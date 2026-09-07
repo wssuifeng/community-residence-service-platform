@@ -10,6 +10,12 @@ spring:
 server:
   port: 8080
 
+# JWT 签发配置（密钥经环境变量注入；dev 默认值仅限本机开发，生产 profile 拒绝默认密钥）
+auth:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-jwt-secret-0123456789abcdef-0123456789abcdef}
+    access-ttl: 2h
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
