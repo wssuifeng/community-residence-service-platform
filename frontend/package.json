@@ -1,0 +1,27 @@
+{
+  "name": "community-residence-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "社区居住服务管理系统 - 前端（居民端/游客端/服务人员端/管理端）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "axios": "^1.20.0",
+    "element-plus": "^2.14.5",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.42",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "~5.9.3",
+    "vite": "^8.2.2",
+    "vue-tsc": "^3.3.11"
+  }
+}
