@@ -14,8 +14,8 @@
 **核心功能（C1~C12）**：社区基础信息管理、居民与居住关系管理、租住管理、服务申请与工单管理、公告广播管理、居民反馈管理、公共资源预约管理、服务评价管理、社区运营统计、用户与权限管理、消息与通知中心、房源展示与看房预约。
 
 **技术架构**：前后端分离单体架构
-- **后端**：Spring Boot 4.0.6 + MyBatis-Plus 3.5.16 + MySQL 8.4+ + Redis 7
-- **前端**：Vue 3.5 + Vite 8 + TypeScript + Element Plus 2.14
+- **后端**（`backend/`，Maven + mvnw）：Spring Boot 4.0.6 + MyBatis-Plus 3.5.16 + MySQL 8.4+ + Redis 7（Redisson 4.5.0）+ Flyway + springdoc-openapi
+- **前端**（`frontend/`，npm + Vite）：Vue 3.5 + Vite 8 + TypeScript + Element Plus 2.14（可用不依赖）
 
 ## 怎么跑
 
@@ -28,8 +28,18 @@ npm run dev        # 开发服务器 http://localhost:5173（/api、/ws 代理�
 npm run build      # vue-tsc 类型检查 + 生产构建（dist/，由后端静态托管）
 ```
 
-**后端**：（待 40_开发实施 后端会话产出可运行系统后回填；当前 Flyway
-迁移脚本已就位于 `src/main/resources/db/migration/`）
+**后端**（已可运行）：
+
+```bash
+# 前置：本机 MySQL（建库）与 Redis
+mysql -uroot -p -e "CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+cd backend
+./mvnw spring-boot:run   # 端口 8080；Flyway 自动建 40 张表 + 初始数据；
+                         # 接口文档 http://localhost:8080/swagger-ui.html
+```
+
+连接配置（数据库地址/账号密码）在 `backend/src/main/resources/application-dev.yml`。
 
 与 AGENTS.md 项目信息块"启动方式"保持一致。
 
