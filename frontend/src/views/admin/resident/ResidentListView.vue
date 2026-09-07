@@ -153,6 +153,7 @@ onMounted(load)
         <template #default="{ row }">
           <el-button link type="primary" size="small" @click="goDetail(row)">详情</el-button>
           <el-button
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
             :type="row.status === 'ACTIVE' ? 'danger' : 'success'"
             size="small"

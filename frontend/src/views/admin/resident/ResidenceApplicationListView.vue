@@ -191,8 +191,8 @@ onMounted(load)
       <el-table-column label="操作" width="140" fixed="right">
         <template #default="{ row }">
           <template v-if="row.status === 'PENDING'">
-            <el-button link type="primary" size="small" @click="openApprove(row)">通过</el-button>
-            <el-button link type="danger" size="small" @click="handleReject(row)">驳回</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openApprove(row)">通过</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleReject(row)">驳回</el-button>
           </template>
           <span v-else class="op-done">-</span>
         </template>

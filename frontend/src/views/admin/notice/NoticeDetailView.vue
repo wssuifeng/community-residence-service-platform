@@ -147,15 +147,16 @@ onMounted(() => {
     <header class="page-head">
       <h1>公告详情</h1>
       <div class="head-actions">
-        <el-button v-if="notice?.status === 'DRAFT'" type="primary" @click="handlePublish">
+        <el-button v-if="notice?.status === 'DRAFT'" v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="handlePublish">
           发布
         </el-button>
-        <el-button v-if="notice?.status === 'DRAFT'" @click="goEdit">编辑</el-button>
-        <el-button v-if="notice?.status === 'PUBLISHED'" type="warning" @click="handleWithdraw">
+        <el-button v-if="notice?.status === 'DRAFT'" v-permission="['ADMIN', 'SUPER_ADMIN']" @click="goEdit">编辑</el-button>
+        <el-button v-if="notice?.status === 'PUBLISHED'" v-permission="['ADMIN', 'SUPER_ADMIN']" type="warning" @click="handleWithdraw">
           撤回
         </el-button>
         <el-button
           v-if="notice?.status === 'DRAFT' || notice?.status === 'EXPIRED'"
+          v-permission="['ADMIN', 'SUPER_ADMIN']"
           type="danger"
           @click="handleDelete"
         >

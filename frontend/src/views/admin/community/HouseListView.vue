@@ -378,7 +378,7 @@ onMounted(loadCommunities)
   <section class="house-list">
     <div class="list-toolbar">
       <span class="toolbar-title">房屋管理</span>
-      <el-button type="primary" :disabled="unitFilter === ''" @click="openCreate">新建房屋</el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :disabled="unitFilter === ''" @click="openCreate">新建房屋</el-button>
     </div>
 
     <FilterPanel resettable @reset="handleReset">
@@ -481,10 +481,10 @@ onMounted(loadCommunities)
         </el-table-column>
         <el-table-column label="操作" width="230" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-            <el-button link type="warning" size="small" @click="openStatusChange(row)">状态</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="warning" size="small" @click="openStatusChange(row)">状态</el-button>
             <el-button link type="info" size="small" @click="openHistory(row)">历史</el-button>
-            <el-button link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
