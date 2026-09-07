@@ -25,14 +25,25 @@ public enum ErrorCode {
     OPERATION_FAILED(5001, "操作失败"),
     DATA_EXISTS(5002, "数据已存在"),
     DATA_NOT_FOUND(5003, "数据不存在"),
+    STATE_TRANSITION_INVALID(5004, "状态流转非法"),
 
     /* ---- 社区管理 5101~5199 ---- */
     COMMUNITY_INACTIVE(5101, "社区已停用"),
     BUILDING_REFERENCED(5102, "楼栋被引用，无法删除"),
+    UNIT_REFERENCED(5103, "单元下存在房屋，无法删除"),
+    HOUSE_HAS_RESIDENT(5104, "房屋存在在住居民，无法删除"),
+    RESOURCE_HAS_RESERVATION(5105, "资源存在未完成预约，无法删除"),
+    TIMESLOT_HAS_RESERVATION(5106, "时段存在预约，无法删除"),
+    TIMESLOT_CONFLICT(5107, "时段与已有时段重叠"),
 
     /* ---- 居民管理 5201~5299 ---- */
     ACCOUNT_FROZEN(5201, "账号已冻结"),
     APPLICATION_ALREADY_REVIEWED(5202, "入住申请已审核"),
+    OLD_PASSWORD_MISMATCH(5203, "旧密码不正确"),
+    REGISTRATION_DISABLED(5204, "居民注册未开放"),
+    HOUSE_NOT_VACANT(5205, "房屋当前不可申请入住"),
+    APPLICATION_PENDING_EXISTS(5206, "已有待审核的入住申请"),
+    RELATION_NOT_ACTIVE(5207, "居住关系不在住，不可办理迁出"),
 
     /* ---- 工单管理 5301~5399 ---- */
     WORK_ORDER_NOT_FOUND(5301, "工单不存在"),
@@ -44,7 +55,11 @@ public enum ErrorCode {
 
     /* ---- 评价管理 5501~5599 ---- */
     EVALUATION_NOT_ALLOWED(5501, "工单未完成，不可评价"),
-    EVALUATION_DUPLICATE(5502, "已评价，不可重复评价");
+    EVALUATION_DUPLICATE(5502, "已评价，不可重复评价"),
+
+    /* ---- 权限管理 5701~5799 ---- */
+    SELF_FREEZE_FORBIDDEN(5701, "不可冻结自己的账号"),
+    BIND_ROLE_INVALID(5702, "仅社区管理员可绑定社区");
 
     private final int code;
     private final String message;

@@ -44,6 +44,27 @@ public class SecurityConfig {
                         // 认证接口与接口文档公开
                         .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**",
                                 "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // 公开只读接口（接口设计.md 标注 ALL（公开）的 GET）
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,
+                                "/api/v1/communities", "/api/v1/communities/{id}",
+                                "/api/v1/communities/{communityId}/buildings",
+                                "/api/v1/communities/{communityId}/resources",
+                                "/api/v1/communities/{communityId}/service-categories",
+                                "/api/v1/buildings/{id}", "/api/v1/buildings/{buildingId}/units",
+                                "/api/v1/units/{id}", "/api/v1/units/{unitId}/houses",
+                                "/api/v1/houses/{id}",
+                                "/api/v1/resources/{id}", "/api/v1/resources/{resourceId}/timeslots",
+                                "/api/v1/resources/{resourceId}/available-slots",
+                                "/api/v1/service-categories/{id}",
+                                "/api/v1/notices", "/api/v1/notices/{id}",
+                                "/api/v1/housings", "/api/v1/housings/{id}",
+                                "/api/v1/housings/{housingId}/available-slots",
+                                "/api/v1/housings/{housingId}/timeslots",
+                                "/api/v1/configs/{key}",
+                                "/api/v1/viewing-appointments/{id}").permitAll()
+                        // 游客可写接口：房源浏览计数、看房预约创建
+                        .requestMatchers(org.springframework.http.HttpMethod.POST,
+                                "/api/v1/housings/{id}/view", "/api/v1/viewing-appointments").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         // 未认证：401 + 统一响应体

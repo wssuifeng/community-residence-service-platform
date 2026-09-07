@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
+
 /** JWT 令牌黑名单表访问 */
 @Mapper
 public interface AuthTokenBlacklistMapper extends BaseMapper<AuthTokenBlacklist> {
@@ -14,4 +16,9 @@ public interface AuthTokenBlacklistMapper extends BaseMapper<AuthTokenBlacklist>
     @Select("SELECT id, jti, user_id, expire_time, reason, blacklist_time "
             + "FROM auth_token_blacklist WHERE jti = #{jti} AND expire_time > NOW()")
     AuthTokenBlacklist selectByJtiNotExpired(@Param("jti") String jti);
+
+    /* 用户级吊销的最新时间（冻结/改密/权限变更后旧令牌全部失效；Redis 降级权威来源） */
+    @Select("SELECT MAX(blacklist_time) FROM auth_token_blacklist "
+            + "WHERE user_id = #{userId} AND reason = 'PERMISSION_CHANGE' AND expire_time > NOW()")
+    LocalDateTime selectLatestRevocationTime(@Param("userId") Long userId);
 }
