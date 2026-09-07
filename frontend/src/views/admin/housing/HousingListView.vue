@@ -329,7 +329,7 @@ onMounted(() => {
         <h1>房源列表</h1>
         <p class="page-head-sub">维护对外展示的房源信息，管理上下架状态</p>
       </div>
-      <el-button type="primary" @click="openCreate">＋ 新建房源</el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openCreate">＋ 新建房源</el-button>
     </header>
 
     <FilterPanel resettable @reset="handleReset">
@@ -378,14 +378,14 @@ onMounted(() => {
       </el-table-column>
       <el-table-column label="操作" width="200" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-          <el-button link :type="row.status === 'OFFLINE' ? 'success' : 'warning'" size="small" @click="handleToggleStatus(row)">
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link :type="row.status === 'OFFLINE' ? 'success' : 'warning'" size="small" @click="handleToggleStatus(row)">
             {{ row.status === 'OFFLINE' ? '上架' : '下架' }}
           </el-button>
           <router-link :to="`/admin/housings/${row.id}`" class="table-link">
             <el-button link size="small">详情</el-button>
           </router-link>
-          <el-button link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

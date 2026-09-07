@@ -115,7 +115,7 @@ onMounted(() => {
         <el-button link @click="goBack">← 返回社区列表</el-button>
         <h2 v-if="community">{{ community.name }}</h2>
       </div>
-      <el-button type="primary" @click="openEdit">编辑社区</el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openEdit">编辑社区</el-button>
     </div>
 
     <el-descriptions v-if="community" :column="2" border class="detail-descriptions">

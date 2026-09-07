@@ -198,7 +198,7 @@ onMounted(load)
   <section class="lease-list">
     <div class="list-toolbar">
       <h2 class="list-title">租住记录</h2>
-      <el-button type="primary" @click="openCreate">新建租住记录</el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openCreate">新建租住记录</el-button>
     </div>
 
     <FilterPanel resettable @reset="handleReset">
@@ -240,9 +240,10 @@ onMounted(load)
       </el-table-column>
       <el-table-column label="操作" width="140" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" @click="openEdit(row)">编辑</el-button>
           <el-button
             v-if="row.status !== 'TERMINATED'"
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
             type="danger"
             @click="handleTerminate(row)"

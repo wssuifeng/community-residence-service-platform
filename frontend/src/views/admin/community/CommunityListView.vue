@@ -198,8 +198,9 @@ onMounted(load)
       <el-table-column label="操作" width="200" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" size="small" @click="goDetail(row.id)">详情</el-button>
-          <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
           <el-button
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
             size="small"
             :type="row.status === 'ACTIVE' ? 'danger' : 'success'"

@@ -210,12 +210,12 @@ onMounted(loadList)
       <el-table-column label="操作" width="150" fixed="right">
         <template #default="{ row }">
           <template v-if="row.status === 'PENDING'">
-            <el-button link type="primary" size="small" @click="handleConfirm(row)">通过</el-button>
-            <el-button link type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="handleConfirm(row)">通过</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
           </template>
           <template v-else-if="row.status === 'CONFIRMED'">
-            <el-button link type="success" size="small" @click="handleComplete(row)">完成</el-button>
-            <el-button link type="danger" size="small" @click="handleViolate(row)">违约</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="success" size="small" @click="handleComplete(row)">完成</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleViolate(row)">违约</el-button>
           </template>
           <span v-else class="no-action">—</span>
         </template>

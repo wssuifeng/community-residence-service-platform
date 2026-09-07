@@ -280,12 +280,13 @@ onMounted(() => {
         </div>
         <div class="head-actions">
           <el-button
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             :type="housing.status === 'OFFLINE' ? 'success' : 'warning'"
             @click="handleToggleStatus"
           >
             {{ housing.status === 'OFFLINE' ? '上架' : '下架' }}
           </el-button>
-          <el-button v-if="!editable" type="primary" @click="toggleEdit">编辑信息</el-button>
+          <el-button v-if="!editable" v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="toggleEdit">编辑信息</el-button>
         </div>
       </header>
 
@@ -369,7 +370,7 @@ onMounted(() => {
         <div class="timeslot-card">
           <div class="timeslot-head">
             <h2 class="card-title">看房时段配置</h2>
-            <el-button type="primary" size="small" @click="openSlotCreate">＋ 新增时段</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" size="small" @click="openSlotCreate">＋ 新增时段</el-button>
           </div>
           <el-table v-loading="timeslotLoading" :data="timeslotRecords" stripe size="small">
             <el-table-column prop="date" label="日期" width="110" />
@@ -389,8 +390,8 @@ onMounted(() => {
             </el-table-column>
             <el-table-column label="操作" width="110" fixed="right">
               <template #default="{ row }">
-                <el-button link type="primary" size="small" @click="openSlotEdit(row)">编辑</el-button>
-                <el-button link type="danger" size="small" @click="handleSlotDelete(row)">删除</el-button>
+                <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openSlotEdit(row)">编辑</el-button>
+                <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleSlotDelete(row)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
