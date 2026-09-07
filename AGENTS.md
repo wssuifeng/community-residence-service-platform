@@ -185,7 +185,7 @@
   | 环节 | 命令/步骤 | 说明 |
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
-  | 环境变量配置 | `export DB_PASSWORD="your_password"` (Linux/Mac) 或 `set DB_PASSWORD=your_password` (Windows) | 数据库密码从环境变量读取，不硬编码在配置文件中 |
+  | 环境变量配置 | `export DB_PASSWORD="your_password"` + `export JWT_SECRET="your_secret_key"`（≥32 字符）(Linux/Mac)；Windows 用 `set` | 数据库密码必需；JWT 密钥 dev 未设置时用仅限本机的默认值（生产 profile 拒绝默认密钥，见架构设计 §7）；Redis 可选 `REDIS_HOST/REDIS_PORT/REDIS_PASSWORD`（默认 localhost:6379 无密码） |
   | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 V1（40 张表）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改），无需手动跑脚本；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |

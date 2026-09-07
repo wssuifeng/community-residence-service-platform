@@ -34,16 +34,30 @@ npm run build      # vue-tsc 类型检查 + 生产构建（dist/，由后端静�
 # 前置：本机 MySQL（建库）与 Redis
 mysql -uroot -p -e "CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-# 配置环境变量（数据库密码）
-export DB_PASSWORD="your_password"   # Linux/Mac
-# 或 Windows: set DB_PASSWORD=your_password
+# 配置环境变量
+export DB_PASSWORD="your_mysql_password"   # MySQL 数据库密码（必需）
+export JWT_SECRET="your_jwt_secret_key"    # JWT 签名密钥（≥32 字符；dev 未设置时
+                                           # 使用仅限本机的默认值，生产必须设置）
+# Windows 用户：
+# set DB_PASSWORD=your_mysql_password
+# set JWT_SECRET=your_jwt_secret_key
 
 cd backend
 ./mvnw spring-boot:run   # 端口 8080；Flyway 自动建 40 张表 + 初始数据；
                          # 接口文档 http://localhost:8080/swagger-ui.html
 ```
 
-连接配置在 `backend/src/main/resources/application-dev.yml`（数据库密码从环境变量 `DB_PASSWORD` 读取）。
+连接配置在 `backend/src/main/resources/application-dev.yml`（数据库密码从 `DB_PASSWORD` 读取，JWT 密钥从 `JWT_SECRET` 读取）。
+
+### 生成 JWT_SECRET
+
+Linux/Mac：`openssl rand -base64 32`；Windows（PowerShell）：
+
+```powershell
+-join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
+```
+
+生产环境：密钥至少 256 位（32 字节）、强随机生成、定期轮换（轮换需吊销所有旧令牌）。
 
 与 AGENTS.md 项目信息块"启动方式"保持一致。
 
