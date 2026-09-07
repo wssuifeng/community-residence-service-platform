@@ -4,6 +4,9 @@ import com.community.residence.auth.dto.LoginDTO;
 import com.community.residence.auth.service.AuthService;
 import com.community.residence.auth.vo.LoginVO;
 import com.community.residence.common.result.ApiResponse;
+import com.community.residence.resident.dto.RegisterResidentDTO;
+import com.community.residence.resident.service.ResidentService;
+import com.community.residence.resident.vo.ResidentVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,6 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final ResidentService residentService;
+
+    /** 居民注册（游客自助，受 registration.enabled 配置控制，接口设计 9.2.1.1） */
+    @Operation(summary = "居民注册")
+    @PostMapping("/resident/register")
+    public ApiResponse<ResidentVO> register(@RequestBody @Valid RegisterResidentDTO dto) {
+        return ApiResponse.success(residentService.register(dto));
+    }
 
     /** 居民端登录（resident 表，签发 RESIDENT 令牌） */
     @Operation(summary = "居民登录")
