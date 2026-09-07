@@ -2,6 +2,7 @@ package com.community.residence.filter;
 
 import com.community.residence.auth.service.AdminCommunityCacheService;
 import com.community.residence.auth.service.TokenBlacklistService;
+import com.community.residence.auth.service.TokenRevocationService;
 import com.community.residence.auth.util.JwtUtil;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService tokenBlacklistService;
+    private final TokenRevocationService tokenRevocationService;
     private final AdminCommunityCacheService adminCommunityCacheService;
 
     @Override
@@ -48,15 +50,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Claims claims = jwtUtil.parseToken(token);
         if (claims != null && !tokenBlacklistService.isBlacklisted(claims.getId())) {
             Long userId = jwtUtil.extractUserId(claims);
-            String username = jwtUtil.extractUsername(claims);
-            String role = jwtUtil.extractRole(claims);
+            /* 用户级吊销：冻结/改密/权限变更后，存量令牌（iat 早于吊销时间）全部失效 */
+            if (claims.getIssuedAt() == null
+                    || !tokenRevocationService.isUserRevoked(userId, claims.getIssuedAt())) {
+                String username = jwtUtil.extractUsername(claims);
+                String role = jwtUtil.extractRole(claims);
 
-            Set<Long> communityIds = RoleConstants.ADMIN.equals(role)
-                    ? adminCommunityCacheService.getCommunityIds(userId)
-                    : Set.of();
+                Set<Long> communityIds = RoleConstants.ADMIN.equals(role)
+                        ? adminCommunityCacheService.getCommunityIds(userId)
+                        : Set.of();
 
-            UserContext context = new UserContext(userId, username, role, communityIds);
-            SecurityUtils.setAuthentication(context);
+                UserContext context = new UserContext(userId, username, role, communityIds);
+                SecurityUtils.setAuthentication(context);
+            }
         }
 
         filterChain.doFilter(request, response);
