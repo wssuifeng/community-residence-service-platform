@@ -183,7 +183,7 @@ onMounted(() => {
             :value="item.id"
           />
         </el-select>
-        <el-button type="primary" :loading="bindLoading" @click="handleBind">绑定</el-button>
+        <el-button v-permission="['SUPER_ADMIN']" type="primary" :loading="bindLoading" @click="handleBind">绑定</el-button>
         <span v-if="!communityLoading && unboundCommunities.length === 0" class="bind-empty">
           暂无可绑定的社区
         </span>
@@ -202,7 +202,7 @@ onMounted(() => {
       </el-table-column>
       <el-table-column label="操作" width="100" fixed="right">
         <template #default="{ row }">
-          <el-button link type="danger" size="small" @click="handleUnbind(row)">解绑</el-button>
+          <el-button v-permission="['SUPER_ADMIN']" link type="danger" size="small" @click="handleUnbind(row)">解绑</el-button>
         </template>
       </el-table-column>
     </el-table>

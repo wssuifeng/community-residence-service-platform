@@ -171,7 +171,7 @@ onMounted(() => {
         >
           <el-option v-for="item in communities" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
-        <el-button type="primary" @click="openCreate(null)">新增顶级类别</el-button>
+        <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openCreate(null)">新增顶级类别</el-button>
       </div>
     </header>
 
@@ -201,9 +201,9 @@ onMounted(() => {
       </el-table-column>
       <el-table-column label="操作" width="220" fixed="right">
         <template #default="{ row }">
-          <el-button text type="primary" size="small" @click="openCreate(row.id)">新增子类别</el-button>
-          <el-button text type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-          <el-button text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="primary" size="small" @click="openCreate(row.id)">新增子类别</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
       <template #empty>

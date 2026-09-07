@@ -220,7 +220,7 @@ onMounted(() => {
   <section class="unit-list">
     <div class="list-toolbar">
       <span class="toolbar-title">单元管理</span>
-      <el-button type="primary" @click="openCreate">新建单元</el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openCreate">新建单元</el-button>
     </div>
 
     <FilterPanel resettable @reset="handleReset">
@@ -277,8 +277,8 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="操作" width="130" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-            <el-button link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

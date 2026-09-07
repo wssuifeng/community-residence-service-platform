@@ -304,8 +304,8 @@ function goBack(): void {
       </el-form-item>
 
       <el-form-item>
-        <el-button :loading="submitting" @click="handleSaveDraft">存草稿</el-button>
-        <el-button type="primary" :loading="publishing" @click="handlePublish">
+        <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" :loading="submitting" @click="handleSaveDraft">存草稿</el-button>
+        <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :loading="publishing" @click="handlePublish">
           {{ form.publishTime && form.publishTime.getTime() > Date.now() ? '定时发布' : '立即发布' }}
         </el-button>
       </el-form-item>

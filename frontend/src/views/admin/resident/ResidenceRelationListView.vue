@@ -205,6 +205,7 @@ onMounted(() => {
         <template #default="{ row }">
           <el-button
             v-if="row.status === 'ACTIVE'"
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
             type="warning"
             size="small"

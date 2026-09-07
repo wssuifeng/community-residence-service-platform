@@ -149,7 +149,7 @@ onMounted(load)
   <section class="admin-notice-list">
     <div class="list-toolbar">
       <SearchBar v-model="keyword" placeholder="搜索公告标题/内容" @search="handleSearch" />
-      <el-button type="primary" @click="goCreate">新建公告</el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="goCreate">新建公告</el-button>
     </div>
 
     <FilterPanel resettable @reset="handleReset">
@@ -200,6 +200,7 @@ onMounted(load)
           <el-button link type="primary" @click="goDetail(row.id)">详情</el-button>
           <el-button
             v-if="row.status === 'DRAFT'"
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
             type="success"
             @click="handlePublish(row)"
@@ -208,6 +209,7 @@ onMounted(load)
           </el-button>
           <el-button
             v-if="row.status === 'PUBLISHED'"
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
             type="warning"
             @click="handleWithdraw(row)"
@@ -216,6 +218,7 @@ onMounted(load)
           </el-button>
           <el-button
             v-if="row.status === 'DRAFT' || row.status === 'EXPIRED'"
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
             type="danger"
             @click="handleDelete(row)"

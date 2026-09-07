@@ -303,7 +303,7 @@ onMounted(() => {
   <section class="resource-list">
     <div class="list-toolbar">
       <span class="toolbar-title">公共资源管理</span>
-      <el-button type="primary" :disabled="communityFilter === ''" @click="openCreate">新建资源</el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :disabled="communityFilter === ''" @click="openCreate">新建资源</el-button>
     </div>
 
     <FilterPanel resettable @reset="handleReset">
@@ -378,9 +378,9 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-            <el-button link type="warning" size="small" @click="openTimeslot(row)">时段配置</el-button>
-            <el-button link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="warning" size="small" @click="openTimeslot(row)">时段配置</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -532,7 +532,7 @@ onMounted(() => {
           <el-input-number v-model="timeslotForm.maxBookings" :min="1" :max="999" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleAddTimeslot">添加时段</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="handleAddTimeslot">添加时段</el-button>
         </el-form-item>
       </el-form>
 
@@ -553,7 +553,7 @@ onMounted(() => {
         </el-table-column>
         <el-table-column label="操作" width="80" fixed="right">
           <template #default="{ row }">
-            <el-button link type="danger" size="small" @click="handleDeleteTimeslot(row)">删除</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleDeleteTimeslot(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

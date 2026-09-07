@@ -308,7 +308,7 @@ onMounted(load)
   <section class="sys-user-list">
     <div class="list-toolbar">
       <SearchBar v-model="keyword" placeholder="搜索用户名/姓名/手机号" @search="handleSearch" />
-      <el-button type="primary" @click="openCreate">创建用户</el-button>
+      <el-button v-permission="['SUPER_ADMIN']" type="primary" @click="openCreate">创建用户</el-button>
     </div>
 
     <FilterPanel resettable @reset="handleReset">
@@ -355,9 +355,10 @@ onMounted(load)
       </el-table-column>
       <el-table-column label="操作" width="280" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+          <el-button v-permission="['SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
           <el-button link type="primary" size="small" @click="goCommunities(row)">社区绑定</el-button>
           <el-button
+            v-permission="['SUPER_ADMIN']"
             link
             :type="row.status === 'ACTIVE' ? 'danger' : 'success'"
             size="small"
@@ -365,7 +366,7 @@ onMounted(load)
           >
             {{ row.status === 'ACTIVE' ? '冻结' : '解冻' }}
           </el-button>
-          <el-button link type="warning" size="small" @click="openChangePassword(row)">修改密码</el-button>
+          <el-button v-permission="['SUPER_ADMIN']" link type="warning" size="small" @click="openChangePassword(row)">修改密码</el-button>
         </template>
       </el-table-column>
     </el-table>
