@@ -159,20 +159,21 @@
     │   ├── user.ts          # 用户状态（登录/角色/权限）
     │   └── permission.ts    # 权限状态（菜单/按钮权限）
     ├── api/                 # API 封装（按 C1~C12 模块分文件）
-    │   ├── community.ts     # C1 社区管理
-    │   ├── resident.ts      # C2 居民管理
-    │   ├── workorder.ts     # C4 工单管理
-    │   └── ...
-    ├── views/               # 页面组件（按三端分目录）
-    │   ├── resident/        # 居民端页面（14页）
-    │   ├── guest/           # 游客端页面（6页）
-    │   ├── staff/           # 服务人员端页面（4页）
-    │   └── admin/           # 管理端页面（40+页，按C1~C12模块分子目录）
-    ├── components/          # 组件（自写17个+EP封装13个）
-    │   ├── layout/          # 布局组件（AppHeader/AppSidebar）
-    │   ├── business/        # 业务组件（WorkOrderCard/FeedbackChat）
-    │   └── common/          # 通用组件（StatusTag/ImageUploader）
-    ├── utils/               # 工具函数（request/auth/permission/format）
+    │   └── auth.ts          # 已实现：认证（其余模块文件随开发补）
+    ├── views/               # 页面组件（按三端分目录；当前为骨架占位页，
+    │   │                     # 页面由各业务模块前端任务实现）
+    │   ├── resident/        # 居民端（UI 设计 14 页规划；当前骨架 16 视图）
+    │   ├── guest/           # 游客端（UI 设计 6 页规划；当前骨架 5 视图）
+    │   ├── staff/           # 服务人员端（UI 设计 4 页；当前骨架 4 视图）
+    │   ├── admin/           # 管理端（UI 设计 40+ 页规划；当前骨架 37 视图，
+    │   │                     # 按 C1~C12 模块分子目录；另 auth/ 登录注册 2 页
+    │   │                     # + 全局 403/404 页）
+    ├── components/          # 组件（UI 设计清单自写17个+EP封装13个，随模块
+    │   │                     # 开发逐步实现；当前仅 layout/ 2 个）
+    │   ├── layout/          # 布局组件（AppHeader/AppSidebar，已实现）
+    │   ├── business/        # 业务组件（WorkOrderCard/FeedbackChat，待模块开发）
+    │   └── common/          # 通用组件（StatusTag/ImageUploader，待模块开发）
+    ├── utils/               # 工具函数（request/auth/permission/responsive）
     ├── composables/         # 组合式函数（useResponsive，响应式布局设计规范 §5.1）
     ├── directives/          # 自定义指令（v-permission）
     ├── styles/              # 全局样式
