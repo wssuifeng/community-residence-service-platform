@@ -1,0 +1,75 @@
+/* 全局基础样式：reset + 排版 + 焦点指示 + 移动端提示（桌面优先，<768px 不适配） */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-light);
+}
+
+button {
+  font-family: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* 焦点指示（组件库设计规范.md §6.2，WCAG AA） */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+:focus {
+  outline: none;
+}
+
+/* 移动端提示（<768px 不适配，提示使用桌面端） */
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-only {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-index-modal);
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    padding: var(--spacing-lg);
+    text-align: center;
+    line-height: var(--line-height-relaxed);
+  }
+}

@@ -1,0 +1,90 @@
+/**
+ * 设计 Token 系统（组件库设计规范.md §3 + 响应式布局设计规范.md §2）
+ * 唯一权威来源，业务代码禁止硬编码间距/圆角/阴影/颜色值
+ */
+:root {
+  /* 间距 Token（§3.1） */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  /* 圆角 Token（§3.2） */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
+
+  /* 阴影 Token（§3.3） */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.2);
+
+  /* 主色调（§3.4.1） */
+  --color-primary: #3b6dff;
+  --color-primary-light: #6b8fff;
+  --color-primary-dark: #2a52cc;
+  --color-primary-bg: #ebf1ff;
+
+  /* 功能色（§3.4.2） */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  /* 中性色（§3.4.3） */
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-disabled: #9ca3af;
+  --color-border: #e5e7eb;
+  --color-bg: #f9fafb;
+  --color-bg-hover: #f3f4f6;
+
+  /* 状态色（§3.4.4，映射六大状态机） */
+  --status-pending: #f59e0b;
+  --status-processing: #3b82f6;
+  --status-completed: #10b981;
+  --status-rejected: #ef4444;
+  --status-canceled: #6b7280;
+
+  /* 字体（§3.5） */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    sans-serif;
+  --font-family-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo,
+    Courier, monospace;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-xxl: 32px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 600;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* z-index（§3.6） */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+  --z-index-notification: 1080;
+
+  /* 断点（响应式布局设计规范.md §2.1，仅作记录，媒体查询不可用 CSS 变量） */
+  --breakpoint-xs: 0px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1600px;
+}
