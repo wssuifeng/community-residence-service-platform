@@ -112,6 +112,26 @@ public class GlobalExceptionHandler {
         return badRequest("请求体格式不合法");
     }
 
+    /* ---- 404：无对应路由（落到静态资源处理器） ---- */
+
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(
+            org.springframework.web.servlet.resource.NoResourceFoundException e, HttpServletRequest request) {
+        log.info("路由不存在：{}", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ErrorCode.NOT_FOUND, "接口不存在"));
+    }
+
+    /* ---- 403：@PreAuthorize 功能级权限拒绝（越权尝试 100% 记日志） ---- */
+
+    @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthorizationDenied(
+            org.springframework.security.authorization.AuthorizationDeniedException e, HttpServletRequest request) {
+        log.error("功能级越权尝试：uri={}, ip={}, message={}", request.getRequestURI(), clientIp(request), e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ErrorCode.FORBIDDEN));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
         log.warn("非法参数：{}", e.getMessage());
