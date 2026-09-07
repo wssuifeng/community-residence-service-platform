@@ -171,6 +171,7 @@
     │   ├── business/        # 业务组件（WorkOrderCard/FeedbackChat）
     │   └── common/          # 通用组件（StatusTag/ImageUploader）
     ├── utils/               # 工具函数（request/auth/permission/format）
+    ├── composables/         # 组合式函数（useResponsive，响应式布局设计规范 §5.1）
     ├── directives/          # 自定义指令（v-permission）
     ├── styles/              # 全局样式
     └── types/               # TypeScript 类型定义
