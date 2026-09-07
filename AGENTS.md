@@ -179,7 +179,7 @@
     └── types/               # TypeScript 类型定义
     ```
 
-- **启动方式**（待 40_开发实施 产出可运行系统后回填，格式参考参考项目表格）：
+- **启动方式**（2026-09-07 前后端会话回填，随任务完成持续更新）：
 
   | 环节 | 命令/步骤 | 说明 |
   |------|---------|------|
@@ -189,7 +189,7 @@
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
-  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`（后端就绪前登录等接口不可用） |
+  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；登录接口已可用（认证任务完成），种子超管账号 `superadmin / Admin@123456`（V3 迁移，生产首登必改） |
 
 ## 四、业务模型快速参考（基于 30_系统设计/数据库设计.md，表名以其 §3 与已执行
 的 Flyway 迁移脚本为准：小写无前缀、单数形式，2026-09-07 对齐）
