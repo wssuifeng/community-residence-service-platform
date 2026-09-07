@@ -66,8 +66,11 @@
     - MySQL：mysql-connector-j 9.6.0（服务端 9.x，connector 兼容 8.x，
       部署环境受限时可降 8.4 LTS 不改代码）；
     - Redis 7；
-    - Redisson 3.36.0（分布式锁看门狗机制 + 布隆过滤器，2026-09-06 架构设计
-      阶段用户确认引入）；
+    - Redisson 4.5.0（分布式锁看门狗机制 + 布隆过滤器，2026-09-06 架构设计
+      阶段用户确认引入；原锁定 3.36.0 于 2026-09-07 开发实施阶段升级——
+      3.36.0 早于 Boot 4 发布，其自动配置硬引用 Boot 3 的 RedisProperties，
+      与 Spring Boot 4.0.6 启动即冲突，4.5.0 为官方针对 Boot 4.0.6 构建
+      的版本，见决策日志）；
     - JWT：jjwt 0.12.6（api / impl / jackson）；
     - springdoc-openapi-starter-webmvc-ui 3.0.3（接口契约单一来源，N10）；
     - Druid 1.2.28（`druid-spring-boot-4-starter`，SQL 监控支撑 N1 压测复核）；
@@ -113,14 +116,16 @@
     - 禁止无意义注释（如 `// 设置ID`、`// 返回结果`）。
 
 - **目录结构约定**（基于 30_系统设计/架构设计.md §2）：
-  - **后端包结构**（`backend/src/main/java/com/example/community/`）：
+  - **后端包结构**（`backend/src/main/java/com/community/residence/`，
+    根包名以冻结的架构设计.md §2 为准，2026-09-07 用户裁决）：
     ```
-    com.example.community
+    com.community.residence
     ├── config/          # 配置类（Security/Redis/MyBatisPlus/WebSocket/Redisson）
-    ├── common/          # 通用类（Result/BusinessException/常量/工具类）
+    ├── common/          # 通用类（ApiResponse/BusinessException/错误码/PageVO）
     ├── filter/          # 过滤器（JwtAuthenticationFilter）
     ├── interceptor/     # 拦截器（DataScopeInterceptor 数据级权限）
     ├── schedule/        # 定时任务（租期判定/到期提醒/公告下线/统计回写）
+    ├── log/             # AOP 操作留痕切面
     ├── community/       # C1 社区基础信息管理
     ├── resident/        # C2 居民与居住关系管理
     ├── lease/           # C3 租住管理
@@ -176,29 +181,30 @@
   | 环节 | 命令/步骤 | 说明 |
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
-  | 数据库初始化 | （待补充 Flyway 执行方式） | （待补充） |
-  | 后端启动 | `cd backend && ./mvnw spring-boot:run` | （待补充端口与配置文件） |
+  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 V1（40 张表）+ V2（初始数据），无需手动跑脚本；连接配置在 `backend/src/main/resources/application-dev.yml` |
+  | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
   | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`（后端就绪前登录等接口不可用） |
 
-## 四、业务模型快速参考（基于 30_系统设计/数据库设计.md）
+## 四、业务模型快速参考（基于 30_系统设计/数据库设计.md，表名以其 §3 与已执行
+的 Flyway 迁移脚本为准：小写无前缀、单数形式，2026-09-07 对齐）
 
 | 模块 | 核心实体表 | 说明 |
 |------|----------|------|
-| C1 社区基础信息 | `tb_community`、`tb_building`、`tb_unit`、`tb_house`、`tb_public_resource` | 社区→楼栋→单元→房屋四级结构 + 公共资源 |
-| C2 居民管理 | `tb_resident`、`tb_residence_application`、`tb_residence_relation` | 居民账号 + 入住申请 + 居住关系 |
-| C3 租住管理 | `tb_lease_record`、`tb_lease_reminder` | 租住记录 + 到期提醒去重表 |
-| C4 工单管理 | `tb_service_category`、`tb_work_order`、`tb_work_order_log`、`tb_work_order_attachment` | 服务类别树 + 工单 + 处理记录 + 附件 |
-| C5 公告管理 | `tb_notice`、`tb_notice_view_log` | 公告 + 查看记录 |
-| C6 反馈管理 | `tb_feedback`、`tb_feedback_message`、`tb_feedback_attachment` | 反馈单 + 会话消息 + 附件 |
-| C7 资源预约 | `tb_resource_timeslot`、`tb_resource_reservation` | 资源时段配置 + 预约记录 |
-| C8 服务评价 | `tb_work_order_evaluation`、`tb_evaluation_followup` | 工单评价 + 不满意跟进 |
-| C9 运营统计 | （无独立表，聚合其他模块数据） | 运营看板：16卡片+4图表 |
-| C10 权限管理 | `tb_sys_user`、`tb_sys_admin_community`、`tb_operation_log`、`auth_token_blacklist` | 系统用户 + 管理员-社区绑定 + 操作日志 + JWT黑名单 |
-| C11 通知中心 | `tb_notification` | 通知推送（WebSocket单向） |
-| C12 房源管理 | `tb_housing`、`tb_housing_timeslot`、`tb_viewing_appointment` | 房源 + 看房时段 + 看房预约 |
-| 全局配置 | `tb_global_config` | 全局配置（注册方式开关等） |
+| C1 社区基础信息 | `community`、`building`、`unit`、`house`、`public_resource` | 社区→楼栋→单元→房屋四级结构 + 公共资源 |
+| C2 居民管理 | `resident`、`residence_application`、`residence_relation` | 居民账号 + 入住申请 + 居住关系 |
+| C3 租住管理 | `lease_record`、`lease_reminder` | 租住记录 + 到期提醒去重表 |
+| C4 工单管理 | `service_category`、`work_order`、`work_order_process`、`work_order_attachment`、`work_order_assignment` | 服务类别树 + 工单 + 处理记录 + 附件 + 派单关系 |
+| C5 公告管理 | `notice`、`notice_target`、`notice_view_record` | 公告 + 目标范围 + 查看记录 |
+| C6 反馈管理 | `feedback`、`feedback_message`、`feedback_attachment` | 反馈单 + 会话消息 + 附件 |
+| C7 资源预约 | `resource_timeslot`、`resource_reservation`、`violation_record` | 资源时段配置 + 预约记录 + 违约处置 |
+| C8 服务评价 | `work_order_evaluation`、`unsatisfied_followup` | 工单评价 + 不满意跟进 |
+| C9 运营统计 | `statistics_snapshot`（可选快照） | 运营看板：16卡片+4图表 |
+| C10 权限管理 | `sys_user`、`sys_admin_community`、`sys_operation_log`、`auth_token_blacklist`、`sys_blacklist_log` | 系统用户 + 管理员-社区绑定 + 操作日志 + JWT黑名单 + 拉黑审计 |
+| C11 通知中心 | `notification`、`notification_channel_log` | 通知推送 + 模拟渠道记录 |
+| C12 房源管理 | `housing`、`housing_timeslot`、`viewing_appointment` | 房源 + 看房时段 + 看房预约 |
+| 全局配置 | `sys_config` | 全局配置（注册方式开关等） |
 
 **六大状态机**（权威定义见 30_系统设计/架构设计.md §6，状态图见
 30_系统设计/assets/02_核心状态机/）：
@@ -216,13 +222,14 @@
 | ❌ Entity/DTO/VO 使用 `//` 行注释 | springdoc 只识别 `@Schema` 注解，`//` 不会出现在接口文档中 |
 | ❌ Controller 直接操作 Entity | 必须用 DTO 接收请求、VO 返回响应，保证接口稳定性 |
 | ❌ Service 直接返回 Entity | 必须转换为 VO 返回，避免敏感字段泄露（如密码哈希） |
-| ❌ 在业务代码中硬编码状态值 | 状态常量统一定义在 `common/constants/` 包下 |
+| ❌ 绕过统一响应格式 | 所有接口必须返回 `ApiResponse<T>`（含错误场景），业务错误码见 `common/constant/ErrorCode` |
+| ❌ 在业务代码中硬编码状态值 | 状态常量统一定义在 `common/constant/` 包下 |
 | ❌ 直接使用 `System.out.println()` | 必须使用 Slf4j `@Slf4j` + `log.info/debug/error` |
 | ❌ 忽略异常或空 catch 块 | 至少记录日志 `log.error("...", e)`，或转换为业务异常 |
 | ❌ SQL 中使用 `SELECT *` | 必须显式列出字段，避免表结构变更后字段映射错误 |
 | ❌ 前端直接存储敏感信息（如完整JWT） | JWT 存储 httpOnly cookie 或 sessionStorage（临时会话） |
 | ❌ 前端硬编码后端地址 | 必须用环境变量配置（`.env.development` / `.env.production`） |
-| ❌ 绕过统一响应格式 | 所有接口必须返回 `Result<T>`，包括错误场景 |
+| ❌ 绕过统一响应格式 | 所有接口必须返回 `ApiResponse<T>`（含错误场景），业务错误码见 `common/constant/ErrorCode` |
 | ❌ 跳过参数校验 | Controller 入参必须加 `@Valid` + JSR-303 注解 |
 | ❌ 数据级权限依赖业务代码手动过滤 | 必须用 MyBatis-Plus 拦截器统一注入 WHERE 条件 |
 

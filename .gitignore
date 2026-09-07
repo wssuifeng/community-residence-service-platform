@@ -14,3 +14,6 @@ target/
 # 系统文件
 .DS_Store
 Thumbs.db
+
+# 项目文档（暂不上传，本地保留）
+docs/
