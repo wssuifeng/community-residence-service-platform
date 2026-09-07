@@ -62,7 +62,9 @@
     - Spring Boot 4.0.6：webmvc / security / validation / data-redis /
       websocket / flyway（+ flyway-mysql）各 starter；
     - MyBatis-Plus 3.5.16（`mybatis-plus-spring-boot4-starter`，Boot 4 专用，
-      非 boot3-starter）；
+      非 boot3-starter；另引 `mybatis-plus-jsqlparser` 同版本——3.5.9 起
+      jsqlparser 支持拆分为独立构件，分页/数据权限拦截器依赖，
+      2026-09-07 开发实施补引，见决策日志）；
     - MySQL：mysql-connector-j 9.6.0（服务端 9.x，connector 兼容 8.x，
       部署环境受限时可降 8.4 LTS 不改代码）；
     - Redis 7；
@@ -183,7 +185,7 @@
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
   | 环境变量配置 | `export DB_PASSWORD="your_password"` (Linux/Mac) 或 `set DB_PASSWORD=your_password` (Windows) | 数据库密码从环境变量读取，不硬编码在配置文件中 |
-  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 V1（40 张表）+ V2（初始数据），无需手动跑脚本；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
+  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 V1（40 张表）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改），无需手动跑脚本；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
