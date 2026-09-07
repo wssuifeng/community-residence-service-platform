@@ -1,0 +1,13 @@
+/**
+ * 断点定义（响应式布局设计规范.md §2.1）
+ * 仅作设计与 JS 侧（utils/responsive.ts）对照记录；
+ * 媒体查询无法消费 CSS 变量，断点样式直接写 media query
+ */
+:root {
+  --breakpoint-xs: 0px;        /* 极小（不适配） */
+  --breakpoint-sm: 576px;      /* 小（不适配） */
+  --breakpoint-md: 768px;      /* 中（平板最小宽度） */
+  --breakpoint-lg: 1024px;     /* 大（平板-桌面过渡） */
+  --breakpoint-xl: 1200px;     /* 超大（桌面最小宽度） */
+  --breakpoint-xxl: 1600px;    /* 极大（宽屏） */
+}
