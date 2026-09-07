@@ -1,18 +1,9 @@
 <script setup lang="ts">
-/** 消息中心（占位页，40 阶段前端基础任务：页面待各模块开发时实现） */
+import NotificationList from '@/components/business/NotificationList.vue'
+
+/** 服务人员端消息中心（三端复用组件） */
 </script>
 
 <template>
-  <section class="placeholder-page">
-    <h1>消息中心</h1>
-    <p>页面开发中，由对应业务模块的前端任务实现。</p>
-  </section>
+  <NotificationList role="STAFF" />
 </template>
-
-<style scoped>
-.placeholder-page {
-  padding: var(--spacing-xxl) var(--spacing-lg);
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-</style>
