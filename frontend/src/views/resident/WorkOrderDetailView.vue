@@ -17,7 +17,7 @@ import type {
   IWorkOrderProcess,
   WorkOrderStatus
 } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderUrgencyLabels } from '@/types/modules/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import type { IEvaluation } from '@/types/modules/evaluation'
 import { formatDateTime, formatRelative } from '@/utils/date'
 
@@ -53,11 +53,8 @@ const evaluation = ref<IEvaluation | null>(null)
 const evaluationLoading = ref(false)
 const evaluationForm = ref({
   rating: 0,
-  serviceAttitude: 0,
-  responseSpeed: 0,
-  solutionQuality: 0,
   content: '',
-  isAnonymous: false
+  tags: ''
 })
 const submittingEvaluation = ref(false)
 
@@ -169,19 +166,18 @@ async function handleUnsatisfied(): Promise<void> {
 
 async function handleSubmitEvaluation(): Promise<void> {
   const form = evaluationForm.value
-  if (!form.rating || !form.serviceAttitude || !form.responseSpeed || !form.solutionQuality) {
-    ElMessage.warning('请完成全部 4 项评分')
+  if (!form.rating) {
+    ElMessage.warning('请先完成总体评分')
     return
   }
   submittingEvaluation.value = true
   try {
     await submitEvaluation(orderId, {
       rating: form.rating as IEvaluation['rating'],
-      serviceAttitude: form.serviceAttitude as IEvaluation['serviceAttitude'],
-      responseSpeed: form.responseSpeed as IEvaluation['responseSpeed'],
-      solutionQuality: form.solutionQuality as IEvaluation['solutionQuality'],
       content: form.content.trim() || undefined,
-      isAnonymous: form.isAnonymous
+      tags: form.tags.trim() || undefined,
+      /* rating ≥ 4 判定满意（后端 CreateEvaluationDTO 口径） */
+      isSatisfied: form.rating >= 4
     })
     ElMessage.success('评价提交成功，感谢您的反馈')
     fetchEvaluation()
@@ -213,7 +209,7 @@ onMounted(() => {
       <article class="info-card">
         <div class="info-card-head">
           <div>
-            <span class="order-number">{{ order.orderNumber }}</span>
+            <span class="order-number">{{ order.orderNo }}</span>
             <h1 class="order-title">{{ order.title }}</h1>
           </div>
           <StatusTag :label="workOrderStatusLabels[order.status]" :type="statusSemantic[order.status]" />
@@ -226,15 +222,11 @@ onMounted(() => {
           </div>
           <div class="info-item">
             <dt>紧急程度</dt>
-            <dd>{{ workOrderUrgencyLabels[order.urgency] }}</dd>
+            <dd>{{ workOrderPriorityLabels[order.priority] }}</dd>
           </div>
           <div class="info-item">
             <dt>提交时间</dt>
             <dd>{{ formatDateTime(order.createdAt) }}</dd>
-          </div>
-          <div class="info-item">
-            <dt>预约上门</dt>
-            <dd>{{ order.appointmentTime ? formatDateTime(order.appointmentTime) : '未预约' }}</dd>
           </div>
           <div class="info-item">
             <dt>联系电话</dt>
@@ -248,23 +240,9 @@ onMounted(() => {
 
         <div class="info-description">
           <dt>问题描述</dt>
-          <dd>{{ order.description }}</dd>
+          <dd>{{ order.content }}</dd>
         </div>
 
-        <el-alert
-          v-if="order.rejectReason"
-          class="reason-alert"
-          type="error"
-          :title="`驳回原因：${order.rejectReason}`"
-          :closable="false"
-        />
-        <el-alert
-          v-else-if="order.cancelReason"
-          class="reason-alert"
-          type="info"
-          :title="`取消原因：${order.cancelReason}`"
-          :closable="false"
-        />
 
         <div v-if="imageAttachments.length > 0" class="attachment-block">
           <h3 class="block-title">现场照片</h3>
@@ -339,24 +317,15 @@ onMounted(() => {
             <div class="evaluation-summary">
               <p class="evaluation-meta">
                 评价时间：{{ formatRelative(evaluation.createdAt) }}
-                <el-tag v-if="evaluation.isAnonymous" size="small" type="info" class="anonymous-tag">匿名</el-tag>
+                <el-tag size="small" :type="evaluation.isSatisfied ? 'success' : 'warning'" class="anonymous-tag">
+                  {{ evaluation.isSatisfied ? '满意' : '不满意' }}
+                </el-tag>
               </p>
               <div class="rate-row">
                 <span class="rate-label">总体评分</span>
                 <el-rate :model-value="evaluation.rating" disabled />
               </div>
-              <div class="rate-row">
-                <span class="rate-label">服务态度</span>
-                <el-rate :model-value="evaluation.serviceAttitude" disabled />
-              </div>
-              <div class="rate-row">
-                <span class="rate-label">响应速度</span>
-                <el-rate :model-value="evaluation.responseSpeed" disabled />
-              </div>
-              <div class="rate-row">
-                <span class="rate-label">解决方案</span>
-                <el-rate :model-value="evaluation.solutionQuality" disabled />
-              </div>
+              <p v-if="evaluation.tags" class="evaluation-tags">{{ evaluation.tags }}</p>
               <p v-if="evaluation.content" class="evaluation-content">{{ evaluation.content }}</p>
             </div>
           </template>
@@ -366,18 +335,13 @@ onMounted(() => {
               <span class="rate-label">总体评分</span>
               <el-rate v-model="evaluationForm.rating" show-score />
             </div>
-            <div class="rate-row">
-              <span class="rate-label">服务态度</span>
-              <el-rate v-model="evaluationForm.serviceAttitude" />
-            </div>
-            <div class="rate-row">
-              <span class="rate-label">响应速度</span>
-              <el-rate v-model="evaluationForm.responseSpeed" />
-            </div>
-            <div class="rate-row">
-              <span class="rate-label">解决方案</span>
-              <el-rate v-model="evaluationForm.solutionQuality" />
-            </div>
+            <el-form-item label="评价标签（可选，逗号分隔）">
+              <el-input
+                v-model="evaluationForm.tags"
+                maxlength="100"
+                placeholder="如：态度好,响应快,专业"
+              />
+            </el-form-item>
             <el-form-item label="评价内容（可选）">
               <el-input
                 v-model="evaluationForm.content"
@@ -389,12 +353,11 @@ onMounted(() => {
               />
             </el-form-item>
             <div class="evaluation-footer">
-              <el-switch v-model="evaluationForm.isAnonymous" active-text="匿名评价" />
               <el-button type="primary" :loading="submittingEvaluation" @click="handleSubmitEvaluation">
                 提交评价
               </el-button>
             </div>
-            <p class="evaluation-hint">评分低于 4 星将自动生成跟进记录，由管理员督促处理</p>
+            <p class="evaluation-hint">评分低于 4 星将判定为不满意，自动生成跟进记录，由管理员督促处理</p>
           </el-form>
         </div>
       </article>

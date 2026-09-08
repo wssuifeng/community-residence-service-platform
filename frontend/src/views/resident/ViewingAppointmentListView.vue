@@ -19,8 +19,8 @@ const statusFilters = [
 ]
 
 const tagTypeMap: Record<ViewingAppointmentStatus, 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled'> = {
-  PENDING: 'pending',
-  CONFIRMED: 'processing',
+  TO_CONFIRM: 'pending',
+  RESERVED: 'processing',
   COMPLETED: 'completed',
   CANCELLED: 'canceled',
   VIOLATED: 'rejected'
@@ -37,7 +37,7 @@ const records = ref<IViewingAppointment[]>([])
 const loading = ref(false)
 
 const canCancel = (row: IViewingAppointment): boolean =>
-  row.status === 'PENDING' || row.status === 'CONFIRMED'
+  row.status === 'TO_CONFIRM' || row.status === 'RESERVED'
 
 async function loadList(): Promise<void> {
   loading.value = true

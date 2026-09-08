@@ -3,19 +3,18 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ImageUploader from '@/components/common/ImageUploader.vue'
-import { getMyProfile } from '@/api/resident'
+import { getMyProfile, getResidentResidenceList } from '@/api/resident'
 import { getServiceCategoryTree, submitWorkOrder, uploadWorkOrderAttachment } from '@/api/workorder'
 import type {
   IServiceCategoryTreeNode,
-  WorkOrderUrgency
+  WorkOrderPriority
 } from '@/types/modules/workorder'
-import { workOrderUrgencyLabels } from '@/types/modules/workorder'
-import { useUserStore } from '@/store/user'
+import { workOrderPriorityLabels } from '@/types/modules/workorder'
+import type { ResidenceRelationStatus } from '@/types/modules/resident'
 
 /** 提交工单（UI设计.md §3.1 / 4.1.2）：类别选择 + 描述 + 紧急程度 + 图片上传 */
 
 const router = useRouter()
-const userStore = useUserStore()
 
 /* 平铺后的类别选项：顶级作为分组，子级作为选项（无子级时顶级自身为选项） */
 interface CategoryOption {
@@ -35,29 +34,39 @@ const images = ref<string[]>([])
 const form = reactive({
   categoryId: null as number | null,
   title: '',
-  description: '',
-  urgency: 'NORMAL' as WorkOrderUrgency,
-  contactPhone: '',
-  appointmentTime: '',
-  appointmentDate: null as Date | null
+  content: '',
+  priority: 'NORMAL' as WorkOrderPriority,
+  contactPhone: ''
 })
 
-const urgencyOptions = (Object.keys(workOrderUrgencyLabels) as WorkOrderUrgency[]).map((value) => ({
+const priorityOptions = (Object.keys(workOrderPriorityLabels) as WorkOrderPriority[]).map((value) => ({
   value,
-  label: workOrderUrgencyLabels[value]
+  label: workOrderPriorityLabels[value]
 }))
 
-/* 居民端社区归属来自登录会话的社区绑定（AuthUser.boundCommunities） */
-const communityId = userStore.user?.boundCommunities?.[0]?.communityId ?? null
+/* 居民端社区归属从本人 ACTIVE 居住关系推导（登录响应 boundCommunities 对居民恒为空） */
+const communityId = ref<number | null>(null)
+
+async function loadCommunityId(): Promise<void> {
+  try {
+    const profile = await getMyProfile()
+    const relations = await getResidentResidenceList(profile.id, { page: 1, size: 5 })
+    const active = relations.records.find((item) => item.status === ('ACTIVE' as ResidenceRelationStatus))
+    communityId.value = active?.communityId ?? null
+  } catch {
+    communityId.value = null
+  }
+}
 
 async function loadCategories(): Promise<void> {
-  if (!communityId) {
+  await loadCommunityId()
+  if (!communityId.value) {
     ElMessage.error('未获取到所属社区信息，请重新登录后再试')
     return
   }
   categoryLoading.value = true
   try {
-    const tree = await getServiceCategoryTree(communityId)
+    const tree = await getServiceCategoryTree(communityId.value as number)
     categoryGroups.value = tree.map((node: IServiceCategoryTreeNode) => {
       if (node.children.length > 0) {
         return {
@@ -108,7 +117,7 @@ async function handleSubmit(): Promise<void> {
     ElMessage.warning('请填写工单标题')
     return
   }
-  if (!form.description.trim()) {
+  if (!form.content.trim()) {
     ElMessage.warning('请描述您遇到的问题')
     return
   }
@@ -120,14 +129,11 @@ async function handleSubmit(): Promise<void> {
   submitting.value = true
   try {
     const order = await submitWorkOrder({
-      categoryId: form.categoryId,
+      categoryId: form.categoryId as number,
       title: form.title.trim(),
-      description: form.description.trim(),
+      content: form.content.trim(),
       contactPhone: form.contactPhone.trim(),
-      urgency: form.urgency,
-      appointmentTime: form.appointmentDate
-        ? formatIsoLocal(form.appointmentDate)
-        : undefined
+      priority: form.priority
     })
     await attachImages(order.id, images.value)
     ElMessage.success('工单提交成功，请耐心等待受理')
@@ -140,10 +146,6 @@ async function handleSubmit(): Promise<void> {
 }
 
 /** Date → 本地时区 ISO 8601（无 Z 后缀，后端按本地时间解析） */
-function formatIsoLocal(date: Date): string {
-  const pad = (value: number): string => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-}
 
 onMounted(() => {
   loadCategories()
@@ -182,7 +184,7 @@ onMounted(() => {
 
       <el-form-item label="问题描述" required>
         <el-input
-          v-model="form.description"
+          v-model="form.content"
           type="textarea"
           :rows="5"
           maxlength="1000"
@@ -193,8 +195,8 @@ onMounted(() => {
 
       <div class="form-row">
         <el-form-item label="紧急程度" required>
-          <el-radio-group v-model="form.urgency" size="large">
-            <el-radio-button v-for="item in urgencyOptions" :key="item.value" :value="item.value">
+          <el-radio-group v-model="form.priority" size="large">
+            <el-radio-button v-for="item in priorityOptions" :key="item.value" :value="item.value">
               {{ item.label }}
             </el-radio-button>
           </el-radio-group>
@@ -204,16 +206,6 @@ onMounted(() => {
           <el-input v-model="form.contactPhone" maxlength="20" placeholder="方便服务人员联系您" size="large" />
         </el-form-item>
       </div>
-
-      <el-form-item label="预约上门时间（可选）">
-        <el-date-picker
-          v-model="form.appointmentDate"
-          type="datetime"
-          placeholder="选择期望上门处理的时间"
-          format="YYYY-MM-DD HH:mm"
-          class="appointment-picker"
-        />
-      </el-form-item>
 
       <el-form-item label="现场照片（可选，最多 6 张）">
         <ImageUploader v-model="images" :limit="6" />

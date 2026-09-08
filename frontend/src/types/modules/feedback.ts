@@ -74,7 +74,8 @@ export interface FeedbackCreateDTO {
 
 /** 关闭反馈请求（接口设计.md 9.6.1.4 请求体） */
 export interface FeedbackCloseDTO {
-  reason: string
+  /** 后端 CloseFeedbackDTO 字段为 remark（接口文档 reason 为漂移命名） */
+  remark: string
 }
 
 /** 反馈列表查询参数（接口设计.md 9.6.1.3） */

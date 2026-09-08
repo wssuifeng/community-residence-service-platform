@@ -9,33 +9,28 @@ export const evaluationSatisfiedLabels = {
   false: '不满意'
 } as const
 
-/** 工单评价（接口设计.md 9.8.1.1 响应） */
+/** 工单评价（后端 EvaluationVO：单一 rating + tags + isSatisfied(0/1)；接口文档的 4 维评分为漂移模型） */
 export interface IEvaluation {
   id: number
-  orderId: number
-  orderNumber: string
+  workOrderId: number
+  workOrderNo: string
   residentId: number
   residentName: string
-  assigneeId: number
-  assigneeName: string
+  communityId: number
   rating: EvaluationRating
-  serviceAttitude: EvaluationRating
-  responseSpeed: EvaluationRating
-  solutionQuality: EvaluationRating
   content: string | null
-  isAnonymous: boolean
-  isSatisfied: boolean
+  tags: string | null
+  isSatisfied: number
   createdAt: string
 }
 
-/** 提交评价请求（接口设计.md 9.8.1.1，仅工单提交人可评价且不可重复） */
+/** 提交评价请求（后端 CreateEvaluationDTO，仅工单提交人可评价且不可重复） */
 export interface IEvaluationCreateRequest {
   rating: EvaluationRating
-  serviceAttitude: EvaluationRating
-  responseSpeed: EvaluationRating
-  solutionQuality: EvaluationRating
   content?: string
-  isAnonymous: boolean
+  tags?: string
+  /** rating ≥ 4 为满意，前端计算 */
+  isSatisfied: boolean
 }
 
 /** 评价列表查询参数（接口设计.md 9.8.1.3） */
