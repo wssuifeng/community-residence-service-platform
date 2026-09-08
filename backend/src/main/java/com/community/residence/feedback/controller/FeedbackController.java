@@ -6,6 +6,7 @@ import com.community.residence.feedback.dto.CloseFeedbackDTO;
 import com.community.residence.feedback.dto.CreateFeedbackDTO;
 import com.community.residence.feedback.dto.SendMessageDTO;
 import com.community.residence.feedback.service.FeedbackService;
+import com.community.residence.feedback.vo.AttachmentVO;
 import com.community.residence.feedback.vo.FeedbackVO;
 import com.community.residence.feedback.vo.MessageVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,6 +73,13 @@ public class FeedbackController {
     @PostMapping("/{id}/messages")
     public ApiResponse<MessageVO> sendMessage(@PathVariable Long id, @RequestBody @Valid SendMessageDTO dto) {
         return ApiResponse.success(feedbackService.sendMessage(id, dto));
+    }
+
+    @Operation(summary = "反馈附件列表", description = "文件上传 P2 接入；当前返回空数组")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/{id}/attachments")
+    public ApiResponse<List<AttachmentVO>> attachments(@PathVariable Long id) {
+        return ApiResponse.success(feedbackService.attachments(id));
     }
 
     @Operation(summary = "会话消息列表", description = "支持 since 增量拉取（P1 轮询用）")

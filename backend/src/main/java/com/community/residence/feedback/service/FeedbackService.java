@@ -15,9 +15,12 @@ import com.community.residence.feedback.dto.CloseFeedbackDTO;
 import com.community.residence.feedback.dto.CreateFeedbackDTO;
 import com.community.residence.feedback.dto.SendMessageDTO;
 import com.community.residence.feedback.entity.Feedback;
+import com.community.residence.feedback.entity.FeedbackAttachment;
 import com.community.residence.feedback.entity.FeedbackMessage;
+import com.community.residence.feedback.mapper.FeedbackAttachmentMapper;
 import com.community.residence.feedback.mapper.FeedbackMapper;
 import com.community.residence.feedback.mapper.FeedbackMessageMapper;
+import com.community.residence.feedback.vo.AttachmentVO;
 import com.community.residence.feedback.vo.FeedbackVO;
 import com.community.residence.feedback.vo.MessageVO;
 import com.community.residence.messaging.service.NotificationService;
@@ -52,6 +55,7 @@ public class FeedbackService {
 
     private final FeedbackMapper feedbackMapper;
     private final FeedbackMessageMapper messageMapper;
+    private final FeedbackAttachmentMapper attachmentMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
     private final NotificationService notificationService;
@@ -167,6 +171,16 @@ public class FeedbackService {
                         .gt(since != null, FeedbackMessage::getCreatedAt, since)
                         .orderByAsc(FeedbackMessage::getId))
                 .stream().map(m -> toVO(m, feedback.getResidentId())).toList();
+    }
+
+    /* 附件列表：访问权限与详情同口径；文件上传 P2 接入，当前返回空数组 */
+    public List<AttachmentVO> attachments(Long feedbackId) {
+        Feedback feedback = requireFeedback(feedbackId);
+        checkReadAccess(feedback);
+        return attachmentMapper.selectList(new LambdaQueryWrapper<FeedbackAttachment>()
+                        .eq(FeedbackAttachment::getFeedbackId, feedbackId)
+                        .orderByAsc(FeedbackAttachment::getId))
+                .stream().map(AttachmentVO::from).toList();
     }
 
     public Feedback requireFeedback(Long id) {
