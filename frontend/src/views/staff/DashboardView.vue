@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import { listWorkOrders } from '@/api/workorder'
 import type { IWorkOrder, WorkOrderStatus } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderUrgencyLabels } from '@/types/modules/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatRelative } from '@/utils/date'
 
 /** 工作台（UI设计.md §4.2.1）：统计卡片（列表接口统计）+ 待办工单快速入口 */
@@ -26,7 +26,7 @@ const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'comple
 }
 
 /* 紧急程度排序权重：越紧急越靠前 */
-const urgencyWeight: Record<string, number> = { URGENT: 3, HIGH: 2, NORMAL: 1, LOW: 0 }
+const priorityWeight: Record<string, number> = { URGENT: 3, HIGH: 2, NORMAL: 1, LOW: 0 }
 
 const todoCount = ref(0)
 const doingCount = ref(0)
@@ -35,11 +35,6 @@ const todoOrders = ref<IWorkOrder[]>([])
 const loading = ref(false)
 
 /** 本地日期 → 查询起始时间字符串（YYYY-MM-DD 00:00:00） */
-function todayStart(): string {
-  const now = new Date()
-  const pad = (value: number): string => String(value).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} 00:00:00`
-}
 
 async function loadDashboard(): Promise<void> {
   loading.value = true
@@ -49,7 +44,7 @@ async function loadDashboard(): Promise<void> {
       listWorkOrders({ status: 'ASSIGNED', page: 1, size: 5 }),
       listWorkOrders({ status: 'ACCEPTED', page: 1, size: 1 }),
       listWorkOrders({ status: 'IN_PROGRESS', page: 1, size: 5 }),
-      listWorkOrders({ status: 'COMPLETED', page: 1, size: 1, startTime: todayStart() })
+      listWorkOrders({ status: 'COMPLETED', page: 1, size: 1 })
     ])
 
     todoCount.value = assigned.total
@@ -58,7 +53,7 @@ async function loadDashboard(): Promise<void> {
 
     /* 待办列表：已派单 + 已接单 + 处理中，按紧急程度与时间排序 */
     todoOrders.value = [...assigned.records, ...accepted.records, ...inProgress.records].sort((a, b) => {
-      const weight = urgencyWeight[b.urgency] - urgencyWeight[a.urgency]
+      const weight = priorityWeight[b.priority] - priorityWeight[a.priority]
       return weight !== 0 ? weight : b.createdAt.localeCompare(a.createdAt)
     })
   } catch (error) {
@@ -115,8 +110,8 @@ onMounted(loadDashboard)
         <el-table-column prop="residentName" label="提交人" width="100" />
         <el-table-column label="紧急程度" width="90">
           <template #default="{ row }">
-            <el-tag :type="row.urgency === 'URGENT' ? 'danger' : row.urgency === 'HIGH' ? 'warning' : 'info'" size="small">
-              {{ workOrderUrgencyLabels[row.urgency as keyof typeof workOrderUrgencyLabels] }}
+            <el-tag :type="row.priority === 'URGENT' ? 'danger' : row.priority === 'HIGH' ? 'warning' : 'info'" size="small">
+              {{ workOrderPriorityLabels[row.priority as keyof typeof workOrderPriorityLabels] }}
             </el-tag>
           </template>
         </el-table-column>

@@ -18,7 +18,7 @@ import type {
   IWorkOrderProcess,
   WorkOrderStatus
 } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderUrgencyLabels } from '@/types/modules/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import type { ISysUser } from '@/types/modules/auth'
 import { formatDateTime } from '@/utils/date'
 
@@ -188,7 +188,7 @@ onMounted(fetchDetail)
       <article class="info-card">
         <div class="info-card-head">
           <div>
-            <span class="order-number">{{ order.orderNumber }}</span>
+            <span class="order-number">{{ order.orderNo }}</span>
             <h1 class="order-title">{{ order.title }}</h1>
           </div>
           <StatusTag :label="workOrderStatusLabels[order.status]" :type="statusSemantic[order.status]" />
@@ -201,11 +201,11 @@ onMounted(fetchDetail)
           </div>
           <div class="info-item">
             <dt>紧急程度</dt>
-            <dd>{{ workOrderUrgencyLabels[order.urgency] }}</dd>
+            <dd>{{ workOrderPriorityLabels[order.priority] }}</dd>
           </div>
           <div class="info-item">
             <dt>提交人</dt>
-            <dd>{{ order.residentName }}（{{ order.residentPhone }}）</dd>
+            <dd>{{ order.residentName }}</dd>
           </div>
           <div class="info-item">
             <dt>联系电话</dt>
@@ -216,46 +216,16 @@ onMounted(fetchDetail)
             <dd>{{ formatDateTime(order.createdAt) }}</dd>
           </div>
           <div class="info-item">
-            <dt>预约上门</dt>
-            <dd>{{ order.appointmentTime ? formatDateTime(order.appointmentTime) : '未预约' }}</dd>
-          </div>
-          <div class="info-item">
             <dt>当前处理人</dt>
             <dd>{{ order.assigneeName ?? '尚未指派' }}</dd>
-          </div>
-          <div class="info-item">
-            <dt>派单时间</dt>
-            <dd>{{ formatDateTime(order.assignedAt) }}</dd>
-          </div>
-          <div class="info-item">
-            <dt>完成时间</dt>
-            <dd>{{ formatDateTime(order.completedAt) }}</dd>
-          </div>
-          <div class="info-item">
-            <dt>居民确认时间</dt>
-            <dd>{{ formatDateTime(order.confirmedAt) }}</dd>
           </div>
         </dl>
 
         <div class="info-description">
           <dt>问题描述</dt>
-          <dd>{{ order.description }}</dd>
+          <dd>{{ order.content }}</dd>
         </div>
 
-        <el-alert
-          v-if="order.rejectReason"
-          class="reason-alert"
-          type="error"
-          :title="`驳回原因：${order.rejectReason}`"
-          :closable="false"
-        />
-        <el-alert
-          v-else-if="order.cancelReason"
-          class="reason-alert"
-          type="info"
-          :title="`取消原因：${order.cancelReason}`"
-          :closable="false"
-        />
 
         <div v-if="imageAttachments.length > 0" class="attachment-block">
           <h3 class="block-title">现场照片</h3>
@@ -318,7 +288,7 @@ onMounted(fetchDetail)
       </article>
     </template>
 
-    <el-dialog v-model="assignDialogVisible" :title="`派单 · ${order?.orderNumber ?? ''}`" width="480px">
+    <el-dialog v-model="assignDialogVisible" :title="`派单 · ${order?.orderNo ?? ''}`" width="480px">
       <el-form label-width="90px" @submit.prevent>
         <el-form-item label="服务人员" required>
           <el-select

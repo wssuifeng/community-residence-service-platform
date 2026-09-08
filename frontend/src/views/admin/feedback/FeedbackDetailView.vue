@@ -122,7 +122,7 @@ async function handleClose(): Promise<void> {
   }
   closing.value = true
   try {
-    await closeFeedback(feedbackId, { reason })
+    await closeFeedback(feedbackId, { remark: reason })
     ElMessage.success('反馈已办结')
     await loadDetail()
   } catch (error) {

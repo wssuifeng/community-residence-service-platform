@@ -8,6 +8,7 @@ import {
   getHousingDetail,
   recordHousingView,
   listViewingAvailableSlots,
+  listHousingTimeslots,
   createViewingAppointment
 } from '@/api/housing'
 import { getMyProfile } from '@/api/resident'
@@ -97,7 +98,31 @@ async function loadSlots(): Promise<void> {
       endDate: windowEnd
     })
   } catch {
-    /* 时段加载失败保留空态，不阻塞详情展示 */
+    /* available-slots 接口后端暂缺（BE-ISSUE-5）：降级取周循环模板自行展开未来窗口 */
+    try {
+      const templates = await listHousingTimeslots(housingId)
+      const expanded: IAvailableViewingTimeslot[] = []
+      const today = new Date()
+      for (let offset = 0; offset <= SLOT_WINDOW_DAYS; offset += 1) {
+        const day = new Date(today.getTime() + offset * 24 * 60 * 60 * 1000)
+        const dow = day.getDay()
+        for (const tpl of templates) {
+          if (tpl.dayOfWeek !== dow || !tpl.isAvailable) continue
+          expanded.push({
+            timeslotId: tpl.id,
+            date: toDateInput(day),
+            startTime: tpl.startTime,
+            endTime: tpl.endTime,
+            maxBookings: 1,
+            currentBookings: 0,
+            status: 'AVAILABLE'
+          })
+        }
+      }
+      slots.value = expanded
+    } catch {
+      /* 模板也取不到时保留空态 */
+    }
   } finally {
     slotsLoading.value = false
   }
@@ -149,12 +174,18 @@ async function handleSubmit(): Promise<void> {
   }
   submitting.value = true
   try {
+    const slot = selectedSlot.value
+    if (!slot) {
+      ElMessage.warning('请先点选一个看房时段')
+      return
+    }
     await createViewingAppointment({
       housingId,
-      timeslotId: selectedTimeslotId.value,
+      appointmentDate: slot.date,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
       visitorName: form.visitorName.trim(),
-      visitorPhone: form.visitorPhone.trim() || undefined,
-      visitorCount: form.visitorCount,
+      contactPhone: form.visitorPhone.trim(),
       remark: form.remark.trim() || undefined
     })
     ElMessage.success('看房预约已提交，等待管理员确认')

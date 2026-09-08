@@ -1,0 +1,745 @@
+{
+  "started_at": "2026-09-08T14:32:38+0800",
+  "checks": [
+    {
+      "name": "public render: guest home",
+      "passed": true,
+      "detail": "http://localhost:5173/guest/home"
+    },
+    {
+      "name": "public render: guest housings",
+      "passed": true,
+      "detail": "http://localhost:5173/guest/housings"
+    },
+    {
+      "name": "public render: guest notices",
+      "passed": true,
+      "detail": "http://localhost:5173/guest/notices"
+    },
+    {
+      "name": "public render: login",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/login"
+    },
+    {
+      "name": "public render: register",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/register"
+    },
+    {
+      "name": "login empty form validation",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/login"
+    },
+    {
+      "name": "register empty form validation",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/register"
+    },
+    {
+      "name": "unauthenticated route guard: resident guard",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/login?redirect=/resident/home"
+    },
+    {
+      "name": "unauthenticated route guard: staff guard",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/login?redirect=/staff/dashboard"
+    },
+    {
+      "name": "unauthenticated route guard: admin guard",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/login?redirect=/admin/statistics/dashboard"
+    },
+    {
+      "name": "BE-ISSUE-3 guest notice detail without view-record call",
+      "passed": true,
+      "detail": "http://localhost:5173/guest/notices/3"
+    },
+    {
+      "name": "superadmin login and redirect",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/statistics/dashboard"
+    },
+    {
+      "name": "superadmin create-community visible",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/communities"
+    },
+    {
+      "name": "superadmin create-user visible",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/sys-users"
+    },
+    {
+      "name": "superadmin config edit visible",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/configs"
+    },
+    {
+      "name": "BE-ISSUE-1 admin notifications loads (no 500)",
+      "passed": true,
+      "detail": "statuses=[200, 200] url=http://localhost:5173/admin/notifications"
+    },
+    {
+      "name": "BE-ISSUE-2 feedback attachments endpoint 200",
+      "passed": true,
+      "detail": "statuses=[200] url=http://localhost:5173/admin/feedbacks/2"
+    },
+    {
+      "name": "BE-ISSUE-4 resident1 real login and redirect",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "resident blocked from admin",
+      "passed": true,
+      "detail": "http://localhost:5173/403"
+    },
+    {
+      "name": "BE-ISSUE-1 resident notifications loads (no 500)",
+      "passed": true,
+      "detail": "statuses=[200, 200, 200] url=http://localhost:5173/resident/notifications"
+    },
+    {
+      "name": "BE-ISSUE-1 mark-all-read succeeds",
+      "passed": true,
+      "detail": "[{'method': 'GET', 'url': 'http://localhost:5173/api/v1/notifications/unread', 'status': 200}, {'method': 'GET', 'url': 'http://localhost:5173/api/v1/notifications?page=1&size=10', 'status': 200}, {'method': 'PATCH', 'url': 'http://localhost:5173/api/v1/notifications/read-all', 'status': 200}]"
+    },
+    {
+      "name": "BE-ISSUE-4 staff1 real login and redirect",
+      "passed": true,
+      "detail": "http://localhost:5173/staff/dashboard"
+    },
+    {
+      "name": "staff blocked from resident",
+      "passed": true,
+      "detail": "http://localhost:5173/403"
+    },
+    {
+      "name": "BE-ISSUE-4 admin1 real login and redirect",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/statistics/dashboard"
+    },
+    {
+      "name": "admin hides create-community",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/communities"
+    },
+    {
+      "name": "admin sees common create button",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/buildings"
+    },
+    {
+      "name": "staff1 relogin for notifications",
+      "passed": true,
+      "detail": "http://localhost:5173/staff/dashboard"
+    },
+    {
+      "name": "BE-ISSUE-1 staff notifications loads (no 500)",
+      "passed": true,
+      "detail": "statuses=[200, 200, 200] url=http://localhost:5173/staff/notifications"
+    },
+    {
+      "name": "responsive guest housing grid 1440px",
+      "passed": true,
+      "detail": "display=grid columns=280px 280px 280px 280px"
+    },
+    {
+      "name": "responsive guest housing grid 1200px",
+      "passed": true,
+      "detail": "display=grid columns=280px 280px 280px 280px"
+    },
+    {
+      "name": "responsive guest housing grid 900px",
+      "passed": true,
+      "detail": "display=grid columns=426px 426px"
+    },
+    {
+      "name": "responsive guest housing grid 600px",
+      "passed": true,
+      "detail": "display=grid columns=568px"
+    }
+  ],
+  "console_errors": [
+    "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "error: Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "page_errors": [],
+  "failed_requests": [],
+  "api_statuses": [
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/feedbacks/2/attachments",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "url": "http://localhost:5173/api/v1/notifications/read-all",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/feedbacks/1/attachments",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notices/1/viewers?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/feedbacks/1/attachments",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5173/api/v1/notifications?page=1&size=10",
+      "status": 200
+    }
+  ],
+  "notes": [],
+  "page_scan": [
+    {
+      "account": null,
+      "path": "/guest/home",
+      "url": "http://localhost:5173/guest/home",
+      "page_error_count": 0,
+      "body_length": 242
+    },
+    {
+      "account": null,
+      "path": "/guest/housings",
+      "url": "http://localhost:5173/guest/housings",
+      "page_error_count": 0,
+      "body_length": 114
+    },
+    {
+      "account": null,
+      "path": "/guest/housings/1",
+      "url": "http://localhost:5173/guest/housings/1",
+      "page_error_count": 0,
+      "body_length": 154
+    },
+    {
+      "account": null,
+      "path": "/guest/notices",
+      "url": "http://localhost:5173/guest/notices",
+      "page_error_count": 0,
+      "body_length": 103
+    },
+    {
+      "account": null,
+      "path": "/guest/notices/1",
+      "url": "http://localhost:5173/guest/notices/1",
+      "page_error_count": 0,
+      "body_length": 100
+    },
+    {
+      "account": null,
+      "path": "/auth/login",
+      "url": "http://localhost:5173/auth/login",
+      "page_error_count": 0,
+      "body_length": 80
+    },
+    {
+      "account": null,
+      "path": "/auth/register",
+      "url": "http://localhost:5173/auth/register",
+      "page_error_count": 0,
+      "body_length": 61
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/home",
+      "url": "http://localhost:5173/resident/home",
+      "page_error_count": 0,
+      "body_length": 228
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/profile",
+      "url": "http://localhost:5173/resident/profile",
+      "page_error_count": 0,
+      "body_length": 185
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/work-orders",
+      "url": "http://localhost:5173/resident/work-orders",
+      "page_error_count": 0,
+      "body_length": 127
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/work-orders/create",
+      "url": "http://localhost:5173/resident/work-orders/create",
+      "page_error_count": 0,
+      "body_length": 203
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/work-orders/1",
+      "url": "http://localhost:5173/resident/work-orders/1",
+      "page_error_count": 0,
+      "body_length": 70
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/feedbacks",
+      "url": "http://localhost:5173/resident/feedbacks",
+      "page_error_count": 0,
+      "body_length": 151
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/feedbacks/create",
+      "url": "http://localhost:5173/resident/feedbacks/create",
+      "page_error_count": 0,
+      "body_length": 185
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/feedbacks/1",
+      "url": "http://localhost:5173/resident/feedbacks",
+      "page_error_count": 0,
+      "body_length": 161
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/reservations",
+      "url": "http://localhost:5173/resident/reservations",
+      "page_error_count": 0,
+      "body_length": 149
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/reservations/create",
+      "url": "http://localhost:5173/resident/reservations/create",
+      "page_error_count": 0,
+      "body_length": 223
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/notices",
+      "url": "http://localhost:5173/resident/notices",
+      "page_error_count": 0,
+      "body_length": 117
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/notices/1",
+      "url": "http://localhost:5173/resident/notices/1",
+      "page_error_count": 0,
+      "body_length": 66
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/notifications",
+      "url": "http://localhost:5173/resident/notifications",
+      "page_error_count": 0,
+      "body_length": 127
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/housings",
+      "url": "http://localhost:5173/resident/housings",
+      "page_error_count": 0,
+      "body_length": 146
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/housings/1",
+      "url": "http://localhost:5173/resident/housings/1",
+      "page_error_count": 0,
+      "body_length": 215
+    },
+    {
+      "account": "resident1",
+      "path": "/resident/viewing-appointments",
+      "url": "http://localhost:5173/resident/viewing-appointments",
+      "page_error_count": 0,
+      "body_length": 149
+    },
+    {
+      "account": "staff1",
+      "path": "/staff/dashboard",
+      "url": "http://localhost:5173/staff/dashboard",
+      "page_error_count": 0,
+      "body_length": 105
+    },
+    {
+      "account": "staff1",
+      "path": "/staff/work-orders",
+      "url": "http://localhost:5173/staff/work-orders",
+      "page_error_count": 0,
+      "body_length": 123
+    },
+    {
+      "account": "staff1",
+      "path": "/staff/work-orders/1",
+      "url": "http://localhost:5173/staff/work-orders/1",
+      "page_error_count": 0,
+      "body_length": 65
+    },
+    {
+      "account": "staff1",
+      "path": "/staff/notifications",
+      "url": "http://localhost:5173/staff/notifications",
+      "page_error_count": 0,
+      "body_length": 70
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/statistics/dashboard",
+      "url": "http://localhost:5173/admin/statistics/dashboard",
+      "page_error_count": 0,
+      "body_length": 431
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/statistics/work-orders",
+      "url": "http://localhost:5173/admin/statistics/work-orders",
+      "page_error_count": 0,
+      "body_length": 280
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/statistics/residents",
+      "url": "http://localhost:5173/admin/statistics/residents",
+      "page_error_count": 0,
+      "body_length": 248
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/statistics/resources",
+      "url": "http://localhost:5173/admin/statistics/resources",
+      "page_error_count": 0,
+      "body_length": 273
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/statistics/evaluations",
+      "url": "http://localhost:5173/admin/statistics/evaluations",
+      "page_error_count": 0,
+      "body_length": 279
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/communities",
+      "url": "http://localhost:5173/admin/communities",
+      "page_error_count": 0,
+      "body_length": 470
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/communities/1",
+      "url": "http://localhost:5173/admin/communities/1",
+      "page_error_count": 0,
+      "body_length": 501
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/buildings",
+      "url": "http://localhost:5173/admin/buildings",
+      "page_error_count": 0,
+      "body_length": 256
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/units",
+      "url": "http://localhost:5173/admin/units",
+      "page_error_count": 0,
+      "body_length": 272
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/houses",
+      "url": "http://localhost:5173/admin/houses",
+      "page_error_count": 0,
+      "body_length": 288
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/resources",
+      "url": "http://localhost:5173/admin/resources",
+      "page_error_count": 0,
+      "body_length": 272
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/residents",
+      "url": "http://localhost:5173/admin/residents",
+      "page_error_count": 0,
+      "body_length": 483
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/residents/1",
+      "url": "http://localhost:5173/admin/residents/1",
+      "page_error_count": 0,
+      "body_length": 439
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/residence-applications",
+      "url": "http://localhost:5173/admin/residence-applications",
+      "page_error_count": 0,
+      "body_length": 415
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/residence-relations",
+      "url": "http://localhost:5173/admin/residence-relations",
+      "page_error_count": 0,
+      "body_length": 317
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/configs",
+      "url": "http://localhost:5173/admin/configs",
+      "page_error_count": 0,
+      "body_length": 850
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/leases",
+      "url": "http://localhost:5173/admin/leases",
+      "page_error_count": 0,
+      "body_length": 476
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/leases/expiring",
+      "url": "http://localhost:5173/admin/leases/expiring",
+      "page_error_count": 0,
+      "body_length": 343
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/service-categories",
+      "url": "http://localhost:5173/admin/service-categories",
+      "page_error_count": 0,
+      "body_length": 358
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/work-orders",
+      "url": "http://localhost:5173/admin/work-orders",
+      "page_error_count": 0,
+      "body_length": 728
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/work-orders/1",
+      "url": "http://localhost:5173/admin/work-orders/1",
+      "page_error_count": 0,
+      "body_length": 562
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/notices",
+      "url": "http://localhost:5173/admin/notices",
+      "page_error_count": 0,
+      "body_length": 561
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/notices/create",
+      "url": "http://localhost:5173/admin/notices/create",
+      "page_error_count": 0,
+      "body_length": 364
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/notices/1",
+      "url": "http://localhost:5173/admin/notices/1",
+      "page_error_count": 0,
+      "body_length": 454
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/feedbacks",
+      "url": "http://localhost:5173/admin/feedbacks",
+      "page_error_count": 0,
+      "body_length": 520
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/feedbacks/1",
+      "url": "http://localhost:5173/admin/feedbacks/1",
+      "page_error_count": 0,
+      "body_length": 530
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/resource-reservations",
+      "url": "http://localhost:5173/admin/resource-reservations",
+      "page_error_count": 0,
+      "body_length": 799
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/violations",
+      "url": "http://localhost:5173/admin/violations",
+      "page_error_count": 0,
+      "body_length": 302
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/evaluations",
+      "url": "http://localhost:5173/admin/evaluations",
+      "page_error_count": 0,
+      "body_length": 474
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/evaluations/1/followup",
+      "url": "http://localhost:5173/admin/evaluations/1/followup",
+      "page_error_count": 0,
+      "body_length": 431
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/sys-users",
+      "url": "http://localhost:5173/admin/sys-users",
+      "page_error_count": 0,
+      "body_length": 891
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/sys-users/1/communities",
+      "url": "http://localhost:5173/admin/sys-users/1/communities",
+      "page_error_count": 0,
+      "body_length": 366
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/operation-logs",
+      "url": "http://localhost:5173/admin/operation-logs",
+      "page_error_count": 0,
+      "body_length": 340
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/notifications",
+      "url": "http://localhost:5173/admin/notifications",
+      "page_error_count": 0,
+      "body_length": 742
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/housings",
+      "url": "http://localhost:5173/admin/housings",
+      "page_error_count": 0,
+      "body_length": 422
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/housings/1",
+      "url": "http://localhost:5173/admin/housings/1",
+      "page_error_count": 0,
+      "body_length": 394
+    },
+    {
+      "account": "superadmin",
+      "path": "/admin/viewing-appointments",
+      "url": "http://localhost:5173/admin/viewing-appointments",
+      "page_error_count": 0,
+      "body_length": 518
+    }
+  ],
+  "api_errors": [
+    "GET http://localhost:5173/api/v1/notices/1 -> 404",
+    "GET http://localhost:5173/api/v1/work-orders/1/attachments -> 403",
+    "GET http://localhost:5173/api/v1/work-orders/1 -> 403",
+    "GET http://localhost:5173/api/v1/work-orders/1/timeline -> 403",
+    "GET http://localhost:5173/api/v1/feedbacks/1/attachments -> 403",
+    "GET http://localhost:5173/api/v1/feedbacks/1 -> 403",
+    "GET http://localhost:5173/api/v1/feedbacks/1/messages -> 403",
+    "GET http://localhost:5173/api/v1/notices/1 -> 404",
+    "GET http://localhost:5173/api/v1/housings/1/available-slots?startDate=2026-09-08&endDate=2026-09-22 -> 404",
+    "GET http://localhost:5173/api/v1/work-orders/1/attachments -> 403",
+    "GET http://localhost:5173/api/v1/work-orders/1 -> 403",
+    "GET http://localhost:5173/api/v1/work-orders/1/timeline -> 403"
+  ],
+  "summary": {
+    "checks": 32,
+    "passed": 32,
+    "failed": 0,
+    "page_scan_count": 64,
+    "page_scan_with_page_errors": 0
+  }
+}
