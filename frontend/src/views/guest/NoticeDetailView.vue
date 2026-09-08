@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getNotice, recordNoticeView } from '@/api/notice'
+import { getNotice } from '@/api/notice'
 import type { INotice } from '@/types/modules/notice'
 import { noticeTypeLabels } from '@/types/modules/notice'
 import { formatDateTime } from '@/utils/date'
@@ -32,9 +32,9 @@ async function load(): Promise<void> {
   }
   loading.value = true
   try {
+    /* 游客无回执主体（notice_view_record 以 resident_id 记录，接口权限 RESIDENT），
+       仅阅读公开详情，不调用查看回执接口 */
     notice.value = await getNotice(id)
-    /* 查看记录为尽力而为的埋点（同一用户同一公告仅记录一次），失败不阻塞阅读 */
-    recordNoticeView(id).catch(() => undefined)
   } catch (error) {
     loadError.value = error instanceof Error ? error.message : '公告加载失败'
     ElMessage.error(loadError.value)
