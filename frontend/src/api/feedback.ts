@@ -5,7 +5,6 @@ import type {
   FeedbackCreateDTO,
   FeedbackListQuery,
   FeedbackMessageCreateDTO,
-  FeedbackMessageQuery,
   IFeedback,
   IFeedbackAttachment,
   IFeedbackMessage
@@ -53,7 +52,7 @@ export function sendFeedbackMessage(feedbackId: number, data: FeedbackMessageCre
   return http.post<IFeedbackMessage>(`/feedbacks/${feedbackId}/messages`, data)
 }
 
-/** 反馈会话消息列表（接口设计.md 9.6.3.2，默认时间升序） */
-export function listFeedbackMessages(feedbackId: number, query?: FeedbackMessageQuery) {
-  return http.get<PageResult<IFeedbackMessage>>(`/feedbacks/${feedbackId}/messages`, query)
+/** 反馈会话消息列表（接口设计.md 9.6.3.2；后端实现返回全量数组，默认时间升序） */
+export function listFeedbackMessages(feedbackId: number) {
+  return http.get<IFeedbackMessage[]>(`/feedbacks/${feedbackId}/messages`)
 }

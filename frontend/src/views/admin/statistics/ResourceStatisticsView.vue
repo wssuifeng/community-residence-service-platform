@@ -4,21 +4,19 @@ import { ElMessage } from 'element-plus'
 import EChart, { type ChartOption } from '@/components/common/EChart.vue'
 import StatCard from '@/components/common/StatCard.vue'
 import { getResourceStats } from '@/api/statistics'
-import type { IResourceStats } from '@/types/modules/statistics'
 import { reservationStatusLabels } from '@/types/modules/reservation'
-import { formatDate, subDays, todayISO } from '@/utils/date'
+import type { IResourceStats } from '@/types/modules/statistics'
 
-/** 资源预约统计：默认展示近 90 天（接口设计.md 9.9.1.4） */
+/** 资源预约统计：总量 + 预约状态分布（后端扁平契约：total/byStatus） */
 const loading = ref(false)
 const stats = ref<IResourceStats | null>(null)
-const range = ref<[string, string]>([formatDate(subDays(90)), todayISO()])
 
 onMounted(load)
 
 async function load(): Promise<void> {
   loading.value = true
   try {
-    stats.value = await getResourceStats({ startDate: range.value[0], endDate: range.value[1] })
+    stats.value = await getResourceStats()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载资源统计失败')
   } finally {
@@ -26,64 +24,48 @@ async function load(): Promise<void> {
   }
 }
 
-const resourceOption = computed<ChartOption>(() => ({
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: stats.value?.byResource.map((item) => item.resourceName) ?? [] },
-  yAxis: { type: 'value', minInterval: 1 },
-  series: [
-    {
-      type: 'bar',
-      name: '预约量',
-      barMaxWidth: 40,
-      data: stats.value?.byResource.map((item) => item.count) ?? []
-    }
-  ]
-}))
-
 const statusOption = computed<ChartOption>(() => ({
   tooltip: { trigger: 'item' },
-  legend: { bottom: 0 },
+  legend: { bottom: 0, type: 'scroll' },
   series: [
     {
       type: 'pie',
       radius: ['42%', '68%'],
-      data: (stats.value?.byStatus ?? []).map((item) => ({
-        name: reservationStatusLabels[item.status as keyof typeof reservationStatusLabels] ?? item.status,
-        value: item.count
+      center: ['50%', '44%'],
+      label: { show: false },
+      data: Object.entries(stats.value?.byStatus ?? {}).map(([status, count]) => ({
+        name: reservationStatusLabels[status as keyof typeof reservationStatusLabels] ?? status,
+        value: count
       }))
     }
   ]
 }))
-
-const completionPercent = computed(() => `${((stats.value?.summary.completionRate ?? 0) * 100).toFixed(1)}%`)
-const violationPercent = computed(() => `${((stats.value?.summary.violationRate ?? 0) * 100).toFixed(2)}%`)
 </script>
 
 <template>
   <section v-loading="loading" class="resource-stats">
     <div class="stat-grid">
-      <StatCard label="预约总量" :value="stats?.summary.totalReservations ?? '-'" type="primary" />
-      <StatCard label="完成率" :value="completionPercent" type="success" />
-      <StatCard label="违约次数" :value="stats?.summary.violationCount ?? '-'" type="warning" />
-      <StatCard label="违约率" :value="violationPercent" />
+      <StatCard label="预约总量" :value="stats?.total ?? '-'" unit="次" type="primary" />
     </div>
 
     <div class="chart-grid">
       <div class="chart-card">
-        <h3>各资源预约量</h3>
+        <h3>预约状态分布</h3>
         <EChart
-          :option="resourceOption"
-          :is-empty="(stats?.byResource.length ?? 0) === 0"
+          :option="statusOption"
+          :is-empty="Object.keys(stats?.byStatus ?? {}).length === 0"
           empty-text="暂无预约数据"
         />
       </div>
       <div class="chart-card">
-        <h3>预约状态分布</h3>
-        <EChart
-          :option="statusOption"
-          :is-empty="(stats?.byStatus.length ?? 0) === 0"
-          empty-text="暂无状态数据"
-        />
+        <h3>状态明细</h3>
+        <ul v-if="stats && Object.keys(stats.byStatus).length" class="detail-list">
+          <li v-for="(count, status) in stats.byStatus" :key="status">
+            <span>{{ reservationStatusLabels[status as keyof typeof reservationStatusLabels] ?? status }}</span>
+            <b>{{ count }}</b>
+          </li>
+        </ul>
+        <p v-else class="empty-text">暂无数据</p>
       </div>
     </div>
   </section>
@@ -114,7 +96,23 @@ const violationPercent = computed(() => `${((stats.value?.summary.violationRate 
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
   margin-bottom: var(--spacing-md);
-  color: var(--color-text-primary);
+}
+
+.detail-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.detail-list li b {
+  color: var(--color-primary);
+}
+
+.empty-text {
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-sm);
 }
 
 @media (max-width: 1023px) {

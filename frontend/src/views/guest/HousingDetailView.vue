@@ -118,7 +118,7 @@ onMounted(load)
           <h1 class="info-title">{{ housing.title }}</h1>
           <p class="info-address">{{ housing.communityName }} · {{ housing.houseAddress }}</p>
 
-          <div v-if="housing.tags.length > 0" class="info-tags">
+          <div v-if="(housing.tags?.length ?? 0) > 0" class="info-tags">
             <span v-for="tag in housing.tags" :key="tag" class="info-tag">{{ tag }}</span>
           </div>
 
@@ -158,16 +158,19 @@ onMounted(load)
         </div>
       </div>
 
-      <!-- 房源描述 -->
+      <!-- 房源描述（后端无描述时为 null，展示占位文案） -->
       <section class="description">
         <h2 class="description-title">房源描述</h2>
-        <p
-          v-for="(paragraph, index) in housing.description.split('\n').filter((line) => line.trim() !== '')"
-          :key="index"
-          class="description-paragraph"
-        >
-          {{ paragraph }}
-        </p>
+        <template v-if="housing.description">
+          <p
+            v-for="(paragraph, index) in housing.description.split('\n').filter((line) => line.trim() !== '')"
+            :key="index"
+            class="description-paragraph"
+          >
+            {{ paragraph }}
+          </p>
+        </template>
+        <p v-else class="description-paragraph description-empty">暂无描述</p>
       </section>
     </template>
   </div>

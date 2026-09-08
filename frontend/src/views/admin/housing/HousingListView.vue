@@ -216,10 +216,10 @@ function openEdit(row: IHousing): void {
     contactPerson: row.contactPerson,
     contactPhone: row.contactPhone ?? '',
     images: [...row.images],
-    tags: [...row.tags]
+    tags: [...(row.tags ?? [])]
   })
   imagesText.value = row.images.join('\n')
-  tagsInput.value = row.tags.join('、')
+  tagsInput.value = (row.tags ?? []).join('、')
   resetCascade()
   dialogVisible.value = true
 }

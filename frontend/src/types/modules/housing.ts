@@ -52,7 +52,8 @@ export interface IHousing {
   contactPerson: string
   contactPhone: string | null
   images: string[]
-  tags: string[]
+  /** 标签：后端实际可能不返回该字段（无标签房源），使用处需空值防御 */
+  tags?: string[]
   status: HousingStatus
   viewCount: number
   createdAt: string

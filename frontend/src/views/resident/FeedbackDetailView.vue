@@ -61,12 +61,8 @@ async function loadDetail(): Promise<void> {
 
 async function loadMessages(): Promise<void> {
   try {
-    const result = await listFeedbackMessages(feedbackId, {
-      page: 1,
-      size: 100,
-      sortOrder: 'ASC'
-    })
-    messages.value = result.records
+    // 后端返回全量数组（默认时间升序），前端不再分页
+    messages.value = await listFeedbackMessages(feedbackId)
     await nextTick()
     scrollToBottom()
   } catch {

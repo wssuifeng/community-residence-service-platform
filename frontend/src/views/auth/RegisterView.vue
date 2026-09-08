@@ -61,6 +61,9 @@ async function handleRegister(): Promise<void> {
     })
     ElMessage.success('注册成功，请登录')
     router.push('/auth/login')
+  } catch (error) {
+    // 注册失败（用户名占用/注册开关关闭等）：提示用户，停留在注册页
+    ElMessage.error(error instanceof Error ? error.message : '注册失败，请稍后重试')
   } finally {
     loading.value = false
   }
