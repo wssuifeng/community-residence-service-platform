@@ -15,6 +15,7 @@ import com.community.residence.workorder.entity.WorkOrderAssignment;
 import com.community.residence.workorder.entity.WorkOrderProcess;
 import com.community.residence.workorder.mapper.ServiceCategoryMapper;
 import com.community.residence.workorder.mapper.WorkOrderAssignmentMapper;
+import com.community.residence.workorder.mapper.WorkOrderAttachmentMapper;
 import com.community.residence.workorder.mapper.WorkOrderMapper;
 import com.community.residence.workorder.mapper.WorkOrderProcessMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,8 @@ class WorkOrderServiceExtraTest {
     private WorkOrderProcessMapper processMapper;
     @Mock
     private WorkOrderAssignmentMapper assignmentMapper;
+    @Mock
+    private WorkOrderAttachmentMapper attachmentMapper;
     @Mock
     private ServiceCategoryMapper categoryMapper;
     @Mock
