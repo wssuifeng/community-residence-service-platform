@@ -72,7 +72,7 @@ public class SysUserService {
         user.setRole(dto.getRole());
         sysUserMapper.updateById(user);
         /* 角色变更影响功能级权限，吊销存量令牌强制重新登录 */
-        tokenRevocationService.revokeUser(id);
+        tokenRevocationService.revokeAdminUser(id);
         return SysUserVO.from(user);
     }
 
@@ -108,7 +108,7 @@ public class SysUserService {
         user.setStatus(status);
         sysUserMapper.updateById(user);
         if (CommonStatus.FROZEN.equals(status)) {
-            tokenRevocationService.revokeUser(id);
+            tokenRevocationService.revokeAdminUser(id);
         }
         log.info("系统用户状态变更：userId={}, status={}, reason={}, operator={}",
                 id, status, reason, SecurityUtils.getUserId());
@@ -123,7 +123,7 @@ public class SysUserService {
         }
         user.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
         sysUserMapper.updateById(user);
-        tokenRevocationService.revokeUser(user.getId());
+        tokenRevocationService.revokeAdminUser(user.getId());
     }
 
     /* 绑定社区：仅 ADMIN 角色可绑定；重复绑定拒绝；变更后吊销令牌并清缓存 */
@@ -148,7 +148,7 @@ public class SysUserService {
         adminCommunityMapper.insert(binding);
 
         adminCommunityCacheService.evict(userId);
-        tokenRevocationService.revokeUser(userId);
+        tokenRevocationService.revokeAdminUser(userId);
         log.info("管理员绑定社区：adminId={}, communityId={}, operator={}",
                 userId, dto.getCommunityId(), SecurityUtils.getUserId());
 
@@ -165,7 +165,7 @@ public class SysUserService {
                 .eq(SysAdminCommunity::getAdminId, userId)
                 .eq(SysAdminCommunity::getCommunityId, communityId));
         adminCommunityCacheService.evict(userId);
-        tokenRevocationService.revokeUser(userId);
+        tokenRevocationService.revokeAdminUser(userId);
         log.info("管理员解绑社区：adminId={}, communityId={}, operator={}",
                 userId, communityId, SecurityUtils.getUserId());
     }

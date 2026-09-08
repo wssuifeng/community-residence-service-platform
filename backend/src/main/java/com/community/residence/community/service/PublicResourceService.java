@@ -75,9 +75,10 @@ public class PublicResourceService {
         return fillCommunityName(ResourceVO.from(requireResource(id)));
     }
 
-    /** 社区下资源分页列表（公开；游客浏览） */
+    /** 社区下资源分页列表（公开；游客浏览；ADMIN 限绑定社区） */
     public PageVO<ResourceVO> pageByCommunity(Long communityId, long page, long size,
                                               String type, String status) {
+        SecurityUtils.checkCommunityAccess(communityId);
         LambdaQueryWrapper<PublicResource> wrapper = new LambdaQueryWrapper<PublicResource>()
                 .eq(PublicResource::getCommunityId, communityId)
                 .eq(StringUtils.hasText(type), PublicResource::getType, type)

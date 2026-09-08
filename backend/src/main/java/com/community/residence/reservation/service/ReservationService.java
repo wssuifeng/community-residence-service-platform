@@ -25,6 +25,7 @@ import com.community.residence.reservation.vo.ReservationVO;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.resident.service.SysConfigService;
+import com.community.residence.messaging.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,7 @@ public class ReservationService {
     private final ResourceTimeslotMapper timeslotMapper;
     private final ResidentMapper residentMapper;
     private final SysConfigService sysConfigService;
+    private final NotificationService notificationService;
 
     /* 创建预约：校验时段落在模板内 + 冲突检测 + 容量校验 */
     @Transactional(rollbackFor = Exception.class)
@@ -92,7 +94,7 @@ public class ReservationService {
             throw new BusinessException(ErrorCode.DATA_EXISTS, "同一天已预约该资源，不可重复预约");
         }
 
-        checkCapacity(resource, dto.getReserveDate(), dto.getStartTime(), dto.getEndTime());
+        checkCapacity(resource, dto.getReserveDate(), dto.getStartTime(), dto.getEndTime(), null);
 
         ResourceReservation reservation = new ResourceReservation();
         reservation.setUserId(userId);
@@ -131,16 +133,20 @@ public class ReservationService {
         return PageVO.of(result.convert(this::toVO));
     }
 
-    /* 确认预约：PENDING → RESERVED */
+    /* 确认预约：PENDING → RESERVED；容量校验排除自身（自身 PENDING 已计入占用） */
     @Transactional(rollbackFor = Exception.class)
     public void confirm(Long id, String remark) {
         ResourceReservation reservation = requireReservation(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
         validateTransition(reservation, ReservationStatus.RESERVED);
         checkCapacity(resourceMapper.selectById(reservation.getResourceId()),
-                reservation.getReserveDate(), reservation.getStartTime(), reservation.getEndTime());
+                reservation.getReserveDate(), reservation.getStartTime(),
+                reservation.getEndTime(), id);
         reservation.setStatus(ReservationStatus.RESERVED);
         reservationMapper.updateById(reservation);
+        notificationService.create(reservation.getUserId(), reservation.getCommunityId(),
+                "预约已确认", "您 " + reservation.getReserveDate() + " 的预约已确认",
+                "RESERVATION", "RESOURCE_RESERVATION", id);
         log.info("预约已确认：reservationId={}, operator={}", id, SecurityUtils.getUserId());
     }
 
@@ -163,6 +169,9 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.REJECTED);
         reservation.setRemark(reason);
         reservationMapper.updateById(reservation);
+        notificationService.create(reservation.getUserId(), reservation.getCommunityId(),
+                "预约未通过", "您 " + reservation.getReserveDate() + " 的预约未通过：" + reason,
+                "RESERVATION", "RESOURCE_RESERVATION", id);
     }
 
     /* 取消预约：PENDING/RESERVED → CANCELLED；仅预约人本人可取消 */
@@ -197,6 +206,9 @@ public class ReservationService {
         violationRecordMapper.insert(record);
 
         freezeIfExceeded(reservation.getUserId(), reason);
+        notificationService.create(reservation.getUserId(), reservation.getCommunityId(),
+                "预约违约处置", "您 " + reservation.getReserveDate() + " 的预约被标记违约：" + reason,
+                "RESERVATION", "RESOURCE_RESERVATION", id);
     }
 
     /** 可预约时段：周循环模板按日期范围展开 + 当前占用计数 */
@@ -294,9 +306,9 @@ public class ReservationService {
                 .orElse(null);
     }
 
-    /* 容量校验：同资源同日期同时间段的有效预约数 < 资源容量 */
+    /* 容量校验：同资源同日期同时间段的有效预约数 < 资源容量；excludeId 排除自身（确认场景） */
     private void checkCapacity(PublicResource resource, LocalDate date,
-                               LocalTime start, LocalTime end) {
+                               LocalTime start, LocalTime end, Long excludeId) {
         if (resource == null) {
             return;
         }
@@ -306,6 +318,7 @@ public class ReservationService {
                 .eq(ResourceReservation::getReserveDate, date)
                 .eq(ResourceReservation::getStartTime, start)
                 .eq(ResourceReservation::getEndTime, end)
+                .ne(excludeId != null, ResourceReservation::getId, excludeId)
                 .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
         if (count >= capacity) {
             throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段预约已满");

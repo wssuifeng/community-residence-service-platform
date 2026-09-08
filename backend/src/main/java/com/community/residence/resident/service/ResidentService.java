@@ -84,7 +84,7 @@ public class ResidentService {
         }
         resident.setPasswordHash(passwordEncoder.encode(newPassword));
         residentMapper.updateById(resident);
-        tokenRevocationService.revokeUser(resident.getId());
+        tokenRevocationService.revokeResident(resident.getId());
     }
 
     public ResidentVO getById(Long id) {
@@ -110,7 +110,7 @@ public class ResidentService {
         resident.setStatus(dto.getStatus());
         residentMapper.updateById(resident);
         if (CommonStatus.FROZEN.equals(dto.getStatus())) {
-            tokenRevocationService.revokeUser(id);
+            tokenRevocationService.revokeResident(id);
         }
         log.info("居民账号状态变更：residentId={}, status={}, reason={}, operator={}",
                 id, dto.getStatus(), dto.getReason(), SecurityUtils.getUserId());

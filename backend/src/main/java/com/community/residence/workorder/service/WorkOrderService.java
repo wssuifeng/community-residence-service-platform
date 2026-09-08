@@ -14,6 +14,7 @@ import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
+import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.workorder.dto.AssignWorkOrderDTO;
 import com.community.residence.workorder.dto.CreateWorkOrderDTO;
 import com.community.residence.workorder.entity.ServiceCategory;
@@ -74,6 +75,7 @@ public class WorkOrderService {
     private final ServiceCategoryMapper categoryMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
+    private final NotificationService notificationService;
 
     /* 提交工单：初始 PENDING 待受理；工单号 WO+日期+随机序号 */
     @Transactional(rollbackFor = Exception.class)
@@ -185,6 +187,13 @@ public class WorkOrderService {
 
         appendProcess(id, "ASSIGN", oldStatus, WorkOrderStatus.ASSIGNED,
                 "派单给 " + assignee.getRealName() + (dto.getRemark() != null ? "：" + dto.getRemark() : ""));
+        /* 通知双向触达：服务人员接单提醒 + 居民派单进度 */
+        notificationService.create(dto.getAssigneeId(), order.getCommunityId(), "新工单派发",
+                "工单 " + order.getOrderNo() + " 已派单给您，请及时接单",
+                "WORK_ORDER", "WORK_ORDER", id);
+        notificationService.create(order.getResidentId(), order.getCommunityId(), "工单已派单",
+                "您的工单 " + order.getOrderNo() + " 已派单给 " + assignee.getRealName(),
+                "WORK_ORDER", "WORK_ORDER", id);
         log.info("工单已派单：orderId={}, assigneeId={}, operator={}",
                 id, dto.getAssigneeId(), SecurityUtils.getUserId());
     }
@@ -215,6 +224,8 @@ public class WorkOrderService {
         checkAssignee(order);
         transition(order, WorkOrderStatus.TO_CONFIRM);
         appendProcess(id, "COMPLETE", WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM, solution);
+        notificationService.create(order.getResidentId(), order.getCommunityId(), "工单已处理完成",
+                "您的工单 " + order.getOrderNo() + " 已处理完成，请确认", "WORK_ORDER", "WORK_ORDER", id);
     }
 
     /* 居民确认：TO_CONFIRM → COMPLETED */
@@ -224,6 +235,8 @@ public class WorkOrderService {
         checkResidentOwner(order);
         transition(order, WorkOrderStatus.COMPLETED);
         appendProcess(id, "CONFIRM", WorkOrderStatus.TO_CONFIRM, WorkOrderStatus.COMPLETED, remark);
+        notifyCurrentAssignee(order, "居民已确认工单",
+                "工单 " + order.getOrderNo() + " 已被居民确认完成", id);
     }
 
     /* 关闭工单：COMPLETED → CLOSED（终态） */
@@ -297,6 +310,19 @@ public class WorkOrderService {
         process.setNewStatus(newStatus);
         process.setContent(content);
         processMapper.insert(process);
+    }
+
+    /** 通知当前派单处理人（接单/确认等 STAFF 触达场景；无派单记录时静默跳过） */
+    private void notifyCurrentAssignee(WorkOrder order, String title, String content, Long orderId) {
+        WorkOrderAssignment latest = assignmentMapper.selectOne(
+                new LambdaQueryWrapper<WorkOrderAssignment>()
+                        .eq(WorkOrderAssignment::getWorkOrderId, orderId)
+                        .orderByDesc(WorkOrderAssignment::getId)
+                        .last("LIMIT 1"));
+        if (latest != null) {
+            notificationService.create(latest.getAssigneeId(), order.getCommunityId(),
+                    title, content, "WORK_ORDER", "WORK_ORDER", orderId);
+        }
     }
 
     private String resolveOperatorType() {

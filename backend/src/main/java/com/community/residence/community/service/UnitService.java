@@ -81,8 +81,10 @@ public class UnitService {
         return vo;
     }
 
-    /** 楼栋下单元分页列表（公开） */
+    /** 楼栋下单元分页列表（公开；ADMIN 限绑定社区） */
     public PageVO<UnitVO> pageByBuilding(Long buildingId, long page, long size) {
+        Building building = requireBuilding(buildingId);
+        SecurityUtils.checkCommunityAccess(building.getCommunityId());
         LambdaQueryWrapper<Unit> wrapper = new LambdaQueryWrapper<Unit>()
                 .eq(Unit::getBuildingId, buildingId)
                 .orderByAsc(Unit::getId);
