@@ -6,6 +6,7 @@ import com.community.residence.workorder.dto.AssignWorkOrderDTO;
 import com.community.residence.workorder.dto.CreateWorkOrderDTO;
 import com.community.residence.workorder.dto.WorkOrderActionDTO;
 import com.community.residence.workorder.service.WorkOrderService;
+import com.community.residence.workorder.vo.AttachmentVO;
 import com.community.residence.workorder.vo.ProcessRecordVO;
 import com.community.residence.workorder.vo.WorkOrderVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,6 +54,13 @@ public class WorkOrderController {
     @GetMapping("/{id}")
     public ApiResponse<WorkOrderVO> getById(@PathVariable Long id) {
         return ApiResponse.success(workOrderService.getById(id));
+    }
+
+    @Operation(summary = "工单附件列表", description = "文件上传 P2 接入；当前返回空数组")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/{id}/attachments")
+    public ApiResponse<List<AttachmentVO>> attachments(@PathVariable Long id) {
+        return ApiResponse.success(workOrderService.attachments(id));
     }
 
     @Operation(summary = "工单列表（分页）", description = "按角色自动收敛数据范围")

@@ -20,11 +20,14 @@ import com.community.residence.workorder.dto.CreateWorkOrderDTO;
 import com.community.residence.workorder.entity.ServiceCategory;
 import com.community.residence.workorder.entity.WorkOrder;
 import com.community.residence.workorder.entity.WorkOrderAssignment;
+import com.community.residence.workorder.entity.WorkOrderAttachment;
 import com.community.residence.workorder.entity.WorkOrderProcess;
 import com.community.residence.workorder.mapper.ServiceCategoryMapper;
 import com.community.residence.workorder.mapper.WorkOrderAssignmentMapper;
+import com.community.residence.workorder.mapper.WorkOrderAttachmentMapper;
 import com.community.residence.workorder.mapper.WorkOrderMapper;
 import com.community.residence.workorder.mapper.WorkOrderProcessMapper;
+import com.community.residence.workorder.vo.AttachmentVO;
 import com.community.residence.workorder.vo.ProcessRecordVO;
 import com.community.residence.workorder.vo.WorkOrderVO;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +75,7 @@ public class WorkOrderService {
     private final WorkOrderMapper workOrderMapper;
     private final WorkOrderProcessMapper processMapper;
     private final WorkOrderAssignmentMapper assignmentMapper;
+    private final WorkOrderAttachmentMapper attachmentMapper;
     private final ServiceCategoryMapper categoryMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
@@ -127,6 +131,16 @@ public class WorkOrderService {
         WorkOrder order = requireOrder(id);
         checkReadAccess(order);
         return toVO(order);
+    }
+
+    /* 附件列表：访问权限与详情同口径；文件上传 P2 接入，当前返回空数组 */
+    public List<AttachmentVO> attachments(Long orderId) {
+        WorkOrder order = requireOrder(orderId);
+        checkReadAccess(order);
+        return attachmentMapper.selectList(new LambdaQueryWrapper<WorkOrderAttachment>()
+                        .eq(WorkOrderAttachment::getWorkOrderId, orderId)
+                        .orderByAsc(WorkOrderAttachment::getId))
+                .stream().map(AttachmentVO::from).toList();
     }
 
     public PageVO<WorkOrderVO> page(long page, long size, String status, String priority,

@@ -6,6 +6,7 @@ import com.community.residence.common.exception.BusinessException;
 import com.community.residence.feedback.dto.CreateFeedbackDTO;
 import com.community.residence.feedback.dto.SendMessageDTO;
 import com.community.residence.feedback.entity.Feedback;
+import com.community.residence.feedback.mapper.FeedbackAttachmentMapper;
 import com.community.residence.feedback.mapper.FeedbackMapper;
 import com.community.residence.feedback.mapper.FeedbackMessageMapper;
 import com.community.residence.messaging.service.NotificationService;
@@ -35,6 +36,8 @@ class FeedbackServiceTest {
     private FeedbackMapper feedbackMapper;
     @Mock
     private FeedbackMessageMapper messageMapper;
+    @Mock
+    private FeedbackAttachmentMapper attachmentMapper;
     @Mock
     private ResidentMapper residentMapper;
     @Mock
