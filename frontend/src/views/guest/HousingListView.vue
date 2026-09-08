@@ -119,7 +119,7 @@ onMounted(load)
         <div class="housing-body">
           <h3 class="housing-title">{{ housing.title }}</h3>
           <p class="housing-meta">{{ housing.communityName }} · {{ housing.houseAddress }}</p>
-          <div v-if="housing.tags.length > 0" class="housing-tags">
+          <div v-if="(housing.tags?.length ?? 0) > 0" class="housing-tags">
             <span v-for="tag in housing.tags" :key="tag" class="housing-tag">{{ tag }}</span>
           </div>
           <div class="housing-footer">

@@ -4,15 +4,11 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getConfigList, updateConfig } from '@/api/resident'
 import type { ISysConfig } from '@/types/modules/resident'
-import Pagination from '@/components/common/Pagination.vue'
 
-/** 全局配置：配置项 key/value/description 表格 + 编辑值对话框（仅超级管理员可修改，路由已限超管） */
+/** 全局配置：配置项表格 + 编辑值对话框（仅超级管理员可修改，路由已限超管；后端为全量列表，无分页） */
 
 const configs = ref<ISysConfig[]>([])
 const loading = ref(false)
-const page = ref(1)
-const size = ref(10)
-const total = ref(0)
 
 /** 编辑对话框 */
 const editVisible = ref(false)
@@ -31,12 +27,9 @@ const editRules: FormRules = {
 async function load(): Promise<void> {
   loading.value = true
   try {
-    const result = await getConfigList({ page: page.value, size: size.value })
-    configs.value = result.records
-    total.value = result.total
+    configs.value = await getConfigList()
   } catch {
     configs.value = []
-    total.value = 0
   } finally {
     loading.value = false
   }
@@ -45,8 +38,8 @@ async function load(): Promise<void> {
 function openEdit(row: ISysConfig): void {
   editFormRef.value?.resetFields()
   Object.assign(editForm, {
-    key: row.key,
-    value: row.value,
+    key: row.configKey,
+    value: row.configValue,
     description: row.description ?? ''
   })
   editVisible.value = true
@@ -82,8 +75,8 @@ onMounted(load)
     />
 
     <el-table v-loading="loading" :data="configs" border>
-      <el-table-column prop="key" label="配置项" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="value" label="配置值" min-width="180" show-overflow-tooltip />
+      <el-table-column prop="configKey" label="配置项" min-width="220" show-overflow-tooltip />
+      <el-table-column prop="configValue" label="配置值" min-width="160" show-overflow-tooltip />
       <el-table-column label="说明" min-width="240" show-overflow-tooltip>
         <template #default="{ row }">{{ row.description || '-' }}</template>
       </el-table-column>
@@ -93,14 +86,6 @@ onMounted(load)
         </template>
       </el-table-column>
     </el-table>
-
-    <Pagination
-      v-model:page="page"
-      v-model:size="size"
-      :total="total"
-      @update:page="load"
-      @update:size="load"
-    />
 
     <!-- 编辑配置值 -->
     <el-dialog v-model="editVisible" title="编辑配置" width="480px">

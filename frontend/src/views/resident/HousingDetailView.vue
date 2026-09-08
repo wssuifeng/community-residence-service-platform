@@ -228,7 +228,7 @@ onMounted(() => {
           <h1 class="housing-title">{{ housing.title }}</h1>
           <p class="housing-location">{{ housing.communityName }} · {{ housing.houseAddress }}</p>
 
-          <div v-if="housing.tags.length > 0" class="housing-tags">
+          <div v-if="(housing.tags?.length ?? 0) > 0" class="housing-tags">
             <span v-for="tag in housing.tags" :key="tag" class="tag-chip">{{ tag }}</span>
           </div>
 

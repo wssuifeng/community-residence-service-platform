@@ -1,11 +1,12 @@
 /** C2 居民与居住关系管理接口（接口设计.md §9.2） */
 import { http } from '@/utils/request'
-import type { PageResult, PageQuery } from '@/types/api'
+import type { PageResult } from '@/types/api'
 import type {
   IApplicationApproveDTO,
   IApplicationApproveResult,
   IApplicationRejectDTO,
   IChangePasswordDTO,
+  IConfigValueResult,
   ICreateResidenceApplicationDTO,
   IHouseResident,
   IMoveOutDTO,
@@ -108,14 +109,14 @@ export function moveOutResidenceRelation(id: number, data: IMoveOutDTO) {
 
 /* ---------------------------------- 9.2.4 全局配置管理 ---------------------------------- */
 
-/** 查询配置（接口设计.md 9.2.4.1） */
+/** 查询配置（接口设计.md 9.2.4.1，后端返回 {key, value} 包装） */
 export function getConfig(key: string) {
-  return http.get<ISysConfig>(`/configs/${key}`)
+  return http.get<IConfigValueResult>(`/configs/${key}`)
 }
 
-/** 配置分页列表（接口设计.md 9.2.4.2） */
-export function getConfigList(params?: PageQuery) {
-  return http.get<PageResult<ISysConfig>>('/configs', params)
+/** 配置列表（接口设计.md 9.2.4.2；后端实现为全量列表，非分页） */
+export function getConfigList() {
+  return http.get<ISysConfig[]>('/configs')
 }
 
 /** 更新配置（接口设计.md 9.2.4.3） */

@@ -1,184 +1,79 @@
-/** 运营看板-居民居住总览（接口设计.md 9.9.1.1 data.overview） */
-export interface IDashboardOverview {
-  totalResidents: number
-  activeResidents: number
-  totalHouses: number
-  occupiedHouses: number
-  occupancyRate: number
-}
+/**
+ * C9 运营统计类型。
+ * 2026-09-08 前端自测联调对齐：后端 StatisticsService 实际返回扁平
+ * Map 结构（非接口设计.md 9.9.1 示例的嵌套 summary/trend 结构），
+ * 类型以后端实现契约为准，字段名与 StatisticsService 逐一对应。
+ */
 
-/** 运营看板-工单统计（接口设计.md 9.9.1.1 data.workOrders） */
-export interface IDashboardWorkOrders {
-  total: number
-  pending: number
-  inProgress: number
-  completed: number
-  avgCompletionTime: number
-  satisfactionRate: number
-}
+import type { PageQuery } from '@/types/api'
 
-/** 运营看板-资源预约统计（接口设计.md 9.9.1.1 data.resources） */
-export interface IDashboardResources {
-  totalReservations: number
-  completionRate: number
-  violationCount: number
-}
-
-/** 运营看板-反馈统计（接口设计.md 9.9.1.1 data.feedbacks） */
-export interface IDashboardFeedbacks {
-  total: number
-  open: number
-  inProgress: number
-  closed: number
-  avgResponseTime: number
-}
-
-/** 运营看板聚合数据（接口设计.md 9.9.1.1 响应 data） */
+/** 看板聚合数据（后端 StatisticsService.dashboard，扁平键） */
 export interface IDashboardStats {
-  overview: IDashboardOverview
-  workOrders: IDashboardWorkOrders
-  resources: IDashboardResources
-  feedbacks: IDashboardFeedbacks
-}
-
-/** 运营看板查询参数（接口设计.md 9.9.1.1） */
-export interface DashboardStatsQuery {
-  communityId?: number
-  startDate?: string
-  endDate?: string
-}
-
-/** 统计分组维度（接口设计.md 9.9.1.2） */
-export type StatisticsGroupBy = 'DAY' | 'WEEK' | 'MONTH' | 'CATEGORY' | 'ASSIGNEE'
-
-/** 状态分布（byStatus 数组元素） */
-export interface IStatusDistribution {
-  status: string
-  count: number
-}
-
-/** 工单类别分布（接口设计.md 9.9.1.2 byCategory 元素） */
-export interface ICategoryDistribution {
-  categoryName: string
-  count: number
-}
-
-/** 工单趋势点（接口设计.md 9.9.1.2 trend 元素） */
-export interface IWorkOrderTrend {
-  date: string
-  count: number
-}
-
-/** 工单统计汇总（接口设计.md 9.9.1.2 summary） */
-export interface IWorkOrderSummary {
-  total: number
-  avgCompletionTime: number
-  satisfactionRate: number
-}
-
-/** 工单统计（接口设计.md 9.9.1.2 响应 data） */
-export interface IWorkOrderStats {
-  summary: IWorkOrderSummary
-  byStatus: IStatusDistribution[]
-  byCategory: ICategoryDistribution[]
-  trend: IWorkOrderTrend[]
-}
-
-/** 工单统计查询参数（接口设计.md 9.9.1.2，起止日期必填） */
-export interface WorkOrderStatsQuery {
-  communityId?: number
-  startDate: string
-  endDate: string
-  groupBy?: StatisticsGroupBy
-}
-
-/** 居民统计汇总（接口设计.md 9.9.1.3 summary） */
-export interface IResidentSummary {
-  total: number
-  active: number
-  frozen: number
-  newThisMonth: number
-}
-
-/** 注册趋势点（接口设计.md 9.9.1.3 registrationTrend 元素） */
-export interface IMonthTrend {
-  month: string
-  count: number
-}
-
-/** 居民统计（接口设计.md 9.9.1.3 响应 data） */
-export interface IResidentStats {
-  summary: IResidentSummary
-  byStatus: IStatusDistribution[]
-  registrationTrend: IMonthTrend[]
-}
-
-/** 居民统计查询参数（接口设计.md 9.9.1.3） */
-export interface ResidentStatsQuery {
-  communityId?: number
-}
-
-/** 资源预约统计汇总（接口设计.md 9.9.1.4 summary） */
-export interface IResourceStatsSummary {
-  totalReservations: number
-  completionRate: number
+  communityCount: number
+  buildingCount: number
+  houseCount: number
+  occupiedHouseCount: number
+  residentCount: number
+  activeLeaseCount: number
+  expiringLeaseCount: number
+  workOrderTotal: number
+  workOrderPending: number
+  workOrderProcessing: number
+  workOrderCompleted: number
+  reservationTotal: number
+  reservationPending: number
   violationCount: number
-  violationRate: number
+  evaluationTotal: number
+  /** 近 7 日工单提交趋势：日期字符串 → 数量 */
+  workOrderTrend7d: Record<string, number>
+  /** 工单状态分布：状态码 → 数量 */
+  workOrderStatusDistribution: Record<string, number>
+  /** 房屋状态分布：状态码 → 数量 */
+  houseStatusDistribution: Record<string, number>
+  /** 评价分档分布：评分（数字字符串键）→ 数量 */
+  ratingDistribution: Record<string, number>
 }
 
-/** 资源预约量分布（接口设计.md 9.9.1.4 byResource 元素） */
-export interface IResourceUsage {
-  resourceName: string
-  count: number
-  completionRate: number
-}
-
-/** 资源预约统计（接口设计.md 9.9.1.4 响应 data） */
-export interface IResourceStats {
-  summary: IResourceStatsSummary
-  byResource: IResourceUsage[]
-  byStatus: IStatusDistribution[]
-}
-
-/** 资源预约统计查询参数（接口设计.md 9.9.1.4，起止日期必填） */
-export interface ResourceStatsQuery {
-  communityId?: number
-  startDate: string
-  endDate: string
-}
-
-/** 服务评价统计汇总（接口设计.md 9.9.1.5 summary） */
-export interface IEvaluationSummary {
+/** 工单统计（专项，后端 workOrderStatistics） */
+export interface IWorkOrderStats {
   total: number
-  avgRating: number
-  satisfactionRate: number
-  unsatisfiedCount: number
+  byStatus: Record<string, number>
+  byPriority: Record<string, number>
 }
 
-/** 评分分布（接口设计.md 9.9.1.5 ratingDistribution 元素） */
-export interface IRatingDistribution {
-  rating: number
-  count: number
+/** 居民统计（专项，后端 residentStatistics） */
+export interface IResidentStats {
+  total: number
+  byStatus: Record<string, number>
 }
 
-/** 服务人员评价分布（接口设计.md 9.9.1.5 byAssignee 元素） */
-export interface IAssigneeRating {
-  assigneeName: string
-  count: number
-  avgRating: number
+/** 资源预约统计（专项，后端 reservationStatistics） */
+export interface IResourceStats {
+  total: number
+  byStatus: Record<string, number>
 }
 
-/** 服务评价统计（接口设计.md 9.9.1.5 响应 data） */
-export interface IEvaluationStats {
-  summary: IEvaluationSummary
-  ratingDistribution: IRatingDistribution[]
-  byAssignee: IAssigneeRating[]
+/** 看板社区筛选下拉项（后端 communityOptions） */
+export interface ICommunityOption {
+  id: number
+  name: string
 }
 
-/** 服务评价统计查询参数（接口设计.md 9.9.1.5，起止日期必填） */
-export interface EvaluationStatsQuery {
+/** 统计查询参数（communityId 可选过滤） */
+export interface StatisticsQuery {
   communityId?: number
-  startDate: string
-  endDate: string
-  assigneeId?: number
 }
+
+/** 兼容导出：旧分页查询参数类型占位（后端统计接口无分页） */
+export type DashboardStatsQuery = StatisticsQuery
+export type WorkOrderStatsQuery = StatisticsQuery
+export type ResidentStatsQuery = StatisticsQuery
+export type ResourceStatsQuery = StatisticsQuery
+
+/** 兼容导出：图表数据（由看板聚合数据的 Record 派生，不再单独请求） */
+export interface IDistributionItem {
+  name: string
+  value: number
+}
+
+export type { PageQuery }

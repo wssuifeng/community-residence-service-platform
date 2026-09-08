@@ -57,6 +57,9 @@ async function handleLogin(): Promise<void> {
       default:
         router.push('/guest/home')
     }
+  } catch (error) {
+    // 登录失败（凭据错误/账号冻结等）：提示用户，不中断停留在登录页
+    ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
   } finally {
     loading.value = false
   }
