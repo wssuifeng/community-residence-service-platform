@@ -65,7 +65,7 @@ function goFollowup(evaluation: IEvaluation): void {
 }
 
 function goWorkOrder(evaluation: IEvaluation): void {
-  router.push(`/admin/work-orders/${evaluation.orderId}`)
+  router.push(`/admin/work-orders/${evaluation.workOrderId}`)
 }
 
 onMounted(fetchList)
@@ -86,13 +86,13 @@ onMounted(fetchList)
     </div>
 
     <el-table v-loading="loading" :data="records" class="evaluation-table">
-      <el-table-column prop="orderNumber" label="工单号" width="170">
+      <el-table-column prop="workOrderNo" label="工单号" width="170">
         <template #default="{ row }">
-          <el-link type="primary" @click="goWorkOrder(row)">{{ row.orderNumber }}</el-link>
+          <el-link type="primary" @click="goWorkOrder(row)">{{ row.workOrderNo }}</el-link>
         </template>
       </el-table-column>
       <el-table-column label="评价人" width="120">
-        <template #default="{ row }">{{ row.isAnonymous ? '匿名居民' : row.residentName }}</template>
+        <template #default="{ row }">{{ row.residentName }}</template>
       </el-table-column>
       <el-table-column prop="assigneeName" label="服务人员" width="110" />
       <el-table-column label="总体评分" width="130">
@@ -103,7 +103,7 @@ onMounted(fetchList)
       <el-table-column label="分项" width="150">
         <template #default="{ row }">
           <span class="sub-rates">
-            态度 {{ row.serviceAttitude }} · 响应 {{ row.responseSpeed }} · 方案 {{ row.solutionQuality }}
+            {{ row.tags ?? '无标签' }}
           </span>
         </template>
       </el-table-column>

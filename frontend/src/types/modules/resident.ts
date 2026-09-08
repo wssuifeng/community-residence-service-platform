@@ -156,8 +156,11 @@ export interface IResidenceRelation {
   id: number
   residentId: number
   residentName: string
+  residentPhone?: string
+  communityId: number
   houseId: number
-  houseAddress: string
+  houseLocation: string
+  relationType?: string
   moveInDate: string
   moveOutDate: string | null
   status: ResidenceRelationStatus

@@ -169,7 +169,7 @@ onMounted(load)
       <div v-else class="relation-list">
         <div v-for="relation in relations" :key="relation.id" class="relation-item">
           <div class="relation-main">
-            <span class="relation-house">{{ relation.houseAddress }}</span>
+            <span class="relation-house">{{ relation.houseLocation }}</span>
             <StatusTag
               :label="residenceRelationStatusLabels[relation.status as ResidenceRelationStatus]"
               :type="relationTagType(relation.status)"
@@ -189,7 +189,7 @@ onMounted(load)
       <div v-if="leases.length === 0" class="empty-tip">暂无租住记录</div>
       <el-table v-else :data="leases" stripe class="lease-table">
         <el-table-column label="房屋" min-width="180" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.houseAddress }}</template>
+          <template #default="{ row }">{{ row.houseLocation }}</template>
         </el-table-column>
         <el-table-column label="租期" min-width="200">
           <template #default="{ row }">

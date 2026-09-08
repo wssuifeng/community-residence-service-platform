@@ -30,11 +30,11 @@ export const workOrderStatusLabels: Record<WorkOrderStatus, string> = {
   CANCELLED: '已取消'
 }
 
-/** 工单紧急程度（Flyway V1 priority 列注释：LOW/NORMAL/HIGH/URGENT） */
-export type WorkOrderUrgency = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
+/** 工单优先级（后端 CreateWorkOrderDTO.priority：LOW/NORMAL/HIGH/URGENT，接口文档的 urgency 为漂移命名） */
+export type WorkOrderPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
 
-/** 工单紧急程度中文标签 */
-export const workOrderUrgencyLabels: Record<WorkOrderUrgency, string> = {
+/** 工单优先级中文标签 */
+export const workOrderPriorityLabels: Record<WorkOrderPriority, string> = {
   LOW: '低',
   NORMAL: '普通',
   HIGH: '高',
@@ -80,65 +80,50 @@ export interface IServiceCategoryTreeNode {
   children: IServiceCategoryTreeNode[]
 }
 
-/** 工单（接口设计.md 9.4.2.1 / 9.4.2.3 响应字段合并） */
+/** 工单（后端 WorkOrderVO：content/priority/orderNo，2026-09-08 验收对齐） */
 export interface IWorkOrder {
   id: number
-  orderNumber: string
+  orderNo: string
   residentId: number
   residentName: string
-  residentPhone: string
+  communityId: number
   categoryId: number
   categoryName: string
   title: string
-  description: string
-  contactPhone: string
-  /** 预约上门时间（ISO 8601，可空） */
-  appointmentTime: string | null
-  urgency: WorkOrderUrgency
+  content: string
+  contactPhone: string | null
+  address: string | null
+  priority: WorkOrderPriority
   status: WorkOrderStatus
   assigneeId: number | null
   assigneeName: string | null
-  assignedAt: string | null
-  acceptedAt: string | null
-  processingAt: string | null
-  completedAt: string | null
-  confirmedAt: string | null
-  closedAt: string | null
-  rejectReason: string | null
-  cancelReason: string | null
   createdAt: string
   updatedAt: string
 }
 
-/** 提交工单请求（接口设计.md 9.4.2.1） */
+/** 提交工单请求（后端 CreateWorkOrderDTO：content/priority/address） */
 export interface IWorkOrderCreateRequest {
   categoryId: number
   title: string
-  description: string
+  content: string
   contactPhone: string
-  appointmentTime?: string
-  urgency: WorkOrderUrgency
-  attachmentIds?: number[]
+  address?: string
+  priority: WorkOrderPriority
 }
 
-/** 更新工单请求（接口设计.md 9.4.2.2，同提交但不允许改 categoryId） */
+/** 更新工单请求（后端无独立更新端点，P1 仅创建） */
 export interface IWorkOrderUpdateRequest {
   title: string
-  description: string
+  content: string
   contactPhone: string
-  appointmentTime?: string
-  urgency: WorkOrderUrgency
-  attachmentIds?: number[]
+  priority: WorkOrderPriority
 }
 
 /** 工单列表查询参数（接口设计.md 9.4.2.4） */
 export interface IWorkOrderQuery extends PageQuery {
   status?: WorkOrderStatus
-  urgency?: WorkOrderUrgency
+  priority?: WorkOrderPriority
   categoryId?: number
-  startTime?: string
-  endTime?: string
-  /** 匹配标题/描述 */
   keyword?: string
 }
 

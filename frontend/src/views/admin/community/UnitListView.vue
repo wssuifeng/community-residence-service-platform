@@ -105,9 +105,8 @@ type UnitForm = Omit<IUnitDTO, 'buildingId'> & { buildingId?: number }
 
 const form = reactive<UnitForm>({
   buildingId: undefined,
-  unitNumber: '',
-  totalFloors: 1,
-  householdsPerFloor: 2
+  name: '',
+  description: ''
 })
 
 /** 对话框内独立维护的社区→楼栋联动（避免与筛选状态互相干扰） */
@@ -116,9 +115,7 @@ const formBuildings = ref<IBuilding[]>([])
 
 const rules: FormRules = {
   buildingId: [{ required: true, message: '请选择所属楼栋', trigger: 'change' }],
-  unitNumber: [{ required: true, message: '请输入单元编号', trigger: 'blur' }],
-  totalFloors: [{ required: true, message: '请输入单元层数', trigger: 'blur' }],
-  householdsPerFloor: [{ required: true, message: '请输入每层户数', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入单元名称', trigger: 'blur' }]
 }
 
 async function handleFormCommunityChange(): Promise<void> {
@@ -136,9 +133,8 @@ async function handleFormCommunityChange(): Promise<void> {
 function openCreate(): void {
   editingId.value = null
   form.buildingId = undefined
-  form.unitNumber = ''
-  form.totalFloors = 1
-  form.householdsPerFloor = 2
+  form.name = ''
+  form.description = ''
   // 默认带入当前筛选的社区/楼栋
   if (communityFilter.value !== '' && buildingFilter.value !== '') {
     formCommunityId.value = communityFilter.value
@@ -166,9 +162,8 @@ function openEdit(row: IUnit): void {
     formBuildings.value = []
   }
   form.buildingId = row.buildingId
-  form.unitNumber = row.unitNumber
-  form.totalFloors = row.totalFloors
-  form.householdsPerFloor = row.householdsPerFloor
+  form.name = row.name
+  form.description = row.description ?? ''
   dialogVisible.value = true
 }
 
@@ -195,7 +190,7 @@ async function handleSubmit(): Promise<void> {
 async function handleDelete(row: IUnit): Promise<void> {
   try {
     await ElMessageBox.confirm(
-      `确定删除单元「${row.unitNumber}」？若该单元下存在房屋，删除将被拒绝。`,
+      `确定删除单元「${row.name}」？若该单元下存在房屋，删除将被拒绝。`,
       '删除单元',
       { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
     )
@@ -269,9 +264,10 @@ onMounted(() => {
       <el-table v-loading="loading" :data="units" border>
         <el-table-column prop="id" label="ID" width="64" />
         <el-table-column prop="buildingName" label="所属楼栋" min-width="140" show-overflow-tooltip />
-        <el-table-column prop="unitNumber" label="单元编号" min-width="110" show-overflow-tooltip />
-        <el-table-column prop="totalFloors" label="单元层数" width="90" />
-        <el-table-column prop="householdsPerFloor" label="每层户数" width="90" />
+        <el-table-column prop="name" label="单元名称" min-width="110" show-overflow-tooltip />
+        <el-table-column prop="description" label="描述" min-width="140" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.description ?? '-' }}</template>
+        </el-table-column>
         <el-table-column label="创建时间" width="150">
           <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
         </el-table-column>
@@ -328,14 +324,17 @@ onMounted(() => {
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="单元编号" prop="unitNumber">
-          <el-input v-model="form.unitNumber" placeholder="如：1单元" maxlength="20" />
+        <el-form-item label="单元名称" prop="name">
+          <el-input v-model="form.name" placeholder="如：1单元" maxlength="20" />
         </el-form-item>
-        <el-form-item label="单元层数" prop="totalFloors">
-          <el-input-number v-model="form.totalFloors" :min="1" :max="99" />
-        </el-form-item>
-        <el-form-item label="每层户数" prop="householdsPerFloor">
-          <el-input-number v-model="form.householdsPerFloor" :min="1" :max="20" />
+        <el-form-item label="描述" prop="description">
+          <el-input
+            v-model="form.description"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入单元描述"
+            maxlength="100"
+          />
         </el-form-item>
       </el-form>
       <template #footer>

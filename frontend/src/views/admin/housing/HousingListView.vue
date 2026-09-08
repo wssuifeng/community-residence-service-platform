@@ -432,7 +432,7 @@ onMounted(() => {
               style="width: 120px"
               @change="handleUnitChange"
             >
-              <el-option v-for="unit in units" :key="unit.id" :value="unit.id" :label="unit.unitNumber" />
+              <el-option v-for="unit in units" :key="unit.id" :value="unit.id" :label="unit.name" />
             </el-select>
             <el-select
               :model-value="form.houseId"

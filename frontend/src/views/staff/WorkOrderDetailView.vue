@@ -19,7 +19,7 @@ import type {
   IWorkOrderProcess,
   WorkOrderStatus
 } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderUrgencyLabels } from '@/types/modules/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatDateTime } from '@/utils/date'
 
 /** 工单详情（UI设计.md §4.2.2）：信息卡片 + 时间线 + 接单/开始处理/提交处理结果 */
@@ -94,7 +94,7 @@ async function fetchDetail(): Promise<void> {
 /* 接单：已派单状态下确认后流转至已接单（状态机 9.4.2.6） */
 async function handleAccept(): Promise<void> {
   try {
-    await ElMessageBox.confirm(`确认接下工单 ${order.value?.orderNumber ?? ''} 吗？`, '接单', {
+    await ElMessageBox.confirm(`确认接下工单 ${order.value?.orderNo ?? ''} 吗？`, '接单', {
       confirmButtonText: '确认接单',
       cancelButtonText: '取消'
     })
@@ -185,7 +185,7 @@ onMounted(fetchDetail)
       <article class="info-card">
         <div class="info-card-head">
           <div>
-            <span class="order-number">{{ order.orderNumber }}</span>
+            <span class="order-number">{{ order.orderNo }}</span>
             <h1 class="order-title">{{ order.title }}</h1>
           </div>
           <StatusTag :label="workOrderStatusLabels[order.status]" :type="statusSemantic[order.status]" />
@@ -198,7 +198,7 @@ onMounted(fetchDetail)
           </div>
           <div class="info-item">
             <dt>紧急程度</dt>
-            <dd>{{ workOrderUrgencyLabels[order.urgency] }}</dd>
+            <dd>{{ workOrderPriorityLabels[order.priority] }}</dd>
           </div>
           <div class="info-item">
             <dt>提交人</dt>
@@ -212,24 +212,12 @@ onMounted(fetchDetail)
             <dt>提交时间</dt>
             <dd>{{ formatDateTime(order.createdAt) }}</dd>
           </div>
-          <div class="info-item">
-            <dt>预约上门</dt>
-            <dd>{{ order.appointmentTime ? formatDateTime(order.appointmentTime) : '未预约' }}</dd>
-          </div>
         </dl>
 
         <div class="info-description">
           <dt>问题描述</dt>
-          <dd>{{ order.description }}</dd>
+          <dd>{{ order.content }}</dd>
         </div>
-
-        <el-alert
-          v-if="order.rejectReason"
-          class="reason-alert"
-          type="error"
-          :title="`驳回原因：${order.rejectReason}`"
-          :closable="false"
-        />
 
         <div v-if="imageAttachments.length > 0" class="attachment-block">
           <h3 class="block-title">现场照片</h3>

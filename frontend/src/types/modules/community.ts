@@ -103,22 +103,22 @@ export interface ICommunityQuery extends PageQuery {
 
 /* ---------------------------------- 楼栋 ---------------------------------- */
 
-/** 楼栋实体（接口设计.md 9.1.2.1 响应） */
+/** 楼栋实体（后端 BuildingVO：floors 字段，2026-09-08 验收对齐） */
 export interface IBuilding {
   id: number
   communityId: number
   communityName: string
   name: string
-  totalFloors: number
+  floors: number
   description?: string
   createdAt: string
 }
 
-/** 创建/更新楼栋请求（接口设计.md 9.1.2.1 请求体，9.1.2.2 同） */
+/** 创建/更新楼栋请求（后端 CreateBuildingDTO：floors） */
 export interface IBuildingDTO {
   communityId: number
   name: string
-  totalFloors: number
+  floors: number
   description?: string
 }
 
@@ -129,23 +129,22 @@ export interface IBuildingQuery extends PageQuery {
 
 /* ---------------------------------- 单元 ---------------------------------- */
 
-/** 单元实体（接口设计.md 9.1.3.1 响应） */
+/** 单元实体（后端 UnitVO：name + description，无数值楼层/户数字段） */
 export interface IUnit {
   id: number
   buildingId: number
   buildingName: string
-  unitNumber: string
-  totalFloors: number
-  householdsPerFloor: number
+  communityId: number
+  name: string
+  description?: string
   createdAt: string
 }
 
-/** 创建/更新单元请求（接口设计.md 9.1.3.1 请求体，9.1.3.2 同） */
+/** 创建/更新单元请求（后端 CreateUnitDTO：buildingId + name + description） */
 export interface IUnitDTO {
   buildingId: number
-  unitNumber: string
-  totalFloors: number
-  householdsPerFloor: number
+  name: string
+  description?: string
 }
 
 /* ---------------------------------- 房屋 ---------------------------------- */
@@ -159,30 +158,24 @@ export interface IHouse {
   houseNumber: string
   floor: number
   area?: number
-  bedrooms?: number
-  livingRooms?: number
-  bathrooms?: number
+  roomCount?: number
+  layout?: string
   orientation?: string
-  propertyType?: PropertyType
   status: HouseStatus
-  monthlyRent?: number
   description?: string
   createdAt: string
 }
 
-/** 创建/更新房屋请求（接口设计.md 9.1.4.1 请求体，9.1.4.2 同） */
+/** 创建/更新房屋请求（后端 CreateHouseDTO：roomCount/layout，无 propertyType/monthlyRent） */
 export interface IHouseDTO {
   unitId: number
   houseNumber: string
   floor: number
-  area: number
-  bedrooms?: number
-  livingRooms?: number
-  bathrooms?: number
+  area?: number
+  roomCount?: number
+  layout?: string
   orientation?: string
-  propertyType?: PropertyType
   status?: HouseStatus
-  monthlyRent?: number
   description?: string
 }
 
