@@ -20,6 +20,7 @@ import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.community.service.CommunityService;
 import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
+import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.dto.ApproveApplicationDTO;
 import com.community.residence.resident.dto.CreateApplicationDTO;
 import com.community.residence.resident.dto.RejectApplicationDTO;
@@ -57,6 +58,7 @@ public class ResidenceApplicationService {
     private final BuildingMapper buildingMapper;
     private final LeaseRecordMapper leaseRecordMapper;
     private final CommunityService communityService;
+    private final NotificationService notificationService;
 
     /* 提交申请：房屋须空置；同一房屋同一居民不可重复在审 */
     @Transactional(rollbackFor = Exception.class)
@@ -157,6 +159,9 @@ public class ResidenceApplicationService {
         application.setReviewTime(LocalDateTime.now());
         application.setReviewRemark(dto.getRemark());
         applicationMapper.updateById(application);
+        notificationService.create(application.getResidentId(), application.getCommunityId(),
+                "入住申请已通过", "您的入住申请（房屋 " + house.getHouseNumber() + "）已审批通过",
+                "RESIDENCE", "RESIDENCE_APPLICATION", id);
         log.info("入住申请已通过：applicationId={}, relationId={}, operator={}",
                 id, relation.getId(), SecurityUtils.getUserId());
         return toVO(application);
@@ -175,6 +180,9 @@ public class ResidenceApplicationService {
         application.setReviewTime(LocalDateTime.now());
         application.setReviewRemark(dto.getReason());
         applicationMapper.updateById(application);
+        notificationService.create(application.getResidentId(), application.getCommunityId(),
+                "入住申请未通过", "您的入住申请未通过：" + dto.getReason(),
+                "RESIDENCE", "RESIDENCE_APPLICATION", id);
         log.info("入住申请已拒绝：applicationId={}, reason={}, operator={}",
                 id, dto.getReason(), SecurityUtils.getUserId());
     }
