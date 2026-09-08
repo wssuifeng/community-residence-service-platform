@@ -20,7 +20,7 @@ public class CreateHouseDTO {
     @NotNull(message = "所属单元不能为空")
     private Long unitId;
 
-    @Schema(description = "房号")
+    @Schema(description = "房号（如 101，字段名为 houseNumber 非 roomNumber）")
     @NotBlank(message = "房号不能为空")
     @Size(max = 20, message = "房号最多 20 字符")
     private String houseNumber;
