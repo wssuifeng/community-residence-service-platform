@@ -3,21 +3,22 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import EChart, { type ChartOption } from '@/components/common/EChart.vue'
 import StatCard from '@/components/common/StatCard.vue'
-import { getEvaluationStats } from '@/api/statistics'
-import type { IEvaluationStats } from '@/types/modules/statistics'
-import { formatDate, subDays, todayISO } from '@/utils/date'
+import { getDashboardStats } from '@/api/statistics'
+import type { IDashboardStats } from '@/types/modules/statistics'
 
-/** 服务评价统计：默认近 90 天（接口设计.md 9.9.1.5） */
+/**
+ * 服务评价统计：后端无独立 /statistics/evaluations 端点，
+ * 评价数据（总数 + 分档分布）取自看板聚合接口
+ */
 const loading = ref(false)
-const stats = ref<IEvaluationStats | null>(null)
-const range = ref<[string, string]>([formatDate(subDays(90)), todayISO()])
+const stats = ref<IDashboardStats | null>(null)
 
 onMounted(load)
 
 async function load(): Promise<void> {
   loading.value = true
   try {
-    stats.value = await getEvaluationStats({ startDate: range.value[0], endDate: range.value[1] })
+    stats.value = await getDashboardStats()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载评价统计失败')
   } finally {
@@ -25,52 +26,49 @@ async function load(): Promise<void> {
   }
 }
 
-const ratingOption = computed<ChartOption>(() => ({
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', name: '星级', data: (stats.value?.ratingDistribution ?? []).map((item) => `${item.rating} 星`) },
-  yAxis: { type: 'value', minInterval: 1 },
-  series: [
-    {
-      type: 'bar',
-      name: '评价数',
-      barMaxWidth: 48,
-      data: (stats.value?.ratingDistribution ?? []).map((item) => item.count)
-    }
-  ]
-}))
+const ratingOption = computed<ChartOption>(() => {
+  const dist = stats.value?.ratingDistribution ?? {}
+  const ratings = [1, 2, 3, 4, 5]
+  return {
+    tooltip: { trigger: 'axis' },
+    grid: { left: 40, right: 20, top: 24, bottom: 28 },
+    xAxis: { type: 'category', data: ratings.map((r) => `${r} 星`) },
+    yAxis: { type: 'value', minInterval: 1 },
+    series: [
+      {
+        name: '评价数',
+        type: 'bar',
+        barMaxWidth: 40,
+        data: ratings.map((r) => dist[String(r)] ?? 0)
+      }
+    ]
+  }
+})
 
-const assigneeOption = computed<ChartOption>(() => ({
-  tooltip: {
-    trigger: 'axis',
-    formatter: (params: unknown) => {
-      const list = params as { name: string; value: number; seriesName: string }[]
-      const target = stats.value?.byAssignee.find((item) => item.assigneeName === list[0]?.name)
-      const avg = target ? `均分 ${target.avgRating.toFixed(1)}` : ''
-      return `${list[0]?.name}<br/>${list[0]?.seriesName}：${list[0]?.value} 条<br/>${avg}`
-    }
-  },
-  xAxis: { type: 'category', data: (stats.value?.byAssignee ?? []).map((item) => item.assigneeName) },
-  yAxis: { type: 'value', minInterval: 1 },
-  series: [
-    {
-      type: 'bar',
-      name: '被评价次数',
-      barMaxWidth: 40,
-      data: (stats.value?.byAssignee ?? []).map((item) => item.count)
-    }
-  ]
-}))
+/** 满意率口径：4 星及以上为满意（评价体系约定） */
+const satisfactionPercent = computed(() => {
+  const dist = stats.value?.ratingDistribution ?? {}
+  const total = Object.values(dist).reduce((sum, count) => sum + count, 0)
+  if (!total) return '-'
+  const satisfied = (dist['4'] ?? 0) + (dist['5'] ?? 0)
+  return `${((satisfied / total) * 100).toFixed(1)}%`
+})
 
-const satisfactionPercent = computed(() => `${((stats.value?.summary.satisfactionRate ?? 0) * 100).toFixed(1)}%`)
+const avgRating = computed(() => {
+  const dist = stats.value?.ratingDistribution ?? {}
+  const total = Object.values(dist).reduce((sum, count) => sum + count, 0)
+  if (!total) return '-'
+  const weighted = Object.entries(dist).reduce((sum, [rating, count]) => sum + Number(rating) * count, 0)
+  return (weighted / total).toFixed(1)
+})
 </script>
 
 <template>
   <section v-loading="loading" class="evaluation-stats">
     <div class="stat-grid">
-      <StatCard label="评价总数" :value="stats?.summary.total ?? '-'" type="primary" />
-      <StatCard label="平均评分" :value="stats?.summary.avgRating?.toFixed(1) ?? '-'" unit="分" type="success" />
-      <StatCard label="满意率" :value="satisfactionPercent" type="success" />
-      <StatCard label="不满意待跟进" :value="stats?.summary.unsatisfiedCount ?? '-'" type="warning" />
+      <StatCard label="评价总数" :value="stats?.evaluationTotal ?? '-'" unit="条" type="primary" />
+      <StatCard label="平均评分" :value="avgRating" unit="分" type="success" />
+      <StatCard label="满意率（≥4 星）" :value="satisfactionPercent" type="success" />
     </div>
 
     <div class="chart-grid">
@@ -78,17 +76,19 @@ const satisfactionPercent = computed(() => `${((stats.value?.summary.satisfactio
         <h3>评分分布</h3>
         <EChart
           :option="ratingOption"
-          :is-empty="(stats?.ratingDistribution.length ?? 0) === 0"
+          :is-empty="Object.keys(stats?.ratingDistribution ?? {}).length === 0"
           empty-text="暂无评分数据"
         />
       </div>
       <div class="chart-card">
-        <h3>服务人员被评价情况</h3>
-        <EChart
-          :option="assigneeOption"
-          :is-empty="(stats?.byAssignee.length ?? 0) === 0"
-          empty-text="暂无人员评价数据"
-        />
+        <h3>分档明细</h3>
+        <ul v-if="stats && Object.keys(stats.ratingDistribution).length" class="detail-list">
+          <li v-for="(count, rating) in stats.ratingDistribution" :key="rating">
+            <span>{{ rating }} 星</span>
+            <b>{{ count }}</b>
+          </li>
+        </ul>
+        <p v-else class="empty-text">暂无数据</p>
       </div>
     </div>
   </section>
@@ -97,14 +97,14 @@ const satisfactionPercent = computed(() => `${((stats.value?.summary.satisfactio
 <style scoped>
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
 }
 
 .chart-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 3fr 2fr;
   gap: var(--spacing-md);
 }
 
@@ -119,12 +119,28 @@ const satisfactionPercent = computed(() => `${((stats.value?.summary.satisfactio
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
   margin-bottom: var(--spacing-md);
-  color: var(--color-text-primary);
+}
+
+.detail-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.detail-list li b {
+  color: var(--color-primary);
+}
+
+.empty-text {
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-sm);
 }
 
 @media (max-width: 1023px) {
   .stat-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .chart-grid {

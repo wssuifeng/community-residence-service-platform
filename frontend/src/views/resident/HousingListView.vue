@@ -157,7 +157,7 @@ onMounted(() => {
           <h2 class="card-title">{{ housing.title }}</h2>
           <p class="card-location">{{ housing.communityName }} · {{ housing.houseAddress }}</p>
           <div class="card-tags">
-            <span v-for="tag in housing.tags.slice(0, 3)" :key="tag" class="tag-chip">{{ tag }}</span>
+            <span v-for="tag in (housing.tags ?? []).slice(0, 3)" :key="tag" class="tag-chip">{{ tag }}</span>
           </div>
           <div class="card-footer">
             <span class="card-rent">

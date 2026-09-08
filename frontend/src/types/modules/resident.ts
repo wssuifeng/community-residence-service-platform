@@ -188,11 +188,23 @@ export interface IMoveOutDTO {
 
 /* ---------------------------------- 全局配置 ---------------------------------- */
 
-/** 全局配置实体（接口设计.md 9.2.4.1 响应） */
+/**
+ * 全局配置实体（后端 SysConfig 实体字段，2026-09-08 联调对齐：
+ * 接口设计.md 9.2.4.2 示例为分页 + key/value，后端实现为全量
+ * 列表 + configKey/configValue，以后端契约为准）
+ */
 export interface ISysConfig {
+  id?: number
+  configKey: string
+  configValue: string
+  description?: string
+  updatedAt?: string
+}
+
+/** 查询配置响应（接口设计.md 9.2.4.1，后端返回 {key, value} 包装） */
+export interface IConfigValueResult {
   key: string
   value: string
-  description?: string
 }
 
 /** 更新配置请求（接口设计.md 9.2.4.3 请求体） */

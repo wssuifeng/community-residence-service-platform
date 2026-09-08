@@ -69,7 +69,7 @@ function fillForm(source: IHousing): void {
   form.contactPerson = source.contactPerson
   form.contactPhone = source.contactPhone ?? ''
   form.imagesText = source.images.join('\n')
-  form.tagsText = source.tags.join('、')
+  form.tagsText = (source.tags ?? []).join('、')
 }
 
 async function loadDetail(): Promise<void> {
@@ -317,7 +317,7 @@ onMounted(() => {
               <div class="meta-item">
                 <dt>标签</dt>
                 <dd>
-                  <template v-if="housing.tags.length > 0">
+                  <template v-if="(housing.tags?.length ?? 0) > 0">
                     <span v-for="tag in housing.tags" :key="tag" class="tag-chip">{{ tag }}</span>
                   </template>
                   <template v-else>—</template>
