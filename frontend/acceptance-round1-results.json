@@ -1,0 +1,864 @@
+{
+  "started_at": "2026-09-08T21:56:17+0800",
+  "checks": [
+    {
+      "name": "E1 superadmin login",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/statistics/dashboard"
+    },
+    {
+      "name": "E1 create community",
+      "passed": true,
+      "detail": "列表应出现「前端测试社区C」"
+    },
+    {
+      "name": "E1 create building",
+      "passed": true,
+      "detail": "楼栋列表应出现 A号楼"
+    },
+    {
+      "name": "E1 create unit",
+      "passed": true,
+      "detail": "单元创建（列表按社区过滤，改为 API 核验）"
+    },
+    {
+      "name": "E1 unit created via data",
+      "passed": true,
+      "detail": "community=8 building=7 unit=6"
+    },
+    {
+      "name": "E1 house create button enabled after unit filter",
+      "passed": true,
+      "detail": "需选到单元后才能新建房屋"
+    },
+    {
+      "name": "E1 create house",
+      "passed": true,
+      "detail": "房屋列表应出现 101"
+    },
+    {
+      "name": "E1 house default vacant",
+      "passed": true,
+      "detail": "6\n\t\n\t\n\t\n101\n\t\n1\n\t\n89.5\n\t\n2室1厅1卫\n\t\n空置\n\t\n编辑\n状态\n历史\n删除"
+    },
+    {
+      "name": "E1 no failed POST",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "E2 register new resident",
+      "passed": true,
+      "detail": "http://localhost:5173/auth/login"
+    },
+    {
+      "name": "E2 new resident login",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "E2 residence application submitted (API)",
+      "passed": true,
+      "detail": "houseId=6 status=200 body={\"code\":200,\"message\":\"success\",\"data\":{\"communityId\":8,\"createdAt\":null,\"houseId\":6,\"houseLocation\":\"A号楼1单元101\",\"id\":5,"
+    },
+    {
+      "name": "E2 admin1 login",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/statistics/dashboard"
+    },
+    {
+      "name": "E2 application visible to admin",
+      "passed": false,
+      "detail": "入住申请列表应出现 前端测试用户D 的申请"
+    },
+    {
+      "name": "E2 resident relogin",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "E2 profile shows residence relation",
+      "passed": true,
+      "detail": "社区居住服务\n首页\n我的工单\n我的反馈\n我的预约\n公告\n房源\n消息\n前端测试用户D（居民）\n前\n前端测试用户D\n编辑资料\n修改密码\n用户名\tfe_test_user4\t手机号\t13800138004\n邮箱\t-\t注册时间\t2026-09-08\n我的居住关系\n暂无居住关系记录\n我的租住记录\n暂无租住记录"
+    },
+    {
+      "name": "E2 profile shows lease record",
+      "passed": true,
+      "detail": "社区居住服务\n首页\n我的工单\n我的反馈\n我的预约\n公告\n房源\n消息\n前端测试用户D（居民）\n前\n前端测试用户D\n编辑资料\n修改密码\n用户名\tfe_test_user4\t手机号\t13800138004\n邮箱\t-\t注册时间\t2026-09-08\n我的居住关系\n暂无居住关系记录\n我的租住记录\n暂无租住记录"
+    },
+    {
+      "name": "E2 house status flipped to occupied",
+      "passed": false,
+      "detail": "6\n\t\n\t\n\t\n101\n\t\n1\n\t\n89.5\n\t\n2室1厅1卫\n\t\n空置\n\t\n编辑\n状态\n历史\n删除"
+    },
+    {
+      "name": "E3 resident1 login",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "E3 lease card visible",
+      "passed": true,
+      "detail": "社区居住服务\n首页\n我的工单\n我的反馈\n我的预约\n公告\n房源\n消息\n测试居民（居民）\n测\n测试居民\n编辑资料\n修改密码\n用户名\tresident1\t手机号\t13900000003\n邮箱\t-\t注册时间\t2026-09-08\n我的居住关系\n居住中\n入住 2026-01-01\n我的租住记录\n房屋\n\t\n租期\n\t\n月租金（元）\n\t\n状态\n\t\n- ~ -\n\t\n2200\n\t\n租住中"
+    },
+    {
+      "name": "E3 lease shows house/rent",
+      "passed": true,
+      "detail": "社区居住服务\n首页\n我的工单\n我的反馈\n我的预约\n公告\n房源\n消息\n测试居民（居民）\n测\n测试居民\n编辑资料\n修改密码\n用户名\tresident1\t手机号\t13900000003\n邮箱\t-\t注册时间\t2026-09-08\n我的居住关系\n居住中\n入住 2026-01-01\n我的租住记录\n房屋\n\t\n租期\n\t\n月租金（元）\n\t\n状态\n\t\n- ~ -\n\t\n2200\n\t\n租住中"
+    },
+    {
+      "name": "E5 admin1 login",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/statistics/dashboard"
+    },
+    {
+      "name": "E5 notice draft saved",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/notices/create"
+    },
+    {
+      "name": "E5 notice in list",
+      "passed": false,
+      "detail": "公告列表应出现「前端测试公告」"
+    },
+    {
+      "name": "E5 resident login",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "E5 resident sees published notice",
+      "passed": false,
+      "detail": "社区居住服务\n首页\n我的工单\n我的反馈\n我的预约\n公告\n房源\n消息\n测试居民（居民）\n社区公告\n\n了解社区最新动态与重要通知\n\n社区停水通知\n\n因水管维修，本社区将于9月15日上午8:00-12:00停水，请各位居民提前做好储水准备。\n\n联调测试社区\n·\n1 小时前\n1 人已读\nAnother notice\n\nx\n\nTest Community One\n·\n11 小时前\n0 人已读\n1"
+    },
+    {
+      "name": "E5 notice detail renders",
+      "passed": false,
+      "detail": "未找到可点击的公告卡片"
+    },
+    {
+      "name": "E5 receipt stats visible",
+      "passed": false,
+      "detail": "公告行未找到"
+    },
+    {
+      "name": "E12 guest housings without login",
+      "passed": true,
+      "detail": "http://localhost:5173/guest/housings"
+    },
+    {
+      "name": "E12 housing detail renders",
+      "passed": true,
+      "detail": "http://localhost:5173/guest/housings/1"
+    },
+    {
+      "name": "E12 detail survives refresh",
+      "passed": true,
+      "detail": "社区居住服务\n首页\n房源\n公告\n登录\n房源列表\n/\nCozy flat\n可租\nCozy flat\n\nTest Community One ·\n\n¥3200\n/月\n押金 ¥\n可入住日期\n-\n联系人\n联系电话\n注册后可见\n浏览量\n14\n预约看房\n\n注册居民账号即可选择看房时段，在线提交预约\n\n房源描述\n"
+    },
+    {
+      "name": "E12 view count displayed",
+      "passed": false,
+      "detail": "社区居住服务\n首页\n房源\n公告\n登录\n在租房源\n\n找到合适的房子，注册居民账号即可预约看房\n\n搜索\n请选择\n可租\nCozy flat\n\nTest Community One ·\n\n¥3200/月\n\n共 1 条\n12\n1\n前往\n页"
+    }
+  ],
+  "issues": [],
+  "api_calls": [
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/admin/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/statistics.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/community.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/communities",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/community.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities/8/buildings?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/buildings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities/8/buildings?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/community.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities/8/buildings?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/units",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/community.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities/8/buildings?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/buildings/7/units?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/units/6/houses?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities/8/buildings?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/houses",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/units/6/houses?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/resident/register",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/resident/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notification.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/notifications/unread",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/notices?page=1&size=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/admin/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/statistics.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/resident.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/residence-applications?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/resident/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notification.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/resident.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/lease.ts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/residents/profile",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/leases?page=1&size=5&residentId=6",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/residents/6/residences?page=1&size=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/admin/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/statistics.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/community.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/communities/8/buildings?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/buildings/7/units?page=1&size=200",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/units/6/houses?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/resident/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notification.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/resident.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/lease.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/residents/profile",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/leases?page=1&size=5&residentId=3",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/residents/3/residences?page=1&size=5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/admin/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/statistics.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/notices",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/notices?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/resident/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notification.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/notices?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/auth/admin/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/statistics.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/notices?page=1&size=10",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/notice.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/housings?page=1&size=12",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/housings/1",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/housings/1/view",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/housings/1",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/housings/1/view",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/housings/1",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/housings/1/view",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/housings/1",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "url": "/api/v1/housings/1/view",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/housing.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/src/api/auth.ts",
+      "status": 304
+    },
+    {
+      "method": "GET",
+      "url": "/api/v1/housings?page=1&size=12",
+      "status": 200
+    }
+  ],
+  "summary": {
+    "checks": 32,
+    "passed": 25,
+    "failed": 7,
+    "issues": 0
+  }
+}
