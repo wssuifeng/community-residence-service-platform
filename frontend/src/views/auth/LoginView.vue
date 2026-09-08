@@ -57,6 +57,9 @@ async function handleLogin(): Promise<void> {
       default:
         router.push('/guest/home')
     }
+  } catch (error) {
+    // 登录失败（凭据错误/账号冻结等）：提示用户，不中断停留在登录页
+    ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
   } finally {
     loading.value = false
   }
@@ -65,63 +68,156 @@ async function handleLogin(): Promise<void> {
 
 <template>
   <main class="login-page">
-    <div class="login-card">
-      <h1 class="login-title">社区居住服务管理系统</h1>
-      <el-tabs v-model="activeTab">
-        <el-tab-pane label="居民登录" name="resident" />
-        <el-tab-pane label="管理员登录" name="admin" />
-      </el-tabs>
+    <div class="login-brand">
+      <img
+        class="login-brand-image"
+        src="/images/login-illustration.png"
+        alt="社区生活插画"
+      />
+      <div class="login-brand-copy">
+        <h1>社区居住服务</h1>
+        <p>房屋、工单、公告、预约，一个入口打理社区生活</p>
+      </div>
+    </div>
 
-      <form class="login-form" @submit.prevent="handleLogin">
-        <label class="login-field">
-          <span>用户名</span>
-          <el-input v-model="form.username" placeholder="请输入用户名" autocomplete="username" />
-        </label>
-        <label class="login-field">
-          <span>密码</span>
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="请输入密码"
-            autocomplete="current-password"
-            show-password
-          />
-        </label>
-        <el-button type="primary" native-type="submit" class="login-submit" :loading="loading">
-          登 录
-        </el-button>
-      </form>
+    <div class="login-panel">
+      <div class="login-card">
+        <h2 class="login-title">登录</h2>
 
-      <p class="login-register">
-        还没有账号？
-        <router-link to="/auth/register">注册居民账号</router-link>
-      </p>
+        <div class="login-tabs" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="activeTab === 'resident'"
+            :class="{ active: activeTab === 'resident' }"
+            @click="activeTab = 'resident'"
+          >
+            居民登录
+          </button>
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="activeTab === 'admin'"
+            :class="{ active: activeTab === 'admin' }"
+            @click="activeTab = 'admin'"
+          >
+            管理员 / 服务人员
+          </button>
+        </div>
+
+        <form class="login-form" @submit.prevent="handleLogin">
+          <label class="login-field">
+            <span>用户名</span>
+            <el-input v-model="form.username" placeholder="请输入用户名" autocomplete="username" />
+          </label>
+          <label class="login-field">
+            <span>密码</span>
+            <el-input
+              v-model="form.password"
+              type="password"
+              placeholder="请输入密码"
+              autocomplete="current-password"
+              show-password
+            />
+          </label>
+          <el-button type="primary" native-type="submit" class="login-submit" :loading="loading">
+            登 录
+          </el-button>
+        </form>
+
+        <p class="login-register">
+          还没有账号？
+          <router-link to="/auth/register">注册居民账号</router-link>
+          <span class="login-divider">·</span>
+          <router-link to="/guest/home">先逛逛</router-link>
+        </p>
+      </div>
     </div>
   </main>
 </template>
 
 <style scoped>
 .login-page {
-  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  min-height: 100dvh;
+  background-color: #fff;
+}
+
+.login-brand {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--color-primary-bg) 0%, #f6f9ff 55%, #eef3ff 100%);
+}
+
+.login-brand-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.login-brand-copy {
+  position: absolute;
+  left: var(--spacing-xl);
+  bottom: var(--spacing-xl);
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(31, 41, 55, 0.45);
+}
+
+.login-brand-copy h1 {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+}
+
+.login-brand-copy p {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-md);
+}
+
+.login-panel {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--color-primary-bg), var(--color-bg));
-  padding: var(--spacing-md);
-}
-
-.login-card {
-  width: 400px;
-  background: #fff;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
   padding: var(--spacing-xl) var(--spacing-lg);
 }
 
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
 .login-title {
-  font-size: var(--font-size-lg);
-  text-align: center;
-  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.login-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: var(--spacing-lg) 0 var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.login-tabs button {
+  padding: var(--spacing-sm) 0;
+  border: none;
+  background-color: #fff;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.login-tabs button.active {
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: var(--font-weight-medium);
 }
 
 .login-form {
@@ -143,9 +239,25 @@ async function handleLogin(): Promise<void> {
 }
 
 .login-register {
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-lg);
   text-align: center;
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
+}
+
+.login-divider {
+  margin: 0 var(--spacing-sm);
+  color: var(--color-text-disabled);
+}
+
+/* 平板竖屏以下收起品牌栏 */
+@media (max-width: 1023px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-brand {
+    min-height: 180px;
+  }
 }
 </style>
