@@ -32,9 +32,21 @@ import java.util.Set;
  * RESIDENT/STAFF 的个人维度过滤涉及具体表语义（resident_id/assignee_id），
  * 由对应模块查询显式约束，不在本拦截器盲注（避免误伤无该列的表）。
  * 未登录（公开接口）不注入。SQL 解析失败视为权限不可判定，拒绝查询。
+ * 无 community_id 列的表（SKIP_TABLES）跳过注入，由业务层经父表归属校验。
  */
 @Slf4j
 public class DataScopeInterceptor implements InnerInterceptor {
+
+    /** 不含 community_id 列的表：注入会导致 SQL 报错，数据权限由业务层经父表校验 */
+    private static final Set<String> SKIP_TABLES = Set.of(
+            "resident", "sys_config", "lease_reminder",
+            "work_order_attachment", "work_order_process", "work_order_assignment",
+            "notice", "notice_target", "notice_view_record",
+            "feedback_attachment", "feedback_message",
+            "violation_record", "unsatisfied_followup",
+            "sys_user", "auth_token_blacklist",
+            "notification", "notification_channel_log",
+            "housing_timeslot", "sys_task_log");
 
     @Override
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter,
@@ -47,14 +59,18 @@ public class DataScopeInterceptor implements InnerInterceptor {
         rewriteSql(ms, boundSql, communityIds != null && !communityIds.isEmpty());
     }
 
-    /** 改写 SQL：community 本表按 id 过滤，其余表按 community_id 过滤；无绑定时注入恒假条件 */
+    /** 改写 SQL：community 本表按 id 过滤，跳过名单表不注入，其余表按 community_id 过滤；无绑定时注入恒假条件 */
     private void rewriteSql(MappedStatement ms, BoundSql boundSql, boolean hasBound) throws SQLException {
         String originalSql = boundSql.getSql();
         try {
             Select select = (Select) CCJSqlParserUtil.parse(originalSql);
             PlainSelect plain = select.getPlainSelect();
 
-            String filterColumn = isCommunityTable(plain) ? "id" : "community_id";
+            if (!(plain.getFromItem() instanceof Table table) || isSkipTable(table)) {
+                return;
+            }
+
+            String filterColumn = "community".equalsIgnoreCase(table.getName()) ? "id" : "community_id";
             InExpression in = new InExpression();
             in.setLeftExpression(new Column(filterColumn));
             ParenthesedExpressionList<net.sf.jsqlparser.expression.Expression> items = new ParenthesedExpressionList<>();
@@ -82,10 +98,8 @@ public class DataScopeInterceptor implements InnerInterceptor {
     }
 
     /** 查询主表是否为 community 本表（过滤列用 id 而非 community_id） */
-    private boolean isCommunityTable(PlainSelect plain) {
-        if (plain.getFromItem() instanceof Table table) {
-            return "community".equalsIgnoreCase(table.getName());
-        }
-        return false;
+    private boolean isSkipTable(Table table) {
+        String name = table.getName();
+        return SKIP_TABLES.stream().anyMatch(s -> s.equalsIgnoreCase(name));
     }
 }
