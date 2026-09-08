@@ -1,0 +1,121 @@
+{
+  "started_at": "2026-09-08T22:21:00+0800",
+  "checks": [
+    {
+      "name": "E5p admin1 login",
+      "passed": true,
+      "detail": "http://localhost:5173/admin/statistics/dashboard"
+    },
+    {
+      "name": "E5p drafts visible",
+      "passed": true,
+      "detail": "rows=2"
+    },
+    {
+      "name": "E5p publish button exists",
+      "passed": true,
+      "detail": "行内发布按钮"
+    },
+    {
+      "name": "E5p notice published",
+      "passed": false,
+      "detail": "7\n\t\n前端测试公告R\n\t\nTest Community One\n\t\n\t\n\t\n草稿\n\t\n2026-09-08 14:16\n\t\n-\n\t\n0\n\t\n详情\n发布\n删除"
+    },
+    {
+      "name": "E5p resident login",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "E5p resident sees published notice",
+      "passed": false,
+      "detail": "社区居住服务\n首页\n我的工单\n我的反馈\n我的预约\n公告\n房源\n消息\n测试居民（居民）\n社区公告\n\n了解社区最新动态与重要通知\n\n社区停水通知\n\n因水管维修，本社区将于9月15日上午8:00-12:00停水，请各位居民提前做好储水准备。\n\n联调测试社区\n·\n1 小时前\n1 人已读\nAnother no"
+    },
+    {
+      "name": "E5p notice detail renders",
+      "passed": false,
+      "detail": "公告卡片未找到"
+    },
+    {
+      "name": "E5p receipt stats visible",
+      "passed": true,
+      "detail": "社区居住服务\n超级管理员（超级管理员）\n运营统计\n运营看板\n工单统计\n居民统计\n资源统计\n评价统计\n社区管理\n社区列表\n楼栋管理\n单元管理\n房屋管理\n公共资源\n居民管理\n居民列表\n入住申请\n居住关系\n全局配置\n租住管理\n租住记录\n即将到期\n服务管理\n服务类别\n工单列表\n评价列表\n公告与反馈\n公告列表\n反馈列表\n预约管理\n资源预约\n违约记录\n看房预约\n房源管理\n房源列表\n系统管理\n系统用户\n操作日志"
+    },
+    {
+      "name": "E4 resident login",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "E4 category options loaded",
+      "passed": true,
+      "detail": "count=0"
+    },
+    {
+      "name": "E4 work order submitted (redirects to detail)",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/work-orders/8"
+    },
+    {
+      "name": "E4 initial status",
+      "passed": true,
+      "detail": "社区居住服务\n首页\n我的工单\n我的反馈\n我的预约\n公告\n房源\n消息\n测试居民（居民）\n我的工单\n/\n工单详情\n返回列表\nWO202609081557\n验收工单Z\n待受理\n服务类别\nPlumbing\n紧急程度\n普通\n提交时间\n2026-09-08 22:21\n联系电话\n13900000003\n当前处理"
+    },
+    {
+      "name": "E4 assign button visible",
+      "passed": true,
+      "detail": "详情页派单按钮"
+    },
+    {
+      "name": "E4 staff options loaded",
+      "passed": true,
+      "detail": "count=3"
+    },
+    {
+      "name": "E4 assigned",
+      "passed": true,
+      "detail": "社区居住服务\n超级管理员（超级管理员）\n运营统计\n运营看板\n工单统计\n居民统计\n资源统计\n评价统计\n社区管理\n社区列表\n楼栋管理\n单元管理\n房屋管理\n公共资源\n居民管理\n居民列表\n入住申请\n居住关系\n全局配置\n租住管理\n租住记录\n即将到期\n服务管理\n服务类别\n工单列表\n评价列表\n公告与反馈\n公告列表"
+    },
+    {
+      "name": "E6 resident login",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/home"
+    },
+    {
+      "name": "E6 feedback submitted (redirects to detail)",
+      "passed": true,
+      "detail": "http://localhost:5173/resident/feedbacks/5"
+    },
+    {
+      "name": "E6 reply box visible",
+      "passed": true,
+      "detail": "详情页回复输入框"
+    },
+    {
+      "name": "E6 admin reply sent",
+      "passed": true,
+      "detail": "社区居住服务\n超级管理员（超级管理员）\n运营统计\n运营看板\n工单统计\n居民统计\n资源统计\n评价统计\n社区管理\n社区列表\n楼栋管理\n单元管理\n房屋管理\n公共资源\n居民管理\n居民列表\n入住申请\n居住关系\n全局配置\n租住管理\n租住记录\n即将到期\n服务管理\n服务类别\n工单列表\n评价列表\n公告与反馈\n公告列表\n反馈列表\n预约管理\n资源预约\n违约记录\n看房预约\n房源管理\n房源列表\n系统管理\n系统用户\n操作日志"
+    },
+    {
+      "name": "E6 status auto in-session",
+      "passed": true,
+      "detail": "社区居住服务\n超级管理员（超级管理员）\n运营统计\n运营看板\n工单统计\n居民统计\n资源统计\n评价统计\n社区管理\n社区列表\n楼栋管理\n单元管理\n房屋管理\n公共资源\n居民管理\n居民列表\n入住申请\n居住关系\n全局配置\n租住管理\n租住记录\n即将到期\n服务管理\n服务类别\n工单列表\n评价列表\n公告与反馈\n公告列表\n反馈列表\n预约管理\n资源预约\n违约记录\n看房预约\n房源管理\n房源列表\n系统管理\n系统用户\n操作日志"
+    },
+    {
+      "name": "E6 feedback closed",
+      "passed": false,
+      "detail": "社区居住服务\n超级管理员（超级管理员）\n运营统计\n运营看板\n工单统计\n居民统计\n资源统计\n评价统计\n社区管理\n社区列表\n楼栋管理\n单元管理\n房屋管理\n公共资源\n居民管理\n居民列表\n入住申请\n居住关系\n全局配置\n租住管理\n租住记录\n即将到期\n服务管理\n服务类别\n工单列表\n评价列表\n公告与反馈\n公告列表\n反馈列表\n预约管理\n资源预约\n违约记录\n看房预约\n房源管理\n房源列表\n系统管理\n系统用户\n操作日志"
+    }
+  ],
+  "issues": [],
+  "api_errors": [
+    "PATCH /api/v1/notices/7/publish -> 500",
+    "PATCH /api/v1/feedbacks/5/close -> 400"
+  ],
+  "summary": {
+    "checks": 21,
+    "passed": 17,
+    "failed": 4,
+    "issues": 0
+  }
+}
