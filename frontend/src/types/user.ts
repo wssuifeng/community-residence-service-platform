@@ -6,7 +6,8 @@ export interface AuthUser {
   username: string
   realName: string
   role: Role
-  boundCommunities?: { communityId: number; communityName: string }[]
+  /** 后端登录响应为社区 ID 数组（数字），社区名需另查社区列表 */
+  boundCommunities?: number[]
 }
 
 export interface LoginResult {

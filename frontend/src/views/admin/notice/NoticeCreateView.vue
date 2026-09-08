@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/** 后端 Jackson 不解析带 Z 的 ISO 时间，统一转本地无时区格式 */
+function toLocalIso(date: Date): string {
+  const pad = (value: number): string => String(value).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -8,6 +13,7 @@ import {
   getNotice,
   publishNotice
 } from '@/api/notice'
+import { getCommunityList } from '@/api/community'
 import type {
   INotice,
   INoticeSaveRequest,
@@ -36,8 +42,21 @@ const editId = ref<number | null>(
 const isEdit = computed(() => editId.value !== null)
 
 const isSuperAdmin = computed(() => userStore.role === 'SUPER_ADMIN')
-/** SUPER_ADMIN 可选全系统广播（communityId=null），ADMIN 必须指定绑定社区 */
-const boundCommunities = computed(() => userStore.user?.boundCommunities ?? [])
+/** 绑定社区 ID 列表（登录响应）；社区名经社区列表接口补全（后端仅返回 ID 数组） */
+const boundCommunityIds = computed(() => userStore.user?.boundCommunities ?? [])
+const boundCommunities = ref<{ id: number; name: string }[]>([])
+
+async function loadBoundCommunities(): Promise<void> {
+  if (boundCommunityIds.value.length === 0) return
+  try {
+    const result = await getCommunityList({ page: 1, size: 200 })
+    boundCommunities.value = result.records.filter(
+      (item) => (boundCommunityIds.value as number[]).includes(item.id)
+    )
+  } catch {
+    boundCommunities.value = []
+  }
+}
 
 const form = ref({
   title: '',
@@ -69,9 +88,12 @@ const formRef = ref()
 
 onMounted(async () => {
   if (editId.value === null) {
-    /* ADMIN 默认选中第一个绑定社区 */
-    if (!isSuperAdmin.value && boundCommunities.value.length > 0) {
-      form.value.communityId = boundCommunities.value[0].communityId
+    /* ADMIN 默认选中第一个绑定社区（登录响应仅含 ID，先拉社区名） */
+    if (!isSuperAdmin.value) {
+      await loadBoundCommunities()
+      if (boundCommunities.value.length > 0) {
+        form.value.communityId = boundCommunities.value[0].id
+      }
     }
     return
   }
@@ -111,9 +133,9 @@ function buildRequest(): INoticeSaveRequest {
     type: form.value.type,
     priority: form.value.priority,
     targetAudience: form.value.targetAudience,
-    publishTime: (form.value.publishTime ?? new Date()).toISOString(),
+    publishTime: toLocalIso(form.value.publishTime ?? new Date()),
     expireTime: form.value.expireTime
-      ? form.value.expireTime.toISOString()
+      ? toLocalIso(form.value.expireTime)
       : undefined
   }
 }
@@ -260,9 +282,9 @@ function goBack(): void {
           >
             <el-option
               v-for="community in boundCommunities"
-              :key="community.communityId"
-              :label="community.communityName"
-              :value="community.communityId"
+              :key="community.id"
+              :label="community.name"
+              :value="community.id"
             />
           </el-select>
         </template>
@@ -274,9 +296,9 @@ function goBack(): void {
           >
             <el-option
               v-for="community in boundCommunities"
-              :key="community.communityId"
-              :label="community.communityName"
-              :value="community.communityId"
+              :key="community.id"
+              :label="community.name"
+              :value="community.id"
             />
           </el-select>
           <span v-if="boundCommunities.length === 0" class="form-tip is-warning">

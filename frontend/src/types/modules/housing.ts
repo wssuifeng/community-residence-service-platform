@@ -11,18 +11,18 @@ export const housingStatusLabels: Record<HousingStatus, string> = {
   OFFLINE: '已下架'
 }
 
-/** 看房预约状态（接口设计.md 9.12.2，状态机：待确认→已预约→已完成 + 已取消/已违约） */
+/** 看房预约状态（架构设计 §6 状态机权威口径：TO_CONFIRM→RESERVED→COMPLETED + 已取消/已违约；接口文档 PENDING/CONFIRMED 为漂移命名） */
 export type ViewingAppointmentStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
+  | 'TO_CONFIRM'
+  | 'RESERVED'
   | 'COMPLETED'
   | 'CANCELLED'
   | 'VIOLATED'
 
 /** 看房预约状态中文标签 */
 export const viewingAppointmentStatusLabels: Record<ViewingAppointmentStatus, string> = {
-  PENDING: '待确认',
-  CONFIRMED: '已预约',
+  TO_CONFIRM: '待确认',
+  RESERVED: '已预约',
   COMPLETED: '已完成',
   CANCELLED: '已取消',
   VIOLATED: '已违约'
@@ -110,11 +110,13 @@ export interface IViewingAppointment {
 
 /** 创建看房预约请求（接口设计.md 9.12.2.1 请求体，游客可提交） */
 export interface ViewingAppointmentCreateDTO {
+  /** 后端 CreateViewingAppointmentDTO：日期+起止时间直传（接口文档的 timeslotId 为漂移命名） */
   housingId: number
-  timeslotId: number
+  appointmentDate: string
+  startTime: string
+  endTime: string
   visitorName: string
-  visitorPhone?: string
-  visitorCount: number
+  contactPhone: string
   remark?: string
 }
 
@@ -154,26 +156,24 @@ export interface AvailableViewingTimeslotQuery {
 }
 
 /** 房源看房时段（接口设计.md 9.12.3.1 响应 data） */
+/** 房源时段（后端 HousingTimeslotVO：周循环模板 dayOfWeek+isAvailable，接口文档的按日期时段为漂移模型） */
 export interface IHousingTimeslot {
   id: number
   housingId: number
-  housingTitle: string
-  date: string
+  dayOfWeek: number
   startTime: string
   endTime: string
-  maxBookings: number
-  currentBookings: number
-  status: HousingTimeslotStatus
+  isAvailable: number
   createdAt: string
+  updatedAt: string
 }
 
-/** 创建/更新房源时段请求（接口设计.md 9.12.3.1 请求体，更新同 9.12.3.2） */
+/** 创建/更新房源时段请求（后端 CreateHousingTimeslotDTO：周模板） */
 export interface HousingTimeslotSaveDTO {
-  date: string
+  dayOfWeek: number
   startTime: string
   endTime: string
-  maxBookings?: number
-  status?: HousingTimeslotStatus
+  isAvailable?: number
 }
 
 /** 房源时段列表查询参数（接口设计.md 9.12.3.4） */

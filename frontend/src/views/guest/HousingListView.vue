@@ -7,7 +7,6 @@ import StatusTag from '@/components/common/StatusTag.vue'
 import { listHousings } from '@/api/housing'
 import type { IHousing, HousingStatus } from '@/types/modules/housing'
 import { housingStatusLabels } from '@/types/modules/housing'
-import { formatDate } from '@/utils/date'
 
 /** 房源列表（公开）：卡片网格 + 关键字/状态筛选 + 分页；无图房源按序号轮换示例图 */
 
@@ -127,9 +126,7 @@ onMounted(load)
               <span class="housing-rent-amount">¥{{ housing.monthlyRent }}</span>
               <span class="housing-rent-unit">/月</span>
             </p>
-            <span class="housing-date">
-              {{ housing.availableDate ? `${formatDate(housing.availableDate)} 起可入住` : '' }}
-            </span>
+            <span class="housing-views">{{ housing.viewCount }} 次浏览</span>
           </div>
         </div>
       </router-link>
@@ -283,7 +280,7 @@ onMounted(load)
   color: var(--color-text-secondary);
 }
 
-.housing-date {
+.housing-views {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   white-space: nowrap;

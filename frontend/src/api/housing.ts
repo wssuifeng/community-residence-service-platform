@@ -107,7 +107,7 @@ export function deleteHousingTimeslot(id: number) {
   return http.delete<null>(`/housing-timeslots/${id}`)
 }
 
-/** 房源看房时段列表（接口设计.md 9.12.3.4，公开） */
+/** 房源看房时段列表（后端返回周模板全量数组，非分页） */
 export function listHousingTimeslots(housingId: number, query?: HousingTimeslotListQuery) {
-  return http.get<PageResult<IHousingTimeslot>>(`/housings/${housingId}/timeslots`, query)
+  return http.get<IHousingTimeslot[]>(`/housings/${housingId}/timeslots`, query)
 }
