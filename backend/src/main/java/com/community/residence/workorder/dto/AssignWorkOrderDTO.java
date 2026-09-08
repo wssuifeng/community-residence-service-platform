@@ -10,7 +10,7 @@ import lombok.Data;
 @Schema(description = "派单请求")
 public class AssignWorkOrderDTO {
 
-    @Schema(description = "服务人员ID（sys_user STAFF 账号）")
+    @Schema(description = "服务人员ID（sys_user STAFF 账号ID，字段名为 assigneeId 非 assignedStaffId）")
     @NotNull(message = "服务人员不能为空")
     private Long assigneeId;
 
