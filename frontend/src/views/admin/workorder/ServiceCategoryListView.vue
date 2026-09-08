@@ -43,9 +43,9 @@ async function loadCommunities(): Promise<void> {
     const page = await getCommunityList({ page: 1, size: 100 })
     communities.value = page.records
     const bound = userStore.user?.boundCommunities ?? []
-    /* 管理员只管绑定社区：单绑定自动锁定，多绑定取第一个（可切换） */
+    /* 管理员只管绑定社区：单绑定自动锁定，多绑定取第一个（可切换）；登录响应为 ID 数组 */
     if (bound.length > 0) {
-      communityId.value = bound[0].communityId
+      communityId.value = bound[0]
     } else if (page.records.length > 0) {
       communityId.value = page.records[0].id
     }

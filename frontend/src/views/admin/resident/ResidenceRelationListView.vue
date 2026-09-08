@@ -186,7 +186,7 @@ onMounted(() => {
       border
     >
       <el-table-column prop="residentName" label="居民" min-width="100" show-overflow-tooltip />
-      <el-table-column prop="houseAddress" label="房屋" min-width="180" show-overflow-tooltip />
+      <el-table-column prop="houseLocation" label="房屋" min-width="180" show-overflow-tooltip />
       <el-table-column label="入住日期" width="120">
         <template #default="{ row }">{{ formatDate(row.moveInDate) }}</template>
       </el-table-column>
@@ -230,7 +230,7 @@ onMounted(() => {
     <el-dialog v-model="moveOutVisible" title="搬出登记" width="480px">
       <el-alert
         v-if="moveOutTarget"
-        :title="`登记后「${moveOutTarget.residentName}」与「${moveOutTarget.houseAddress}」的居住关系将结束，关联租住记录同步终止`"
+        :title="`登记后「${moveOutTarget.residentName}」与「${moveOutTarget.houseLocation}」的居住关系将结束，关联租住记录同步终止`"
         type="info"
         :closable="false"
         class="move-out-tip"

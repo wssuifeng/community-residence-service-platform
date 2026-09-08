@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/** 后端 Jackson 不解析带 Z 的 ISO 时间，统一转本地无时区格式 */
+function toLocalIso(date: Date): string {
+  const pad = (value: number): string => String(value).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -90,7 +95,7 @@ async function handlePublish(row: INotice): Promise<void> {
     return
   }
   try {
-    await publishNotice(row.id, { publishTime: new Date().toISOString() })
+    await publishNotice(row.id, { publishTime: toLocalIso(new Date()) })
     ElMessage.success('公告已发布')
     load()
   } catch (error) {

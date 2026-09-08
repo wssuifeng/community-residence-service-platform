@@ -23,7 +23,7 @@ import type {
   IUnit,
   HouseStatus
 } from '@/types/modules/community'
-import { houseStatusLabels, propertyTypeLabels } from '@/types/modules/community'
+import { houseStatusLabels } from '@/types/modules/community'
 import { formatDateTime } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
@@ -52,13 +52,9 @@ function statusTagType(status: HouseStatus): 'info' | 'completed' | 'pending' | 
   return 'info'
 }
 
-/** 户型展示：x室x厅x卫 */
+/** 户型展示：后端 layout 为字符串（如「2室1厅1卫」） */
 function layoutText(row: IHouse): string {
-  const parts: string[] = []
-  if (row.bedrooms !== undefined && row.bedrooms !== null) parts.push(`${row.bedrooms}室`)
-  if (row.livingRooms !== undefined && row.livingRooms !== null) parts.push(`${row.livingRooms}厅`)
-  if (row.bathrooms !== undefined && row.bathrooms !== null) parts.push(`${row.bathrooms}卫`)
-  return parts.length > 0 ? parts.join('') : '-'
+  return row.layout ?? '-'
 }
 
 async function loadCommunities(): Promise<void> {
@@ -163,12 +159,9 @@ const form = reactive<HouseForm>({
   houseNumber: '',
   floor: 1,
   area: undefined,
-  bedrooms: undefined,
-  livingRooms: undefined,
-  bathrooms: undefined,
+  roomCount: undefined,
+  layout: '',
   orientation: '',
-  propertyType: 'APARTMENT',
-  monthlyRent: undefined,
   description: ''
 })
 
@@ -217,12 +210,9 @@ function openCreate(): void {
   form.houseNumber = ''
   form.floor = 1
   form.area = undefined
-  form.bedrooms = undefined
-  form.livingRooms = undefined
-  form.bathrooms = undefined
+  form.roomCount = undefined
+  form.layout = ''
   form.orientation = ''
-  form.propertyType = 'APARTMENT'
-  form.monthlyRent = undefined
   form.description = ''
   // 默认带入当前筛选的三级选择
   formCommunityId.value = communityFilter.value
@@ -242,12 +232,9 @@ function openEdit(row: IHouse): void {
   form.houseNumber = row.houseNumber
   form.floor = row.floor
   form.area = row.area ?? undefined
-  form.bedrooms = row.bedrooms ?? undefined
-  form.livingRooms = row.livingRooms ?? undefined
-  form.bathrooms = row.bathrooms ?? undefined
+  form.roomCount = row.roomCount ?? undefined
+  form.layout = row.layout ?? ''
   form.orientation = row.orientation ?? ''
-  form.propertyType = row.propertyType ?? 'APARTMENT'
-  form.monthlyRent = row.monthlyRent ?? undefined
   form.description = row.description ?? ''
   // 回显联动：定位所在楼栋/社区（IHouse 无 unit 溯源字段，从当前筛选选项兜底）
   const belongedBuilding = buildings.value.find(
@@ -425,7 +412,7 @@ onMounted(loadCommunities)
         <el-option
           v-for="item in units"
           :key="item.id"
-          :label="item.unitNumber"
+          :label="item.name"
           :value="item.id"
         />
       </el-select>
@@ -457,7 +444,7 @@ onMounted(loadCommunities)
       <el-table v-loading="loading" :data="houses" border>
         <el-table-column prop="id" label="ID" width="64" />
         <el-table-column prop="buildingName" label="楼栋" min-width="100" show-overflow-tooltip />
-        <el-table-column prop="unitNumber" label="单元" width="90" show-overflow-tooltip />
+        <el-table-column prop="unitName" label="单元" width="90" show-overflow-tooltip />
         <el-table-column prop="houseNumber" label="门牌号" min-width="100" show-overflow-tooltip />
         <el-table-column prop="floor" label="楼层" width="70" />
         <el-table-column label="面积(㎡)" width="90">
@@ -465,11 +452,6 @@ onMounted(loadCommunities)
         </el-table-column>
         <el-table-column label="户型" width="110">
           <template #default="{ row }">{{ layoutText(row) }}</template>
-        </el-table-column>
-        <el-table-column label="属性" width="80">
-          <template #default="{ row }">
-            {{ row.propertyType ? propertyTypeLabels[row.propertyType as keyof typeof propertyTypeLabels] : '-' }}
-          </template>
         </el-table-column>
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
@@ -546,7 +528,7 @@ onMounted(loadCommunities)
             <el-option
               v-for="item in formUnits"
               :key="item.id"
-              :label="item.unitNumber"
+              :label="item.name"
               :value="item.id"
             />
           </el-select>
@@ -561,30 +543,13 @@ onMounted(loadCommunities)
           <el-input-number v-model="form.area" :min="1" :max="10000" :precision="2" />
         </el-form-item>
         <el-form-item label="户型">
-          <div class="layout-inputs">
-            <el-input-number v-model="form.bedrooms" :min="0" :max="9" placeholder="室" />
-            <span class="layout-sep">室</span>
-            <el-input-number v-model="form.livingRooms" :min="0" :max="9" placeholder="厅" />
-            <span class="layout-sep">厅</span>
-            <el-input-number v-model="form.bathrooms" :min="0" :max="9" placeholder="卫" />
-            <span class="layout-sep">卫</span>
-          </div>
+          <el-input v-model="form.layout" placeholder="如：2室1厅1卫" maxlength="20" />
+        </el-form-item>
+        <el-form-item label="房间数">
+          <el-input-number v-model="form.roomCount" :min="1" :max="20" />
         </el-form-item>
         <el-form-item label="朝向">
           <el-input v-model="form.orientation" placeholder="如：南北" maxlength="10" />
-        </el-form-item>
-        <el-form-item label="属性类型">
-          <el-select v-model="form.propertyType" style="width: 100%">
-            <el-option
-              v-for="(label, value) in propertyTypeLabels"
-              :key="value"
-              :label="label"
-              :value="value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="月租金(元)">
-          <el-input-number v-model="form.monthlyRent" :min="0" :max="999999" :precision="2" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input

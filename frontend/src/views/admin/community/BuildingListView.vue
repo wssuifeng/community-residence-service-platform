@@ -93,21 +93,21 @@ type BuildingForm = Omit<IBuildingDTO, 'communityId'> & { communityId?: number }
 const form = reactive<BuildingForm>({
   communityId: undefined,
   name: '',
-  totalFloors: 1,
+  floors: 1,
   description: ''
 })
 
 const rules: FormRules = {
   communityId: [{ required: true, message: '请选择所属社区', trigger: 'change' }],
   name: [{ required: true, message: '请输入楼栋名称', trigger: 'blur' }],
-  totalFloors: [{ required: true, message: '请输入总层数', trigger: 'blur' }]
+  floors: [{ required: true, message: '请输入总层数', trigger: 'blur' }]
 }
 
 function openCreate(): void {
   editingId.value = null
   form.communityId = communityFilter.value === '' ? undefined : communityFilter.value
   form.name = ''
-  form.totalFloors = 1
+  form.floors = 1
   form.description = ''
   dialogVisible.value = true
 }
@@ -116,7 +116,7 @@ function openEdit(row: IBuilding): void {
   editingId.value = row.id
   form.communityId = row.communityId
   form.name = row.name
-  form.totalFloors = row.totalFloors
+  form.floors = row.floors
   form.description = row.description ?? ''
   dialogVisible.value = true
 }
@@ -203,7 +203,7 @@ onMounted(() => {
         <el-table-column prop="id" label="ID" width="64" />
         <el-table-column prop="communityName" label="所属社区" min-width="140" show-overflow-tooltip />
         <el-table-column prop="name" label="楼栋名称" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="totalFloors" label="总层数" width="90" />
+        <el-table-column prop="floors" label="总层数" width="90" />
         <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">{{ row.description || '-' }}</template>
         </el-table-column>
@@ -246,8 +246,8 @@ onMounted(() => {
         <el-form-item label="楼栋名称" prop="name">
           <el-input v-model="form.name" placeholder="如：1号楼" maxlength="30" />
         </el-form-item>
-        <el-form-item label="总层数" prop="totalFloors">
-          <el-input-number v-model="form.totalFloors" :min="1" :max="99" />
+        <el-form-item label="总层数" prop="floors">
+          <el-input-number v-model="form.floors" :min="1" :max="99" />
         </el-form-item>
         <el-form-item label="描述" prop="description">
           <el-input

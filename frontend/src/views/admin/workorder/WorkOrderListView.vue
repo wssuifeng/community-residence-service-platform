@@ -8,8 +8,8 @@ import SearchBar from '@/components/common/SearchBar.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import { assignWorkOrder, listWorkOrders } from '@/api/workorder'
 import { getSysUserList } from '@/api/sysuser'
-import type { IWorkOrder, WorkOrderStatus, WorkOrderUrgency } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderUrgencyLabels } from '@/types/modules/workorder'
+import type { IWorkOrder, WorkOrderStatus, WorkOrderPriority } from '@/types/modules/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import type { ISysUser } from '@/types/modules/auth'
 import { formatDateTime } from '@/utils/date'
 
@@ -34,13 +34,13 @@ const statusOptions = (Object.keys(workOrderStatusLabels) as WorkOrderStatus[]).
   value,
   label: workOrderStatusLabels[value]
 }))
-const urgencyOptions = (Object.keys(workOrderUrgencyLabels) as WorkOrderUrgency[]).map((value) => ({
+const priorityOptions = (Object.keys(workOrderPriorityLabels) as WorkOrderPriority[]).map((value) => ({
   value,
-  label: workOrderUrgencyLabels[value]
+  label: workOrderPriorityLabels[value]
 }))
 
 const status = ref<WorkOrderStatus | ''>('')
-const urgency = ref<WorkOrderUrgency | ''>('')
+const priority = ref<WorkOrderPriority | ''>('')
 const keyword = ref('')
 const dateRange = ref<[Date, Date] | null>(null)
 
@@ -65,10 +65,8 @@ async function fetchList(): Promise<void> {
       page: page.value,
       size: size.value,
       status: status.value || undefined,
-      urgency: urgency.value || undefined,
+      priority: priority.value || undefined,
       keyword: keyword.value || undefined,
-      startTime: dateRange.value ? formatIsoLocal(dateRange.value[0]) : undefined,
-      endTime: dateRange.value ? formatIsoLocal(dateRange.value[1]) : undefined
     })
     records.value = result.records
     total.value = result.total
@@ -79,11 +77,6 @@ async function fetchList(): Promise<void> {
   }
 }
 
-/** Date → 本地时区 ISO 8601（无 Z 后缀） */
-function formatIsoLocal(date: Date): string {
-  const pad = (value: number): string => String(value).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-}
 
 function handleSearch(): void {
   page.value = 1
@@ -92,7 +85,7 @@ function handleSearch(): void {
 
 function handleReset(): void {
   status.value = ''
-  urgency.value = ''
+  priority.value = ''
   keyword.value = ''
   dateRange.value = null
   page.value = 1
@@ -155,8 +148,8 @@ onMounted(fetchList)
       <el-select v-model="status" placeholder="全部状态" clearable class="filter-select" @change="handleSearch">
         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
-      <el-select v-model="urgency" placeholder="全部紧急度" clearable class="filter-select" @change="handleSearch">
-        <el-option v-for="item in urgencyOptions" :key="item.value" :label="item.label" :value="item.value" />
+      <el-select v-model="priority" placeholder="全部紧急度" clearable class="filter-select" @change="handleSearch">
+        <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
       <el-date-picker
         v-model="dateRange"
@@ -171,9 +164,9 @@ onMounted(fetchList)
     </FilterPanel>
 
     <el-table v-loading="loading" :data="records" class="order-table" @row-click="goDetail">
-      <el-table-column prop="orderNumber" label="工单号" width="170">
+      <el-table-column prop="orderNo" label="工单号" width="170">
         <template #default="{ row }">
-          <el-link type="primary" @click.stop="goDetail(row)">{{ row.orderNumber }}</el-link>
+          <el-link type="primary" @click.stop="goDetail(row)">{{ row.orderNo }}</el-link>
         </template>
       </el-table-column>
       <el-table-column prop="categoryName" label="类别" width="110" />
@@ -181,8 +174,8 @@ onMounted(fetchList)
       <el-table-column prop="residentName" label="提交人" width="90" />
       <el-table-column label="紧急程度" width="80">
         <template #default="{ row }">
-          <el-tag :type="row.urgency === 'URGENT' ? 'danger' : row.urgency === 'HIGH' ? 'warning' : 'info'" size="small">
-            {{ workOrderUrgencyLabels[row.urgency as keyof typeof workOrderUrgencyLabels] }}
+          <el-tag :type="row.priority === 'URGENT' ? 'danger' : row.priority === 'HIGH' ? 'warning' : 'info'" size="small">
+            {{ workOrderPriorityLabels[row.priority as keyof typeof workOrderPriorityLabels] }}
           </el-tag>
         </template>
       </el-table-column>
@@ -218,7 +211,7 @@ onMounted(fetchList)
 
     <Pagination v-model:page="page" v-model:size="size" :total="total" />
 
-    <el-dialog v-model="assignDialogVisible" :title="`派单 · ${assignTarget?.orderNumber ?? ''}`" width="480px">
+    <el-dialog v-model="assignDialogVisible" :title="`派单 · ${assignTarget?.orderNo ?? ''}`" width="480px">
       <el-form label-width="90px" @submit.prevent>
         <el-form-item label="服务人员" required>
           <el-select

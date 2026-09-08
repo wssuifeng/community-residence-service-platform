@@ -6,7 +6,7 @@ import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { listWorkOrders } from '@/api/workorder'
 import type { IWorkOrder, WorkOrderStatus } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderUrgencyLabels } from '@/types/modules/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatDateTime } from '@/utils/date'
 
 /** 我的工单（UI设计.md §4.2 / §3.3）：状态 Tab（待接单/处理中/已完成）+ 表格 */
@@ -108,7 +108,7 @@ onMounted(fetchList)
     <el-table v-loading="loading" :data="records" class="order-table" @row-click="goDetail">
       <el-table-column prop="orderNumber" label="工单号" width="170">
         <template #default="{ row }">
-          <el-link type="primary" @click.stop="goDetail(row)">{{ row.orderNumber }}</el-link>
+          <el-link type="primary" @click.stop="goDetail(row)">{{ row.orderNo }}</el-link>
         </template>
       </el-table-column>
       <el-table-column prop="categoryName" label="类别" width="110" />
@@ -116,8 +116,8 @@ onMounted(fetchList)
       <el-table-column prop="residentName" label="提交人" width="90" />
       <el-table-column label="紧急程度" width="80">
         <template #default="{ row }">
-          <el-tag :type="row.urgency === 'URGENT' ? 'danger' : row.urgency === 'HIGH' ? 'warning' : 'info'" size="small">
-            {{ workOrderUrgencyLabels[row.urgency as keyof typeof workOrderUrgencyLabels] }}
+          <el-tag :type="row.priority === 'URGENT' ? 'danger' : row.priority === 'HIGH' ? 'warning' : 'info'" size="small">
+            {{ workOrderPriorityLabels[row.priority as keyof typeof workOrderPriorityLabels] }}
           </el-tag>
         </template>
       </el-table-column>
