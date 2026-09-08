@@ -87,8 +87,10 @@ public class HouseService {
         return vo;
     }
 
-    /** 单元下房屋分页列表（公开） */
+    /** 单元下房屋分页列表（公开；ADMIN 限绑定社区） */
     public PageVO<HouseVO> pageByUnit(Long unitId, long page, long size, String status) {
+        Unit unit = requireUnit(unitId);
+        SecurityUtils.checkCommunityAccess(unit.getCommunityId());
         LambdaQueryWrapper<House> wrapper = new LambdaQueryWrapper<House>()
                 .eq(House::getUnitId, unitId)
                 .eq(StringUtils.hasText(status), House::getStatus, status)

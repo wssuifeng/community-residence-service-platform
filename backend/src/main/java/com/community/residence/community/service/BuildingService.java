@@ -78,8 +78,9 @@ public class BuildingService {
         return vo;
     }
 
-    /** 社区下楼栋分页列表（公开） */
+    /** 社区下楼栋分页列表（公开；ADMIN 限绑定社区） */
     public PageVO<BuildingVO> pageByCommunity(Long communityId, long page, long size, String keyword) {
+        SecurityUtils.checkCommunityAccess(communityId);
         LambdaQueryWrapper<Building> wrapper = new LambdaQueryWrapper<Building>()
                 .eq(Building::getCommunityId, communityId)
                 .like(StringUtils.hasText(keyword), Building::getName, keyword)

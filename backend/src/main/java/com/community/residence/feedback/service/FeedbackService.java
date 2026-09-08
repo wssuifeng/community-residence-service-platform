@@ -20,6 +20,7 @@ import com.community.residence.feedback.mapper.FeedbackMapper;
 import com.community.residence.feedback.mapper.FeedbackMessageMapper;
 import com.community.residence.feedback.vo.FeedbackVO;
 import com.community.residence.feedback.vo.MessageVO;
+import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,7 @@ public class FeedbackService {
     private final FeedbackMessageMapper messageMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
+    private final NotificationService notificationService;
 
     @Transactional(rollbackFor = Exception.class)
     public FeedbackVO create(CreateFeedbackDTO dto) {
@@ -102,6 +104,9 @@ public class FeedbackService {
         message.setSenderType("ADMIN");
         message.setContent("[办结] " + dto.getRemark());
         messageMapper.insert(message);
+        notificationService.create(feedback.getResidentId(), feedback.getCommunityId(),
+                "反馈已办结", "您的反馈「" + feedback.getTitle() + "」已办结",
+                "FEEDBACK", "FEEDBACK", id);
         log.info("反馈已办结：feedbackId={}, operator={}", id, SecurityUtils.getUserId());
     }
 
@@ -137,6 +142,17 @@ public class FeedbackService {
         message.setContent(dto.getContent());
         message.setParentId(dto.getParentId());
         messageMapper.insert(message);
+
+        /* 会话消息触达对端：管理员回复通知居民；居民追问通知处理人（未受理时无处理人则跳过） */
+        if (isAdminSide) {
+            notificationService.create(feedback.getResidentId(), feedback.getCommunityId(),
+                    "反馈有新回复", "您的反馈「" + feedback.getTitle() + "」有新回复",
+                    "FEEDBACK", "FEEDBACK", feedbackId);
+        } else if (feedback.getHandlerId() != null) {
+            notificationService.create(feedback.getHandlerId(), feedback.getCommunityId(),
+                    "反馈有新消息", "反馈「" + feedback.getTitle() + "」有居民新消息",
+                    "FEEDBACK", "FEEDBACK", feedbackId);
+        }
         return toVO(message, feedback.getResidentId());
     }
 

@@ -57,7 +57,7 @@ public class NotificationService {
                 new Page<>(page, Math.min(size, 100)),
                 new LambdaQueryWrapper<Notification>()
                         .eq(Notification::getUserId, SecurityUtils.getUserId())
-                        .eq(isRead != null, Notification::getIsRead, isRead ? 1 : 0)
+                        .eq(isRead != null, Notification::getIsRead, Boolean.TRUE.equals(isRead) ? 1 : 0)
                         .orderByDesc(Notification::getSeq));
         return PageVO.of(result.convert(NotificationVO::from));
     }
