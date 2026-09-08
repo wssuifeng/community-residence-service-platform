@@ -191,7 +191,7 @@
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
-  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；登录接口已可用（认证任务完成），种子超管账号 `superadmin / Admin@123456`（V3 迁移，生产首登必改） |
+  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；种子超管账号 `superadmin / Admin@123456`（V3 迁移，生产首登必改）。**C1~C12 后端业务接口已全量实现（2026-09-07：V1~V5 迁移 40+ 表、六大状态机、功能级+数据级权限；E1/E2/E4/E6/E10b 端到端冒烟通过），前端对接以 swagger-ui 与 `接口设计.md` 为准；状态枚举以 Flyway 迁移脚本注释与架构设计 §6 为准（见决策日志 2026-09-07 口径裁决）** |
 
 ## 四、业务模型快速参考（基于 30_系统设计/数据库设计.md，表名以其 §3 与已执行
 的 Flyway 迁移脚本为准：小写无前缀、单数形式，2026-09-07 对齐）

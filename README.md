@@ -29,7 +29,7 @@ npm run dev        # 开发服务器 http://localhost:5173（/api、/ws 代理�
 npm run build      # vue-tsc 类型检查 + 生产构建（dist/，由后端静态托管）
 ```
 
-**后端**（已可运行）：
+**后端**（已可运行；C1~C12 全部业务模块后端接口已实现）：
 
 ```bash
 # 前置：本机 MySQL（建库）与 Redis
@@ -44,9 +44,16 @@ export JWT_SECRET="your_jwt_secret_key"    # JWT 签名密钥（≥32 字符；d
 # set JWT_SECRET=your_jwt_secret_key
 
 cd backend
-./mvnw spring-boot:run   # 端口 8080；Flyway 自动建 40 张表 + 初始数据；
+./mvnw spring-boot:run   # 端口 8080；Flyway 自动建 40 张表 + 初始数据 + 种子超管
+                         # （superadmin / Admin@123456，生产首登必改）；
                          # 接口文档 http://localhost:8080/swagger-ui.html
 ```
+
+后端已实现能力（2026-09-07）：认证与五角色权限（JWT + 功能级 @PreAuthorize +
+数据级权限拦截器）、C1~C12 全部业务接口（社区/房屋四级结构、居民与入住审批联动、
+租住状态机、工单全流程状态机、公告发布、反馈会话、资源预约冲突检测、评价与跟进、
+运营看板、通知中心、房源与游客看房预约），端到端流程 E1/E2/E4/E6/E10b 已冒烟验证；
+单元测试、WebSocket/定时任务/文件上传归入 P2 集成任务（见 40_中控 §5.3/§5.4）。
 
 连接配置在 `backend/src/main/resources/application-dev.yml`（数据库密码从 `DB_PASSWORD` 读取，JWT 密钥从 `JWT_SECRET` 读取）。
 
