@@ -142,7 +142,7 @@ onMounted(() => {
       <el-table v-loading="buildingsLoading" :data="buildings" border>
         <el-table-column prop="id" label="ID" width="64" />
         <el-table-column prop="name" label="楼栋名称" min-width="140" show-overflow-tooltip />
-        <el-table-column prop="totalFloors" label="总层数" width="90" />
+        <el-table-column prop="floors" label="总层数" width="90" />
         <el-table-column prop="description" label="描述" min-width="180" show-overflow-tooltip>
           <template #default="{ row }">{{ row.description || '-' }}</template>
         </el-table-column>

@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import StatCard from '@/components/common/StatCard.vue'
-import Pagination from '@/components/common/Pagination.vue'
 import {
   getHousingDetail,
   updateHousing,
@@ -18,10 +17,9 @@ import type {
   IHousing,
   IHousingTimeslot,
   HousingStatus,
-  HousingTimeslotSaveDTO,
-  HousingTimeslotStatus
+  HousingTimeslotSaveDTO
 } from '@/types/modules/housing'
-import { housingStatusLabels, housingTimeslotStatusLabels } from '@/types/modules/housing'
+import { housingStatusLabels } from '@/types/modules/housing'
 import { formatDate } from '@/utils/date'
 
 /**
@@ -151,7 +149,6 @@ async function handleToggleStatus(): Promise<void> {
 
 /* ------------------------------ 时段配置管理 ------------------------------ */
 
-const timeslotQuery = reactive({ page: 1, size: 10 })
 const timeslotTotal = ref(0)
 const timeslotRecords = ref<IHousingTimeslot[]>([])
 const timeslotLoading = ref(false)
@@ -159,12 +156,9 @@ const timeslotLoading = ref(false)
 async function loadTimeslots(): Promise<void> {
   timeslotLoading.value = true
   try {
-    const result = await listHousingTimeslots(housingId, {
-      page: timeslotQuery.page,
-      size: timeslotQuery.size
-    })
-    timeslotRecords.value = result.records
-    timeslotTotal.value = result.total
+    const list = await listHousingTimeslots(housingId)
+    timeslotRecords.value = list
+    timeslotTotal.value = list.length
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载看房时段失败')
   } finally {
@@ -178,41 +172,41 @@ const editingSlotId = ref<number | null>(null)
 const slotSaving = ref(false)
 
 const slotForm = reactive<HousingTimeslotSaveDTO>({
-  date: '',
+  dayOfWeek: 1,
   startTime: '',
   endTime: '',
-  maxBookings: 5
+  isAvailable: 1
 })
 
 function openSlotCreate(): void {
   editingSlotId.value = null
-  Object.assign(slotForm, { date: '', startTime: '', endTime: '', maxBookings: 5 })
+  Object.assign(slotForm, { dayOfWeek: 1, startTime: '', endTime: '', isAvailable: 1 })
   slotDialogVisible.value = true
 }
 
 function openSlotEdit(row: IHousingTimeslot): void {
   editingSlotId.value = row.id
   Object.assign(slotForm, {
-    date: row.date,
+    dayOfWeek: row.dayOfWeek,
     startTime: row.startTime,
     endTime: row.endTime,
-    maxBookings: row.maxBookings
+    isAvailable: row.isAvailable
   })
   slotDialogVisible.value = true
 }
 
 async function handleSlotSave(): Promise<void> {
-  if (!slotForm.date || !slotForm.startTime || !slotForm.endTime) {
-    ElMessage.warning('请完整填写日期与起止时间')
+  if (!slotForm.dayOfWeek || !slotForm.startTime || !slotForm.endTime) {
+    ElMessage.warning('请完整填写星期与起止时间')
     return
   }
   slotSaving.value = true
   try {
     const payload: HousingTimeslotSaveDTO = {
-      date: slotForm.date,
+      dayOfWeek: slotForm.dayOfWeek,
       startTime: slotForm.startTime,
       endTime: slotForm.endTime,
-      maxBookings: slotForm.maxBookings
+      isAvailable: slotForm.isAvailable
     }
     if (editingSlotId.value === null) {
       await createHousingTimeslot(housingId, payload)
@@ -233,7 +227,7 @@ async function handleSlotSave(): Promise<void> {
 async function handleSlotDelete(row: IHousingTimeslot): Promise<void> {
   try {
     await ElMessageBox.confirm(
-      `删除 ${row.date} ${row.startTime} ~ ${row.endTime} 时段？已有预约时无法删除`,
+      `删除 周${'日一二三四五六'[row.dayOfWeek]} ${row.startTime} ~ ${row.endTime} 时段？已有预约时无法删除`,
       '删除时段',
       { confirmButtonText: '确认删除', cancelButtonText: '取消', type: 'error' }
     )
@@ -245,8 +239,6 @@ async function handleSlotDelete(row: IHousingTimeslot): Promise<void> {
     ElMessage.error(error instanceof Error ? error.message : '删除时段失败')
   }
 }
-
-const isFull = (status: HousingTimeslotStatus): boolean => status === 'FULL'
 
 const coverImage = computed(() => {
   const images = housing.value?.images ?? []
@@ -373,18 +365,17 @@ onMounted(() => {
             <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" size="small" @click="openSlotCreate">＋ 新增时段</el-button>
           </div>
           <el-table v-loading="timeslotLoading" :data="timeslotRecords" stripe size="small">
-            <el-table-column prop="date" label="日期" width="110" />
+            <el-table-column label="星期" width="80" align="center">
+              <template #default="{ row }">{{ '日一二三四五六'[row.dayOfWeek] }}</template>
+            </el-table-column>
             <el-table-column label="时间" min-width="130">
               <template #default="{ row }">{{ row.startTime }} ~ {{ row.endTime }}</template>
-            </el-table-column>
-            <el-table-column label="预约情况" width="100" align="center">
-              <template #default="{ row }">{{ row.currentBookings }}/{{ row.maxBookings }}</template>
             </el-table-column>
             <el-table-column label="状态" width="90" align="center">
               <template #default="{ row }">
                 <StatusTag
-                  :label="housingTimeslotStatusLabels[row.status as HousingTimeslotStatus]"
-                  :type="isFull(row.status) ? 'canceled' : 'completed'"
+                  :label="row.isAvailable ? '开放' : '停用'"
+                  :type="row.isAvailable ? 'completed' : 'canceled'"
                 />
               </template>
             </el-table-column>
@@ -395,13 +386,6 @@ onMounted(() => {
               </template>
             </el-table-column>
           </el-table>
-          <Pagination
-            v-model:page="timeslotQuery.page"
-            v-model:size="timeslotQuery.size"
-            :total="timeslotTotal"
-            @update:page="loadTimeslots"
-            @update:size="loadTimeslots"
-          />
         </div>
       </div>
     </template>
@@ -414,8 +398,10 @@ onMounted(() => {
       destroy-on-close
     >
       <el-form label-width="80px">
-        <el-form-item label="日期" required>
-          <el-date-picker v-model="slotForm.date" type="date" value-format="YYYY-MM-DD" style="width: 180px" />
+        <el-form-item label="星期" required>
+          <el-select v-model="slotForm.dayOfWeek" style="width: 180px">
+            <el-option v-for="(name, dow) in ['周日','周一','周二','周三','周四','周五','周六']" :key="dow" :label="name" :value="Number(dow)" />
+          </el-select>
         </el-form-item>
         <el-form-item label="开始时间" required>
           <el-time-picker v-model="slotForm.startTime" format="HH:mm" value-format="HH:mm" placeholder="如 09:00" style="width: 180px" />
@@ -423,8 +409,8 @@ onMounted(() => {
         <el-form-item label="结束时间" required>
           <el-time-picker v-model="slotForm.endTime" format="HH:mm" value-format="HH:mm" placeholder="如 10:00" style="width: 180px" />
         </el-form-item>
-        <el-form-item label="可约人数">
-          <el-input-number v-model="slotForm.maxBookings" :min="1" :max="50" />
+        <el-form-item label="开放预约">
+          <el-switch v-model="slotForm.isAvailable" :active-value="1" :inactive-value="0" />
         </el-form-item>
       </el-form>
       <template #footer>

@@ -7,7 +7,7 @@ import Pagination from '@/components/common/Pagination.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
 import { cancelWorkOrder, listWorkOrders } from '@/api/workorder'
 import type { IWorkOrder, WorkOrderStatus } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderUrgencyLabels } from '@/types/modules/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatRelative } from '@/utils/date'
 
 /** 我的工单（UI设计.md §4.1.2）：状态筛选 + 关键字搜索 + 卡片列表 + 分页 */
@@ -27,7 +27,7 @@ const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'comple
 }
 
 /* 紧急程度 → el-tag 语义色 */
-const urgencyTagType: Record<string, 'info' | 'primary' | 'warning' | 'danger'> = {
+const priorityTagType: Record<string, 'info' | 'primary' | 'warning' | 'danger'> = {
   LOW: 'info',
   NORMAL: 'primary',
   HIGH: 'warning',
@@ -84,7 +84,7 @@ watch([page, size], () => {
 /* 仅提交人可取消，且限待受理/待派单阶段（状态机） */
 async function handleCancel(order: IWorkOrder): Promise<void> {
   try {
-    const { value } = await ElMessageBox.prompt('取消后无法恢复，请填写取消原因', `取消工单 ${order.orderNumber}`, {
+    const { value } = await ElMessageBox.prompt('取消后无法恢复，请填写取消原因', `取消工单 ${order.orderNo}`, {
       confirmButtonText: '确认取消',
       cancelButtonText: '再想想',
       inputPlaceholder: '取消原因（必填）',
@@ -131,10 +131,10 @@ onMounted(fetchList)
 
       <article v-for="order in records" :key="order.id" class="order-card" @click="goDetail(order)">
         <div class="order-card-head">
-          <span class="order-number">{{ order.orderNumber }}</span>
+          <span class="order-number">{{ order.orderNo }}</span>
           <div class="order-card-tags">
-            <el-tag :type="urgencyTagType[order.urgency]" effect="light" size="small">
-              {{ workOrderUrgencyLabels[order.urgency] }}
+            <el-tag :type="priorityTagType[order.priority]" effect="light" size="small">
+              {{ workOrderPriorityLabels[order.priority] }}
             </el-tag>
             <StatusTag :label="workOrderStatusLabels[order.status]" :type="statusSemantic[order.status]" />
           </div>
