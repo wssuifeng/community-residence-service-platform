@@ -22,7 +22,7 @@ public class CreateBuildingDTO {
     @Size(max = 50, message = "楼栋名称最多 50 字符")
     private String name;
 
-    @Schema(description = "楼层数")
+    @Schema(description = "楼层数（总楼层，字段名为 floors 非 totalFloors）")
     @NotNull(message = "楼层数不能为空")
     @Min(value = 1, message = "楼层数最少为 1")
     @Max(value = 200, message = "楼层数最多为 200")

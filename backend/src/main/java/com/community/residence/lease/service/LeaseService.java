@@ -16,6 +16,7 @@ import com.community.residence.community.mapper.BuildingMapper;
 import com.community.residence.community.mapper.HouseMapper;
 import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.lease.dto.CreateLeaseDTO;
+import com.community.residence.lease.dto.RenewLeaseDTO;
 import com.community.residence.lease.dto.UpdateLeaseStatusDTO;
 import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
@@ -107,6 +108,33 @@ public class LeaseService {
         lease.setContractUrl(dto.getContractUrl());
         lease.setRemark(dto.getRemark());
         leaseMapper.updateById(lease);
+        return toVO(lease);
+    }
+
+    /**
+     * 续租（需求 E3：止期顺延）：仅 ACTIVE 租约可续；新止期须晚于原止期；
+     * 租金/押金/备注一并更新，状态保持 ACTIVE。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public LeaseVO renew(Long id, RenewLeaseDTO dto) {
+        LeaseRecord lease = requireLease(id);
+        SecurityUtils.checkCommunityAccess(lease.getCommunityId());
+        if (!"ACTIVE".equals(lease.getStatus())) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
+                    "仅已生效租约可续租，当前状态：" + lease.getStatus());
+        }
+        if (!dto.getNewEndDate().isAfter(lease.getEndDate())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "新结束日期必须晚于原结束日期");
+        }
+        lease.setEndDate(dto.getNewEndDate());
+        lease.setMonthlyRent(dto.getMonthlyRent());
+        lease.setDeposit(dto.getDeposit());
+        if (StringUtils.hasText(dto.getRemark())) {
+            lease.setRemark(dto.getRemark());
+        }
+        leaseMapper.updateById(lease);
+        log.info("租约已续租：leaseId={}, newEndDate={}, operator={}",
+                id, dto.getNewEndDate(), SecurityUtils.getUserId());
         return toVO(lease);
     }
 

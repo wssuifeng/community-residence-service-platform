@@ -3,6 +3,7 @@ package com.community.residence.lease.controller;
 import com.community.residence.common.result.ApiResponse;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.lease.dto.CreateLeaseDTO;
+import com.community.residence.lease.dto.RenewLeaseDTO;
 import com.community.residence.lease.dto.UpdateLeaseStatusDTO;
 import com.community.residence.lease.service.LeaseService;
 import com.community.residence.lease.vo.LeaseVO;
@@ -42,6 +43,13 @@ public class LeaseController {
     @PutMapping("/{id}")
     public ApiResponse<LeaseVO> update(@PathVariable Long id, @RequestBody @Valid CreateLeaseDTO dto) {
         return ApiResponse.success(leaseService.update(id, dto));
+    }
+
+    @Operation(summary = "续租", description = "仅已生效租约；止期顺延，租金/押金更新，状态保持已生效")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/{id}/renew")
+    public ApiResponse<LeaseVO> renew(@PathVariable Long id, @RequestBody @Valid RenewLeaseDTO dto) {
+        return ApiResponse.success(leaseService.renew(id, dto));
     }
 
     @Operation(summary = "查询租住详情", description = "居民限本人")
