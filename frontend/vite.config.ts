@@ -12,6 +12,10 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
+    // sockjs-client 为 CommonJS 包引用 Node 的 global（接口设计 9.11.1.6 SockJS 通道）
+    define: {
+      global: 'globalThis'
+    },
     server: {
       port: 5173,
       proxy: {

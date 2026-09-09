@@ -38,17 +38,13 @@ export interface IPulledNotification extends INotificationBase {
   isRead: boolean
 }
 
-/** 未读通知响应（接口设计.md 9.11.1.2，最多返回最新 50 条） */
-export interface IUnreadNotificationResult {
-  count: number
-  notifications: IUnreadNotification[]
-}
+/** 未读通知响应（后端实际返回纯数组；接口设计.md 9.11.1.2 的
+ *  {count, notifications} 包裹结构为文档示例偏差，前端在 api 层适配） */
+export type IUnreadNotificationResult = IUnreadNotification[]
 
-/** 增量补拉响应（接口设计.md 9.11.1.3，按 seq 升序） */
-export interface IPullNotificationResult {
-  notifications: IPulledNotification[]
-  latestSeq: number
-}
+/** 增量补拉响应（后端实际返回纯数组；接口设计.md 9.11.1.3 的
+ *  {notifications, latestSeq} 包裹结构为文档示例偏差，前端在 api 层适配） */
+export type IPullNotificationResult = IPulledNotification[]
 
 /** 通知列表查询参数（接口设计.md 9.11.1.1） */
 export interface INotificationQuery extends PageQuery {

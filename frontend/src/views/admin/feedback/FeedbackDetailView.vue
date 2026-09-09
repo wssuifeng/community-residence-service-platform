@@ -7,6 +7,7 @@ import {
   listFeedbackMessages,
   sendFeedbackMessage,
   listFeedbackAttachments,
+  deleteFeedbackAttachment,
   closeFeedback
 } from '@/api/feedback'
 import type {
@@ -83,6 +84,22 @@ async function loadAttachments(): Promise<void> {
 function scrollToBottom(): void {
   const container = messageListRef.value
   if (container) container.scrollTop = container.scrollHeight
+}
+
+/** 删除不合规附件（办结反馈同样允许管理员删除） */
+async function handleDeleteAttachment(id: number): Promise<void> {
+  try {
+    await ElMessageBox.confirm('确认删除该附件？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
+  try {
+    await deleteFeedbackAttachment(id)
+    ElMessage.success('附件已删除')
+    await loadAttachments()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '删除失败')
+  }
 }
 
 async function handleSend(): Promise<void> {
@@ -203,16 +220,28 @@ onUnmounted(() => {
           <span class="info-content">{{ feedback.content }}</span>
         </el-descriptions-item>
         <el-descriptions-item v-if="attachments.length > 0" label="附件" :span="3">
-          <a
+          <span
             v-for="attachment in attachments"
             :key="attachment.id"
-            :href="attachment.fileUrl"
-            target="_blank"
-            rel="noopener"
-            class="attachment-link"
+            class="attachment-row"
           >
-            {{ attachment.fileName }}
-          </a>
+            <a
+              :href="attachment.fileUrl"
+              target="_blank"
+              rel="noopener"
+              class="attachment-link"
+            >
+              {{ attachment.fileName }}
+            </a>
+            <el-button
+              link
+              type="danger"
+              size="small"
+              @click="handleDeleteAttachment(attachment.id)"
+            >
+              删除
+            </el-button>
+          </span>
         </el-descriptions-item>
         <el-descriptions-item
           v-if="feedback.status === 'CLOSED' && feedback.closeReason"
@@ -320,10 +349,16 @@ onUnmounted(() => {
   word-break: break-word;
 }
 
+.attachment-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-right: var(--spacing-md);
+}
+
 .attachment-link {
   color: var(--color-primary);
   text-decoration: none;
-  margin-right: var(--spacing-md);
 }
 
 .attachment-link:hover {
