@@ -6,6 +6,11 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  # 文件上传限制（接口设计.md §5.1：图片 ≤5MB、文档 ≤10MB）
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 60MB
 
 server:
   port: 8080
@@ -15,6 +20,10 @@ auth:
   jwt:
     secret: ${JWT_SECRET:dev-only-jwt-secret-0123456789abcdef-0123456789abcdef}
     access-ttl: 2h
+
+# 文件上传本地存储目录（生产可替换为对象存储；FileUploadService 为唯一写入点）
+upload:
+  dir: ./uploads
 
 mybatis-plus:
   configuration:
