@@ -26,10 +26,7 @@ const menuGroups: MenuGroup[] = [
     title: '运营统计',
     items: [
       { path: '/admin/statistics/dashboard', title: '运营看板' },
-      { path: '/admin/statistics/work-orders', title: '工单统计' },
-      { path: '/admin/statistics/residents', title: '居民统计' },
-      { path: '/admin/statistics/resources', title: '资源统计' },
-      { path: '/admin/statistics/evaluations', title: '评价统计' }
+      { path: '/admin/statistics/details', title: '详细统计' }
     ]
   },
   {
@@ -54,8 +51,7 @@ const menuGroups: MenuGroup[] = [
   {
     title: '租住管理',
     items: [
-      { path: '/admin/leases', title: '租住记录' },
-      { path: '/admin/leases/expiring', title: '即将到期' }
+      { path: '/admin/leases', title: '租住记录' }
     ]
   },
   {
@@ -108,7 +104,7 @@ const visibleGroups = computed(() =>
 )
 
 function isActive(path: string): boolean {
-  // 精确匹配优先，避免「租住记录」与「即将到期」互相点亮
+  // 前缀匹配，覆盖列表页下的子路径
   return route.path === path || route.path.startsWith(`${path}/`)
 }
 </script>
