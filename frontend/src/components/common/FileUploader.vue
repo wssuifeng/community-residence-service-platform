@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseUploader from './BaseUploader.vue'
 
-/** 文件上传：pdf/doc/docx，单个 ≤10MB（反馈附件等场景） */
+/** 文件上传：pdf/doc/docx/txt，单个 ≤10MB（反馈附件等场景） */
 withDefaults(
   defineProps<{
     modelValue: string[]
@@ -18,7 +18,8 @@ defineEmits<{
 <template>
   <BaseUploader
     :model-value="modelValue"
-    accept=".pdf,.doc,.docx"
+    type="DOCUMENT"
+    accept=".pdf,.doc,.docx,.txt"
     :max-size="10"
     :limit="limit"
     preview="file"

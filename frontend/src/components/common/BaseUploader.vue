@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { http } from '@/utils/request'
+import { uploadFile } from '@/api/upload'
+import type { UploadFileType } from '@/types/modules/upload'
 
 /**
- * 通用上传组件：图片/文件统一入口（P2 文件上传接口就绪前，
- * 默认请求 /upload，可通过 uploadRequest prop 注入自定义实现）
+ * 通用上传组件：图片/文件统一入口，经 POST /upload 上传
+ * （ImageUploader/FileUploader 分别以 IMAGE/DOCUMENT 类型接入）
  */
 const props = withDefaults(
   defineProps<{
     /** 已上传文件 URL 列表（v-model） */
     modelValue: string[]
+    /** 上传分类（后端按类型校验扩展名与大小上限） */
+    type?: UploadFileType
     /** 接受的文件类型（input accept） */
     accept?: string
     /** 单文件大小上限（MB） */
@@ -21,6 +24,7 @@ const props = withDefaults(
     preview?: 'image' | 'file' | 'none'
   }>(),
   {
+    type: 'IMAGE',
     accept: 'image/*',
     maxSize: 5,
     limit: 6,
@@ -35,12 +39,10 @@ const emit = defineEmits<{
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
-/** 默认上传实现：multipart 表单提交到通用上传接口（接口设计.md 9.13） */
-async function defaultUpload(file: File): Promise<string> {
-  const formData = new FormData()
-  formData.append('file', file)
-  const result = await http.post<{ url: string }>('/upload', formData)
-  return result.url
+/** 上传实现：multipart 表单提交到通用上传接口，返回可访问 fileUrl */
+async function doUpload(file: File): Promise<string> {
+  const result = await uploadFile(file, props.type)
+  return result.fileUrl
 }
 
 function handleClick(): void {
@@ -68,7 +70,7 @@ async function handleChange(event: Event): Promise<void> {
   try {
     const urls: string[] = []
     for (const file of files) {
-      urls.push(await defaultUpload(file))
+      urls.push(await doUpload(file))
     }
     emit('update:modelValue', [...props.modelValue, ...urls])
   } catch (error) {
