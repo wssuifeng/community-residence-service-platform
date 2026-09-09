@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -20,7 +21,8 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 /**
- * 通知业务逻辑：P1 HTTP 轮询（列表/未读/seq 增量拉取），P2 升级 WebSocket 推送。
+ * 通知业务逻辑：站内通知统一生成（P2 升级 WebSocket 实时推送）。
+ * 生成时若接收人 WebSocket 在线则即时推送，离线由前端登录后 pull 补拉；
  * seq 由 Redis INCR 生成，Redis 不可用时以毫秒时间戳兜底（保持递增性）。
  * 通知为用户私有数据，全部查询按当前登录用户约束。
  */
@@ -33,8 +35,10 @@ public class NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final StringRedisTemplate redisTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketSessionService webSocketSessionService;
 
-    /** 生成通知（业务模块调用）：seq 全局递增 */
+    /** 生成通知（业务模块调用）：seq 全局递增；接收人在线时实时推送 */
     @Transactional(rollbackFor = Exception.class)
     public void create(Long userId, Long communityId, String title, String content,
                        String type, String sourceType, Long sourceId) {
@@ -50,6 +54,16 @@ public class NotificationService {
         notification.setChannels("WEBSOCKET");
         notification.setIsRead(0);
         notificationMapper.insert(notification);
+
+        /* 推送失败不影响通知落库（事务内异常回滚会连带丢通知），由轮询兜底 */
+        if (webSocketSessionService.isOnline(userId)) {
+            try {
+                messagingTemplate.convertAndSendToUser(userId.toString(),
+                        "/queue/notifications", NotificationVO.from(notification));
+            } catch (Exception e) {
+                log.warn("WebSocket 推送失败，由轮询兜底：userId={}", userId, e);
+            }
+        }
     }
 
     public PageVO<NotificationVO> page(long page, long size, Boolean isRead) {
