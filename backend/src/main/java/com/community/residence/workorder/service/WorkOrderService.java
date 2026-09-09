@@ -12,6 +12,7 @@ import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.common.service.FileUploadService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.messaging.service.NotificationService;
@@ -35,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -80,6 +82,7 @@ public class WorkOrderService {
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
     private final NotificationService notificationService;
+    private final FileUploadService fileUploadService;
 
     /* 提交工单：初始 PENDING 待受理；工单号 WO+日期+随机序号 */
     @Transactional(rollbackFor = Exception.class)
@@ -133,7 +136,7 @@ public class WorkOrderService {
         return toVO(order);
     }
 
-    /* 附件列表：访问权限与详情同口径；文件上传 P2 接入，当前返回空数组 */
+    /* 附件列表：访问权限与详情同口径 */
     public List<AttachmentVO> attachments(Long orderId) {
         WorkOrder order = requireOrder(orderId);
         checkReadAccess(order);
@@ -141,6 +144,38 @@ public class WorkOrderService {
                         .eq(WorkOrderAttachment::getWorkOrderId, orderId)
                         .orderByAsc(WorkOrderAttachment::getId))
                 .stream().map(AttachmentVO::from).toList();
+    }
+
+    /* 上传工单附件（接口设计.md 9.4.3.1）：仅工单提交人；文件落盘后建附件记录 */
+    @Transactional(rollbackFor = Exception.class)
+    public AttachmentVO uploadAttachment(Long orderId, MultipartFile file) {
+        WorkOrder order = requireOrder(orderId);
+        if (!order.getResidentId().equals(SecurityUtils.getUserId())) {
+            throw new ForbiddenException("仅工单提交人可上传附件");
+        }
+        FileUploadService.UploadResult uploaded = fileUploadService.uploadAutoType(file);
+        WorkOrderAttachment attachment = new WorkOrderAttachment();
+        attachment.setWorkOrderId(orderId);
+        attachment.setFileName(uploaded.fileName());
+        attachment.setFileUrl(uploaded.fileUrl());
+        attachment.setFileType(uploaded.fileType());
+        attachment.setFileSize(uploaded.fileSize());
+        attachmentMapper.insert(attachment);
+        return AttachmentVO.from(attachment);
+    }
+
+    /* 删除工单附件（接口设计.md 9.4.3.2）：仅工单提交人；物理文件保留（P2 异步清理） */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAttachment(Long attachmentId) {
+        WorkOrderAttachment attachment = attachmentMapper.selectById(attachmentId);
+        if (attachment == null) {
+            throw new ResourceNotFoundException("附件不存在");
+        }
+        WorkOrder order = requireOrder(attachment.getWorkOrderId());
+        if (!order.getResidentId().equals(SecurityUtils.getUserId())) {
+            throw new ForbiddenException("仅工单提交人可删除附件");
+        }
+        attachmentMapper.deleteById(attachmentId);
     }
 
     public PageVO<WorkOrderVO> page(long page, long size, String status, String priority,
