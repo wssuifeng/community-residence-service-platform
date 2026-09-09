@@ -24,6 +24,11 @@ export default defineConfig(({ mode }) => {
         '/ws': {
           target: env.VITE_PROXY_TARGET ?? 'http://localhost:8080',
           ws: true
+        },
+        // 上传文件静态访问代理（后端 /uploads/** 托管本地磁盘文件）
+        '/uploads': {
+          target: env.VITE_PROXY_TARGET ?? 'http://localhost:8080',
+          changeOrigin: true
         }
       }
     }
