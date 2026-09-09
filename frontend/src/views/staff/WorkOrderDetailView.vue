@@ -21,11 +21,13 @@ import type {
 } from '@/types/modules/workorder'
 import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatDateTime } from '@/utils/date'
+import { useUserStore } from '@/store/user'
 
 /** 工单详情（UI设计.md §4.2.2）：信息卡片 + 时间线 + 接单/开始处理/提交处理结果 */
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const orderId = Number(route.params.id)
 
@@ -91,7 +93,8 @@ async function fetchDetail(): Promise<void> {
   }
 }
 
-/* 接单：已派单状态下确认后流转至已接单（状态机 9.4.2.6） */
+/* 接单：已派单状态下确认后流转至已接单（状态机 9.4.2.6；
+   后端 WorkOrderActionDTO.remark @NotBlank，须携带处置说明） */
 async function handleAccept(): Promise<void> {
   try {
     await ElMessageBox.confirm(`确认接下工单 ${order.value?.orderNo ?? ''} 吗？`, '接单', {
@@ -99,7 +102,7 @@ async function handleAccept(): Promise<void> {
       cancelButtonText: '取消'
     })
     actionLoading.value = true
-    await acceptWorkOrder(orderId)
+    await acceptWorkOrder(orderId, { remark: `服务人员 ${userStore.user?.realName ?? ''} 已接单` })
     ElMessage.success('接单成功，请尽快开始处理')
     fetchDetail()
   } catch (error) {
@@ -110,7 +113,7 @@ async function handleAccept(): Promise<void> {
   }
 }
 
-/* 开始处理：已接单状态下流转至处理中（状态机 9.4.2.7） */
+/* 开始处理：已接单状态下流转至处理中（状态机 9.4.2.7，remark 同上必填） */
 async function handleProcess(): Promise<void> {
   try {
     await ElMessageBox.confirm('确认开始处理该工单吗？', '开始处理', {
@@ -118,7 +121,7 @@ async function handleProcess(): Promise<void> {
       cancelButtonText: '取消'
     })
     actionLoading.value = true
-    await processWorkOrder(orderId)
+    await processWorkOrder(orderId, { remark: '已开始处理' })
     ElMessage.success('已开始处理')
     fetchDetail()
   } catch (error) {
