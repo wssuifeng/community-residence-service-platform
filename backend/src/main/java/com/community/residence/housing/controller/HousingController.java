@@ -6,10 +6,12 @@ import com.community.residence.housing.dto.CreateHousingDTO;
 import com.community.residence.housing.dto.UpdateHousingStatusDTO;
 import com.community.residence.housing.service.HousingService;
 import com.community.residence.housing.vo.HousingVO;
+import com.community.residence.reservation.vo.AvailableSlotVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 /** 房源管理控制器：上架/下架 + 游客浏览（接口设计.md 9.12.1） */
 @Tag(name = "房源管理", description = "房源展示与管理接口")
@@ -88,5 +92,14 @@ public class HousingController {
     public ApiResponse<Void> recordView(@PathVariable Long id) {
         housingService.recordView(id);
         return ApiResponse.success();
+    }
+
+    @Operation(summary = "查询看房可预约时段", description = "公开；周循环模板按日期范围展开 + 占用计数（接口设计 9.12.2.8）")
+    @GetMapping("/{id}/available-slots")
+    public ApiResponse<List<AvailableSlotVO>> availableSlots(
+            @PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return ApiResponse.success(housingService.availableSlots(id, startDate, endDate));
     }
 }
