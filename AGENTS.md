@@ -187,11 +187,11 @@
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
   | 环境变量配置 | `export DB_PASSWORD="your_password"` + `export JWT_SECRET="your_secret_key"`（≥32 字符）(Linux/Mac)；Windows 用 `set` | 数据库密码必需；JWT 密钥 dev 未设置时用仅限本机的默认值（生产 profile 拒绝默认密钥，见架构设计 §7）；Redis 可选 `REDIS_HOST/REDIS_PORT/REDIS_PASSWORD`（默认 localhost:6379 无密码） |
-  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 V1（40 张表）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改），无需手动跑脚本；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
+  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 V1（40 张表）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V6（五角色演示种子：admin1/Admin123456 绑社区、staff1/Staff123456、resident1/Resident123456 已入住 + 游客可见的公告/房源/看房时段 + 健身房资源与时段），无需手动跑脚本；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
-  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；种子超管账号 `superadmin / Admin@123456`（V3 迁移，生产首登必改）。**C1~C12 后端业务接口已全量实现（2026-09-07：V1~V5 迁移 40+ 表、六大状态机、功能级+数据级权限；E1/E2/E4/E6/E10b 端到端冒烟通过），前端对接以 swagger-ui 与 `接口设计.md` 为准；状态枚举以 Flyway 迁移脚本注释与架构设计 §6 为准（见决策日志 2026-09-07 口径裁决）** |
+  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；V6 演示种子账号：超管 `superadmin / Admin@123456`（V3，生产首登必改）、社区管理员 `admin1 / Admin123456`、服务人员 `staff1 / Staff123456`、居民 `resident1 / Resident123456`（已入住）、游客无需账号。**C1~C12 后端业务接口已全量实现（2026-09-07：V1~V6 迁移 40+ 表、六大状态机、功能级+数据级权限；E1/E2/E4/E6/E10b 端到端冒烟通过；2026-09-09 联调复测 12/12 流程全过），前端对接以 swagger-ui 与 `接口设计.md` 为准；状态枚举以 Flyway 迁移脚本注释与架构设计 §6 为准（见决策日志 2026-09-07 口径裁决）** |
 
 ## 四、业务模型快速参考（基于 30_系统设计/数据库设计.md，表名以其 §3 与已执行
 的 Flyway 迁移脚本为准：小写无前缀、单数形式，2026-09-07 对齐）
