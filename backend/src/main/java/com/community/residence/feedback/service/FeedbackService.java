@@ -11,6 +11,7 @@ import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.common.service.FileUploadService;
 import com.community.residence.feedback.dto.CloseFeedbackDTO;
 import com.community.residence.feedback.dto.CreateFeedbackDTO;
 import com.community.residence.feedback.dto.SendMessageDTO;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,6 +61,7 @@ public class FeedbackService {
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
     private final NotificationService notificationService;
+    private final FileUploadService fileUploadService;
 
     @Transactional(rollbackFor = Exception.class)
     public FeedbackVO create(CreateFeedbackDTO dto) {
@@ -173,7 +176,7 @@ public class FeedbackService {
                 .stream().map(m -> toVO(m, feedback.getResidentId())).toList();
     }
 
-    /* 附件列表：访问权限与详情同口径；文件上传 P2 接入，当前返回空数组 */
+    /* 附件列表：访问权限与详情同口径 */
     public List<AttachmentVO> attachments(Long feedbackId) {
         Feedback feedback = requireFeedback(feedbackId);
         checkReadAccess(feedback);
@@ -181,6 +184,51 @@ public class FeedbackService {
                         .eq(FeedbackAttachment::getFeedbackId, feedbackId)
                         .orderByAsc(FeedbackAttachment::getId))
                 .stream().map(AttachmentVO::from).toList();
+    }
+
+    /**
+     * 上传反馈附件（接口设计.md 9.6.2.1，BE-ISSUE-9）：居民限本人反馈，
+     * 管理员放行（数据级权限已过滤）；已办结反馈不可补传。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public AttachmentVO uploadAttachment(Long feedbackId, MultipartFile file) {
+        Feedback feedback = requireFeedback(feedbackId);
+        checkWriteAccess(feedback);
+        if ("CLOSED".equals(feedback.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_FAILED, "反馈已办结，不可上传附件");
+        }
+        FileUploadService.UploadResult uploaded = fileUploadService.uploadAutoType(file);
+        FeedbackAttachment attachment = new FeedbackAttachment();
+        attachment.setFeedbackId(feedbackId);
+        attachment.setFileName(uploaded.fileName());
+        attachment.setFileUrl(uploaded.fileUrl());
+        attachment.setFileType(uploaded.fileType());
+        attachment.setFileSize(uploaded.fileSize());
+        attachmentMapper.insert(attachment);
+        return AttachmentVO.from(attachment);
+    }
+
+    /* 删除反馈附件（接口设计.md 9.6.2.2）：权限与上传同口径；物理文件保留（与工单附件一致） */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAttachment(Long attachmentId) {
+        FeedbackAttachment attachment = attachmentMapper.selectById(attachmentId);
+        if (attachment == null) {
+            throw new ResourceNotFoundException("附件不存在");
+        }
+        Feedback feedback = requireFeedback(attachment.getFeedbackId());
+        checkWriteAccess(feedback);
+        if ("CLOSED".equals(feedback.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_FAILED, "反馈已办结，不可删除附件");
+        }
+        attachmentMapper.deleteById(attachmentId);
+    }
+
+    /* 附件写权限：居民限本人反馈；管理端角色放行（社区归属在 Controller 入口由数据级权限过滤） */
+    private void checkWriteAccess(Feedback feedback) {
+        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
+                && !feedback.getResidentId().equals(SecurityUtils.getUserId())) {
+            throw new ForbiddenException("仅可操作本人反馈的附件");
+        }
     }
 
     public Feedback requireFeedback(Long id) {
