@@ -20,8 +20,8 @@ public class WorkOrderAttachmentController {
 
     private final WorkOrderService workOrderService;
 
-    @Operation(summary = "删除工单附件", description = "仅工单提交人")
-    @PreAuthorize("hasRole('RESIDENT')")
+    @Operation(summary = "删除工单附件", description = "居民限提交人，服务人员限被派单人")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteAttachment(@PathVariable Long id) {
         workOrderService.deleteAttachment(id);
