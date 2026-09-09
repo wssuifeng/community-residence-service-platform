@@ -146,13 +146,13 @@ public class WorkOrderService {
                 .stream().map(AttachmentVO::from).toList();
     }
 
-    /* 上传工单附件（接口设计.md 9.4.3.1）：仅工单提交人；文件落盘后建附件记录 */
+    /* 上传工单附件（接口设计.md 9.4.3.1）：居民限提交人，服务人员限被派单人
+       （处理现场照片场景，BE-ISSUE-10），管理员放行（数据级权限已过滤）；
+       文件落盘后建附件记录 */
     @Transactional(rollbackFor = Exception.class)
     public AttachmentVO uploadAttachment(Long orderId, MultipartFile file) {
         WorkOrder order = requireOrder(orderId);
-        if (!order.getResidentId().equals(SecurityUtils.getUserId())) {
-            throw new ForbiddenException("仅工单提交人可上传附件");
-        }
+        checkReadAccess(order);
         FileUploadService.UploadResult uploaded = fileUploadService.uploadAutoType(file);
         WorkOrderAttachment attachment = new WorkOrderAttachment();
         attachment.setWorkOrderId(orderId);
@@ -164,7 +164,7 @@ public class WorkOrderService {
         return AttachmentVO.from(attachment);
     }
 
-    /* 删除工单附件（接口设计.md 9.4.3.2）：仅工单提交人；物理文件保留（P2 异步清理） */
+    /* 删除工单附件（接口设计.md 9.4.3.2）：访问权限与上传同口径；物理文件保留（P2 异步清理） */
     @Transactional(rollbackFor = Exception.class)
     public void deleteAttachment(Long attachmentId) {
         WorkOrderAttachment attachment = attachmentMapper.selectById(attachmentId);
@@ -172,9 +172,7 @@ public class WorkOrderService {
             throw new ResourceNotFoundException("附件不存在");
         }
         WorkOrder order = requireOrder(attachment.getWorkOrderId());
-        if (!order.getResidentId().equals(SecurityUtils.getUserId())) {
-            throw new ForbiddenException("仅工单提交人可删除附件");
-        }
+        checkReadAccess(order);
         attachmentMapper.deleteById(attachmentId);
     }
 

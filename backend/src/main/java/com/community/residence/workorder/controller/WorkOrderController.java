@@ -60,8 +60,8 @@ public class WorkOrderController {
         return ApiResponse.success(workOrderService.getById(id));
     }
 
-    @Operation(summary = "上传工单附件", description = "仅工单提交人；图片 ≤5MB，文档 ≤10MB")
-    @PreAuthorize("hasRole('RESIDENT')")
+    @Operation(summary = "上传工单附件", description = "居民限提交人，服务人员限被派单人；图片 ≤5MB，文档 ≤10MB")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @PostMapping(value = "/{id}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<AttachmentVO> uploadAttachment(@PathVariable Long id,
                                                       @RequestPart("file") MultipartFile file) {
