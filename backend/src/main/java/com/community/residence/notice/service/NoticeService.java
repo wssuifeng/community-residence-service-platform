@@ -110,7 +110,8 @@ public class NoticeService {
         return toVO(notice, resolveCommunityId(notice.getId()));
     }
 
-    /* 删除公告：仅 DRAFT/WITHDRAWN 可删（已发布公告走撤回流程） */
+    /* 删除公告：仅 DRAFT/WITHDRAWN 可删（已发布公告走撤回流程）；
+       子表 FK 为 RESTRICT，须先清两张子表（定向目标 + 浏览回执）再删父表 */
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         Notice notice = requireNotice(id);
@@ -119,9 +120,11 @@ public class NoticeService {
                 && !NoticeStatus.WITHDRAWN.equals(notice.getStatus())) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "仅草稿或已撤回的公告可删除");
         }
-        noticeMapper.deleteById(id);
         noticeTargetMapper.delete(new LambdaQueryWrapper<NoticeTarget>()
                 .eq(NoticeTarget::getNoticeId, id));
+        viewRecordMapper.delete(new LambdaQueryWrapper<NoticeViewRecord>()
+                .eq(NoticeViewRecord::getNoticeId, id));
+        noticeMapper.deleteById(id);
         log.info("公告已删除：noticeId={}, operator={}", id, SecurityUtils.getUserId());
     }
 
