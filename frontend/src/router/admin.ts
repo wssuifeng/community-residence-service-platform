@@ -24,9 +24,8 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: 'residence-relations', name: 'AdminResidenceRelations', component: () => import('@/views/admin/resident/ResidenceRelationListView.vue'), meta: { title: '居住关系' } },
       { path: 'configs', name: 'AdminConfigs', component: () => import('@/views/admin/resident/GlobalConfigView.vue'), meta: { title: '全局配置', roles: ['SUPER_ADMIN'] } },
 
-      // C3 租住管理
+      // C3 租住管理（即将到期并入租住记录页 Tab）
       { path: 'leases', name: 'AdminLeases', component: () => import('@/views/admin/lease/LeaseListView.vue'), meta: { title: '租住记录' } },
-      { path: 'leases/expiring', name: 'AdminExpiringLeases', component: () => import('@/views/admin/lease/ExpiringLeaseListView.vue'), meta: { title: '即将到期' } },
 
       // C4 工单管理
       { path: 'service-categories', name: 'AdminServiceCategories', component: () => import('@/views/admin/workorder/ServiceCategoryListView.vue'), meta: { title: '服务类别' } },
@@ -50,12 +49,9 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: 'evaluations', name: 'AdminEvaluations', component: () => import('@/views/admin/evaluation/EvaluationListView.vue'), meta: { title: '评价列表' } },
       { path: 'evaluations/:id/followup', name: 'AdminEvaluationFollowup', component: () => import('@/views/admin/evaluation/EvaluationFollowupView.vue'), meta: { title: '跟进记录' } },
 
-      // C9 运营统计
+      // C9 运营统计（工单/居民/资源三页合并为详细统计 Tab 页，评价摘要并入看板）
       { path: 'statistics/dashboard', name: 'AdminStatisticsDashboard', component: () => import('@/views/admin/statistics/DashboardView.vue'), meta: { title: '运营看板' } },
-      { path: 'statistics/work-orders', name: 'AdminWorkOrderStatistics', component: () => import('@/views/admin/statistics/WorkOrderStatisticsView.vue'), meta: { title: '工单统计' } },
-      { path: 'statistics/residents', name: 'AdminResidentStatistics', component: () => import('@/views/admin/statistics/ResidentStatisticsView.vue'), meta: { title: '居民统计' } },
-      { path: 'statistics/resources', name: 'AdminResourceStatistics', component: () => import('@/views/admin/statistics/ResourceStatisticsView.vue'), meta: { title: '资源统计' } },
-      { path: 'statistics/evaluations', name: 'AdminEvaluationStatistics', component: () => import('@/views/admin/statistics/EvaluationStatisticsView.vue'), meta: { title: '评价统计' } },
+      { path: 'statistics/details', name: 'AdminStatisticsDetails', component: () => import('@/views/admin/statistics/StatisticsView.vue'), meta: { title: '详细统计' } },
 
       // C10 权限管理
       { path: 'sys-users', name: 'AdminSysUsers', component: () => import('@/views/admin/auth/SysUserListView.vue'), meta: { title: '系统用户', roles: ['SUPER_ADMIN'] } },
