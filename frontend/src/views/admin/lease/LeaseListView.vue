@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   createLease,
+  getExpiringLeaseList,
   getLeaseList,
   updateLease,
   updateLeaseStatus
@@ -15,7 +16,9 @@ import StatusTag from '@/components/common/StatusTag.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
-/** 租住记录列表：状态筛选 + 新建/编辑 + 终止操作 */
+/** 租住管理：全部记录 + 即将到期两个 Tab */
+const activeTab = ref<'all' | 'expiring'>('all')
+
 const leases = ref<ILeaseRecord[]>([])
 const loading = ref(false)
 const page = ref(1)
@@ -23,10 +26,72 @@ const size = ref(10)
 const total = ref(0)
 const statusFilter = ref<LeaseStatus | ''>('')
 
+/* 即将到期 Tab 独立状态 */
+const expiringLeases = ref<ILeaseRecord[]>([])
+const expiringLoading = ref(false)
+const expiringPage = ref(1)
+const expiringSize = ref(10)
+const expiringTotal = ref(0)
+const daysWindow = ref(30)
+
 /** 租住状态 → StatusTag 语义色（生效 completed / 到期、终止 canceled） */
 function statusTagType(status: LeaseStatus): 'completed' | 'canceled' {
   return status === 'ACTIVE' ? 'completed' : 'canceled'
 }
+
+/* 即将到期 Tab 辅助 */
+function remainingDays(endDate: string): number {
+  const end = new Date(`${formatDate(endDate)}T00:00:00`).getTime()
+  const today = new Date(`${formatDate(new Date().toISOString())}T00:00:00`).getTime()
+  return Math.round((end - today) / 86400000)
+}
+
+function remainingText(days: number): string {
+  if (days < 0) return `已逾期 ${Math.abs(days)} 天`
+  if (days === 0) return '今日到期'
+  return `剩 ${days} 天`
+}
+
+const expiringSummary = computed(() => {
+  const overdue = expiringLeases.value.filter((item) => remainingDays(item.leaseEndDate) < 0).length
+  return `共 ${expiringTotal.value} 条即将到期${overdue > 0 ? `，其中已逾期 ${overdue} 条` : ''}`
+})
+
+async function loadExpiring(): Promise<void> {
+  expiringLoading.value = true
+  try {
+    const result = await getExpiringLeaseList({
+      page: expiringPage.value,
+      size: expiringSize.value,
+      days: daysWindow.value
+    })
+    expiringLeases.value = [...result.records].sort(
+      (a, b) => new Date(a.leaseEndDate).getTime() - new Date(b.leaseEndDate).getTime()
+    )
+    expiringTotal.value = result.total
+  } catch {
+    expiringLeases.value = []
+    expiringTotal.value = 0
+  } finally {
+    expiringLoading.value = false
+  }
+}
+
+function handleExpiringFilterChange(): void {
+  expiringPage.value = 1
+  loadExpiring()
+}
+
+function handleExpiringReset(): void {
+  daysWindow.value = 30
+  expiringPage.value = 1
+  loadExpiring()
+}
+
+/* 切换 Tab 时懒加载即将到期数据 */
+watch(activeTab, (tab) => {
+  if (tab === 'expiring' && expiringLeases.value.length === 0) loadExpiring()
+})
 
 async function load(): Promise<void> {
   loading.value = true
@@ -198,69 +263,145 @@ onMounted(load)
   <section class="lease-list">
     <div class="list-toolbar">
       <h2 class="list-title">租住记录</h2>
-      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openCreate">新建租住记录</el-button>
+      <el-button
+        v-if="activeTab === 'all'"
+        v-permission="['ADMIN', 'SUPER_ADMIN']"
+        type="primary"
+        @click="openCreate"
+      >
+        新建租住记录
+      </el-button>
     </div>
 
-    <FilterPanel resettable @reset="handleReset">
-      <span class="filter-label">状态</span>
-      <el-select
-        v-model="statusFilter"
-        style="width: 140px"
-        @change="handleFilterChange"
-      >
-        <el-option label="全部" value="" />
-        <el-option
-          v-for="(label, value) in leaseStatusLabels"
-          :key="value"
-          :label="label"
-          :value="value"
-        />
-      </el-select>
-    </FilterPanel>
-
-    <el-table v-loading="loading" :data="leases" stripe>
-      <el-table-column prop="id" label="ID" width="64" />
-      <el-table-column prop="residentName" label="居民" min-width="100" show-overflow-tooltip />
-      <el-table-column prop="houseAddress" label="房屋" min-width="180" show-overflow-tooltip />
-      <el-table-column label="租期" min-width="200">
-        <template #default="{ row }">
-          {{ formatDate(row.leaseStartDate) }} ~ {{ formatDate(row.leaseEndDate) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="月租金（元）" width="110" align="right">
-        <template #default="{ row }">{{ row.monthlyRent }}</template>
-      </el-table-column>
-      <el-table-column label="状态" width="90">
-        <template #default="{ row }">
-          <StatusTag
-            :label="leaseStatusLabels[row.status as LeaseStatus]"
-            :type="statusTagType(row.status)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="140" fixed="right">
-        <template #default="{ row }">
-          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" @click="openEdit(row)">编辑</el-button>
-          <el-button
-            v-if="row.status !== 'TERMINATED'"
-            v-permission="['ADMIN', 'SUPER_ADMIN']"
-            link
-            type="danger"
-            @click="handleTerminate(row)"
+    <el-tabs v-model="activeTab">
+      <el-tab-pane label="全部记录" name="all">
+        <FilterPanel resettable @reset="handleReset">
+          <span class="filter-label">状态</span>
+          <el-select
+            v-model="statusFilter"
+            style="width: 140px"
+            @change="handleFilterChange"
           >
-            终止
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+            <el-option label="全部" value="" />
+            <el-option
+              v-for="(label, value) in leaseStatusLabels"
+              :key="value"
+              :label="label"
+              :value="value"
+            />
+          </el-select>
+        </FilterPanel>
 
-    <Pagination
-      v-model:page="page"
-      v-model:size="size"
-      :total="total"
-      @update:page="load"
-      @update:size="load"
-    />
+        <el-table v-loading="loading" :data="leases" stripe>
+          <el-table-column prop="id" label="ID" width="64" />
+          <el-table-column prop="residentName" label="居民" min-width="100" show-overflow-tooltip />
+          <el-table-column prop="houseAddress" label="房屋" min-width="180" show-overflow-tooltip />
+          <el-table-column label="租期" min-width="200">
+            <template #default="{ row }">
+              {{ formatDate(row.leaseStartDate) }} ~ {{ formatDate(row.leaseEndDate) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="月租金（元）" width="110" align="right">
+            <template #default="{ row }">{{ row.monthlyRent }}</template>
+          </el-table-column>
+          <el-table-column label="状态" width="90">
+            <template #default="{ row }">
+              <StatusTag
+                :label="leaseStatusLabels[row.status as LeaseStatus]"
+                :type="statusTagType(row.status)"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="140" fixed="right">
+            <template #default="{ row }">
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" @click="openEdit(row)">编辑</el-button>
+              <el-button
+                v-if="row.status !== 'TERMINATED'"
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                link
+                type="danger"
+                @click="handleTerminate(row)"
+              >
+                终止
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <Pagination
+          v-model:page="page"
+          v-model:size="size"
+          :total="total"
+          @update:page="load"
+          @update:size="load"
+        />
+      </el-tab-pane>
+
+      <el-tab-pane label="即将到期" name="expiring">
+        <div class="tab-summary">{{ expiringSummary }}</div>
+
+        <FilterPanel resettable @reset="handleExpiringReset">
+          <span class="filter-label">到期窗口</span>
+          <el-select
+            v-model="daysWindow"
+            style="width: 160px"
+            @change="handleExpiringFilterChange"
+          >
+            <el-option label="未来 7 天" :value="7" />
+            <el-option label="未来 15 天" :value="15" />
+            <el-option label="未来 30 天" :value="30" />
+            <el-option label="未来 60 天" :value="60" />
+            <el-option label="未来 90 天" :value="90" />
+          </el-select>
+        </FilterPanel>
+
+        <el-table v-loading="expiringLoading" :data="expiringLeases" stripe>
+          <el-table-column prop="id" label="ID" width="64" />
+          <el-table-column prop="residentName" label="居民" min-width="100" show-overflow-tooltip />
+          <el-table-column prop="houseAddress" label="房屋" min-width="180" show-overflow-tooltip />
+          <el-table-column label="租期" min-width="200">
+            <template #default="{ row }">
+              {{ formatDate(row.leaseStartDate) }} ~ {{ formatDate(row.leaseEndDate) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="到期日" width="110" sortable sort-by="leaseEndDate">
+            <template #default="{ row }">{{ formatDate(row.leaseEndDate) }}</template>
+          </el-table-column>
+          <el-table-column label="剩余天数" width="120">
+            <template #default="{ row }">
+              <span
+                :style="{
+                  color:
+                    remainingDays(row.leaseEndDate) < 0
+                      ? 'var(--color-danger)'
+                      : remainingDays(row.leaseEndDate) < 30
+                        ? 'var(--color-warning)'
+                        : 'var(--color-text-primary)'
+                }"
+              >
+                {{ remainingText(remainingDays(row.leaseEndDate)) }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="状态" width="90">
+            <template #default="{ row }">
+              <StatusTag
+                :label="leaseStatusLabels[row.status as LeaseStatus]"
+                :type="statusTagType(row.status)"
+              />
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <Pagination
+          v-model:page="expiringPage"
+          v-model:size="expiringSize"
+          :total="expiringTotal"
+          @update:page="loadExpiring"
+          @update:size="loadExpiring"
+        />
+      </el-tab-pane>
+    </el-tabs>
 
     <el-dialog
       v-model="dialogVisible"
@@ -372,5 +513,11 @@ onMounted(load)
 .filter-label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+.tab-summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
 }
 </style>

@@ -117,6 +117,23 @@ const ratingOption = computed<ChartOption>(() => {
     ]
   }
 })
+
+/* 评价摘要——复用看板接口数据，不额外发请求 */
+const avgRating = computed(() => {
+  const dist = dashboard.value?.ratingDistribution ?? {}
+  const total = Object.values(dist).reduce((s, n) => s + n, 0)
+  if (!total) return '-'
+  const weighted = Object.entries(dist).reduce((s, [r, n]) => s + Number(r) * n, 0)
+  return (weighted / total).toFixed(1)
+})
+
+/** 满意率口径：4 星及以上（与独立评价统计页保持一致） */
+const satisfactionPercent = computed(() => {
+  const dist = dashboard.value?.ratingDistribution ?? {}
+  const total = Object.values(dist).reduce((s, n) => s + n, 0)
+  if (!total) return '-'
+  return `${(((dist['4'] ?? 0) + (dist['5'] ?? 0)) / total * 100).toFixed(1)}%`
+})
 </script>
 
 <template>
@@ -154,6 +171,8 @@ const ratingOption = computed<ChartOption>(() => {
           <StatCard label="待审核预约" :value="dashboard.reservationPending" unit="次" type="warning" />
           <StatCard label="违约记录" :value="dashboard.violationCount" unit="次" type="danger" />
           <StatCard label="评价总数" :value="dashboard.evaluationTotal" unit="条" />
+          <StatCard label="平均评分" :value="avgRating" unit="分" type="success" />
+          <StatCard label="满意率（≥4 星）" :value="satisfactionPercent" type="success" />
         </div>
       </template>
 
