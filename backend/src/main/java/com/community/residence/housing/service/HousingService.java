@@ -19,10 +19,13 @@ import com.community.residence.community.service.CommunityService;
 import com.community.residence.housing.dto.CreateHousingDTO;
 import com.community.residence.housing.dto.UpdateHousingStatusDTO;
 import com.community.residence.housing.entity.Housing;
+import com.community.residence.housing.entity.HousingTimeslot;
 import com.community.residence.housing.entity.ViewingAppointment;
 import com.community.residence.housing.mapper.HousingMapper;
+import com.community.residence.housing.mapper.HousingTimeslotMapper;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.housing.vo.HousingVO;
+import com.community.residence.reservation.vo.AvailableSlotVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -32,8 +35,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /** 房源业务逻辑：上架管理 + 游客浏览（游客只见可租/已预订房源） */
 @Slf4j
@@ -54,6 +60,7 @@ public class HousingService {
     private final HouseMapper houseMapper;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
+    private final HousingTimeslotMapper timeslotMapper;
     private final ViewingAppointmentMapper appointmentMapper;
     private final CommunityService communityService;
     private final StringRedisTemplate redisTemplate;
@@ -163,6 +170,49 @@ public class HousingService {
                     .eq(Housing::getId, id)
                     .setSql("view_count = view_count + 1"));
         }
+    }
+
+    /**
+     * 看房可预约时段（接口设计 9.12.2.8，BE-ISSUE-5）：周模板按日期范围展开 +
+     * 占用计数。housing_timeslot 无 max_bookings 列且预约创建按「每时段仅一条
+     * 有效预约」做冲突检测，故 maxBookings 固定为 1（与创建口径一致）；
+     * endDate 缺省展开 7 天；占用状态与创建冲突检测同口径（TO_CONFIRM/RESERVED）。
+     */
+    public List<AvailableSlotVO> availableSlots(Long housingId, LocalDate startDate, LocalDate endDate) {
+        requireHousing(housingId);
+        LocalDate end = endDate != null ? endDate : startDate.plusDays(6);
+        List<HousingTimeslot> templates = timeslotMapper.selectList(
+                new LambdaQueryWrapper<HousingTimeslot>()
+                        .eq(HousingTimeslot::getHousingId, housingId)
+                        .eq(HousingTimeslot::getIsAvailable, 1));
+        List<ViewingAppointment> occupying = appointmentMapper.selectList(
+                new LambdaQueryWrapper<ViewingAppointment>()
+                        .eq(ViewingAppointment::getHousingId, housingId)
+                        .in(ViewingAppointment::getStatus, "TO_CONFIRM", "RESERVED")
+                        .ge(ViewingAppointment::getAppointmentDate, startDate)
+                        .le(ViewingAppointment::getAppointmentDate, end));
+
+        List<AvailableSlotVO> slots = new ArrayList<>();
+        Set<String> occupyingStatus = Set.of("TO_CONFIRM", "RESERVED");
+        for (LocalDate d = startDate; !d.isAfter(end); d = d.plusDays(1)) {
+            final LocalDate date = d;
+            int dayOfWeek = date.getDayOfWeek().getValue();
+            for (HousingTimeslot template : templates) {
+                if (template.getDayOfWeek() != dayOfWeek) {
+                    continue;
+                }
+                int current = (int) occupying.stream()
+                        .filter(a -> occupyingStatus.contains(a.getStatus()))
+                        .filter(a -> a.getAppointmentDate().equals(date)
+                                && a.getStartTime().equals(template.getStartTime())
+                                && a.getEndTime().equals(template.getEndTime()))
+                        .count();
+                slots.add(new AvailableSlotVO(template.getId(), date,
+                        template.getStartTime(), template.getEndTime(),
+                        1, current, current >= 1 ? "FULL" : "AVAILABLE"));
+            }
+        }
+        return slots;
     }
 
     public Housing requireHousing(Long id) {
