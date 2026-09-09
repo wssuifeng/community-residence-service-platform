@@ -41,9 +41,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 认证接口与接口文档公开
+                        // 认证接口与接口文档公开；上传文件静态访问公开（<img> 无法携带令牌）
                         .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**",
-                                "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                "/swagger-ui/**", "/swagger-ui.html", "/uploads/**").permitAll()
                         // 公开只读接口（接口设计.md 标注 ALL（公开）的 GET）
                         .requestMatchers(org.springframework.http.HttpMethod.GET,
                                 "/api/v1/communities", "/api/v1/communities/{id}",

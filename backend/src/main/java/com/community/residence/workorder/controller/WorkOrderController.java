@@ -13,7 +13,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +24,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -56,7 +60,15 @@ public class WorkOrderController {
         return ApiResponse.success(workOrderService.getById(id));
     }
 
-    @Operation(summary = "工单附件列表", description = "文件上传 P2 接入；当前返回空数组")
+    @Operation(summary = "上传工单附件", description = "仅工单提交人；图片 ≤5MB，文档 ≤10MB")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @PostMapping(value = "/{id}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<AttachmentVO> uploadAttachment(@PathVariable Long id,
+                                                      @RequestPart("file") MultipartFile file) {
+        return ApiResponse.success(workOrderService.uploadAttachment(id, file));
+    }
+
+    @Operation(summary = "工单附件列表", description = "访问权限与工单详情同口径")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}/attachments")
     public ApiResponse<List<AttachmentVO>> attachments(@PathVariable Long id) {
