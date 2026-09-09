@@ -23,6 +23,7 @@ import java.util.List;
 public class SysConfigService {
 
     public static final String KEY_REGISTRATION_ENABLED = "registration.enabled";
+    public static final String KEY_LEASE_REMINDER_DAYS = "lease.reminder_days_before_expire";
 
     private static final String CACHE_PREFIX = "config:";
     private static final Duration CACHE_TTL = Duration.ofHours(1);

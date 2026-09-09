@@ -1,6 +1,7 @@
 package com.community.residence.housing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.RoleConstants;
@@ -24,6 +25,8 @@ import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.housing.vo.HousingVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -44,12 +47,16 @@ public class HousingService {
     /** 未完成看房预约状态集合（删除保护判定） */
     private static final List<String> ACTIVE_APPOINTMENT_STATUS = List.of("TO_CONFIRM", "RESERVED");
 
+    /** 浏览计数 Redis 键前缀（架构设计.md §3.3.1，HousingViewFlushTask 每 5 分钟回写） */
+    public static final String VIEW_COUNT_KEY_PREFIX = "housing:view:";
+
     private final HousingMapper housingMapper;
     private final HouseMapper houseMapper;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final ViewingAppointmentMapper appointmentMapper;
     private final CommunityService communityService;
+    private final StringRedisTemplate redisTemplate;
 
     /* 上架房源：社区由房屋推导；同一房屋仅允许一条非下线房源 */
     @Transactional(rollbackFor = Exception.class)
@@ -144,10 +151,18 @@ public class HousingService {
 
     /* 浏览计数：直接累加（高并发场景 P2 升级 Redis 计数 + 定时回写） */
     @Transactional(rollbackFor = Exception.class)
+    /* 记录浏览：INCR Redis 计数器（架构设计.md §3.3.1），定时任务每 5 分钟回写 view_count；
+       降级：Redis 不可用时直接累加数据库，保证计数不丢 */
     public void recordView(Long id) {
-        Housing housing = requireHousing(id);
-        housing.setViewCount(housing.getViewCount() == null ? 1 : housing.getViewCount() + 1);
-        housingMapper.updateById(housing);
+        requireHousing(id);
+        try {
+            redisTemplate.opsForValue().increment(VIEW_COUNT_KEY_PREFIX + id);
+        } catch (RedisConnectionFailureException e) {
+            log.warn("Redis 不可用，浏览计数直写数据库：housingId={}", id);
+            housingMapper.update(null, new LambdaUpdateWrapper<Housing>()
+                    .eq(Housing::getId, id)
+                    .setSql("view_count = view_count + 1"));
+        }
     }
 
     public Housing requireHousing(Long id) {

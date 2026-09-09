@@ -23,7 +23,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/** 通知业务逻辑测试：seq 生成降级、已读、增量拉取 */
+/** 通知业务逻辑测试：seq 生成降级、已读、增量拉取、WebSocket 在线推送 */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("NotificationService 单元测试")
 class NotificationServiceTest {
@@ -34,6 +34,10 @@ class NotificationServiceTest {
     private StringRedisTemplate redisTemplate;
     @Mock
     private ValueOperations<String, String> valueOps;
+    @Mock
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+    @Mock
+    private WebSocketSessionService webSocketSessionService;
 
     @InjectMocks
     private NotificationService notificationService;
@@ -49,6 +53,7 @@ class NotificationServiceTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOps);
         when(valueOps.increment(anyString())).thenReturn(42L);
         when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
+        when(webSocketSessionService.isOnline(1L)).thenReturn(false);
 
         notificationService.create(1L, 1L, "Title", "Content", "TYPE", "SRC", 7L);
 
@@ -57,6 +62,35 @@ class NotificationServiceTest {
         assertThat(captor.getValue().getSeq()).isEqualTo(42L);
         assertThat(captor.getValue().getIsRead()).isEqualTo(0);
         assertThat(captor.getValue().getUserId()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("在线推送：接收人 WebSocket 在线时推送到用户专属队列")
+    void create_onlineUser_pushesToQueue() {
+        when(redisTemplate.opsForValue()).thenReturn(valueOps);
+        when(valueOps.increment(anyString())).thenReturn(43L);
+        when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
+        when(webSocketSessionService.isOnline(1L)).thenReturn(true);
+
+        notificationService.create(1L, 1L, "Title", "Content", "TYPE", "SRC", 7L);
+
+        verify(messagingTemplate).convertAndSendToUser(eq("1"),
+                eq("/queue/notifications"), any());
+    }
+
+    @Test
+    @DisplayName("推送失败：不影响通知落库（轮询兜底）")
+    void create_pushFailure_notificationStillPersisted() {
+        when(redisTemplate.opsForValue()).thenReturn(valueOps);
+        when(valueOps.increment(anyString())).thenReturn(44L);
+        when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
+        when(webSocketSessionService.isOnline(1L)).thenReturn(true);
+        org.mockito.Mockito.doThrow(new RuntimeException("ws down"))
+                .when(messagingTemplate).convertAndSendToUser(anyString(), anyString(), any());
+
+        notificationService.create(1L, 1L, "Title", "Content", "TYPE", "SRC", 7L);
+
+        verify(notificationMapper).insert(any(Notification.class));
     }
 
     @Test
