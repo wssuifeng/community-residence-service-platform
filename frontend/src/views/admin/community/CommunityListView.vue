@@ -5,6 +5,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   createCommunity,
+  deleteCommunity,
   getCommunityList,
   updateCommunity,
   updateCommunityStatus
@@ -147,6 +148,31 @@ async function toggleStatus(row: ICommunity): Promise<void> {
   }
 }
 
+/* ---------------------------------- 删除（仅超管） ---------------------------------- */
+
+/**
+ * 删除社区（需求 v1.1 R1/R6 社区退场）：级联删除，强提示二次确认
+ * 明示不可恢复与删除范围；停用与否不做前端拦截（由后端裁决）
+ */
+async function handleDelete(row: ICommunity): Promise<void> {
+  try {
+    await ElMessageBox.confirm(
+      `删除社区「${row.name}」将删除该社区全部楼栋/单元/房屋/公共资源/房源及关联业务数据，不可恢复。确定删除？`,
+      '删除社区（级联删除）',
+      { type: 'error', confirmButtonText: '确认删除', cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  try {
+    await deleteCommunity(row.id)
+    ElMessage.success('社区已删除')
+    load()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '删除失败')
+  }
+}
+
 onMounted(load)
 </script>
 
@@ -195,7 +221,7 @@ onMounted(load)
       <el-table-column label="创建时间" width="150">
         <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="200" fixed="right">
+      <el-table-column label="操作" width="240" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" size="small" @click="goDetail(row.id)">详情</el-button>
           <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
@@ -208,6 +234,7 @@ onMounted(load)
           >
             {{ row.status === 'ACTIVE' ? '停用' : '启用' }}
           </el-button>
+          <el-button v-permission="['SUPER_ADMIN']" link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
