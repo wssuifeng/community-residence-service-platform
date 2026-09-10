@@ -2,6 +2,8 @@ package com.community.residence.resident.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.community.residence.auth.entity.SysOperationLog;
+import com.community.residence.auth.mapper.SysOperationLogMapper;
 import com.community.residence.auth.service.TokenRevocationService;
 import com.community.residence.common.constant.CommonStatus;
 import com.community.residence.common.constant.ErrorCode;
@@ -9,11 +11,14 @@ import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.resident.dto.AdminCreateResidentDTO;
 import com.community.residence.resident.dto.RegisterResidentDTO;
 import com.community.residence.resident.dto.UpdateProfileDTO;
 import com.community.residence.resident.dto.UpdateResidentStatusDTO;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
+import com.community.residence.resident.vo.AdminCreateResidentVO;
+import com.community.residence.resident.vo.ResidentImportVO;
 import com.community.residence.resident.vo.ResidentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +26,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 居民账号业务逻辑：注册（开关控制）、个人资料、改密、冻结。
@@ -36,6 +50,7 @@ public class ResidentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRevocationService tokenRevocationService;
     private final SysConfigService sysConfigService;
+    private final SysOperationLogMapper sysOperationLogMapper;
 
     /** 居民自助注册：受 registration.enabled 配置控制；用户名/手机号唯一 */
     @Transactional(rollbackFor = Exception.class)
@@ -114,6 +129,159 @@ public class ResidentService {
         }
         log.info("居民账号状态变更：residentId={}, status={}, reason={}, operator={}",
                 id, dto.getStatus(), dto.getReason(), SecurityUtils.getUserId());
+    }
+
+    /**
+     * 管理员代建居民（R8 v1.2）：初始密码服务端生成（手机号后 6 位），
+     * 明文仅本次返回；resident 无 community_id 列，社区经数据级权限锚点
+     * （绑定社区校验）确认管理范围；操作写 sys_operation_log。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public AdminCreateResidentVO adminCreate(AdminCreateResidentDTO dto) {
+        SecurityUtils.checkCommunityAccess(dto.getCommunityId());
+        String username = StringUtils.hasText(dto.getUsername())
+                ? dto.getUsername() : "r" + dto.getPhone();
+        String initialPassword = dto.getPhone().substring(5);
+        AdminCreateResidentVO vo = createResidentAccount(username, dto.getRealName(),
+                dto.getPhone(), dto.getIdCard(), initialPassword, null);
+        logOperation("CREATE", vo.getResidentId(), dto.getCommunityId(),
+                "{\"realName\":\"" + dto.getRealName() + "\",\"source\":\"ADMIN_CREATE\"}");
+        log.info("管理员代建居民：residentId={}, username={}, operator={}",
+                vo.getResidentId(), username, SecurityUtils.getUserId());
+        return vo;
+    }
+
+    /**
+     * CSV 批量导入（R8 v1.2 扩展）：UTF-8，首行表头（社区ID,姓名,手机号,证件号）；
+     * 部分成功语义——逐行独立事务（经 self 代理避免同类内调用 @Transactional 失效，
+     * 此处改为行级 try-catch + 手动回退：插入失败即该行失败，不影响已成功行）；
+     * CSV 解析自实现（处理逗号/引号转义），不引入 EasyExcel（AGENTS 排除先例）。
+     */
+    public ResidentImportVO importCsv(InputStream in) {
+        List<String[]> rows = parseCsv(in);
+        ResidentImportVO result = new ResidentImportVO();
+        List<ResidentImportVO.SuccessRow> successRows = new ArrayList<>();
+        List<ResidentImportVO.FailRow> failRows = new ArrayList<>();
+        for (int i = 0; i < rows.size(); i++) {
+            int rowNo = i + 1;
+            String[] cols = rows.get(i);
+            try {
+                if (cols.length < 3) {
+                    throw new IllegalArgumentException("列数不足（需至少 社区ID,姓名,手机号）");
+                }
+                Long communityId = Long.parseLong(cols[0].trim());
+                String realName = cols[1].trim();
+                String phone = cols[2].trim();
+                String idCard = cols.length > 3 ? cols[3].trim() : null;
+                if (!phone.matches("^1[3-9]\\d{9}$")) {
+                    throw new IllegalArgumentException("手机号格式不正确");
+                }
+                SecurityUtils.checkCommunityAccess(communityId);
+                AdminCreateResidentVO created = createResidentAccount(
+                        "r" + phone, realName, phone, idCard, phone.substring(5), communityId);
+                successRows.add(ResidentImportVO.SuccessRow.of(
+                        rowNo, created.getUsername(), created.getInitialPassword()));
+                logOperation("CREATE", created.getResidentId(), communityId,
+                        "{\"realName\":\"" + realName + "\",\"source\":\"CSV_IMPORT\"}");
+            } catch (Exception e) {
+                String reason = e instanceof BusinessException be
+                        ? be.getMessage() : e.getMessage();
+                failRows.add(ResidentImportVO.FailRow.of(rowNo, reason));
+            }
+        }
+        result.setTotal(rows.size());
+        result.setSuccess(successRows.size());
+        result.setFail(failRows.size());
+        result.setSuccessRows(successRows);
+        result.setFailRows(failRows);
+        log.info("居民批量导入：total={}, success={}, fail={}, operator={}",
+                result.getTotal(), result.getSuccess(), result.getFail(), SecurityUtils.getUserId());
+        return result;
+    }
+
+    /* 账号创建公共路径：唯一性校验 + 落库，返回代建结果 */
+    private AdminCreateResidentVO createResidentAccount(String username, String realName,
+                                                        String phone, String idCard,
+                                                        String initialPassword, Long communityId) {
+        checkUsernameUnique(username);
+        checkPhoneUnique(phone, null);
+        Resident resident = new Resident();
+        resident.setUsername(username);
+        resident.setPasswordHash(passwordEncoder.encode(initialPassword));
+        resident.setRealName(realName);
+        resident.setPhone(phone);
+        resident.setIdCard(idCard);
+        resident.setStatus(CommonStatus.ACTIVE);
+        residentMapper.insert(resident);
+        return AdminCreateResidentVO.of(resident.getId(), username, initialPassword);
+    }
+
+    private void logOperation(String operationType, Long targetId, Long communityId, String content) {
+        SysOperationLog entry = new SysOperationLog();
+        entry.setOperatorId(SecurityUtils.getUserId());
+        entry.setOperatorType("ADMIN");
+        entry.setCommunityId(communityId);
+        entry.setOperationType(operationType);
+        entry.setTargetType("RESIDENT");
+        entry.setTargetId(targetId);
+        entry.setContent(content);
+        entry.setCreatedAt(LocalDateTime.now());
+        sysOperationLogMapper.insert(entry);
+    }
+
+    /* 轻量 CSV 解析：支持双引号包裹与引号内转义（"" 表示字面引号，逗号不分割） */
+    private List<String[]> parseCsv(InputStream in) {
+        List<String[]> rows = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(in, StandardCharsets.UTF_8))) {
+            String line = reader.readLine();
+            boolean first = true;
+            while (line != null) {
+                if (first) {
+                    /* 首行为表头，跳过 */
+                    first = false;
+                } else if (!line.isBlank()) {
+                    rows.add(splitCsvLine(line));
+                }
+                line = reader.readLine();
+            }
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV 文件读取失败");
+        }
+        if (rows.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV 无数据行");
+        }
+        return rows;
+    }
+
+    private String[] splitCsvLine(String line) {
+        List<String> cols = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (inQuotes) {
+                if (c == '"') {
+                    if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                        current.append('"');
+                        i++;
+                    } else {
+                        inQuotes = false;
+                    }
+                } else {
+                    current.append(c);
+                }
+            } else if (c == '"') {
+                inQuotes = true;
+            } else if (c == ',') {
+                cols.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        cols.add(current.toString());
+        return cols.toArray(new String[0]);
     }
 
     public Resident requireResident(Long id) {

@@ -84,6 +84,8 @@ public class HousingService {
         housing.setCommunityId(house.getCommunityId());
         housing.setHouseId(house.getId());
         applyDto(housing, dto);
+        /* 户型冗余自 house.layout（R53 列表筛选用，避免 join；权威值在 house） */
+        housing.setLayout(house.getLayout());
         housing.setStatus("AVAILABLE");
         housing.setViewCount(0);
         housing.setPublishTime(LocalDateTime.now());
@@ -129,12 +131,19 @@ public class HousingService {
 
     /** 房源分页列表（公开；游客默认只见可租/已预订） */
     public PageVO<HousingVO> page(long page, long size, Long communityId, String status,
-                                  BigDecimal minRent, BigDecimal maxRent, String keyword) {
+                                  BigDecimal minRent, BigDecimal maxRent, String keyword,
+                                  String layout, String rentType) {
+        if (StringUtils.hasText(rentType) && !"RENT".equals(rentType) && !"SALE".equals(rentType)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "租售类型仅支持 RENT/SALE");
+        }
         LambdaQueryWrapper<Housing> wrapper = new LambdaQueryWrapper<Housing>()
                 .eq(communityId != null, Housing::getCommunityId, communityId)
                 .eq(StringUtils.hasText(status), Housing::getStatus, status)
                 .ge(minRent != null, Housing::getMonthlyRent, minRent)
                 .le(maxRent != null, Housing::getMonthlyRent, maxRent)
+                /* R53 v1.2：户型精确匹配（冗余列，权威值 house.layout）+ 租售类型 */
+                .eq(StringUtils.hasText(layout), Housing::getLayout, layout)
+                .eq(StringUtils.hasText(rentType), Housing::getRentType, rentType)
                 .and(StringUtils.hasText(keyword), w -> w
                         .like(Housing::getTitle, keyword)
                         .or().like(Housing::getDescription, keyword))
@@ -232,6 +241,7 @@ public class HousingService {
         housing.setDescription(dto.getDescription());
         housing.setMonthlyRent(dto.getMonthlyRent());
         housing.setDeposit(dto.getDeposit());
+        housing.setRentType(StringUtils.hasText(dto.getRentType()) ? dto.getRentType() : "RENT");
         housing.setImages(dto.getImages());
     }
 

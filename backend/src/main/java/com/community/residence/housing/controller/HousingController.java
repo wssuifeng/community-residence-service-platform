@@ -65,7 +65,7 @@ public class HousingController {
         return ApiResponse.success(housingService.getById(id));
     }
 
-    @Operation(summary = "房源列表（分页）", description = "公开；支持社区/状态/租金/关键词过滤")
+    @Operation(summary = "房源列表（分页）", description = "公开；支持社区/状态/租金/关键词/户型/租售类型过滤（R53 v1.2）")
     @GetMapping
     public ApiResponse<PageVO<HousingVO>> page(@RequestParam(defaultValue = "1") long page,
                                                @RequestParam(defaultValue = "20") long size,
@@ -73,9 +73,11 @@ public class HousingController {
                                                @RequestParam(required = false) String status,
                                                @RequestParam(required = false) BigDecimal minRent,
                                                @RequestParam(required = false) BigDecimal maxRent,
-                                               @RequestParam(required = false) String keyword) {
+                                               @RequestParam(required = false) String keyword,
+                                               @RequestParam(required = false) String layout,
+                                               @RequestParam(required = false) String rentType) {
         return ApiResponse.success(housingService.page(page, size, communityId, status,
-                minRent, maxRent, keyword));
+                minRent, maxRent, keyword, layout, rentType));
     }
 
     @Operation(summary = "更新房源状态", description = "可租/已预订/已出租/已下线")

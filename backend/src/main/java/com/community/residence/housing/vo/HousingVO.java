@@ -39,6 +39,12 @@ public class HousingVO {
     @Schema(description = "押金")
     private BigDecimal deposit;
 
+    @Schema(description = "租售类型：RENT-出租, SALE-出售（R53 v1.2）")
+    private String rentType;
+
+    @Schema(description = "户型（冗余自 house.layout，R53 v1.2）")
+    private String layout;
+
     @Schema(description = "房源图片URL列表")
     private String[] images;
 
@@ -63,6 +69,8 @@ public class HousingVO {
         vo.setDescription(entity.getDescription());
         vo.setMonthlyRent(entity.getMonthlyRent());
         vo.setDeposit(entity.getDeposit());
+        vo.setRentType(entity.getRentType());
+        vo.setLayout(entity.getLayout());
         vo.setImages(entity.getImages() != null && !entity.getImages().isBlank()
                 ? entity.getImages().split(",") : new String[0]);
         vo.setStatus(entity.getStatus());
