@@ -52,6 +52,11 @@ export function updateCommunityStatus(id: number, data: IUpdateCommunityStatusDT
   return http.patch<null>(`/communities/${id}/status`, data)
 }
 
+/** 删除社区（需求 v1.1 R1/R6：仅超管，级联删除下级结构与关联业务数据；端点由 50 阶段步骤 1b 后端并行交付） */
+export function deleteCommunity(id: number) {
+  return http.delete<null>(`/communities/${id}`)
+}
+
 /* ---------------------------------- 9.1.2 楼栋管理 ---------------------------------- */
 
 /** 创建楼栋（接口设计.md 9.1.2.1） */
