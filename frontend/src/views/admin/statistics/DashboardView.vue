@@ -8,17 +8,38 @@ import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/compon
 import StatCard from '@/components/common/StatCard.vue'
 import EChart from '@/components/common/EChart.vue'
 import type { ChartOption } from '@/components/common/EChart.vue'
-import { getDashboardStats } from '@/api/statistics'
+import { getDashboardStats, getCommunityOptions } from '@/api/statistics'
 import { workOrderStatusLabels } from '@/types/modules/workorder'
 import { houseStatusLabels } from '@/types/modules/community'
-import type { IDashboardStats } from '@/types/modules/statistics'
+import type { ICommunityOption, IDashboardStats } from '@/types/modules/statistics'
+import { useUserStore } from '@/store/user'
 
 /** 运营看板：看板聚合接口一次提供统计卡片 + 四图表数据（后端扁平契约） */
 
 use([CanvasRenderer, LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent])
 
+const userStore = useUserStore()
+
 const dashboard = ref<IDashboardStats | null>(null)
 const loading = ref(false)
+
+/* 社区筛选：SUPER_ADMIN 跨社区切换；ADMIN 仅绑定社区（后端数据级权限保证）
+   且 dashboard 的 communityId 过滤对 ADMIN 一律收窄，无需前端额外过滤 */
+const communityOptions = ref<ICommunityOption[]>([])
+const selectedCommunityId = ref<number | null>(null)
+const isSuperAdmin = computed(() => userStore.role === 'SUPER_ADMIN')
+
+async function loadCommunityOptions(): Promise<void> {
+  try {
+    communityOptions.value = await getCommunityOptions()
+    /* ADMIN 默认选中首个绑定社区，使卡片与图表带社区过滤口径 */
+    if (!isSuperAdmin.value && communityOptions.value.length > 0) {
+      selectedCommunityId.value = communityOptions.value[0].id
+    }
+  } catch {
+    /* 下拉加载失败不阻塞看板，仍按全量口径展示 */
+  }
+}
 
 /** Record<string, number> → ECharts 名值对，标签走各模块中文映射 */
 function toItems(dist: Record<string, number> | undefined, labels?: Record<string, string>) {
@@ -31,7 +52,9 @@ function toItems(dist: Record<string, number> | undefined, labels?: Record<strin
 async function load(): Promise<void> {
   loading.value = true
   try {
-    dashboard.value = await getDashboardStats()
+    dashboard.value = await getDashboardStats(
+      selectedCommunityId.value !== null ? { communityId: selectedCommunityId.value } : undefined
+    )
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载看板数据失败')
   } finally {
@@ -39,7 +62,14 @@ async function load(): Promise<void> {
   }
 }
 
-onMounted(load)
+function handleCommunityChange(): void {
+  load()
+}
+
+onMounted(async () => {
+  await loadCommunityOptions()
+  load()
+})
 
 /* ------------------------------ 图表配置 ------------------------------ */
 
@@ -119,6 +149,13 @@ const ratingOption = computed<ChartOption>(() => {
 })
 
 /* 评价摘要——复用看板接口数据，不额外发请求 */
+/** 房屋占用率：已入住 / 房屋总数（无房屋时无意义，显示 -） */
+const occupancyPercent = computed(() => {
+  const total = dashboard.value?.houseCount ?? 0
+  if (!total) return '-'
+  return `${((dashboard.value?.occupiedHouseCount ?? 0) / total * 100).toFixed(1)}%`
+})
+
 const avgRating = computed(() => {
   const dist = dashboard.value?.ratingDistribution ?? {}
   const total = Object.values(dist).reduce((s, n) => s + n, 0)
@@ -139,8 +176,24 @@ const satisfactionPercent = computed(() => {
 <template>
   <section class="dashboard">
     <header class="page-head">
-      <h1>运营看板</h1>
-      <p class="page-head-sub">社区运营总览 · 趋势图为近 7 日口径</p>
+      <div>
+        <h1>运营看板</h1>
+        <p class="page-head-sub">社区运营总览 · 趋势图为近 7 日口径</p>
+      </div>
+      <el-select
+        v-model="selectedCommunityId"
+        clearable
+        placeholder="全部社区"
+        class="community-filter"
+        @change="handleCommunityChange"
+      >
+        <el-option
+          v-for="community in communityOptions"
+          :key="community.id"
+          :label="community.name"
+          :value="community.id"
+        />
+      </el-select>
     </header>
 
     <div v-loading="loading">
@@ -152,6 +205,7 @@ const satisfactionPercent = computed(() => {
           <StatCard label="楼栋数" :value="dashboard.buildingCount" unit="栋" />
           <StatCard label="房屋总数" :value="dashboard.houseCount" unit="套" />
           <StatCard label="已入住房屋" :value="dashboard.occupiedHouseCount" unit="套" />
+          <StatCard label="房屋占用率" :value="occupancyPercent" type="primary" />
           <StatCard label="居民总数" :value="dashboard.residentCount" unit="人" type="primary" />
         </div>
 
@@ -218,6 +272,14 @@ const satisfactionPercent = computed(() => {
 <style scoped>
 .page-head {
   margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.community-filter {
+  width: 200px;
 }
 
 .page-head h1 {

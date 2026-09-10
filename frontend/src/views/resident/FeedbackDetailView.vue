@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getFeedbackDetail,
   listFeedbackMessages,
   sendFeedbackMessage,
-  listFeedbackAttachments
+  listFeedbackAttachments,
+  uploadFeedbackAttachment,
+  deleteFeedbackAttachment
 } from '@/api/feedback'
 import type {
   IFeedback,
@@ -19,6 +21,7 @@ import {
 } from '@/types/modules/feedback'
 import { formatDateTime, formatRelative } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
+import FileUploader from '@/components/common/FileUploader.vue'
 
 /**
  * 反馈详情 + 会话（居民端）：居民消息靠右、管理员靠左；
@@ -75,6 +78,46 @@ async function loadAttachments(): Promise<void> {
     attachments.value = await listFeedbackAttachments(feedbackId)
   } catch {
     attachments.value = []
+  }
+}
+
+/* FileUploader v-model（通用上传 URL）；新增 url 回捕转存为反馈附件（后端要求先有 feedbackId） */
+const attachmentUrls = ref<string[]>([])
+const attachmentUploading = ref(false)
+
+async function handleAttachmentsChange(urls: string[]): Promise<void> {
+  const existing = new Set(attachments.value.map((item) => item.fileUrl))
+  const added = urls.filter((url) => !existing.has(url))
+  if (added.length === 0) return
+  attachmentUploading.value = true
+  let failed = 0
+  for (const url of added) {
+    try {
+      const blob = await (await fetch(url)).blob()
+      const fileName = url.split('/').pop() ?? 'attachment'
+      await uploadFeedbackAttachment(feedbackId, new File([blob], fileName, { type: blob.type }))
+    } catch {
+      failed += 1
+    }
+  }
+  attachmentUploading.value = false
+  if (failed > 0) ElMessage.warning(`${failed} 个附件关联失败，请重试`)
+  attachmentUrls.value = []
+  await loadAttachments()
+}
+
+async function handleDeleteAttachment(id: number): Promise<void> {
+  try {
+    await ElMessageBox.confirm('确认删除该附件？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
+  try {
+    await deleteFeedbackAttachment(id)
+    ElMessage.success('附件已删除')
+    await loadAttachments()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '删除失败')
   }
 }
 
@@ -143,18 +186,34 @@ onUnmounted(() => {
           <span v-if="feedback.isAnonymous" class="meta-anonymous">匿名反馈</span>
         </div>
 
-        <div v-if="attachments.length > 0" class="info-attachments">
+        <div class="info-attachments">
           <span class="attachments-label">附件：</span>
-          <a
-            v-for="attachment in attachments"
-            :key="attachment.id"
-            :href="attachment.fileUrl"
-            target="_blank"
-            rel="noopener"
-            class="attachment-link"
-          >
-            {{ attachment.fileName }}
-          </a>
+          <template v-if="attachments.length > 0">
+            <span v-for="attachment in attachments" :key="attachment.id" class="attachment-item">
+              <a
+                :href="attachment.fileUrl"
+                target="_blank"
+                rel="noopener"
+                class="attachment-link"
+              >
+                {{ attachment.fileName }}
+              </a>
+              <button
+                v-if="feedback.status !== 'CLOSED'"
+                type="button"
+                class="attachment-remove"
+                @click="handleDeleteAttachment(attachment.id)"
+              >
+                删除
+              </button>
+            </span>
+          </template>
+          <FileUploader
+            v-if="feedback.status !== 'CLOSED'"
+            v-model="attachmentUrls"
+            :limit="5"
+            @update:model-value="handleAttachmentsChange"
+          />
         </div>
 
         <div v-if="feedback.status === 'CLOSED' && feedback.closeReason" class="info-closed">
@@ -326,6 +385,25 @@ onUnmounted(() => {
 
 .attachment-link:hover {
   text-decoration: underline;
+}
+
+.attachment-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.attachment-remove {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  cursor: pointer;
+}
+
+.attachment-remove:hover {
+  opacity: 0.8;
 }
 
 .info-closed {

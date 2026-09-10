@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseUploader from './BaseUploader.vue'
 
-/** 图片上传：jpg/png，单张 ≤5MB（工单图片等场景） */
+/** 图片上传：jpg/jpeg/png/gif，单张 ≤5MB（工单图片等场景） */
 withDefaults(
   defineProps<{
     modelValue: string[]
@@ -18,7 +18,8 @@ defineEmits<{
 <template>
   <BaseUploader
     :model-value="modelValue"
-    accept="image/jpeg,image/png,image/webp"
+    type="IMAGE"
+    accept="image/jpeg,image/png,image/gif"
     :max-size="5"
     :limit="limit"
     preview="image"

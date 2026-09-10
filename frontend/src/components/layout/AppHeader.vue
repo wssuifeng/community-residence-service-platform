@@ -2,11 +2,12 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useNotificationStore } from '@/store/notification'
 import { ElMessage } from 'element-plus'
 import { residentLogout, adminLogout } from '@/api/auth'
 
 /**
- * 顶部导航栏（三端通用，UI设计.md §2）：Logo + 导航菜单 + 用户下拉
+ * 顶部导航栏（三端通用，UI设计.md §2）：Logo + 导航菜单 + 通知铃铛 + 用户下拉
  */
 defineProps<{
   /** 顶部导航菜单项 */
@@ -16,6 +17,7 @@ defineProps<{
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const notificationStore = useNotificationStore()
 
 const roleLabels: Record<string, string> = {
   RESIDENT: '居民',
@@ -74,6 +76,41 @@ function isActive(to: string): boolean {
       </nav>
 
       <div class="app-header-user">
+        <el-popover
+          v-if="userStore.isLoggedIn"
+          placement="bottom-end"
+          width="320"
+          trigger="click"
+        >
+          <template #reference>
+            <button type="button" class="header-bell" aria-label="通知">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span
+                v-if="notificationStore.unreadCount > 0"
+                class="bell-badge"
+              >
+                {{ notificationStore.unreadCount > 99 ? '99+' : notificationStore.unreadCount }}
+              </span>
+            </button>
+          </template>
+          <div class="bell-panel">
+            <div v-if="notificationStore.latest.length === 0" class="bell-empty">
+              暂无通知
+            </div>
+            <div
+              v-for="item in notificationStore.latest.slice(0, 5)"
+              :key="item.id"
+              class="bell-item"
+              :class="{ 'is-unread': !item.isRead }"
+            >
+              <div class="bell-item-title">{{ item.title }}</div>
+              <div class="bell-item-content">{{ item.content }}</div>
+            </div>
+          </div>
+        </el-popover>
         <template v-if="userStore.isLoggedIn">
           <el-dropdown @command="handleCommand">
             <span class="app-header-user-name">
@@ -145,6 +182,81 @@ function isActive(to: string): boolean {
 
 .app-header-login {
   color: var(--color-primary);
+}
+
+/* 通知铃铛 */
+.header-bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.header-bell:hover {
+  color: var(--color-primary);
+  background-color: var(--color-primary-bg);
+}
+
+.bell-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: var(--color-danger);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  line-height: 16px;
+  text-align: center;
+}
+
+.bell-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.bell-empty {
+  padding: var(--spacing-lg) 0;
+  text-align: center;
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-sm);
+}
+
+.bell-item {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.bell-item.is-unread {
+  background-color: var(--color-primary-bg);
+  border-left: 3px solid var(--color-primary);
+}
+
+.bell-item-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.bell-item-content {
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 平板端（768~1199px）：导航可横向滚动 */
