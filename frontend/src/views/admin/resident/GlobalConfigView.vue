@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getConfigList, updateConfig } from '@/api/resident'
 import type { ISysConfig } from '@/types/modules/resident'
 
 /** 全局配置：配置项表格 + 编辑值对话框（仅超级管理员可修改，路由已限超管；后端为全量列表，无分页） */
+
+/** 日志保留期键（R58/N6：阈值天数为正整数，到期自动清理并通知超管） */
+const LOG_RETENTION_KEY = 'log.retention_days'
 
 const configs = ref<ISysConfig[]>([])
 const loading = ref(false)
@@ -20,8 +23,30 @@ const editForm = reactive({
   description: ''
 })
 
+/** 日志保留期走数字输入（el-input-number 绑定数字，编辑表单值为字符串） */
+const isRetentionDays = computed(() => editForm.key === LOG_RETENTION_KEY)
+const retentionDays = computed({
+  get: () => Number(editForm.value) || undefined,
+  set: (val: number | undefined) => {
+    editForm.value = val === undefined ? '' : String(val)
+  }
+})
+
 const editRules: FormRules = {
-  value: [{ required: true, message: '请输入配置值', trigger: 'blur' }]
+  value: [
+    { required: true, message: '请输入配置值', trigger: 'blur' },
+    {
+      validator: (_rule, value: string, callback) => {
+        if (!isRetentionDays.value) return callback()
+        const num = Number(value)
+        if (!Number.isInteger(num) || num <= 0) {
+          return callback(new Error('日志保留期必须为正整数（天）'))
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 async function load(): Promise<void> {
@@ -97,7 +122,18 @@ onMounted(load)
           <span class="config-desc">{{ editForm.description }}</span>
         </el-form-item>
         <el-form-item label="配置值" prop="value">
+          <template v-if="isRetentionDays">
+            <el-input-number
+              v-model="retentionDays"
+              :min="1"
+              :max="36500"
+              :step="30"
+              step-strictly
+            />
+            <div class="config-hint">日志保留期（天），默认 730；到期自动清理并通知超级管理员</div>
+          </template>
           <el-input
+            v-else
             v-model="editForm.value"
             type="textarea"
             :rows="3"
@@ -130,5 +166,12 @@ onMounted(load)
 .config-desc {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+.config-hint {
+  width: 100%;
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
 }
 </style>
