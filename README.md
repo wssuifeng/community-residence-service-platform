@@ -61,7 +61,8 @@ P2 集成能力已交付（2026-09-09）：文件上传（POST /api/v1/upload + 
 通知（/ws 端点 STOMP，在线推送 + 轮询兜底，前端铃铛 + 断线补拉）、看房
 可约时段接口（GET /housings/{id}/available-slots，周模板展开 + 占用计数）；
 缺陷修复：公告删除 FK 冲突（BE-ISSUE-8）等。
-单元测试 113 用例全过（见 40_中控 §5.3/§5.4 与 §7 验收记录）。
+单元测试 113 用例全过（阶段性测试，全需求系统性测试归 50 系统测试阶段，
+见 40_中控 §5.4 测试范围口径）。
 
 连接配置在 `backend/src/main/resources/application-dev.yml`（数据库密码从 `DB_PASSWORD` 读取，JWT 密钥从 `JWT_SECRET` 读取）。
 
