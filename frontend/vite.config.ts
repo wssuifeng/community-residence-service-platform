@@ -12,6 +12,10 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
     },
+    // sockjs-client 为 CommonJS 包引用 Node 的 global（接口设计 9.11.1.6 SockJS 通道）
+    define: {
+      global: 'globalThis'
+    },
     server: {
       port: 5173,
       proxy: {
@@ -24,6 +28,11 @@ export default defineConfig(({ mode }) => {
         '/ws': {
           target: env.VITE_PROXY_TARGET ?? 'http://localhost:8080',
           ws: true
+        },
+        // 上传文件静态访问代理（后端 /uploads/** 托管本地磁盘文件）
+        '/uploads': {
+          target: env.VITE_PROXY_TARGET ?? 'http://localhost:8080',
+          changeOrigin: true
         }
       }
     }
