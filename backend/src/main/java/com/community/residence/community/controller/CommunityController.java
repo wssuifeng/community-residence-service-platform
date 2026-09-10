@@ -68,4 +68,12 @@ public class CommunityController {
         communityService.updateStatus(id, dto.getStatus());
         return ApiResponse.success();
     }
+
+    @Operation(summary = "删除社区（级联）", description = "仅超级管理员；社区退场时其下级结构与关联业务数据一并删除（R1/R6 v1.1），前端须二次确认")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        communityService.delete(id);
+        return ApiResponse.success();
+    }
 }
