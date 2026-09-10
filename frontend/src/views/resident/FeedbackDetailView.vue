@@ -13,19 +13,23 @@ import {
 import type {
   IFeedback,
   IFeedbackMessage,
-  IFeedbackAttachment
+  IFeedbackAttachment,
+  FeedbackWsEvent
 } from '@/types/modules/feedback'
 import {
   feedbackStatusLabels,
   feedbackCategoryLabels
 } from '@/types/modules/feedback'
 import { formatDateTime, formatRelative } from '@/utils/date'
+import { subscribe, isWsConnected } from '@/utils/websocket'
 import StatusTag from '@/components/common/StatusTag.vue'
 import FileUploader from '@/components/common/FileUploader.vue'
 
 /**
  * 反馈详情 + 会话（居民端）：居民消息靠右、管理员靠左；
- * P1 HTTP 轮询——每 5 秒全量刷新消息（API 无 since 增量参数），卸载时清理定时器
+ * R30 实时化——WS 订阅 /topic/feedback/{id} 实时渲染（≤3s），
+ * 轮询兜底自适应降频：WS 在线 30s 对账防静默丢包，WS 不可用回退 5s；
+ * 发消息仍走 HTTP POST（校验与错误提示链路不变），卸载时退订并清理定时器
  */
 const route = useRoute()
 const router = useRouter()
@@ -38,9 +42,11 @@ const loading = ref(true)
 const messageInput = ref('')
 const sending = ref(false)
 
-/** 消息轮询间隔（ms） */
-const POLL_INTERVAL = 5000
-let pollTimer: ReturnType<typeof setInterval> | null = null
+/** 轮询兜底间隔（ms）：WS 在线降频对账 / WS 不可用维持既有 5s */
+const POLL_FALLBACK_INTERVAL = 5000
+const POLL_RELAXED_INTERVAL = 30000
+let pollTimer: ReturnType<typeof setTimeout> | null = null
+let unsubscribeWs: (() => void) | null = null
 
 const messageListRef = ref<HTMLElement | null>(null)
 
@@ -133,7 +139,8 @@ async function handleSend(): Promise<void> {
   try {
     await sendFeedbackMessage(feedbackId, { content })
     messageInput.value = ''
-    /* 发送后立即刷新：消息与会话状态（首条消息触发 OPEN→IN_PROGRESS） */
+    /* 发送后立即刷新：消息与会话状态（首条消息触发 OPEN→IN_PROGRESS）；
+       本端消息也会经 WS 广播回来，按 id 去重 */
     await Promise.all([loadMessages(), loadDetail()])
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '发送失败')
@@ -142,19 +149,51 @@ async function handleSend(): Promise<void> {
   }
 }
 
+/**
+ * WS 推送归一：§9.6.3.3 为 {type, data} 包裹；后端若直推裸
+ * FeedbackMessageVO（无 type 字段）亦兼容，最终以联调实测为准
+ */
+function extractWsMessage(raw: unknown): IFeedbackMessage | null {
+  const event = raw as Partial<FeedbackWsEvent> & { content?: unknown }
+  if (event?.type === 'FEEDBACK_MESSAGE' && event.data) {
+    return event.data as IFeedbackMessage
+  }
+  if (event?.type === undefined && typeof event?.content === 'string') {
+    return raw as IFeedbackMessage
+  }
+  return null
+}
+
+/** WS 推送处理：消息按 id 去重实时追加；状态事件（受理/办结）刷新详情收口 */
+function handleWsPush(raw: unknown): void {
+  const message = extractWsMessage(raw)
+  if (message && !messages.value.some((item) => item.id === message.id)) {
+    messages.value.push(message)
+    void nextTick(scrollToBottom)
+  }
+  void loadDetail()
+}
+
+/** 轮询兜底：每轮按 WS 连接状态自适应选间隔（setTimeout 链，间隔可变） */
+function schedulePoll(): void {
+  pollTimer = setTimeout(() => {
+    void Promise.all([loadMessages(), loadDetail()]).finally(schedulePoll)
+  }, isWsConnected() ? POLL_RELAXED_INTERVAL : POLL_FALLBACK_INTERVAL)
+}
+
 onMounted(async () => {
   await Promise.all([loadDetail(), loadMessages(), loadAttachments()])
   loading.value = false
-  /* 5 秒轮询新消息与状态变化（管理员回复/办结） */
-  pollTimer = setInterval(() => {
-    loadMessages()
-    loadDetail()
-  }, POLL_INTERVAL)
+  /* R30：订阅会话主题（连接未就绪时由 websocket.ts 排队，重连自动补订阅） */
+  unsubscribeWs = subscribe(`/topic/feedback/${feedbackId}`, handleWsPush)
+  schedulePoll()
 })
 
 onUnmounted(() => {
+  unsubscribeWs?.()
+  unsubscribeWs = null
   if (pollTimer !== null) {
-    clearInterval(pollTimer)
+    clearTimeout(pollTimer)
     pollTimer = null
   }
 })
