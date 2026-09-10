@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -35,6 +36,10 @@ public class CreateHousingDTO {
     @Schema(description = "押金")
     @DecimalMin(value = "0", message = "押金不能为负数")
     private BigDecimal deposit;
+
+    @Schema(description = "租售类型：RENT-出租, SALE-出售（R53 v1.2；为空默认 RENT）")
+    @Pattern(regexp = "^(RENT|SALE)$", message = "租售类型仅支持 RENT/SALE")
+    private String rentType;
 
     @Schema(description = "房源图片（逗号分隔URL）")
     @Size(max = 1000, message = "图片URL总长最多 1000 字符")
