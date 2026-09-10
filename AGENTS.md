@@ -156,25 +156,32 @@
     │   └── admin.ts         # 管理端路由
     ├── store/               # Pinia 状态管理
     │   ├── index.ts
-    │   ├── user.ts          # 用户状态（登录/角色/权限）
+    │   ├── user.ts          # 用户状态（登录/角色/权限；setSession/logout
+    │   │                     # 联动通知 store 初始化与清理，P2）
+    │   ├── notification.ts  # 通知中心（WS 推送去重 + 30s 轮询兜底，P2）
     │   └── permission.ts    # 权限状态（菜单/按钮权限）
     ├── api/                 # API 封装（按 C1~C12 模块分文件；2026-09-07
-    │   │                     # P1 前端实施全部完成，约 190 个接口函数）
+    │   │                     # P1 前端实施全部完成，约 190 个接口函数；
+    │   │                     # P2 增 upload.ts 通用上传）
     │   └── auth.ts          # 认证（居民/管理员登录注册登出）
-    ├── views/               # 页面组件（按三端分目录；三端 64 视图
-    │   │                     # 2026-09-07 P1 前端实施全部实现，待联调）
+    ├── views/               # 页面组件（按三端分目录；三端 58 功能视图
+    │   │                     # 2026-09-07 P1 全部实现（时点 64，后经
+    │   │                     # 2026-09-09 冗余清理删 6 页）；联调复测
+    │   │                     # 12/12 通过，另登录注册 2 页 + 403/404）
     │   ├── resident/        # 居民端（16 视图全部实现）
-    │   ├── guest/           # 游客端（6 视图全部实现）
+    │   ├── guest/           # 游客端（5 视图全部实现）
     │   ├── staff/           # 服务人员端（4 视图全部实现）
-    │   ├── admin/           # 管理端（39 视图全部实现，按 C1~C12
-    │   │                     # 模块分子目录；另 auth/ 登录注册 2 页
-    │   │                     # + 全局 403/404 页）
+    │   ├── admin/           # 管理端（33 功能视图，按 C1~C12 模块分子目录，
+    │   │                     # 其中 auth/ 子目录为 C10 系统用户/操作日志 3 页）
+    │   ├── auth/            # 登录注册（LoginView/RegisterView 2 页）
+    │   ├── ForbiddenView/NotFoundView  # 全局 403/404
     ├── components/          # 组件（通用组件层与业务组件 P1 已实现）
     │   ├── layout/          # 布局组件（AppHeader/AppSidebar）
     │   ├── business/        # 业务组件（NotificationList 三端复用）
     │   └── common/          # 通用组件（StatusTag/Pagination/SearchBar/
     │                         # FilterPanel/StatCard/Uploader 系列/EChart）
-    ├── utils/               # 工具函数（request/auth/permission/responsive/date）
+    ├── utils/               # 工具函数（request/auth/permission/responsive/
+    │                         # date/websocket——P2 增 WS 连接管理）
     ├── composables/         # 组合式函数（useResponsive，响应式布局设计规范 §5.1）
     ├── directives/          # 自定义指令（v-permission）
     ├── styles/              # 全局样式
