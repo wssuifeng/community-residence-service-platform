@@ -35,6 +35,10 @@ class FeedbackAttachmentTest {
     private FeedbackAttachmentMapper attachmentMapper;
     @Mock
     private FileUploadService fileUploadService;
+    @Mock
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+    @Mock
+    private com.community.residence.messaging.service.WebSocketSessionService webSocketSessionService;
 
     @InjectMocks
     private FeedbackService feedbackService;
