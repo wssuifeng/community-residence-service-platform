@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import type { AuthUser, PersistedSession } from '@/types/user'
 import type { Role } from '@/types/api'
 import { loadSession, saveSession, clearSession } from '@/utils/auth'
+import { useNotificationStore } from './notification'
 
 export const useUserStore = defineStore('user', () => {
   const session = ref<PersistedSession | null>(loadSession())
@@ -15,9 +16,11 @@ export const useUserStore = defineStore('user', () => {
   function setSession(next: PersistedSession): void {
     session.value = next
     saveSession(next)
+    useNotificationStore().init()
   }
 
   function logout(): void {
+    useNotificationStore().cleanup()
     session.value = null
     clearSession()
   }

@@ -156,25 +156,32 @@
     │   └── admin.ts         # 管理端路由
     ├── store/               # Pinia 状态管理
     │   ├── index.ts
-    │   ├── user.ts          # 用户状态（登录/角色/权限）
+    │   ├── user.ts          # 用户状态（登录/角色/权限；setSession/logout
+    │   │                     # 联动通知 store 初始化与清理，P2）
+    │   ├── notification.ts  # 通知中心（WS 推送去重 + 30s 轮询兜底，P2）
     │   └── permission.ts    # 权限状态（菜单/按钮权限）
     ├── api/                 # API 封装（按 C1~C12 模块分文件；2026-09-07
-    │   │                     # P1 前端实施全部完成，约 190 个接口函数）
+    │   │                     # P1 前端实施全部完成，约 190 个接口函数；
+    │   │                     # P2 增 upload.ts 通用上传）
     │   └── auth.ts          # 认证（居民/管理员登录注册登出）
-    ├── views/               # 页面组件（按三端分目录；三端 64 视图
-    │   │                     # 2026-09-07 P1 前端实施全部实现，待联调）
+    ├── views/               # 页面组件（按三端分目录；三端 58 功能视图
+    │   │                     # 2026-09-07 P1 全部实现（时点 64，后经
+    │   │                     # 2026-09-09 冗余清理删 6 页）；联调复测
+    │   │                     # 12/12 通过，另登录注册 2 页 + 403/404）
     │   ├── resident/        # 居民端（16 视图全部实现）
-    │   ├── guest/           # 游客端（6 视图全部实现）
+    │   ├── guest/           # 游客端（5 视图全部实现）
     │   ├── staff/           # 服务人员端（4 视图全部实现）
-    │   ├── admin/           # 管理端（39 视图全部实现，按 C1~C12
-    │   │                     # 模块分子目录；另 auth/ 登录注册 2 页
-    │   │                     # + 全局 403/404 页）
+    │   ├── admin/           # 管理端（33 功能视图，按 C1~C12 模块分子目录，
+    │   │                     # 其中 auth/ 子目录为 C10 系统用户/操作日志 3 页）
+    │   ├── auth/            # 登录注册（LoginView/RegisterView 2 页）
+    │   ├── ForbiddenView/NotFoundView  # 全局 403/404
     ├── components/          # 组件（通用组件层与业务组件 P1 已实现）
     │   ├── layout/          # 布局组件（AppHeader/AppSidebar）
     │   ├── business/        # 业务组件（NotificationList 三端复用）
     │   └── common/          # 通用组件（StatusTag/Pagination/SearchBar/
     │                         # FilterPanel/StatCard/Uploader 系列/EChart）
-    ├── utils/               # 工具函数（request/auth/permission/responsive/date）
+    ├── utils/               # 工具函数（request/auth/permission/responsive/
+    │                         # date/websocket——P2 增 WS 连接管理）
     ├── composables/         # 组合式函数（useResponsive，响应式布局设计规范 §5.1）
     ├── directives/          # 自定义指令（v-permission）
     ├── styles/              # 全局样式
@@ -191,7 +198,7 @@
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
-  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；V6 演示种子账号：超管 `superadmin / Admin@123456`（V3，生产首登必改）、社区管理员 `admin1 / Admin123456`、服务人员 `staff1 / Staff123456`、居民 `resident1 / Resident123456`（已入住）、游客无需账号。**C1~C12 后端业务接口已全量实现（2026-09-07：V1~V7 迁移 40+ 表、六大状态机、功能级+数据级权限；E1/E2/E4/E6/E10b 端到端冒烟通过；2026-09-09 联调复测 12/12 流程全过；文件上传 POST /api/v1/upload（本地磁盘 ./uploads，/uploads/** 静态访问）+ 工单附件（四角色：居民限提交人/服务人员限被派单人）与反馈附件（附件独立管理，已办结禁增删）上传/删除均已实现（BE-ISSUE-9/10 修复，见决策日志 2026-09-09）），前端对接以 swagger-ui 与 `接口设计.md` 为准；状态枚举以 Flyway 迁移脚本注释与架构设计 §6 为准（见决策日志 2026-09-07 口径裁决）。P2 后端已交付（2026-09-09）：四定时任务（租期判定 01:00 / 到期提醒 01:30 / 公告下线每小时 / 浏览回写每 5 分钟；Redisson 锁防重入 + sys_task_log 执行日志；到期为日期标注非状态流转，见决策日志同日口径裁决）+ WebSocket 实时通知（/ws 端点 SockJS + STOMP，CONNECT 帧认证，订阅 /user/queue/notifications；推送失败由 HTTP 轮询兜底，前端对接见 P2实施计划_前端.md T3）。缺陷修复（2026-09-09）：公告删除 FK 冲突（BE-ISSUE-8，先清 notice_target/notice_view_record 两子表再删父表）+ 看房可约时段接口 GET /housings/{id}/available-slots（BE-ISSUE-5，startDate+endDate 周模板展开，maxBookings=1 与预约创建冲突检测同口径）；单元测试 113 用例全过** |
+  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；V6 演示种子账号：超管 `superadmin / Admin@123456`（V3，生产首登必改）、社区管理员 `admin1 / Admin123456`、服务人员 `staff1 / Staff123456`、居民 `resident1 / Resident123456`（已入住）、游客无需账号。**C1~C12 后端业务接口已全量实现（2026-09-07：V1~V7 迁移 40+ 表、六大状态机、功能级+数据级权限；E1/E2/E4/E6/E10b 端到端冒烟通过；2026-09-09 联调复测 12/12 流程全过；文件上传 POST /api/v1/upload（本地磁盘 ./uploads，/uploads/** 静态访问）+ 工单附件（四角色：居民限提交人/服务人员限被派单人）与反馈附件（附件独立管理，已办结禁增删）上传/删除均已实现，BE-ISSUE-9/10 闭环），前端对接以 swagger-ui 与 `接口设计.md` 为准；状态枚举以 Flyway 迁移脚本注释与架构设计 §6 为准（见决策日志 2026-09-07 口径裁决）。P2 后端已交付（2026-09-09）：四定时任务（租期判定 01:00 / 到期提醒 01:30 / 公告下线每小时 / 浏览回写每 5 分钟；Redisson 锁防重入 + sys_task_log 执行日志）+ WebSocket 实时通知（/ws 端点 SockJS + STOMP，CONNECT 帧认证，订阅 /user/queue/notifications；推送失败由 HTTP 轮询兜底）+ 缺陷修复（公告删除 FK 冲突 BE-ISSUE-8、看房可约时段接口 BE-ISSUE-5）；单元测试 113 用例全过。P2 前端（2026-09-09 全部完成）：文件上传链路（工单/反馈附件三端接入）+ 运营看板社区筛选与占用率卡片 + WebSocket 实时通知前端（utils/websocket.ts + store/notification.ts + AppHeader 铃铛，推送/轮询双保障）；综合 E2E 14/14 + typecheck/build 全绿；通知 unread/pull 后端返回纯数组，api 层已适配（前端问题清单问题10）** |
 
 ## 四、业务模型快速参考（基于 30_系统设计/数据库设计.md，表名以其 §3 与已执行
 的 Flyway 迁移脚本为准：小写无前缀、单数形式，2026-09-07 对齐）
