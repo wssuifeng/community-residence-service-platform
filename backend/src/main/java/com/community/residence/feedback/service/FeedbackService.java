@@ -22,14 +22,17 @@ import com.community.residence.feedback.mapper.FeedbackAttachmentMapper;
 import com.community.residence.feedback.mapper.FeedbackMapper;
 import com.community.residence.feedback.mapper.FeedbackMessageMapper;
 import com.community.residence.feedback.vo.AttachmentVO;
+import com.community.residence.feedback.vo.FeedbackPushVO;
 import com.community.residence.feedback.vo.FeedbackVO;
 import com.community.residence.feedback.vo.MessageVO;
 import com.community.residence.messaging.service.NotificationService;
+import com.community.residence.messaging.service.WebSocketSessionService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,6 +65,8 @@ public class FeedbackService {
     private final SysUserMapper sysUserMapper;
     private final NotificationService notificationService;
     private final FileUploadService fileUploadService;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final WebSocketSessionService webSocketSessionService;
 
     @Transactional(rollbackFor = Exception.class)
     public FeedbackVO create(CreateFeedbackDTO dto) {
@@ -159,6 +164,19 @@ public class FeedbackService {
             notificationService.create(feedback.getHandlerId(), feedback.getCommunityId(),
                     "反馈有新消息", "反馈「" + feedback.getTitle() + "」有居民新消息",
                     "FEEDBACK", "FEEDBACK", feedbackId);
+        }
+
+        /* R30 会话实时推送：广播到 /topic/feedback/{id}（订阅鉴权保证仅参与者收到）；
+           双方均离线不推送，推送失败不回滚——前端轮询兜底即离线补拉语义 */
+        if (webSocketSessionService.isOnline(feedback.getResidentId())
+                || (feedback.getHandlerId() != null
+                        && webSocketSessionService.isOnline(feedback.getHandlerId()))) {
+            try {
+                messagingTemplate.convertAndSend("/topic/feedback/" + feedbackId,
+                        FeedbackPushVO.message(toVO(message, feedback.getResidentId())));
+            } catch (Exception e) {
+                log.warn("反馈会话 WebSocket 推送失败，由轮询兜底：feedbackId={}", feedbackId, e);
+            }
         }
         return toVO(message, feedback.getResidentId());
     }
