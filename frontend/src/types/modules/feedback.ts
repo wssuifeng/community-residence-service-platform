@@ -119,8 +119,10 @@ export interface FeedbackMessageQuery extends PageQuery {
   sortOrder?: 'ASC' | 'DESC'
 }
 
-/** WebSocket 会话消息推送载荷（接口设计.md 9.6.3.3 消息格式） */
-export interface FeedbackWsMessage {
-  type: 'FEEDBACK_MESSAGE'
-  data: IFeedbackMessage
-}
+/**
+ * 反馈会话 WS 推送事件（接口设计.md 9.6.3.3 消息格式）：
+ * FEEDBACK_STATUS 为受理/办结状态事件；后端实际推送若为裸 VO 由页面入口归一
+ */
+export type FeedbackWsEvent =
+  | { type: 'FEEDBACK_MESSAGE'; data: IFeedbackMessage }
+  | { type: 'FEEDBACK_STATUS'; data: Pick<IFeedback, 'id' | 'status'> }
