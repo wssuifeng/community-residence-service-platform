@@ -42,6 +42,9 @@ public class Notice {
     @Schema(description = "浏览次数")
     private Integer viewCount;
 
+    @Schema(description = "置顶：0-普通, 1-置顶（列表排最前，R25 v1.2）")
+    private Integer isPinned;
+
     @Schema(description = "创建时间")
     private LocalDateTime createdAt;
 

@@ -37,6 +37,12 @@ public class Housing {
     @Schema(description = "押金")
     private BigDecimal deposit;
 
+    @Schema(description = "租售类型：RENT-出租, SALE-出售（R53 v1.2）")
+    private String rentType;
+
+    @Schema(description = "户型（冗余自 house.layout，列表筛选用，R53 v1.2）")
+    private String layout;
+
     @Schema(description = "房源图片（逗号分隔URL）")
     private String images;
 

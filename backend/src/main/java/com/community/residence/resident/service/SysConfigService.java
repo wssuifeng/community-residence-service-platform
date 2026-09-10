@@ -82,6 +82,29 @@ public class SysConfigService {
         return value == null || Boolean.parseBoolean(value);
     }
 
+    /** 插入或更新（键不存在则建；R51 渠道分级配置等后建键使用），缓存同步清理 */
+    @Transactional(rollbackFor = Exception.class)
+    public void upsert(String key, String value, String description) {
+        SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
+                .eq(SysConfig::getConfigKey, key));
+        if (config == null) {
+            config = new SysConfig();
+            config.setConfigKey(key);
+            config.setConfigValue(value);
+            config.setDescription(description);
+            sysConfigMapper.insert(config);
+        } else {
+            config.setConfigValue(value);
+            sysConfigMapper.updateById(config);
+        }
+        try {
+            redisTemplate.delete(CACHE_PREFIX + key);
+        } catch (RedisConnectionFailureException e) {
+            log.warn("Redis 不可用，配置缓存未清理（1h TTL 自然过期）：key={}", key);
+        }
+        log.info("全局配置已写入：key={}", key);
+    }
+
     private String queryValue(String key) {
         SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getConfigKey, key));

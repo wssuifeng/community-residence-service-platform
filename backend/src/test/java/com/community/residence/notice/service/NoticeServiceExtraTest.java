@@ -52,6 +52,12 @@ class NoticeServiceExtraTest {
     private SysUserMapper sysUserMapper;
     @Mock
     private ResidentMapper residentMapper;
+    @Mock
+    private com.community.residence.messaging.service.NotificationService notificationService;
+    @Mock
+    private com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
+    @Mock
+    private com.community.residence.community.mapper.BuildingMapper buildingMapper;
 
     @InjectMocks
     private NoticeService noticeService;
@@ -88,7 +94,10 @@ class NoticeServiceExtraTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
-            when(communityService.requireActiveCommunity(1L)).thenReturn(community);
+            /* v1.2 多目标改造：communityId 单目标走 checkTargetAccess → requireActiveCommunity */
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .checkCommunityAccess(1L)).thenAnswer(inv -> null);
+            org.mockito.Mockito.lenient().when(communityService.requireActiveCommunity(1L)).thenReturn(community);
             when(noticeMapper.insert(any(Notice.class))).thenAnswer(inv -> {
                 inv.getArgument(0, Notice.class).setId(5L);
                 return 1;

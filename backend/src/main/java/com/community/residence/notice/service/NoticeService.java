@@ -23,8 +23,10 @@ import com.community.residence.notice.mapper.NoticeTargetMapper;
 import com.community.residence.notice.mapper.NoticeViewRecordMapper;
 import com.community.residence.notice.vo.NoticeVO;
 import com.community.residence.notice.vo.NoticeViewRecordVO;
+import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
+import com.community.residence.resident.mapper.ResidenceRelationMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -56,15 +58,19 @@ public class NoticeService {
     private final CommunityService communityService;
     private final SysUserMapper sysUserMapper;
     private final ResidentMapper residentMapper;
+    private final NotificationService notificationService;
+    private final ResidenceRelationMapper residenceRelationMapper;
+    private final com.community.residence.community.mapper.BuildingMapper buildingMapper;
 
-    /* 创建公告：初始 DRAFT；社区定向写 notice_target；无 communityId 为全系统广播 */
+    /* 创建公告：初始 DRAFT；多社区/楼栋定向逐项写 notice_target（R25 v1.2），
+       ADMIN 逐项目标校验绑定范围；无目标为全系统广播（仅超管） */
     @Transactional(rollbackFor = Exception.class)
     public NoticeVO create(CreateNoticeDTO dto) {
-        if (dto.getCommunityId() != null) {
-            communityService.requireActiveCommunity(dto.getCommunityId());
-            SecurityUtils.checkCommunityAccess(dto.getCommunityId());
-        } else if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "社区管理员必须指定目标社区");
+        List<NoticeServiceTarget> targets = resolveTargets(dto);
+        if (targets.isEmpty()) {
+            if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "社区管理员必须指定目标社区");
+            }
         }
 
         Notice notice = new Notice();
@@ -77,19 +83,20 @@ public class NoticeService {
                 ? dto.getEndTime()
                 : dto.getPublishTime().plusDays(DEFAULT_VALID_DAYS));
         notice.setViewCount(0);
+        notice.setIsPinned(dto.getIsPinned() != null && dto.getIsPinned() == 1 ? 1 : 0);
         noticeMapper.insert(notice);
 
-        if (dto.getCommunityId() != null) {
-            NoticeTarget target = new NoticeTarget();
-            target.setNoticeId(notice.getId());
-            target.setTargetType("COMMUNITY");
-            target.setTargetId(dto.getCommunityId());
-            noticeTargetMapper.insert(target);
+        for (NoticeServiceTarget target : targets) {
+            NoticeTarget entity = new NoticeTarget();
+            entity.setNoticeId(notice.getId());
+            entity.setTargetType(target.type());
+            entity.setTargetId(target.id());
+            noticeTargetMapper.insert(entity);
         }
-        return toVO(notice, dto.getCommunityId());
+        return toVO(notice);
     }
 
-    /* 更新公告：仅 DRAFT 可改；目标社区不可变更（重新建公告） */
+    /* 更新公告：仅 DRAFT 可改；目标范围不可变更（重新建公告） */
     @Transactional(rollbackFor = Exception.class)
     public NoticeVO update(Long id, CreateNoticeDTO dto) {
         Notice notice = requireNotice(id);
@@ -97,8 +104,8 @@ public class NoticeService {
         if (!NoticeStatus.DRAFT.equals(notice.getStatus())) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "仅草稿状态的公告可修改");
         }
-        if (dto.getCommunityId() != null) {
-            SecurityUtils.checkCommunityAccess(dto.getCommunityId());
+        for (NoticeServiceTarget target : resolveTargets(dto)) {
+            checkTargetAccess(target);
         }
         notice.setTitle(dto.getTitle());
         notice.setContent(dto.getContent());
@@ -106,8 +113,46 @@ public class NoticeService {
         notice.setEndTime(dto.getEndTime() != null
                 ? dto.getEndTime()
                 : dto.getPublishTime().plusDays(DEFAULT_VALID_DAYS));
+        notice.setIsPinned(dto.getIsPinned() != null && dto.getIsPinned() == 1 ? 1 : 0);
         noticeMapper.updateById(notice);
-        return toVO(notice, resolveCommunityId(notice.getId()));
+        return toVO(notice);
+    }
+
+    /** 解析目标列表：targets 列表优先；否则回退 communityId 单目标（向后兼容）；均空=广播 */
+    private List<NoticeServiceTarget> resolveTargets(CreateNoticeDTO dto) {
+        if (dto.getTargets() != null && !dto.getTargets().isEmpty()) {
+            return dto.getTargets().stream()
+                    .map(t -> new NoticeServiceTarget(t.getTargetType(), t.getTargetId()))
+                    .peek(this::checkTargetAccess)
+                    .toList();
+        }
+        if (dto.getCommunityId() != null) {
+            return List.of(new NoticeServiceTarget("COMMUNITY", dto.getCommunityId()));
+        }
+        return List.of();
+    }
+
+    /* 逐项目标校验：类型合法（COMMUNITY/BUILDING）、社区运营中、ADMIN 限绑定范围（R24 v1.2） */
+    private void checkTargetAccess(NoticeServiceTarget target) {
+        if (!"COMMUNITY".equals(target.type()) && !"BUILDING".equals(target.type())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "非法目标类型：" + target.type());
+        }
+        if ("COMMUNITY".equals(target.type())) {
+            communityService.requireActiveCommunity(target.id());
+            SecurityUtils.checkCommunityAccess(target.id());
+        } else {
+            /* BUILDING 目标：经楼栋归属社区校验（building.community_id） */
+            com.community.residence.community.entity.Building building =
+                    buildingMapper.selectById(target.id());
+            if (building == null) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "目标楼栋不存在");
+            }
+            SecurityUtils.checkCommunityAccess(building.getCommunityId());
+        }
+    }
+
+    /* 目标范围值对象 */
+    private record NoticeServiceTarget(String type, Long id) {
     }
 
     /* 删除公告：仅 DRAFT/WITHDRAWN 可删（已发布公告走撤回流程）；
@@ -138,7 +183,7 @@ public class NoticeService {
                 throw new ResourceNotFoundException("公告不存在或已下线");
             }
         }
-        return toVO(notice, resolveCommunityId(id));
+        return toVO(notice);
     }
 
     /**
@@ -153,6 +198,8 @@ public class NoticeService {
                 .and(StringUtils.hasText(keyword), w -> w
                         .like(Notice::getTitle, keyword)
                         .or().like(Notice::getContent, keyword))
+                /* 置顶排最前（R25 v1.2），同档按发布时间倒序 */
+                .orderByDesc(Notice::getIsPinned)
                 .orderByDesc(Notice::getPublishTime);
 
         if (!managerView) {
@@ -177,10 +224,12 @@ public class NoticeService {
         }
 
         Page<Notice> result = noticeMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
-        return PageVO.of(result.convert(n -> toVO(n, resolveCommunityId(n.getId()))));
+        return PageVO.of(result.convert(this::toVO));
     }
 
-    /* 发布公告：DRAFT → PUBLISHED；publishTime 早于当前时间立即生效 */
+    /* 发布公告：DRAFT → PUBLISHED；publishTime 早于当前时间立即生效；
+       发布触达目标居民（R48 公告广播通知），渠道留痕由 NotificationService
+       按 notify.channel.levels 配置分级触发（R51） */
     @Transactional(rollbackFor = Exception.class)
     public void publish(Long id, LocalDateTime publishTime) {
         Notice notice = requireNotice(id);
@@ -192,8 +241,32 @@ public class NoticeService {
         notice.setPublishTime(publishTime);
         notice.setStartTime(publishTime);
         noticeMapper.updateById(notice);
-        log.info("公告已发布：noticeId={}, publishTime={}, operator={}",
-                id, publishTime, SecurityUtils.getUserId());
+
+        for (Long residentId : noticeTargetResidentIds(notice.getId())) {
+            notificationService.create(residentId, null, "社区公告",
+                    "新公告「" + notice.getTitle() + "」已发布，请查看",
+                    "NOTICE", "NOTICE", notice.getId());
+        }
+        log.info("公告已发布：noticeId={}, publishTime={}, operator={}, 触达 {} 人",
+                id, publishTime, SecurityUtils.getUserId(), noticeTargetResidentIds(id).size());
+    }
+
+    /** 公告目标居民：COMMUNITY 目标取社区在住居民（经 residence_relation），全系统广播取全部 ACTIVE 居民 */
+    private List<Long> noticeTargetResidentIds(Long noticeId) {
+        List<NoticeTarget> targets = noticeTargetMapper.selectList(
+                new LambdaQueryWrapper<NoticeTarget>()
+                        .eq(NoticeTarget::getNoticeId, noticeId)
+                        .eq(NoticeTarget::getTargetType, "COMMUNITY"));
+        if (targets.isEmpty()) {
+            return residentMapper.selectList(new LambdaQueryWrapper<Resident>()
+                            .eq(Resident::getStatus, "ACTIVE"))
+                    .stream().map(Resident::getId).toList();
+        }
+        List<Long> communityIds = targets.stream().map(NoticeTarget::getTargetId).toList();
+        return residenceRelationMapper.selectList(new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
+                        .in(com.community.residence.resident.entity.ResidenceRelation::getCommunityId, communityIds))
+                .stream().map(com.community.residence.resident.entity.ResidenceRelation::getResidentId)
+                .distinct().toList();
     }
 
     /* 撤回公告：PUBLISHED → WITHDRAWN */
@@ -295,15 +368,30 @@ public class NoticeService {
         return notice.getEndTime() != null && notice.getEndTime().isBefore(LocalDateTime.now());
     }
 
-    private NoticeVO toVO(Notice notice, Long communityId) {
+    private NoticeVO toVO(Notice notice) {
         NoticeVO vo = NoticeVO.from(notice);
-        if (communityId != null) {
-            vo.setCommunityId(communityId);
-            Community community = communityMapperQuiet(communityId);
-            if (community != null) {
-                vo.setCommunityName(community.getName());
+        List<NoticeTarget> targets = noticeTargetMapper.selectList(
+                new LambdaQueryWrapper<NoticeTarget>()
+                        .eq(NoticeTarget::getNoticeId, notice.getId()));
+        List<NoticeVO.TargetItem> targetItems = new java.util.ArrayList<>();
+        for (NoticeTarget target : targets) {
+            String name = null;
+            if ("COMMUNITY".equals(target.getTargetType())) {
+                Community community = communityMapperQuiet(target.getTargetId());
+                name = community != null ? community.getName() : null;
+                if (vo.getCommunityId() == null) {
+                    vo.setCommunityId(target.getTargetId());
+                    vo.setCommunityName(name);
+                }
+            } else if ("BUILDING".equals(target.getTargetType())) {
+                com.community.residence.community.entity.Building building =
+                        buildingMapper.selectById(target.getTargetId());
+                name = building != null ? building.getName() : null;
             }
+            targetItems.add(NoticeVO.TargetItem.of(
+                    target.getTargetType(), target.getTargetId(), name));
         }
+        vo.setTargets(targetItems);
         SysUser publisher = sysUserMapper.selectById(notice.getPublisherId());
         if (publisher != null) {
             vo.setPublisherName(publisher.getRealName());
