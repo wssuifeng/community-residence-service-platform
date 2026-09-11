@@ -8,7 +8,7 @@
 import { execSync } from 'child_process';
 import crypto from 'crypto';
 
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-jwt-secret-0123456789abcdef-0123456789abcdef';
 
 let pass = 0, fail = 0;
@@ -158,32 +158,37 @@ async function main() {
       `直查 B 社区居民=${direct.status}/${direct.code}（放行=DEF-010 确证，已登记 08）；列表 records=${recs.length}（无社区过滤）`);
   }
 
-  // ── TC-C10-010 绑定变更吊销令牌 ──
+  // ── TC-C10-010 绑定变更吊销令牌（DEF-009 修复后回归口径） ──
   {
     const uname = 'tc10_bind_' + (Date.now() % 100000);
     const created = await api('POST', '/api/v1/sys-users', { token: tok, body: { username: uname, password: 'Pass123456', realName: 'C10绑定测试', phone: '139' + String(20000000 + Math.floor(Math.random() * 8999999)), role: 'ADMIN' } });
     const uid = created.data?.id;
-    // 绑定社区 1（阳光花园）
+    // 绑定社区 1（阳光花园）；隔秒登录规避 DEF-009 同秒连带拦（修复口径：重新登录需隔秒）
     const bind1 = await api('POST', `/api/v1/sys-users/${uid}/communities`, { token: tok, body: { communityId: 1 } });
-    const lg = await api('POST', '/api/v1/auth/admin/login', { body: { username: uname, password: 'Pass123456' } });
-    const T1 = lg.data?.token;
+    await new Promise(r => setTimeout(r, 1100));
+    const T1 = (await api('POST', '/api/v1/auth/admin/login', { body: { username: uname, password: 'Pass123456' } })).data?.token;
     const ok1 = await api('GET', '/api/v1/residents?page=1&size=5', { token: T1 });
-    // 变更绑定 → 社区 2（清源里）
+    // 变更绑定 → 社区 2（清源里）：T1 应立即吊销（401）；隔秒登录 T2 只可见清源里居民（DEF-010 修复后列表有社区过滤）
     const bind2 = await api('POST', `/api/v1/sys-users/${uid}/communities`, { token: tok, body: { communityId: 2 } });
     const T1after = await api('GET', '/api/v1/residents?page=1&size=5', { token: T1 });
-    const lg2 = await api('POST', '/api/v1/auth/admin/login', { body: { username: uname, password: 'Pass123456' } });
-    const T2 = lg2.data?.token;
+    await new Promise(r => setTimeout(r, 1100));
+    const T2 = (await api('POST', '/api/v1/auth/admin/login', { body: { username: uname, password: 'Pass123456' } })).data?.token;
     const ok2 = await api('GET', '/api/v1/residents?page=1&size=50', { token: T2 });
     const t2recs = ok2.data?.records ?? [];
     const seesQY = t2recs.some(x => x.id === 2 || x.username === 'test_resident');
-    // 解绑社区 2 → T2 访问被拒/不可见
-    const unbind = await api('DELETE', `/api/v1/sys-users/${uid}/communities/2`, { token: tok });
+    const seesSunny = t2recs.some(x => x.username === 'resident1');
+    // 解绑两个社区 → T2 应立即吊销（401）
+    const unbind2 = await api('DELETE', `/api/v1/sys-users/${uid}/communities/2`, { token: tok });
     const T2after = await api('GET', '/api/v1/residents?page=1&size=5', { token: T2 });
-    // DEF-009 关联面：绑定/解绑吊销同样因秒级碰撞不生效；且居民列表无社区过滤（DEF-010）致 T2 可见范围断言不可用
-    tc('TC-C10-010', '绑定变更链路可用（吊销时效=DEF-009 已登记）',
-      bind1.code === 200 && ok1.status === 200 && bind2.code === 200 && ok2.status === 200 && unbind.code === 200,
-      `绑1=${bind1.code} T1=${ok1.status} 变更后T1=${T1after.status}（DEF-009 秒级碰撞，已登记 08） T2=${ok2.status} T2见清源里=${seesQY}（DEF-010 列表无过滤） 解绑=${unbind.code} 解绑后T2=${T2after.status}（DEF-009）`);
+    // bind2 为追加绑定（bind1 未解绑）——T2 同时可见两社区居民均为绑定范围，属正确行为
+    tc('TC-C10-010', '绑定变更即时吊销存量令牌 + 新令牌数据范围同步（DEF-009/010 修复后）',
+      bind1.code === 200 && ok1.status === 200 && bind2.code === 200
+      && T1after.status === 401 && ok2.status === 200 && seesQY && seesSunny
+      && unbind2.code === 200 && T2after.status === 401,
+      `绑1=${bind1.code} T1可用=${ok1.status} 变更后T1吊销=${T1after.status} T2可用=${ok2.status} T2见清源里=${seesQY} T2见阳光=${seesSunny}(追加绑定,均属绑定范围) 解绑2=${unbind2.code} 解绑后T2吊销=${T2after.status}`);
   }
+
+
 
   console.log(`\n========== TC-C10-001~010 汇总 ==========`);
   console.log(`通过 ${pass} / ${pass + fail}`);
