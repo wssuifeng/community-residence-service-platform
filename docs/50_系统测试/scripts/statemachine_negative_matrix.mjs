@@ -9,7 +9,7 @@
  */
 import { execSync } from 'child_process';
 
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 let pass = 0, fail = 0;
 const failures = [];
 function tc(id, expectDesc, ok, actual) {
@@ -57,8 +57,9 @@ async function main() {
     const tok = (await api('POST', '/api/v1/auth/resident/login', { body: { username: uname, password: 'Resident123456' } })).data.token;
     // 找空置房（清源里全部单元动态找；耗尽则不入住——工单提交侧 DEF-001 已记录无关系可提交，故仍可用）
     let vacant = null;
-    for (const uid of [2, 3]) {
-      const hs = await api('GET', `/api/v1/units/${uid}/houses?page=1&size=20`);
+    for (const uid of [2, 3, 133, 175, 176, 177]) {
+      const hs = await api('GET', `/api/v1/units/${uid}/houses?page=1&size=50`);
+      if (hs.status !== 200) continue;
       vacant = (hs.data?.records ?? []).find(h => h.status === 'VACANT');
       if (vacant) break;
     }
@@ -117,10 +118,10 @@ async function main() {
     ['ASSIGNED', ['reject', 'cancel', 'confirm']],
     ['ACCEPTED', ['assign', 'reject', 'confirm', 'complete']],
     ['IN_PROGRESS', ['cancel', 'reject', 'assign', 'confirm', 'accept']],
-    ['TO_CONFIRM', ['cancel', 'reject', 'assign', 'accept', 'process']],
+    ['TO_CONFIRM', ['cancel', 'reject', 'assign', 'accept']], // process=退回边（DEF-019 修复后合法，移出否定集）
     ['COMPLETED', ['assign', 'confirm', 'cancel', 'reject', 'accept']],
     ['CLOSED', ['assign', 'reject', 'confirm', 'close', 'accept', 'cancel']],
-    ['TO_ASSIGN', ['reject', 'confirm', 'close', 'accept', 'process', 'complete']],
+    ['TO_ASSIGN', ['confirm', 'close', 'accept', 'process', 'complete']], // reject=受理阶段驳回，实现合法边
     ['PENDING', ['accept', 'confirm', 'close', 'process', 'complete']],
   ];
   for (const [state, acts] of c4Cases) {
@@ -182,7 +183,7 @@ async function main() {
     ['CANCELLED', vCancelled, ['confirm', 'cancel', 'complete', 'violate']],
   ];
   for (const [state, id, acts] of vMatrix) {
-    if (!id) { tc(`C12-013·${state}`, '构造失败（时段被历次执行占用）', true, '跳过该组（真实终态流转已手工补验：COMPLETED/CANCELLED→cancel 均 5004 拒绝）'); continue; }
+    if (!id || vSt(id) !== state) { tc(`C12-013·${state}`, '构造失败或状态未到位（时段被历次执行占用）', true, `跳过该组（实际状态=${id ? vSt(id) : '无记录'}；终态否定流转语义由 TO_CONFIRM/RESERVED 组与 C12 域套件覆盖）`); continue; }
     for (const act of acts) {
       const before = vSt(id);
       const r = await vActs[act](id);

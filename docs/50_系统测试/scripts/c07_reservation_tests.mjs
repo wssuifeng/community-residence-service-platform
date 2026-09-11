@@ -6,7 +6,7 @@
  */
 import { execSync } from 'child_process';
 
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 let pass = 0, fail = 0;
 const failures = [];
 function tc(id, expectDesc, ok, actual) {
@@ -86,17 +86,16 @@ async function main() {
       rej(a) && rej(b) && rej(c), `${a.code}/${b.code}/${c.code}`);
   }
 
-  // ══ TC-C7-004 同日限约（实现口径 DEF-002 已登记） ══
+  // ══ TC-C7-004 同日限约（DEF-002 修复后口径：同时段拦、同天不同时段放行） ══
   {
-    // R2 换一天预约成功，然后同日另一时段被拒
     const d1 = future(10);
     const first = await api('POST', '/api/v1/resource-reservations', { token: R2.token, body: { resourceId: cap1Id, reserveDate: d1, startTime: '09:00:00', endTime: '10:00:00', purpose: 'x', contactPhone: '13800000002' } });
-    const dup = await api('POST', '/api/v1/resource-reservations', { token: R2.token, body: { resourceId: cap1Id, reserveDate: d1, startTime: '10:00:00', endTime: '11:00:00', purpose: 'x', contactPhone: '13800000002' } });
-    const otherDay = await api('POST', '/api/v1/resource-reservations', { token: R2.token, body: { resourceId: cap1Id, reserveDate: future(11), startTime: '09:00:00', endTime: '10:00:00', purpose: 'x', contactPhone: '13800000002' } });
+    const sameDayDiffSlot = await api('POST', '/api/v1/resource-reservations', { token: R2.token, body: { resourceId: cap1Id, reserveDate: d1, startTime: '10:00:00', endTime: '11:00:00', purpose: 'x', contactPhone: '13800000002' } });
+    const sameSlot = await api('POST', '/api/v1/resource-reservations', { token: R2.token, body: { resourceId: cap1Id, reserveDate: d1, startTime: '09:00:00', endTime: '10:00:00', purpose: 'x', contactPhone: '13800000002' } });
     const validN = q(`SELECT COUNT(*) FROM resource_reservation WHERE user_id=${R2.id} AND resource_id=${cap1Id} AND reserve_date='${d1}' AND status IN ('PENDING','RESERVED')`);
-    tc('TC-C7-004', '同日同资源拒+另一日放行（同日限约=DEF-002 已登记实现口径）',
-      ok(first) && rej(dup) && ok(otherDay) && Number(validN) === 1,
-      `首约=${first.code} 同日另一时段=${dup.code}(${dup.json?.message?.slice(0, 16)})（DEF-002：按天拦截比接口设计「同时段」更严，已登记 08） 另一日=${otherDay.code} 有效记录=${validN}`);
+    tc('TC-C7-004', '同天不同时段放行+同时段拒（DEF-002 修复口径）',
+      ok(first) && ok(sameDayDiffSlot) && rej(sameSlot) && Number(validN) === 2,
+      `首约=${first.code} 同日另一时段=${sameDayDiffSlot.code}(DEF-002修复后放行) 同时段重复=${sameSlot.code}(${sameSlot.json?.message?.slice(0, 14)}) 有效记录=${validN}`);
   }
 
   // ══ TC-C7-005/006/007 容量与边界（半重叠=DEF-006 已登记；首尾相接验证） ══

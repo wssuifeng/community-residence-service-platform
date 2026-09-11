@@ -7,7 +7,7 @@
 import { execSync } from 'child_process';
 import net from 'net';
 
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 let pass = 0, fail = 0;
 const failures = [];
 function tc(id, expectDesc, ok, actual) {
@@ -53,6 +53,7 @@ async function main() {
     const hash = q(`SELECT LEFT(password_hash,7) FROM sys_user WHERE username='${uname}'`);
     // 绑定期内工作验证（重绑+登录+建楼）
     await api('POST', `/api/v1/sys-users/${u.data.id}/communities`, { token: superTok, body: { communityId: c.data.id } });
+    await new Promise(r => setTimeout(r, 1100)); // DEF-009 口径：重绑吊销同秒登录会被连带拦
     const nTok = (await api('POST', '/api/v1/auth/admin/login', { body: { username: uname, password: 'Pass123456' } })).data?.token;
     const work = nTok ? await api('POST', '/api/v1/buildings', { token: nTok, body: { communityId: c.data.id, name: 'E10b楼', floors: 1 } }) : { code: 'skip' };
     tc('TC-C10-011', 'E10b 全链：建/查/绑/重复绑5002/列表/冻/解/解绑/BCrypt/工作开展',

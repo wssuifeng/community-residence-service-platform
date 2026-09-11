@@ -8,7 +8,7 @@
  */
 import { execSync } from 'child_process';
 
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 let pass = 0, fail = 0;
 const failures = [];
 function tc(id, expectDesc, ok, actual) {
@@ -149,7 +149,10 @@ async function main() {
   {
     const w = await mkOrder('C4-010 派单');
     const r1 = await api('PATCH', `/api/v1/work-orders/${w.id}/assign`, { token: admin1Tok, body: { assigneeId: resident1Id } });
-    const r2 = await api('PATCH', `/api/v1/work-orders/${w.id}/assign`, { token: admin1Tok, body: { assigneeId: staffDisabledId } });
+    // 冻结 STAFF 动态保障（test_staff_disabled 历史上被解冻——现场冻结 test_staff(id=6)，用后还原）
+    await api('PATCH', `/api/v1/sys-users/6/status`, { token: superTok, body: { status: 'FROZEN', reason: 'C4-010 冻结口径' } });
+    const r2 = await api('PATCH', `/api/v1/work-orders/${w.id}/assign`, { token: admin1Tok, body: { assigneeId: 6 } });
+    await api('PATCH', `/api/v1/sys-users/6/status`, { token: superTok, body: { status: 'ACTIVE', reason: '还原' } });
     const r3 = await api('PATCH', `/api/v1/work-orders/${w.id}/assign`, { token: admin1Tok, body: { assigneeId: staff1Id } });
     const asgN = q(`SELECT COUNT(*) FROM work_order_assignment WHERE work_order_id=${w.id}`);
     tc('TC-C4-010', '非服务人员拒+冻结拒+正常派单+写派单关系',
@@ -164,6 +167,7 @@ async function main() {
   {
     const w = await mkOrder('C4-012 接单');
     await api('PATCH', `/api/v1/work-orders/${w.id}/assign`, { token: admin1Tok, body: { assigneeId: staff1Id } });
+    await new Promise(r => setTimeout(r, 1100)); // DEF-009 口径：C4-010 现场冻结/解冻 test_staff 后同秒登录会被连带拦
     const staff3Tok = (await api('POST', '/api/v1/auth/admin/login', { body: { username: 'test_staff', password: 'Staff123456' } })).data?.token;
     const notMine = staff3Tok ? await api('PATCH', `/api/v1/work-orders/${w.id}/accept`, { token: staff3Tok, body: { remark: 'x' } }) : { status: 'skip' };
     const mine = await api('PATCH', `/api/v1/work-orders/${w.id}/accept`, { token: staff1Tok, body: { remark: '已确认，将尽快处理' } });

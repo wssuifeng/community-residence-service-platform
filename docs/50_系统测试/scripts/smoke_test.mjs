@@ -5,7 +5,7 @@
  * 被测环境：后端 http://localhost:8080（指向 community_residence_test）
  * 用法：node smoke_test.mjs
  */
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 
 const results = [];
 let passed = 0, failed = 0;
@@ -109,6 +109,7 @@ async function main() {
     const uid = u.data.id;
     await api('POST', `/api/v1/sys-users/${uid}/communities`, { token: superTok, body: { communityId: cid }, expectStatus: 200 });
     // 新管理员登录并在本社区开展工作（查社区楼栋）
+    await new Promise(r => setTimeout(r, 1100)); // DEF-009 口径：吊销同秒登录会被连带拦，隔秒重登
     const na = await login(uname, 'Admin123456');
     const b = await api('GET', `/api/v1/communities/${cid}/buildings`, { token: na.token, expectStatus: 200 });
     // 越全局级：管理员创建系统用户应被拒（403）
@@ -135,11 +136,14 @@ async function main() {
     });
     const cid = c.data.id;
     // 超管把 E1 社区绑给 test_admin（模拟其管理该社区）；绑定后需重新登录生效（接口文档口径）
-    const ta = await api('GET', '/api/v1/sys-users?page=1&size=50', { token: superTok, expectStatus: 200 });
+    const ta = await api('GET', '/api/v1/sys-users?page=1&size=500', { token: superTok, expectStatus: 200 });
     const taRec = (ta.data?.records ?? []).find(x => x.username === 'test_admin');
     if (!taRec) throw new Error('未找到 test_admin 账号');
     await api('POST', `/api/v1/sys-users/${taRec.id}/communities`, { token: superTok, body: { communityId: cid }, expectStatus: 200 });
+    await new Promise(r => setTimeout(r, 1100)); // 同上：绑定吊销后隔秒重登
     const adminTok2 = (await login('test_admin', 'Admin123456')).token;
+    // 绑定变更吊销 test_admin 全部存量令牌（含全局 adminTok）——刷新全局令牌供后续用例
+    adminTok = adminTok2;
     const b = await api('POST', '/api/v1/buildings', { token: adminTok2, body: { communityId: cid, name: '冒烟1号楼', floors: 3, description: '' }, expectStatus: 200 });
     const u = await api('POST', '/api/v1/units', { token: adminTok2, body: { buildingId: b.data.id, name: '1单元', description: '' }, expectStatus: 200 });
     const h = await api('POST', '/api/v1/houses', { token: adminTok2, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 88.5, roomCount: 2, layout: '两室一厅', orientation: '南', status: 'VACANT', description: '' }, expectStatus: 200 });
@@ -164,9 +168,16 @@ async function main() {
     });
     const obs = `无关系账号提交工单 HTTP ${woDenied.status} code=${woDenied.code}（观察项：R9 口径疑似应拒，归 TC-C2/C4 裁决）`;
     // 申请入住清源里空置房（动态查询，脚本可重复执行）
-    const hs = await api('GET', '/api/v1/units/3/houses?page=1&size=10');
-    const vacant = (hs.data?.records ?? hs.data ?? []).find(h => h.status === 'VACANT');
-    if (!vacant) throw new Error('清源里 1 单元已无空置房（冒烟重复执行耗尽，请重建数据或换单元）');
+    // 清源里（社区 2）全部单元找空置房——按社区实际单元查询，避免扫到其他社区
+    //（此前按 id 3~12 扫描会命中累加数据中其他社区的单元，审核人 test_admin 无权导致 404）
+    let vacant = null;
+    for (let uid of [2, 3, 133, 175, 176, 177]) {
+      const hs = await api('GET', `/api/v1/units/${uid}/houses?page=1&size=50`);
+      if (hs.status !== 200) continue;
+      vacant = (hs.data?.records ?? hs.data ?? []).find(h => h.status === 'VACANT') ?? null;
+      if (vacant) break;
+    }
+    if (!vacant) throw new Error('清源里全部单元无空置房（累加耗尽，需重建数据）');
     const app = await api('POST', '/api/v1/residence-applications', {
       token: nl.token, body: { houseId: vacant.id, relationType: 'TENANT', remark: '冒烟入住申请' }, expectStatus: 200,
     });
@@ -243,13 +254,13 @@ async function main() {
     const body = { resourceId: 2, reserveDate: target, startTime: '08:00:00', endTime: '09:00:00', purpose: '冒烟健身', contactPhone: '13800005555', remark: '' };
     const r1 = await api('POST', '/api/v1/resource-reservations', { token: resTok, body, expectStatus: 200 });
     if (!r1.data?.id) throw new Error(`预约创建失败: code=${r1.code} ${JSON.stringify(r1.json).slice(0, 120)}`);
-    // 同一天重复预约应被拒（实现口径的同资源同天拦截；R33 重叠时段拦截归 SP-01 专项）
-    const r2 = await api('POST', '/api/v1/resource-reservations', { token: resTok, body: { ...body, purpose: '冲突预约', startTime: '10:00:00', endTime: '11:00:00' } });
+    // 同时段重复预约应被拒（DEF-002 修复后口径：同天不同时段放行、同时段拦；R33 并发归 SP-01）
+    const r2 = await api('POST', '/api/v1/resource-reservations', { token: resTok, body: { ...body, purpose: '冲突预约' } });
     const conflictRejected = r2.status !== 200 || r2.code !== 200;
     // 管理员审核通过
     const cf = await api('PATCH', `/api/v1/resource-reservations/${r1.data.id}/confirm`, { token: adminTok, body: { reason: '按约使用' }, expectStatus: 200 });
     record('E7-资源预约', conflictRejected,
-      `预约#${r1.data.id}(${r1.data.status}, ${target} 08:00-09:00)→同天同时段冲突被拒（HTTP ${r2.status}, code=${r2.code}）→审核通过(${cf.data?.status ?? 'OK'})；available-slots 返回=${Array.isArray(slots.data) ? slots.data.length : slots.data?.total ?? '?'}档`);
+      `预约#${r1.data.id}(${r1.data.status}, ${target} 08:00-09:00)→同时段重复被拒（HTTP ${r2.status}, code=${r2.code}）→审核通过(${cf.data?.status ?? 'OK'})；available-slots 返回=${Array.isArray(slots.data) ? slots.data.length : slots.data?.total ?? '?'}档`);
   } catch (e) { record('E7-资源预约', false, e.message); }
 
   // ── 汇总 ──

@@ -52,8 +52,9 @@ const PNG_HEAD = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const JPG_HEAD = Buffer.from([0xFF, 0xD8, 0xFF, 0xE0]);
 const PDF_HEAD = Buffer.from([0x25, 0x50, 0x44, 0x46]); // %PDF
 
-/* 上传目录：8081 基线实例 cwd = worktree/backend（worktree 位于 D:/crsp-50-baseline） */
-const uploadDir = process.env.UPLOAD_DIR || 'D:/crsp-50-baseline/backend/uploads';
+/* 上传目录：实例 cwd = backend/（主工作区或 worktree 同构） */
+const repoRoot = import.meta.dirname.replace(/\\/g, '/').replace(/\/docs\/50_系统测试\/scripts$/, '');
+const uploadDir = process.env.UPLOAD_DIR || repoRoot + '/backend/uploads';
 function diskCount() {
   try { return Number(execSync(`ls -1 "${uploadDir}" 2>/dev/null | wc -l`, { shell: 'bash' }).toString().trim()); }
   catch { return -1; }
@@ -102,13 +103,12 @@ async function main() {
     const rejects = [overDoc, exe, jpgAsDoc].every(r => r.status !== 200 || r.code !== 200);
     const n1 = diskCount();
     const noResidue = n1 === n0 + 4;
-    // DEF-024：文档超限（>10MB）由 multipart 层拦截 → 500「系统内部错误」，
-    // 业务层「文档不能超过 10MB」400 提示不可达（multipart max-file-size=10MB
-    // 与业务上限相同，>10MB 永远到不了业务校验）——用例预期 400，实测 500 契约破损
+    // DEF-024 修复后：GlobalExceptionHandler 映射 MaxUploadSizeExceededException → 400
+    // （multipart 上限 12MB/请求 64MB 留 buffer，10~12MB 走业务层原文案，>12MB 走映射）
     const contractOk = overDoc.code === 400 && (overDoc.msg || '').includes('10MB');
-    tc('TC-SP-024', '合法文档4格式全过；11MB 超限应 400 明确提示（实测 500=DEF-024）；.exe/.jpg-as-doc 拒；失败不落盘',
+    tc('TC-SP-024', '合法文档4格式全过；11MB 超限 400 明确提示（DEF-024 修复回归）；.exe/.jpg-as-doc 拒；失败不落盘',
       legalOk && rejects && noResidue && contractOk,
-      `pdf/doc/docx/txt=${legalOk} 11MB=${overDoc.status}/${overDoc.code}(${(overDoc.msg || '').slice(0, 12)}→DEF-024:multipart 层 500，业务 400 不可达) exe=${exe.code} jpg-as-doc=${jpgAsDoc.code} 落盘增量=${n1 - n0}(期望4)`);
+      `pdf/doc/docx/txt=${legalOk} 11MB=${overDoc.status}/${overDoc.code}(${(overDoc.msg || '').slice(0, 14)}) exe=${exe.code} jpg-as-doc=${jpgAsDoc.code} 落盘增量=${n1 - n0}(期望4)`);
   }
 
   /* ── TC-SP-026 /uploads 静态资源访问 ─────────────────────────── */
