@@ -22,6 +22,9 @@ import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -31,6 +34,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 看房预约业务逻辑：待确认→已预约→已完成 + 已取消/已违约（六大状态机 #5，
@@ -49,9 +53,15 @@ public class ViewingAppointmentService {
     private final HousingTimeslotMapper timeslotMapper;
     private final ResidentMapper residentMapper;
     private final ViolationRecordMapper violationRecordMapper;
+    private final RedissonClient redissonClient;
 
-    /* 创建预约：居民取令牌身份；游客必填姓名电话；时段落在房源模板内 + 冲突检测 */
-    @Transactional(rollbackFor = Exception.class)
+    /**
+     * 创建预约：居民取令牌身份；游客必填姓名电话；时段落在房源模板内 + 冲突检测。
+     * R55 冲突校验复用 C7（R33）机制——「Redisson 分布式锁 + 数据库唯一约束
+     * （V10 uk_viewing_slot）」双保险：锁内做区间重叠判定（与 C7 同口径，
+     * 含半重叠/包含/被包含，仅首尾相接放行）后单条 INSERT 自动提交；
+     * 完全同槽竞态漏网由唯一约束兜底。刻意不加 @Transactional（理由同 C7）。
+     */
     public ViewingAppointmentVO create(CreateViewingAppointmentDTO dto) {
         Housing housing = housingMapper.selectById(dto.getHousingId());
         if (housing == null || !"AVAILABLE".equals(housing.getStatus())) {
@@ -66,38 +76,63 @@ public class ViewingAppointmentService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "所选时间不在房源可预约时段内");
         }
 
-        /* 冲突检测：同房源同日期同时间段仅允许一条有效预约 */
-        Long conflictCount = appointmentMapper.selectCount(new LambdaQueryWrapper<ViewingAppointment>()
-                .eq(ViewingAppointment::getHousingId, dto.getHousingId())
-                .eq(ViewingAppointment::getAppointmentDate, dto.getAppointmentDate())
-                .eq(ViewingAppointment::getStartTime, dto.getStartTime())
-                .in(ViewingAppointment::getStatus, OCCUPYING_STATUS));
-        if (conflictCount > 0) {
-            throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段已被预约");
-        }
-
-        ViewingAppointment appointment = new ViewingAppointment();
-        if (SecurityUtils.getUser() != null
-                && SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
-            appointment.setUserId(SecurityUtils.getUserId());
-        } else {
-            /* 游客预约：user_id 空 + visitor 信息必填 */
-            if (!StringUtils.hasText(dto.getVisitorName())) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "游客预约请填写姓名");
+        RLock lock = redissonClient.getLock(
+                "viewing:lock:housing:" + dto.getHousingId() + ":" + dto.getAppointmentDate());
+        boolean locked = false;
+        try {
+            try {
+                locked = lock.tryLock(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE, "预约请求繁忙，请稍后重试");
             }
-            appointment.setVisitorName(dto.getVisitorName());
-            appointment.setVisitorPhone(dto.getContactPhone());
+            if (!locked) {
+                throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE, "预约请求繁忙，请稍后重试");
+            }
+
+            /* 冲突检测：同房源同日期时间段重叠（任一有效状态）即拦截，与 C7 同口径 */
+            Long conflictCount = appointmentMapper.selectCount(new LambdaQueryWrapper<ViewingAppointment>()
+                    .eq(ViewingAppointment::getHousingId, dto.getHousingId())
+                    .eq(ViewingAppointment::getAppointmentDate, dto.getAppointmentDate())
+                    .lt(ViewingAppointment::getStartTime, dto.getEndTime())
+                    .gt(ViewingAppointment::getEndTime, dto.getStartTime())
+                    .in(ViewingAppointment::getStatus, OCCUPYING_STATUS));
+            if (conflictCount > 0) {
+                throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "所选时段与已有看房预约重叠");
+            }
+
+            ViewingAppointment appointment = new ViewingAppointment();
+            if (SecurityUtils.getUser() != null
+                    && SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
+                appointment.setUserId(SecurityUtils.getUserId());
+            } else {
+                /* 游客预约：user_id 空 + visitor 信息必填 */
+                if (!StringUtils.hasText(dto.getVisitorName())) {
+                    throw new BusinessException(ErrorCode.INVALID_PARAM, "游客预约请填写姓名");
+                }
+                appointment.setVisitorName(dto.getVisitorName());
+                appointment.setVisitorPhone(dto.getContactPhone());
+            }
+            appointment.setHousingId(housing.getId());
+            appointment.setCommunityId(housing.getCommunityId());
+            appointment.setAppointmentDate(dto.getAppointmentDate());
+            appointment.setStartTime(dto.getStartTime());
+            appointment.setEndTime(dto.getEndTime());
+            appointment.setStatus("TO_CONFIRM");
+            appointment.setContactPhone(dto.getContactPhone());
+            appointment.setRemark(dto.getRemark());
+            try {
+                appointmentMapper.insert(appointment);
+            } catch (DuplicateKeyException e) {
+                /* 完全同槽并发竞态被 V10 唯一约束拦截（锁失效时的最后防线） */
+                throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段已被预约");
+            }
+            return toVO(appointment);
+        } finally {
+            if (locked) {
+                unlockQuietly(lock);
+            }
         }
-        appointment.setHousingId(housing.getId());
-        appointment.setCommunityId(housing.getCommunityId());
-        appointment.setAppointmentDate(dto.getAppointmentDate());
-        appointment.setStartTime(dto.getStartTime());
-        appointment.setEndTime(dto.getEndTime());
-        appointment.setStatus("TO_CONFIRM");
-        appointment.setContactPhone(dto.getContactPhone());
-        appointment.setRemark(dto.getRemark());
-        appointmentMapper.insert(appointment);
-        return toVO(appointment);
     }
 
     /** 预约详情：居民限本人；游客经公开路径查看（手机号核对由前端交互完成） */
@@ -128,6 +163,7 @@ public class ViewingAppointmentService {
 
     /* 确认预约：TO_CONFIRM → RESERVED */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "REVIEW", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约确认'")
     public void confirm(Long id, String remark) {
         ViewingAppointment appointment = requireAppointment(id);
         SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
@@ -138,6 +174,7 @@ public class ViewingAppointmentService {
 
     /* 完成预约：RESERVED → COMPLETED */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约完成'")
     public void complete(Long id, String remark) {
         ViewingAppointment appointment = requireAppointment(id);
         SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
@@ -164,6 +201,7 @@ public class ViewingAppointmentService {
 
     /* 标记违约：RESERVED → VIOLATED；居民违约写 violation_record（游客无账号不计） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DISPOSAL", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约违约处置：' + #reason")
     public void violate(Long id, String reason) {
         ViewingAppointment appointment = requireAppointment(id);
         SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
@@ -213,6 +251,14 @@ public class ViewingAppointmentService {
                 .filter(t -> !start.isBefore(t.getStartTime()) && !end.isAfter(t.getEndTime()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void unlockQuietly(RLock lock) {
+        try {
+            lock.unlock();
+        } catch (Exception e) {
+            log.warn("看房冲突锁释放异常（锁键已过期时正常）", e);
+        }
     }
 
     private ViewingAppointmentVO toVO(ViewingAppointment appointment) {

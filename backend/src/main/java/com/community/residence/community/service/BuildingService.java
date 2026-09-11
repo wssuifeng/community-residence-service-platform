@@ -30,6 +30,7 @@ public class BuildingService {
     private final CommunityService communityService;
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "BUILDING", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建楼栋：' + #dto.name")
     public BuildingVO create(CreateBuildingDTO dto) {
         communityService.requireActiveCommunity(dto.getCommunityId());
         SecurityUtils.checkCommunityAccess(dto.getCommunityId());
@@ -43,6 +44,7 @@ public class BuildingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "BUILDING", targetId = "#id", content = "'更新楼栋：' + #dto.name")
     public BuildingVO update(Long id, CreateBuildingDTO dto) {
         Building building = requireBuilding(id);
         /* 更新不允许跨社区迁移楼栋（四级结构按社区归属建立，迁移会导致子级引用断裂） */
@@ -59,6 +61,7 @@ public class BuildingService {
 
     /* 删除保护：楼栋下存在未删除单元时拒绝（软删除） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "BUILDING", targetId = "#id")
     public void delete(Long id) {
         Building building = requireBuilding(id);
         SecurityUtils.checkCommunityAccess(building.getCommunityId());

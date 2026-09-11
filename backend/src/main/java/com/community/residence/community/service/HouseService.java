@@ -38,6 +38,7 @@ public class HouseService {
     private final ResidenceRelationMapper residenceRelationMapper;
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSE", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建房屋：' + #dto.houseNumber")
     public HouseVO create(CreateHouseDTO dto) {
         Unit unit = requireUnit(dto.getUnitId());
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());
@@ -51,6 +52,7 @@ public class HouseService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "HOUSE", targetId = "#id", content = "'更新房屋：' + #dto.houseNumber")
     public HouseVO update(Long id, CreateHouseDTO dto) {
         House house = requireHouse(id);
         if (!house.getUnitId().equals(dto.getUnitId())) {
@@ -64,6 +66,7 @@ public class HouseService {
 
     /* 删除保护：存在在住居民（move_out_date 为空）时拒绝；软删除 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "HOUSE", targetId = "#id")
     public void delete(Long id) {
         House house = requireHouse(id);
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
@@ -101,6 +104,7 @@ public class HouseService {
 
     /* 状态变更：写主表 + 追加历史记录（同一事务） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "HOUSE", targetId = "#id", content = "'房屋状态变更为 ' + #dto.status")
     public void updateStatus(Long id, UpdateHouseStatusDTO dto) {
         House house = requireHouse(id);
         SecurityUtils.checkCommunityAccess(house.getCommunityId());

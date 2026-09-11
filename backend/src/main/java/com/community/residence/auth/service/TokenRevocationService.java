@@ -80,7 +80,9 @@ public class TokenRevocationService {
 
     private boolean isRevoked(String scope, Long userId, Date issuedAt) {
         Long revokedAt = readRevokedAt(scope, userId);
-        return revokedAt != null && issuedAt.getTime() / 1000 < revokedAt;
+        /* DEF-009：iat 与 revokedAt 均为秒级，冻结与登录同秒时 iat==revokedAt；
+           口径为「吊销该用户全部存量令牌」，同秒签发按已吊销处理（<=） */
+        return revokedAt != null && issuedAt.getTime() / 1000 <= revokedAt;
     }
 
     private Long readRevokedAt(String scope, Long userId) {

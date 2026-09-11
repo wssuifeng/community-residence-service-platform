@@ -130,6 +130,7 @@ public class CommunityService {
 
     /** 创建社区（仅超管，功能级权限在 Controller 声明） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "COMMUNITY", targetId = "#result.id", content = "'创建社区：' + #dto.name")
     public CommunityVO create(CreateCommunityDTO dto) {
         Community community = new Community();
         applyDto(community, dto);
@@ -140,6 +141,7 @@ public class CommunityService {
 
     /** 更新社区基本信息（超管全局；社区管理员限绑定社区） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "COMMUNITY", targetId = "#id", content = "'更新社区：' + #dto.name")
     public CommunityVO update(Long id, CreateCommunityDTO dto) {
         Community community = requireCommunity(id);
         SecurityUtils.checkCommunityAccess(community.getId());
@@ -167,6 +169,7 @@ public class CommunityService {
 
     /** 停用/启用社区（仅超管；停用后该社区下所有写业务被 COMMUNITY_INACTIVE 拦截） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "COMMUNITY", targetId = "#id", content = "'社区状态变更为 ' + #status")
     public void updateStatus(Long id, String status) {
         Community community = requireCommunity(id);
         community.setStatus(status);
@@ -186,6 +189,7 @@ public class CommunityService {
      * 删除动作写操作日志（先写后删父表，sys_operation_log 无 FK 不受级联影响）。
      */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "COMMUNITY", targetId = "#id", content = "'删除社区（级联）'")
     public void delete(Long id) {
         Community community = requireCommunity(id);
         Long operatorId = SecurityUtils.getUserId();

@@ -20,15 +20,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +56,10 @@ class ReservationServiceExtraTest {
     private SysConfigService sysConfigService;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private RedissonClient redissonClient;
+    @Mock
+    private RLock lock;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -60,6 +69,14 @@ class ReservationServiceExtraTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(redissonClient.getLock(anyString())).thenReturn(lock);
+        try {
+            lenient().when(lock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
+
         resource = new PublicResource();
         resource.setId(1L);
         resource.setCommunityId(1L);

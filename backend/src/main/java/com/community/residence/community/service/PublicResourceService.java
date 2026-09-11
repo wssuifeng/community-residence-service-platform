@@ -35,6 +35,7 @@ public class PublicResourceService {
     private final CommunityService communityService;
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "PUBLIC_RESOURCE", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建公共资源：' + #dto.name")
     public ResourceVO create(CreateResourceDTO dto) {
         communityService.requireActiveCommunity(dto.getCommunityId());
         SecurityUtils.checkCommunityAccess(dto.getCommunityId());
@@ -45,6 +46,7 @@ public class PublicResourceService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "PUBLIC_RESOURCE", targetId = "#id", content = "'更新公共资源：' + #dto.name")
     public ResourceVO update(Long id, CreateResourceDTO dto) {
         PublicResource resource = requireResource(id);
         if (!resource.getCommunityId().equals(dto.getCommunityId())) {
@@ -58,6 +60,7 @@ public class PublicResourceService {
 
     /* 删除保护：存在待确认/已预约状态的预约时拒绝（软删除） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "PUBLIC_RESOURCE", targetId = "#id")
     public void delete(Long id) {
         PublicResource resource = requireResource(id);
         SecurityUtils.checkCommunityAccess(resource.getCommunityId());
