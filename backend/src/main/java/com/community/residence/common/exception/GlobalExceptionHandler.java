@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.sql.SQLTimeoutException;
 import java.util.UUID;
@@ -136,6 +137,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {
         log.warn("非法参数：{}", e.getMessage());
         return badRequest(e.getMessage());
+    }
+
+    /* ---- 400：上传文件超限（DEF-024：multipart 层超限原落入 500 兜底，
+       业务层「文档不能超过 10MB」提示对 >10MB 文件不可达；multipart 上限与
+       业务上限间留 buffer 使业务层校验可达） ---- */
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSize(MaxUploadSizeExceededException e) {
+        log.warn("上传文件超限：{}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.INVALID_PARAM, "单个文件不能超过 10MB"));
     }
 
     /* ---- 409：唯一约束冲突（转换为业务措辞，避免泄露表结构） ---- */

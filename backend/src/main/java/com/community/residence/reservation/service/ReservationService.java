@@ -107,14 +107,18 @@ public class ReservationService {
             if (!locked) {
                 throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE, "预约请求繁忙，请稍后重试");
             }
-            /* 同一居民同资源同日期不可重复预约在审/已预约记录 */
-            Long mineCount = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
+            /* 同一居民同资源同时段不可重复预约（DEF-002：接口设计 §9.7.1.1 口径，
+               原按天拦截过严；R32~R33 无同天限次约束，2026-09-11 核实） */
+            Long mineOverlap = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
                     .eq(ResourceReservation::getUserId, userId)
                     .eq(ResourceReservation::getResourceId, resource.getId())
                     .eq(ResourceReservation::getReserveDate, dto.getReserveDate())
+                    .lt(ResourceReservation::getStartTime, dto.getEndTime())
+                    .gt(ResourceReservation::getEndTime, dto.getStartTime())
                     .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
-            if (mineCount > 0) {
-                throw new BusinessException(ErrorCode.DATA_EXISTS, "同一天已预约该资源，不可重复预约");
+            if (mineOverlap > 0) {
+                throw new BusinessException(ErrorCode.DATA_EXISTS,
+                        "同一时段已有本人的预约，不可重复预约该时段");
             }
 
             /* 重叠判定：与任一占用中预约的时间区间有交集即拦截（半重叠/包含/被包含同拦，

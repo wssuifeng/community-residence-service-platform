@@ -127,6 +127,14 @@ public class WorkOrderController {
         return ApiResponse.success();
     }
 
+    @Operation(summary = "居民不满意退回处理中", description = "待确认 → 处理中；仅工单提交人，须填原因（R22）")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @PatchMapping("/{id}/return")
+    public ApiResponse<Void> returnBack(@PathVariable Long id, @RequestBody @Valid WorkOrderActionDTO dto) {
+        workOrderService.returnBack(id, dto.getRemark());
+        return ApiResponse.success();
+    }
+
     @Operation(summary = "关闭工单", description = "已完成 → 已关闭（终态）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/close")
