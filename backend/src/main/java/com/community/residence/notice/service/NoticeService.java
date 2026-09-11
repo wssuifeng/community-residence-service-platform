@@ -52,6 +52,10 @@ public class NoticeService {
     /** 失效时间默认值：发布时间 + 30 天 */
     private static final long DEFAULT_VALID_DAYS = 30;
 
+    /** 广播公告（无定向目标）过滤子查询：notice_target 无记录即广播 */
+    private static final String BROADCAST_FILTER_SQL =
+            "NOT EXISTS (SELECT 1 FROM notice_target nt WHERE nt.notice_id = notice.id)";
+
     private final NoticeMapper noticeMapper;
     private final NoticeTargetMapper noticeTargetMapper;
     private final NoticeViewRecordMapper viewRecordMapper;
@@ -65,6 +69,7 @@ public class NoticeService {
     /* 创建公告：初始 DRAFT；多社区/楼栋定向逐项写 notice_target（R25 v1.2），
        ADMIN 逐项目标校验绑定范围；无目标为全系统广播（仅超管） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "NOTICE", targetId = "#result.id", content = "'创建公告：' + #dto.title")
     public NoticeVO create(CreateNoticeDTO dto) {
         List<NoticeServiceTarget> targets = resolveTargets(dto);
         if (targets.isEmpty()) {
@@ -98,6 +103,7 @@ public class NoticeService {
 
     /* 更新公告：仅 DRAFT 可改；目标范围不可变更（重新建公告） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "NOTICE", targetId = "#id", content = "'更新公告：' + #dto.title")
     public NoticeVO update(Long id, CreateNoticeDTO dto) {
         Notice notice = requireNotice(id);
         checkManageAccess(notice);
@@ -127,7 +133,10 @@ public class NoticeService {
                     .toList();
         }
         if (dto.getCommunityId() != null) {
-            return List.of(new NoticeServiceTarget("COMMUNITY", dto.getCommunityId()));
+            /* communityId 单目标写法与 targets 列表同口径校验（DEF-004：原仅 targets 分支校验） */
+            NoticeServiceTarget target = new NoticeServiceTarget("COMMUNITY", dto.getCommunityId());
+            checkTargetAccess(target);
+            return List.of(target);
         }
         return List.of();
     }
@@ -158,6 +167,7 @@ public class NoticeService {
     /* 删除公告：仅 DRAFT/WITHDRAWN 可删（已发布公告走撤回流程）；
        子表 FK 为 RESTRICT，须先清两张子表（定向目标 + 浏览回执）再删父表 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "NOTICE", targetId = "#id")
     public void delete(Long id) {
         Notice notice = requireNotice(id);
         checkManageAccess(notice);
@@ -173,15 +183,32 @@ public class NoticeService {
         log.info("公告已删除：noticeId={}, operator={}", id, SecurityUtils.getUserId());
     }
 
-    /** 公告详情：普通访问仅 PUBLISHED 且未过期；管理端角色放行（归属已在入口校验） */
+    /**
+     * 公告详情：普通访问仅 PUBLISHED 且未过期；
+     * 居民限本人社区定向公告与全系统广播（R25 范围外不可见，DEF-003）；
+     * ADMIN 越绑定社区按数据不可见 404（与写路径 403 区分口径）。
+     */
     public NoticeVO getById(Long id) {
         Notice notice = requireNotice(id);
-        boolean managerView = SecurityUtils.hasRole(RoleConstants.ADMIN)
-                || SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN);
-        if (!managerView) {
-            if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)) {
+        if (SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+            return toVO(notice);
+        }
+        if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
+            /* 数据级读过滤：任一目标（社区/楼栋归属社区）落在绑定集合内才可见 */
+            if (resolveNoticeCommunityIds(notice.getId()).stream()
+                    .noneMatch(SecurityUtils.getCommunityIds()::contains)) {
+                throw new ResourceNotFoundException("公告不存在");
+            }
+            return toVO(notice);
+        }
+        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
+            if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
+                    || !visibleToResidentCommunities(notice, residentCommunityIds(SecurityUtils.getUserId()))) {
                 throw new ResourceNotFoundException("公告不存在或已下线");
             }
+        } else if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)) {
+            /* 游客/未登录：公开口径，仅状态与有效期过滤 */
+            throw new ResourceNotFoundException("公告不存在或已下线");
         }
         return toVO(notice);
     }
@@ -221,6 +248,17 @@ public class NoticeService {
                 return PageVO.of(List.of(), 0, page, size);
             }
             wrapper.in(Notice::getId, boundNoticeIds);
+        } else if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
+            /* 居民限本人社区定向公告 + 全系统广播（R25 范围外不可见，DEF-003；
+               游客/未登录维持公开口径不动，未被缺陷报告覆盖） */
+            List<Long> mine = residentCommunityIds(SecurityUtils.getUserId());
+            List<Long> visibleIds = targetedNoticeIdsForCommunities(mine);
+            if (visibleIds.isEmpty()) {
+                wrapper.apply(BROADCAST_FILTER_SQL);
+            } else {
+                wrapper.and(w -> w.in(Notice::getId, visibleIds)
+                        .or().apply(BROADCAST_FILTER_SQL));
+            }
         }
 
         Page<Notice> result = noticeMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
@@ -231,6 +269,7 @@ public class NoticeService {
        发布触达目标居民（R48 公告广播通知），渠道留痕由 NotificationService
        按 notify.channel.levels 配置分级触发（R51） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "NOTICE", targetId = "#id", content = "'发布公告'")
     public void publish(Long id, LocalDateTime publishTime) {
         Notice notice = requireNotice(id);
         checkManageAccess(notice);
@@ -271,6 +310,7 @@ public class NoticeService {
 
     /* 撤回公告：PUBLISHED → WITHDRAWN */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "NOTICE", targetId = "#id", content = "'撤回公告：' + #reason")
     public void withdraw(Long id, String reason) {
         Notice notice = requireNotice(id);
         checkManageAccess(notice);
@@ -332,23 +372,77 @@ public class NoticeService {
         return notice;
     }
 
-    /* 管理权限：SUPER_ADMIN 全局；ADMIN 限公告目标社区在绑定集合内（无目标的广播仅超管管理） */
+    /* 管理权限：SUPER_ADMIN 全局；ADMIN 限公告目标社区在绑定集合内（无目标的广播仅超管管理）。
+       目标社区含 BUILDING 目标经归属社区解析（楼栋定向公告的管理范围与其归属社区一致） */
     private void checkManageAccess(Notice notice) {
         if (SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
             return;
         }
-        Long communityId = resolveCommunityId(notice.getId());
-        if (communityId == null || !SecurityUtils.getCommunityIds().contains(communityId)) {
+        if (resolveNoticeCommunityIds(notice.getId()).stream()
+                .noneMatch(SecurityUtils.getCommunityIds()::contains)) {
             throw new ForbiddenException("无权管理该公告");
         }
     }
 
-    /** 取公告的社区目标 ID（全系统广播返回 null） */
-    private Long resolveCommunityId(Long noticeId) {
-        return noticeTargetMapper.selectList(new LambdaQueryWrapper<NoticeTarget>()
-                        .eq(NoticeTarget::getNoticeId, noticeId)
-                        .eq(NoticeTarget::getTargetType, "COMMUNITY"))
-                .stream().findFirst().map(NoticeTarget::getTargetId).orElse(null);
+    /** 公告全部目标归属社区：COMMUNITY 目标直取 + BUILDING 目标经 building.community_id 解析 */
+    private List<Long> resolveNoticeCommunityIds(Long noticeId) {
+        List<NoticeTarget> targets = noticeTargetMapper.selectList(
+                new LambdaQueryWrapper<NoticeTarget>()
+                        .eq(NoticeTarget::getNoticeId, noticeId));
+        List<Long> communityIds = new java.util.ArrayList<>();
+        List<Long> buildingIds = new java.util.ArrayList<>();
+        for (NoticeTarget target : targets) {
+            if ("COMMUNITY".equals(target.getTargetType())) {
+                communityIds.add(target.getTargetId());
+            } else if ("BUILDING".equals(target.getTargetType())) {
+                buildingIds.add(target.getTargetId());
+            }
+        }
+        if (!buildingIds.isEmpty()) {
+            buildingMapper.selectBatchIds(buildingIds).stream()
+                    .map(com.community.residence.community.entity.Building::getCommunityId)
+                    .forEach(communityIds::add);
+        }
+        return communityIds.stream().distinct().toList();
+    }
+
+    /** 居民在住社区集合（经 residence_relation；无居住关系返回空集合） */
+    private List<Long> residentCommunityIds(Long residentId) {
+        return residenceRelationMapper.selectList(
+                        new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
+                                .eq(com.community.residence.resident.entity.ResidenceRelation::getResidentId, residentId))
+                .stream().map(com.community.residence.resident.entity.ResidenceRelation::getCommunityId)
+                .distinct().toList();
+    }
+
+    /** 公告对居民社区集合可见：无目标=广播可见；任一目标（含楼栋归属）落在集合内可见 */
+    private boolean visibleToResidentCommunities(Notice notice, List<Long> communityIds) {
+        List<Long> targetCommunities = resolveNoticeCommunityIds(notice.getId());
+        return targetCommunities.isEmpty()
+                || targetCommunities.stream().anyMatch(communityIds::contains);
+    }
+
+    /** 社区集合可见的定向公告 ID（COMMUNITY 目标 + BUILDING 目标归属社区在集合内） */
+    private List<Long> targetedNoticeIdsForCommunities(List<Long> communityIds) {
+        if (communityIds.isEmpty()) {
+            return List.of();
+        }
+        List<NoticeTarget> targets = noticeTargetMapper.selectList(null);
+        List<Long> buildingIds = targets.stream()
+                .filter(t -> "BUILDING".equals(t.getTargetType()))
+                .map(NoticeTarget::getTargetId).distinct().toList();
+        Map<Long, Long> buildingCommunity = buildingIds.isEmpty() ? Map.of()
+                : buildingMapper.selectBatchIds(buildingIds).stream()
+                        .collect(Collectors.toMap(
+                                com.community.residence.community.entity.Building::getId,
+                                com.community.residence.community.entity.Building::getCommunityId));
+        return targets.stream()
+                .filter(t -> "COMMUNITY".equals(t.getTargetType())
+                        && communityIds.contains(t.getTargetId())
+                        || "BUILDING".equals(t.getTargetType())
+                        && communityIds.contains(buildingCommunity.get(t.getTargetId())))
+                .map(NoticeTarget::getNoticeId)
+                .distinct().toList();
     }
 
     /** 按社区取公告 ID 集合；为空时经 wrapper 注入恒假条件（in 空集合会生成非法 SQL） */

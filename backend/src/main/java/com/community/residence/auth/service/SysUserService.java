@@ -44,6 +44,7 @@ public class SysUserService {
     private final AdminCommunityCacheService adminCommunityCacheService;
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "SYS_USER", targetId = "#result.id", content = "'创建系统用户：' + #dto.username")
     public SysUserVO create(CreateSysUserDTO dto) {
         checkUsernameUnique(dto.getUsername());
         checkPhoneUnique(dto.getPhone(), null);
@@ -63,6 +64,7 @@ public class SysUserService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#id", content = "'更新系统用户'")
     public SysUserVO update(Long id, UpdateSysUserDTO dto) {
         SysUser user = requireUser(id);
         checkPhoneUnique(dto.getPhone(), id);
@@ -100,6 +102,7 @@ public class SysUserService {
 
     /* 冻结/解冻：不可冻结自己；冻结吊销全部令牌（即时生效） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "SYS_USER", targetId = "#id", content = "'账号状态变更为 ' + #status + '：' + #reason")
     public void updateStatus(Long id, String status, String reason) {
         if (id.equals(SecurityUtils.getUserId())) {
             throw new BusinessException(ErrorCode.SELF_FREEZE_FORBIDDEN);
@@ -128,6 +131,7 @@ public class SysUserService {
 
     /* 绑定社区：仅 ADMIN 角色可绑定；重复绑定拒绝；变更后吊销令牌并清缓存 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#userId", content = "'绑定社区：' + #dto.communityIds")
     public BoundCommunityVO bindCommunity(Long userId, BindCommunityDTO dto) {
         SysUser user = requireUser(userId);
         if (!RoleConstants.ADMIN.equals(user.getRole())) {
@@ -158,6 +162,7 @@ public class SysUserService {
 
     /* 解绑社区：变更后吊销令牌并清缓存（数据级权限范围立即收窄） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#userId", content = "'解绑社区：' + #communityId")
     public void unbindCommunity(Long userId, Long communityId) {
         requireUser(userId);
         communityService.requireCommunity(communityId);

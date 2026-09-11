@@ -62,6 +62,7 @@ public class LeaseService {
 
     /* 登记租约：房屋与租客须存在；初始 PENDING 待审核 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "LEASE_RECORD", targetId = "#result.id", content = "'创建租住记录'")
     public LeaseVO create(CreateLeaseDTO dto) {
         Resident tenant = residentMapper.selectById(dto.getResidentId());
         if (tenant == null) {
@@ -92,6 +93,7 @@ public class LeaseService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "LEASE_RECORD", targetId = "#id", content = "'更新租住记录'")
     public LeaseVO update(Long id, CreateLeaseDTO dto) {
         LeaseRecord lease = requireLease(id);
         SecurityUtils.checkCommunityAccess(lease.getCommunityId());
@@ -116,6 +118,7 @@ public class LeaseService {
      * 租金/押金/备注一并更新，状态保持 ACTIVE。
      */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "LEASE_RECORD", targetId = "#id", content = "'续租租住记录'")
     public LeaseVO renew(Long id, RenewLeaseDTO dto) {
         LeaseRecord lease = requireLease(id);
         SecurityUtils.checkCommunityAccess(lease.getCommunityId());
@@ -160,6 +163,7 @@ public class LeaseService {
 
     /* 状态流转：查表校验合法性；非法流转拒绝 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "LEASE_RECORD", targetId = "#id", content = "'租住状态变更为 ' + #dto.status")
     public void updateStatus(Long id, UpdateLeaseStatusDTO dto) {
         LeaseRecord lease = requireLease(id);
         SecurityUtils.checkCommunityAccess(lease.getCommunityId());

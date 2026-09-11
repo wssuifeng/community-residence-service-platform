@@ -7,6 +7,7 @@ import com.community.residence.auth.mapper.SysOperationLogMapper;
 import com.community.residence.auth.service.TokenRevocationService;
 import com.community.residence.common.constant.CommonStatus;
 import com.community.residence.common.constant.ErrorCode;
+import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ResourceNotFoundException;
@@ -16,7 +17,9 @@ import com.community.residence.resident.dto.RegisterResidentDTO;
 import com.community.residence.resident.dto.UpdateProfileDTO;
 import com.community.residence.resident.dto.UpdateResidentStatusDTO;
 import com.community.residence.resident.entity.Resident;
+import com.community.residence.resident.entity.ResidenceRelation;
 import com.community.residence.resident.mapper.ResidentMapper;
+import com.community.residence.resident.mapper.ResidenceRelationMapper;
 import com.community.residence.resident.vo.AdminCreateResidentVO;
 import com.community.residence.resident.vo.ResidentImportVO;
 import com.community.residence.resident.vo.ResidentVO;
@@ -39,7 +42,8 @@ import java.util.List;
 /**
  * 居民账号业务逻辑：注册（开关控制）、个人资料、改密、冻结。
  * resident 表无 community_id 列（拦截器跳过），ADMIN 的居民范围过滤
- * 经 residence_relation 在业务层处理（居民列表场景默认查全量，前端按社区筛选）。
+ * 经 residence_relation 在业务层处理（接口设计 9.2.1.7/9.2.1.8：
+ * ADMIN 限绑定社区内居民；DEF-010 修复：列表注入社区过滤，详情越范围 404）。
  */
 @Slf4j
 @Service
@@ -47,6 +51,7 @@ import java.util.List;
 public class ResidentService {
 
     private final ResidentMapper residentMapper;
+    private final ResidenceRelationMapper residenceRelationMapper;
     private final PasswordEncoder passwordEncoder;
     private final TokenRevocationService tokenRevocationService;
     private final SysConfigService sysConfigService;
@@ -102,10 +107,18 @@ public class ResidentService {
         tokenRevocationService.revokeResident(resident.getId());
     }
 
+    /** 居民详情：ADMIN 限绑定社区内居民（经 residence_relation 关联，越范围 404；
+        SUPER_ADMIN/STAFF 放行——STAFF 数据权限走派单关系，由工单模块约束） */
     public ResidentVO getById(Long id) {
-        return ResidentVO.from(requireResident(id));
+        Resident resident = requireResident(id);
+        if (SecurityUtils.hasRole(RoleConstants.ADMIN)
+                && !boundResidentIds(SecurityUtils.getCommunityIds()).contains(id)) {
+            throw new ResourceNotFoundException("居民不存在");
+        }
+        return ResidentVO.from(resident);
     }
 
+    /** 居民列表：ADMIN 自动注入绑定社区过滤（经 residence_relation，DEF-010） */
     public PageVO<ResidentVO> page(long page, long size, String status, String keyword) {
         LambdaQueryWrapper<Resident> wrapper = new LambdaQueryWrapper<Resident>()
                 .eq(StringUtils.hasText(status), Resident::getStatus, status)
@@ -114,12 +127,30 @@ public class ResidentService {
                         .or().like(Resident::getPhone, keyword)
                         .or().like(Resident::getUsername, keyword))
                 .orderByDesc(Resident::getId);
+        if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
+            List<Long> boundIds = boundResidentIds(SecurityUtils.getCommunityIds());
+            if (boundIds.isEmpty()) {
+                return PageVO.of(List.of(), 0, page, size);
+            }
+            wrapper.in(Resident::getId, boundIds);
+        }
         Page<Resident> result = residentMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
         return PageVO.of(result.convert(ResidentVO::from));
     }
 
+    /** 绑定社区内在住/曾住居民 ID 集合（居民与社区的关联唯一来源是 residence_relation） */
+    private List<Long> boundResidentIds(java.util.Set<Long> communityIds) {
+        if (communityIds == null || communityIds.isEmpty()) {
+            return List.of();
+        }
+        return residenceRelationMapper.selectList(new LambdaQueryWrapper<ResidenceRelation>()
+                        .in(ResidenceRelation::getCommunityId, communityIds))
+                .stream().map(ResidenceRelation::getResidentId).distinct().toList();
+    }
+
     /* 冻结/解冻：冻结即时吊销全部令牌 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "RESIDENT", targetId = "#id", content = "'居民账号状态变更为 ' + #dto.status + '：' + #dto.reason")
     public void updateStatus(Long id, UpdateResidentStatusDTO dto) {
         Resident resident = requireResident(id);
         resident.setStatus(dto.getStatus());

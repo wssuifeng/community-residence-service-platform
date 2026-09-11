@@ -59,16 +59,19 @@ public class WorkOrderService {
 
     private static final DateTimeFormatter ORDER_NO_DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    /** 状态机合法流转表（key 当前状态 → value 可达状态集合） */
+    /** 状态机合法流转表（key 当前状态 → value 可达状态集合）。
+        权威口径见架构设计 §6.1 / 01_工单状态机.lifecycle.json：
+        居民取消仅 PENDING/TO_ASSIGN 可发起；派单限 PENDING/TO_ASSIGN/ASSIGNED
+        （ASSIGNED=改派）；TO_CONFIRM → IN_PROGRESS 为居民不满意退回（DEF-019 端点） */
     private static final Map<String, Set<String>> ALLOWED_TRANSITIONS = Map.of(
             WorkOrderStatus.PENDING, Set.of(WorkOrderStatus.TO_ASSIGN, WorkOrderStatus.REJECTED,
-                    WorkOrderStatus.CANCELLED),
+                    WorkOrderStatus.CANCELLED, WorkOrderStatus.ASSIGNED),
             WorkOrderStatus.TO_ASSIGN, Set.of(WorkOrderStatus.ASSIGNED, WorkOrderStatus.REJECTED,
                     WorkOrderStatus.CANCELLED),
-            WorkOrderStatus.ASSIGNED, Set.of(WorkOrderStatus.ACCEPTED, WorkOrderStatus.CANCELLED),
-            WorkOrderStatus.ACCEPTED, Set.of(WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.CANCELLED),
+            WorkOrderStatus.ASSIGNED, Set.of(WorkOrderStatus.ACCEPTED, WorkOrderStatus.ASSIGNED),
+            WorkOrderStatus.ACCEPTED, Set.of(WorkOrderStatus.IN_PROGRESS),
             WorkOrderStatus.IN_PROGRESS, Set.of(WorkOrderStatus.TO_CONFIRM),
-            WorkOrderStatus.TO_CONFIRM, Set.of(WorkOrderStatus.COMPLETED),
+            WorkOrderStatus.TO_CONFIRM, Set.of(WorkOrderStatus.COMPLETED, WorkOrderStatus.IN_PROGRESS),
             WorkOrderStatus.COMPLETED, Set.of(WorkOrderStatus.CLOSED),
             WorkOrderStatus.CLOSED, Set.of(),
             WorkOrderStatus.REJECTED, Set.of(),
@@ -111,6 +114,7 @@ public class WorkOrderService {
 
     /** 居民更新工单：仅 PENDING/TO_ASSIGN 可改本人工单 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "WORK_ORDER", targetId = "#id", content = "'居民修改工单：' + #dto.title")
     public WorkOrderVO update(Long id, CreateWorkOrderDTO dto) {
         WorkOrder order = requireOrder(id);
         checkResidentOwner(order);
@@ -203,8 +207,10 @@ public class WorkOrderService {
         return PageVO.of(result.convert(this::toVO));
     }
 
-    /* 派单：PENDING/TO_ASSIGN → ASSIGNED；写派单关系；可改派（重新派单覆盖当前处理人） */
+    /* 派单：PENDING/TO_ASSIGN → ASSIGNED；ASSIGNED → ASSIGNED 为改派（重新派单覆盖
+       当前处理人）；已接单及之后不可改派（架构 §6.1，DEF-012） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'派单给服务人员 ' + #dto.assigneeId")
     public void assign(Long id, AssignWorkOrderDTO dto) {
         WorkOrder order = requireOrder(id);
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
@@ -216,11 +222,12 @@ public class WorkOrderService {
             throw new BusinessException(ErrorCode.ACCOUNT_FROZEN, "服务人员账号已冻结");
         }
         String oldStatus = order.getStatus();
-        if (!WorkOrderStatus.PENDING.equals(oldStatus)
-                && !WorkOrderStatus.TO_ASSIGN.equals(oldStatus)
-                && !WorkOrderStatus.ASSIGNED.equals(oldStatus)) {
+        /* 与 ALLOWED_TRANSITIONS 同口径：PENDING/TO_ASSIGN 首派 + ASSIGNED 改派 */
+        Set<String> assignable = Set.of(WorkOrderStatus.PENDING, WorkOrderStatus.TO_ASSIGN,
+                WorkOrderStatus.ASSIGNED);
+        if (!assignable.contains(oldStatus)) {
             throw new BusinessException(ErrorCode.WORK_ORDER_INVALID_TRANSITION,
-                    String.format("仅待受理/待派单状态可派单，当前 %s", oldStatus));
+                    String.format("仅待受理/待派单/已派单（改派）状态可派单，当前 %s", oldStatus));
         }
         order.setStatus(WorkOrderStatus.ASSIGNED);
         workOrderMapper.updateById(order);
@@ -247,6 +254,7 @@ public class WorkOrderService {
 
     /* 接单：ASSIGNED → ACCEPTED；仅被派单的服务人员 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'服务人员接单'")
     public void accept(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         checkAssignee(order);
@@ -257,6 +265,7 @@ public class WorkOrderService {
 
     /* 开始处理：ACCEPTED → IN_PROGRESS */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'开始处理工单'")
     public void process(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         checkAssignee(order);
@@ -266,6 +275,7 @@ public class WorkOrderService {
 
     /* 完成处理：IN_PROGRESS → TO_CONFIRM（待居民确认） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'提交处理结果'")
     public void complete(Long id, String solution) {
         WorkOrder order = requireOrder(id);
         checkAssignee(order);
@@ -277,6 +287,7 @@ public class WorkOrderService {
 
     /* 居民确认：TO_CONFIRM → COMPLETED */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'居民确认完成'")
     public void confirm(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         checkResidentOwner(order);
@@ -288,6 +299,7 @@ public class WorkOrderService {
 
     /* 关闭工单：COMPLETED → CLOSED（终态） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'管理员关闭工单'")
     public void close(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
@@ -297,6 +309,7 @@ public class WorkOrderService {
 
     /* 驳回：PENDING/TO_ASSIGN → REJECTED（终态） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'驳回工单：' + #reason")
     public void reject(Long id, String reason) {
         WorkOrder order = requireOrder(id);
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
@@ -304,8 +317,9 @@ public class WorkOrderService {
         appendProcess(id, "REJECT", order.getStatus(), WorkOrderStatus.REJECTED, reason);
     }
 
-    /* 取消：PENDING/TO_ASSIGN/ASSIGNED/ACCEPTED → CANCELLED；仅提交人本人 */
+    /* 取消：仅 PENDING/TO_ASSIGN 居民可取消（R19/架构 §6.1，流转表拦截其余状态，DEF-012） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'居民取消工单：' + #reason")
     public void cancel(Long id, String reason) {
         WorkOrder order = requireOrder(id);
         checkResidentOwner(order);
@@ -334,9 +348,8 @@ public class WorkOrderService {
     /* 状态机校验 + 主表更新（order.status 已被改写前保存原值） */
     private void transition(WorkOrder order, String target) {
         String current = order.getStatus();
-        if (current.equals(target)) {
-            return;
-        }
+        /* DEF-011：同态重复动作与非法流转同口径拒绝（R19/R20/R22：
+           已接单不可被再接、已完成不可再确认），且不产生处理记录 */
         Set<String> allowed = ALLOWED_TRANSITIONS.getOrDefault(current, Set.of());
         if (!allowed.contains(target)) {
             throw new BusinessException(ErrorCode.WORK_ORDER_INVALID_TRANSITION,

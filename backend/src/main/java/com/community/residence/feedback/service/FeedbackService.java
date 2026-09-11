@@ -102,6 +102,7 @@ public class FeedbackService {
 
     /* 办结：IN_SESSION → CLOSED；办结说明作为系统消息落档 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "FEEDBACK", targetId = "#id", content = "'反馈办结：' + #dto.result")
     public void close(Long id, CloseFeedbackDTO dto) {
         Feedback feedback = requireFeedback(id);
         SecurityUtils.checkCommunityAccess(feedback.getCommunityId());

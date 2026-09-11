@@ -28,6 +28,9 @@ import com.community.residence.resident.service.SysConfigService;
 import com.community.residence.messaging.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -38,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 资源预约业务逻辑：待审核→已预约→已完成 + 已拒绝/已取消/已违约（六大状态机 #4）。
@@ -63,9 +67,15 @@ public class ReservationService {
     private final ResidentMapper residentMapper;
     private final SysConfigService sysConfigService;
     private final NotificationService notificationService;
+    private final RedissonClient redissonClient;
 
-    /* 创建预约：校验时段落在模板内 + 冲突检测 + 容量校验 */
-    @Transactional(rollbackFor = Exception.class)
+    /**
+     * 创建预约：R33 冲突校验——同资源同日期时间段重叠 100% 拦截（含并发）。
+     * 并发防护为「Redisson 分布式锁 + 数据库唯一约束（V10 uk_reservation_slot）」双保险：
+     * 锁内完成重叠判定与插入；完全同槽的竞态漏网由唯一约束兜底（DuplicateKeyException
+     * 转业务冲突）。刻意不加 @Transactional：方法仅一条 INSERT，锁内自动提交保证
+     * 锁释放前已落库行对后到并发请求可见（先释放锁后提交的事务会让重叠判定失效）。
+     */
     public ReservationVO create(CreateReservationDTO dto) {
         PublicResource resource = resourceMapper.selectById(dto.getResourceId());
         if (resource == null) {
@@ -84,31 +94,64 @@ public class ReservationService {
         }
 
         Long userId = SecurityUtils.getUserId();
-        /* 同一居民同资源同日期不可重复预约在审/已预约记录 */
-        Long mineCount = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
-                .eq(ResourceReservation::getUserId, userId)
-                .eq(ResourceReservation::getResourceId, resource.getId())
-                .eq(ResourceReservation::getReserveDate, dto.getReserveDate())
-                .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
-        if (mineCount > 0) {
-            throw new BusinessException(ErrorCode.DATA_EXISTS, "同一天已预约该资源，不可重复预约");
+        RLock lock = redissonClient.getLock(
+                "reservation:lock:resource:" + resource.getId() + ":" + dto.getReserveDate());
+        boolean locked = false;
+        try {
+            try {
+                locked = lock.tryLock(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE, "预约请求繁忙，请稍后重试");
+            }
+            if (!locked) {
+                throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE, "预约请求繁忙，请稍后重试");
+            }
+            /* 同一居民同资源同日期不可重复预约在审/已预约记录 */
+            Long mineCount = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
+                    .eq(ResourceReservation::getUserId, userId)
+                    .eq(ResourceReservation::getResourceId, resource.getId())
+                    .eq(ResourceReservation::getReserveDate, dto.getReserveDate())
+                    .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
+            if (mineCount > 0) {
+                throw new BusinessException(ErrorCode.DATA_EXISTS, "同一天已预约该资源，不可重复预约");
+            }
+
+            /* 重叠判定：与任一占用中预约的时间区间有交集即拦截（半重叠/包含/被包含同拦，
+               仅首尾相接不算重叠）；替代原「仅起止完全相同的容量匹配」口径 */
+            Long overlapCount = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
+                    .eq(ResourceReservation::getResourceId, resource.getId())
+                    .eq(ResourceReservation::getReserveDate, dto.getReserveDate())
+                    .lt(ResourceReservation::getStartTime, dto.getEndTime())
+                    .gt(ResourceReservation::getEndTime, dto.getStartTime())
+                    .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
+            if (overlapCount > 0) {
+                throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "所选时段与已有预约重叠");
+            }
+
+            ResourceReservation reservation = new ResourceReservation();
+            reservation.setUserId(userId);
+            reservation.setResourceId(resource.getId());
+            reservation.setCommunityId(resource.getCommunityId());
+            reservation.setReserveDate(dto.getReserveDate());
+            reservation.setStartTime(dto.getStartTime());
+            reservation.setEndTime(dto.getEndTime());
+            reservation.setStatus(ReservationStatus.PENDING);
+            reservation.setPurpose(dto.getPurpose());
+            reservation.setContactPhone(dto.getContactPhone());
+            reservation.setRemark(dto.getRemark());
+            try {
+                reservationMapper.insert(reservation);
+            } catch (DuplicateKeyException e) {
+                /* 完全同槽并发竞态被 V10 唯一约束拦截（锁失效时的最后防线） */
+                throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段已被预约");
+            }
+            return toVO(reservation);
+        } finally {
+            if (locked) {
+                unlockQuietly(lock);
+            }
         }
-
-        checkCapacity(resource, dto.getReserveDate(), dto.getStartTime(), dto.getEndTime(), null);
-
-        ResourceReservation reservation = new ResourceReservation();
-        reservation.setUserId(userId);
-        reservation.setResourceId(resource.getId());
-        reservation.setCommunityId(resource.getCommunityId());
-        reservation.setReserveDate(dto.getReserveDate());
-        reservation.setStartTime(dto.getStartTime());
-        reservation.setEndTime(dto.getEndTime());
-        reservation.setStatus(ReservationStatus.PENDING);
-        reservation.setPurpose(dto.getPurpose());
-        reservation.setContactPhone(dto.getContactPhone());
-        reservation.setRemark(dto.getRemark());
-        reservationMapper.insert(reservation);
-        return toVO(reservation);
     }
 
     public ReservationVO getById(Long id) {
@@ -135,6 +178,7 @@ public class ReservationService {
 
     /* 确认预约：PENDING → RESERVED；容量校验排除自身（自身 PENDING 已计入占用） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约审核通过'")
     public void confirm(Long id, String remark) {
         ResourceReservation reservation = requireReservation(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
@@ -152,6 +196,7 @@ public class ReservationService {
 
     /* 完成预约：RESERVED → COMPLETED */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约完成登记'")
     public void complete(Long id, String remark) {
         ResourceReservation reservation = requireReservation(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
@@ -162,6 +207,7 @@ public class ReservationService {
 
     /* 拒绝预约：PENDING → REJECTED */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约审核拒绝：' + #reason")
     public void reject(Long id, String reason) {
         ResourceReservation reservation = requireReservation(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
@@ -189,6 +235,7 @@ public class ReservationService {
 
     /* 标记违约：RESERVED → VIOLATED；写违约记录，超限自动冻结 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DISPOSAL", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约违约处置：' + #reason")
     public void violate(Long id, String reason) {
         ResourceReservation reservation = requireReservation(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
@@ -306,7 +353,8 @@ public class ReservationService {
                 .orElse(null);
     }
 
-    /* 容量校验：同资源同日期同时间段的有效预约数 < 资源容量；excludeId 排除自身（确认场景） */
+    /* 容量校验（confirm 用，排除自身）：创建路径的重叠拦截已保证同槽至多一条占用，
+       此处为状态流转时的防御性复核；同槽有效预约数 < 资源容量 */
     private void checkCapacity(PublicResource resource, LocalDate date,
                                LocalTime start, LocalTime end, Long excludeId) {
         if (resource == null) {
@@ -353,6 +401,14 @@ public class ReservationService {
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
                 && !reservation.getUserId().equals(SecurityUtils.getUserId())) {
             throw new ForbiddenException("无权查看他人预约");
+        }
+    }
+
+    private void unlockQuietly(RLock lock) {
+        try {
+            lock.unlock();
+        } catch (Exception e) {
+            log.warn("预约冲突锁释放异常（锁键已过期时正常）", e);
         }
     }
 

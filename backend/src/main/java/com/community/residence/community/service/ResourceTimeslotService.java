@@ -29,6 +29,7 @@ public class ResourceTimeslotService {
     private final PublicResourceService publicResourceService;
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "RESOURCE_TIMESLOT", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建资源时段'")
     public TimeSlotVO create(Long resourceId, CreateTimeSlotDTO dto) {
         PublicResource resource = publicResourceService.requireResource(resourceId);
         SecurityUtils.checkCommunityAccess(resource.getCommunityId());
@@ -47,6 +48,7 @@ public class ResourceTimeslotService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "RESOURCE_TIMESLOT", targetId = "#id", content = "'更新资源时段'")
     public TimeSlotVO update(Long id, CreateTimeSlotDTO dto) {
         ResourceTimeslot timeslot = requireTimeslot(id);
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
@@ -65,6 +67,7 @@ public class ResourceTimeslotService {
 
     /* 删除保护：C7 预约按日期+时段校验冲突，模板时段被引用前不允许物理删除 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "RESOURCE_TIMESLOT", targetId = "#id")
     public void delete(Long id) {
         ResourceTimeslot timeslot = requireTimeslot(id);
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
