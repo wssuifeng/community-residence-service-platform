@@ -86,18 +86,32 @@ public class WorkOrderService {
     private final SysUserMapper sysUserMapper;
     private final NotificationService notificationService;
     private final FileUploadService fileUploadService;
+    private final com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
 
-    /* 提交工单：初始 PENDING 待受理；工单号 WO+日期+随机序号 */
+    /* 提交工单：初始 PENDING 待受理；工单号 WO+日期+随机序号。
+       R9「申请通过后获得居民端功能入口」+ R12 居住私有数据口径（DEF-001）：
+       提交人须在类别归属社区存在在住关系（move_out_date 为空） */
     @Transactional(rollbackFor = Exception.class)
     public WorkOrderVO create(CreateWorkOrderDTO dto) {
         ServiceCategory category = categoryMapper.selectById(dto.getCategoryId());
         if (category == null || category.getIsActive() != 1) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "服务类别不存在或已停用");
         }
+        Long residentId = SecurityUtils.getUserId();
+        Long activeRelation = residenceRelationMapper.selectCount(
+                new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
+                        .eq(com.community.residence.resident.entity.ResidenceRelation::getResidentId, residentId)
+                        .eq(com.community.residence.resident.entity.ResidenceRelation::getCommunityId,
+                                category.getCommunityId())
+                        .isNull(com.community.residence.resident.entity.ResidenceRelation::getMoveOutDate));
+        if (activeRelation == 0) {
+            throw new BusinessException(ErrorCode.FORBIDDEN,
+                    "居住关系未建立或不在该社区，无法提交工单（请先完成入住申请）");
+        }
 
         WorkOrder order = new WorkOrder();
         order.setOrderNo(generateOrderNo());
-        order.setResidentId(SecurityUtils.getUserId());
+        order.setResidentId(residentId);
         order.setCommunityId(category.getCommunityId());
         order.setCategoryId(category.getId());
         order.setTitle(dto.getTitle());
@@ -297,6 +311,20 @@ public class WorkOrderService {
                 "工单 " + order.getOrderNo() + " 已被居民确认完成", id);
     }
 
+    /* 居民不满意退回：TO_CONFIRM → IN_PROGRESS（R22「注明原因」——DTO @NotBlank 保证；
+       DEF-019 新增），退回后服务人员重新处理 */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'居民不满意退回：' + #reason")
+    public void returnBack(Long id, String reason) {
+        WorkOrder order = requireOrder(id);
+        checkResidentOwner(order);
+        transition(order, WorkOrderStatus.IN_PROGRESS);
+        appendProcess(id, "RETURN", WorkOrderStatus.TO_CONFIRM, WorkOrderStatus.IN_PROGRESS,
+                "居民不满意退回：" + reason);
+        notifyCurrentAssignee(order, "工单被退回处理中",
+                "工单 " + order.getOrderNo() + " 被居民退回：" + reason, id);
+    }
+
     /* 关闭工单：COMPLETED → CLOSED（终态） */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'管理员关闭工单'")
@@ -315,6 +343,10 @@ public class WorkOrderService {
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
         transition(order, WorkOrderStatus.REJECTED);
         appendProcess(id, "REJECT", order.getStatus(), WorkOrderStatus.REJECTED, reason);
+        /* R48 工单流转事件全覆盖（DEF-020）：驳回通知提交居民 */
+        notificationService.create(order.getResidentId(), order.getCommunityId(), "工单已驳回",
+                "您的工单 " + order.getOrderNo() + " 被驳回：" + reason,
+                "WORK_ORDER", "WORK_ORDER", id);
     }
 
     /* 取消：仅 PENDING/TO_ASSIGN 居民可取消（R19/架构 §6.1，流转表拦截其余状态，DEF-012） */

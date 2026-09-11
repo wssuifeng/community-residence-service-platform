@@ -20,6 +20,11 @@ import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.workorder.entity.WorkOrder;
 import com.community.residence.workorder.mapper.WorkOrderMapper;
+import com.community.residence.workorder.mapper.WorkOrderAssignmentMapper;
+import com.community.residence.workorder.mapper.ServiceCategoryMapper;
+import com.community.residence.workorder.entity.WorkOrderAssignment;
+import com.community.residence.workorder.entity.ServiceCategory;
+import com.community.residence.auth.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +49,9 @@ public class StatisticsService {
     private final HouseMapper houseMapper;
     private final ResidentMapper residentMapper;
     private final WorkOrderMapper workOrderMapper;
+    private final WorkOrderAssignmentMapper assignmentMapper;
+    private final ServiceCategoryMapper serviceCategoryMapper;
+    private final SysUserMapper sysUserMapper;
     private final WorkOrderEvaluationMapper evaluationMapper;
     private final ResourceReservationMapper reservationMapper;
     private final LeaseRecordMapper leaseMapper;
@@ -133,6 +141,67 @@ public class StatisticsService {
                         .eq(communityId != null, WorkOrderEvaluation::getCommunityId, communityId)));
 
         return result;
+    }
+
+    /** 评价满意度双维度聚合（R39，DEF-022）：按服务人员（最新派单）/ 按服务类别分组。
+        输出行：dimension 键（staffId/categoryId）+ 名称 + 评价数/平均分/满意率 */
+    public Map<String, Object> evaluationAggregation(Long communityId) {
+        List<WorkOrderEvaluation> evaluations = evaluationMapper.selectList(
+                new LambdaQueryWrapper<WorkOrderEvaluation>()
+                        .eq(communityId != null, WorkOrderEvaluation::getCommunityId, communityId));
+
+        /* 工单 → 类别 与 工单 → 最新派单服务人员 的映射（一次载入） */
+        List<Long> orderIds = evaluations.stream().map(WorkOrderEvaluation::getWorkOrderId).toList();
+        Map<Long, Long> orderCategory = orderIds.isEmpty() ? Map.of()
+                : workOrderMapper.selectBatchIds(orderIds).stream()
+                        .collect(Collectors.toMap(WorkOrder::getId, WorkOrder::getCategoryId));
+        Map<Long, Long> orderStaff = orderIds.isEmpty() ? Map.of()
+                : assignmentMapper.selectList(new LambdaQueryWrapper<WorkOrderAssignment>()
+                                .in(WorkOrderAssignment::getWorkOrderId, orderIds)
+                                .orderByAsc(WorkOrderAssignment::getId)).stream()
+                        .collect(Collectors.toMap(WorkOrderAssignment::getWorkOrderId,
+                                WorkOrderAssignment::getAssigneeId, (a, b) -> b));
+
+        Map<Long, String> staffNames = sysUserMapper.selectList(new LambdaQueryWrapper<com.community.residence.auth.entity.SysUser>()
+                        .eq(com.community.residence.auth.entity.SysUser::getRole, RoleConstants.STAFF))
+                .stream().collect(Collectors.toMap(
+                        com.community.residence.auth.entity.SysUser::getId,
+                        com.community.residence.auth.entity.SysUser::getRealName));
+        Map<Long, String> categoryNames = serviceCategoryMapper.selectList(null).stream()
+                .collect(Collectors.toMap(ServiceCategory::getId, ServiceCategory::getName));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("byStaff", aggregate(evaluations,
+                e -> orderStaff.containsKey(e.getWorkOrderId())
+                        ? "staff-" + orderStaff.get(e.getWorkOrderId()) : null,
+                id -> staffNames.getOrDefault(Long.parseLong(id.substring(6)), "未知服务人员")));
+        result.put("byCategory", aggregate(evaluations,
+                e -> orderCategory.containsKey(e.getWorkOrderId())
+                        ? "category-" + orderCategory.get(e.getWorkOrderId()) : null,
+                id -> categoryNames.getOrDefault(Long.parseLong(id.substring(9)), "未知类别")));
+        return result;
+    }
+
+    /* 分组聚合骨架：total/avgRating/satisfiedRate 三指标 + 名称回填 */
+    private List<Map<String, Object>> aggregate(List<WorkOrderEvaluation> evaluations,
+                                                java.util.function.Function<WorkOrderEvaluation, String> keyFn,
+                                                java.util.function.Function<String, String> nameFn) {
+        Map<String, List<WorkOrderEvaluation>> grouped = evaluations.stream()
+                .filter(e -> keyFn.apply(e) != null)
+                .collect(Collectors.groupingBy(keyFn));
+        List<Map<String, Object>> rows = new java.util.ArrayList<>();
+        for (Map.Entry<String, List<WorkOrderEvaluation>> entry : grouped.entrySet()) {
+            List<WorkOrderEvaluation> group = entry.getValue();
+            Map<String, Object> row = new HashMap<>();
+            row.put("total", (long) group.size());
+            row.put("avgRating", group.stream().mapToInt(WorkOrderEvaluation::getRating).average().orElse(0));
+            row.put("satisfiedRate", group.stream()
+                    .filter(e -> e.getIsSatisfied() != null && e.getIsSatisfied() == 1).count() * 100.0 / group.size());
+            row.put("name", nameFn.apply(entry.getKey()));
+            rows.add(row);
+        }
+        rows.sort((a, b) -> Long.compare((long) b.get("total"), (long) a.get("total")));
+        return rows;
     }
 
     /** 工单统计（专项）：状态分布 + 优先级分布 */

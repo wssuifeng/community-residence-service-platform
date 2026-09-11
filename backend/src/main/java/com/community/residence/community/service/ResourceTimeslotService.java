@@ -27,6 +27,7 @@ public class ResourceTimeslotService {
 
     private final ResourceTimeslotMapper timeslotMapper;
     private final PublicResourceService publicResourceService;
+    private final com.community.residence.reservation.mapper.ResourceReservationMapper reservationMapper;
 
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "RESOURCE_TIMESLOT", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建资源时段'")
@@ -71,6 +72,22 @@ public class ResourceTimeslotService {
     public void delete(Long id) {
         ResourceTimeslot timeslot = requireTimeslot(id);
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
+        /* R6 删除保护（DEF-015）：预约表无 timeslot_id，按资源+起止时段匹配引用；
+           周循环模板按 (resource_id, day_of_week, start_time, end_time) 定位，
+           存在该模板形状的占用中预约（任意日期）即拒绝删除 */
+        Long referencing = reservationMapper.selectCount(
+                new LambdaQueryWrapper<com.community.residence.reservation.entity.ResourceReservation>()
+                        .eq(com.community.residence.reservation.entity.ResourceReservation::getResourceId,
+                                timeslot.getResourceId())
+                        .eq(com.community.residence.reservation.entity.ResourceReservation::getStartTime,
+                                timeslot.getStartTime())
+                        .eq(com.community.residence.reservation.entity.ResourceReservation::getEndTime,
+                                timeslot.getEndTime())
+                        .in(com.community.residence.reservation.entity.ResourceReservation::getStatus,
+                                java.util.List.of("PENDING", "RESERVED")));
+        if (referencing > 0) {
+            throw new BusinessException(ErrorCode.TIMESLOT_HAS_RESERVATION);
+        }
         timeslotMapper.deleteById(id);
         log.info("资源时段已删除：timeslotId={}, operator={}", id, SecurityUtils.getUserId());
     }
