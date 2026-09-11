@@ -54,6 +54,7 @@ public class ViewingAppointmentService {
     private final ResidentMapper residentMapper;
     private final ViolationRecordMapper violationRecordMapper;
     private final RedissonClient redissonClient;
+    private final com.community.residence.messaging.service.NotificationService notificationService;
 
     /**
      * 创建预约：居民取令牌身份；游客必填姓名电话；时段落在房源模板内 + 冲突检测。
@@ -170,6 +171,8 @@ public class ViewingAppointmentService {
         validateTransition(appointment, "RESERVED");
         appointment.setStatus("RESERVED");
         appointmentMapper.updateById(appointment);
+        notifyApplicant(appointment, "看房预约已确认",
+                "您 " + appointment.getAppointmentDate() + " 的看房预约已确认");
     }
 
     /* 完成预约：RESERVED → COMPLETED */
@@ -181,6 +184,8 @@ public class ViewingAppointmentService {
         validateTransition(appointment, "COMPLETED");
         appointment.setStatus("COMPLETED");
         appointmentMapper.updateById(appointment);
+        notifyApplicant(appointment, "看房预约已完成",
+                "您 " + appointment.getAppointmentDate() + " 的看房预约已完成");
     }
 
     /* 取消预约：TO_CONFIRM/RESERVED → CANCELLED（居民本人或管理端） */
@@ -197,6 +202,8 @@ public class ViewingAppointmentService {
         appointment.setStatus("CANCELLED");
         appointment.setRemark(reason);
         appointmentMapper.updateById(appointment);
+        notifyApplicant(appointment, "看房预约已取消",
+                "您 " + appointment.getAppointmentDate() + " 的看房预约已取消" + (reason != null ? "：" + reason : ""));
     }
 
     /* 标记违约：RESERVED → VIOLATED；居民违约写 violation_record（游客无账号不计） */
@@ -218,6 +225,17 @@ public class ViewingAppointmentService {
             record.setPunishment("记录违约");
             record.setRemark(reason);
             violationRecordMapper.insert(record);
+        }
+        notifyApplicant(appointment, "看房预约违约处置",
+                "您 " + appointment.getAppointmentDate() + " 的看房预约被标记违约：" + reason);
+    }
+
+    /* R55「确认/取消均通知对方」（DEF-023）：预约人有账号时经通知中心触达；
+       游客预约无账号，通知语义不适用（违约处置等动作的游客触达无通道，为 R55 口径内边界） */
+    private void notifyApplicant(ViewingAppointment appointment, String title, String content) {
+        if (appointment.getUserId() != null) {
+            notificationService.create(appointment.getUserId(), appointment.getCommunityId(),
+                    title, content, "RESERVATION", "VIEWING_APPOINTMENT", appointment.getId());
         }
     }
 

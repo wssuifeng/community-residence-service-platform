@@ -51,6 +51,13 @@ public class StatisticsController {
         return ApiResponse.success(statisticsService.reservationStatistics(communityId));
     }
 
+    @Operation(summary = "评价满意度双维度聚合", description = "按服务人员（经派单关系）与按服务类别聚合满意度（R39）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/evaluations/aggregation")
+    public ApiResponse<Map<String, Object>> evaluationAggregation(@RequestParam(required = false) Long communityId) {
+        return ApiResponse.success(statisticsService.evaluationAggregation(communityId));
+    }
+
     @Operation(summary = "社区选项列表", description = "看板社区筛选下拉")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/communities")

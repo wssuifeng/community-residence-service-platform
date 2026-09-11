@@ -44,9 +44,11 @@ import java.util.Set;
 public class LeaseService {
 
     /** 状态机合法流转表 */
+    /* 状态机（架构 §6.2 线性流转，R16）：待审核→已生效→已搬出→已归档；
+       DEF-013 删除 ACTIVE→ARCHIVED 跳级边（未搬出不可归档） */
     private static final Map<String, Set<String>> ALLOWED_TRANSITIONS = Map.of(
             "PENDING", Set.of("ACTIVE", "REJECTED"),
-            "ACTIVE", Set.of("MOVED_OUT", "ARCHIVED"),
+            "ACTIVE", Set.of("MOVED_OUT"),
             "MOVED_OUT", Set.of("ARCHIVED"),
             "ARCHIVED", Set.of(),
             "REJECTED", Set.of());
@@ -97,6 +99,10 @@ public class LeaseService {
     public LeaseVO update(Long id, CreateLeaseDTO dto) {
         LeaseRecord lease = requireLease(id);
         SecurityUtils.checkCommunityAccess(lease.getCommunityId());
+        /* R16「归档后不可修改」（DEF-017）：流转端点已有状态机拦截，PUT 旁路补终态校验 */
+        if ("ARCHIVED".equals(lease.getStatus())) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "已归档的租约不可修改");
+        }
         if (!lease.getHouseId().equals(dto.getHouseId())) {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "租约不允许变更房屋");
         }

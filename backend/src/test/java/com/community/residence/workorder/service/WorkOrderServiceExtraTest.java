@@ -56,6 +56,8 @@ class WorkOrderServiceExtraTest {
     private SysUserMapper sysUserMapper;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
 
     @InjectMocks
     private WorkOrderService workOrderService;
@@ -108,6 +110,8 @@ class WorkOrderServiceExtraTest {
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
             when(categoryMapper.selectById(1L)).thenReturn(category);
+            /* DEF-001：提交人须在类别归属社区有在住关系 */
+            when(residenceRelationMapper.selectCount(any())).thenReturn(1L);
             when(workOrderMapper.insert(any(WorkOrder.class))).thenAnswer(inv -> {
                 inv.getArgument(0, WorkOrder.class).setId(1L);
                 return 1;
