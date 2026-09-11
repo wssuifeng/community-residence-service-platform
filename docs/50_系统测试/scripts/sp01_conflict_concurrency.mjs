@@ -9,7 +9,7 @@
  */
 import { execSync } from 'child_process';
 
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 const MYSQL = 'mysql -u root -h localhost --default-character-set=utf8mb4 community_residence_test -N -e';
 
 let pass = 0, fail = 0;

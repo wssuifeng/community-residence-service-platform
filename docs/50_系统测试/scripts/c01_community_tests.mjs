@@ -6,7 +6,7 @@
  */
 import { execSync } from 'child_process';
 
-const BASE = 'http://localhost:8080';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
 let pass = 0, fail = 0;
 const failures = [];
 function tc(id, expectDesc, ok, actual) {
@@ -224,12 +224,24 @@ async function main() {
     // 阳光花园健身房(id=1) + 未完成预约
     const rl = await api('GET', '/api/v1/communities/1/resources');
     const gym = (rl.data?.records ?? []).find(x => x.name.includes('健身'));
-    const slot = { data: { id: Number(q(`SELECT id FROM resource_timeslot WHERE resource_id=${gym.id} AND day_of_week=5 AND start_time='09:00:00' LIMIT 1`)) } };
-    // resident1 预约该时段（找未来周五）
-    const nextFri = new Date(); nextFri.setDate(nextFri.getDate() + ((5 - nextFri.getDay() + 7) % 7 || 7));
+    // 动态选健身房现存模板的未占档（历次执行会消耗/占用模板，固定引用会漂移）
     const P = n => String(n).padStart(2, '0');
-    const ds = `${nextFri.getFullYear()}-${P(nextFri.getMonth() + 1)}-${P(nextFri.getDate())}`;
-    const rv = await api('POST', '/api/v1/resource-reservations', { token: res2Tok, body: { resourceId: gym.id, reserveDate: ds, startTime: '09:00:00', endTime: '10:00:00', purpose: 'C1-022', contactPhone: '13800005555' } });
+    let ds = null, st = null, et = null, slotId = null;
+    for (let wk = 0; wk < 7 && !slotId; wk++) {
+      const dow = ((new Date().getDay() + wk) % 7) || 7; // Java 口径 MON=1..SUN=7
+      const tpl = q(`SELECT id, start_time, end_time FROM resource_timeslot WHERE resource_id=${gym.id} AND day_of_week=${dow} AND is_available=1 ORDER BY start_time LIMIT 1`);
+      if (!tpl) continue;
+      const [tid, s0, e0] = tpl.split('	');
+      // 找该 dow 的未来日期（≥7 天后避开已占）
+      for (let add = ((dow - new Date().getDay() + 7) % 7 || 7); add <= 60; add += 7) {
+        const d = new Date(); d.setDate(d.getDate() + add);
+        const cand = `${d.getFullYear()}-${P(d.getMonth() + 1)}-${P(d.getDate())}`;
+        const busy = Number(q(`SELECT COUNT(*) FROM resource_reservation WHERE resource_id=${gym.id} AND reserve_date='${cand}' AND status IN ('PENDING','RESERVED') AND start_time < '${e0}' AND end_time > '${s0}'`));
+        if (busy === 0) { ds = cand; st = s0.slice(0, 5) + ':00'; et = (Number(s0.slice(0, 2)) + 1 + '').padStart(2, '0') + s0.slice(5, 8); slotId = Number(tid); break; }
+      }
+    }
+    const slot = { data: { id: slotId } };
+    const rv = slotId ? await api('POST', '/api/v1/resource-reservations', { token: res2Tok, body: { resourceId: gym.id, reserveDate: ds, startTime: st, endTime: et, purpose: 'C1-022', contactPhone: '13800005555' } }) : { code: 'skip' };
     if (ok(rv)) {
       const delR = await api('DELETE', `/api/v1/resources/${gym.id}`, { token: admin1Tok });
       const delT = await api('DELETE', `/api/v1/timeslots/${slot.data.id}`, { token: admin1Tok });
@@ -265,6 +277,7 @@ async function main() {
     const adm = await api('POST', '/api/v1/sys-users', { token: superTok, body: { username: uname, password: 'Admin123456', realName: '级联管理员', phone: uniqPhone(), role: 'ADMIN' } });
     await api('POST', `/api/v1/sys-users/${adm.data.id}/communities`, { token: superTok, body: { communityId: cid } });
     // 025：管理员先试删（被拒）
+    await new Promise(r => setTimeout(r, 1100)); // DEF-009 口径：绑定吊销同秒登录会被拦，隔秒重登
     const admTok = (await api('POST', '/api/v1/auth/admin/login', { body: { username: uname, password: 'Admin123456' } })).data?.token;
     const r25 = await api('DELETE', `/api/v1/communities/${cid}`, { token: admTok });
     tc('TC-C1-025', '管理员级联删除被拒', r25.status === 403, `HTTP ${r25.status}`);

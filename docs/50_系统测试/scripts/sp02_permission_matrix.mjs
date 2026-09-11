@@ -8,8 +8,8 @@
  */
 import { execSync } from 'child_process';
 
-const BASE = 'http://localhost:8080';
-const BACKEND_LOG = (process.env.TEMP || 'C:/Users/17841/AppData/Local/Temp') + '/backend_test.log';
+const BASE = process.env.TEST_BASE || 'http://localhost:8080';
+const BACKEND_LOG = process.env.BACKEND_LOG || (process.env.TEMP || 'C:/Users/17841/AppData/Local/Temp') + '/backend_test.log';
 
 let pass = 0, fail = 0;
 const failures = [];
@@ -115,15 +115,17 @@ async function main() {
     tc(C, '13对照-公告公开', '200', accepted(n), `HTTP ${n.status} code=${n.code}`);
     const h = await api('GET', '/api/v1/housings?page=1&size=1');
     tc(C, '13对照-房源公开', '200', accepted(h), `HTTP ${h.status} code=${h.code}`);
-    const vslots = await api('GET', `/api/v1/housings/1/available-slots?startDate=${future(1)}&endDate=${future(14)}`);
+    const vslots = await api('GET', `/api/v1/housings/1/available-slots?startDate=${future(1)}&endDate=${future(21)}`);
     const vlist = vslots.data?.records ?? vslots.data ?? [];
     let vaOk = false, vaDesc = '';
-    const freeSlot = Array.isArray(vlist) ? vlist[0] : null;
-    if (freeSlot) {
+    const slots = Array.isArray(vlist) ? vlist : [];
+    // 逐档尝试（slots 不标记已占——历次执行占用的档在预约时被 5401 拦，换档即可）
+    for (const freeSlot of slots) {
       const va = await api('POST', '/api/v1/viewing-appointments', { body: { housingId: 1, appointmentDate: String(freeSlot.date ?? freeSlot.appointmentDate ?? '').slice(0, 10), startTime: String(freeSlot.startTime).slice(0, 5) + ':00', endTime: String(freeSlot.endTime).slice(0, 5) + ':00', visitorName: '游客张三', contactPhone: '13812340003', remark: 'SP-006 对照' } });
-      vaOk = accepted(va);
-      vaDesc = `HTTP ${va.status} code=${va.code} 档=${JSON.stringify(freeSlot).slice(0, 80)}`;
-    } else { vaOk = true; vaDesc = 'available-slots 无返回档（历次执行占满，非缺陷）'; }
+      if (accepted(va)) { vaOk = true; vaDesc = `HTTP ${va.status} code=${va.code} 档=${JSON.stringify(freeSlot).slice(0, 80)}`; break; }
+      vaDesc = `HTTP ${va.status} code=${va.code} 档=${JSON.stringify(freeSlot).slice(0, 80)}（换档重试中）`;
+    }
+    if (!vaOk && !slots.length) { vaOk = true; vaDesc = 'available-slots 无返回档（历次执行占满，非缺陷）'; }
     tc(C, '14对照-游客看房预约', '200', vaOk, vaDesc);
   }
 
