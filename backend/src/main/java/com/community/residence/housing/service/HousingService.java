@@ -67,6 +67,7 @@ public class HousingService {
 
     /* 上架房源：社区由房屋推导；同一房屋仅允许一条非下线房源 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSING", targetId = "#result.id", content = "'创建房源：' + #dto.title")
     public HousingVO create(CreateHousingDTO dto) {
         House house = houseMapper.selectById(dto.getHouseId());
         if (house == null) {
@@ -94,6 +95,7 @@ public class HousingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "HOUSING", targetId = "#id", content = "'更新房源：' + #dto.title")
     public HousingVO update(Long id, CreateHousingDTO dto) {
         Housing housing = requireHousing(id);
         SecurityUtils.checkCommunityAccess(housing.getCommunityId());
@@ -107,6 +109,7 @@ public class HousingService {
 
     /* 删除保护：存在待确认/已预约的看房预约时拒绝；物理删除 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "HOUSING", targetId = "#id")
     public void delete(Long id) {
         Housing housing = requireHousing(id);
         SecurityUtils.checkCommunityAccess(housing.getCommunityId());
@@ -156,6 +159,7 @@ public class HousingService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "HOUSING", targetId = "#id", content = "'房源状态变更为 ' + #dto.status")
     public void updateStatus(Long id, UpdateHousingStatusDTO dto) {
         Housing housing = requireHousing(id);
         SecurityUtils.checkCommunityAccess(housing.getCommunityId());

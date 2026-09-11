@@ -31,6 +31,7 @@ public class UnitService {
     private final HouseMapper houseMapper;
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "UNIT", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建单元：' + #dto.name")
     public UnitVO create(CreateUnitDTO dto) {
         Building building = requireBuilding(dto.getBuildingId());
         SecurityUtils.checkCommunityAccess(building.getCommunityId());
@@ -44,6 +45,7 @@ public class UnitService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "UNIT", targetId = "#id", content = "'更新单元：' + #dto.name")
     public UnitVO update(Long id, CreateUnitDTO dto) {
         Unit unit = requireUnit(id);
         Building building = requireBuilding(dto.getBuildingId());
@@ -59,6 +61,7 @@ public class UnitService {
 
     /* 删除保护：单元下存在未删除房屋时拒绝（软删除） */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "UNIT", targetId = "#id")
     public void delete(Long id) {
         Unit unit = requireUnit(id);
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());

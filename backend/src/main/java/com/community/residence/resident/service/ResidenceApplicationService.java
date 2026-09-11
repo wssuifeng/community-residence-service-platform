@@ -113,6 +113,7 @@ public class ResidenceApplicationService {
 
     /* 审批通过：建立居住关系 + 租住记录 + 房屋状态翻转，同一事务 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESIDENCE_APPLICATION", targetId = "#id", content = "'入住申请审核通过'")
     public ApplicationVO approve(Long id, ApproveApplicationDTO dto) {
         ResidenceApplication application = requireApplication(id);
         checkReviewAccess(application);
@@ -169,6 +170,7 @@ public class ResidenceApplicationService {
 
     /* 审批拒绝：终态不可变更 */
     @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESIDENCE_APPLICATION", targetId = "#id", content = "'入住申请驳回：' + #dto.reason")
     public void reject(Long id, RejectApplicationDTO dto) {
         ResidenceApplication application = requireApplication(id);
         checkReviewAccess(application);
