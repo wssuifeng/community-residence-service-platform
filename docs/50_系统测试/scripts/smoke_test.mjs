@@ -168,14 +168,17 @@ async function main() {
     });
     const obs = `无关系账号提交工单 HTTP ${woDenied.status} code=${woDenied.code}（观察项：R9 口径疑似应拒，归 TC-C2/C4 裁决）`;
     // 申请入住清源里空置房（动态查询，脚本可重复执行）
-    // 清源里（社区 2）全部单元找空置房——按社区实际单元查询，避免扫到其他社区
-    //（此前按 id 3~12 扫描会命中累加数据中其他社区的单元，审核人 test_admin 无权导致 404）
+    // 清源里（社区 2）找空置房：社区楼栋→逐楼栋单元→房（全量动态，勿依赖固定单元 id）
     let vacant = null;
-    for (let uid of [2, 3, 133, 175, 176, 177]) {
-      const hs = await api('GET', `/api/v1/units/${uid}/houses?page=1&size=50`);
-      if (hs.status !== 200) continue;
-      vacant = (hs.data?.records ?? hs.data ?? []).find(h => h.status === 'VACANT') ?? null;
-      if (vacant) break;
+    const bList = await api('GET', '/api/v1/communities/2/buildings?page=1&size=50');
+    outer: for (const b of (bList.data?.records ?? bList.data ?? [])) {
+      const uList = await api('GET', `/api/v1/buildings/${b.id}/units`);
+      for (const u of (uList.data?.records ?? uList.data ?? [])) {
+        const hs = await api('GET', `/api/v1/units/${u.id}/houses?page=1&size=100`);
+        if (hs.status !== 200) continue;
+        vacant = (hs.data?.records ?? hs.data ?? []).find(h => h.status === 'VACANT') ?? null;
+        if (vacant) break outer;
+      }
     }
     if (!vacant) throw new Error('清源里全部单元无空置房（累加耗尽，需重建数据）');
     const app = await api('POST', '/api/v1/residence-applications', {

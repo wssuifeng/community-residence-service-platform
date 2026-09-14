@@ -262,6 +262,10 @@ async function main() {
     const r1s = new StompSession(r1Tok, 'r1-timing');
     const a1s = new StompSession(admin1Tok, 'a1-timing');
     await r1s.connect(); await a1s.connect();
+    /* 等待服务器端 SessionConnectedEvent 异步完成 Redis 在线注册（ws:session）
+       —— 018 尾部 a1live.close() 的 deregister 与本连接 register 存在事件竞态，
+       立即发消息会命中「对端离线」分支跳过 topic 广播（DEF-036 关联时序）。 */
+    await new Promise(x => setTimeout(x, 2000));
     const r1Notif = await r1s.subscribe('/user/queue/notifications');
     const a1Notif = await a1s.subscribe('/user/queue/notifications');
     await r1s.subscribe(`/topic/feedback/${F}`);
