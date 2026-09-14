@@ -1,9 +1,9 @@
 /** C2 居民与居住关系管理接口（接口设计.md §9.2） */
 import { http } from '@/utils/request'
+import { loadSession } from '@/utils/auth'
 import type { PageResult } from '@/types/api'
 import type {
   IApplicationApproveDTO,
-  IApplicationApproveResult,
   IApplicationRejectDTO,
   IChangePasswordDTO,
   IConfigValueResult,
@@ -74,9 +74,9 @@ export function getResidenceApplicationList(params: IResidenceApplicationQuery) 
   return http.get<PageResult<IResidenceApplication>>('/residence-applications', params)
 }
 
-/** 入住申请审批通过（接口设计.md 9.2.2.4） */
+/** 入住申请审批通过（接口设计.md 9.2.2.4；后端实际返回更新后的申请 VO，非文档示例组装结果） */
 export function approveResidenceApplication(id: number, data: IApplicationApproveDTO) {
-  return http.patch<IApplicationApproveResult>(
+  return http.patch<IResidenceApplication>(
     `/residence-applications/${id}/approve`,
     data
   )
@@ -95,6 +95,21 @@ export function getResidentResidenceList(
   params?: IResidenceRelationQuery
 ) {
   return http.get<PageResult<IResidenceRelation>>(`/residents/${residentId}/residences`, params)
+}
+
+/**
+ * 当前登录居民的居住关系列表（居民端自助查询，居民端三段预约流的社区来源）
+ * residentId 取当前会话用户 ID（后端 ResidenceRelationService 对 RESIDENT 强校验限本人），
+ * 默认只取生效中关系（status=ACTIVE，后端按 move_out_date IS NULL 过滤）
+ */
+export async function getMyResidenceRelations(
+  params?: Omit<IResidenceRelationQuery, 'page' | 'size'>
+): Promise<PageResult<IResidenceRelation>> {
+  const residentId = loadSession()?.user.id
+  if (!residentId) {
+    throw new Error('未登录或会话已过期')
+  }
+  return getResidentResidenceList(residentId, { page: 1, size: 50, ...params })
 }
 
 /** 房屋居民分页列表（接口设计.md 9.2.3.2） */

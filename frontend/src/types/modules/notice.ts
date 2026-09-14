@@ -48,7 +48,11 @@ export const targetAudienceLabels: Record<TargetAudience, string> = {
   ALL: '全部居民'
 }
 
-/** 公告（接口设计.md 9.5.1.1 响应） */
+/** 公告（接口设计.md 9.5.1.1 响应；
+ * 后端 NoticeVO 当前实际返回 id/communityId/communityName/title/content/status/
+ * publishTime/endTime/viewCount/publisherId/publisherName/createdAt，
+ * type/priority/expireTime/targetAudience 均已不返回（漂移字段，读取需空值防御）；
+ * notice 表已有 is_pinned 列但 VO 暂未暴露，置顶判定同时兼容 pinned 布尔字段） */
 export interface INotice {
   id: number
   /** SUPER_ADMIN 全系统广播时为 null */
@@ -56,12 +60,22 @@ export interface INotice {
   communityName: string | null
   title: string
   content: string
-  type: NoticeType
-  priority: NoticePriority
+  /** 漂移字段：后端 NoticeVO 不再返回 */
+  type?: NoticeType
+  /** 漂移字段：后端 NoticeVO 不再返回 */
+  priority?: NoticePriority
   status: NoticeStatus
   publishTime: string | null
-  expireTime: string | null
-  targetAudience: TargetAudience
+  /** 漂移字段：后端实际返回 endTime，读取侧优先用 endTime */
+  expireTime?: string | null
+  /** 后端实际返回字段：截止/失效时间 */
+  endTime?: string | null
+  /** 置顶标记（notice 表 is_pinned 列，VO 暴露前恒缺省） */
+  pinned?: boolean
+  /** 置顶标记的备选命名（防御 VO 字段名落地差异） */
+  isPinned?: boolean
+  /** 漂移字段：后端 NoticeVO 不再返回 */
+  targetAudience?: TargetAudience
   viewCount: number
   publisherId: number
   publisherName: string

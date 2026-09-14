@@ -52,7 +52,9 @@ export function markNotificationRead(id: number) {
   return http.patch<null>(`/notifications/${id}/read`)
 }
 
-/** 全部标记已读（接口设计.md 9.11.1.5） */
-export function markAllNotificationsRead() {
-  return http.patch<IMarkAllReadResult>('/notifications/read-all')
+/** 全部标记已读（接口设计.md 9.11.1.5；后端 data 为 null，api 层适配为
+ *  { count: number | null }——null 表示后端未回传数量，调用方提示语降级） */
+export async function markAllNotificationsRead(): Promise<IMarkAllReadResult> {
+  const data = await http.patch<number | null>('/notifications/read-all')
+  return { count: typeof data === 'number' ? data : null }
 }

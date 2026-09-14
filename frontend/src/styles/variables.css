@@ -44,6 +44,29 @@
   --color-bg: #f9fafb;
   --color-bg-hover: #f3f4f6;
 
+  /* 深色区（游客端沉浸式首页页脚等深灰蓝底场景） */
+  --color-bg-dark: #1e293b;
+  --color-text-on-dark: rgba(255, 255, 255, 0.72);
+  --color-text-on-dark-strong: #f8fafc;
+
+  /* 浅灰容器底（游客首页公告板等贴底容器，仅比 --color-bg 深一档的冷灰） */
+  --color-bg-subtle: #f3f4f6;
+
+  /* 兼容别名（2026-09-12 用户裁决：全站画布统一冷灰，暖白弃用；仅 auth/错误页
+     历史引用，新代码一律直接用 --color-bg） */
+  --color-bg-warm: var(--color-bg);
+
+  /* 语义色浅底（预警横幅/状态区块等大面积浅色容器，比半透明叠加更可控） */
+  --color-danger-soft: #fef1f1;
+  --color-warning-soft: #fff7e6;
+  --color-success-soft: #e9f9f1;
+
+  /* 白卡柔和染色阴影（全站设计语言：卡片以阴影分层，替代硬边框） */
+  --shadow-card: 0 1px 3px rgba(31, 41, 55, 0.06), 0 6px 16px rgba(31, 41, 55, 0.04);
+
+  /* 登录/注册大卡浮层阴影（比 --shadow-card 更柔更远的悬浮感） */
+  --shadow-card-float: 0 2px 6px rgba(31, 41, 55, 0.04), 0 18px 48px rgba(31, 41, 55, 0.09);
+
   /* 状态色（§3.4.4，映射六大状态机） */
   --status-pending: #f59e0b;
   --status-processing: #3b82f6;
@@ -63,12 +86,35 @@
   --font-size-lg: 18px;
   --font-size-xl: 24px;
   --font-size-xxl: 32px;
+  /* 沉浸式 Hero 主标题（营销门面页专用，超出常规层级） */
+  --font-size-hero: 40px;
+  /* 错误页状态码特大字（403/404 数字展示） */
+  --font-size-display: 80px;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-bold: 600;
   --line-height-tight: 1.25;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.75;
+
+  /* 管理端（frontend-beautify 增量；2026-09-12 D1 修订：画布与全站统一冷灰，
+     仅侧栏/白卡自成体系） */
+  --admin-sidebar-bg: #10233f;
+  --admin-sidebar-active: #3b6dff;
+  --admin-sidebar-width: 232px;
+  --admin-canvas: var(--color-bg);
+  --admin-sidebar-text: rgba(255, 255, 255, 0.72);
+  --admin-sidebar-text-active: #ffffff;
+  --admin-card-bg: #ffffff;
+
+  /* 管理端图表色板（02-运营看板设计稿推导，frontend-beautify 任务 2 增量；
+     ECharts 不解析 CSS 变量，组件层经 getComputedStyle 读取，色值单一来源在此） */
+  --chart-c1: #3b6dff; /* 品牌蓝：主序列 / 待受理族 */
+  --chart-c2: #10b981; /* 绿：处理中 / 已入住 */
+  --chart-c3: #f59e0b; /* 橙：已完成 / 维护中 */
+  --chart-c4: #8b5cf6; /* 紫：归档 / 预留等次要族 */
+  --chart-c5: #6b7280; /* 灰：取消兜底 */
+  --chart-c6: #d1d5db; /* 浅灰：空置等低占比强调的大面积段（对照设计稿） */
 
   /* z-index（§3.6） */
   --z-index-dropdown: 1000;

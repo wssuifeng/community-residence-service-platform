@@ -54,9 +54,10 @@ export interface INotificationQuery extends PageQuery {
   endTime?: string
 }
 
-/** 全部标记已读响应（接口设计.md 9.11.1.5） */
+/** 全部标记已读响应（接口设计.md 9.11.1.5；后端实为 ApiResponse<Void>，
+ *  data 为 null 不回传数量，count=null 表示后端未提供，前端提示降级） */
 export interface IMarkAllReadResult {
-  count: number
+  count: number | null
 }
 
 /** 通知 WebSocket 推送消息（接口设计.md 9.11.1.6 / §6.3） */

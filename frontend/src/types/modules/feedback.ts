@@ -1,12 +1,12 @@
 import type { PageQuery } from '@/types/api'
 
-/** 反馈状态（接口设计.md 9.6.1，状态机：待受理→会话中→已办结） */
-export type FeedbackStatus = 'OPEN' | 'IN_PROGRESS' | 'CLOSED'
+/** 反馈状态（后端实际枚举；接口文档的 OPEN/IN_PROGRESS 为漂移命名，状态机：待受理→会话中→已办结） */
+export type FeedbackStatus = 'PENDING' | 'IN_SESSION' | 'CLOSED'
 
 /** 反馈状态中文标签 */
 export const feedbackStatusLabels: Record<FeedbackStatus, string> = {
-  OPEN: '待受理',
-  IN_PROGRESS: '会话中',
+  PENDING: '待受理',
+  IN_SESSION: '会话中',
   CLOSED: '已办结'
 }
 
@@ -38,27 +38,37 @@ export const feedbackFileTypeLabels: Record<FeedbackFileType, string> = {
   DOCUMENT: '文档'
 }
 
-/** 反馈单（接口设计.md 9.6.1.1 / 9.6.1.2 响应 data） */
+/** 反馈单（接口设计.md 9.6.1.1 / 9.6.1.2 响应 data；
+ *  后端 FeedbackVO 实际仅返回 id/residentId/residentName/communityId/title/content/
+ *  category/status/handlerId/handlerName/createdAt，其余为接口文档漂移字段，读取需空值防御） */
 export interface IFeedback {
   id: number
-  feedbackNumber: string
+  /** 漂移字段：后端无反馈编号，展示侧用 `#${id}` 代替 */
+  feedbackNumber?: string
   residentId: number
   residentName: string
   communityId: number
-  communityName: string
+  /** 漂移字段：后端 FeedbackVO 不返回 */
+  communityName?: string
   category: FeedbackCategory
   title: string
   content: string
-  contactPhone: string | null
-  isAnonymous: boolean
+  /** 漂移字段：后端 FeedbackVO 不返回 */
+  contactPhone?: string | null
+  /** 漂移字段：后端 FeedbackVO 不返回 */
+  isAnonymous?: boolean
   status: FeedbackStatus
   handlerId: number | null
   handlerName: string | null
-  assignedAt: string | null
-  closedAt: string | null
-  closeReason: string | null
+  /** 漂移字段：后端 FeedbackVO 不返回 */
+  assignedAt?: string | null
+  /** 漂移字段：后端 FeedbackVO 不返回 */
+  closedAt?: string | null
+  /** 漂移字段：后端办结说明落在会话消息（[办结] 前缀），不单返回 */
+  closeReason?: string | null
   createdAt: string
-  updatedAt: string
+  /** 漂移字段：后端 FeedbackVO 不返回 */
+  updatedAt?: string
 }
 
 /** 提交反馈请求（接口设计.md 9.6.1.1 请求体） */
