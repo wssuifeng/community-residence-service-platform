@@ -11,6 +11,15 @@ export const housingStatusLabels: Record<HousingStatus, string> = {
   OFFLINE: '已下架'
 }
 
+/** 租售类型（V9 迁移 R53：RENT-出租 / SALE-出售，后端 HousingService 白名单校验） */
+export type HousingRentType = 'RENT' | 'SALE'
+
+/** 租售类型中文标签 */
+export const housingRentTypeLabels: Record<HousingRentType, string> = {
+  RENT: '出租',
+  SALE: '出售'
+}
+
 /** 看房预约状态（架构设计 §6 状态机权威口径：TO_CONFIRM→RESERVED→COMPLETED + 已取消/已违约；接口文档 PENDING/CONFIRMED 为漂移命名） */
 export type ViewingAppointmentStatus =
   | 'TO_CONFIRM'
@@ -39,7 +48,7 @@ export const housingTimeslotStatusLabels: Record<HousingTimeslotStatus, string> 
 
 /**
  * 房源（2026-09-12 管理端任务 10 以后端 HousingVO.java 逐一核对收口）。
- * 后端实体仅含 id/communityId/houseId/title/description/monthlyRent/deposit/images/status/viewCount/publishTime/createdAt；
+ * 后端实体含 id/communityId/houseId/title/description/monthlyRent/deposit/rentType/layout/images/status/viewCount/publishTime/createdAt；
  * communityName/houseLocation 由服务层组装。接口设计.md 9.12.1.1 的
  * houseAddress/depositAmount/availableDate/contactPerson/contactPhone 均为漂移命名，
  * 无消费方后已从类型删除。
@@ -56,16 +65,16 @@ export interface IHousing {
   monthlyRent: number
   /** 押金，未填为 null（接口文档 depositAmount 为漂移命名） */
   deposit: number | null
+  /** 租售类型（V9 起后端真实返回，默认 RENT） */
+  rentType: HousingRentType
+  /** 户型（V9 起后端真实返回，冗余自 house.layout 的自由文本，未填为 null） */
+  layout: string | null
   images: string[]
   status: HousingStatus
   viewCount: number
   /** 发布时间（创建即发布） */
   publishTime: string
   createdAt: string
-  /** 幽灵字段：后端 HousingVO 不返回 layout；保留仅因游客/居民端详情视图仍读取（本任务禁改保护端），运行时恒为 undefined 走兜底文案 */
-  layout: string | null
-  /** 幽灵字段：后端 HousingVO 不返回 rentType；保留原因同 layout */
-  rentType: string
   /** 幽灵字段：后端 HousingVO 不返回 tags；游客/居民端列表与详情仍读取，使用处需空值防御 */
   tags?: string[]
   /** 幽灵字段：后端 HousingVO 不返回 contactPhone；游客/居民端详情仍读取，保留原因同 layout */
@@ -88,13 +97,17 @@ export interface HousingSaveDTO {
   images: string
 }
 
-/** 房源列表查询参数（接口设计.md 9.12.1.5） */
+/** 房源列表查询参数（接口设计.md 9.12.1.5；V9 增 layout/rentType，R53） */
 export interface HousingListQuery extends PageQuery {
   communityId?: number
   status?: HousingStatus
   minRent?: number
   maxRent?: number
   keyword?: string
+  /** 户型精确匹配（自由文本，如「2室1厅1卫」） */
+  layout?: string
+  /** 租售类型（后端白名单校验，非法值 400） */
+  rentType?: HousingRentType
 }
 
 /** 更新房源状态请求（接口设计.md 9.12.1.6 请求体） */
