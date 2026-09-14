@@ -50,12 +50,12 @@ let unsubscribeWs: (() => void) | null = null
 
 const messageListRef = ref<HTMLElement | null>(null)
 
-/** 反馈状态 → StatusTag 语义色 */
+/** 反馈状态 → StatusTag 语义色（后端实际枚举 PENDING/IN_SESSION/CLOSED） */
 function statusTagType(
   status: IFeedback['status']
 ): 'pending' | 'processing' | 'completed' {
-  if (status === 'OPEN') return 'pending'
-  if (status === 'IN_PROGRESS') return 'processing'
+  if (status === 'PENDING') return 'pending'
+  if (status === 'IN_SESSION') return 'processing'
   return 'completed'
 }
 
@@ -208,108 +208,132 @@ onUnmounted(() => {
     <div v-if="loading" class="page-loading">加载中…</div>
 
     <template v-else-if="feedback">
-      <!-- 反馈信息卡 -->
-      <div class="info-card">
-        <div class="info-head">
-          <StatusTag
-            :label="feedbackStatusLabels[feedback.status]"
-            :type="statusTagType(feedback.status)"
-          />
-          <span class="info-category">{{ feedbackCategoryLabels[feedback.category] }}</span>
-          <span class="info-number">{{ feedback.feedbackNumber }}</span>
-        </div>
-        <h1 class="info-title">{{ feedback.title }}</h1>
-        <div class="info-content">{{ feedback.content }}</div>
-        <div class="info-meta">
-          <span>提交于 {{ formatDateTime(feedback.createdAt) }}</span>
-          <span v-if="feedback.isAnonymous" class="meta-anonymous">匿名反馈</span>
-        </div>
-
-        <div class="info-attachments">
-          <span class="attachments-label">附件：</span>
-          <template v-if="attachments.length > 0">
-            <span v-for="attachment in attachments" :key="attachment.id" class="attachment-item">
-              <a
-                :href="attachment.fileUrl"
-                target="_blank"
-                rel="noopener"
-                class="attachment-link"
-              >
-                {{ attachment.fileName }}
-              </a>
-              <button
-                v-if="feedback.status !== 'CLOSED'"
-                type="button"
-                class="attachment-remove"
-                @click="handleDeleteAttachment(attachment.id)"
-              >
-                删除
-              </button>
-            </span>
-          </template>
-          <FileUploader
-            v-if="feedback.status !== 'CLOSED'"
-            v-model="attachmentUrls"
-            :limit="5"
-            @update:model-value="handleAttachmentsChange"
-          />
-        </div>
-
-        <div v-if="feedback.status === 'CLOSED' && feedback.closeReason" class="info-closed">
-          <span class="closed-label">办结</span>{{ feedback.closeReason }}
-        </div>
+      <!-- 标题行：反馈编号 + 状态胶囊 + 分类/提交时间（后端无反馈编号，用 #id 近似） -->
+      <div class="title-row">
+        <h1 class="info-title">反馈 #{{ feedback.id }}</h1>
+        <StatusTag
+          :label="feedbackStatusLabels[feedback.status]"
+          :type="statusTagType(feedback.status)"
+        />
+        <span class="title-meta">
+          {{ feedbackCategoryLabels[feedback.category] }} · {{ formatDateTime(feedback.createdAt) }} 提交
+        </span>
       </div>
 
-      <!-- 会话区 -->
-      <div class="chat-card">
-        <div class="chat-head">
-          <h2>沟通记录</h2>
-          <span class="chat-hint">管理人员工作时段内回复</span>
-        </div>
-
-        <div ref="messageListRef" class="chat-messages">
-          <div v-if="messages.length === 0" class="chat-empty">
-            暂无沟通记录，工作人员受理后会在这里与您对话
+      <div class="detail-grid">
+        <!-- 左 2/3：会话容器 -->
+        <div class="chat-card">
+          <div class="chat-head">
+            <h2>沟通记录</h2>
+            <span class="chat-hint">管理人员工作时段内回复</span>
           </div>
-          <div
-            v-for="message in messages"
-            :key="message.id"
-            class="chat-row"
-            :class="message.senderType === 'RESIDENT' ? 'is-self' : 'is-other'"
-          >
-            <div class="chat-bubble">
-              <div class="bubble-sender">{{ message.senderName }}</div>
-              <div class="bubble-content">{{ message.content }}</div>
-              <div class="bubble-time">{{ formatRelative(message.createdAt) }}</div>
+
+          <div ref="messageListRef" class="chat-messages">
+            <div v-if="messages.length === 0" class="chat-empty">
+              暂无沟通记录，工作人员受理后会在这里与您对话
+            </div>
+            <div
+              v-for="message in messages"
+              :key="message.id"
+              class="chat-row"
+              :class="message.senderType === 'RESIDENT' ? 'is-self' : 'is-other'"
+            >
+              <div class="chat-bubble">
+                <div class="bubble-sender">{{ message.senderName }}</div>
+                <div class="bubble-content">{{ message.content }}</div>
+                <div class="bubble-time">{{ formatRelative(message.createdAt) }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input">
+            <template v-if="feedback.status !== 'CLOSED'">
+              <el-input
+                v-model="messageInput"
+                type="textarea"
+                :rows="2"
+                resize="none"
+                placeholder="输入内容，与工作人员沟通…"
+                maxlength="500"
+                @keydown.enter.exact.prevent="handleSend"
+              />
+              <el-button
+                type="primary"
+                round
+                :loading="sending"
+                :disabled="!messageInput.trim()"
+                @click="handleSend"
+              >
+                发送
+              </el-button>
+            </template>
+            <div v-else class="chat-closed-tip">
+              该反馈已办结，如仍有问题可提交新的反馈
             </div>
           </div>
         </div>
 
-        <div class="chat-input">
-          <template v-if="feedback.status !== 'CLOSED'">
-            <el-input
-              v-model="messageInput"
-              type="textarea"
-              :rows="2"
-              resize="none"
-              placeholder="输入内容，与工作人员沟通…"
-              maxlength="500"
-              @keydown.enter.exact.prevent="handleSend"
-            />
-            <el-button
-              type="primary"
-              round
-              :loading="sending"
-              :disabled="!messageInput.trim()"
-              @click="handleSend"
-            >
-              发送
-            </el-button>
-          </template>
-          <div v-else class="chat-closed-tip">
-            该反馈已办结，如仍有问题可提交新的反馈
+        <!-- 右 1/3：反馈信息容器 -->
+        <aside class="info-card">
+          <h2 class="info-card-title">反馈信息</h2>
+
+          <div class="info-block">
+            <dt>分类</dt>
+            <dd>{{ feedbackCategoryLabels[feedback.category] }}</dd>
           </div>
-        </div>
+          <div class="info-block">
+            <dt>提交时间</dt>
+            <dd>{{ formatDateTime(feedback.createdAt) }}</dd>
+          </div>
+          <div class="info-block">
+            <dt>问题描述</dt>
+            <dd class="info-content">{{ feedback.content }}</dd>
+          </div>
+
+          <div class="info-block">
+            <dt>附件</dt>
+            <div class="info-attachments">
+              <template v-if="attachments.length > 0">
+                <div class="attachment-thumbs">
+                  <a
+                    v-for="attachment in attachments"
+                    :key="attachment.id"
+                    :href="attachment.fileUrl"
+                    target="_blank"
+                    rel="noopener"
+                    class="attachment-thumb"
+                  >
+                    <img
+                      v-if="attachment.fileType === 'IMAGE'"
+                      :src="attachment.fileUrl"
+                      :alt="attachment.fileName"
+                    />
+                    <span v-else class="attachment-file">{{ attachment.fileName }}</span>
+                    <button
+                      v-if="feedback.status !== 'CLOSED'"
+                      type="button"
+                      class="attachment-remove"
+                      @click.prevent="handleDeleteAttachment(attachment.id)"
+                    >
+                      删除
+                    </button>
+                  </a>
+                </div>
+              </template>
+              <p v-else class="attachment-none">无附件</p>
+              <FileUploader
+                v-if="feedback.status !== 'CLOSED'"
+                v-model="attachmentUrls"
+                :limit="5"
+                @update:model-value="handleAttachmentsChange"
+              />
+            </div>
+          </div>
+
+          <div v-if="feedback.status === 'CLOSED' && feedback.closeReason" class="info-closed">
+            <span class="closed-label">办结</span>{{ feedback.closeReason }}
+          </div>
+        </aside>
       </div>
     </template>
   </section>
@@ -342,7 +366,35 @@ onUnmounted(() => {
   color: var(--color-text-secondary);
 }
 
-/* 反馈信息卡 */
+/* 标题行：反馈编号 + 状态胶囊 + 分类/提交时间 */
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.info-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.title-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
+/* 左右分栏：会话 2/3 + 反馈信息 1/3 */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-md);
+  align-items: start;
+}
+
+/* 反馈信息容器 */
 .info-card {
   background-color: #fff;
   border: 1px solid var(--color-border);
@@ -351,98 +403,92 @@ onUnmounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-.info-head {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-}
-
-.info-category {
-  font-size: var(--font-size-xs);
-  color: var(--color-primary);
-  background-color: var(--color-primary-bg);
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-pill);
-}
-
-.info-number {
-  margin-left: auto;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
-  font-family: var(--font-family-mono);
-}
-
-.info-title {
-  margin: 0 0 var(--spacing-sm);
-  font-size: var(--font-size-lg);
+.info-card-title {
+  margin: 0 0 var(--spacing-md);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
 }
 
+.info-block {
+  margin-bottom: var(--spacing-md);
+}
+
+.info-block dt {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.info-block dd {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
 .info-content {
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--color-bg);
   border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
   line-height: var(--line-height-relaxed);
-  color: var(--color-text-primary);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-.info-meta {
+/* 附件缩略图 */
+.attachment-thumbs {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-sm);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
-}
-
-.meta-anonymous {
-  color: var(--color-text-secondary);
-}
-
-.info-attachments {
-  margin-top: var(--spacing-sm);
-  font-size: var(--font-size-xs);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
   flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
 }
 
-.attachments-label {
-  color: var(--color-text-disabled);
+.attachment-thumb {
+  position: relative;
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
 }
 
-.attachment-link {
-  color: var(--color-primary);
-  text-decoration: none;
+.attachment-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.attachment-link:hover {
-  text-decoration: underline;
-}
-
-.attachment-item {
-  display: inline-flex;
+.attachment-file {
+  display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  word-break: break-all;
+  background: var(--color-primary-bg);
 }
 
 .attachment-remove {
+  position: absolute;
+  right: 2px;
+  top: 2px;
   border: none;
-  background: none;
-  padding: 0;
+  border-radius: var(--radius-sm);
+  padding: 0 var(--spacing-xs);
   font-size: var(--font-size-xs);
-  color: var(--color-danger);
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
   cursor: pointer;
 }
 
-.attachment-remove:hover {
-  opacity: 0.8;
+.attachment-none {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
 }
 
 .info-closed {
@@ -583,5 +629,12 @@ onUnmounted(() => {
   padding: var(--spacing-sm) 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-disabled);
+}
+
+/* 响应式：窄屏降单栏 */
+@media (max-width: 991px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
