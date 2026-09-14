@@ -5,7 +5,6 @@ import type {
   IAvailableTimeslot,
   IResourceReservation,
   IViolationRecord,
-  ReservationActionDTO,
   ReservationCreateDTO,
   ReservationListQuery,
   ReservationReasonDTO,
@@ -27,13 +26,13 @@ export function listReservations(query: ReservationListQuery) {
   return http.get<PageResult<IResourceReservation>>('/resource-reservations', query)
 }
 
-/** 确认预约（接口设计.md 9.7.1.4，PENDING → CONFIRMED） */
-export function confirmReservation(id: number, data?: ReservationActionDTO) {
+/** 确认预约（PENDING → RESERVED；后端 reason @NotBlank，文档 remark 请求体为漂移） */
+export function confirmReservation(id: number, data: ReservationReasonDTO) {
   return http.patch<null>(`/resource-reservations/${id}/confirm`, data)
 }
 
-/** 完成预约（接口设计.md 9.7.1.5，CONFIRMED → COMPLETED） */
-export function completeReservation(id: number, data?: ReservationActionDTO) {
+/** 完成预约（RESERVED → COMPLETED；后端 reason @NotBlank，文档 remark 请求体为漂移） */
+export function completeReservation(id: number, data: ReservationReasonDTO) {
   return http.patch<null>(`/resource-reservations/${id}/complete`, data)
 }
 
@@ -42,17 +41,17 @@ export function rejectReservation(id: number, data: ReservationReasonDTO) {
   return http.patch<null>(`/resource-reservations/${id}/reject`, data)
 }
 
-/** 取消预约（接口设计.md 9.7.1.7，PENDING/CONFIRMED → CANCELLED，仅预约人） */
+/** 取消预约（PENDING/RESERVED → CANCELLED，仅预约人本人） */
 export function cancelReservation(id: number, data: ReservationReasonDTO) {
   return http.patch<null>(`/resource-reservations/${id}/cancel`, data)
 }
 
-/** 标记违约（接口设计.md 9.7.1.8，CONFIRMED → VIOLATED） */
+/** 标记违约（RESERVED → VIOLATED） */
 export function violateReservation(id: number, data: ReservationReasonDTO) {
   return http.patch<null>(`/resource-reservations/${id}/violate`, data)
 }
 
-/** 查询资源可预约时段（接口设计.md 9.7.1.9，公开） */
+/** 查询资源可预约时段（周循环模板按日期展开，公开接口） */
 export function listAvailableTimeslots(resourceId: number, query: AvailableTimeslotQuery) {
   return http.get<IAvailableTimeslot[]>(`/resources/${resourceId}/available-slots`, query)
 }
