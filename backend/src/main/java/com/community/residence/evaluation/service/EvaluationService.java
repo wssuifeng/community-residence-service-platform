@@ -102,29 +102,24 @@ public class EvaluationService {
 
     /**
      * 不满意评价列表（ADMIN 跟进工作台）。
-     * DEF-028：hasFollowup 参数（true 仅已跟进 / false 仅待跟进 / null 全量）——
-     * 服务端过滤替代前端逐条请求 followups 的 N+1 兜底。
+     * DEF-028：hasFollowup 参数（true 仅已跟进 / false 仅待跟进 / null 全量）。
+     * DEF-035：SQL 级过滤（EXISTS/NOT EXISTS 子查询条件）+ total 全集计数——
+     * 原页内内存过滤在大数据量下失真（首页 20 条无匹配项时整页滤空、total 被改写）。
      */
     public PageVO<EvaluationVO> unsatisfied(long page, long size, Boolean hasFollowup) {
-        Page<WorkOrderEvaluation> result = evaluationMapper.selectPage(
-                new Page<>(page, Math.min(size, 100)),
-                new LambdaQueryWrapper<WorkOrderEvaluation>()
-                        .eq(WorkOrderEvaluation::getIsSatisfied, 0)
-                        .orderByDesc(WorkOrderEvaluation::getId));
-        if (hasFollowup == null) {
-            return PageVO.of(result.convert(this::toVO));
+        LambdaQueryWrapper<WorkOrderEvaluation> wrapper = new LambdaQueryWrapper<WorkOrderEvaluation>()
+                .eq(WorkOrderEvaluation::getIsSatisfied, 0)
+                .orderByDesc(WorkOrderEvaluation::getId);
+        if (Boolean.TRUE.equals(hasFollowup)) {
+            wrapper.exists("SELECT 1 FROM unsatisfied_followup uf "
+                    + "WHERE uf.evaluation_id = work_order_evaluation.id");
+        } else if (Boolean.FALSE.equals(hasFollowup)) {
+            wrapper.notExists("SELECT 1 FROM unsatisfied_followup uf "
+                    + "WHERE uf.evaluation_id = work_order_evaluation.id");
         }
-        List<EvaluationVO> filtered = result.getRecords().stream()
-                .filter(e -> hasFollowup == hasFollowupOf(e.getId()))
-                .map(this::toVO)
-                .toList();
-        return PageVO.of(filtered, filtered.size(), result.getCurrent(), result.getSize());
-    }
-
-    /* 评价是否已有跟进记录 */
-    private boolean hasFollowupOf(Long evaluationId) {
-        return followupMapper.selectCount(new LambdaQueryWrapper<UnsatisfiedFollowup>()
-                .eq(UnsatisfiedFollowup::getEvaluationId, evaluationId)) > 0;
+        Page<WorkOrderEvaluation> result = evaluationMapper.selectPage(
+                new Page<>(page, Math.min(size, 100)), wrapper);
+        return PageVO.of(result.convert(this::toVO));
     }
 
     /* 不满意跟进：仅不满意评价可跟进；多次跟进全量留痕 */

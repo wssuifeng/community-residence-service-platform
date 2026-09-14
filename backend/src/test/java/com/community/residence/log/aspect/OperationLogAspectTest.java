@@ -85,11 +85,51 @@ class OperationLogAspectTest {
         return jp;
     }
 
-    /* AfterReturning 语义：返回值在切面执行时以 result 变量注入 —— joinPoint mock 无法携带，
-       故 targetId 引用 #result 的用例改由方法参数承载（同解析路径覆盖 SpEL 主干） */
-    @BeforeEach
-    void initNames() {
-        // DefaultParameterNameDiscoverer 需编译期 -parameters 支持（Boot 默认开启），无额外准备
+    /* AfterReturning returning="result" 绑定（DEF-034 修复）：返回值经第三参数传入切面，
+       #result SpEL 恢复求值——原缺陷正是该绑定缺失致 CREATE 类注解 NPE 全丢弃 */
+
+    /** #result.id 承载对象（public 字段保证 SpEL 属性访问） */
+    public static class ResultHolder {
+        public Long id;
+
+        ResultHolder(Long id) {
+            this.id = id;
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-034：#result SpEL 求值——CREATE 注解 targetId 取返回值 ID")
+    void recordCreate_resultSpelResolved() throws Exception {
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUser)
+                    .thenReturn(new UserContext(9L, "admin1", "ADMIN", Set.of(1L)));
+
+            JoinPoint jp = joinPoint("create", new Dto());
+            aspect.recordOperation(jp,
+                    methodAnnotation("create", Dto.class), new ResultHolder(42L));
+
+            ArgumentCaptor<SysOperationLog> captor = ArgumentCaptor.forClass(SysOperationLog.class);
+            verify(operationLogMapper).insert(captor.capture());
+            SysOperationLog entry = captor.getValue();
+            assertThat(entry.getTargetId()).isEqualTo(42L);
+            assertThat(entry.getOperationType()).isEqualTo("CREATE");
+            assertThat(entry.getContent()).isEqualTo("{\"action\":\"创建社区：阳光花园\"}");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-034 边界：result 为 null（void/无返回值路径）时 #result.id 求值失败由切面兜底，不向调用方抛异常")
+    void recordCreate_nullResult_doesNotPropagate() throws Exception {
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUser).thenReturn(null);
+
+            JoinPoint jp = joinPoint("create", new Dto());
+            /* CREATE 注解 targetId="#result.id"，result=null 时 SpEL 对 null 求 .id
+               抛异常 → 切面 catch 兜底（WARN 留痕），不阻断也不落库——防御性口径 */
+            assertThatCode(() ->
+                    aspect.recordOperation(jp, methodAnnotation("create", Dto.class), null))
+                    .doesNotThrowAnyException();
+        }
     }
 
     @Test
@@ -101,7 +141,7 @@ class OperationLogAspectTest {
 
             JoinPoint jp = joinPoint("transition", 5L, new Dto());
             aspect.recordOperation(jp,
-                    methodAnnotation("transition", Long.class, Dto.class));
+                    methodAnnotation("transition", Long.class, Dto.class), "OK");
 
             ArgumentCaptor<SysOperationLog> captor = ArgumentCaptor.forClass(SysOperationLog.class);
             verify(operationLogMapper).insert(captor.capture());
@@ -125,7 +165,7 @@ class OperationLogAspectTest {
                     .thenReturn(new UserContext(9L, "admin1", "ADMIN", Set.of(3L)));
 
             JoinPoint jp = joinPoint("noExpression");
-            aspect.recordOperation(jp, methodAnnotation("noExpression"));
+            aspect.recordOperation(jp, methodAnnotation("noExpression"), null);
 
             ArgumentCaptor<SysOperationLog> captor = ArgumentCaptor.forClass(SysOperationLog.class);
             verify(operationLogMapper).insert(captor.capture());
@@ -144,7 +184,7 @@ class OperationLogAspectTest {
             mocked.when(SecurityUtils::getUser).thenReturn(null);
 
             JoinPoint jp = joinPoint("noExpression");
-            aspect.recordOperation(jp, methodAnnotation("noExpression"));
+            aspect.recordOperation(jp, methodAnnotation("noExpression"), null);
 
             ArgumentCaptor<SysOperationLog> captor = ArgumentCaptor.forClass(SysOperationLog.class);
             verify(operationLogMapper).insert(captor.capture());
@@ -164,7 +204,7 @@ class OperationLogAspectTest {
 
             JoinPoint jp = joinPoint("noExpression");
             assertThatCode(() ->
-                    aspect.recordOperation(jp, methodAnnotation("noExpression")))
+                    aspect.recordOperation(jp, methodAnnotation("noExpression"), null))
                     .doesNotThrowAnyException();
             verify(operationLogMapper, times(1)).insert(any(SysOperationLog.class));
         }

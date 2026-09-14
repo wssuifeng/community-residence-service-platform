@@ -54,6 +54,18 @@ class BuildingBatch3Test {
     @Mock
     private ResidenceRelationMapper residenceRelationMapper;
     @Mock
+    private com.community.residence.resident.mapper.ResidenceApplicationMapper residenceApplicationMapper;
+    @Mock
+    private com.community.residence.lease.mapper.LeaseRecordMapper leaseRecordMapper;
+    @Mock
+    private com.community.residence.lease.mapper.LeaseReminderMapper leaseReminderMapper;
+    @Mock
+    private com.community.residence.housing.mapper.HousingMapper housingMapper;
+    @Mock
+    private com.community.residence.housing.mapper.HousingTimeslotMapper housingTimeslotMapper;
+    @Mock
+    private com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
+    @Mock
     private CommunityService communityService;
 
     @InjectMocks
@@ -106,7 +118,7 @@ class BuildingBatch3Test {
     }
 
     @Test
-    @DisplayName("D-端点1：cascade=true 自底向上物理删除——历史→房屋→单元→楼栋")
+    @DisplayName("D-端点1：cascade=true 自底向上物理删除——引用链清理→历史→房屋→单元→楼栋（DEF-033 扩链）")
     void delete_cascade_physicalBottomUp() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> ignored =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
@@ -114,16 +126,53 @@ class BuildingBatch3Test {
             when(unitMapper.selectList(any())).thenReturn(List.of(unit));
             when(houseMapper.selectList(any())).thenReturn(List.of(house));
             when(residenceRelationMapper.selectCount(any())).thenReturn(0L);
+            /* DEF-033 引用链查询：无租约/房源挂靠（selectList 返回空） */
+            org.mockito.Mockito.lenient().when(leaseRecordMapper.selectList(any()))
+                    .thenReturn(List.of());
+            org.mockito.Mockito.lenient().when(housingMapper.selectList(any()))
+                    .thenReturn(List.of());
 
             buildingService.delete(1L, true);
 
-            /* 子表在前、父表在后（FK 约束顺序） */
+            /* house_id 引用链清理在前（FK RESTRICT），再房屋历史 → 房屋 → 单元 → 楼栋 */
             var inOrder = org.mockito.Mockito.inOrder(
+                    residenceApplicationMapper, residenceRelationMapper,
                     houseStatusHistoryMapper, houseMapper, unitMapper, buildingMapper);
+            inOrder.verify(residenceApplicationMapper).delete(any());
+            inOrder.verify(residenceRelationMapper).delete(any());
             inOrder.verify(houseStatusHistoryMapper).delete(any());
             inOrder.verify(houseMapper).physicalDeleteByIds(List.of(101L));
             inOrder.verify(unitMapper).physicalDeleteByIds(List.of(11L));
             inOrder.verify(buildingMapper).physicalDeleteById(1L);
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-033：历史居住关系随级联清理——入住申请/居住关系/租约链/房源链全删（已搬出场景 500 不再发生）")
+    void delete_cascade_clearsHistoricalRelations() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> ignored =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(buildingMapper.selectById(1L)).thenReturn(building);
+            when(unitMapper.selectList(any())).thenReturn(List.of(unit));
+            when(houseMapper.selectList(any())).thenReturn(List.of(house));
+            when(residenceRelationMapper.selectCount(any())).thenReturn(0L);
+            /* 历史租约 + 挂靠房源各 1 条 */
+            var lease = new com.community.residence.lease.entity.LeaseRecord();
+            lease.setId(300L);
+            when(leaseRecordMapper.selectList(any())).thenReturn(List.of(lease));
+            var housingRow = new com.community.residence.housing.entity.Housing();
+            housingRow.setId(400L);
+            when(housingMapper.selectList(any())).thenReturn(List.of(housingRow));
+
+            buildingService.delete(1L, true);
+
+            verify(residenceRelationMapper).delete(any());
+            verify(residenceApplicationMapper).delete(any());
+            verify(leaseReminderMapper).delete(any());
+            verify(leaseRecordMapper).deleteBatchIds(List.of(300L));
+            verify(housingTimeslotMapper).delete(any());
+            verify(viewingAppointmentMapper).delete(any());
+            verify(housingMapper).deleteBatchIds(List.of(400L));
         }
     }
 
@@ -164,7 +213,7 @@ class BuildingBatch3Test {
     /* ---- D-端点2：批量创建（部分成功语义） ---- */
 
     @Test
-    @DisplayName("D-端点2：楼栋批量创建——第 2 行失败不阻断，逐行反馈")
+    @DisplayName("DEF-032：楼栋批量创建——坏行（名称空）逐行校验反馈，好行照常创建（不再整批 400）")
     void batchCreateBuildings_partialSuccess() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> ignored =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
@@ -172,24 +221,24 @@ class BuildingBatch3Test {
             var dto = new BatchCreateBuildingsDTO();
             dto.setCommunityId(1L);
             var ok = buildingDto("2栋");
-            var bad = buildingDto(null); // @NotBlank 在 Controller 层，服务层以异常模拟失败
-            dto.setBuildings(List.of(ok, bad));
-            when(buildingMapper.insert(any(Building.class)))
-                    .thenAnswer(inv -> {
-                        inv.getArgument(0, Building.class).setId(50L);
-                        return 1;
-                    })
-                    .thenThrow(new RuntimeException("楼栋名称不能为空"));
+            var bad = buildingDto(null); // DEF-032：RowValidator 逐行校验拦截
+            var bad2 = buildingDto("");  // 空串同拦
+            dto.setBuildings(List.of(ok, bad, bad2));
+            when(buildingMapper.insert(any(Building.class))).thenAnswer(inv -> {
+                inv.getArgument(0, Building.class).setId(50L);
+                return 1;
+            });
 
             BatchCreateResultVO vo = buildingService.batchCreate(dto);
 
-            assertThat(vo.getTotal()).isEqualTo(2);
+            assertThat(vo.getTotal()).isEqualTo(3);
             assertThat(vo.getSuccess()).isEqualTo(1);
-            assertThat(vo.getFail()).isEqualTo(1);
+            assertThat(vo.getFail()).isEqualTo(2);
             assertThat(vo.getRows().get(0).getSuccess()).isTrue();
             assertThat(vo.getRows().get(0).getId()).isEqualTo(50L);
             assertThat(vo.getRows().get(1).getSuccess()).isFalse();
             assertThat(vo.getRows().get(1).getReason()).contains("楼栋名称");
+            assertThat(vo.getRows().get(2).getReason()).contains("楼栋名称");
         }
     }
 
@@ -218,7 +267,7 @@ class BuildingBatch3Test {
     }
 
     @Test
-    @DisplayName("D-端点2：房屋批量创建——area 必填缺失行失败，其余成功")
+    @DisplayName("DEF-032：房屋批量创建——area 缺失行 RowValidator 逐行反馈，其余成功")
     void batchCreateHouses_partialSuccess() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> ignored =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
@@ -226,14 +275,12 @@ class BuildingBatch3Test {
             var dto = new BatchCreateHousesDTO();
             dto.setUnitId(11L);
             var ok = houseDto("101", new BigDecimal("80.5"));
-            var bad = houseDto("102", null); // area @NotNull 在 Controller 层，服务层以异常模拟
+            var bad = houseDto("102", null); // DEF-032：RowValidator 拦截 area @NotNull
             dto.setHouses(List.of(ok, bad));
-            when(houseMapper.insert(any(House.class)))
-                    .thenAnswer(inv -> {
-                        inv.getArgument(0, House.class).setId(70L);
-                        return 1;
-                    })
-                    .thenThrow(new RuntimeException("建筑面积不能为空"));
+            when(houseMapper.insert(any(House.class))).thenAnswer(inv -> {
+                inv.getArgument(0, House.class).setId(70L);
+                return 1;
+            });
 
             BatchCreateResultVO vo = houseService.batchCreate(dto);
 
@@ -241,6 +288,29 @@ class BuildingBatch3Test {
             assertThat(vo.getFail()).isEqualTo(1);
             assertThat(vo.getRows().get(0).getId()).isEqualTo(70L);
             assertThat(vo.getRows().get(1).getReason()).contains("建筑面积");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-032：单元批量创建——空串/超长名称逐行反馈，好行照常创建")
+    void batchCreateUnits_badNameRowFails() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> ignored =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(buildingMapper.selectById(1L)).thenReturn(building);
+            var dto = new BatchCreateUnitsDTO();
+            dto.setBuildingId(1L);
+            dto.setNames(java.util.Arrays.asList("一单元", "  ", "超".repeat(51)));
+            when(unitMapper.insert(any(Unit.class))).thenAnswer(inv -> {
+                inv.getArgument(0, Unit.class).setId(61L);
+                return 1;
+            });
+
+            BatchCreateResultVO vo = unitService.batchCreate(dto);
+
+            assertThat(vo.getSuccess()).isEqualTo(1);
+            assertThat(vo.getFail()).isEqualTo(2);
+            assertThat(vo.getRows().get(1).getReason()).contains("单元名称");
+            assertThat(vo.getRows().get(2).getReason()).contains("单元名称");
         }
     }
 

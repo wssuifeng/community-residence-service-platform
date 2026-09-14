@@ -40,6 +40,12 @@ public class BuildingService {
     private final HouseMapper houseMapper;
     private final HouseStatusHistoryMapper houseStatusHistoryMapper;
     private final ResidenceRelationMapper residenceRelationMapper;
+    private final com.community.residence.resident.mapper.ResidenceApplicationMapper residenceApplicationMapper;
+    private final com.community.residence.lease.mapper.LeaseRecordMapper leaseRecordMapper;
+    private final com.community.residence.lease.mapper.LeaseReminderMapper leaseReminderMapper;
+    private final com.community.residence.housing.mapper.HousingMapper housingMapper;
+    private final com.community.residence.housing.mapper.HousingTimeslotMapper housingTimeslotMapper;
+    private final com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
     private final CommunityService communityService;
 
     @Transactional(rollbackFor = Exception.class)
@@ -93,9 +99,12 @@ public class BuildingService {
 
     /**
      * 楼栋事务级联删除（D-端点1，50 阶段第三批）：参照社区级联（stage-50-1b
-     * CommunityService.delete）事务模式，自底向上物理删除——房屋状态历史 → 房屋 →
-     * 单元 → 楼栋。在住居民保护：任一房屋存在在住居住关系（move_out_date 为空）
-     * 时整体拒绝（事务回滚），替代前端逐层编排的非原子删除。
+     * CommunityService.delete）事务模式，自底向上物理删除——房屋状态历史 →
+     * 房屋 → 单元 → 楼栋。在住居民保护：任一房屋存在在住居住关系（move_out_date
+     * 为空）时整体拒绝（事务回滚），替代前端逐层编排的非原子删除。
+     * DEF-033：补齐 house_id 引用链清理（residence_application/residence_relation/
+     * lease_record/lease_reminder/housing 及其子表）——历史（已搬出）关系随级联
+     * 清理，在住关系整体拒绝，与社区级联 26 表口径对齐。
      */
     private void cascadeDelete(Building building) {
         Long buildingId = building.getId();
@@ -120,6 +129,43 @@ public class BuildingService {
                 throw new BusinessException(ErrorCode.HOUSE_HAS_RESIDENT,
                         "楼栋下存在在住居民的房屋，不可级联删除（请先办理迁出）");
             }
+
+            /* ---- house_id 引用链清理（V1 FK RESTRICT，子表在前；DEF-033） ---- */
+            /* 入住申请 + 居住关系（在住已被上方拦截，此处均为历史行） */
+            residenceApplicationMapper.delete(
+                    new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceApplication>()
+                            .in(com.community.residence.resident.entity.ResidenceApplication::getHouseId, houseIds));
+            residenceRelationMapper.delete(
+                    new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
+                            .in(com.community.residence.resident.entity.ResidenceRelation::getHouseId, houseIds));
+
+            /* 租约链：提醒 → 租约（历史租住记录） */
+            List<Long> leaseIds = leaseRecordMapper.selectList(
+                            new LambdaQueryWrapper<com.community.residence.lease.entity.LeaseRecord>()
+                                    .in(com.community.residence.lease.entity.LeaseRecord::getHouseId, houseIds))
+                    .stream().map(com.community.residence.lease.entity.LeaseRecord::getId).toList();
+            if (!leaseIds.isEmpty()) {
+                leaseReminderMapper.delete(
+                        new LambdaQueryWrapper<com.community.residence.lease.entity.LeaseReminder>()
+                                .in(com.community.residence.lease.entity.LeaseReminder::getLeaseId, leaseIds));
+                leaseRecordMapper.deleteBatchIds(leaseIds);
+            }
+
+            /* 房源链：时段/看房预约 → 房源（挂靠该楼栋房屋的房源展示记录） */
+            List<Long> housingIds = housingMapper.selectList(
+                            new LambdaQueryWrapper<com.community.residence.housing.entity.Housing>()
+                                    .in(com.community.residence.housing.entity.Housing::getHouseId, houseIds))
+                    .stream().map(com.community.residence.housing.entity.Housing::getId).toList();
+            if (!housingIds.isEmpty()) {
+                housingTimeslotMapper.delete(
+                        new LambdaQueryWrapper<com.community.residence.housing.entity.HousingTimeslot>()
+                                .in(com.community.residence.housing.entity.HousingTimeslot::getHousingId, housingIds));
+                viewingAppointmentMapper.delete(
+                        new LambdaQueryWrapper<com.community.residence.housing.entity.ViewingAppointment>()
+                                .in(com.community.residence.housing.entity.ViewingAppointment::getHousingId, housingIds));
+                housingMapper.deleteBatchIds(housingIds);
+            }
+
             houseStatusHistoryMapper.delete(
                     new LambdaQueryWrapper<com.community.residence.community.entity.HouseStatusHistory>()
                             .in(com.community.residence.community.entity.HouseStatusHistory::getHouseId, houseIds));
@@ -160,6 +206,7 @@ public class BuildingService {
     /**
      * 楼栋批量创建（D-端点2，50 阶段第三批）：部分成功语义对齐 R8 CSV 导入先例
      * （逐行反馈成功/失败原因，逐行独立不整体回滚），替代前端 310 请求循环单建。
+     * DEF-032：逐行 Validator 校验（DTO 已去 @Valid 级联，坏行不再整批 400）。
      */
     public BatchCreateResultVO batchCreate(BatchCreateBuildingsDTO dto) {
         communityService.requireActiveCommunity(dto.getCommunityId());
@@ -168,6 +215,11 @@ public class BuildingService {
         int success = 0;
         for (int i = 0; i < dto.getBuildings().size(); i++) {
             CreateBuildingDTO item = dto.getBuildings().get(i);
+            String violation = RowValidator.validate(item);
+            if (violation != null) {
+                rows.add(BatchCreateResultVO.Row.fail(i + 1, violation));
+                continue;
+            }
             try {
                 Building building = new Building();
                 building.setCommunityId(dto.getCommunityId());
