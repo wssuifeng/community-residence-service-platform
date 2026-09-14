@@ -95,6 +95,51 @@ export interface IUpdateResidentStatusDTO {
   reason?: string
 }
 
+/* ---------------------------------- 代建居民 / 批量导入（R8 v1.2，后端 AdminCreateResidentDTO / ResidentImportVO 契约） ---------------------------------- */
+
+/** 管理员代建居民请求（后端 AdminCreateResidentDTO；初始密码服务端生成：手机号后 6 位） */
+export interface IAdminCreateResidentDTO {
+  /** 所属社区 ID（数据级权限锚点，ADMIN 限绑定社区） */
+  communityId: number
+  /** 真实姓名（≤50 字符） */
+  realName: string
+  /** 手机号（^1[3-9]\d{9}$） */
+  phone: string
+  /** 身份证号（选填，^\d{17}[\dXx]$） */
+  idCard?: string
+  /** 用户名（选填，^[a-zA-Z0-9_]+$ 4~20 字符；留空服务端按手机号生成） */
+  username?: string
+}
+
+/** 代建居民结果（初始密码明文仅本次返回，供管理员转交居民） */
+export interface IAdminCreateResidentVO {
+  residentId: number
+  username: string
+  initialPassword: string
+}
+
+/** CSV 批量导入成功行（行号从 1 计，不含表头） */
+export interface IResidentImportSuccessRow {
+  row: number
+  username: string
+  initialPassword: string
+}
+
+/** CSV 批量导入失败行 */
+export interface IResidentImportFailRow {
+  row: number
+  reason: string
+}
+
+/** CSV 批量导入结果（部分成功语义：成功行生效，失败行带行号与原因） */
+export interface IResidentImportVO {
+  total: number
+  success: number
+  fail: number
+  successRows: IResidentImportSuccessRow[]
+  failRows: IResidentImportFailRow[]
+}
+
 /* ---------------------------------- 入住申请 ---------------------------------- */
 
 /**
