@@ -193,7 +193,7 @@ class ReservationServiceExtraTest {
     }
 
     @Test
-    @DisplayName("可预约时段展开：模板按日期展开 + 占用计数 + FULL 状态")
+    @DisplayName("可预约时段展开：Slot Grid 栅格分桶 + 占用计数 + FULL 状态（V11 第三批）")
     void availableSlots_expandsAndCounts() {
         LocalDate monday = LocalDate.now().plusDays(1);
         while (monday.getDayOfWeek().getValue() != 1) {
@@ -210,9 +210,15 @@ class ReservationServiceExtraTest {
 
         var slots = reservationService.availableSlots(1L, monday, monday);
 
-        assertThat(slots).hasSize(1);
+        /* 模板 9:00-10:00 按 30 分钟栅格拆为 2 格，各格 booked=1；
+           容量 2 → AVAILABLE；占用覆盖即计入两格 */
+        assertThat(slots).hasSize(2);
+        assertThat(slots.get(0).getStartTime()).isEqualTo(LocalTime.of(9, 0));
+        assertThat(slots.get(0).getEndTime()).isEqualTo(LocalTime.of(9, 30));
         assertThat(slots.get(0).getCurrentBookings()).isEqualTo(1);
         assertThat(slots.get(0).getStatus()).isEqualTo("AVAILABLE");  // 容量2，占1
+        assertThat(slots.get(1).getStartTime()).isEqualTo(LocalTime.of(9, 30));
+        assertThat(slots.get(1).getCurrentBookings()).isEqualTo(1);
     }
 
     @Test
@@ -222,8 +228,8 @@ class ReservationServiceExtraTest {
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             resource.setCapacity(1);
             when(reservationMapper.selectById(1L)).thenReturn(reservation);
-            // 容量查询（排除自身）= 0
-            when(reservationMapper.selectCount(any())).thenReturn(0L);
+            // 逐格容量查询（排除自身）= 空占用列表（Slot Grid：selectList 口径）
+            when(reservationMapper.selectList(any())).thenReturn(List.of());
             when(resourceMapper.selectById(1L)).thenReturn(resource);
             when(reservationMapper.updateById(any(ResourceReservation.class))).thenReturn(1);
 

@@ -100,14 +100,31 @@ public class EvaluationService {
         return PageVO.of(result.convert(this::toVO));
     }
 
-    /** 不满意评价列表（ADMIN 跟进工作台） */
-    public PageVO<EvaluationVO> unsatisfied(long page, long size) {
+    /**
+     * 不满意评价列表（ADMIN 跟进工作台）。
+     * DEF-028：hasFollowup 参数（true 仅已跟进 / false 仅待跟进 / null 全量）——
+     * 服务端过滤替代前端逐条请求 followups 的 N+1 兜底。
+     */
+    public PageVO<EvaluationVO> unsatisfied(long page, long size, Boolean hasFollowup) {
         Page<WorkOrderEvaluation> result = evaluationMapper.selectPage(
                 new Page<>(page, Math.min(size, 100)),
                 new LambdaQueryWrapper<WorkOrderEvaluation>()
                         .eq(WorkOrderEvaluation::getIsSatisfied, 0)
                         .orderByDesc(WorkOrderEvaluation::getId));
-        return PageVO.of(result.convert(this::toVO));
+        if (hasFollowup == null) {
+            return PageVO.of(result.convert(this::toVO));
+        }
+        List<EvaluationVO> filtered = result.getRecords().stream()
+                .filter(e -> hasFollowup == hasFollowupOf(e.getId()))
+                .map(this::toVO)
+                .toList();
+        return PageVO.of(filtered, filtered.size(), result.getCurrent(), result.getSize());
+    }
+
+    /* 评价是否已有跟进记录 */
+    private boolean hasFollowupOf(Long evaluationId) {
+        return followupMapper.selectCount(new LambdaQueryWrapper<UnsatisfiedFollowup>()
+                .eq(UnsatisfiedFollowup::getEvaluationId, evaluationId)) > 0;
     }
 
     /* 不满意跟进：仅不满意评价可跟进；多次跟进全量留痕 */

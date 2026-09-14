@@ -17,4 +17,8 @@ public interface HouseMapper extends BaseMapper<House> {
     /* 物理删除（社区级联删除 R1/R6 v1.1 专用：绕过 @TableLogic，消除 unit/community FK 引用） */
     @Delete("DELETE FROM house WHERE community_id = #{communityId}")
     int physicalDeleteByCommunityId(@Param("communityId") Long communityId);
+
+    /* 物理删除批量（楼栋级联删除 D-端点1：绕过 @TableLogic，消除 FK 引用） */
+    @Delete("<script>DELETE FROM house WHERE id IN <foreach item='item' collection='ids' open='(' separator=',' close=')'>#{item}</foreach></script>")
+    int physicalDeleteByIds(@Param("ids") java.util.List<Long> ids);
 }

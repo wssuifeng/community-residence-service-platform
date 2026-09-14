@@ -29,8 +29,11 @@ public class ResourceVO {
     @Schema(description = "位置描述")
     private String location;
 
-    @Schema(description = "容纳人数/车位数")
+    @Schema(description = "每时段可承载人数上限（Slot Grid：资源级·每时段人数）")
     private Integer capacity;
+
+    @Schema(description = "预约最小单位（分钟）：15/30/60，默认 30（Slot Grid 栅格粒度）")
+    private Integer slotUnit;
 
     @Schema(description = "资源描述")
     private String description;
@@ -46,6 +49,7 @@ public class ResourceVO {
         vo.setType(entity.getType());
         vo.setLocation(entity.getLocation());
         vo.setCapacity(entity.getCapacity());
+        vo.setSlotUnit(entity.getSlotUnit());
         vo.setDescription(entity.getDescription());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;

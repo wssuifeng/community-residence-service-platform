@@ -45,6 +45,15 @@ public class NoticeVO {
     @Schema(description = "置顶：0-普通, 1-置顶（R25 v1.2）")
     private Integer isPinned;
 
+    @Schema(description = "优先级：LOW-低, NORMAL-普通, HIGH-高, URGENT-紧急（V12）")
+    private String priority;
+
+    @Schema(description = "公告类型：ANNOUNCEMENT-公告（V12）")
+    private String type;
+
+    @Schema(description = "失效时间别名（前端表单字段名，与 endTime 同值）")
+    private LocalDateTime expireTime;
+
     @Schema(description = "发布人ID")
     private Long publisherId;
 
@@ -64,6 +73,9 @@ public class NoticeVO {
         vo.setEndTime(entity.getEndTime());
         vo.setViewCount(entity.getViewCount());
         vo.setIsPinned(entity.getIsPinned());
+        vo.setPriority(entity.getPriority());
+        vo.setType(entity.getType());
+        vo.setExpireTime(entity.getEndTime());
         vo.setPublisherId(entity.getPublisherId());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;

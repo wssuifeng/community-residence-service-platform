@@ -2,8 +2,10 @@ package com.community.residence.community.controller;
 
 import com.community.residence.common.result.ApiResponse;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.community.dto.BatchCreateBuildingsDTO;
 import com.community.residence.community.dto.CreateBuildingDTO;
 import com.community.residence.community.service.BuildingService;
+import com.community.residence.community.vo.BatchCreateResultVO;
 import com.community.residence.community.vo.BuildingVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,12 +45,20 @@ public class BuildingController {
         return ApiResponse.success(buildingService.update(id, dto));
     }
 
-    @Operation(summary = "删除楼栋", description = "楼栋下有单元时不可删除")
+    @Operation(summary = "删除楼栋", description = "楼栋下有单元时不可删除；cascade=true 事务级联删除（D-端点1）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/buildings/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
-        buildingService.delete(id);
+    public ApiResponse<Void> delete(@PathVariable Long id,
+                                    @RequestParam(defaultValue = "false") boolean cascade) {
+        buildingService.delete(id, cascade);
         return ApiResponse.success();
+    }
+
+    @Operation(summary = "批量创建楼栋", description = "部分成功语义：逐行反馈（D-端点2）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/buildings/batch")
+    public ApiResponse<BatchCreateResultVO> batchCreate(@RequestBody @Valid BatchCreateBuildingsDTO dto) {
+        return ApiResponse.success(buildingService.batchCreate(dto));
     }
 
     @Operation(summary = "查询楼栋详情")

@@ -64,13 +64,17 @@ public class NoticeController {
         return ApiResponse.success(noticeService.getById(id));
     }
 
-    @Operation(summary = "公告列表（分页）", description = "公开；管理端角色可见全部状态")
+    @Operation(summary = "公告列表（分页）", description = "公开；管理端角色可见全部状态；支持 priority/isPinned/type 过滤（DEF-031/V12）")
     @GetMapping
     public ApiResponse<PageVO<NoticeVO>> page(@RequestParam(defaultValue = "1") long page,
                                               @RequestParam(defaultValue = "20") long size,
                                               @RequestParam(required = false) Long communityId,
-                                              @RequestParam(required = false) String keyword) {
-        return ApiResponse.success(noticeService.page(page, size, communityId, keyword));
+                                              @RequestParam(required = false) String keyword,
+                                              @RequestParam(required = false) String priority,
+                                              @RequestParam(required = false) Integer isPinned,
+                                              @RequestParam(required = false) String type) {
+        return ApiResponse.success(noticeService.page(page, size, communityId, keyword,
+                priority, isPinned, type));
     }
 
     @Operation(summary = "发布公告", description = "草稿 → 已发布")

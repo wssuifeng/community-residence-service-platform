@@ -245,4 +245,63 @@ public class StatisticsService {
                 .map(c -> Map.<String, Object>of("id", c.getId(), "name", c.getName()))
                 .toList();
     }
+
+    /**
+     * 服务人员按日趋势（DEF-029，STAFF 限本人数据）：近 N 日（默认 7，上限 90）
+     * 各指标的日序列 + 今日概览。指标经 work_order_assignment（本人被派单的工单）
+     * 收敛数据范围——assigned（被派单数）/ completed（已完成，含 TO_CONFIRM 待确认）/
+     * processing（处理中 = ACCEPTED+IN_PROGRESS），逐日序列按 work_order.created_at 归日。
+     */
+    public Map<String, Object> staffTrend(int days) {
+        Long staffId = SecurityUtils.getUserId();
+        int window = Math.min(Math.max(days, 1), 90);
+        LocalDate startDate = LocalDate.now().minusDays(window - 1L);
+
+        List<Long> orderIds = assignmentMapper.selectList(
+                        new LambdaQueryWrapper<WorkOrderAssignment>()
+                                .eq(WorkOrderAssignment::getAssigneeId, staffId))
+                .stream().map(WorkOrderAssignment::getWorkOrderId).distinct().toList();
+        List<WorkOrder> orders = orderIds.isEmpty() ? List.of()
+                : workOrderMapper.selectList(new LambdaQueryWrapper<WorkOrder>()
+                        .in(WorkOrder::getId, orderIds)
+                        .ge(WorkOrder::getCreatedAt, startDate.atStartOfDay()));
+
+        Map<String, Long> assignedTrend = new java.util.LinkedHashMap<>();
+        Map<String, Long> completedTrend = new java.util.LinkedHashMap<>();
+        Map<String, Long> processingTrend = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < window; i++) {
+            String day = startDate.plusDays(i).toString();
+            assignedTrend.put(day, 0L);
+            completedTrend.put(day, 0L);
+            processingTrend.put(day, 0L);
+        }
+        for (WorkOrder order : orders) {
+            String day = order.getCreatedAt().toLocalDate().toString();
+            assignedTrend.merge(day, 1L, Long::sum);
+            if (WorkOrderStatus.COMPLETED.equals(order.getStatus())
+                    || WorkOrderStatus.CLOSED.equals(order.getStatus())
+                    || WorkOrderStatus.TO_CONFIRM.equals(order.getStatus())) {
+                completedTrend.merge(day, 1L, Long::sum);
+            } else if (WorkOrderStatus.ACCEPTED.equals(order.getStatus())
+                    || WorkOrderStatus.IN_PROGRESS.equals(order.getStatus())) {
+                processingTrend.merge(day, 1L, Long::sum);
+            }
+        }
+
+        String today = LocalDate.now().toString();
+        Map<String, Object> result = new HashMap<>();
+        result.put("days", window);
+        result.put("startDate", startDate.toString());
+        result.put("assignedTrend", assignedTrend);
+        result.put("completedTrend", completedTrend);
+        result.put("processingTrend", processingTrend);
+        result.put("todayAssigned", assignedTrend.getOrDefault(today, 0L));
+        result.put("todayCompleted", completedTrend.getOrDefault(today, 0L));
+        result.put("todayProcessing", processingTrend.getOrDefault(today, 0L));
+        result.put("totalCompleted", orders.stream().filter(o ->
+                WorkOrderStatus.COMPLETED.equals(o.getStatus())
+                        || WorkOrderStatus.CLOSED.equals(o.getStatus())
+                        || WorkOrderStatus.TO_CONFIRM.equals(o.getStatus())).count());
+        return result;
+    }
 }

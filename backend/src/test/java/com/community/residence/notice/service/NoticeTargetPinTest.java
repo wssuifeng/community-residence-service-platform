@@ -212,7 +212,7 @@ class NoticeTargetPinTest {
                 return p;
             });
 
-            noticeService.page(1, 10, null, null);
+            noticeService.page(1, 10, null, null, null, null, null);
 
             ArgumentCaptor<com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Notice>>
                     wrapperCaptor = ArgumentCaptor.forClass(

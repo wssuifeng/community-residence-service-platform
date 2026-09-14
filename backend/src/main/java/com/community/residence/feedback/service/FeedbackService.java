@@ -88,10 +88,14 @@ public class FeedbackService {
         return toVO(feedback);
     }
 
-    public PageVO<FeedbackVO> page(long page, long size, String status, String category) {
+    public PageVO<FeedbackVO> page(long page, long size, String status, String category, String keyword) {
         LambdaQueryWrapper<Feedback> wrapper = new LambdaQueryWrapper<Feedback>()
                 .eq(StringUtils.hasText(status), Feedback::getStatus, status)
                 .eq(StringUtils.hasText(category), Feedback::getCategory, category)
+                /* DEF-027：keyword 标题/内容模糊过滤（原仅前端过滤已加载页） */
+                .and(StringUtils.hasText(keyword), w -> w
+                        .like(Feedback::getTitle, keyword)
+                        .or().like(Feedback::getContent, keyword))
                 .orderByDesc(Feedback::getId);
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             wrapper.eq(Feedback::getResidentId, SecurityUtils.getUserId());
@@ -100,7 +104,9 @@ public class FeedbackService {
         return PageVO.of(result.convert(this::toVO));
     }
 
-    /* 办结：IN_SESSION → CLOSED；办结说明作为系统消息落档 */
+    /* 办结：IN_SESSION → CLOSED；办结说明作为系统消息落档；
+       DEF-027：办结事件补 WS 推送（FEEDBACK_STATUS 载荷，对端实时感知办结，
+       原仅 sendMessage 推送、对端最长滞后一个轮询周期） */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "FEEDBACK", targetId = "#id", content = "'反馈办结：' + #dto.result")
     public void close(Long id, CloseFeedbackDTO dto) {
@@ -120,6 +126,18 @@ public class FeedbackService {
         notificationService.create(feedback.getResidentId(), feedback.getCommunityId(),
                 "反馈已办结", "您的反馈「" + feedback.getTitle() + "」已办结",
                 "FEEDBACK", "FEEDBACK", id);
+
+        /* 与 sendMessage 同口径：任一端在线即广播状态变更，失败由轮询兜底 */
+        if (webSocketSessionService.isOnline(feedback.getResidentId())
+                || (feedback.getHandlerId() != null
+                        && webSocketSessionService.isOnline(feedback.getHandlerId()))) {
+            try {
+                messagingTemplate.convertAndSend("/topic/feedback/" + id,
+                        FeedbackPushVO.status(id, "CLOSED"));
+            } catch (Exception e) {
+                log.warn("反馈办结 WebSocket 推送失败，由轮询兜底：feedbackId={}", id, e);
+            }
+        }
         log.info("反馈已办结：feedbackId={}, operator={}", id, SecurityUtils.getUserId());
     }
 

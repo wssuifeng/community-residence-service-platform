@@ -209,7 +209,7 @@ class NoticeServiceExtraTest {
                     });
             when(communityService.requireCommunity(1L)).thenReturn(community);
 
-            var vo = noticeService.page(1, 10, 1L, null);
+            var vo = noticeService.page(1, 10, 1L, null, null, null, null);
             assertThat(vo.getTotal()).isEqualTo(1);
         }
     }

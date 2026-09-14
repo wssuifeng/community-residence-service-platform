@@ -18,4 +18,8 @@ public interface BuildingMapper extends BaseMapper<Building> {
     /* 物理删除（社区级联删除 R1/R6 v1.1 专用：绕过 @TableLogic，消除 community FK 引用） */
     @Delete("DELETE FROM building WHERE community_id = #{communityId}")
     int physicalDeleteByCommunityId(@Param("communityId") Long communityId);
+
+    /* 物理删除单条（楼栋级联删除 D-端点1：绕过 @TableLogic，消除 FK 引用） */
+    @Delete("DELETE FROM building WHERE id = #{id}")
+    int physicalDeleteById(@Param("id") Long id);
 }
