@@ -1,5 +1,14 @@
 import type { PageQuery } from '@/types/api'
 
+/** 评价统计（GET /statistics/evaluations，后端 EvaluationService.statistics 实测形状） */
+export interface IEvaluationStatistics {
+  total: number
+  averageRating: number
+  satisfiedRate: number
+  /** 分档计数：键为评分字符串（'1'~'5'），仅含有记录的档位 */
+  ratingDistribution: Record<string, number>
+}
+
 /** 评价分值（1-5，rating ≥ 4 判定满意） */
 export type EvaluationRating = 1 | 2 | 3 | 4 | 5
 
@@ -33,36 +42,28 @@ export interface IEvaluationCreateRequest {
   isSatisfied: boolean
 }
 
-/** 评价列表查询参数（接口设计.md 9.8.1.3） */
+/** 评价列表查询参数（后端 GET /evaluations 实际仅收 page/size/minRating/maxRating，
+ *  旧类型的 isSatisfied/assigneeId/startTime/endTime 为文档漂移、后端不识别，已删除） */
 export interface IEvaluationQuery extends PageQuery {
-  isSatisfied?: boolean
-  minRating?: EvaluationRating
-  assigneeId?: number
-  startTime?: string
-  endTime?: string
+  minRating?: number
+  maxRating?: number
 }
 
-/** 不满意评价列表查询参数（接口设计.md 9.8.1.4） */
-export interface IUnsatisfiedEvaluationQuery extends PageQuery {
-  /** 是否已跟进 */
-  hasFollowup?: boolean
-}
+/** 不满意评价列表查询参数（后端 GET /evaluations/unsatisfied 实际仅收 page/size） */
+export type IUnsatisfiedEvaluationQuery = PageQuery
 
-/** 不满意跟进记录（接口设计.md 9.8.2.1 响应） */
+/** 不满意跟进记录（后端 FollowUpVO 实测字段：跟进内容单字段 + 跟进人 + 跟进时间；
+ *  旧类型的 action/result/remark/followerName/createdAt 为文档漂移，已删除） */
 export interface IEvaluationFollowup {
   id: number
   evaluationId: number
-  action: string
-  result: string | null
-  remark: string | null
-  followerId: number
-  followerName: string
-  createdAt: string
+  handlerId: number
+  handlerName: string | null
+  followupContent: string | null
+  followupTime: string
 }
 
-/** 添加跟进请求（接口设计.md 9.8.2.1） */
+/** 添加跟进请求（后端 CreateFollowUpDTO：仅 content，@NotBlank ≤1000 字符） */
 export interface IEvaluationFollowupCreateRequest {
-  action: string
-  result?: string
-  remark?: string
+  content: string
 }

@@ -1,73 +1,85 @@
-/** C3 租住管理类型定义（接口设计.md §9.3） */
+/** C3 租住管理类型定义（对齐后端实测契约：LeaseController/LeaseVO/CreateLeaseDTO/UpdateLeaseStatusDTO） */
 import type { PageQuery } from '@/types/api'
 
 /* ---------------------------------- 状态枚举 ---------------------------------- */
 
-/** 租住状态（接口设计.md 9.3.1.4 / 9.3.1.5） */
-export type LeaseStatus = 'ACTIVE' | 'EXPIRED' | 'TERMINATED'
+/** 租住状态（Flyway V1 lease_record.status 注释 + LeaseService 状态机：待审核→已生效→已搬出→已归档 + 已驳回） */
+export type LeaseStatus = 'PENDING' | 'ACTIVE' | 'MOVED_OUT' | 'ARCHIVED' | 'REJECTED'
 
-/** 租住状态中文标签 */
+/** 租住状态中文标签（ACTIVE 界面文案「在租」对齐设计稿，状态机语义=已生效） */
 export const leaseStatusLabels: Record<LeaseStatus, string> = {
-  ACTIVE: '租住中',
-  EXPIRED: '已到期',
-  TERMINATED: '已终止'
+  PENDING: '待审核',
+  ACTIVE: '在租',
+  MOVED_OUT: '已搬出',
+  ARCHIVED: '已归档',
+  REJECTED: '已驳回'
 }
 
-/** 支付方式（接口设计.md 9.3.1.1，文档示例值 MONTHLY） */
-export type PaymentMethod = 'MONTHLY'
-
-/** 支付方式中文标签 */
-export const paymentMethodLabels: Record<PaymentMethod, string> = {
-  MONTHLY: '按月支付'
-}
+/** 到期标注（后端按日期自动判定，非状态值；架构设计 §6）：EXPIRING-即将到期(30天内) / EXPIRED-已到期 */
+export type LeaseExpiryFlag = 'EXPIRING' | 'EXPIRED'
 
 /* ---------------------------------- 租住记录 ---------------------------------- */
 
-/** 租住记录实体（接口设计.md 9.3.1.1 响应） */
+/** 租住记录（后端 LeaseVO 实测字段；无 paymentMethod/contractNumber，押金字段名为 deposit） */
 export interface ILeaseRecord {
   id: number
-  residentId: number
-  residentName: string
+  /** 租客ID */
+  tenantId: number
+  /** 租客姓名 */
+  tenantName: string
+  communityId: number
   houseId: number
-  houseAddress: string
-  leaseStartDate: string
-  leaseEndDate: string
+  /** 房屋位置（楼栋-单元-房号） */
+  houseLocation: string
+  /** 租期开始日期（YYYY-MM-DD） */
+  startDate: string
+  /** 租期结束日期（YYYY-MM-DD） */
+  endDate: string
   monthlyRent: number
-  depositAmount?: number
-  paymentMethod?: PaymentMethod
-  contractNumber?: string
+  deposit?: number
   status: LeaseStatus
+  /** 到期标注（仅 ACTIVE 判定，其余为空） */
+  expiryFlag?: LeaseExpiryFlag | null
   remark?: string
   createdAt: string
 }
 
-/** 创建/更新租住记录请求（接口设计.md 9.3.1.1 请求体，9.3.1.2 同） */
+/** 创建/更新租住记录请求（后端 CreateLeaseDTO；社区归属由房屋推导，更新不允许变更房屋） */
 export interface ILeaseRecordDTO {
+  /** 租客ID */
   residentId: number
   houseId: number
-  leaseStartDate: string
-  leaseEndDate: string
+  startDate: string
+  endDate: string
   monthlyRent: number
-  depositAmount?: number
-  paymentMethod?: PaymentMethod
-  contractNumber?: string
+  deposit?: number
+  contractUrl?: string
   remark?: string
 }
 
-/** 租住记录列表查询参数（接口设计.md 9.3.1.4） */
+/** 租住记录列表查询参数（status 为状态机值；到期标注不是状态、不可作为 status 传参） */
 export interface ILeaseQuery extends PageQuery {
   status?: LeaseStatus
   residentId?: number
   houseId?: number
 }
 
-/** 更新租住状态请求（接口设计.md 9.3.1.5 请求体） */
+/** 更新租住状态请求（状态机流转校验，LeaseService ALLOWED_TRANSITIONS） */
 export interface IUpdateLeaseStatusDTO {
   status: LeaseStatus
   remark?: string
 }
 
-/** 即将到期租住列表查询参数（接口设计.md 9.3.1.6） */
+/** 续租请求（需求 E3：止期顺延，仅已生效租约；后端 RenewLeaseDTO） */
+export interface IRenewLeaseDTO {
+  /** 新结束日期（须晚于原结束日期） */
+  newEndDate: string
+  monthlyRent: number
+  deposit: number
+  remark?: string
+}
+
+/** 即将到期租住列表查询参数（ACTIVE 且结束日期在 [今天, 今天+days] 窗口内） */
 export interface IExpiringLeaseQuery extends PageQuery {
   days?: number
 }
