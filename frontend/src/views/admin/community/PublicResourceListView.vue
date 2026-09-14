@@ -19,18 +19,37 @@ import type {
   IPublicResourceDTO,
   IPublicResourceQuery,
   IResourceTimeslot,
-  ResourceType,
-  TimeslotStatus
+  ResourceType
 } from '@/types/modules/community'
 import {
   bookingUnitLabels,
   resourceStatusLabels,
-  resourceTypeLabels,
-  timeslotStatusLabels
+  resourceTypeLabels
 } from '@/types/modules/community'
 import StatusTag from '@/components/common/StatusTag.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import Pagination from '@/components/common/Pagination.vue'
+
+/** 星期标签（后端 dayOfWeek 1-周一 … 7-周日，CreateTimeSlotDTO @Schema） */
+const DAY_OF_WEEK_LABELS: Record<number, string> = {
+  1: '周一',
+  2: '周二',
+  3: '周三',
+  4: '周四',
+  5: '周五',
+  6: '周六',
+  7: '周日'
+}
+
+const DAY_OF_WEEK_OPTIONS = Object.entries(DAY_OF_WEEK_LABELS).map(([value, label]) => ({
+  value: Number(value),
+  label
+}))
+
+/** HH:mm:ss → HH:mm（后端 LocalTime 序列化带秒） */
+function hm(time?: string): string {
+  return time ? time.slice(0, 5) : '--'
+}
 
 /** 公共资源管理：社区筛选 + 表格 CRUD + 可预约时段配置（列出/新增/删除） */
 const resources = ref<IPublicResource[]>([])
@@ -111,7 +130,7 @@ type ResourceForm = Omit<IPublicResourceDTO, 'communityId'> & { communityId?: nu
 const form = reactive<ResourceForm>({
   communityId: undefined,
   name: '',
-  type: 'SPORTS',
+  type: 'GYM',
   location: '',
   capacity: undefined,
   openTime: '',
@@ -132,7 +151,7 @@ function openCreate(): void {
   editingId.value = null
   form.communityId = communityFilter.value === '' ? undefined : communityFilter.value
   form.name = ''
-  form.type = 'SPORTS'
+  form.type = 'GYM'
   form.location = ''
   form.capacity = undefined
   form.openTime = ''
@@ -195,18 +214,18 @@ const timeslotSize = ref(10)
 const timeslotTotal = ref(0)
 
 const timeslotFormRef = ref<FormInstance>()
+/* 周循环模板（后端 CreateTimeSlotDTO：dayOfWeek 1-7 + 起止时间 + isAvailable） */
 const timeslotForm = reactive<ICreateTimeslotDTO>({
-  date: '',
+  dayOfWeek: 1,
   startTime: '',
   endTime: '',
-  maxBookings: 1
+  isAvailable: 1
 })
 
 const timeslotRules: FormRules = {
-  date: [{ required: true, message: '请选择日期', trigger: 'change' }],
+  dayOfWeek: [{ required: true, message: '请选择星期', trigger: 'change' }],
   startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
-  endTime: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
-  maxBookings: [{ required: true, message: '请输入最大预约数', trigger: 'blur' }]
+  endTime: [{ required: true, message: '请选择结束时间', trigger: 'change' }]
 }
 
 async function loadTimeslots(): Promise<void> {
@@ -227,13 +246,17 @@ async function loadTimeslots(): Promise<void> {
   }
 }
 
+function resetTimeslotForm(): void {
+  timeslotForm.dayOfWeek = 1
+  timeslotForm.startTime = ''
+  timeslotForm.endTime = ''
+  timeslotForm.isAvailable = 1
+}
+
 function openTimeslot(row: IPublicResource): void {
   timeslotResource.value = row
   timeslotPage.value = 1
-  timeslotForm.date = ''
-  timeslotForm.startTime = ''
-  timeslotForm.endTime = ''
-  timeslotForm.maxBookings = 1
+  resetTimeslotForm()
   timeslotVisible.value = true
   loadTimeslots()
 }
@@ -244,10 +267,7 @@ async function handleAddTimeslot(): Promise<void> {
   try {
     await createTimeslot(timeslotResource.value.id, { ...timeslotForm })
     ElMessage.success('时段已添加')
-    timeslotForm.date = ''
-    timeslotForm.startTime = ''
-    timeslotForm.endTime = ''
-    timeslotForm.maxBookings = 1
+    resetTimeslotForm()
     loadTimeslots()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '添加时段失败')
@@ -257,7 +277,7 @@ async function handleAddTimeslot(): Promise<void> {
 async function handleDeleteTimeslot(row: IResourceTimeslot): Promise<void> {
   try {
     await ElMessageBox.confirm(
-      `确定删除时段「${row.date} ${row.startTime}~${row.endTime}」？`,
+      `确定删除时段「${DAY_OF_WEEK_LABELS[row.dayOfWeek] ?? row.dayOfWeek} ${hm(row.startTime)}~${hm(row.endTime)}」？`,
       '删除时段',
       { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
     )
@@ -301,8 +321,8 @@ onMounted(() => {
 
 <template>
   <section class="resource-list">
+    <!-- 任务 3 换壳内嵌：页头/标题由容器 Tab 承担，此处仅保留操作按钮 -->
     <div class="list-toolbar">
-      <span class="toolbar-title">公共资源管理</span>
       <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :disabled="communityFilter === ''" @click="openCreate">新建资源</el-button>
     </div>
 
@@ -487,7 +507,7 @@ onMounted(() => {
       </template>
     </el-dialog>
 
-    <!-- 可预约时段配置 -->
+    <!-- 可预约时段配置（周循环模板，对齐后端 CreateTimeSlotDTO） -->
     <el-dialog
       v-model="timeslotVisible"
       :title="timeslotResource ? `时段配置：${timeslotResource.name}` : '时段配置'"
@@ -500,36 +520,35 @@ onMounted(() => {
         label-width="100px"
         class="timeslot-form"
       >
-        <el-form-item label="日期" prop="date">
-          <el-date-picker
-            v-model="timeslotForm.date"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="选择日期"
-            style="width: 160px"
-          />
+        <el-form-item label="星期" prop="dayOfWeek">
+          <el-select v-model="timeslotForm.dayOfWeek" placeholder="请选择星期" style="width: 160px">
+            <el-option
+              v-for="option in DAY_OF_WEEK_OPTIONS"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="时间段" prop="startTime">
           <div class="time-range">
-            <el-time-select
+            <el-time-picker
               v-model="timeslotForm.startTime"
-              start="06:00"
-              end="22:30"
-              step="00:30"
+              format="HH:mm"
+              value-format="HH:mm"
               placeholder="开始"
             />
             <span class="time-sep">至</span>
-            <el-time-select
+            <el-time-picker
               v-model="timeslotForm.endTime"
-              :start="timeslotForm.startTime || '06:00'"
-              end="23:00"
-              step="00:30"
+              format="HH:mm"
+              value-format="HH:mm"
               placeholder="结束"
             />
           </div>
         </el-form-item>
-        <el-form-item label="最大预约数" prop="maxBookings">
-          <el-input-number v-model="timeslotForm.maxBookings" :min="1" :max="999" />
+        <el-form-item label="默认可约">
+          <el-switch v-model="timeslotForm.isAvailable" :active-value="1" :inactive-value="0" />
         </el-form-item>
         <el-form-item>
           <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="handleAddTimeslot">添加时段</el-button>
@@ -537,17 +556,17 @@ onMounted(() => {
       </el-form>
 
       <el-table v-loading="timeslotLoading" :data="timeslots" border max-height="320">
-        <el-table-column prop="date" label="日期" width="110" />
-        <el-table-column label="时间段" width="150">
-          <template #default="{ row }">{{ row.startTime }} ~ {{ row.endTime }}</template>
+        <el-table-column label="星期" width="110">
+          <template #default="{ row }">{{ DAY_OF_WEEK_LABELS[row.dayOfWeek as number] ?? row.dayOfWeek }}</template>
         </el-table-column>
-        <el-table-column prop="maxBookings" label="可约数" width="80" />
-        <el-table-column prop="currentBookings" label="已约数" width="80" />
+        <el-table-column label="时间段" width="150">
+          <template #default="{ row }">{{ hm(row.startTime) }} ~ {{ hm(row.endTime) }}</template>
+        </el-table-column>
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
             <StatusTag
-              :label="timeslotStatusLabels[row.status as TimeslotStatus]"
-              type="completed"
+              :label="row.isAvailable === 1 ? '可预约' : '停用'"
+              :type="row.isAvailable === 1 ? 'completed' : 'canceled'"
             />
           </template>
         </el-table-column>
