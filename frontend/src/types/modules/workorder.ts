@@ -139,16 +139,20 @@ export interface IWorkOrderCompleteRequest {
   remark?: string
 }
 
-/** 驳回/取消工单请求（接口设计.md 9.4.2.11 / 9.4.2.12） */
+/** 驳回/取消工单请求（接口设计.md 9.4.2.11 / 9.4.2.12；后端 WorkOrderActionDTO 实际字段为 remark，reason 为文档漂移命名） */
 export interface IWorkOrderReasonRequest {
-  reason: string
+  remark: string
 }
 
-/** 工单处理记录/时间线节点（接口设计.md 9.4.2.13） */
+/** 工单处理记录/时间线节点（接口设计.md 9.4.2.13；后端实际响应为 newStatus/content，status/remark 为文档漂移命名） */
 export interface IWorkOrderProcess {
-  status: WorkOrderStatus
+  action: string
+  oldStatus: WorkOrderStatus | null
+  newStatus: WorkOrderStatus
+  content: string | null
+  operatorId: number
   operatorName: string
-  remark: string | null
+  operatorType: string
   createdAt: string
 }
 

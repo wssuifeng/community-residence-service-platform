@@ -193,7 +193,7 @@ onMounted(load)
         </el-table-column>
         <el-table-column label="租期" min-width="200">
           <template #default="{ row }">
-            {{ formatDate(row.leaseStartDate) }} ~ {{ formatDate(row.leaseEndDate) }}
+            {{ formatDate(row.startDate) }} ~ {{ formatDate(row.endDate) }}
           </template>
         </el-table-column>
         <el-table-column label="月租金（元）" width="110" align="right">

@@ -1,174 +1,318 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import Pagination from '@/components/common/Pagination.vue'
+import SearchBar from '@/components/common/SearchBar.vue'
 import { listNotices } from '@/api/notice'
 import type { INotice } from '@/types/modules/notice'
-import { formatRelative } from '@/utils/date'
+import { formatDate } from '@/utils/date'
 
-/** 居民端公告列表：卡片流，置顶（高优先级）在前，带发布相对时间 */
-const router = useRouter()
+/** 居民端公告列表：与游客端同语言（衬线页头 + 置顶横拉卡条 + 日期块期刊列表） */
 
 const notices = ref<INotice[]>([])
-const loading = ref(false)
+const total = ref(0)
 const page = ref(1)
 const size = ref(10)
-const total = ref(0)
+const keyword = ref('')
+const loading = ref(false)
+
+/** 置顶判定：兼容旧 priority 枚举与 notice 表 is_pinned 布尔列（VO 暴露前恒 false） */
+function isPinned(notice: INotice): boolean {
+  return notice.priority === 'HIGH' || notice.priority === 'URGENT'
+    || notice.pinned === true || notice.isPinned === true
+}
+
+/** 置顶区与期刊列表按优先级拆分（保持后端返回顺序） */
+const pinnedNotices = computed<INotice[]>(() => notices.value.filter(isPinned))
+const journalNotices = computed<INotice[]>(() => notices.value.filter((notice) => !isPinned(notice)))
+
+/* 置顶横拉卡条：左右悬浮箭头平滑滚动一屏的 80% */
+const pinnedScroller = ref<HTMLElement | null>(null)
+
+function scrollPinned(direction: 1 | -1): void {
+  const el = pinnedScroller.value
+  if (!el) return
+  el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: 'smooth' })
+}
+
+/** 日期块：大字号「日」（publishTime 为空时占位） */
+function dayOf(notice: INotice): string {
+  const date = new Date(notice.publishTime ?? '')
+  return Number.isNaN(date.getTime()) ? '--' : String(date.getDate()).padStart(2, '0')
+}
+
+/** 日期块：小字「年-月」 */
+function yearMonthOf(notice: INotice): string {
+  return formatDate(notice.publishTime).slice(0, 7)
+}
 
 async function load(): Promise<void> {
   loading.value = true
   try {
-    const result = await listNotices({ page: page.value, size: size.value })
+    const result = await listNotices({
+      page: page.value,
+      size: size.value,
+      keyword: keyword.value === '' ? undefined : keyword.value
+    })
     notices.value = result.records
     total.value = result.total
-  } catch {
-    notices.value = []
-    total.value = 0
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '公告加载失败')
   } finally {
     loading.value = false
   }
 }
 
-onMounted(load)
-
-function goDetail(id: number): void {
-  router.push(`/resident/notices/${id}`)
+function handleSearch(): void {
+  page.value = 1
+  load()
 }
+
+function handleSizeChange(): void {
+  /* 每页条数变化后回到第一页，避免停留在越界页码 */
+  page.value = 1
+  load()
+}
+
+onMounted(load)
 </script>
 
 <template>
-  <section class="notice-list-page">
-    <header class="page-head">
-      <h1>社区公告</h1>
-      <p>了解社区最新动态与重要通知</p>
+  <div class="notice-list">
+    <header class="list-head">
+      <div>
+        <h1 class="list-title">社区公告</h1>
+        <p class="list-sub">了解社区最新动态与服务安排</p>
+      </div>
+      <SearchBar v-model="keyword" placeholder="搜索公告标题 / 内容" @search="handleSearch" />
     </header>
 
-    <div v-if="loading" class="page-loading">加载中…</div>
-
-    <template v-else>
-      <div v-if="notices.length === 0" class="page-empty">
-        暂无公告，社区有新消息会第一时间通知您
+    <div v-loading="loading" class="notice-body">
+      <!-- 置顶区：横向滚动长条卡 + 左右半透明悬浮箭头（notice 无封面字段，占位插画封面） -->
+      <div v-if="pinnedNotices.length > 0" class="pinned-wrap">
+        <button type="button" class="pinned-arrow is-left" aria-label="向左滚动" @click="scrollPinned(-1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <div ref="pinnedScroller" class="pinned-strip">
+          <router-link
+            v-for="notice in pinnedNotices"
+            :key="notice.id"
+            :to="`/resident/notices/${notice.id}`"
+            class="pinned-card"
+          >
+            <img class="pinned-cover" src="/images/notice-cover-default.png" :alt="notice.title" />
+            <div class="pinned-main">
+              <div class="pinned-title-row">
+                <span class="pin-mark">置顶</span>
+                <h2 class="pinned-title">{{ notice.title }}</h2>
+              </div>
+              <p class="pinned-excerpt">{{ notice.content }}</p>
+              <p class="pinned-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 3" />
+                </svg>
+                {{ formatDate(notice.publishTime) }} · 阅读 {{ notice.viewCount }}
+              </p>
+            </div>
+          </router-link>
+        </div>
+        <button type="button" class="pinned-arrow is-right" aria-label="向右滚动" @click="scrollPinned(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
       </div>
 
-      <ul v-else class="notice-cards">
-        <li
-          v-for="notice in notices"
+      <!-- 公告列表：大白容器内日期块行（大字号日 + 年月 | 标题+摘要 | 阅读量） -->
+      <div v-if="journalNotices.length > 0" class="journal-board">
+        <router-link
+          v-for="notice in journalNotices"
           :key="notice.id"
-          class="notice-card"
-          @click="goDetail(notice.id)"
+          :to="`/resident/notices/${notice.id}`"
+          class="journal-item"
         >
-          <div class="notice-card-head">
-            <span
-              v-if="notice.priority === 'HIGH' || notice.priority === 'URGENT'"
-              class="notice-pin"
-            >
-              置顶
-            </span>
-            <h2 class="notice-title">{{ notice.title }}</h2>
+          <div class="journal-date">
+            <span class="journal-day">{{ dayOf(notice) }}</span>
+            <span class="journal-ym">{{ yearMonthOf(notice) }}</span>
           </div>
-          <p class="notice-summary">{{ notice.content }}</p>
-          <div class="notice-meta">
-            <span class="notice-community">{{ notice.communityName ?? '全社区' }}</span>
-            <span class="notice-dot">·</span>
-            <span>{{ formatRelative(notice.publishTime) }}</span>
-            <span class="notice-views">{{ notice.viewCount }} 人已读</span>
+          <span class="journal-sep" aria-hidden="true">|</span>
+          <div class="journal-main">
+            <h3 class="journal-title">{{ notice.title }}</h3>
+            <p class="journal-excerpt">{{ notice.content }}</p>
           </div>
-        </li>
-      </ul>
-
-      <div class="page-pagination">
-        <el-pagination
-          v-model:current-page="page"
-          v-model:page-size="size"
-          :total="total"
-          layout="prev, pager, next"
-          background
-          @current-change="load"
-        />
+          <span class="journal-views">阅读 {{ notice.viewCount }}</span>
+        </router-link>
       </div>
-    </template>
-  </section>
+
+      <!-- 空状态：示例图 + 引导，而非一行灰字 -->
+      <div v-if="!loading && notices.length === 0" class="empty-state">
+        <img src="/images/empty-state.png" alt="暂无公告" />
+        <h3>暂无相关公告</h3>
+        <p>换个关键字试试，社区有新动态时会第一时间在这里发布。</p>
+      </div>
+    </div>
+
+    <Pagination
+      v-model:page="page"
+      v-model:size="size"
+      :total="total"
+      layout="prev, pager, next"
+      @update:page="load"
+      @update:size="handleSizeChange"
+    />
+  </div>
 </template>
 
 <style scoped>
-.notice-list-page {
+.list-head {
   display: flex;
-  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-lg);
 }
 
-.page-head h1 {
-  margin: 0 0 var(--spacing-xs);
-  font-size: var(--font-size-xl);
+/* 衬线感大标题（期刊氛围，仅此页） */
+.list-title {
+  font-family: Georgia, 'Songti SC', 'SimSun', serif;
+  font-size: var(--font-size-xxl);
   font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: 0.04em;
 }
 
-.page-head p {
-  margin: 0;
-  color: var(--color-text-secondary);
+.list-sub {
+  margin-top: var(--spacing-xs);
   font-size: var(--font-size-sm);
-}
-
-.page-loading,
-.page-empty {
-  padding: var(--spacing-xxl) 0;
-  text-align: center;
   color: var(--color-text-secondary);
 }
 
-.notice-cards {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+.notice-body {
+  min-height: 200px;
+  margin-bottom: var(--spacing-lg);
 }
 
-.notice-card {
-  padding: var(--spacing-lg);
-  background-color: #fff;
+/* 置顶横拉卡条：原生滚动条隐藏，悬浮箭头滚动 */
+.pinned-wrap {
+  position: relative;
+  margin-bottom: var(--spacing-xl);
+}
+
+.pinned-strip {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: var(--spacing-xs) 0;
+}
+
+.pinned-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.pinned-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-circle);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.pinned-arrow:hover {
+  color: var(--color-primary);
+}
+
+.pinned-arrow.is-left {
+  left: var(--spacing-xs);
+}
+
+.pinned-arrow.is-right {
+  right: var(--spacing-xs);
+}
+
+.pinned-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* 置顶长条白卡：左 16:9 偏宽封面 + 右三段文本 */
+.pinned-card {
+  flex: 0 0 min(620px, 92%);
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: #fff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.notice-card:hover {
+.pinned-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
-.notice-card-head {
+.pinned-cover {
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  object-fit: cover;
+}
+
+.pinned-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  min-width: 0;
+}
+
+.pinned-title-row {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
+  min-width: 0;
 }
 
-.notice-pin {
+.pin-mark {
   flex-shrink: 0;
   padding: 1px var(--spacing-sm);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger);
+  color: #fff;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  color: var(--status-rejected);
-  background-color: rgba(239, 68, 68, 0.1);
 }
 
-.notice-title {
-  margin: 0;
+.pinned-title {
+  flex: 1;
+  min-width: 0;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.notice-summary {
-  margin: 0 0 var(--spacing-md);
-  color: var(--color-text-secondary);
+.pinned-excerpt {
   font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   line-height: var(--line-height-normal);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -176,25 +320,135 @@ function goDetail(id: number): void {
   overflow: hidden;
 }
 
-.notice-meta {
+.pinned-meta {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  margin-top: auto;
   font-size: var(--font-size-xs);
   color: var(--color-text-disabled);
 }
 
-.notice-community {
+.pinned-meta svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* 期刊列表：一个大白容器，行间细分隔线 */
+.journal-board {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0 var(--spacing-lg);
+}
+
+.journal-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) 0;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.journal-item:last-child {
+  border-bottom: none;
+}
+
+.journal-item:hover .journal-title {
   color: var(--color-primary);
 }
 
-.notice-views {
-  margin-left: auto;
+/* 日期块：大字号日 + 小灰年月 */
+.journal-date {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 56px;
 }
 
-.page-pagination {
+.journal-day {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.journal-ym {
+  margin-top: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
+.journal-sep {
+  flex-shrink: 0;
+  color: var(--color-border);
+  font-weight: var(--font-weight-normal);
+}
+
+.journal-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.journal-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease;
+}
+
+.journal-excerpt {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.journal-views {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+  white-space: nowrap;
+}
+
+/* 空状态 */
+.empty-state {
   display: flex;
-  justify-content: center;
-  padding: var(--spacing-md) 0;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xxl) var(--spacing-md);
+  background: #fff;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.empty-state img {
+  width: 180px;
+}
+
+.empty-state h3 {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.empty-state p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* 响应式：窄屏置顶卡降上下结构 */
+@media (max-width: 768px) {
+  .pinned-card {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

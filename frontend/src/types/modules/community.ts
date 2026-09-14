@@ -31,12 +31,15 @@ export const propertyTypeLabels: Record<PropertyType, string> = {
   APARTMENT: '公寓'
 }
 
-/** 公共资源类型（接口设计.md 9.1.5.1，文档示例值 SPORTS） */
-export type ResourceType = 'SPORTS'
+/** 公共资源类型（2026-09-12 对齐后端 PublicResource @Schema：MEETING_ROOM/GYM/PARKING，
+ * 原 SPORTS 为接口文档示例值，后端枚举中不存在，见任务 3 报告数据决策） */
+export type ResourceType = 'MEETING_ROOM' | 'GYM' | 'PARKING'
 
 /** 公共资源类型中文标签 */
 export const resourceTypeLabels: Record<ResourceType, string> = {
-  SPORTS: '运动场地'
+  MEETING_ROOM: '会议室',
+  GYM: '健身房',
+  PARKING: '停车位'
 }
 
 /** 资源预约单位（接口设计.md 9.1.5.1，文档示例值 HOURLY） */
@@ -53,14 +56,6 @@ export type ResourceStatus = 'AVAILABLE'
 /** 公共资源状态中文标签 */
 export const resourceStatusLabels: Record<ResourceStatus, string> = {
   AVAILABLE: '可用'
-}
-
-/** 资源时段状态（接口设计.md 9.1.6，文档示例值 AVAILABLE） */
-export type TimeslotStatus = 'AVAILABLE'
-
-/** 资源时段状态中文标签 */
-export const timeslotStatusLabels: Record<TimeslotStatus, string> = {
-  AVAILABLE: '可预约'
 }
 
 /* ---------------------------------- 社区 ---------------------------------- */
@@ -129,11 +124,12 @@ export interface IBuildingQuery extends PageQuery {
 
 /* ---------------------------------- 单元 ---------------------------------- */
 
-/** 单元实体（后端 UnitVO：name + description，无数值楼层/户数字段） */
+/** 单元实体（后端 UnitVO：name + description，无数值楼层/户数字段；
+ * buildingName 后端可空，展示一律以树/筛选上下文为准） */
 export interface IUnit {
   id: number
   buildingId: number
-  buildingName: string
+  buildingName?: string
   communityId: number
   name: string
   description?: string
@@ -149,12 +145,13 @@ export interface IUnitDTO {
 
 /* ---------------------------------- 房屋 ---------------------------------- */
 
-/** 房屋实体（接口设计.md 9.1.4.1 响应） */
+/** 房屋实体（2026-09-12 对齐后端 HouseVO：无 buildingName/unitNumber 字段，
+ * unitName 后端可空；楼栋/单元展示名由前端以筛选/树上下文补全，见任务 3 报告） */
 export interface IHouse {
   id: number
   unitId: number
-  buildingName: string
-  unitNumber: string
+  buildingName?: string
+  unitName?: string
   houseNumber: string
   floor: number
   area?: number
@@ -246,35 +243,31 @@ export interface IPublicResourceQuery extends PageQuery {
 
 /* ---------------------------------- 资源时段 ---------------------------------- */
 
-/** 资源时段实体（接口设计.md 9.1.6.1 响应） */
+/** 资源时段实体（2026-09-12 对齐后端 ResourceTimeslotVO：周循环模板
+ * dayOfWeek 1-7 + isAvailable；接口设计.md 9.1.6 的按日期 date/maxBookings
+ * 模型为漂移定义，与房源时段 housing.ts 同款修正） */
 export interface IResourceTimeslot {
   id: number
   resourceId: number
-  resourceName: string
-  date: string
+  resourceName?: string
+  /** 星期几：1-周一 … 7-周日（后端 CreateTimeSlotDTO @Schema） */
+  dayOfWeek: number
   startTime: string
   endTime: string
-  maxBookings: number
-  currentBookings: number
-  status: TimeslotStatus
+  isAvailable: number
   createdAt: string
 }
 
-/** 创建资源时段请求（接口设计.md 9.1.6.1 请求体） */
+/** 创建资源时段请求（后端 CreateTimeSlotDTO：周模板） */
 export interface ICreateTimeslotDTO {
-  date: string
+  dayOfWeek: number
   startTime: string
   endTime: string
-  maxBookings?: number
-  status?: TimeslotStatus
+  isAvailable?: number
 }
 
-/** 更新资源时段请求（接口设计.md 9.1.6.2，同创建但不含 resourceId） */
+/** 更新资源时段请求（后端同创建） */
 export type IUpdateTimeslotDTO = ICreateTimeslotDTO
 
-/** 资源时段列表查询参数（接口设计.md 9.1.6.4） */
-export interface ITimeslotQuery extends PageQuery {
-  startDate?: string
-  endDate?: string
-  status?: TimeslotStatus
-}
+/** 资源时段列表查询参数（后端按资源分页，无额外过滤参数） */
+export type ITimeslotQuery = PageQuery

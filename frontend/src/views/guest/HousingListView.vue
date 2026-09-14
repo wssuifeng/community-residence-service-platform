@@ -5,10 +5,12 @@ import Pagination from '@/components/common/Pagination.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
 import StatusTag from '@/components/common/StatusTag.vue'
 import { listHousings } from '@/api/housing'
+import { getCommunityList } from '@/api/community'
+import type { ICommunity } from '@/types/modules/community'
 import type { IHousing, HousingStatus } from '@/types/modules/housing'
 import { housingStatusLabels } from '@/types/modules/housing'
 
-/** 房源列表（公开）：卡片网格 + 关键字/状态筛选 + 分页；无图房源按序号轮换示例图 */
+/** 房源列表（公开）：卡片网格 + 社区/状态/租金/关键字筛选 + 分页；无图房源按序号轮换示例图 */
 
 const housings = ref<IHousing[]>([])
 const total = ref(0)
@@ -16,6 +18,9 @@ const page = ref(1)
 const size = ref(12)
 const keyword = ref('')
 const statusFilter = ref<HousingStatus | ''>('')
+const rentRange = ref('')
+const communityFilter = ref(0)
+const communityOptions = ref<ICommunity[]>([])
 const loading = ref(false)
 
 /** 状态筛选选项：'' 表示全部（接口无房型参数，房型信息经 tags 展示、经关键字匹配） */
@@ -24,6 +29,15 @@ const statusOptions: Array<{ label: string; value: HousingStatus | '' }> = [
   { label: housingStatusLabels.AVAILABLE, value: 'AVAILABLE' },
   { label: housingStatusLabels.RESERVED, value: 'RESERVED' },
   { label: housingStatusLabels.RENTED, value: 'RENTED' }
+]
+
+/** 租金区间选项：接口支持 minRent/maxRent，档位映射两个参数（接口无户型/朝向参数，不做对应控件） */
+const rentRangeOptions = [
+  { label: '全部租金', value: '' },
+  { label: '2000 以下', value: '-2000' },
+  { label: '2000 - 3000', value: '2000-3000' },
+  { label: '3000 - 4000', value: '3000-4000' },
+  { label: '4000 以上', value: '4000-' }
 ]
 
 /** 房源状态 → StatusTag 语义色（可租=绿 / 已预订=黄 / 已出租、已下架=灰） */
@@ -42,11 +56,16 @@ function coverImage(housing: IHousing, index: number): string {
 async function load(): Promise<void> {
   loading.value = true
   try {
+    /* 租金档位拆成 min/max 两个接口参数，空端表示不限 */
+    const [rangeMin, rangeMax] = rentRange.value.split('-')
     const result = await listHousings({
       page: page.value,
       size: size.value,
       status: statusFilter.value === '' ? undefined : statusFilter.value,
-      keyword: keyword.value === '' ? undefined : keyword.value
+      keyword: keyword.value === '' ? undefined : keyword.value,
+      communityId: communityFilter.value > 0 ? communityFilter.value : undefined,
+      minRent: rangeMin === '' ? undefined : Number(rangeMin),
+      maxRent: rangeMax === '' || rangeMax === undefined ? undefined : Number(rangeMax)
     })
     housings.value = result.records
     total.value = result.total
@@ -62,7 +81,7 @@ function handleSearch(): void {
   load()
 }
 
-function handleStatusChange(): void {
+function handleFilterChange(): void {
   page.value = 1
   load()
 }
@@ -73,32 +92,89 @@ function handleSizeChange(): void {
   load()
 }
 
-onMounted(load)
+/* 社区下拉选项：社区列表接口游客可匿名访问（后端未加权限注解），拉取失败降级为不过滤 */
+async function loadCommunities(): Promise<void> {
+  try {
+    const result = await getCommunityList({ page: 1, size: 50 })
+    communityOptions.value = result.records
+  } catch {
+    communityOptions.value = []
+  }
+}
+
+onMounted(() => {
+  load()
+  void loadCommunities()
+})
 </script>
 
 <template>
   <div class="housing-list">
     <header class="list-head">
-      <div>
-        <h1 class="list-title">在租房源</h1>
-        <p class="list-sub">找到合适的房子，注册居民账号即可预约看房</p>
-      </div>
-      <div class="list-filters">
-        <SearchBar v-model="keyword" placeholder="搜索小区 / 地址 / 标题" @search="handleSearch" />
-        <el-select
-          v-model="statusFilter"
-          style="width: 130px"
-          @change="handleStatusChange"
-        >
-          <el-option
-            v-for="option in statusOptions"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
-          />
-        </el-select>
-      </div>
+      <h1 class="list-title">在租房源</h1>
+      <p class="list-sub">共 {{ total }} 套在售 · 找到合适的房子，注册居民账号即可预约看房</p>
     </header>
+
+    <!-- 筛选工具条：白卡横条铺满整行；社区/状态/租金/关键字有接口参数，户型/朝向无参数不做控件 -->
+    <div class="filter-bar">
+      <el-select
+        v-model="communityFilter"
+        class="filter-select"
+        style="width: 210px"
+        @change="handleFilterChange"
+      >
+        <template #prefix>
+          <span class="filter-select-label">社区</span>
+        </template>
+        <el-option label="全部社区" :value="0" />
+        <el-option
+          v-for="community in communityOptions"
+          :key="community.id"
+          :label="community.name"
+          :value="community.id"
+        />
+      </el-select>
+      <el-select
+        v-model="statusFilter"
+        class="filter-select"
+        style="width: 170px"
+        @change="handleFilterChange"
+      >
+        <template #prefix>
+          <span class="filter-select-label">状态</span>
+        </template>
+        <el-option
+          v-for="option in statusOptions"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value"
+        />
+      </el-select>
+      <el-select
+        v-model="rentRange"
+        class="filter-select"
+        style="width: 190px"
+        placeholder="租金区间"
+        @change="handleFilterChange"
+      >
+        <template #prefix>
+          <span class="filter-select-label">租金</span>
+        </template>
+        <el-option
+          v-for="option in rentRangeOptions"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value"
+        />
+      </el-select>
+      <SearchBar v-model="keyword" placeholder="搜索小区 / 地址 / 标题" @search="handleSearch" />
+      <button type="button" class="filter-btn" @click="handleSearch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+        </svg>
+        筛选
+      </button>
+    </div>
 
     <div v-loading="loading" class="grid">
       <router-link
@@ -111,22 +187,23 @@ onMounted(load)
           <img :src="coverImage(housing, index)" :alt="housing.title" loading="lazy" />
           <StatusTag
             class="housing-status"
+            on-image
             :label="housingStatusLabels[housing.status]"
             :type="statusTagType[housing.status]"
           />
         </div>
         <div class="housing-body">
-          <h3 class="housing-title">{{ housing.title }}</h3>
-          <p class="housing-meta">{{ housing.communityName }} · {{ housing.houseAddress }}</p>
-          <div v-if="(housing.tags?.length ?? 0) > 0" class="housing-tags">
-            <span v-for="tag in housing.tags" :key="tag" class="housing-tag">{{ tag }}</span>
-          </div>
-          <div class="housing-footer">
+          <div class="housing-price-row">
             <p class="housing-rent">
               <span class="housing-rent-amount">¥{{ housing.monthlyRent }}</span>
               <span class="housing-rent-unit">/月</span>
             </p>
             <span class="housing-views">{{ housing.viewCount }} 次浏览</span>
+          </div>
+          <h3 class="housing-title">{{ housing.title }}</h3>
+          <p class="housing-meta">{{ housing.communityName }} · {{ housing.houseLocation }}</p>
+          <div v-if="(housing.tags?.length ?? 0) > 0" class="housing-tags">
+            <span v-for="tag in housing.tags" :key="tag" class="housing-tag">{{ tag }}</span>
           </div>
         </div>
       </router-link>
@@ -150,12 +227,8 @@ onMounted(load)
 </template>
 
 <style scoped>
+/* 页头：大标题 + 副标题（贴页面背景） */
 .list-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
   margin-bottom: var(--spacing-lg);
 }
 
@@ -171,11 +244,57 @@ onMounted(load)
   color: var(--color-text-secondary);
 }
 
-.list-filters {
+/* 筛选工具条：白卡横条 */
+.filter-bar {
   display: flex;
-  gap: var(--spacing-sm);
   align-items: center;
+  gap: var(--spacing-sm);
   flex-wrap: wrap;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.filter-bar :deep(.search-bar) {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* 下拉前缀标签：label + 控件组合感 */
+.filter-select-label {
+  padding-right: var(--spacing-xs);
+  margin-right: var(--spacing-xs);
+  border-right: 1px solid var(--color-border);
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-sm);
+}
+
+/* 筛选按钮：主色实心 + 漏斗图标（与搜索同触发逻辑，对齐参考设计） */
+.filter-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.filter-btn:hover {
+  background: var(--color-primary-dark);
+}
+
+.filter-btn svg {
+  width: 15px;
+  height: 15px;
 }
 
 /* 卡片网格：宽屏 3 列 → 中屏 2 列 → 窄屏 1 列 */
@@ -201,9 +320,10 @@ onMounted(load)
   box-shadow: var(--shadow-md);
 }
 
+/* 3:2 摄影封面（与设计稿比例契约一致） */
 .housing-media {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
 }
 
@@ -228,6 +348,31 @@ onMounted(load)
   flex: 1;
 }
 
+.housing-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.housing-rent-amount {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.housing-rent-unit {
+  margin-left: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.housing-views {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
 .housing-title {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
@@ -249,6 +394,7 @@ onMounted(load)
   display: flex;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
+  margin-top: var(--spacing-xs);
 }
 
 .housing-tag {
@@ -257,33 +403,6 @@ onMounted(load)
   background: var(--color-primary-bg);
   color: var(--color-primary);
   font-size: var(--font-size-xs);
-}
-
-.housing-footer {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
-  margin-top: auto;
-  padding-top: var(--spacing-sm);
-}
-
-.housing-rent-amount {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary);
-}
-
-.housing-rent-unit {
-  margin-left: var(--spacing-xs);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.housing-views {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
 }
 
 /* 空状态横跨整行 */

@@ -168,39 +168,44 @@ onMounted(load)
       />
     </FilterPanel>
 
-    <el-table v-loading="loading" :data="logs" border @row-click="openDetail">
-      <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="operatorName" label="操作人" min-width="110" show-overflow-tooltip />
-      <el-table-column label="操作人类型" width="100">
-        <template #default="{ row }">
-          {{ operatorTypeLabels[row.operatorType] ?? row.operatorType }}
+    <div class="table-panel">
+      <el-table v-loading="loading" :data="logs" @row-click="openDetail">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="operatorName" label="操作人" min-width="110" show-overflow-tooltip />
+        <el-table-column label="操作人类型" width="100">
+          <template #default="{ row }">
+            {{ operatorTypeLabels[row.operatorType] ?? row.operatorType }}
+          </template>
+        </el-table-column>
+        <el-table-column label="模块" width="100">
+          <template #default="{ row }">{{ moduleLabel(row.module) }}</template>
+        </el-table-column>
+        <el-table-column prop="action" label="操作类型" width="110" show-overflow-tooltip />
+        <el-table-column prop="description" label="操作描述" min-width="220" show-overflow-tooltip />
+        <el-table-column label="操作对象" width="140" show-overflow-tooltip>
+          <template #default="{ row }">
+            {{ row.targetType ? `${row.targetType}#${row.targetId ?? '-'}` : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="IP 地址" width="130">
+          <template #default="{ row }">{{ row.ipAddress || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="操作时间" width="160">
+          <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
+        </el-table-column>
+        <template #empty>
+          <el-empty description="暂无符合条件的操作日志" :image-size="80" />
         </template>
-      </el-table-column>
-      <el-table-column label="模块" width="100">
-        <template #default="{ row }">{{ moduleLabel(row.module) }}</template>
-      </el-table-column>
-      <el-table-column prop="action" label="操作类型" width="110" show-overflow-tooltip />
-      <el-table-column prop="description" label="操作描述" min-width="220" show-overflow-tooltip />
-      <el-table-column label="操作对象" width="140" show-overflow-tooltip>
-        <template #default="{ row }">
-          {{ row.targetType ? `${row.targetType}#${row.targetId ?? '-'}` : '-' }}
-        </template>
-      </el-table-column>
-      <el-table-column label="IP 地址" width="130">
-        <template #default="{ row }">{{ row.ipAddress || '-' }}</template>
-      </el-table-column>
-      <el-table-column label="操作时间" width="160">
-        <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
-      </el-table-column>
-    </el-table>
+      </el-table>
 
-    <Pagination
-      v-model:page="page"
-      v-model:size="size"
-      :total="total"
-      @update:page="load"
-      @update:size="load"
-    />
+      <Pagination
+        v-model:page="page"
+        v-model:size="size"
+        :total="total"
+        @update:page="load"
+        @update:size="load"
+      />
+    </div>
 
     <!-- 日志详情 -->
     <el-dialog v-model="detailVisible" title="操作日志详情" width="640px">
@@ -250,6 +255,14 @@ onMounted(load)
 .filter-label {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+/* 表格白卡容器（含分页，与居民列表 table-panel 同款） */
+.table-panel {
+  background-color: var(--admin-card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-md) var(--spacing-md) 0;
 }
 
 :deep(.el-table__row) {

@@ -71,8 +71,8 @@ async function handleLogin(): Promise<void> {
     <div class="login-brand">
       <img
         class="login-brand-image"
-        src="/images/login-illustration.png"
-        alt="社区生活插画"
+        src="/images/login-brand-panel.png"
+        alt="暮色下的社区花园"
       />
       <div class="login-brand-copy">
         <h1>社区居住服务</h1>
@@ -82,7 +82,8 @@ async function handleLogin(): Promise<void> {
 
     <div class="login-panel">
       <div class="login-card">
-        <h2 class="login-title">登录</h2>
+        <h2 class="login-title">欢迎回来</h2>
+        <p class="login-subtitle">登录你的账号</p>
 
         <div class="login-tabs" role="tablist">
           <button
@@ -106,20 +107,52 @@ async function handleLogin(): Promise<void> {
         </div>
 
         <form class="login-form" @submit.prevent="handleLogin">
-          <label class="login-field">
-            <span>用户名</span>
-            <el-input v-model="form.username" placeholder="请输入用户名" autocomplete="username" />
-          </label>
-          <label class="login-field">
-            <span>密码</span>
-            <el-input
-              v-model="form.password"
-              type="password"
-              placeholder="请输入密码"
-              autocomplete="current-password"
-              show-password
-            />
-          </label>
+          <el-input
+            v-model="form.username"
+            class="login-input"
+            placeholder="请输入用户名"
+            autocomplete="username"
+          >
+            <template #prefix>
+              <svg
+                class="login-input-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4.5 20c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5" />
+              </svg>
+            </template>
+          </el-input>
+          <el-input
+            v-model="form.password"
+            class="login-input"
+            type="password"
+            placeholder="请输入密码"
+            autocomplete="current-password"
+            show-password
+          >
+            <template #prefix>
+              <svg
+                class="login-input-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="5" y="11" width="14" height="9" rx="2" />
+                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+            </template>
+          </el-input>
           <el-button type="primary" native-type="submit" class="login-submit" :loading="loading">
             登 录
           </el-button>
@@ -139,7 +172,7 @@ async function handleLogin(): Promise<void> {
 <style scoped>
 .login-page {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 55fr 45fr;
   min-height: 100dvh;
   background-color: #fff;
 }
@@ -147,10 +180,20 @@ async function handleLogin(): Promise<void> {
 .login-brand {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(160deg, var(--color-primary-bg) 0%, #f6f9ff 55%, #eef3ff 100%);
 }
 
+/* 底部暗纱：保证左下白字叠在摄影图上可读 */
+.login-brand::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(20, 24, 40, 0.45), transparent 45%);
+}
+
+/* 品牌图绝对定位填充：竖向摄影图若参与栅格行高计算会撑高整页 */
 .login-brand-image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -160,14 +203,15 @@ async function handleLogin(): Promise<void> {
 
 .login-brand-copy {
   position: absolute;
-  left: var(--spacing-xl);
-  bottom: var(--spacing-xl);
+  left: var(--spacing-xxl);
+  bottom: var(--spacing-xxl);
+  z-index: 1;
   color: #fff;
   text-shadow: 0 2px 12px rgba(31, 41, 55, 0.45);
 }
 
 .login-brand-copy h1 {
-  font-size: var(--font-size-xxl);
+  font-size: var(--font-size-hero);
   font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
 }
@@ -182,40 +226,52 @@ async function handleLogin(): Promise<void> {
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xl) var(--spacing-lg);
+  background-color: var(--color-bg);
 }
 
 .login-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
+  padding: var(--spacing-xxl);
+  background-color: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card-float);
+  text-align: center;
 }
 
 .login-title {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-xxl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+}
+
+.login-subtitle {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
 }
 
 .login-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  margin: var(--spacing-lg) 0 var(--spacing-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-xl) 0 var(--spacing-lg);
 }
 
 .login-tabs button {
-  padding: var(--spacing-sm) 0;
-  border: none;
+  padding: var(--spacing-md) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   background-color: #fff;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .login-tabs button.active {
   background-color: var(--color-primary);
+  border-color: var(--color-primary);
   color: #fff;
   font-weight: var(--font-weight-medium);
 }
@@ -224,25 +280,60 @@ async function handleLogin(): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
 }
 
-.login-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
+.login-input {
+  /* 输入框通高 48px（= spacing-xxl），对齐设计稿的大输入框比例 */
+  --el-input-height: var(--spacing-xxl);
 }
 
+.login-input-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-disabled);
+}
+
+.login-input :deep(.el-input__wrapper) {
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 1px var(--color-border) inset;
+  transition: box-shadow 0.2s ease;
+}
+
+.login-input :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px var(--color-text-disabled) inset;
+}
+
+.login-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--color-primary) inset;
+}
+
+/* EP 未做全局主题覆盖，此处把主按钮染回品牌蓝 */
 .login-submit {
+  --el-button-bg-color: var(--color-primary);
+  --el-button-border-color: var(--color-primary);
+  --el-button-hover-bg-color: var(--color-primary-light);
+  --el-button-hover-border-color: var(--color-primary-light);
+  --el-button-active-bg-color: var(--color-primary-dark);
+  --el-button-active-border-color: var(--color-primary-dark);
+  --el-button-text-color: #fff;
+  --el-button-hover-text-color: #fff;
+  --el-button-active-text-color: #fff;
   width: 100%;
+  height: auto;
   margin-top: var(--spacing-sm);
+  padding: var(--spacing-md) 0;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.3em;
 }
 
 .login-register {
-  margin-top: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
   text-align: center;
   color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
 }
 
 .login-divider {
@@ -258,6 +349,15 @@ async function handleLogin(): Promise<void> {
 
   .login-brand {
     min-height: 180px;
+  }
+
+  .login-brand-copy {
+    left: var(--spacing-lg);
+    bottom: var(--spacing-md);
+  }
+
+  .login-brand-copy h1 {
+    font-size: var(--font-size-xxl);
   }
 }
 </style>

@@ -1,22 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { listReservations, cancelReservation } from '@/api/reservation'
 import type { IResourceReservation, ReservationStatus } from '@/types/modules/reservation'
 import { reservationStatusLabels } from '@/types/modules/reservation'
-import { formatDateTime } from '@/utils/date'
 
-/** 我的预约：状态筛选卡片 + 列表 + 取消（PENDING/CONFIRMED 可取消，状态机 9.7.1.7） */
-
-const statusFilters = [
-  { value: '', label: '全部' },
-  ...(Object.keys(reservationStatusLabels) as ReservationStatus[]).map((value) => ({
-    value,
-    label: reservationStatusLabels[value]
-  }))
-]
+/** 我的预约：左日历（标记有预约的日期、点选筛选）+ 右预约卡列表 + 底部规则提示 */
 
 const query = reactive({
   page: 1,
@@ -27,15 +17,68 @@ const total = ref(0)
 const records = ref<IResourceReservation[]>([])
 const loading = ref(false)
 
-/** 状态 → StatusTag 语义色 */
-const tagTypeMap: Record<ReservationStatus, 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled'> = {
-  PENDING: 'pending',
-  CONFIRMED: 'processing',
-  COMPLETED: 'completed',
-  REJECTED: 'rejected',
-  CANCELLED: 'canceled',
-  VIOLATED: 'rejected'
+/* ---------- 日历状态 ---------- */
+
+const today = new Date()
+const viewYear = ref(today.getFullYear())
+const viewMonth = ref(today.getMonth())
+const selectedDate = ref<string | null>(null)
+/** 有预约的日期集合（YYYY-MM-DD）：取全量（≤100 条）预约提取，仅作标记 */
+const markedDates = ref<Set<string>>(new Set())
+
+const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
+
+function toISODate(year: number, month: number, day: number): string {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
+
+const todayISO = toISODate(today.getFullYear(), today.getMonth(), today.getDate())
+
+/* 日历格子：周一开头；空格补齐首周（getDay 周日=0 → 周一开头的偏移） */
+const calendarCells = computed(() => {
+  const first = new Date(viewYear.value, viewMonth.value, 1)
+  const offset = (first.getDay() + 6) % 7
+  const daysInMonth = new Date(viewYear.value, viewMonth.value + 1, 0).getDate()
+  const cells: Array<{ day: number; iso: string } | null> = []
+  for (let i = 0; i < offset; i += 1) cells.push(null)
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    cells.push({ day, iso: toISODate(viewYear.value, viewMonth.value, day) })
+  }
+  return cells
+})
+
+function shiftMonth(delta: number): void {
+  const next = new Date(viewYear.value, viewMonth.value + delta, 1)
+  viewYear.value = next.getFullYear()
+  viewMonth.value = next.getMonth()
+}
+
+/* 点选某天筛选右侧列表（接口支持 startDate/endDate）；再点同一天或「全部」清除 */
+function toggleDate(iso: string): void {
+  selectedDate.value = selectedDate.value === iso ? null : iso
+  query.page = 1
+  loadList()
+}
+
+function clearDateFilter(): void {
+  selectedDate.value = null
+  query.page = 1
+  loadList()
+}
+
+/* 日历标记：与列表查询独立，取全量预约日期（多于 100 条时只标记最近 100 条） */
+async function loadMarkedDates(): Promise<void> {
+  try {
+    const result = await listReservations({ page: 1, size: 100 })
+    markedDates.value = new Set(
+      result.records.map((row) => row.reserveDate ?? row.reservationDate).filter(Boolean)
+    )
+  } catch {
+    markedDates.value = new Set()
+  }
+}
+
+/* ---------- 列表 ---------- */
 
 const canCancel = (row: IResourceReservation): boolean =>
   row.status === 'PENDING' || row.status === 'CONFIRMED'
@@ -46,9 +89,17 @@ async function loadList(): Promise<void> {
     const result = await listReservations({
       page: query.page,
       size: query.size,
-      status: query.status === '' ? undefined : query.status
+      status: query.status === '' ? undefined : query.status,
+      startDate: selectedDate.value ?? undefined,
+      endDate: selectedDate.value ?? undefined
     })
-    records.value = result.records
+    /* 按 id 去重兜底：防御后端异常返回重复行；正常数据 id 唯一，Set 过滤幂等不影响展示 */
+    const seen = new Set<number>()
+    records.value = result.records.filter((row) => {
+      if (seen.has(row.id)) return false
+      seen.add(row.id)
+      return true
+    })
     total.value = result.total
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载预约列表失败')
@@ -57,16 +108,20 @@ async function loadList(): Promise<void> {
   }
 }
 
-function handleStatusChange(status: '' | ReservationStatus): void {
-  query.status = status
-  query.page = 1
-  loadList()
+/** 时段文案：9月10日 18:00-19:00（startTime/endTime 可能带秒） */
+function slotText(row: IResourceReservation): string {
+  const date = row.reserveDate ?? row.reservationDate
+  const parsed = new Date(date)
+  const dateText = Number.isNaN(parsed.getTime())
+    ? date
+    : `${parsed.getMonth() + 1}月${parsed.getDate()}日`
+  return `${dateText} ${row.startTime.slice(0, 5)}-${row.endTime.slice(0, 5)}`
 }
 
-/** 取消需填写原因（ReservationReasonDTO.reason 必填） */
+/** 取消需填写原因（ReservationReasonDTO.reason 必填；后端无预约单号字段，标题用 #id） */
 async function handleCancel(row: IResourceReservation): Promise<void> {
   try {
-    const { value } = await ElMessageBox.prompt('请填写取消原因', `取消预约 ${row.reservationNumber}`, {
+    const { value } = await ElMessageBox.prompt('请填写取消原因', `取消预约 #${row.id}`, {
       confirmButtonText: '确认取消预约',
       cancelButtonText: '再想想',
       inputPlaceholder: '例如：临时有事，无法按时使用',
@@ -76,6 +131,7 @@ async function handleCancel(row: IResourceReservation): Promise<void> {
     await cancelReservation(row.id, { reason: value.trim() })
     ElMessage.success('预约已取消')
     loadList()
+    void loadMarkedDates()
   } catch (error) {
     if (error === 'cancel' || error === 'close') return
     ElMessage.error(error instanceof Error ? error.message : '取消预约失败')
@@ -84,7 +140,10 @@ async function handleCancel(row: IResourceReservation): Promise<void> {
 
 const isEmpty = computed(() => !loading.value && records.value.length === 0)
 
-onMounted(loadList)
+onMounted(() => {
+  loadList()
+  void loadMarkedDates()
+})
 </script>
 
 <template>
@@ -94,81 +153,141 @@ onMounted(loadList)
         <h1>我的预约</h1>
         <p class="page-head-sub">社区公共资源预约记录，待审核与已预约的预约可取消</p>
       </div>
-      <router-link to="/resident/reservations/create">
-        <el-button type="primary" round>＋ 发起预约</el-button>
+      <router-link to="/resident/resources">
+        <el-button type="primary">＋ 预约公共资源</el-button>
       </router-link>
     </header>
 
-    <div class="status-filter" role="tablist">
-      <button
-        v-for="filter in statusFilters"
-        :key="filter.value"
-        class="status-chip"
-        :class="{ 'is-active': query.status === filter.value }"
-        @click="handleStatusChange(filter.value as '' | ReservationStatus)"
-      >
-        {{ filter.label }}
-      </button>
-    </div>
+    <div class="reservation-grid">
+      <!-- 左：日历容器（周一开头，今天蓝圈，有预约的日期打绿点） -->
+      <div class="calendar-card card">
+        <div class="calendar-head">
+          <span class="calendar-title">{{ viewYear }}年 {{ viewMonth + 1 }}月</span>
+          <div class="calendar-nav">
+            <button type="button" aria-label="上月" @click="shiftMonth(-1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+            <button type="button" aria-label="下月" @click="shiftMonth(1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+          </div>
+        </div>
 
-    <div v-loading="loading" class="list-body">
-      <div v-if="isEmpty" class="empty-state">
-        <img src="/images/empty-state.png" alt="暂无预约" />
-        <p>还没有预约记录，去发起一个吧</p>
-        <router-link to="/resident/reservations/create">
-          <el-button type="primary" plain round>发起预约</el-button>
-        </router-link>
+        <div class="calendar-weekdays">
+          <span v-for="day in WEEKDAYS" :key="day">{{ day }}</span>
+        </div>
+
+        <div class="calendar-cells">
+          <button
+            v-for="(cell, index) in calendarCells"
+            :key="index"
+            type="button"
+            class="calendar-cell"
+            :class="{
+              'is-blank': cell === null,
+              'is-today': cell?.iso === todayISO,
+              'is-selected': cell !== null && cell.iso === selectedDate
+            }"
+            :disabled="cell === null"
+            @click="cell && toggleDate(cell.iso)"
+          >
+            <template v-if="cell">
+              <span class="cell-day">{{ cell.day }}</span>
+              <span v-if="markedDates.has(cell.iso)" class="cell-dot" aria-hidden="true"></span>
+            </template>
+          </button>
+        </div>
+
+        <button
+          v-if="selectedDate"
+          type="button"
+          class="calendar-clear"
+          @click="clearDateFilter"
+        >
+          全部（清除日期筛选）
+        </button>
       </div>
 
-      <article v-for="row in records" v-else :key="row.id" class="reservation-card">
-        <div class="card-main">
-          <div class="card-title-row">
-            <h2 class="card-title">{{ row.resourceName }}</h2>
-            <StatusTag :label="reservationStatusLabels[row.status]" :type="tagTypeMap[row.status]" />
-          </div>
-          <dl class="card-meta">
-            <div class="meta-item">
-              <dt>预约时间</dt>
-              <dd>{{ row.reservationDate }} {{ row.startTime }} ~ {{ row.endTime }}</dd>
-            </div>
-            <div class="meta-item">
-              <dt>使用人数</dt>
-              <dd>{{ row.participants }} 人</dd>
-            </div>
-            <div class="meta-item">
-              <dt>预约单号</dt>
-              <dd class="mono">{{ row.reservationNumber }}</dd>
-            </div>
-            <div class="meta-item">
-              <dt>提交时间</dt>
-              <dd>{{ formatDateTime(row.createdAt) }}</dd>
-            </div>
-          </dl>
-          <p v-if="row.purpose" class="card-purpose">用途：{{ row.purpose }}</p>
-          <p v-if="row.remark" class="card-purpose is-remark">备注：{{ row.remark }}</p>
-        </div>
-        <div class="card-actions">
-          <el-button
-            v-if="canCancel(row)"
-            type="danger"
-            plain
-            round
-            size="small"
-            @click="handleCancel(row)"
+      <!-- 右：预约列表容器（同高 stretch，超高内部竖向滚动，分页条在容器底部） -->
+      <div class="list-card card">
+        <div class="list-card-head">
+          <span v-if="selectedDate" class="list-filter-hint">
+            已筛选：{{ selectedDate.slice(5).replace('-', '月') }}日
+          </span>
+          <el-select
+            v-model="query.status"
+            class="list-status-select"
+            placeholder="全部状态"
+            clearable
+            @change="query.page = 1; loadList()"
           >
-            取消预约
-          </el-button>
+            <el-option
+              v-for="(label, value) in reservationStatusLabels"
+              :key="value"
+              :label="label"
+              :value="value"
+            />
+          </el-select>
         </div>
-      </article>
+
+        <div v-loading="loading" class="list-scroll">
+          <div v-if="isEmpty" class="empty-state">
+            <p>{{ selectedDate ? '当天没有预约记录' : '还没有预约记录，去发起一个吧' }}</p>
+          </div>
+
+          <article v-for="row in records" v-else :key="row.id" class="reservation-card">
+            <!-- 资源无图片字段：用资源类型 SVG 占位块 -->
+            <span class="resource-thumb">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M3 9h18M8 4v5" />
+                <path d="M8 14h4M8 17h6" />
+              </svg>
+            </span>
+            <div class="card-main">
+              <h2 class="card-title">{{ row.resourceName }}</h2>
+              <p class="card-slot">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 3" />
+                </svg>
+                {{ slotText(row) }}
+              </p>
+              <span class="status-pill" :data-status="row.status">
+                {{ reservationStatusLabels[row.status] }}
+              </span>
+            </div>
+            <div class="card-actions">
+              <el-button
+                v-if="canCancel(row)"
+                text
+                type="primary"
+                @click="handleCancel(row)"
+              >
+                取消预约
+              </el-button>
+            </div>
+          </article>
+        </div>
+
+        <Pagination
+          v-model:page="query.page"
+          v-model:size="query.size"
+          :total="total"
+          @update:page="loadList"
+          @update:size="loadList"
+        />
+      </div>
     </div>
 
-    <Pagination
-      v-model:page="query.page"
-      v-model:size="query.size"
-      :total="total"
-      @update:page="loadList"
-      @update:size="loadList"
-    />
+    <!-- 底部规则提示条（sys_config 无规则文案字段，静态文案） -->
+    <div class="rule-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8h.01M12 11v5" />
+      </svg>
+      <span>预约规则：每人每天限约 2 个时段，违约 3 次将暂停预约资格。</span>
+    </div>
   </section>
 </template>
 
@@ -176,13 +295,13 @@ onMounted(loadList)
 .reservation-list {
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .page-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: var(--spacing-lg);
 }
 
 .page-head h1 {
@@ -196,68 +315,221 @@ onMounted(loadList)
   font-size: var(--font-size-sm);
 }
 
-.status-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-}
-
-.status-chip {
-  padding: 6px var(--spacing-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background-color: #fff;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.status-chip:hover {
-  border-color: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.status-chip.is-active {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-  font-weight: var(--font-weight-medium);
-}
-
-.list-body {
-  min-height: 240px;
-}
-
-.empty-state {
-  background-color: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xxl) var(--spacing-lg);
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-
-.empty-state img {
-  width: 120px;
-  margin: 0 auto var(--spacing-md);
-}
-
-.empty-state p {
-  margin-bottom: var(--spacing-md);
-}
-
-.reservation-card {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  background-color: #fff;
+.card {
+  background: #fff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
+}
+
+/* 左日历 + 右列表：stretch 同高 */
+.reservation-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--spacing-md);
+  align-items: stretch;
+}
+
+/* 日历 */
+.calendar-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+}
+
+.calendar-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.calendar-nav {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.calendar-nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.calendar-nav button:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.calendar-nav svg {
+  width: 14px;
+  height: 14px;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+  text-align: center;
+}
+
+.calendar-cells {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: var(--spacing-xs);
+}
+
+.calendar-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--spacing-xs) 0 5px;
+  border: none;
+  background: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.calendar-cell.is-blank {
+  cursor: default;
+}
+
+.cell-day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-circle);
+}
+
+/* 今天：蓝色描边圈；选中：蓝色实心圆 */
+.calendar-cell.is-today .cell-day {
+  border: 1.5px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.calendar-cell.is-selected .cell-day {
+  background: var(--color-primary);
+  border: 1.5px solid var(--color-primary);
+  color: #fff;
+}
+
+.calendar-cell:not(.is-blank):hover .cell-day {
+  background: var(--color-primary-bg);
+}
+
+.calendar-cell.is-selected:hover .cell-day {
+  background: var(--color-primary);
+}
+
+/* 有预约的日期：绿点 */
+.cell-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-circle);
+  background: var(--color-success);
+}
+
+.calendar-clear {
+  margin-top: var(--spacing-md);
+  align-self: center;
+  border: none;
+  background: none;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+/* 右列表容器：内部竖向滚动（hover 显示滚动条），分页条沉底 */
+.list-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.list-filter-hint {
+  margin-right: auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}
+
+.list-status-select {
+  width: 130px;
+}
+
+.list-scroll {
+  flex: 1;
+  min-height: 320px;
+  max-height: 520px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-right: var(--spacing-xs);
+}
+
+.list-scroll:hover {
+  scrollbar-color: var(--color-text-disabled) transparent;
+}
+
+.list-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.list-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--radius-pill);
+}
+
+.list-scroll:hover::-webkit-scrollbar-thumb {
+  background: var(--color-text-disabled);
+}
+
+.empty-state {
+  margin: auto;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xxl) 0;
+}
+
+/* 预约卡：左资源占位块 / 中内容 / 右取消 */
+.reservation-card {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
   transition: box-shadow 0.2s ease;
 }
 
@@ -265,53 +537,109 @@ onMounted(loadList)
   box-shadow: var(--shadow-md);
 }
 
-.card-title-row {
+.resource-thumb {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+  justify-content: center;
+}
+
+.resource-thumb svg {
+  width: 30px;
+  height: 30px;
+}
+
+.card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
 .card-title {
+  margin: 0;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-}
-
-.card-meta {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-sm) var(--spacing-md);
-}
-
-.meta-item dt {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
-  margin-bottom: var(--spacing-xs);
-}
-
-.meta-item dd {
-  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
 }
 
-.mono {
-  font-family: var(--font-family-mono);
-}
-
-.card-purpose {
-  margin-top: var(--spacing-sm);
+.card-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
-.card-purpose.is-remark {
-  color: var(--color-text-disabled);
+.card-slot svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* 状态胶囊：已预约绿 / 待审核黄 / 其余灰（已拒绝、已违约用红色系） */
+.status-pill {
+  align-self: flex-start;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-pill[data-status='CONFIRMED'] {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.status-pill[data-status='PENDING'] {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-warning);
+}
+
+.status-pill[data-status='COMPLETED'],
+.status-pill[data-status='CANCELLED'] {
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+.status-pill[data-status='REJECTED'],
+.status-pill[data-status='VIOLATED'] {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
 }
 
 .card-actions {
+  flex-shrink: 0;
+}
+
+/* 底部规则提示条 */
+.rule-bar {
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+}
+
+.rule-bar svg {
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* 响应式：窄屏降单栏 */
+@media (max-width: 991px) {
+  .reservation-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { useNotificationStore } from '@/store/notification'
 import { ElMessage } from 'element-plus'
 import { residentLogout, adminLogout } from '@/api/auth'
+import { markNotificationRead } from '@/api/notification'
+import { notificationTarget } from '@/utils/notificationNav'
+import AppLogo from '@/components/common/AppLogo.vue'
 
 /**
  * 顶部导航栏（三端通用，UI设计.md §2）：Logo + 导航菜单 + 通知铃铛 + 用户下拉
@@ -12,6 +15,8 @@ import { residentLogout, adminLogout } from '@/api/auth'
 defineProps<{
   /** 顶部导航菜单项 */
   items?: { label: string; to: string }[]
+  /** 未登录态是否追加「注册」按钮（游客端对齐设计稿；默认不展示，其他端不受影响） */
+  showRegister?: boolean
 }>()
 
 const route = useRoute()
@@ -56,12 +61,38 @@ function handleCommand(command: string): void {
 function isActive(to: string): boolean {
   return route.path.startsWith(to)
 }
+
+/** 铃铛下拉面板实例（点击面板项后收起面板） */
+const bellPopoverRef = ref<{ hide: () => void } | null>(null)
+
+/** 铃铛面板项点击：未读先标记已读，再按来源类型跳转并收起面板 */
+async function handleBellItemClick(item: {
+  id: number
+  isRead: boolean
+  sourceType?: string | null
+  sourceId?: number | null
+}): Promise<void> {
+  if (!item.isRead) {
+    try {
+      await markNotificationRead(item.id)
+      notificationStore.markLocalRead(item.id)
+    } catch {
+      /* 已读失败不阻塞跳转 */
+    }
+  }
+  bellPopoverRef.value?.hide()
+  const target = notificationTarget(item, userStore.role)
+  if (target) router.push(target)
+}
 </script>
 
 <template>
   <header class="app-header">
     <div class="app-header-inner">
-      <router-link to="/" class="app-header-logo">社区居住服务</router-link>
+      <router-link to="/" class="app-header-logo">
+        <AppLogo :size="22" />
+        <span>社区居住服务</span>
+      </router-link>
 
       <nav class="app-header-nav" aria-label="主导航">
         <router-link
@@ -78,6 +109,7 @@ function isActive(to: string): boolean {
       <div class="app-header-user">
         <el-popover
           v-if="userStore.isLoggedIn"
+          ref="bellPopoverRef"
           placement="bottom-end"
           width="320"
           trigger="click"
@@ -105,6 +137,8 @@ function isActive(to: string): boolean {
               :key="item.id"
               class="bell-item"
               :class="{ 'is-unread': !item.isRead }"
+              role="button"
+              @click="handleBellItemClick(item)"
             >
               <div class="bell-item-title">{{ item.title }}</div>
               <div class="bell-item-content">{{ item.content }}</div>
@@ -113,8 +147,10 @@ function isActive(to: string): boolean {
         </el-popover>
         <template v-if="userStore.isLoggedIn">
           <el-dropdown @command="handleCommand">
-            <span class="app-header-user-name">
-              {{ realName }}（{{ roleLabel }}）
+            <span class="app-header-user-trigger">
+              <!-- 用户无头像字段，统一用首字圆形占位头像（主色底白字） -->
+              <span class="app-header-avatar">{{ realName.slice(0, 1) }}</span>
+              <span class="app-header-user-name">{{ realName }}（{{ roleLabel }}）</span>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -125,6 +161,9 @@ function isActive(to: string): boolean {
         </template>
         <template v-else>
           <router-link to="/auth/login" class="app-header-login">登录</router-link>
+          <router-link v-if="showRegister" to="/auth/register" class="app-header-register">
+            注册
+          </router-link>
         </template>
       </div>
     </div>
@@ -151,6 +190,9 @@ function isActive(to: string): boolean {
 }
 
 .app-header-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-primary);
@@ -175,13 +217,54 @@ function isActive(to: string): boolean {
   background: var(--color-primary-bg);
 }
 
-.app-header-user-name {
+.app-header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  /* 兜底右对齐：nav 缺席或被压缩时用户集群仍贴容器右缘 */
+  margin-left: auto;
+}
+
+.app-header-user-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
   cursor: pointer;
   color: var(--color-text-primary);
 }
 
+.app-header-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-circle);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.app-header-user-name {
+  line-height: 1;
+}
+
 .app-header-login {
   color: var(--color-primary);
+}
+
+.app-header-register {
+  margin-left: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+}
+
+.app-header-register:hover {
+  background: var(--color-primary-bg);
 }
 
 /* 通知铃铛 */
@@ -237,6 +320,12 @@ function isActive(to: string): boolean {
 .bell-item {
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.bell-item:hover {
+  background-color: var(--color-bg-hover);
 }
 
 .bell-item.is-unread {
@@ -264,5 +353,15 @@ function isActive(to: string): boolean {
   .app-header-nav {
     overflow-x: auto;
   }
+}
+</style>
+
+<style>
+/* 管理端宿主（.admin-layout）内容区为全宽，头部同步放开 1200px 限宽，
+   使右侧用户集群贴近视口右缘（验收反馈：集群偏左、右侧大片空白）；
+   居民端/服务人员端/游客端内容列仍为 1200px 居中，维持与内容对齐。
+   说明：scoped 规则无法向祖先方向匹配，故用非 scoped 块并提升特异性压过上面的限宽规则 */
+.admin-layout .app-header .app-header-inner {
+  max-width: none;
 }
 </style>

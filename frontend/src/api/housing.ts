@@ -11,7 +11,6 @@ import type {
   IHousingTimeslot,
   IAvailableViewingTimeslot,
   IViewingAppointment,
-  ViewingAppointmentActionDTO,
   ViewingAppointmentCreateDTO,
   ViewingAppointmentListQuery,
   ViewingAppointmentReasonDTO
@@ -67,13 +66,13 @@ export function listViewingAppointments(query?: ViewingAppointmentListQuery) {
   return http.get<PageResult<IViewingAppointment>>('/viewing-appointments', query)
 }
 
-/** 确认看房预约（接口设计.md 9.12.2.4，PENDING → CONFIRMED） */
-export function confirmViewingAppointment(id: number, data?: ViewingAppointmentActionDTO) {
+/** 确认看房预约（后端 ReservationActionDTO，reason 必填；TO_CONFIRM → RESERVED） */
+export function confirmViewingAppointment(id: number, data: ViewingAppointmentReasonDTO) {
   return http.patch<null>(`/viewing-appointments/${id}/confirm`, data)
 }
 
-/** 完成看房预约（接口设计.md 9.12.2.5，CONFIRMED → COMPLETED） */
-export function completeViewingAppointment(id: number, data?: ViewingAppointmentActionDTO) {
+/** 完成看房预约（后端 ReservationActionDTO，reason 必填；RESERVED → COMPLETED） */
+export function completeViewingAppointment(id: number, data: ViewingAppointmentReasonDTO) {
   return http.patch<null>(`/viewing-appointments/${id}/complete`, data)
 }
 
