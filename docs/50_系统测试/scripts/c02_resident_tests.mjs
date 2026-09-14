@@ -115,6 +115,8 @@ async function main() {
 
   // ══ TC-C2-007 唯一性与非法参数 ══
   {
+    // 先占号再测重复（纯净库首跑时 13800000001 未占用，直接测重复不成立——脚本适配）
+    await api('POST', '/api/v1/auth/resident/register', { body: { username: `occ${Date.now() % 100000}`, password: 'Resident123456', realName: '占号', phone: '13800000001' } });
     const r1 = await api('POST', '/api/v1/auth/resident/register', { body: { username: 'resident1', password: 'Resident123456', realName: 'x', phone: uniqPhone() } });
     const r2 = await api('POST', '/api/v1/auth/resident/register', { body: { username: `dup${Date.now() % 100000}`, password: 'Resident123456', realName: 'x', phone: '13800000001' } });
     const r3 = await api('POST', '/api/v1/auth/resident/register', { body: { username: `pw${Date.now() % 100000}`, password: '1234567', realName: 'x', phone: uniqPhone() } });
