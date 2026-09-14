@@ -57,11 +57,15 @@ async function main() {
     const tok = (await api('POST', '/api/v1/auth/resident/login', { body: { username: uname, password: 'Resident123456' } })).data.token;
     // 找空置房（清源里全部单元动态找；耗尽则不入住——工单提交侧 DEF-001 已记录无关系可提交，故仍可用）
     let vacant = null;
-    for (const uid of [2, 3, 133, 175, 176, 177]) {
-      const hs = await api('GET', `/api/v1/units/${uid}/houses?page=1&size=50`);
-      if (hs.status !== 200) continue;
-      vacant = (hs.data?.records ?? []).find(h => h.status === 'VACANT');
-      if (vacant) break;
+    const bList = await api('GET', '/api/v1/communities/2/buildings?page=1&size=50');
+    outer: for (const b of (bList.data?.records ?? bList.data ?? [])) {
+      const uList = await api('GET', `/api/v1/buildings/${b.id}/units`);
+      for (const u of (uList.data?.records ?? uList.data ?? [])) {
+        const hs = await api('GET', `/api/v1/units/${u.id}/houses?page=1&size=100`);
+        if (hs.status !== 200) continue;
+        vacant = (hs.data?.records ?? hs.data ?? []).find(h => h.status === 'VACANT') ?? null;
+        if (vacant) break outer;
+      }
     }
     if (vacant) {
       const app = await api('POST', '/api/v1/residence-applications', { token: tok, body: { houseId: vacant.id, relationType: 'TENANT', remark: '状态机用' } });

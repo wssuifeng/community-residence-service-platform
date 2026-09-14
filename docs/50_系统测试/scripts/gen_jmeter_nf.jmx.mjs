@@ -120,6 +120,10 @@ if (props.get("AMTOKEN") == null) {
       <hashTree>
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="仅一次" enabled="true"/>
         <hashTree/>
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="每轮间隔500ms防端口耗尽" enabled="true">
+          <stringProp name="ConstantTimer.delay">500</stringProp>
+        </ConstantTimer>
+        <hashTree/>
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="令牌 CSV" enabled="true">
           <stringProp name="filename">${dir.replace(/\\/g, '/')}/tokens.csv</stringProp>
           <stringProp name="variableNames">tuser,token</stringProp>
@@ -141,14 +145,15 @@ ${['GET /api/v1/communities|L1-社区列表(公开)',
     'GET /api/v1/notices?page=1&size=20|L3-公告列表(公开)',
     'GET /api/v1/work-orders?page=1&size=20|L4-工单列表(令牌)',
     'GET /api/v1/notifications?page=1&size=20|L5-通知列表(令牌)',
-    'GET /api/v1/work-orders/1|L6-工单详情(令牌)',
+    'GET /api/v1/work-orders/' + process.env.WO_PUBLIC + '|L6-工单详情(令牌)',
     'GET /api/v1/housings/1|L7-房源详情(公开)'].map(([s]) => s).join('\n')}
 ${[['/api/v1/communities', 'L1-社区列表(公开)', ''],
   ['/api/v1/units/1/houses?page=1&size=20', 'L2-房屋列表(公开)', ''],
   ['/api/v1/notices?page=1&size=20', 'L3-公告列表(公开)', ''],
   ['/api/v1/work-orders?page=1&size=20', 'L4-工单列表(令牌)', ''],
   ['/api/v1/notifications?page=1&size=20', 'L5-通知列表(令牌)', ''],
-  ['/api/v1/work-orders/11189', 'L6-工单详情(admin1令牌)', 'AM'],
+  ['/api/v1/work-orders/' + process.env.WO_PUBLIC, 'L6-工单详情(admin1令牌2)', 'AM'],
+  ['/api/v1/work-orders/' + process.env.WO_ADMIN, 'L6-工单详情(admin1令牌)', 'AM'],
   ['/api/v1/housings/1', 'L7-房源详情(公开)', '']].map(([p, n, am]) => `        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="${n}" enabled="true">
           <stringProp name="HTTPSampler.domain">\${HOST}</stringProp>
           <stringProp name="HTTPSampler.port">\${PORT}</stringProp>

@@ -60,23 +60,25 @@ async function main() {
   }
 
   /* ══ DEF-002 同天不同时段预约放行（同时段仍拦） ══
-     资源 15（C7会议室，周一~周日 09:00/10:00 双档模板） */
+     C7会议室（动态查找：周模板含 09:00 与 10:00 两档的资源，纯净库重建后 id 不固定） */
   {
-    // 找资源 15 模板覆盖的未来周几日期
+    const res15 = q(`SELECT rt.resource_id FROM resource_timeslot rt JOIN public_resource r ON rt.resource_id=r.id WHERE r.community_id=1 AND r.name LIKE 'C7会议室%' AND rt.day_of_week=1 AND rt.start_time='09:00:00' LIMIT 1`);
+    const RID = Number(res15);
+    // 找该资源模板覆盖的未来周几日期
     const nextDayWithSlot = (dow, offsetDays = 14) => { const d = new Date(); d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7 || 7) + offsetDays); return `${d.getFullYear()}-${P(d.getMonth() + 1)}-${P(d.getDate())}`; };
-    // 选一个资源 15 的 09:00-11:00 两档都空闲的日期（轮次间数据累加，跳过被占日期）
+    // 选一个该资源的 09:00-11:00 两档都空闲的日期（轮次间数据累加，跳过被占日期）
     let date = null;
     for (let off = 7; off <= 70; off += 7) {
       const cand = nextDayWithSlot(1, off);
-      const busy = Number(q(`SELECT COUNT(*) FROM resource_reservation WHERE resource_id=15 AND reserve_date='${cand}' AND status IN ('PENDING','RESERVED')`));
+      const busy = Number(q(`SELECT COUNT(*) FROM resource_reservation WHERE resource_id=${RID} AND reserve_date='${cand}' AND status IN ('PENDING','RESERVED')`));
       if (busy === 0) { date = cand; break; }
     }
-    const a = await api('POST', '/api/v1/resource-reservations', { token: r1Tok, body: { resourceId: 15, reserveDate: date, startTime: '09:00:00', endTime: '10:00:00', purpose: `DEF002-A${TAG}`, contactPhone: '13800005555' } });
-    const b = await api('POST', '/api/v1/resource-reservations', { token: r1Tok, body: { resourceId: 15, reserveDate: date, startTime: '10:00:00', endTime: '11:00:00', purpose: `DEF002-B${TAG}`, contactPhone: '13800005555' } });
-    const c = await api('POST', '/api/v1/resource-reservations', { token: r1Tok, body: { resourceId: 15, reserveDate: date, startTime: '09:00:00', endTime: '10:00:00', purpose: `DEF002-C${TAG}`, contactPhone: '13800005555' } });
+    const a = await api('POST', '/api/v1/resource-reservations', { token: r1Tok, body: { resourceId: RID, reserveDate: date, startTime: '09:00:00', endTime: '10:00:00', purpose: `DEF002-A${TAG}`, contactPhone: '13800005555' } });
+    const b = await api('POST', '/api/v1/resource-reservations', { token: r1Tok, body: { resourceId: RID, reserveDate: date, startTime: '10:00:00', endTime: '11:00:00', purpose: `DEF002-B${TAG}`, contactPhone: '13800005555' } });
+    const c = await api('POST', '/api/v1/resource-reservations', { token: r1Tok, body: { resourceId: RID, reserveDate: date, startTime: '09:00:00', endTime: '10:00:00', purpose: `DEF002-C${TAG}`, contactPhone: '13800005555' } });
     tc('DEF-002', '同天不同时段/同时段', '不同时段放行 + 同时段拦',
       ok(a) && ok(b) && rej(c),
-      `日期=${date} A(09-10)=${a.code} B(10-11)=${b.code} C(同时段重复)=${c.code}/${(c.msg || '').slice(0, 16)}`);
+      `资源=${RID} 日期=${date} A(09-10)=${a.code} B(10-11)=${b.code} C(同时段重复)=${c.code}/${(c.msg || '').slice(0, 16)}`);
   }
 
   /* ══ DEF-003 公告读路径数据范围 ══ */
