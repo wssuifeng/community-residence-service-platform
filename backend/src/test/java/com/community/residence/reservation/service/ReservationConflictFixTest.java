@@ -27,6 +27,7 @@ import org.redisson.api.RedissonClient;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -164,19 +165,24 @@ class ReservationConflictFixTest {
         lenient().when(timeslotMapper.selectList(any())).thenReturn(List.of(template()));
 
         // selectCount 引入延迟打满「查后插前」竞态窗口（原缺陷复现条件）；
-        // 每线程第 1 次调用=本人重复检查（独立身份恒 0），第 2 次=重叠查询（返回已落库数）
+        // 本人重复检查（独立身份恒 0）走 selectCount，逐格容量检查走 selectList
+        // （返回当前已落库的占用预约列表，锁内串行时后到线程可见先行落库行）
         AtomicLong insertCount = new AtomicLong();
-        ThreadLocal<Integer> callIdx = ThreadLocal.withInitial(() -> 0);
+        List<ResourceReservation> inserted = java.util.Collections.synchronizedList(new ArrayList<>());
         when(reservationMapper.selectCount(any())).thenAnswer(inv -> {
-            int idx = callIdx.get();
-            callIdx.set(idx + 1);
             Thread.sleep(50);
-            return idx == 0 ? 0L : insertCount.get();
+            return 0L;
+        });
+        when(reservationMapper.selectList(any())).thenAnswer(inv -> {
+            Thread.sleep(20);
+            return List.copyOf(inserted);
         });
         when(reservationMapper.insert(any(ResourceReservation.class))).thenAnswer(inv -> {
             Thread.sleep(20);
             insertCount.incrementAndGet();
-            inv.getArgument(0, ResourceReservation.class).setId(1000L + insertCount.get());
+            ResourceReservation saved = inv.getArgument(0, ResourceReservation.class);
+            saved.setId(1000L + insertCount.get());
+            inserted.add(saved);
             return 1;
         });
 
@@ -244,16 +250,18 @@ class ReservationConflictFixTest {
         assertNoConflictWithCount(start, end, 0L);
     }
 
-    /** count>0 模拟区间重叠查询命中占用记录（SQL 语义：start<已有end AND end>已有start）；
-       第 1 次 selectCount = 本人重复检查（0=无重复），第 2 次 = 重叠查询 */
+    /** Slot Grid 口径：occupying>0 模拟锁内逐格检查命中满员栅格（返回覆盖请求窗口的
+       占用预约列表）；第 1 次 selectCount = 本人重复检查（0=无重复） */
     private void assertNoConflictWithCount(LocalTime start, LocalTime end, long overlapCount) {
-        when(reservationMapper.selectCount(any())).thenReturn(0L).thenReturn(overlapCount);
+        when(reservationMapper.selectCount(any())).thenReturn(0L);
+        when(reservationMapper.selectList(any()))
+                .thenReturn(overlapCount > 0 ? List.of(existing) : List.of());
         if (overlapCount > 0) {
             assertThatThrownBy(() -> invokeCreate(start, end))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
                             .isEqualTo(ErrorCode.RESERVATION_CONFLICT))
-                    .hasMessageContaining("重叠");
+                    .hasMessageContaining("已约满");
         } else {
             ReservationVO vo = invokeCreate(start, end);
             assertThat(vo.getStatus()).isEqualTo("PENDING");

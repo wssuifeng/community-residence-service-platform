@@ -141,7 +141,7 @@ class WorkOrderServiceExtraTest {
                     .hasRole(RoleConstants.STAFF)).thenReturn(true);
             when(assignmentMapper.selectList(any())).thenReturn(List.of());
 
-            var vo = workOrderService.page(1, 10, null, null, null, null);
+            var vo = workOrderService.page(1, 10, null, null, null, null, null, null, null);
             assertThat(vo.getTotal()).isEqualTo(0);
         }
     }
@@ -167,7 +167,7 @@ class WorkOrderServiceExtraTest {
             r.setRealName("Zhang");
             when(residentMapper.selectById(1L)).thenReturn(r);
 
-            var vo = workOrderService.page(1, 10, null, null, null, null);
+            var vo = workOrderService.page(1, 10, null, null, null, null, null, null, null);
             assertThat(vo.getTotal()).isEqualTo(1);
             assertThat(vo.getRecords().get(0).getCategoryName()).isNotNull();
         }

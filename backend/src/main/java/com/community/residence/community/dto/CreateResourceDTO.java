@@ -1,6 +1,7 @@
 package com.community.residence.community.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,9 +31,14 @@ public class CreateResourceDTO {
     @Size(max = 200, message = "位置描述最多 200 字符")
     private String location;
 
-    @Schema(description = "容纳人数/车位数")
-    @Min(value = 1, message = "容纳人数最少为 1")
+    @Schema(description = "每时段可承载人数上限（Slot Grid：资源级·每时段人数）")
+    @Min(value = 1, message = "每时段可承载人数最少为 1")
     private Integer capacity;
+
+    @Schema(description = "预约最小单位（分钟）：15/30/60，默认 30（Slot Grid 栅格粒度）")
+    @Min(value = 15, message = "预约最小单位取值 15/30/60")
+    @Max(value = 60, message = "预约最小单位取值 15/30/60")
+    private Integer slotUnit;
 
     @Schema(description = "资源描述")
     @Size(max = 1000, message = "资源描述最多 1000 字符")

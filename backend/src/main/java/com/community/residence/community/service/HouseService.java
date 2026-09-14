@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 /** 房屋业务逻辑：四级结构末级；状态变更强制留痕（house_status_history） */
 @Slf4j
 @Service
@@ -164,5 +166,35 @@ public class HouseService {
             throw new ResourceNotFoundException("单元不存在");
         }
         return unit;
+    }
+
+    /**
+     * 房屋批量创建（D-端点2，50 阶段第三批）：部分成功语义对齐 R8 CSV 导入先例。
+     */
+    public com.community.residence.community.vo.BatchCreateResultVO batchCreate(
+            com.community.residence.community.dto.BatchCreateHousesDTO dto) {
+        Unit unit = requireUnit(dto.getUnitId());
+        SecurityUtils.checkCommunityAccess(unit.getCommunityId());
+        List<com.community.residence.community.vo.BatchCreateResultVO.Row> rows = new java.util.ArrayList<>();
+        int success = 0;
+        for (int i = 0; i < dto.getHouses().size(); i++) {
+            CreateHouseDTO item = dto.getHouses().get(i);
+            try {
+                House house = new House();
+                house.setUnitId(unit.getId());
+                house.setCommunityId(unit.getCommunityId());
+                applyDto(house, item);
+                house.setStatus(StringUtils.hasText(item.getStatus())
+                        ? item.getStatus() : HouseStatusConstant.VACANT);
+                houseMapper.insert(house);
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.success(i + 1, house.getId()));
+                success++;
+            } catch (Exception e) {
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(i + 1, e.getMessage()));
+            }
+        }
+        log.info("房屋批量创建：unitId={}, total={}, success={}, operator={}",
+                unit.getId(), dto.getHouses().size(), success, SecurityUtils.getUserId());
+        return com.community.residence.community.vo.BatchCreateResultVO.of(dto.getHouses().size(), success, rows);
     }
 }

@@ -111,15 +111,23 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("容量校验：时段满员拒绝（RESERVATION_CONFLICT 5401）")
+    @DisplayName("容量校验：时段满员拒绝（RESERVATION_CONFLICT 5401，Slot Grid 逐格口径）")
     void create_capacityFull_throws() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
             when(resourceMapper.selectById(1L)).thenReturn(resource);
             when(timeslotMapper.selectList(any())).thenReturn(java.util.List.of(template()));
-            // 第一次 count：本人重复预约检查 = 0；第二次：容量检查 = 1（满）
-            when(reservationMapper.selectCount(any())).thenReturn(0L).thenReturn(1L);
+            // 本人重复检查 = 0；锁内占用列表含他人同槽预约（容量 1 → 满员）
+            when(reservationMapper.selectCount(any())).thenReturn(0L);
+            ResourceReservation others = new ResourceReservation();
+            others.setUserId(999L);
+            others.setResourceId(1L);
+            others.setReserveDate(pendingReservation.getReserveDate());
+            others.setStartTime(LocalTime.of(9, 0));
+            others.setEndTime(LocalTime.of(10, 0));
+            others.setStatus(ReservationStatus.RESERVED);
+            when(reservationMapper.selectList(any())).thenReturn(java.util.List.of(others));
 
             assertThatThrownBy(() -> reservationService.create(dto()))
                     .isInstanceOf(BusinessException.class)

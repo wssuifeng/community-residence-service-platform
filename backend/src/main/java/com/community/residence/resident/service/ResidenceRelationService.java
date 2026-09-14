@@ -132,6 +132,51 @@ public class ResidenceRelationService {
         return relation;
     }
 
+    /**
+     * 管理员直建居住关系（D-端点3，50 阶段第三批）：ADMIN 限绑定社区，直接建立
+     * 关系不走入住审批流；校验居民存在且房屋可入住（VACANT，同审批通过口径），
+     * 房屋状态置 OCCUPIED，写操作日志（R47 管理侧变更语义）。
+     * 租约不联动建立——TENANT 租约仍走 C3 独立登记（与审批流 approve 口径一致）。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "RESIDENCE_RELATION", targetId = "#result.id", communityId = "#result.communityId", content = "'管理员直建居住关系：' + #dto.relationType + '，' + #dto.remark")
+    public RelationVO adminCreate(com.community.residence.resident.dto.AdminCreateRelationDTO dto) {
+        var resident = residentMapper.selectById(dto.getResidentId());
+        if (resident == null) {
+            throw new ResourceNotFoundException("居民不存在");
+        }
+        House house = houseMapper.selectById(dto.getHouseId());
+        if (house == null) {
+            throw new ResourceNotFoundException("房屋不存在");
+        }
+        SecurityUtils.checkCommunityAccess(house.getCommunityId());
+        if (HouseStatusConstant.OCCUPIED.equals(house.getStatus())) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已入住，不可建立居住关系");
+        }
+        if (relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
+                .eq(ResidenceRelation::getHouseId, house.getId())
+                .isNull(ResidenceRelation::getMoveOutDate)) > 0) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已有在住居民");
+        }
+
+        ResidenceRelation relation = new ResidenceRelation();
+        relation.setResidentId(dto.getResidentId());
+        relation.setCommunityId(house.getCommunityId());
+        relation.setHouseId(house.getId());
+        relation.setRelationType(dto.getRelationType());
+        relation.setMoveInDate(dto.getMoveInDate());
+        relation.setIsPrimary(1);
+        relationMapper.insert(relation);
+
+        house.setStatus(HouseStatusConstant.OCCUPIED);
+        houseMapper.updateById(house);
+
+        log.info("管理员直建居住关系：relationId={}, residentId={}, houseId={}, operator={}, remark={}",
+                relation.getId(), dto.getResidentId(), dto.getHouseId(),
+                SecurityUtils.getUserId(), dto.getRemark());
+        return toVO(relation);
+    }
+
     private RelationVO toVO(ResidenceRelation relation) {
         RelationVO vo = RelationVO.from(relation);
         var resident = residentMapper.selectById(relation.getResidentId());

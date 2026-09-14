@@ -84,11 +84,11 @@ public class NoticeService {
         notice.setPublisherId(SecurityUtils.getUserId());
         notice.setStatus(NoticeStatus.DRAFT);
         notice.setPublishTime(dto.getPublishTime());
-        notice.setEndTime(dto.getEndTime() != null
-                ? dto.getEndTime()
-                : dto.getPublishTime().plusDays(DEFAULT_VALID_DAYS));
+        notice.setEndTime(resolveEndTime(dto));
         notice.setViewCount(0);
         notice.setIsPinned(dto.getIsPinned() != null && dto.getIsPinned() == 1 ? 1 : 0);
+        notice.setPriority(StringUtils.hasText(dto.getPriority()) ? dto.getPriority() : "NORMAL");
+        notice.setType(StringUtils.hasText(dto.getType()) ? dto.getType() : "ANNOUNCEMENT");
         noticeMapper.insert(notice);
 
         for (NoticeServiceTarget target : targets) {
@@ -116,12 +116,24 @@ public class NoticeService {
         notice.setTitle(dto.getTitle());
         notice.setContent(dto.getContent());
         notice.setPublishTime(dto.getPublishTime());
-        notice.setEndTime(dto.getEndTime() != null
-                ? dto.getEndTime()
-                : dto.getPublishTime().plusDays(DEFAULT_VALID_DAYS));
+        notice.setEndTime(resolveEndTime(dto));
         notice.setIsPinned(dto.getIsPinned() != null && dto.getIsPinned() == 1 ? 1 : 0);
+        notice.setPriority(StringUtils.hasText(dto.getPriority()) ? dto.getPriority() : "NORMAL");
+        notice.setType(StringUtils.hasText(dto.getType()) ? dto.getType() : "ANNOUNCEMENT");
         noticeMapper.updateById(notice);
         return toVO(notice);
+    }
+
+    /* 失效时间解析：endTime 优先，其次前端表单字段名 expireTime（V12 接收映射），
+       均空缺省发布时间 + 30 天 */
+    private LocalDateTime resolveEndTime(CreateNoticeDTO dto) {
+        if (dto.getEndTime() != null) {
+            return dto.getEndTime();
+        }
+        if (dto.getExpireTime() != null) {
+            return dto.getExpireTime();
+        }
+        return dto.getPublishTime().plusDays(DEFAULT_VALID_DAYS);
     }
 
     /** 解析目标列表：targets 列表优先；否则回退 communityId 单目标（向后兼容）；均空=广播 */
@@ -217,7 +229,8 @@ public class NoticeService {
      * 公告分页列表：匿名/普通用户仅 PUBLISHED 且未过期；
      * 管理端角色返回全部状态（ADMIN 限绑定社区，业务层经 notice_target 过滤）。
      */
-    public PageVO<NoticeVO> page(long page, long size, Long communityId, String keyword) {
+    public PageVO<NoticeVO> page(long page, long size, Long communityId, String keyword,
+                                 String priority, Integer isPinned, String type) {
         boolean managerView = SecurityUtils.hasRole(RoleConstants.ADMIN)
                 || SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN);
 
@@ -225,6 +238,10 @@ public class NoticeService {
                 .and(StringUtils.hasText(keyword), w -> w
                         .like(Notice::getTitle, keyword)
                         .or().like(Notice::getContent, keyword))
+                /* DEF-031：priority/isPinned/type 过滤参数（R25 置顶配套 + V12 字段） */
+                .eq(StringUtils.hasText(priority), Notice::getPriority, priority)
+                .eq(isPinned != null, Notice::getIsPinned, isPinned)
+                .eq(StringUtils.hasText(type), Notice::getType, type)
                 /* 置顶排最前（R25 v1.2），同档按发布时间倒序 */
                 .orderByDesc(Notice::getIsPinned)
                 .orderByDesc(Notice::getPublishTime);

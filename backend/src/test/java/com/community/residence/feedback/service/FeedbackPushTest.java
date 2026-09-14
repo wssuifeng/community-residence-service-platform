@@ -89,8 +89,11 @@ class FeedbackPushTest {
         assertThat(payload.getValue()).isInstanceOf(FeedbackPushVO.class);
         FeedbackPushVO push = (FeedbackPushVO) payload.getValue();
         assertThat(push.getType()).isEqualTo("FEEDBACK_MESSAGE");
-        assertThat(push.getData().getId()).isEqualTo(77L);
-        assertThat(push.getData().getContent()).isEqualTo("hello");
+        /* data 通道为 Object（FEEDBACK_MESSAGE/FEEDBACK_STATUS 双载荷，V11 第三批），按消息载荷断言 */
+        com.community.residence.feedback.vo.MessageVO data =
+                (com.community.residence.feedback.vo.MessageVO) push.getData();
+        assertThat(data.getId()).isEqualTo(77L);
+        assertThat(data.getContent()).isEqualTo("hello");
     }
 
     @Test

@@ -2,8 +2,10 @@ package com.community.residence.community.controller;
 
 import com.community.residence.common.result.ApiResponse;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.community.dto.BatchCreateUnitsDTO;
 import com.community.residence.community.dto.CreateUnitDTO;
 import com.community.residence.community.service.UnitService;
+import com.community.residence.community.vo.BatchCreateResultVO;
 import com.community.residence.community.vo.UnitVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +36,13 @@ public class UnitController {
     @PostMapping("/units")
     public ApiResponse<UnitVO> create(@RequestBody @Valid CreateUnitDTO dto) {
         return ApiResponse.success(unitService.create(dto));
+    }
+
+    @Operation(summary = "批量创建单元", description = "按名称列表逐项插入，部分成功语义：逐行反馈（D-端点2）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/units/batch")
+    public ApiResponse<BatchCreateResultVO> batchCreate(@RequestBody @Valid BatchCreateUnitsDTO dto) {
+        return ApiResponse.success(unitService.batchCreate(dto));
     }
 
     @Operation(summary = "更新单元")

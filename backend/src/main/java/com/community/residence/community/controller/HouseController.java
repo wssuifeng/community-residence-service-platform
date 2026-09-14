@@ -2,9 +2,11 @@ package com.community.residence.community.controller;
 
 import com.community.residence.common.result.ApiResponse;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.community.dto.BatchCreateHousesDTO;
 import com.community.residence.community.dto.CreateHouseDTO;
 import com.community.residence.community.dto.UpdateHouseStatusDTO;
 import com.community.residence.community.service.HouseService;
+import com.community.residence.community.vo.BatchCreateResultVO;
 import com.community.residence.community.vo.HouseStatusHistoryVO;
 import com.community.residence.community.vo.HouseVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,6 +39,13 @@ public class HouseController {
     @PostMapping("/houses")
     public ApiResponse<HouseVO> create(@RequestBody @Valid CreateHouseDTO dto) {
         return ApiResponse.success(houseService.create(dto));
+    }
+
+    @Operation(summary = "批量创建房屋", description = "部分成功语义：逐行反馈（D-端点2）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/houses/batch")
+    public ApiResponse<BatchCreateResultVO> batchCreate(@RequestBody @Valid BatchCreateHousesDTO dto) {
+        return ApiResponse.success(houseService.batchCreate(dto));
     }
 
     @Operation(summary = "更新房屋")

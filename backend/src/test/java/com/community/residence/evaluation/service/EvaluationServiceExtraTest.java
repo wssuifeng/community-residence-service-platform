@@ -162,7 +162,7 @@ class EvaluationServiceExtraTest {
         when(workOrderMapper.selectById(1L)).thenReturn(completedOrder);
         when(residentMapper.selectById(1L)).thenReturn(new Resident());
 
-        var vo = evaluationService.unsatisfied(1, 10);
+        var vo = evaluationService.unsatisfied(1, 10, null);
         assertThat(vo.getTotal()).isEqualTo(1);
     }
 }

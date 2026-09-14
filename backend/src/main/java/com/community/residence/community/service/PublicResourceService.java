@@ -39,6 +39,7 @@ public class PublicResourceService {
     public ResourceVO create(CreateResourceDTO dto) {
         communityService.requireActiveCommunity(dto.getCommunityId());
         SecurityUtils.checkCommunityAccess(dto.getCommunityId());
+        validateSlotUnit(dto.getSlotUnit());
         PublicResource resource = new PublicResource();
         applyDto(resource, dto);
         resourceMapper.insert(resource);
@@ -53,6 +54,7 @@ public class PublicResourceService {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "资源不允许变更所属社区");
         }
         SecurityUtils.checkCommunityAccess(resource.getCommunityId());
+        validateSlotUnit(dto.getSlotUnit());
         applyDto(resource, dto);
         resourceMapper.updateById(resource);
         return fillCommunityName(ResourceVO.from(resource));
@@ -111,6 +113,21 @@ public class PublicResourceService {
         resource.setType(dto.getType());
         resource.setLocation(dto.getLocation());
         resource.setCapacity(dto.getCapacity());
+        /* 未传 slotUnit 时保留既有值（更新场景不回退默认），新建缺省 30 */
+        if (dto.getSlotUnit() != null) {
+            resource.setSlotUnit(dto.getSlotUnit());
+        } else if (resource.getSlotUnit() == null) {
+            resource.setSlotUnit(com.community.residence.reservation.service.SlotGrids.DEFAULT_SLOT_UNIT);
+        }
         resource.setDescription(dto.getDescription());
+    }
+
+    /* Slot Grid 栅格粒度校验：取值限 15/30/60（08 §3.7；@Min/@Max 拦截范围外，
+       此处收敛到合法枚举，含 null 放行走默认值） */
+    private void validateSlotUnit(Integer slotUnit) {
+        if (slotUnit != null
+                && !com.community.residence.reservation.service.SlotGrids.ALLOWED_SLOT_UNITS.contains(slotUnit)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "预约最小单位取值 15/30/60");
+        }
     }
 }

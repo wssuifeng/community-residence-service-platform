@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +46,14 @@ public class ResidenceRelationController {
                                                        @RequestParam(defaultValue = "20") long size,
                                                        @RequestParam(required = false) String status) {
         return ApiResponse.success(relationService.pageByHouse(houseId, page, size, status));
+    }
+
+    @Operation(summary = "管理员直建居住关系", description = "直接建立关系不走审批流；限绑定社区空置房屋（D-端点3）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/residence-relations")
+    public ApiResponse<RelationVO> adminCreate(@RequestBody @Valid
+                                               com.community.residence.resident.dto.AdminCreateRelationDTO dto) {
+        return ApiResponse.success(relationService.adminCreate(dto));
     }
 
     @Operation(summary = "办理迁出", description = "联动终止在住租约；房屋无在住居民时回翻空置")

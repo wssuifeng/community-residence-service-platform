@@ -64,4 +64,11 @@ public class StatisticsController {
     public ApiResponse<List<Map<String, Object>>> communityOptions() {
         return ApiResponse.success(statisticsService.communityOptions());
     }
+
+    @Operation(summary = "服务人员按日趋势", description = "STAFF 限本人被派单数据；近 N 日（默认 7，上限 90）日序列 + 今日概览（DEF-029）")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/staff/trend")
+    public ApiResponse<Map<String, Object>> staffTrend(@RequestParam(defaultValue = "7") int days) {
+        return ApiResponse.success(statisticsService.staffTrend(days));
+    }
 }
