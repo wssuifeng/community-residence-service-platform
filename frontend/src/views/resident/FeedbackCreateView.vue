@@ -137,12 +137,19 @@ onMounted(async () => {
 
 <template>
   <section class="feedback-create">
-    <header class="page-head">
-      <h1>提交反馈</h1>
-      <p>您的建议对我们很重要</p>
-    </header>
+    <nav class="breadcrumb">
+      <router-link to="/resident/feedbacks">我的反馈</router-link>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">提交反馈</span>
+    </nav>
 
+    <!-- 居中限宽表单大容器 -->
     <div class="form-card">
+      <header class="form-head">
+        <h1>提交反馈</h1>
+        <p>您的建议对我们很重要，我们会认真对待每一条反馈</p>
+      </header>
+
       <el-form
         ref="formRef"
         :model="form"
@@ -150,7 +157,7 @@ onMounted(async () => {
         label-position="top"
         class="feedback-form"
       >
-        <el-form-item label="反馈类别" prop="category">
+        <el-form-item label="反馈类型" prop="category">
           <div class="category-options">
             <button
               v-for="option in categoryOptions"
@@ -160,6 +167,21 @@ onMounted(async () => {
               :class="{ 'is-active': form.category === option.value }"
               @click="form.category = option.value"
             >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <template v-if="option.value === 'SUGGESTION'">
+                  <path d="M9 18h6M10 21h4" />
+                  <path d="M12 3a6 6 0 0 0-4 10.5c.8.7 1 1.5 1 2.5h6c0-1 .2-1.8 1-2.5A6 6 0 0 0 12 3z" />
+                </template>
+                <template v-else-if="option.value === 'COMPLAINT'">
+                  <path d="M12 9v4M12 17h.01" />
+                  <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+                </template>
+                <template v-else>
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4" />
+                  <path d="M12 17h.01" />
+                </template>
+              </svg>
               {{ option.label }}
             </button>
           </div>
@@ -194,27 +216,41 @@ onMounted(async () => {
         </el-form-item>
 
         <el-form-item label="附件（可选）">
-          <FileUploader v-model="attachmentUrls" :limit="5" />
-          <span class="upload-tip">支持 pdf / doc / docx，单个不超过 10MB，最多 5 个</span>
+          <!-- 虚线上传区：内部为现有 FileUploader（逻辑与数量限制不变） -->
+          <div class="upload-zone">
+            <div class="upload-zone-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <span>点击上传，最多 5 个（pdf / doc / docx，单个不超过 10MB）</span>
+            </div>
+            <FileUploader v-model="attachmentUrls" :limit="5" />
+          </div>
         </el-form-item>
 
-        <el-form-item>
-          <el-checkbox v-model="form.isAnonymous">匿名提交（管理员不可见您的姓名）</el-checkbox>
+        <el-form-item class="anonymous-item">
+          <el-switch v-model="form.isAnonymous" />
+          <span class="anonymous-text">
+            <strong>匿名提交</strong>
+            <span>开启后，管理员处理您的反馈时不可见您的姓名</span>
+          </span>
         </el-form-item>
 
-        <el-form-item>
+        <div class="form-actions">
+          <el-button text size="large" @click="router.push('/resident/feedbacks')">取消</el-button>
           <el-button
             type="primary"
             size="large"
-            round
+            class="submit-btn"
             :loading="submitting"
             :disabled="!canSubmit"
             @click="handleSubmit"
           >
             {{ communityLoading ? '确认社区信息…' : '提交反馈' }}
           </el-button>
-          <el-button size="large" text @click="router.push('/resident/feedbacks')">取消</el-button>
-        </el-form-item>
+        </div>
       </el-form>
     </div>
   </section>
@@ -222,48 +258,80 @@ onMounted(async () => {
 
 <style scoped>
 .feedback-create {
-  max-width: 760px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
 }
 
-.page-head h1 {
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb-sep {
+  color: var(--color-text-disabled);
+}
+
+.breadcrumb-current {
+  color: var(--color-text-secondary);
+}
+
+/* 居中限宽表单大容器 */
+.form-card {
+  max-width: 780px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-xxl);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-head {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-head h1 {
   margin: 0 0 var(--spacing-xs);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
 }
 
-.page-head p {
+.form-head p {
   margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
-.form-card {
-  background-color: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl) var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
-}
-
+/* 反馈类型：可选胶囊卡片（图标 + 名称，选中蓝色描边浅底） */
 .category-options {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   flex-wrap: wrap;
 }
 
 .category-option {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background-color: #fff;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.category-option svg {
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
 }
 
 .category-option.is-active {
@@ -273,10 +341,58 @@ onMounted(async () => {
   font-weight: var(--font-weight-medium);
 }
 
-.upload-tip {
-  display: block;
-  margin-top: var(--spacing-sm);
+/* 虚线上传区 */
+.upload-zone {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.upload-zone-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0 var(--spacing-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.upload-zone-head svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary);
+}
+
+/* 匿名开关 + 说明文字 */
+.anonymous-item :deep(.el-form-item__content) {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.anonymous-text {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.anonymous-text span {
   font-size: var(--font-size-xs);
   color: var(--color-text-disabled);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.submit-btn {
+  min-width: 280px;
 }
 </style>
