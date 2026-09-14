@@ -57,7 +57,7 @@ class BuildingServiceTest {
             when(buildingMapper.selectById(1L)).thenReturn(building);
             when(unitMapper.selectCount(any())).thenReturn(2L);
 
-            assertThatThrownBy(() -> buildingService.delete(1L))
+            assertThatThrownBy(() -> buildingService.delete(1L, false))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
                             .isEqualTo(ErrorCode.BUILDING_REFERENCED));
@@ -73,7 +73,7 @@ class BuildingServiceTest {
             when(unitMapper.selectCount(any())).thenReturn(0L);
             when(buildingMapper.softDeleteById(1L)).thenReturn(1);
 
-            buildingService.delete(1L);
+            buildingService.delete(1L, false);
         }
     }
 

@@ -8,6 +8,7 @@ import com.community.residence.workorder.dto.WorkOrderActionDTO;
 import com.community.residence.workorder.service.WorkOrderService;
 import com.community.residence.workorder.vo.AttachmentVO;
 import com.community.residence.workorder.vo.ProcessRecordVO;
+import com.community.residence.workorder.vo.StaffOptionVO;
 import com.community.residence.workorder.vo.WorkOrderVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -75,16 +76,28 @@ public class WorkOrderController {
         return ApiResponse.success(workOrderService.attachments(id));
     }
 
-    @Operation(summary = "工单列表（分页）", description = "按角色自动收敛数据范围")
+    @Operation(summary = "工单列表（分页）", description = "按角色自动收敛数据范围；status/statuses 单选与多选二选一，statuses 逗号分隔")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping
     public ApiResponse<PageVO<WorkOrderVO>> page(@RequestParam(defaultValue = "1") long page,
                                                  @RequestParam(defaultValue = "20") long size,
                                                  @RequestParam(required = false) String status,
+                                                 @RequestParam(required = false) String statuses,
                                                  @RequestParam(required = false) String priority,
                                                  @RequestParam(required = false) Long categoryId,
-                                                 @RequestParam(required = false) String keyword) {
-        return ApiResponse.success(workOrderService.page(page, size, status, priority, categoryId, keyword));
+                                                 @RequestParam(required = false) String keyword,
+                                                 @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startTime,
+                                                 @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endTime) {
+        return ApiResponse.success(workOrderService.page(page, size, status, statuses,
+                priority, categoryId, keyword, startTime, endTime));
+    }
+
+    @Operation(summary = "可派单服务人员选项", description = "启用状态 STAFF；绑定社区内派过单者优先（DEF-025，R20 派单下拉）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/assignable-staff")
+    public ApiResponse<List<StaffOptionVO>> assignableStaff(
+            @RequestParam(required = false) Long communityId) {
+        return ApiResponse.success(workOrderService.assignableStaff(communityId));
     }
 
     @Operation(summary = "派单", description = "待受理/待派单 → 已派单；支持改派")

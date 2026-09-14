@@ -45,6 +45,12 @@ public class Notice {
     @Schema(description = "置顶：0-普通, 1-置顶（列表排最前，R25 v1.2）")
     private Integer isPinned;
 
+    @Schema(description = "优先级：LOW-低, NORMAL-普通, HIGH-高, URGENT-紧急（V12）")
+    private String priority;
+
+    @Schema(description = "公告类型：ANNOUNCEMENT-公告（V12）")
+    private String type;
+
     @Schema(description = "创建时间")
     private LocalDateTime createdAt;
 

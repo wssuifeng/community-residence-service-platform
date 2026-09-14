@@ -30,6 +30,7 @@ import com.community.residence.workorder.mapper.WorkOrderMapper;
 import com.community.residence.workorder.mapper.WorkOrderProcessMapper;
 import com.community.residence.workorder.vo.AttachmentVO;
 import com.community.residence.workorder.vo.ProcessRecordVO;
+import com.community.residence.workorder.vo.StaffOptionVO;
 import com.community.residence.workorder.vo.WorkOrderVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class WorkOrderService {
 
     private static final DateTimeFormatter ORDER_NO_DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+    /** 工单号撞号重试上限（DEF-026） */
+    private static final int ORDER_NO_RETRY_LIMIT = 5;
 
     /** 状态机合法流转表（key 当前状态 → value 可达状态集合）。
         权威口径见架构设计 §6.1 / 01_工单状态机.lifecycle.json：
@@ -194,15 +198,21 @@ public class WorkOrderService {
         attachmentMapper.deleteById(attachmentId);
     }
 
-    public PageVO<WorkOrderVO> page(long page, long size, String status, String priority,
-                                    Long categoryId, String keyword) {
+    public PageVO<WorkOrderVO> page(long page, long size, String status, String statuses,
+                                    String priority, Long categoryId, String keyword,
+                                    LocalDateTime startTime, LocalDateTime endTime) {
+        List<String> statusList = splitStatuses(statuses);
         LambdaQueryWrapper<WorkOrder> wrapper = new LambdaQueryWrapper<WorkOrder>()
                 .eq(StringUtils.hasText(status), WorkOrder::getStatus, status)
+                .in(!statusList.isEmpty(), WorkOrder::getStatus, statusList)
                 .eq(StringUtils.hasText(priority), WorkOrder::getPriority, priority)
                 .eq(categoryId != null, WorkOrder::getCategoryId, categoryId)
+                .ge(startTime != null, WorkOrder::getCreatedAt, startTime)
+                .le(endTime != null, WorkOrder::getCreatedAt, endTime)
                 .and(StringUtils.hasText(keyword), w -> w
                         .like(WorkOrder::getTitle, keyword)
-                        .or().like(WorkOrder::getContent, keyword))
+                        .or().like(WorkOrder::getContent, keyword)
+                        .or().like(WorkOrder::getOrderNo, keyword))
                 .orderByDesc(WorkOrder::getId);
         /* RESIDENT 限本人；STAFF 限派给本人（工单表无法直查派单表，先取派单ID集合） */
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
@@ -369,6 +379,51 @@ public class WorkOrderService {
                 .stream().map(this::toProcessVO).toList();
     }
 
+    /**
+     * 可派单服务人员选项（DEF-025 方案 A，R20）：启用状态 STAFF 账号；
+     * ADMIN 场景按绑定社区内派过单的服务人员优先置前（引导就近派单），
+     * 范围外 STAFF 仍可选（R20 判据仅要求启用状态，STAFF 数据权限走派单关系
+     * 不做社区绑定，2026-09-14 核实）；最小暴露面：仅 ID + 姓名。
+     */
+    public List<StaffOptionVO> assignableStaff(Long communityId) {
+        List<com.community.residence.auth.entity.SysUser> staffList =
+                sysUserMapper.selectList(new LambdaQueryWrapper<com.community.residence.auth.entity.SysUser>()
+                        .eq(com.community.residence.auth.entity.SysUser::getRole, RoleConstants.STAFF)
+                        .eq(com.community.residence.auth.entity.SysUser::getStatus, "ACTIVE")
+                        .orderByAsc(com.community.residence.auth.entity.SysUser::getId));
+        if (staffList.isEmpty()) {
+            return List.of();
+        }
+        Long filterCommunityId = communityId;
+        if (filterCommunityId == null && SecurityUtils.hasRole(RoleConstants.ADMIN)) {
+            /* 未显式传社区时：ADMIN 取其绑定社区（单绑定直接用，多绑定不预置） */
+            var bound = SecurityUtils.getCommunityIds();
+            filterCommunityId = bound.size() == 1 ? bound.iterator().next() : null;
+        }
+        if (filterCommunityId == null) {
+            return staffList.stream()
+                    .map(s -> StaffOptionVO.of(s.getId(), s.getRealName())).toList();
+        }
+        /* 绑定社区内派过单的服务人员优先（派单关系引导，非硬过滤） */
+        List<Long> communityOrderIds = workOrderMapper.selectList(
+                        new LambdaQueryWrapper<WorkOrder>()
+                                .eq(WorkOrder::getCommunityId, filterCommunityId))
+                .stream().map(WorkOrder::getId).toList();
+        java.util.Set<Long> experienced = communityOrderIds.isEmpty()
+                ? java.util.Set.of()
+                : assignmentMapper.selectList(new LambdaQueryWrapper<WorkOrderAssignment>()
+                                .in(WorkOrderAssignment::getWorkOrderId, communityOrderIds))
+                        .stream().map(WorkOrderAssignment::getAssigneeId)
+                        .collect(java.util.stream.Collectors.toSet());
+        return staffList.stream()
+                .sorted(java.util.Comparator
+                        .comparing((com.community.residence.auth.entity.SysUser s)
+                                -> experienced.contains(s.getId()) ? 0 : 1)
+                        .thenComparing(com.community.residence.auth.entity.SysUser::getId))
+                .map(s -> StaffOptionVO.of(s.getId(), s.getRealName()))
+                .toList();
+    }
+
     public WorkOrder requireOrder(Long id) {
         WorkOrder order = workOrderMapper.selectById(id);
         if (order == null) {
@@ -466,10 +521,30 @@ public class WorkOrderService {
         }
     }
 
-    /** 工单号：WO + yyyyMMdd + 4 位随机序号（单机日提交量远小于随机空间，重复由唯一键兜底重试） */
+    /** 工单号：WO + yyyyMMdd + 4 位随机序号；撞唯一键时循环重试（上限 5 次，
+        仍撞抛冲突——4 位随机空间下单日万级提交才可能耗尽，教学规模不可达，
+        DEF-026：原实现无重试直接 409） */
     private String generateOrderNo() {
-        return "WO" + LocalDate.now().format(ORDER_NO_DATE)
-                + String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
+        for (int i = 0; i < ORDER_NO_RETRY_LIMIT; i++) {
+            String orderNo = "WO" + LocalDate.now().format(ORDER_NO_DATE)
+                    + String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
+            Long exists = workOrderMapper.selectCount(new LambdaQueryWrapper<WorkOrder>()
+                    .eq(WorkOrder::getOrderNo, orderNo));
+            if (exists == 0) {
+                return orderNo;
+            }
+            log.warn("工单号撞号重试（{}/{}）：{}", i + 1, ORDER_NO_RETRY_LIMIT, orderNo);
+        }
+        throw new BusinessException(ErrorCode.OPERATION_FAILED, "工单号生成失败，请稍后重试");
+    }
+
+    /* statuses 多选参数拆分（逗号分隔状态码列表，空白容错；null/空返回空列表） */
+    private List<String> splitStatuses(String statuses) {
+        if (!StringUtils.hasText(statuses)) {
+            return List.of();
+        }
+        return java.util.Arrays.stream(statuses.split(","))
+                .map(String::trim).filter(StringUtils::hasText).toList();
     }
 
     private WorkOrderVO toVO(WorkOrder order) {

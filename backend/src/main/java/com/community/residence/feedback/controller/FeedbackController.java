@@ -50,14 +50,15 @@ public class FeedbackController {
         return ApiResponse.success(feedbackService.getById(id));
     }
 
-    @Operation(summary = "反馈列表（分页）", description = "居民只看本人反馈")
+    @Operation(summary = "反馈列表（分页）", description = "居民只看本人反馈；keyword 匹配标题/内容")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping
     public ApiResponse<PageVO<FeedbackVO>> page(@RequestParam(defaultValue = "1") long page,
                                                 @RequestParam(defaultValue = "20") long size,
                                                 @RequestParam(required = false) String status,
-                                                @RequestParam(required = false) String category) {
-        return ApiResponse.success(feedbackService.page(page, size, status, category));
+                                                @RequestParam(required = false) String category,
+                                                @RequestParam(required = false) String keyword) {
+        return ApiResponse.success(feedbackService.page(page, size, status, category, keyword));
     }
 
     @Operation(summary = "办结反馈", description = "会话中 → 已办结；办结说明落档")

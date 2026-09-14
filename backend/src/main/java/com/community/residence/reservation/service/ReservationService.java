@@ -70,11 +70,13 @@ public class ReservationService {
     private final RedissonClient redissonClient;
 
     /**
-     * 创建预约：R33 冲突校验——同资源同日期时间段重叠 100% 拦截（含并发）。
-     * 并发防护为「Redisson 分布式锁 + 数据库唯一约束（V10 uk_reservation_slot）」双保险：
-     * 锁内完成重叠判定与插入；完全同槽的竞态漏网由唯一约束兜底（DuplicateKeyException
-     * 转业务冲突）。刻意不加 @Transactional：方法仅一条 INSERT，锁内自动提交保证
-     * 锁释放前已落库行对后到并发请求可见（先释放锁后提交的事务会让重叠判定失效）。
+     * 创建预约：Slot Grid 模型（08 §3.7 定案）。三道防线：
+     * ① 栅格对齐校验（起止须为资源 slot_unit 整数倍，400）+ 模板覆盖校验；
+     * ② Redisson 锁内对请求覆盖的每个栅格逐一检查 booked < capacity
+     *    （同居民同资源同起始时段重复拦截 + 全局逐格容量检查）；
+     * ③ V11 uk_reservation_user_slot 唯一约束兜底（同用户同槽并发重复）。
+     * 并发防护沿用 DEF-005 锁模式：刻意不加 @Transactional——方法仅一条 INSERT，
+     * 锁内自动提交保证锁释放前已落库行对后到并发请求可见。
      */
     public ReservationVO create(CreateReservationDTO dto) {
         PublicResource resource = resourceMapper.selectById(dto.getResourceId());
@@ -86,7 +88,15 @@ public class ReservationService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "结束时间必须晚于开始时间");
         }
 
-        /* 时段须完全落在该资源当日的某个可预约模板内 */
+        /* 防线①a：起止须为资源栅格粒度整数倍（Slot Grid，08 §3.7） */
+        int slotUnit = SlotGrids.slotUnitOf(resource);
+        if (!SlotGrids.isAligned(dto.getStartTime(), slotUnit)
+                || !SlotGrids.isAligned(dto.getEndTime(), slotUnit)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM,
+                    "预约起止时间必须为预约最小单位（" + slotUnit + " 分钟）的整数倍");
+        }
+
+        /* 防线①b：时段须完全落在该资源当日的某个可预约模板内 */
         ResourceTimeslot template = findCoveringTemplate(resource.getId(),
                 dto.getReserveDate(), dto.getStartTime(), dto.getEndTime());
         if (template == null) {
@@ -107,8 +117,8 @@ public class ReservationService {
             if (!locked) {
                 throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE, "预约请求繁忙，请稍后重试");
             }
-            /* 同一居民同资源同时段不可重复预约（DEF-002：接口设计 §9.7.1.1 口径，
-               原按天拦截过严；R32~R33 无同天限次约束，2026-09-11 核实） */
+            /* 防线②a：同一居民同资源同起始时段不可重复预约（接口设计 §9.7.1.1 口径；
+               DEF-002 并发穿透由 V11 uk_reservation_user_slot 兜底） */
             Long mineOverlap = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
                     .eq(ResourceReservation::getUserId, userId)
                     .eq(ResourceReservation::getResourceId, resource.getId())
@@ -121,16 +131,26 @@ public class ReservationService {
                         "同一时段已有本人的预约，不可重复预约该时段");
             }
 
-            /* 重叠判定：与任一占用中预约的时间区间有交集即拦截（半重叠/包含/被包含同拦，
-               仅首尾相接不算重叠）；替代原「仅起止完全相同的容量匹配」口径 */
-            Long overlapCount = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
-                    .eq(ResourceReservation::getResourceId, resource.getId())
-                    .eq(ResourceReservation::getReserveDate, dto.getReserveDate())
-                    .lt(ResourceReservation::getStartTime, dto.getEndTime())
-                    .gt(ResourceReservation::getEndTime, dto.getStartTime())
-                    .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
-            if (overlapCount > 0) {
-                throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "所选时段与已有预约重叠");
+            /* 防线②b：锁内逐栅格容量检查——请求覆盖的每个栅格 booked < capacity
+               （存量非对齐预约按覆盖即占用宽松计入） */
+            int capacity = SlotGrids.capacityOf(resource);
+            List<ResourceReservation> occupying = reservationMapper.selectList(
+                    new LambdaQueryWrapper<ResourceReservation>()
+                            .eq(ResourceReservation::getResourceId, resource.getId())
+                            .eq(ResourceReservation::getReserveDate, dto.getReserveDate())
+                            .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
+            for (LocalTime gridStart = dto.getStartTime();
+                    gridStart.isBefore(dto.getEndTime()); gridStart = gridStart.plusMinutes(slotUnit)) {
+                LocalTime slotStart = gridStart;
+                LocalTime slotEnd = gridStart.plusMinutes(slotUnit);
+                long booked = occupying.stream()
+                        .filter(r -> r.getStartTime().isBefore(slotEnd)
+                                && r.getEndTime().isAfter(slotStart))
+                        .count();
+                if (booked >= capacity) {
+                    throw new BusinessException(ErrorCode.RESERVATION_CONFLICT,
+                            "时段 " + slotStart + "~" + slotEnd + " 已约满");
+                }
             }
 
             ResourceReservation reservation = new ResourceReservation();
@@ -147,7 +167,7 @@ public class ReservationService {
             try {
                 reservationMapper.insert(reservation);
             } catch (DuplicateKeyException e) {
-                /* 完全同槽并发竞态被 V10 唯一约束拦截（锁失效时的最后防线） */
+                /* 同用户同槽并发竞态被 V11 唯一约束拦截（锁失效时的最后防线） */
                 throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段已被预约");
             }
             return toVO(reservation);
@@ -262,13 +282,21 @@ public class ReservationService {
                 "RESERVATION", "RESOURCE_RESERVATION", id);
     }
 
-    /** 可预约时段：周循环模板按日期范围展开 + 当前占用计数 */
+    /**
+     * 可预约时段（Slot Grid 栅格化，08 §3.7）：周循环模板按日期范围展开为
+     * slot_unit 粒度栅格，一次范围查询该日该资源全部占用态预约后内存按栅格分桶
+     * （「覆盖即占用」宽松计入，存量非对齐预约不清洗）。
+     * 响应为字段兼容的标准化栅格数组（timeslotId 为「模板ID×10000+当日分钟数」
+     * 的栅格标识，仅作前端选择键，非数据库主键）；同日按 startTime 排序。
+     */
     public List<AvailableSlotVO> availableSlots(Long resourceId, LocalDate startDate, LocalDate endDate) {
         PublicResource resource = resourceMapper.selectById(resourceId);
         if (resource == null) {
             throw new ResourceNotFoundException("公共资源不存在");
         }
         LocalDate end = endDate != null ? endDate : startDate.plusDays(6);
+        int slotUnit = SlotGrids.slotUnitOf(resource);
+        int capacity = SlotGrids.capacityOf(resource);
         List<ResourceTimeslot> templates = timeslotMapper.selectList(
                 new LambdaQueryWrapper<ResourceTimeslot>()
                         .eq(ResourceTimeslot::getResourceId, resourceId)
@@ -280,25 +308,36 @@ public class ReservationService {
                         .ge(ResourceReservation::getReserveDate, startDate)
                         .le(ResourceReservation::getReserveDate, end));
 
-        int capacity = resource.getCapacity() != null ? resource.getCapacity() : 1;
         List<AvailableSlotVO> slots = new ArrayList<>();
         for (LocalDate d = startDate; !d.isAfter(end); d = d.plusDays(1)) {
             final LocalDate date = d;
             int dayOfWeek = date.getDayOfWeek().getValue();
+            List<ResourceReservation> dayOccupying = occupying.stream()
+                    .filter(r -> r.getReserveDate().equals(date)).toList();
             for (ResourceTimeslot template : templates) {
                 if (template.getDayOfWeek() != dayOfWeek) {
                     continue;
                 }
-                int current = (int) occupying.stream()
-                        .filter(r -> r.getReserveDate().equals(date)
-                                && r.getStartTime().equals(template.getStartTime())
-                                && r.getEndTime().equals(template.getEndTime()))
-                        .count();
-                slots.add(new AvailableSlotVO(template.getId(), date,
-                        template.getStartTime(), template.getEndTime(),
-                        capacity, current, current >= capacity ? "FULL" : "AVAILABLE"));
+                /* 栅格边界：模板起止向上对齐到 slot_unit 边界（存量非对齐模板宽容展示） */
+                LocalTime gridStart = SlotGrids.alignUp(template.getStartTime(), slotUnit);
+                LocalTime gridEnd = SlotGrids.alignUp(template.getEndTime(), slotUnit);
+                for (LocalTime s = gridStart; s.isBefore(gridEnd); s = s.plusMinutes(slotUnit)) {
+                    LocalTime slotStart = s;
+                    LocalTime slotEnd = s.plusMinutes(slotUnit);
+                    int booked = (int) dayOccupying.stream()
+                            .filter(r -> r.getStartTime().isBefore(slotEnd)
+                                    && r.getEndTime().isAfter(slotStart))
+                            .count();
+                    slots.add(new AvailableSlotVO(
+                            SlotGrids.gridId(template.getId(), slotStart), date,
+                            slotStart, slotEnd, capacity, booked,
+                            booked >= capacity ? "FULL" : "AVAILABLE"));
+                }
             }
         }
+        /* 同日按开始时间稳定排序（原无 ORDER BY 的无序问题顺带修复） */
+        slots.sort(java.util.Comparator.comparing(AvailableSlotVO::getDate)
+                .thenComparing(AvailableSlotVO::getStartTime));
         return slots;
     }
 
@@ -357,23 +396,32 @@ public class ReservationService {
                 .orElse(null);
     }
 
-    /* 容量校验（confirm 用，排除自身）：创建路径的重叠拦截已保证同槽至多一条占用，
-       此处为状态流转时的防御性复核；同槽有效预约数 < 资源容量 */
+    /* 容量校验（confirm 用，排除自身）：Slot Grid 逐格口径——请求覆盖的每个
+       slot_unit 栅格内占用数 < 资源容量；创建路径已在锁内做过同样检查，
+       此处为审核流转时的防御性复核 */
     private void checkCapacity(PublicResource resource, LocalDate date,
                                LocalTime start, LocalTime end, Long excludeId) {
         if (resource == null) {
             return;
         }
-        int capacity = resource.getCapacity() != null ? resource.getCapacity() : 1;
-        Long count = reservationMapper.selectCount(new LambdaQueryWrapper<ResourceReservation>()
-                .eq(ResourceReservation::getResourceId, resource.getId())
-                .eq(ResourceReservation::getReserveDate, date)
-                .eq(ResourceReservation::getStartTime, start)
-                .eq(ResourceReservation::getEndTime, end)
-                .ne(excludeId != null, ResourceReservation::getId, excludeId)
-                .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
-        if (count >= capacity) {
-            throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段预约已满");
+        int slotUnit = SlotGrids.slotUnitOf(resource);
+        int capacity = SlotGrids.capacityOf(resource);
+        List<ResourceReservation> occupying = reservationMapper.selectList(
+                new LambdaQueryWrapper<ResourceReservation>()
+                        .eq(ResourceReservation::getResourceId, resource.getId())
+                        .eq(ResourceReservation::getReserveDate, date)
+                        .ne(excludeId != null, ResourceReservation::getId, excludeId)
+                        .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
+        for (LocalTime s = start; s.isBefore(end); s = s.plusMinutes(slotUnit)) {
+            LocalTime slotStart = s;
+            LocalTime slotEnd = s.plusMinutes(slotUnit);
+            long booked = occupying.stream()
+                    .filter(r -> r.getStartTime().isBefore(slotEnd)
+                            && r.getEndTime().isAfter(slotStart))
+                    .count();
+            if (booked >= capacity) {
+                throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段预约已满");
+            }
         }
     }
 

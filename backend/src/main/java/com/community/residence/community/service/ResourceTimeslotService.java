@@ -35,6 +35,7 @@ public class ResourceTimeslotService {
         PublicResource resource = publicResourceService.requireResource(resourceId);
         SecurityUtils.checkCommunityAccess(resource.getCommunityId());
         validateTimeRange(dto);
+        checkSlotAlignment(resource, dto);
         checkOverlap(resourceId, dto.getDayOfWeek(), dto.getStartTime(), dto.getEndTime(), null);
 
         ResourceTimeslot timeslot = new ResourceTimeslot();
@@ -54,6 +55,8 @@ public class ResourceTimeslotService {
         ResourceTimeslot timeslot = requireTimeslot(id);
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
         validateTimeRange(dto);
+        PublicResource resource = publicResourceService.requireResource(timeslot.getResourceId());
+        checkSlotAlignment(resource, dto);
         checkOverlap(timeslot.getResourceId(), dto.getDayOfWeek(), dto.getStartTime(), dto.getEndTime(), id);
 
         timeslot.setDayOfWeek(dto.getDayOfWeek());
@@ -114,6 +117,17 @@ public class ResourceTimeslotService {
     private void validateTimeRange(CreateTimeSlotDTO dto) {
         if (!dto.getStartTime().isBefore(dto.getEndTime())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "开始时间必须早于结束时间");
+        }
+    }
+
+    /* Slot Grid 模板对齐校验（08 §3.7）：起止须为资源 slot_unit 整数倍，
+       源头保栅格纯净；存量非对齐模板保留（可约计算宽容分桶），仅拦新写 */
+    private void checkSlotAlignment(PublicResource resource, CreateTimeSlotDTO dto) {
+        int slotUnit = com.community.residence.reservation.service.SlotGrids.slotUnitOf(resource);
+        if (!com.community.residence.reservation.service.SlotGrids.isAligned(dto.getStartTime(), slotUnit)
+                || !com.community.residence.reservation.service.SlotGrids.isAligned(dto.getEndTime(), slotUnit)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM,
+                    "时段起止必须为预约最小单位（" + slotUnit + " 分钟）的整数倍");
         }
     }
 

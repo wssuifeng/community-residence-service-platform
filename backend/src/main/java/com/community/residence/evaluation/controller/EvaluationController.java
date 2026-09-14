@@ -57,12 +57,13 @@ public class EvaluationController {
         return ApiResponse.success(evaluationService.page(page, size, minRating, maxRating));
     }
 
-    @Operation(summary = "不满意评价列表", description = "跟进工作台")
+    @Operation(summary = "不满意评价列表", description = "跟进工作台；hasFollowup 服务端过滤（DEF-028）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/evaluations/unsatisfied")
     public ApiResponse<PageVO<EvaluationVO>> unsatisfied(@RequestParam(defaultValue = "1") long page,
-                                                         @RequestParam(defaultValue = "20") long size) {
-        return ApiResponse.success(evaluationService.unsatisfied(page, size));
+                                                         @RequestParam(defaultValue = "20") long size,
+                                                         @RequestParam(required = false) Boolean hasFollowup) {
+        return ApiResponse.success(evaluationService.unsatisfied(page, size, hasFollowup));
     }
 
     @Operation(summary = "添加跟进", description = "仅不满意评价可跟进")

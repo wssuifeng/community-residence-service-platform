@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /** 单元业务逻辑：社区下四级结构的第三级，社区ID 由楼栋推导冗余存储 */
 @Slf4j
 @Service
@@ -101,6 +103,33 @@ public class UnitService {
             throw new ResourceNotFoundException("单元不存在");
         }
         return unit;
+    }
+
+    /**
+     * 单元批量创建（D-端点2，50 阶段第三批）：部分成功语义对齐 R8 CSV 导入先例。
+     */
+    public com.community.residence.community.vo.BatchCreateResultVO batchCreate(
+            com.community.residence.community.dto.BatchCreateUnitsDTO dto) {
+        Building building = requireBuilding(dto.getBuildingId());
+        SecurityUtils.checkCommunityAccess(building.getCommunityId());
+        List<com.community.residence.community.vo.BatchCreateResultVO.Row> rows = new java.util.ArrayList<>();
+        int success = 0;
+        for (int i = 0; i < dto.getNames().size(); i++) {
+            try {
+                Unit unit = new Unit();
+                unit.setBuildingId(building.getId());
+                unit.setCommunityId(building.getCommunityId());
+                unit.setName(dto.getNames().get(i));
+                unitMapper.insert(unit);
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.success(i + 1, unit.getId()));
+                success++;
+            } catch (Exception e) {
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(i + 1, e.getMessage()));
+            }
+        }
+        log.info("单元批量创建：buildingId={}, total={}, success={}, operator={}",
+                building.getId(), dto.getNames().size(), success, SecurityUtils.getUserId());
+        return com.community.residence.community.vo.BatchCreateResultVO.of(dto.getNames().size(), success, rows);
     }
 
     private Building requireBuilding(Long id) {
