@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -9,10 +10,12 @@ import {
   getCommunityList,
   getHouseList,
   getHouseStatusHistory,
+  getUnit,
   getUnitList,
   updateHouse,
   updateHouseStatus
 } from '@/api/community'
+import { getHouseResidentList, moveOutResidenceRelation } from '@/api/resident'
 import type {
   IBuilding,
   ICommunity,
@@ -24,10 +27,13 @@ import type {
   HouseStatus
 } from '@/types/modules/community'
 import { houseStatusLabels } from '@/types/modules/community'
-import { formatDateTime } from '@/utils/date'
+import { relationTypeLabels } from '@/types/modules/resident'
+import type { IHouseResident, RelationType } from '@/types/modules/resident'
+import { formatDateTime, formatDate, todayISO } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
 
 /** 房屋管理：社区→楼栋→单元三级联动筛选 + CRUD + 状态变更 + 状态历史时间线 */
 const houses = ref<IHouse[]>([])
@@ -104,7 +110,14 @@ async function load(): Promise<void> {
       status: statusFilter.value || undefined
     }
     const result = await getHouseList(unitFilter.value, params)
-    houses.value = result.records
+    /* 后端 HouseVO 无楼栋/单元名称字段（unitName 可空），以当前筛选上下文补全供表格展示与编辑回显 */
+    const contextBuildingName = buildings.value.find((item) => item.id === buildingFilter.value)?.name
+    const contextUnitName = units.value.find((item) => item.id === unitFilter.value)?.name
+    houses.value = result.records.map((record) => ({
+      ...record,
+      buildingName: contextBuildingName ?? record.buildingName,
+      unitName: contextUnitName ?? record.unitName
+    }))
     total.value = result.total
   } catch {
     houses.value = []
@@ -358,13 +371,235 @@ async function handleDelete(row: IHouse): Promise<void> {
   }
 }
 
+/* ---------------------------------- 批量生成（A7 步骤 7.3） ---------------------------------- */
+
+const batchVisible = ref(false)
+
+function openBatchCreate(): void {
+  batchVisible.value = true
+}
+
+/** 批量生成完成：以单元详情回溯三级上下文定位筛选并刷新列表 */
+async function handleBatchSaved(unitId: number): Promise<void> {
+  try {
+    const unit = await getUnit(unitId)
+    communityFilter.value = unit.communityId
+    await loadBuildings()
+    buildingFilter.value = unit.buildingId
+    await loadUnits()
+    unitFilter.value = unitId
+  } catch {
+    /* 上下文回溯失败时仅刷新当前列表 */
+  }
+  page.value = 1
+  load()
+}
+
+/* ---------------------------------- 多选删除（A7 步骤 7.3） ---------------------------------- */
+
+const selectedRows = ref<IHouse[]>([])
+
+function handleSelectionChange(rows: IHouse[]): void {
+  selectedRows.value = rows
+}
+
+/** 多选删除：二次确认一次，逐条调既有 delete，逐个失败不中断并汇报结果 */
+async function handleBatchDelete(): Promise<void> {
+  const rows = selectedRows.value
+  if (rows.length === 0) return
+  try {
+    await ElMessageBox.confirm(
+      `已选择 ${rows.length} 套房屋，将逐个删除；若房屋存在居住/租住关系，该房屋删除将被拒绝。确定继续？`,
+      '批量删除房屋',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  let success = 0
+  let fail = 0
+  let firstError = ''
+  for (const row of rows) {
+    try {
+      await deleteHouse(row.id)
+      success += 1
+    } catch (error) {
+      fail += 1
+      if (!firstError) {
+        firstError = error instanceof Error ? error.message : '删除失败'
+      }
+    }
+  }
+  if (fail === 0) {
+    ElMessage.success(`成功删除 ${success} 套房屋`)
+  } else {
+    ElMessage.warning(`成功删除 ${success} 套，失败 ${fail} 套${firstError ? `：${firstError}` : ''}`)
+  }
+  selectedRows.value = []
+  /* 当前页可能被删空：若剩余总数落在前一页则回退页码 */
+  if (houses.value.length <= fail && page.value > 1) {
+    page.value -= 1
+  }
+  load()
+}
+
+/* ---------------------------------- 行内编辑（A7 步骤 7.3） ---------------------------------- */
+
+/* 行内编辑覆盖文本/数值字段；状态变更走既有「状态」入口（updateHouseStatus 记录变更历史），
+   行内保存复用对话框编辑同一契约（updateHouse，不含 status） */
+type InlineForm = Pick<IHouseDTO, 'houseNumber' | 'floor' | 'area' | 'roomCount' | 'layout' | 'orientation'>
+
+const inlineEditingId = ref<number | null>(null)
+const inlineForm = reactive<InlineForm>({
+  houseNumber: '',
+  floor: 1,
+  area: undefined,
+  roomCount: undefined,
+  layout: '',
+  orientation: ''
+})
+
+function openInlineEdit(row: IHouse): void {
+  if (inlineEditingId.value !== null) {
+    ElMessage.warning('请先保存或取消当前行编辑')
+    return
+  }
+  inlineEditingId.value = row.id
+  inlineForm.houseNumber = row.houseNumber
+  inlineForm.floor = row.floor
+  inlineForm.area = row.area ?? undefined
+  inlineForm.roomCount = row.roomCount ?? undefined
+  inlineForm.layout = row.layout ?? ''
+  inlineForm.orientation = row.orientation ?? ''
+}
+
+function cancelInlineEdit(): void {
+  inlineEditingId.value = null
+}
+
+async function saveInlineEdit(row: IHouse): Promise<void> {
+  if (!inlineForm.houseNumber.trim()) {
+    ElMessage.error('门牌号不能为空')
+    return
+  }
+  try {
+    await updateHouse(row.id, {
+      unitId: row.unitId,
+      houseNumber: inlineForm.houseNumber.trim(),
+      floor: inlineForm.floor,
+      area: inlineForm.area,
+      roomCount: inlineForm.roomCount,
+      layout: inlineForm.layout || undefined,
+      orientation: inlineForm.orientation || undefined,
+      description: row.description
+    })
+    ElMessage.success('房屋已更新')
+    inlineEditingId.value = null
+    load()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '保存失败')
+  }
+}
+
+/* ---------------------------------- 住户信息抽屉（A7 步骤 7.4） ---------------------------------- */
+
+const router = useRouter()
+
+const residentsVisible = ref(false)
+const residentsLoading = ref(false)
+const residentsHouse = ref<IHouse | null>(null)
+const residentsList = ref<IHouseResident[]>([])
+
+const activeResidents = computed(() => residentsList.value.filter((item) => item.status === 'ACTIVE'))
+const movedOutResidents = computed(() => residentsList.value.filter((item) => item.status !== 'ACTIVE'))
+
+async function openResidents(row: IHouse): Promise<void> {
+  residentsHouse.value = row
+  residentsVisible.value = true
+  residentsLoading.value = true
+  try {
+    const result = await getHouseResidentList(row.id, { page: 1, size: 50 })
+    residentsList.value = result.records
+  } catch {
+    residentsList.value = []
+  } finally {
+    residentsLoading.value = false
+  }
+}
+
+/** 关系类型展示：枚举走标签表，后端扩展值原样回显 */
+function relationTypeText(relationType: RelationType | undefined): string {
+  if (!relationType) return '-'
+  return relationTypeLabels[relationType] ?? relationType
+}
+
+/* 住户登记直建端点缺失（POST /residence-relations 不存在，关系建立仅经
+   居民提交入住申请 + 管理端审批，缺口已记 BEAUTIFY_NOTES 后端适配清单）：
+   引导前往既有审批流页面 */
+function goApplicationApproval(): void {
+  residentsVisible.value = false
+  router.push({ path: '/admin/residents', query: { tab: 'applications' } })
+}
+
+/* 办理搬出：小对话框二次确认（迁出日期 + 原因），成功后刷新抽屉与列表 */
+const moveOutVisible = ref(false)
+const moveOutSubmitting = ref(false)
+const moveOutTarget = ref<IHouseResident | null>(null)
+const moveOutFormRef = ref<FormInstance>()
+const moveOutForm = reactive<{ moveOutDate: string; reason: string }>({
+  moveOutDate: todayISO(),
+  reason: ''
+})
+
+const moveOutRules: FormRules = {
+  moveOutDate: [{ required: true, message: '请选择迁出日期', trigger: 'change' }]
+}
+
+function openMoveOut(resident: IHouseResident): void {
+  moveOutTarget.value = resident
+  moveOutForm.moveOutDate = todayISO()
+  moveOutForm.reason = ''
+  moveOutVisible.value = true
+}
+
+async function submitMoveOut(): Promise<void> {
+  const valid = await moveOutFormRef.value?.validate().catch(() => false)
+  if (!valid || !moveOutTarget.value || !residentsHouse.value) return
+  moveOutSubmitting.value = true
+  try {
+    await moveOutResidenceRelation(moveOutTarget.value.id, {
+      moveOutDate: moveOutForm.moveOutDate,
+      reason: moveOutForm.reason || undefined
+    })
+    ElMessage.success(`已为 ${moveOutTarget.value.residentName} 办理迁出`)
+    moveOutVisible.value = false
+    /* 房屋无在住居民时后端回翻空置：抽屉与列表同步刷新 */
+    openResidents(residentsHouse.value)
+    load()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '迁出失败')
+  } finally {
+    moveOutSubmitting.value = false
+  }
+}
+
 onMounted(loadCommunities)
 </script>
 
 <template>
   <section class="house-list">
+    <!-- 任务 3 换壳内嵌：页头/标题由容器 Tab 承担，此处仅保留操作按钮 -->
     <div class="list-toolbar">
-      <span class="toolbar-title">房屋管理</span>
+      <el-button
+        v-if="selectedRows.length > 0"
+        v-permission="['ADMIN', 'SUPER_ADMIN']"
+        type="danger"
+        plain
+        @click="handleBatchDelete"
+      >
+        批量删除（{{ selectedRows.length }}）
+      </el-button>
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" @click="openBatchCreate">批量生成</el-button>
       <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :disabled="unitFilter === ''" @click="openCreate">新建房屋</el-button>
     </div>
 
@@ -441,17 +676,83 @@ onMounted(loadCommunities)
       class="empty-hint"
     />
     <template v-else>
-      <el-table v-loading="loading" :data="houses" border>
+      <el-table
+        v-loading="loading"
+        :data="houses"
+        border
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="42" />
         <el-table-column prop="id" label="ID" width="64" />
         <el-table-column prop="buildingName" label="楼栋" min-width="100" show-overflow-tooltip />
         <el-table-column prop="unitName" label="单元" width="90" show-overflow-tooltip />
-        <el-table-column prop="houseNumber" label="门牌号" min-width="100" show-overflow-tooltip />
-        <el-table-column prop="floor" label="楼层" width="70" />
-        <el-table-column label="面积(㎡)" width="90">
-          <template #default="{ row }">{{ row.area ?? '-' }}</template>
+        <!-- 行内编辑列（A7 7.3）：门牌/楼层/面积/户型/朝向可直接输入，逐行保存调既有 update -->
+        <el-table-column min-width="110" show-overflow-tooltip>
+          <template #header>门牌号</template>
+          <template #default="{ row }">
+            <el-input
+              v-if="inlineEditingId === row.id"
+              v-model="inlineForm.houseNumber"
+              size="small"
+              maxlength="20"
+            />
+            <span v-else>{{ row.houseNumber }}</span>
+          </template>
         </el-table-column>
-        <el-table-column label="户型" width="110">
-          <template #default="{ row }">{{ layoutText(row) }}</template>
+        <el-table-column width="120">
+          <template #header>楼层</template>
+          <template #default="{ row }">
+            <el-input-number
+              v-if="inlineEditingId === row.id"
+              v-model="inlineForm.floor"
+              size="small"
+              :min="1"
+              :max="99"
+              controls-position="right"
+              style="width: 88px"
+            />
+            <span v-else>{{ row.floor }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column width="130">
+          <template #header>面积(㎡)</template>
+          <template #default="{ row }">
+            <el-input-number
+              v-if="inlineEditingId === row.id"
+              v-model="inlineForm.area"
+              size="small"
+              :min="1"
+              :max="10000"
+              :precision="2"
+              controls-position="right"
+              style="width: 96px"
+            />
+            <span v-else>{{ row.area ?? '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column width="130">
+          <template #header>户型</template>
+          <template #default="{ row }">
+            <el-input
+              v-if="inlineEditingId === row.id"
+              v-model="inlineForm.layout"
+              size="small"
+              maxlength="20"
+            />
+            <span v-else>{{ layoutText(row) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column width="110">
+          <template #header>朝向</template>
+          <template #default="{ row }">
+            <el-input
+              v-if="inlineEditingId === row.id"
+              v-model="inlineForm.orientation"
+              size="small"
+              maxlength="10"
+            />
+            <span v-else>{{ row.orientation || '-' }}</span>
+          </template>
         </el-table-column>
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
@@ -461,12 +762,20 @@ onMounted(loadCommunities)
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="230" fixed="right">
+        <el-table-column label="操作" width="300" fixed="right">
           <template #default="{ row }">
-            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="warning" size="small" @click="openStatusChange(row)">状态</el-button>
-            <el-button link type="info" size="small" @click="openHistory(row)">历史</el-button>
-            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <template v-if="inlineEditingId === row.id">
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="saveInlineEdit(row)">保存</el-button>
+              <el-button link type="info" size="small" @click="cancelInlineEdit">取消</el-button>
+            </template>
+            <template v-else>
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openInlineEdit(row)">行内编辑</el-button>
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="warning" size="small" @click="openStatusChange(row)">状态</el-button>
+              <el-button link type="info" size="small" @click="openResidents(row)">住户</el-button>
+              <el-button link type="info" size="small" @click="openHistory(row)">历史</el-button>
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -628,23 +937,121 @@ onMounted(loadCommunities)
         <el-empty v-else description="暂无状态变更记录" />
       </div>
     </el-drawer>
+
+    <!-- 批量生成房屋（A7 7.3）：选单元 + 楼层范围 + 每层房号，预览确认后循环创建 -->
+    <HouseBatchDialog
+      v-model="batchVisible"
+      :communities="communities"
+      :initial-community-id="communityFilter"
+      :initial-building-id="buildingFilter"
+      :initial-unit-id="unitFilter"
+      @saved="handleBatchSaved"
+    />
+
+    <!-- 住户信息抽屉（A7 7.4）：房屋维度居住信息维护，非用户账号信息 -->
+    <el-drawer
+      v-model="residentsVisible"
+      :title="residentsHouse ? `住户信息：${residentsHouse.houseNumber}` : '住户信息'"
+      size="480px"
+    >
+      <div v-loading="residentsLoading" class="residents-body">
+        <!-- 住户登记引导：直建关系端点缺失，经居民入住申请 + 审批流建立 -->
+        <el-alert type="info" :closable="false" class="residents-guide">
+          <template #title>
+            住户登记须经居民端提交入住申请，审批通过后自动建立居住关系
+          </template>
+          <el-button link type="primary" @click="goApplicationApproval">
+            前往入住申请审批
+          </el-button>
+        </el-alert>
+
+        <h4 class="residents-section-title">在住住户（{{ activeResidents.length }}）</h4>
+        <template v-if="!residentsLoading">
+          <ul v-if="activeResidents.length > 0" class="resident-list">
+            <li v-for="item in activeResidents" :key="item.id" class="resident-item">
+              <div class="resident-main">
+                <span class="resident-name">{{ item.residentName }}</span>
+                <span class="resident-relation">{{ relationTypeText(item.relationType) }}</span>
+              </div>
+              <div class="resident-meta">
+                <span>{{ item.residentPhone || '-' }}</span>
+                <span>入住：{{ formatDate(item.moveInDate) }}</span>
+              </div>
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                type="warning"
+                plain
+                size="small"
+                @click="openMoveOut(item)"
+              >
+                办理搬出
+              </el-button>
+            </li>
+          </ul>
+          <el-empty v-else description="暂无在住住户，可经入住申请流程登记" :image-size="72" />
+        </template>
+
+        <template v-if="movedOutResidents.length > 0">
+          <h4 class="residents-section-title">迁出记录（{{ movedOutResidents.length }}）</h4>
+          <ul class="resident-list is-history">
+            <li v-for="item in movedOutResidents" :key="item.id" class="resident-item is-muted">
+              <div class="resident-main">
+                <span class="resident-name">{{ item.residentName }}</span>
+                <span class="resident-relation">{{ relationTypeText(item.relationType) }}</span>
+              </div>
+              <div class="resident-meta">
+                <span>入住：{{ formatDate(item.moveInDate) }}</span>
+                <span>迁出：{{ formatDate(item.moveOutDate) }}</span>
+              </div>
+            </li>
+          </ul>
+        </template>
+      </div>
+    </el-drawer>
+
+    <!-- 办理搬出（二次确认）：迁出日期 + 原因，成功后联动刷新抽屉与列表 -->
+    <el-dialog
+      v-model="moveOutVisible"
+      :title="moveOutTarget ? `办理搬出：${moveOutTarget.residentName}` : '办理搬出'"
+      width="420px"
+      append-to-body
+    >
+      <el-form ref="moveOutFormRef" :model="moveOutForm" :rules="moveOutRules" label-width="90px">
+        <el-form-item label="迁出日期" prop="moveOutDate">
+          <el-date-picker
+            v-model="moveOutForm.moveOutDate"
+            type="date"
+            placeholder="请选择迁出日期"
+            value-format="YYYY-MM-DD"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="迁出原因">
+          <el-input
+            v-model="moveOutForm.reason"
+            type="textarea"
+            :rows="2"
+            placeholder="选填"
+            maxlength="100"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="moveOutVisible = false">取消</el-button>
+        <el-button type="primary" :loading="moveOutSubmitting" @click="submitMoveOut">确认迁出</el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
 <style scoped>
 .list-toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: var(--spacing-md);
   gap: var(--spacing-md);
   flex-wrap: wrap;
-}
-
-.toolbar-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
 }
 
 .filter-label {
@@ -686,6 +1093,73 @@ onMounted(loadCommunities)
 .history-operator,
 .history-remark {
   font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 住户信息抽屉（A7 7.4） ---------- */
+
+.residents-body {
+  padding: var(--spacing-sm) var(--spacing-md);
+  min-height: 200px;
+}
+
+.residents-guide {
+  margin-bottom: var(--spacing-md);
+}
+
+.residents-section-title {
+  margin: var(--spacing-md) 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.resident-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.resident-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border-light, var(--color-border));
+  border-radius: var(--radius-md);
+}
+
+.resident-item.is-muted {
+  opacity: 0.72;
+}
+
+.resident-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 88px;
+}
+
+.resident-name {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.resident-relation {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+}
+
+.resident-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 </style>

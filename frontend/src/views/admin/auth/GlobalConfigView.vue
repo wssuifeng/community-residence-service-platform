@@ -5,7 +5,10 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { getConfigList, updateConfig } from '@/api/resident'
 import type { ISysConfig } from '@/types/modules/resident'
 
-/** 全局配置：配置项表格 + 编辑值对话框（仅超级管理员可修改，路由已限超管；后端为全量列表，无分页） */
+/**
+ * 全局配置 Tab（自 resident/GlobalConfigView.vue 原样迁入系统管理页，任务 12 只换壳）：
+ * 配置项表格 + 编辑值对话框（仅超级管理员可修改，ADMIN 视角由容器渲染空态；后端为全量列表，无分页）
+ */
 
 /** 日志保留期键（R58/N6：阈值天数为正整数，到期自动清理并通知超管） */
 const LOG_RETENTION_KEY = 'log.retention_days'
@@ -99,18 +102,23 @@ onMounted(load)
       show-icon
     />
 
-    <el-table v-loading="loading" :data="configs" border>
-      <el-table-column prop="configKey" label="配置项" min-width="220" show-overflow-tooltip />
-      <el-table-column prop="configValue" label="配置值" min-width="160" show-overflow-tooltip />
-      <el-table-column label="说明" min-width="240" show-overflow-tooltip>
-        <template #default="{ row }">{{ row.description || '-' }}</template>
-      </el-table-column>
-      <el-table-column label="操作" width="100" fixed="right">
-        <template #default="{ row }">
-          <el-button v-permission="['SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+    <div class="table-panel">
+      <el-table v-loading="loading" :data="configs">
+        <el-table-column prop="configKey" label="配置项" min-width="220" show-overflow-tooltip />
+        <el-table-column prop="configValue" label="配置值" min-width="160" show-overflow-tooltip />
+        <el-table-column label="说明" min-width="240" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.description || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button v-permission="['SUPER_ADMIN']" link type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <el-empty description="暂无配置项" :image-size="80" />
         </template>
-      </el-table-column>
-    </el-table>
+      </el-table>
+    </div>
 
     <!-- 编辑配置值 -->
     <el-dialog v-model="editVisible" title="编辑配置" width="480px">
@@ -154,6 +162,14 @@ onMounted(load)
 <style scoped>
 .config-notice {
   margin-bottom: var(--spacing-md);
+}
+
+/* 表格白卡容器（含内边距，与居民列表 table-panel 同款） */
+.table-panel {
+  background-color: var(--admin-card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-xs);
 }
 
 .config-key {

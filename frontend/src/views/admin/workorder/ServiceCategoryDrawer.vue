@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getCommunityList } from '@/api/community'
 import {
@@ -13,14 +13,63 @@ import type { ICommunity } from '@/types/modules/community'
 import type { IServiceCategory, IServiceCategoryTreeNode } from '@/types/modules/workorder'
 import { useUserStore } from '@/store/user'
 
-/** 服务类别管理（UI设计.md §3.4.4）：社区选择 + 两级类别树表格 + CRUD 对话框 */
+/**
+ * 服务类别抽屉（原 /admin/service-categories 独立页收编，对照 design-mockups/admin/03 任务 4）：
+ * 社区选择 + 两级类别树表格 + 新增/编辑/删除全套，挂在工作列表页页头入口。
+ * CRUD 完成后 emit('changed')（当前列表数据与类别无联动、不强制刷新，留作扩展点）。
+ */
+const props = defineProps<{ modelValue: boolean }>()
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+  changed: []
+}>()
 
 const userStore = useUserStore()
+
+const visible = ref(props.modelValue)
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    visible.value = value
+    /* 首次打开再初始化社区与类别树，避免页面挂载即发请求 */
+    if (value && !initialized) {
+      initialized = true
+      loadCommunities().then(() => {
+        if (communityId.value) loadTree()
+      })
+    }
+  }
+)
+
+watch(visible, (value) => {
+  if (value !== props.modelValue) emit('update:modelValue', value)
+})
+
+let initialized = false
 
 const communities = ref<ICommunity[]>([])
 const communityId = ref<number | null>(null)
 const tree = ref<IServiceCategoryTreeNode[]>([])
 const loading = ref(false)
+
+/* 树展开受控：所有含子类别的节点恒展开。
+   不用 default-expand-all——el-table 树模式在数据重载后保留旧展开态，
+   新增子类别的行不会渲染（受控 expand-row-keys 每次重载全量展开）。 */
+const expandedKeys = computed(() => {
+  const keys: string[] = []
+  const walk = (nodes: IServiceCategoryTreeNode[]): void => {
+    for (const node of nodes) {
+      if (node.children.length > 0) {
+        keys.push(String(node.id))
+        walk(node.children)
+      }
+    }
+  }
+  walk(tree.value)
+  return keys
+})
 
 /* 新增/编辑对话框 */
 const dialogVisible = ref(false)
@@ -61,7 +110,10 @@ async function loadTree(): Promise<void> {
   if (!communityId.value) return
   loading.value = true
   try {
-    tree.value = await getServiceCategoryTree(communityId.value)
+    /* 后端对二级类别返回 children:null，统一归一为数组，避免树表渲染与子类别计数空指针 */
+    const withChildren = (nodes: IServiceCategoryTreeNode[]): IServiceCategoryTreeNode[] =>
+      nodes.map((node) => ({ ...node, children: withChildren(node.children ?? []) }))
+    tree.value = withChildren(await getServiceCategoryTree(communityId.value))
     topCategories.value = tree.value.map((node) => ({ id: node.id, name: node.name }))
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '服务类别加载失败')
@@ -127,6 +179,7 @@ async function handleSave(): Promise<void> {
     }
     dialogVisible.value = false
     loadTree()
+    emit('changed')
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '保存失败')
   } finally {
@@ -145,73 +198,67 @@ async function handleDelete(row: IServiceCategoryTreeNode): Promise<void> {
     await deleteServiceCategory(row.id)
     ElMessage.success('类别已删除')
     loadTree()
+    emit('changed')
   } catch (error) {
     if (error === 'cancel' || error === 'close') return
     ElMessage.error(error instanceof Error ? error.message : '删除失败')
   }
 }
-
-onMounted(() => {
-  loadCommunities().then(() => {
-    if (communityId.value) loadTree()
-  })
-})
 </script>
 
 <template>
-  <section class="category-page">
-    <header class="page-header">
-      <h1 class="page-title">服务类别</h1>
-      <div class="header-actions">
+  <el-drawer v-model="visible" title="服务类别管理" size="520px" class="category-drawer">
+    <div class="drawer-body">
+      <div class="drawer-toolbar">
         <el-select
           v-model="communityId"
           placeholder="选择社区"
           class="community-select"
           :disabled="communities.length === 0"
+          aria-label="社区选择"
         >
           <el-option v-for="item in communities" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
         <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openCreate(null)">新增顶级类别</el-button>
       </div>
-    </header>
 
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      title="类别最多两级：顶级为大类（如维修/保洁），二级为具体事项（如水管维修）；有子类别或工单关联的类别不可删除"
-      class="page-tip"
-    />
+      <el-alert
+        type="info"
+        :closable="false"
+        show-icon
+        title="类别最多两级；有子类别或工单关联的类别不可删除"
+        class="drawer-tip"
+      />
 
-    <el-table
-      v-loading="loading"
-      :data="tree"
-      row-key="id"
-      default-expand-all
-      :tree-props="{ children: 'children' }"
-      class="category-table"
-    >
-      <el-table-column prop="name" label="类别名称" min-width="220" />
-      <el-table-column prop="description" label="描述" min-width="220" show-overflow-tooltip>
-        <template #default="{ row }">{{ row.description ?? '-' }}</template>
-      </el-table-column>
-      <el-table-column prop="sortOrder" label="排序" width="80" />
-      <el-table-column label="子类别数" width="100">
-        <template #default="{ row }">{{ row.children.length }}</template>
-      </el-table-column>
-      <el-table-column label="操作" width="220" fixed="right">
-        <template #default="{ row }">
-          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="primary" size="small" @click="openCreate(row.id)">新增子类别</el-button>
-          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="primary" size="small" @click="openEdit(row)">编辑</el-button>
-          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+      <el-table
+        v-loading="loading"
+        :data="tree"
+        row-key="id"
+        :expand-row-keys="expandedKeys"
+        :tree-props="{ children: 'children' }"
+        class="category-table"
+      >
+        <el-table-column prop="name" label="类别名称" min-width="150" />
+        <el-table-column prop="description" label="描述" min-width="120" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.description ?? '—' }}</template>
+        </el-table-column>
+        <el-table-column label="子类别" width="70" align="center">
+          <template #default="{ row }">{{ row.children.length }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="160">
+          <template #default="{ row }">
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="primary" size="small" @click="openCreate(row.id)">新增子类别</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="primary" size="small" @click="openEdit(row)">编辑</el-button>
+            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <el-empty description="暂无服务类别，点击「新增顶级类别」创建" :image-size="70" />
         </template>
-      </el-table-column>
-      <template #empty>
-        <el-empty description="暂无服务类别，点击右上角「新增顶级类别」创建" :image-size="80" />
-      </template>
-    </el-table>
+      </el-table>
+    </div>
 
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="440px" append-to-body>
       <el-form label-width="90px" @submit.prevent>
         <el-form-item label="上级类别">
           <el-select v-model="form.parentId" placeholder="无（作为顶级类别）" clearable class="parent-select">
@@ -233,43 +280,34 @@ onMounted(() => {
         <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
       </template>
     </el-dialog>
-  </section>
+  </el-drawer>
 </template>
 
 <style scoped>
-.page-header {
+.drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.drawer-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-
-.page-title {
-  margin: 0;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
   gap: var(--spacing-sm);
 }
 
 .community-select {
-  width: 200px;
+  flex: 1;
+  min-width: 0;
 }
 
-.page-tip {
-  margin-bottom: var(--spacing-md);
+.drawer-tip {
+  --el-alert-padding: 8px 12px;
 }
 
 .category-table {
-  background-color: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  width: 100%;
 }
 
 .parent-select {
