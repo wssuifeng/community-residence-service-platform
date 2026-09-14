@@ -40,7 +40,7 @@ public class HouseService {
     private final ResidenceRelationMapper residenceRelationMapper;
 
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSE", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建房屋：' + #dto.houseNumber")
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSE", targetId = "#result.id", communityId = "#result.communityId", content = "'创建房屋：' + #dto.houseNumber")
     public HouseVO create(CreateHouseDTO dto) {
         Unit unit = requireUnit(dto.getUnitId());
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());
@@ -170,6 +170,7 @@ public class HouseService {
 
     /**
      * 房屋批量创建（D-端点2，50 阶段第三批）：部分成功语义对齐 R8 CSV 导入先例。
+     * DEF-032：逐行 Validator 校验（area @NotNull 等字段规则），坏行逐行反馈。
      */
     public com.community.residence.community.vo.BatchCreateResultVO batchCreate(
             com.community.residence.community.dto.BatchCreateHousesDTO dto) {
@@ -179,6 +180,12 @@ public class HouseService {
         int success = 0;
         for (int i = 0; i < dto.getHouses().size(); i++) {
             CreateHouseDTO item = dto.getHouses().get(i);
+            String violation = RowValidator.validate(item);
+            if (violation != null) {
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(
+                        i + 1, violation));
+                continue;
+            }
             try {
                 House house = new House();
                 house.setUnitId(unit.getId());

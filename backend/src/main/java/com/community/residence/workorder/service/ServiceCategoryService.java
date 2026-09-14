@@ -89,8 +89,34 @@ public class ServiceCategoryService {
         return CategoryVO.from(requireCategory(id));
     }
 
-    /** 社区类别树（公开；居民端提交工单时选择类别） */
+    /**
+     * 社区类别树（公开；居民端提交工单时选择类别）。
+     * DEF-041：过滤停用类别（R17「停用类别不再出现在提交选项」）——
+     * 停用父类别连同其子类别整体不出树（子类挂靠停用父类，选项语义随父类失效）。
+     */
     public List<CategoryVO> treeByCommunity(Long communityId) {
+        List<ServiceCategory> categories = categoryMapper.selectList(
+                new LambdaQueryWrapper<ServiceCategory>()
+                        .eq(ServiceCategory::getCommunityId, communityId)
+                        .eq(ServiceCategory::getIsActive, 1)
+                        .orderByAsc(ServiceCategory::getSortOrder)
+                        .orderByAsc(ServiceCategory::getId));
+        Map<Long, List<CategoryVO>> children = categories.stream()
+                .filter(c -> c.getParentId() != null)
+                .map(CategoryVO::from)
+                .collect(Collectors.groupingBy(CategoryVO::getParentId));
+        return categories.stream()
+                .filter(c -> c.getParentId() == null)
+                .map(c -> {
+                    CategoryVO vo = CategoryVO.from(c);
+                    vo.setChildren(children.getOrDefault(c.getId(), List.of()));
+                    return vo;
+                })
+                .toList();
+    }
+
+    /** 管理端类别树（全量含停用，供配置管理） */
+    public List<CategoryVO> treeByCommunityAll(Long communityId) {
         List<ServiceCategory> categories = categoryMapper.selectList(
                 new LambdaQueryWrapper<ServiceCategory>()
                         .eq(ServiceCategory::getCommunityId, communityId)
@@ -124,5 +150,10 @@ public class ServiceCategoryService {
         category.setDescription(dto.getDescription());
         category.setParentId(dto.getParentId());
         category.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
+        /* DEF-041：update 路径补 isActive 写入（原 applyDto 忽略致停用状态只能 SQL 产生，
+       create/update 各自的显式 setIsActive 保留缺省语义，此处兜底两者均覆盖） */
+        if (dto.getIsActive() != null) {
+            category.setIsActive(dto.getIsActive());
+        }
     }
 }

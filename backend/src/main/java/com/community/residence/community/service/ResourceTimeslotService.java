@@ -30,7 +30,7 @@ public class ResourceTimeslotService {
     private final com.community.residence.reservation.mapper.ResourceReservationMapper reservationMapper;
 
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "RESOURCE_TIMESLOT", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建资源时段'")
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "RESOURCE_TIMESLOT", targetId = "#result.id", communityId = "#result.communityId", content = "'创建资源时段'")
     public TimeSlotVO create(Long resourceId, CreateTimeSlotDTO dto) {
         PublicResource resource = publicResourceService.requireResource(resourceId);
         SecurityUtils.checkCommunityAccess(resource.getCommunityId());
