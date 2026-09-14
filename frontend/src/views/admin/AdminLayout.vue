@@ -39,6 +39,7 @@ const realName = computed(() => userStore.user?.realName ?? '')
   flex: 1;
   min-width: 0;
   padding: var(--spacing-lg);
+  background: var(--admin-canvas);
 }
 
 .admin-breadcrumb {

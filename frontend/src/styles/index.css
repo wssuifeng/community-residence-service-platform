@@ -53,6 +53,18 @@ img {
   outline: none;
 }
 
+/* 浏览器自动填充修复 v2：Chrome 对 autofill 强加的蓝底被超长过渡无限延迟，
+   不涂抹任何像素（v1 内阴影方案会盖住 wrapper 边框，已废弃——原生 input
+   比可见区域大，巨大 spread 内阴影会把 el-input wrapper 的边框与圆角也
+   铺白，表现为边框缺块；勿再改回内阴影方案），仅统一文字与光标色。 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text-primary);
+  caret-color: var(--color-text-primary);
+  transition: background-color 999999s ease-in-out 0s;
+}
+
 /* 移动端提示（<768px 不适配，提示使用桌面端） */
 .mobile-only {
   display: none;

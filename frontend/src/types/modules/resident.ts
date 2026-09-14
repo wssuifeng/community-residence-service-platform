@@ -22,14 +22,6 @@ export const residenceApplicationStatusLabels: Record<ResidenceApplicationStatus
   REJECTED: '已驳回'
 }
 
-/** 入住申请类型（接口设计.md 9.2.2.1，文档示例值 RENT） */
-export type ApplicationType = 'RENT'
-
-/** 入住申请类型中文标签 */
-export const applicationTypeLabels: Record<ApplicationType, string> = {
-  RENT: '租住'
-}
-
 /** 居住关系状态（接口设计.md 9.2.3.1 / 9.2.3.2） */
 export type ResidenceRelationStatus = 'ACTIVE' | 'MOVED_OUT'
 
@@ -39,18 +31,32 @@ export const residenceRelationStatusLabels: Record<ResidenceRelationStatus, stri
   MOVED_OUT: '已迁出'
 }
 
+/** 居住身份（后端 RelationVO.relationType，ResidenceRelation/ResidenceApplication 共用） */
+export type RelationType = 'OWNER' | 'TENANT' | 'FAMILY'
+
+/** 居住身份中文标签 */
+export const relationTypeLabels: Record<RelationType, string> = {
+  OWNER: '业主',
+  TENANT: '租客',
+  FAMILY: '家属'
+}
+
 /* ---------------------------------- 居民账号 ---------------------------------- */
 
-/** 居民实体（接口设计.md 9.2.1.4 / 9.2.1.7 响应） */
+/**
+ * 居民实体（后端 ResidentVO 实际返回，2026-09-12 对齐：
+ * 接口设计.md 9.2.1.7 示例的 violationCount 后端 VO 未暴露；
+ * 身份证号为脱敏字段 idCardMasked，非文档示例的 idCardNumber）
+ */
 export interface IResident {
   id: number
   username: string
   realName: string
   phone: string
   email?: string
-  idCardNumber?: string
+  /** 身份证号（后端脱敏：保留前 4 后 2 位） */
+  idCardMasked?: string
   status: ResidentStatus
-  violationCount?: number
   createdAt: string
 }
 
@@ -91,62 +97,58 @@ export interface IUpdateResidentStatusDTO {
 
 /* ---------------------------------- 入住申请 ---------------------------------- */
 
-/** 入住申请实体（接口设计.md 9.2.2.1 响应） */
+/**
+ * 入住申请实体（后端 ApplicationVO 实际返回，2026-09-12 对齐：
+ * 文档示例的 applicationType/moveInDate/familyMembers/contactPhone/emergencyContact/
+ * emergencyPhone/houseAddress 后端 VO 均未返回，真实字段为 relationType/houseLocation）
+ */
 export interface IResidenceApplication {
   id: number
   residentId: number
   residentName: string
+  communityId: number
   houseId: number
-  houseAddress: string
-  applicationType: ApplicationType
-  moveInDate: string
-  familyMembers: number
-  contactPhone?: string
-  emergencyContact?: string
-  emergencyPhone?: string
+  /** 房屋位置（楼栋-单元-房号，后端拼装） */
+  houseLocation: string
+  relationType?: string
   status: ResidenceApplicationStatus
   remark?: string
+  reviewRemark?: string
+  reviewTime?: string
   createdAt: string
 }
 
-/** 提交入住申请请求（接口设计.md 9.2.2.1 请求体） */
+/** 提交入住申请请求（后端 CreateApplicationDTO 实际契约） */
 export interface ICreateResidenceApplicationDTO {
   houseId: number
-  applicationType: ApplicationType
-  moveInDate: string
-  familyMembers?: number
-  contactPhone?: string
-  emergencyContact?: string
-  emergencyPhone?: string
+  relationType: RelationType
   remark?: string
 }
 
-/** 入住申请列表查询参数（接口设计.md 9.2.2.3） */
+/**
+ * 入住申请列表查询参数（后端 ResidenceApplicationController.page 实际仅支持
+ * page/size/status；文档示例的 startTime/endTime 为漂移参数，暂删）
+ */
 export interface IResidenceApplicationQuery extends PageQuery {
   status?: ResidenceApplicationStatus
-  startTime?: string
-  endTime?: string
 }
 
-/** 入住申请审批通过请求（接口设计.md 9.2.2.4 请求体） */
+/**
+ * 入住申请审批通过请求（后端 ApproveApplicationDTO 实际契约：押金字段为 deposit）
+ * 审批通过响应为更新后的 IResidenceApplication（后端不返回文档示例的
+ * applicationId/residenceRelationId/leaseRecordId 组装结果）
+ */
 export interface IApplicationApproveDTO {
   leaseStartDate: string
   leaseEndDate: string
   monthlyRent: number
-  depositAmount?: number
+  deposit?: number
   remark?: string
 }
 
 /** 入住申请审批拒绝请求（接口设计.md 9.2.2.5 请求体） */
 export interface IApplicationRejectDTO {
   reason: string
-}
-
-/** 入住申请审批通过响应（接口设计.md 9.2.2.4 响应，自动创建居住关系与租住记录） */
-export interface IApplicationApproveResult {
-  applicationId: number
-  residenceRelationId: number
-  leaseRecordId: number
 }
 
 /* ---------------------------------- 居住关系 ---------------------------------- */
@@ -167,15 +169,24 @@ export interface IResidenceRelation {
   createdAt: string
 }
 
-/** 房屋居民实体（接口设计.md 9.2.3.2 响应，房屋视角） */
+/**
+ * 房屋居民实体（后端 RelationVO 实际返回，2026-09-12 对齐：
+ * 手机号字段为 residentPhone（接口设计.md 9.2.3.2 示例的 phone 为漂移定义），
+ * 并携带 relationType/houseLocation/communityId/houseId/createdAt）
+ */
 export interface IHouseResident {
   id: number
   residentId: number
   residentName: string
-  phone: string
+  residentPhone?: string
+  communityId?: number
+  houseId?: number
+  houseLocation?: string
+  relationType?: RelationType
   moveInDate: string
   moveOutDate: string | null
   status: ResidenceRelationStatus
+  createdAt?: string
 }
 
 /** 居住关系列表查询参数（接口设计.md 9.2.3.1 / 9.2.3.2） */

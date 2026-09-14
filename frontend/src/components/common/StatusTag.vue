@@ -10,13 +10,15 @@ const props = defineProps<{
   label: string
   /** 语义色：pending 黄 / processing 蓝 / completed 绿 / rejected 红 / canceled 灰 */
   type?: 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled' | 'info'
+  /** 压图变体：不透明实心语义色底 + 白字（封面图角标专用，保证任何图片上可读） */
+  onImage?: boolean
 }>()
 
 const typeClass = computed(() => props.type ?? 'info')
 </script>
 
 <template>
-  <span class="status-tag" :class="`is-${typeClass}`">{{ label }}</span>
+  <span class="status-tag" :class="[`is-${typeClass}`, { 'on-image': onImage }]">{{ label }}</span>
 </template>
 
 <style scoped>
@@ -59,5 +61,36 @@ const typeClass = computed(() => props.type ?? 'info')
 .is-info {
   color: var(--color-primary);
   background-color: var(--color-primary-bg);
+}
+
+/* 压图变体：实心语义色底 + 白字 + 微阴影（覆盖上方的半透明浅底） */
+.on-image {
+  padding: 3px var(--spacing-md);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.on-image.is-pending {
+  background-color: var(--status-pending);
+}
+
+.on-image.is-processing {
+  background-color: var(--status-processing);
+}
+
+.on-image.is-completed {
+  background-color: var(--status-completed);
+}
+
+.on-image.is-rejected {
+  background-color: var(--status-rejected);
+}
+
+.on-image.is-canceled {
+  background-color: var(--status-canceled);
+}
+
+.on-image.is-info {
+  background-color: var(--color-primary);
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** 入住申请列表：状态筛选 + 通过（生成居住关系与租住记录）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
+/** 入住申请 Tab：状态筛选 + 通过（生成居住关系与租住记录）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -12,14 +12,13 @@ import type {
   IResidenceApplication,
   ResidenceApplicationStatus
 } from '@/types/modules/resident'
-import {
-  applicationTypeLabels,
-  residenceApplicationStatusLabels
-} from '@/types/modules/resident'
-import { formatDateTime } from '@/utils/date'
+import { relationTypeLabels, residenceApplicationStatusLabels } from '@/types/modules/resident'
+import { formatDateTime, todayISO } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import Pagination from '@/components/common/Pagination.vue'
+
+const emit = defineEmits<{ reviewed: [] }>()
 
 const records = ref<IResidenceApplication[]>([])
 const loading = ref(false)
@@ -35,6 +34,13 @@ function statusTagType(
   if (status === 'PENDING') return 'pending'
   if (status === 'APPROVED') return 'completed'
   return 'rejected'
+}
+
+/* 申请身份 → 中文标签（后端 VO 为 relationType，非文档示例的 applicationType） */
+function relationLabel(relationType?: string): string {
+  return relationType
+    ? relationTypeLabels[relationType as keyof typeof relationTypeLabels] ?? relationType
+    : '—'
 }
 
 async function load(): Promise<void> {
@@ -89,7 +95,7 @@ function openApprove(row: IResidenceApplication): void {
   approveTarget.value = row
   approveFormRef.value?.resetFields()
   Object.assign(approveForm, {
-    leaseStartDate: row.moveInDate,
+    leaseStartDate: todayISO(),
     leaseEndDate: '',
     monthlyRent: undefined,
     depositAmount: undefined,
@@ -108,12 +114,14 @@ async function handleApprove(): Promise<void> {
       leaseStartDate: approveForm.leaseStartDate,
       leaseEndDate: approveForm.leaseEndDate,
       monthlyRent: approveForm.monthlyRent as number,
-      depositAmount: approveForm.depositAmount,
+      /* 后端 ApproveApplicationDTO 字段为 deposit（前端表单字段名保留 depositAmount） */
+      deposit: approveForm.depositAmount,
       remark: approveForm.remark.trim() || undefined
     })
     ElMessage.success('审批通过，已创建居住关系与租住记录')
     approveVisible.value = false
     load()
+    emit('reviewed')
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '审批通过失败')
   } finally {
@@ -126,7 +134,7 @@ async function handleReject(row: IResidenceApplication): Promise<void> {
   let reason: string
   try {
     const result = await ElMessageBox.prompt(
-      `驳回「${row.residentName}」申请入住「${row.houseAddress}」的申请，理由将通知申请人。`,
+      `驳回「${row.residentName}」申请入住「${row.houseLocation}」的申请，理由将通知申请人。`,
       '驳回入住申请',
       {
         type: 'warning',
@@ -146,6 +154,7 @@ async function handleReject(row: IResidenceApplication): Promise<void> {
     await rejectResidenceApplication(row.id, { reason })
     ElMessage.success('已驳回该申请')
     load()
+    emit('reviewed')
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '驳回失败')
   }
@@ -157,9 +166,13 @@ onMounted(load)
 <template>
   <section class="application-list">
     <FilterPanel resettable @reset="handleReset">
-      <span class="filter-label">状态</span>
-      <el-select v-model="statusFilter" style="width: 120px" @change="handleStatusChange">
-        <el-option label="全部" value="" />
+      <el-select
+        v-model="statusFilter"
+        clearable
+        placeholder="全部状态"
+        class="status-select"
+        @change="handleStatusChange"
+      >
         <el-option
           v-for="(label, value) in residenceApplicationStatusLabels"
           :key="value"
@@ -169,49 +182,52 @@ onMounted(load)
       </el-select>
     </FilterPanel>
 
-    <el-table v-loading="loading" :data="records" border>
-      <el-table-column prop="residentName" label="申请人" min-width="100" show-overflow-tooltip />
-      <el-table-column label="申请类型" width="100">
-        <template #default="{ row }">
-          {{ applicationTypeLabels[row.applicationType as keyof typeof applicationTypeLabels] }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="houseAddress" label="目标房屋" min-width="180" show-overflow-tooltip />
-      <el-table-column label="申请时间" width="160">
-        <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
-      </el-table-column>
-      <el-table-column label="状态" width="100">
-        <template #default="{ row }">
-          <StatusTag
-            :label="residenceApplicationStatusLabels[row.status as ResidenceApplicationStatus]"
-            :type="statusTagType(row.status)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="140" fixed="right">
-        <template #default="{ row }">
-          <template v-if="row.status === 'PENDING'">
-            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" size="small" @click="openApprove(row)">通过</el-button>
-            <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="danger" size="small" @click="handleReject(row)">驳回</el-button>
+    <div class="table-panel">
+      <el-table v-loading="loading" :data="records">
+        <el-table-column prop="residentName" label="申请人" min-width="110" show-overflow-tooltip />
+        <el-table-column label="身份" width="90">
+          <template #default="{ row }">{{ relationLabel(row.relationType) }}</template>
+        </el-table-column>
+        <el-table-column prop="houseLocation" label="目标房屋" min-width="180" show-overflow-tooltip />
+        <el-table-column label="申请时间" width="160">
+          <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <StatusTag
+              :label="residenceApplicationStatusLabels[row.status as ResidenceApplicationStatus]"
+              :type="statusTagType(row.status)"
+            />
           </template>
-          <span v-else class="op-done">-</span>
+        </el-table-column>
+        <el-table-column label="操作" width="140" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row.status === 'PENDING'">
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="primary" size="small" @click="openApprove(row)">通过</el-button>
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="danger" size="small" @click="handleReject(row)">驳回</el-button>
+            </template>
+            <span v-else class="op-done">-</span>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <el-empty description="暂无符合条件的申请" :image-size="80" />
         </template>
-      </el-table-column>
-    </el-table>
+      </el-table>
 
-    <Pagination
-      v-model:page="page"
-      v-model:size="size"
-      :total="total"
-      @update:page="load"
-      @update:size="load"
-    />
+      <Pagination
+        v-model:page="page"
+        v-model:size="size"
+        :total="total"
+        @update:page="load"
+        @update:size="load"
+      />
+    </div>
 
     <!-- 审批通过：填写租住信息 -->
     <el-dialog v-model="approveVisible" title="审批通过" width="520px">
       <el-alert
         v-if="approveTarget"
-        :title="`通过后将为「${approveTarget.residentName}」自动创建「${approveTarget.houseAddress}」的居住关系与租住记录`"
+        :title="`通过后将为「${approveTarget.residentName}」自动创建「${approveTarget.houseLocation}」的居住关系与租住记录`"
         type="info"
         :closable="false"
         class="approve-tip"
@@ -277,9 +293,15 @@ onMounted(load)
 </template>
 
 <style scoped>
-.filter-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+.status-select {
+  width: 130px;
+}
+
+.table-panel {
+  background-color: var(--admin-card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-md) var(--spacing-md) 0;
 }
 
 .op-done {

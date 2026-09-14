@@ -2,15 +2,11 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { listFeedbacks } from '@/api/feedback'
-import type { IFeedback, FeedbackStatus } from '@/types/modules/feedback'
-import {
-  feedbackStatusLabels,
-  feedbackCategoryLabels
-} from '@/types/modules/feedback'
-import { formatRelative } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
+import type { IFeedback, FeedbackStatus, FeedbackCategory } from '@/types/modules/feedback'
+import { feedbackStatusLabels, feedbackCategoryLabels } from '@/types/modules/feedback'
+import { formatDate } from '@/utils/date'
 
-/** 我的反馈列表：状态筛选 + 卡片流 */
+/** 我的反馈列表：状态 Tab + 分类图标卡片流（状态枚举以后端实际 PENDING/IN_SESSION/CLOSED 为准） */
 const router = useRouter()
 
 const feedbacks = ref<IFeedback[]>([])
@@ -19,20 +15,21 @@ const statusFilter = ref<FeedbackStatus | ''>('')
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
-
-/** 反馈状态 → StatusTag 语义色（OPEN 待受理黄 / IN_PROGRESS 蓝 / CLOSED 绿） */
-function statusTagType(status: FeedbackStatus): 'pending' | 'processing' | 'completed' {
-  if (status === 'OPEN') return 'pending'
-  if (status === 'IN_PROGRESS') return 'processing'
-  return 'completed'
-}
+const inSessionTotal = ref<number | null>(null)
 
 const statusTabs: { label: string; value: FeedbackStatus | '' }[] = [
   { label: '全部', value: '' },
-  { label: '待受理', value: 'OPEN' },
-  { label: '会话中', value: 'IN_PROGRESS' },
+  { label: '待受理', value: 'PENDING' },
+  { label: '会话中', value: 'IN_SESSION' },
   { label: '已办结', value: 'CLOSED' }
 ]
+
+/** 分类 → 圆形图标配色（建议蓝 / 投诉橙 / 咨询绿） */
+const categoryColor: Record<FeedbackCategory, string> = {
+  SUGGESTION: 'blue',
+  COMPLAINT: 'orange',
+  INQUIRY: 'green'
+}
 
 async function load(): Promise<void> {
   loading.value = true
@@ -52,6 +49,16 @@ async function load(): Promise<void> {
   }
 }
 
+/* 副标题「进行中」计数（会话中）：只取 total，失败则不显示该段 */
+async function loadInSessionTotal(): Promise<void> {
+  try {
+    const result = await listFeedbacks({ page: 1, size: 1, status: 'IN_SESSION' })
+    inSessionTotal.value = result.total
+  } catch {
+    inSessionTotal.value = null
+  }
+}
+
 function handleTabChange(): void {
   page.value = 1
   load()
@@ -65,7 +72,10 @@ function goCreate(): void {
   router.push('/resident/feedbacks/create')
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  void loadInSessionTotal()
+})
 </script>
 
 <template>
@@ -73,19 +83,27 @@ onMounted(load)
     <header class="page-head">
       <div>
         <h1>我的反馈</h1>
-        <p>您的建议与诉求，我们都会认真对待</p>
+        <p>
+          共 {{ total }} 条<template v-if="inSessionTotal !== null">，{{ inSessionTotal }} 条进行中</template>
+        </p>
       </div>
-      <el-button type="primary" round @click="goCreate">+ 提交反馈</el-button>
+      <el-button type="primary" @click="goCreate">+ 提交反馈</el-button>
     </header>
 
-    <el-tabs v-model="statusFilter" class="status-tabs" @tab-change="handleTabChange">
-      <el-tab-pane
+    <!-- 状态 Tab：当前项蓝色下划线（与我的工单同语言） -->
+    <div class="status-tabs" role="tablist">
+      <button
         v-for="tab in statusTabs"
         :key="tab.value"
-        :label="tab.label"
-        :name="tab.value"
-      />
-    </el-tabs>
+        type="button"
+        role="tab"
+        class="status-tab"
+        :class="{ active: statusFilter === tab.value }"
+        @click="statusFilter = tab.value; handleTabChange()"
+      >
+        {{ tab.label }}
+      </button>
+    </div>
 
     <div v-if="loading" class="page-loading">加载中…</div>
 
@@ -101,22 +119,38 @@ onMounted(load)
           class="feedback-card"
           @click="goDetail(feedback.id)"
         >
-          <div class="card-head">
-            <StatusTag
-              :label="feedbackStatusLabels[feedback.status]"
-              :type="statusTagType(feedback.status)"
-            />
-            <span class="card-category">{{ feedbackCategoryLabels[feedback.category] }}</span>
-            <span class="card-number">{{ feedback.feedbackNumber }}</span>
+          <span class="category-icon" :data-color="categoryColor[feedback.category]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <template v-if="feedback.category === 'SUGGESTION'">
+                <path d="M9 18h6M10 21h4" />
+                <path d="M12 3a6 6 0 0 0-4 10.5c.8.7 1 1.5 1 2.5h6c0-1 .2-1.8 1-2.5A6 6 0 0 0 12 3z" />
+              </template>
+              <template v-else-if="feedback.category === 'COMPLAINT'">
+                <path d="M12 9v4M12 17h.01" />
+                <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+              </template>
+              <template v-else>
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.6-3 4" />
+                <path d="M12 17h.01" />
+              </template>
+            </svg>
+          </span>
+
+          <div class="card-main">
+            <div class="card-head">
+              <h2 class="card-title">{{ feedback.title }}</h2>
+              <span class="status-pill" :data-status="feedback.status">
+                {{ feedbackStatusLabels[feedback.status] }}
+              </span>
+            </div>
+            <!-- 无最后消息字段，摘要取反馈内容 -->
+            <p class="card-summary">{{ feedback.content }}</p>
+            <!-- 后端无反馈编号与对话数字段，编号用 #id 近似 -->
+            <p class="card-foot">反馈 #{{ feedback.id }} · {{ feedbackCategoryLabels[feedback.category] }}</p>
           </div>
-          <h2 class="card-title">{{ feedback.title }}</h2>
-          <p class="card-summary">{{ feedback.content }}</p>
-          <div class="card-meta">
-            <span>提交于 {{ formatRelative(feedback.createdAt) }}</span>
-            <span v-if="feedback.closeReason" class="card-closed">
-              办结意见：{{ feedback.closeReason }}
-            </span>
-          </div>
+
+          <span class="card-date">{{ formatDate(feedback.createdAt).slice(5) }}</span>
         </li>
       </ul>
 
@@ -161,6 +195,43 @@ onMounted(load)
   font-size: var(--font-size-sm);
 }
 
+/* 状态 Tab 条（与我的工单同款） */
+.status-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: 0 var(--spacing-md);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.status-tab {
+  position: relative;
+  padding: var(--spacing-md) var(--spacing-xs);
+  border: none;
+  background: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.status-tab.active {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+}
+
 .page-loading,
 .page-empty {
   padding: var(--spacing-xxl) 0;
@@ -177,8 +248,12 @@ onMounted(load)
   gap: var(--spacing-md);
 }
 
+/* 反馈卡：左分类圆形图标 / 中内容 / 右日期 */
 .feedback-card {
-  padding: var(--spacing-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   background-color: #fff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -191,60 +266,90 @@ onMounted(load)
   transform: translateY(-1px);
 }
 
+.category-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-circle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.category-icon[data-color='blue'] { background: var(--color-primary-bg); color: var(--color-primary); }
+.category-icon[data-color='orange'] { background: #fef3e2; color: var(--color-warning); }
+.category-icon[data-color='green'] { background: #e7f8f1; color: var(--color-success); }
+
+.card-main {
+  flex: 1;
+  min-width: 0;
+}
+
 .card-head {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-}
-
-.card-category {
-  font-size: var(--font-size-xs);
-  color: var(--color-primary);
-  background-color: var(--color-primary-bg);
-  padding: 2px var(--spacing-sm);
-  border-radius: var(--radius-pill);
-}
-
-.card-number {
-  margin-left: auto;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
-  font-family: var(--font-family-mono);
 }
 
 .card-title {
-  margin: 0 0 var(--spacing-sm);
+  margin: 0;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 状态胶囊：待受理红 / 会话中绿 / 已办结灰 */
+.status-pill {
+  flex-shrink: 0;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-pill[data-status='PENDING'] {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+.status-pill[data-status='IN_SESSION'] {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.status-pill[data-status='CLOSED'] {
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
 }
 
 .card-summary {
-  margin: 0 0 var(--spacing-md);
+  margin: var(--spacing-xs) 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.card-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
+.card-foot {
+  margin: 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-disabled);
 }
 
-.card-closed {
-  color: var(--status-completed);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.card-date {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+  padding-top: 2px;
 }
 
 .page-pagination {
