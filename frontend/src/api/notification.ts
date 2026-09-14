@@ -1,6 +1,7 @@
 import { http } from '@/utils/request'
 import type { PageResult } from '@/types/api'
 import type {
+  IChannelLevels,
   IMarkAllReadResult,
   INotification,
   INotificationQuery,
@@ -57,4 +58,14 @@ export function markNotificationRead(id: number) {
 export async function markAllNotificationsRead(): Promise<IMarkAllReadResult> {
   const data = await http.patch<number | null>('/notifications/read-all')
   return { count: typeof data === 'number' ? data : null }
+}
+
+/** 查询通知渠道分级配置（R51；等级→已勾选模拟渠道，缺省空映射；ADMIN/SUPER_ADMIN 可读） */
+export function getChannelLevels(): Promise<IChannelLevels> {
+  return http.get<IChannelLevels>('/notifications/channel-levels')
+}
+
+/** 更新通知渠道分级配置（R51；PUT 全量 levels，渠道仅 EMAIL/SMS，仅超管；后端 data 为 null） */
+export async function updateChannelLevels(levels: IChannelLevels): Promise<void> {
+  await http.put<null>('/notifications/channel-levels', { levels })
 }
