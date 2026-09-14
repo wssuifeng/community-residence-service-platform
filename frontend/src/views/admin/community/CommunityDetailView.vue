@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
-import { getBuildingList, getCommunity, updateCommunity } from '@/api/community'
-import type { IBuilding, ICommunity, ICreateCommunityDTO } from '@/types/modules/community'
+import { getBuildingList, getCommunity } from '@/api/community'
+import type { IBuilding, ICommunity } from '@/types/modules/community'
 import { communityStatusLabels } from '@/types/modules/community'
 import { formatDateTime } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
+import CommunityEditDialog from '@/views/admin/community/CommunityEditDialog.vue'
 
-/** 社区详情：基本信息 el-descriptions + 编辑对话框 + 该社区楼栋列表 */
+/**
+ * 社区详情（隐藏下钻）：基本信息 + 该社区楼栋列表（任务 3 换壳美化：
+ * AdminPageHeader + 白卡 token，数据绑定零删减；编辑对话框收编为共用
+ * CommunityEditDialog，返回目标改为社区结构容器）。
+ */
 const route = useRoute()
 const router = useRouter()
 const communityId = Number(route.params.id)
@@ -29,52 +34,26 @@ async function loadCommunity(): Promise<void> {
   }
 }
 
+/* 面包屑返回：社区结构容器（任务 3 新 IA 的上级页面） */
 function goBack(): void {
-  router.push('/admin/communities')
+  router.push({ name: 'AdminCommunity' })
 }
 
+/* 楼栋入口：直达社区结构树并预选本社区（?communityId= 由树消费） */
 function goBuildings(): void {
-  router.push({ path: '/admin/buildings', query: { communityId: String(communityId) } })
+  router.push({
+    name: 'AdminCommunity',
+    query: { communityId: String(communityId), tab: 'tree' }
+  })
 }
 
-/* ---------------------------------- 编辑对话框 ---------------------------------- */
+/* ---------------------------------- 编辑对话框（共用组件） ---------------------------------- */
 
 const dialogVisible = ref(false)
-const formRef = ref<FormInstance>()
-const form = reactive<ICreateCommunityDTO>({
-  name: '',
-  address: '',
-  contactPhone: '',
-  contactPerson: '',
-  description: ''
-})
-
-const rules: FormRules = {
-  name: [{ required: true, message: '请输入社区名称', trigger: 'blur' }],
-  address: [{ required: true, message: '请输入社区地址', trigger: 'blur' }]
-}
 
 function openEdit(): void {
   if (!community.value) return
-  form.name = community.value.name
-  form.address = community.value.address
-  form.contactPhone = community.value.contactPhone ?? ''
-  form.contactPerson = community.value.contactPerson ?? ''
-  form.description = community.value.description ?? ''
   dialogVisible.value = true
-}
-
-async function handleSubmit(): Promise<void> {
-  const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
-  try {
-    await updateCommunity(communityId, { ...form })
-    ElMessage.success('社区已更新')
-    dialogVisible.value = false
-    loadCommunity()
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '保存失败')
-  }
 }
 
 /* ---------------------------------- 楼栋列表 ---------------------------------- */
@@ -109,36 +88,46 @@ onMounted(() => {
 </script>
 
 <template>
-  <section v-loading="loading" class="community-detail">
-    <div class="detail-header">
-      <div class="detail-title">
-        <el-button link @click="goBack">← 返回社区列表</el-button>
-        <h2 v-if="community">{{ community.name }}</h2>
-      </div>
+  <div v-loading="loading" class="admin-page community-detail">
+    <!-- 面包屑返回 -->
+    <button type="button" class="back-link" @click="goBack">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5" />
+        <path d="M12 19l-7-7 7-7" />
+      </svg>
+      返回社区结构
+    </button>
+
+    <AdminPageHeader :title="community?.name ?? '社区详情'" subtitle="社区基础信息与楼栋结构">
       <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openEdit">编辑社区</el-button>
-    </div>
+    </AdminPageHeader>
 
-    <el-descriptions v-if="community" :column="2" border class="detail-descriptions">
-      <el-descriptions-item label="社区名称">{{ community.name }}</el-descriptions-item>
-      <el-descriptions-item label="状态">
-        <StatusTag
-          :label="communityStatusLabels[community.status]"
-          :type="community.status === 'ACTIVE' ? 'completed' : 'canceled'"
-        />
-      </el-descriptions-item>
-      <el-descriptions-item label="社区地址" :span="2">{{ community.address }}</el-descriptions-item>
-      <el-descriptions-item label="联系人">{{ community.contactPerson || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="联系电话">{{ community.contactPhone || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="创建时间">{{ formatDateTime(community.createdAt) }}</el-descriptions-item>
-      <el-descriptions-item label="更新时间">{{ formatDateTime(community.updatedAt) }}</el-descriptions-item>
-      <el-descriptions-item label="社区简介" :span="2">{{ community.description || '-' }}</el-descriptions-item>
-    </el-descriptions>
+    <article class="panel">
+      <header class="panel-header">
+        <h3 class="panel-title">基本信息</h3>
+      </header>
+      <el-descriptions v-if="community" :column="2" border>
+        <el-descriptions-item label="社区名称">{{ community.name }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <StatusTag
+            :label="communityStatusLabels[community.status]"
+            :type="community.status === 'ACTIVE' ? 'completed' : 'canceled'"
+          />
+        </el-descriptions-item>
+        <el-descriptions-item label="社区地址" :span="2">{{ community.address }}</el-descriptions-item>
+        <el-descriptions-item label="联系人">{{ community.contactPerson || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="联系电话">{{ community.contactPhone || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ formatDateTime(community.createdAt) }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间">{{ formatDateTime(community.updatedAt) }}</el-descriptions-item>
+        <el-descriptions-item label="社区简介" :span="2">{{ community.description || '-' }}</el-descriptions-item>
+      </el-descriptions>
+    </article>
 
-    <div class="building-section">
-      <div class="section-header">
-        <h3>楼栋列表</h3>
-        <el-button type="primary" link @click="goBuildings">前往楼栋管理 →</el-button>
-      </div>
+    <article class="panel">
+      <header class="panel-header">
+        <h3 class="panel-title">楼栋列表</h3>
+        <el-button type="primary" link @click="goBuildings">前往社区结构 →</el-button>
+      </header>
       <el-table v-loading="buildingsLoading" :data="buildings" border>
         <el-table-column prop="id" label="ID" width="64" />
         <el-table-column prop="name" label="楼栋名称" min-width="140" show-overflow-tooltip />
@@ -157,85 +146,65 @@ onMounted(() => {
         @update:page="loadBuildings"
         @update:size="loadBuildings"
       />
-    </div>
+    </article>
 
-    <el-dialog v-model="dialogVisible" title="编辑社区" width="520px">
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="社区名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入社区名称" maxlength="50" />
-        </el-form-item>
-        <el-form-item label="社区地址" prop="address">
-          <el-input v-model="form.address" placeholder="请输入社区地址" maxlength="100" />
-        </el-form-item>
-        <el-form-item label="联系人" prop="contactPerson">
-          <el-input v-model="form.contactPerson" placeholder="请输入联系人" maxlength="20" />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="contactPhone">
-          <el-input v-model="form.contactPhone" placeholder="请输入联系电话" maxlength="20" />
-        </el-form-item>
-        <el-form-item label="社区简介" prop="description">
-          <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入社区简介"
-            maxlength="200"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
-      </template>
-    </el-dialog>
-  </section>
+    <CommunityEditDialog v-model="dialogVisible" :community="community" @saved="loadCommunity" />
+  </div>
 </template>
 
 <style scoped>
-.detail-header {
+.community-detail {
   display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* 面包屑返回链接（token 着色，悬停品牌蓝） */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.back-link:hover {
+  color: var(--color-primary);
+}
+
+.back-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* 白卡容器（管理端统一 token，替代原 #fff + 硬边框） */
+.panel {
+  min-width: 0;
+  padding: var(--spacing-lg);
+  background-color: var(--admin-card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
+  gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
 }
 
-.detail-title {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.detail-title h2 {
-  font-size: var(--font-size-lg);
-  color: var(--color-text-primary);
+.panel-title {
   margin: 0;
-}
-
-.detail-descriptions {
-  background-color: #fff;
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.building-section {
-  background-color: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-md);
-}
-
-.section-header h3 {
   font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
-  margin: 0;
 }
 </style>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
- * 居住关系台账：按居民查询居住关系（接口仅提供居民/房屋两视角列表，
- * 台账采用居民视角 9.2.3.1）+ 在住关系搬出登记（9.2.3.3）
+ * 居住关系 Tab：按居民查询居住关系（接口仅提供居民/房屋两视角列表，
+ * 台账采用居民视角 9.2.3.1）+ 在住关系搬出登记（9.2.3.3）。
+ * 支持由居民列表「居住关系」操作预选居民（presetResidentId）。
  */
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
@@ -21,6 +22,8 @@ import { formatDate, todayISO } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import Pagination from '@/components/common/Pagination.vue'
+
+const props = defineProps<{ presetResidentId?: number }>()
 
 const relations = ref<IResidenceRelation[]>([])
 const loading = ref(false)
@@ -74,6 +77,23 @@ async function searchResidents(keyword: string): Promise<void> {
   }
 }
 
+/* 预选居民（列表 Tab「居住关系」跳转）：带出选项并加载其关系 */
+async function applyPreset(residentIdValue: number): Promise<void> {
+  residentId.value = residentIdValue
+  page.value = 1
+  await searchResidents('')
+  load()
+}
+
+watch(
+  () => props.presetResidentId,
+  (value) => {
+    if (value && value !== residentId.value) {
+      applyPreset(value)
+    }
+  }
+)
+
 function handleResidentChange(): void {
   page.value = 1
   load()
@@ -84,12 +104,12 @@ function handleStatusChange(): void {
   load()
 }
 
+/* 重置后必重新加载（清空选择即回到「请先选择居民」空态，保持单一路径刷新） */
 function handleReset(): void {
   residentId.value = undefined
   statusFilter.value = ''
   page.value = 1
-  relations.value = []
-  total.value = 0
+  load()
 }
 
 /* 搬出登记：必须填写搬出日期 */
@@ -135,14 +155,17 @@ async function handleMoveOut(): Promise<void> {
 }
 
 onMounted(() => {
-  searchResidents('')
+  if (props.presetResidentId) {
+    applyPreset(props.presetResidentId)
+  } else {
+    searchResidents('')
+  }
 })
 </script>
 
 <template>
   <section class="relation-list">
     <FilterPanel resettable @reset="handleReset">
-      <span class="filter-label">居民</span>
       <el-select
         v-model="residentId"
         filterable
@@ -151,7 +174,7 @@ onMounted(() => {
         :remote-method="searchResidents"
         :loading="residentLoading"
         placeholder="搜索并选择居民（用户名/姓名/手机号）"
-        style="width: 260px"
+        class="resident-select"
         @change="handleResidentChange"
         @focus="searchResidents('')"
       >
@@ -162,14 +185,14 @@ onMounted(() => {
           :value="item.id"
         />
       </el-select>
-      <span class="filter-label">状态</span>
       <el-select
         v-model="statusFilter"
+        clearable
         :disabled="!residentId"
-        style="width: 120px"
+        placeholder="全部状态"
+        class="status-select"
         @change="handleStatusChange"
       >
-        <el-option label="全部" value="" />
         <el-option
           v-for="(label, value) in residenceRelationStatusLabels"
           :key="value"
@@ -179,52 +202,55 @@ onMounted(() => {
       </el-select>
     </FilterPanel>
 
-    <el-table
-      v-loading="loading"
-      :data="relations"
-      :empty-text="residentId ? '暂无居住关系' : '请先在上方选择居民'"
-      border
-    >
-      <el-table-column prop="residentName" label="居民" min-width="100" show-overflow-tooltip />
-      <el-table-column prop="houseLocation" label="房屋" min-width="180" show-overflow-tooltip />
-      <el-table-column label="入住日期" width="120">
-        <template #default="{ row }">{{ formatDate(row.moveInDate) }}</template>
-      </el-table-column>
-      <el-table-column label="搬出日期" width="120">
-        <template #default="{ row }">{{ formatDate(row.moveOutDate) }}</template>
-      </el-table-column>
-      <el-table-column label="状态" width="100">
-        <template #default="{ row }">
-          <StatusTag
-            :label="residenceRelationStatusLabels[row.status as ResidenceRelationStatus]"
-            :type="statusTagType(row.status)"
-          />
+    <div class="table-panel">
+      <el-table
+        v-loading="loading"
+        :data="relations"
+      >
+        <el-table-column prop="residentName" label="居民" min-width="110" show-overflow-tooltip />
+        <el-table-column prop="houseLocation" label="房屋" min-width="180" show-overflow-tooltip />
+        <el-table-column label="入住日期" width="120">
+          <template #default="{ row }">{{ formatDate(row.moveInDate) }}</template>
+        </el-table-column>
+        <el-table-column label="搬出日期" width="120">
+          <template #default="{ row }">{{ formatDate(row.moveOutDate) }}</template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <StatusTag
+              :label="residenceRelationStatusLabels[row.status as ResidenceRelationStatus]"
+              :type="statusTagType(row.status)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="110" fixed="right">
+          <template #default="{ row }">
+            <el-button
+              v-if="row.status === 'ACTIVE'"
+              v-permission="['ADMIN', 'SUPER_ADMIN']"
+              text
+              type="warning"
+              size="small"
+              @click="openMoveOut(row)"
+            >
+              搬出登记
+            </el-button>
+            <span v-else class="op-done">-</span>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <el-empty :description="residentId ? '暂无居住关系' : '请先在上方选择居民'" :image-size="80" />
         </template>
-      </el-table-column>
-      <el-table-column label="操作" width="110" fixed="right">
-        <template #default="{ row }">
-          <el-button
-            v-if="row.status === 'ACTIVE'"
-            v-permission="['ADMIN', 'SUPER_ADMIN']"
-            link
-            type="warning"
-            size="small"
-            @click="openMoveOut(row)"
-          >
-            搬出登记
-          </el-button>
-          <span v-else class="op-done">-</span>
-        </template>
-      </el-table-column>
-    </el-table>
+      </el-table>
 
-    <Pagination
-      v-model:page="page"
-      v-model:size="size"
-      :total="total"
-      @update:page="load"
-      @update:size="load"
-    />
+      <Pagination
+        v-model:page="page"
+        v-model:size="size"
+        :total="total"
+        @update:page="load"
+        @update:size="load"
+      />
+    </div>
 
     <!-- 搬出登记 -->
     <el-dialog v-model="moveOutVisible" title="搬出登记" width="480px">
@@ -267,9 +293,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.filter-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+.resident-select {
+  width: 260px;
+}
+
+.status-select {
+  width: 130px;
+}
+
+.table-panel {
+  background-color: var(--admin-card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-md) var(--spacing-md) 0;
 }
 
 .op-done {
