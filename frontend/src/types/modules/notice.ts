@@ -48,33 +48,53 @@ export const targetAudienceLabels: Record<TargetAudience, string> = {
   ALL: '全部居民'
 }
 
-/** 公告（接口设计.md 9.5.1.1 响应；
- * 后端 NoticeVO 当前实际返回 id/communityId/communityName/title/content/status/
- * publishTime/endTime/viewCount/publisherId/publisherName/createdAt，
- * type/priority/expireTime/targetAudience 均已不返回（漂移字段，读取需空值防御）；
- * notice 表已有 is_pinned 列但 VO 暂未暴露，置顶判定同时兼容 pinned 布尔字段） */
+/** 公告目标范围类型（V9 R25 v1.2：COMMUNITY-社区, BUILDING-楼栋） */
+export type NoticeTargetType = 'COMMUNITY' | 'BUILDING'
+
+/**
+ * 公告目标范围项（后端 NoticeVO.TargetItem，V9 起真实返回）：
+ * 无 targets 记录 = 全系统广播（仅超管）
+ */
+export interface INoticeTargetItem {
+  targetType: NoticeTargetType
+  targetId: number
+  /** 社区名/楼栋名，可空 */
+  targetName: string | null
+}
+
+/** 公告目标范围项请求体（后端 TargetItemDTO 仅接收 targetType/targetId） */
+export interface INoticeSaveTargetItem {
+  targetType: NoticeTargetType
+  targetId: number
+}
+
+/**
+ * 公告（后端 NoticeVO，V9 后 type/priority/isPinned/targets/expireTime 均真实返回；
+ * targetAudience 后端 VO 不返回，读取仍需空值防御）
+ */
 export interface INotice {
   id: number
-  /** SUPER_ADMIN 全系统广播时为 null */
+  /** 首个社区目标 ID；全系统广播时为 null */
   communityId: number | null
+  /** 首个社区目标名称 */
   communityName: string | null
+  /** 目标范围列表（R25 v1.2：多社区/楼栋定向；空=全系统广播） */
+  targets: INoticeTargetItem[]
   title: string
   content: string
-  /** 漂移字段：后端 NoticeVO 不再返回 */
-  type?: NoticeType
-  /** 漂移字段：后端 NoticeVO 不再返回 */
-  priority?: NoticePriority
+  type: NoticeType
+  priority: NoticePriority
   status: NoticeStatus
   publishTime: string | null
-  /** 漂移字段：后端实际返回 endTime，读取侧优先用 endTime */
-  expireTime?: string | null
-  /** 后端实际返回字段：截止/失效时间 */
-  endTime?: string | null
-  /** 置顶标记（notice 表 is_pinned 列，VO 暴露前恒缺省） */
+  /** 失效时间别名（与 endTime 同值，V12 起真实返回） */
+  expireTime: string | null
+  /** 失效时间 */
+  endTime: string | null
+  /** 置顶：0-普通, 1-置顶（R25 v1.2；排序由后端负责，前端如实渲染） */
+  isPinned: number
+  /** 置顶标记旧布尔命名兜底（历史防御式读取，正常路径不出现） */
   pinned?: boolean
-  /** 置顶标记的备选命名（防御 VO 字段名落地差异） */
-  isPinned?: boolean
-  /** 漂移字段：后端 NoticeVO 不再返回 */
+  /** 后端 NoticeVO 不返回，读取需空值防御 */
   targetAudience?: TargetAudience
   viewCount: number
   publisherId: number
@@ -82,10 +102,14 @@ export interface INotice {
   createdAt: string
 }
 
-/** 创建/更新公告请求（接口设计.md 9.5.1.1 / 9.5.1.2） */
+/** 创建/更新公告请求（CreateNoticeDTO：targets 优先，communityId 单目标写法向后兼容） */
 export interface INoticeSaveRequest {
-  /** SUPER_ADMIN 广播时传 null，ADMIN 必须指定（限绑定社区） */
+  /** 单目标旧写法；与 targets 并设时后端以 targets 为准 */
   communityId: number | null
+  /** 目标范围列表（空=按 communityId 单目标/全系统广播仅超管） */
+  targets?: INoticeSaveTargetItem[]
+  /** 置顶：0-普通, 1-置顶 */
+  isPinned: number
   title: string
   content: string
   type: NoticeType
@@ -97,11 +121,13 @@ export interface INoticeSaveRequest {
   targetAudience: TargetAudience
 }
 
-/** 公告列表查询参数（接口设计.md 9.5.1.5） */
+/** 公告列表查询参数（Controller @RequestParam：keyword/priority/isPinned/type 透传） */
 export interface INoticeQuery extends PageQuery {
   communityId?: number
   type?: NoticeType
   priority?: NoticePriority
+  /** 置顶过滤：0-普通, 1-置顶 */
+  isPinned?: number
   /** 匹配标题/内容 */
   keyword?: string
 }
