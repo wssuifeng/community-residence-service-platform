@@ -113,10 +113,6 @@ const resourceStatusOption = computed<ChartOption>(() => ({
 
 <template>
   <section class="statistics-view">
-    <header class="page-head">
-      <h1>详细统计</h1>
-    </header>
-
     <el-tabs v-model="activeTab" class="stats-tabs">
       <!-- ===== 工单统计 ===== -->
       <el-tab-pane label="工单" name="workorder">
@@ -233,15 +229,6 @@ const resourceStatusOption = computed<ChartOption>(() => ({
 </template>
 
 <style scoped>
-.page-head {
-  margin-bottom: var(--spacing-md);
-}
-
-.page-head h1 {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-}
-
 .stats-tabs {
   margin-top: var(--spacing-sm);
 }
@@ -266,11 +253,12 @@ const resourceStatusOption = computed<ChartOption>(() => ({
   gap: var(--spacing-md);
 }
 
+/* 外壳样式与看板统一：白卡容器走 admin token（数据绑定/筛选/图表零改动） */
 .panel-card,
 .chart-card {
-  background-color: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background-color: var(--admin-card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
   padding: var(--spacing-lg);
 }
 

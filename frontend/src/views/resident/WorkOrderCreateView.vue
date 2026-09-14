@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ImageUploader from '@/components/common/ImageUploader.vue'
@@ -31,10 +31,21 @@ const categoryLoading = ref(false)
 const submitting = ref(false)
 const images = ref<string[]>([])
 
+/** 平铺类别选项（胶囊卡片用）：叶子选项 + 所属分组名 */
+const flatCategoryOptions = computed(() =>
+  categoryGroups.value.flatMap((group) =>
+    group.options.map((option) => ({ ...option, group: group.label }))
+  )
+)
+
+/* 类别图标：后端类别无图标字段，按序号轮换线性图标 */
+const categoryIcons = ['wrench', 'spray', 'leaf', 'gear']
+
 const form = reactive({
   categoryId: null as number | null,
   title: '',
   content: '',
+  address: '',
   priority: 'NORMAL' as WorkOrderPriority,
   contactPhone: ''
 })
@@ -44,7 +55,8 @@ const priorityOptions = (Object.keys(workOrderPriorityLabels) as WorkOrderPriori
   label: workOrderPriorityLabels[value]
 }))
 
-/* 居民端社区归属从本人 ACTIVE 居住关系推导（登录响应 boundCommunities 对居民恒为空） */
+/* 居民端社区归属从本人 ACTIVE 居住关系推导（登录响应 boundCommunities 对居民恒为空）；
+   顺带取房屋位置预填服务地址 */
 const communityId = ref<number | null>(null)
 
 async function loadCommunityId(): Promise<void> {
@@ -53,6 +65,7 @@ async function loadCommunityId(): Promise<void> {
     const relations = await getResidentResidenceList(profile.id, { page: 1, size: 5 })
     const active = relations.records.find((item) => item.status === ('ACTIVE' as ResidenceRelationStatus))
     communityId.value = active?.communityId ?? null
+    if (active && !form.address) form.address = active.houseLocation
   } catch {
     communityId.value = null
   }
@@ -133,6 +146,7 @@ async function handleSubmit(): Promise<void> {
       title: form.title.trim(),
       content: form.content.trim(),
       contactPhone: form.contactPhone.trim(),
+      address: form.address.trim() || undefined,
       priority: form.priority
     })
     await attachImages(order.id, images.value)
@@ -155,76 +169,147 @@ onMounted(() => {
 
 <template>
   <section class="work-order-create">
-    <header class="page-header">
-      <div>
+    <nav class="breadcrumb">
+      <router-link to="/resident/work-orders">我的工单</router-link>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">提交工单</span>
+    </nav>
+
+    <!-- 居中限宽表单大容器 -->
+    <div class="form-container">
+      <header class="form-head">
         <h1 class="page-title">提交工单</h1>
-        <p class="page-subtitle">描述越清楚，处理越高效；可上传现场照片帮助服务人员定位问题</p>
-      </div>
-      <el-button text @click="router.back()">返回</el-button>
-    </header>
+        <p class="page-subtitle">描述你遇到的问题，我们会尽快安排处理</p>
+      </header>
 
-    <el-form class="create-form" label-position="top" @submit.prevent>
-      <el-form-item label="服务类别" required>
-        <el-select
-          v-model="form.categoryId"
-          :loading="categoryLoading"
-          placeholder="请选择服务类别"
-          size="large"
-          class="category-select"
-        >
-          <el-option-group v-for="group in categoryGroups" :key="group.label" :label="group.label">
-            <el-option v-for="option in group.options" :key="option.value" :label="option.label" :value="option.value" />
-          </el-option-group>
-        </el-select>
-      </el-form-item>
+      <el-form class="create-form" label-position="top" @submit.prevent>
+        <el-form-item label="服务类别" required>
+          <div v-loading="categoryLoading" class="category-cards">
+            <button
+              v-for="(option, index) in flatCategoryOptions"
+              :key="option.value"
+              type="button"
+              class="category-card"
+              :class="{ active: form.categoryId === option.value }"
+              @click="form.categoryId = option.value"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <template v-if="categoryIcons[index % categoryIcons.length] === 'wrench'">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                </template>
+                <template v-else-if="categoryIcons[index % categoryIcons.length] === 'spray'">
+                  <path d="M4 20c0-6 4-10 10-10l6 6c0 2-1 4-3 4H4z" />
+                  <path d="M14 10 20 4M16 8l2 2" />
+                </template>
+                <template v-else-if="categoryIcons[index % categoryIcons.length] === 'leaf'">
+                  <path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-10-1 12-5 16-9 17z" />
+                  <path d="M4 20c4-4 8-8 12-11" />
+                </template>
+                <template v-else>
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" />
+                </template>
+              </svg>
+              <span>{{ option.label }}</span>
+            </button>
+          </div>
+        </el-form-item>
 
-      <el-form-item label="工单标题" required>
-        <el-input v-model="form.title" maxlength="100" show-word-limit placeholder="一句话概括问题，如：厨房水管漏水" size="large" />
-      </el-form-item>
+        <el-form-item label="标题" required>
+          <el-input v-model="form.title" maxlength="100" show-word-limit placeholder="一句话描述问题" size="large" />
+        </el-form-item>
 
-      <el-form-item label="问题描述" required>
-        <el-input
-          v-model="form.content"
-          type="textarea"
-          :rows="5"
-          maxlength="1000"
-          show-word-limit
-          placeholder="请描述问题发生的位置、现象、持续时间等"
-        />
-      </el-form-item>
+        <el-form-item label="问题描述" required>
+          <el-input
+            v-model="form.content"
+            type="textarea"
+            :rows="5"
+            maxlength="1000"
+            show-word-limit
+            placeholder="请详细描述问题情况、位置等"
+          />
+        </el-form-item>
 
-      <div class="form-row">
+        <el-form-item label="服务地址">
+          <el-input v-model="form.address" maxlength="100" placeholder="问题发生的地址" size="large" />
+        </el-form-item>
+
         <el-form-item label="紧急程度" required>
-          <el-radio-group v-model="form.priority" size="large">
-            <el-radio-button v-for="item in priorityOptions" :key="item.value" :value="item.value">
+          <div class="priority-cards">
+            <button
+              v-for="item in priorityOptions"
+              :key="item.value"
+              type="button"
+              class="priority-card"
+              :class="{ active: form.priority === item.value }"
+              :data-priority="item.value"
+              @click="form.priority = item.value"
+            >
+              <span class="priority-dot" aria-hidden="true"></span>
               {{ item.label }}
-            </el-radio-button>
-          </el-radio-group>
+            </button>
+          </div>
         </el-form-item>
 
         <el-form-item label="联系电话" required>
           <el-input v-model="form.contactPhone" maxlength="20" placeholder="方便服务人员联系您" size="large" />
         </el-form-item>
-      </div>
 
-      <el-form-item label="现场照片（可选，最多 6 张）">
-        <ImageUploader v-model="images" :limit="6" />
-      </el-form-item>
+        <el-form-item label="附件照片">
+          <!-- 虚线上传区：内部为现有 ImageUploader（逻辑与数量限制不变） -->
+          <div class="upload-zone">
+            <div class="upload-zone-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <span>点击上传，最多 6 张</span>
+            </div>
+            <ImageUploader v-model="images" :limit="6" />
+          </div>
+        </el-form-item>
 
-      <div class="form-actions">
-        <el-button size="large" @click="router.push('/resident/work-orders')">取消</el-button>
-        <el-button type="primary" size="large" :loading="submitting" @click="handleSubmit">提交工单</el-button>
-      </div>
-    </el-form>
+        <div class="form-actions">
+          <el-button text size="large" @click="router.push('/resident/work-orders')">取消</el-button>
+          <el-button type="primary" size="large" class="submit-btn" :loading="submitting" @click="handleSubmit">
+            提交工单
+          </el-button>
+        </div>
+      </el-form>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.page-header {
+.breadcrumb {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--spacing-md);
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb-sep {
+  color: var(--color-text-disabled);
+}
+
+.breadcrumb-current {
+  color: var(--color-text-secondary);
+}
+
+/* 居中限宽表单大容器 */
+.form-container {
+  max-width: 780px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-xxl);
+  box-shadow: var(--shadow-sm);
+}
+
+.form-head {
+  text-align: center;
   margin-bottom: var(--spacing-lg);
 }
 
@@ -241,34 +326,123 @@ onMounted(() => {
   color: var(--color-text-secondary);
 }
 
-.create-form {
-  background-color: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  max-width: 720px;
-}
-
-.category-select,
-.appointment-picker {
-  width: 100%;
-}
-
-.form-row {
+/* 服务类别：可选胶囊卡片（图标 + 名称，选中蓝色描边浅底） */
+.category-cards {
   display: flex;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  width: 100%;
+  min-height: 56px;
+}
+
+.category-card {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.category-card svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary);
+}
+
+.category-card.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 紧急程度：单选胶囊（紧急红色） */
+.priority-cards {
+  display: flex;
+  gap: var(--spacing-md);
   flex-wrap: wrap;
 }
 
-.form-row .el-form-item {
-  flex: 1;
-  min-width: 240px;
+.priority-card {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.priority-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-circle);
+  border: 2px solid var(--color-text-disabled);
+}
+
+.priority-card.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
+
+.priority-card.active .priority-dot {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.priority-card[data-priority='URGENT'].active {
+  border-color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--color-danger);
+}
+
+.priority-card[data-priority='URGENT'].active .priority-dot {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+}
+
+/* 虚线上传区 */
+.upload-zone {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.upload-zone-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0 var(--spacing-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.upload-zone-head svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary);
 }
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm);
+  justify-content: center;
+  gap: var(--spacing-md);
   margin-top: var(--spacing-md);
+}
+
+.submit-btn {
+  min-width: 280px;
 }
 </style>

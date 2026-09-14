@@ -37,41 +37,55 @@ export const housingTimeslotStatusLabels: Record<HousingTimeslotStatus, string> 
   FULL: '已约满'
 }
 
-/** 房源（接口设计.md 9.12.1.1 / 9.12.1.4 响应 data） */
+/**
+ * 房源（2026-09-12 管理端任务 10 以后端 HousingVO.java 逐一核对收口）。
+ * 后端实体仅含 id/communityId/houseId/title/description/monthlyRent/deposit/images/status/viewCount/publishTime/createdAt；
+ * communityName/houseLocation 由服务层组装。接口设计.md 9.12.1.1 的
+ * houseAddress/depositAmount/availableDate/contactPerson/contactPhone 均为漂移命名，
+ * 无消费方后已从类型删除。
+ */
 export interface IHousing {
   id: number
   communityId: number
   communityName: string
   houseId: number
-  houseAddress: string
+  /** 房屋位置（服务层组装「楼栋+单元+房号」，如「1 号楼1 单元102」） */
+  houseLocation: string
   title: string
   description: string
   monthlyRent: number
-  depositAmount: number | null
-  availableDate: string
-  contactPerson: string
-  contactPhone: string | null
+  /** 押金，未填为 null（接口文档 depositAmount 为漂移命名） */
+  deposit: number | null
   images: string[]
-  /** 标签：后端实际可能不返回该字段（无标签房源），使用处需空值防御 */
-  tags?: string[]
   status: HousingStatus
   viewCount: number
+  /** 发布时间（创建即发布） */
+  publishTime: string
   createdAt: string
+  /** 幽灵字段：后端 HousingVO 不返回 layout；保留仅因游客/居民端详情视图仍读取（本任务禁改保护端），运行时恒为 undefined 走兜底文案 */
+  layout: string | null
+  /** 幽灵字段：后端 HousingVO 不返回 rentType；保留原因同 layout */
+  rentType: string
+  /** 幽灵字段：后端 HousingVO 不返回 tags；游客/居民端列表与详情仍读取，使用处需空值防御 */
+  tags?: string[]
+  /** 幽灵字段：后端 HousingVO 不返回 contactPhone；游客/居民端详情仍读取，保留原因同 layout */
+  contactPhone: string | null
 }
 
-/** 创建/更新房源请求（接口设计.md 9.12.1.1 请求体，更新同 9.12.1.2） */
+/**
+ * 创建/更新房源请求（2026-09-12 对齐后端 CreateHousingDTO：houseId/title/description/monthlyRent/deposit/images）。
+ * - 押金字段为 deposit：原 depositAmount 后端不识别，押金一直被静默丢弃，收口后可正常保存；
+ * - communityId 由后端从 houseId 推导，不接收（前端级联选择仅作定位房屋的本地状态）；
+ * - images 为逗号分隔 URL 单字符串（后端按 String 存储并以逗号拆分返回）；
+ * - availableDate/contactPerson/contactPhone/tags 后端无对应字段，已删。
+ */
 export interface HousingSaveDTO {
-  communityId: number
   houseId: number
   title: string
   description: string
   monthlyRent: number
-  depositAmount?: number
-  availableDate: string
-  contactPerson: string
-  contactPhone?: string
-  images: string[]
-  tags?: string[]
+  deposit?: number
+  images: string
 }
 
 /** 房源列表查询参数（接口设计.md 9.12.1.5） */
@@ -89,23 +103,32 @@ export interface HousingStatusUpdateDTO {
   remark?: string
 }
 
-/** 看房预约单（接口设计.md 9.12.2.1 / 9.12.2.2 响应 data） */
+/**
+ * 看房预约单（2026-09-12 以后端 ViewingAppointmentVO.java 核对收口）。
+ * 接口设计.md 9.12.2.1 的 appointmentNumber/timeslotId/visitorPhone/visitorCount/residentId 均为漂移命名：
+ * visitorPhone→contactPhone、residentId→userId 已收口；appointmentNumber/visitorCount 为
+ * 幽灵字段（后端不返回），保留仅因居民端列表仍展示（本任务禁改保护端）。
+ */
 export interface IViewingAppointment {
   id: number
-  appointmentNumber: string
-  residentId: number | null
+  /** 预约人用户ID（游客预约为 null；接口文档 residentId 为漂移命名） */
+  userId: number | null
   housingId: number
   housingTitle: string
-  timeslotId: number
+  communityId: number
   appointmentDate: string
   startTime: string
   endTime: string
   visitorName: string
-  visitorPhone: string
-  visitorCount: number
+  /** 联系电话（接口文档 visitorPhone 为漂移命名） */
+  contactPhone: string
   status: ViewingAppointmentStatus
   remark: string | null
   createdAt: string
+  /** 幽灵字段：后端 VO 不返回 appointmentNumber；居民端列表仍展示，运行时恒为 undefined */
+  appointmentNumber: string
+  /** 幽灵字段：后端 VO 不返回 visitorCount；居民端列表仍展示，保留原因同上 */
+  visitorCount: number
 }
 
 /** 创建看房预约请求（接口设计.md 9.12.2.1 请求体，游客可提交） */
@@ -120,12 +143,8 @@ export interface ViewingAppointmentCreateDTO {
   remark?: string
 }
 
-/** 看房预约操作备注请求体（接口设计.md 9.12.2.4 / 9.12.2.5） */
-export interface ViewingAppointmentActionDTO {
-  remark?: string
-}
-
-/** 看房预约操作原因请求体（接口设计.md 9.12.2.6 / 9.12.2.7） */
+/** 看房预约操作请求体（后端 ReservationActionDTO：确认/完成/取消/违约四端点共用，reason 必填。
+ * 接口设计.md 9.12.2.4/9.12.2.5 的 remark 选填体为漂移契约，2026-09-12 收口） */
 export interface ViewingAppointmentReasonDTO {
   reason: string
 }
