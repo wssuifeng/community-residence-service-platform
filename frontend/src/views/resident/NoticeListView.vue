@@ -16,10 +16,9 @@ const size = ref(10)
 const keyword = ref('')
 const loading = ref(false)
 
-/** 置顶判定：兼容旧 priority 枚举与 notice 表 is_pinned 布尔列（VO 暴露前恒 false） */
+/** 置顶判定：isPinned 真实字段（0/1）优先，旧布尔命名留兜底（优先级是展示属性，不参与置顶） */
 function isPinned(notice: INotice): boolean {
-  return notice.priority === 'HIGH' || notice.priority === 'URGENT'
-    || notice.pinned === true || notice.isPinned === true
+  return notice.isPinned === 1 || notice.pinned === true
 }
 
 /** 置顶区与期刊列表按优先级拆分（保持后端返回顺序） */
