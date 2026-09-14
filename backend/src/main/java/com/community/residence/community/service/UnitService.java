@@ -33,7 +33,7 @@ public class UnitService {
     private final HouseMapper houseMapper;
 
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "UNIT", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建单元：' + #dto.name")
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "UNIT", targetId = "#result.id", communityId = "#result.communityId", content = "'创建单元：' + #dto.name")
     public UnitVO create(CreateUnitDTO dto) {
         Building building = requireBuilding(dto.getBuildingId());
         SecurityUtils.checkCommunityAccess(building.getCommunityId());
@@ -107,6 +107,7 @@ public class UnitService {
 
     /**
      * 单元批量创建（D-端点2，50 阶段第三批）：部分成功语义对齐 R8 CSV 导入先例。
+     * DEF-032：逐行校验名称（非空/≤50 字符，元素注解已去级联），坏行逐行反馈。
      */
     public com.community.residence.community.vo.BatchCreateResultVO batchCreate(
             com.community.residence.community.dto.BatchCreateUnitsDTO dto) {
@@ -115,11 +116,22 @@ public class UnitService {
         List<com.community.residence.community.vo.BatchCreateResultVO.Row> rows = new java.util.ArrayList<>();
         int success = 0;
         for (int i = 0; i < dto.getNames().size(); i++) {
+            String name = dto.getNames().get(i);
+            if (name == null || name.isBlank()) {
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(
+                        i + 1, "单元名称不能为空"));
+                continue;
+            }
+            if (name.length() > 50) {
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(
+                        i + 1, "单元名称最多 50 字符"));
+                continue;
+            }
             try {
                 Unit unit = new Unit();
                 unit.setBuildingId(building.getId());
                 unit.setCommunityId(building.getCommunityId());
-                unit.setName(dto.getNames().get(i));
+                unit.setName(name);
                 unitMapper.insert(unit);
                 rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.success(i + 1, unit.getId()));
                 success++;

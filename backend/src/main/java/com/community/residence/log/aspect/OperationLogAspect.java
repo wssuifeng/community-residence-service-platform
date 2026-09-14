@@ -42,18 +42,20 @@ public class OperationLogAspect {
     private final SpelExpressionParser spelParser = new SpelExpressionParser();
     private final ParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-    @AfterReturning(pointcut = "@annotation(operationLogAnnotation)")
-    public void recordOperation(JoinPoint joinPoint, OperationLog operationLogAnnotation) {
+    /* returning = "result" 绑定方法返回值（DEF-034：原无绑定致 #result SpEL 恒为 null，
+       CREATE 类注解 targetId/communityId 求值抛 NPE 整条日志被 catch 丢弃） */
+    @AfterReturning(pointcut = "@annotation(operationLogAnnotation)", returning = "result")
+    public void recordOperation(JoinPoint joinPoint, OperationLog operationLogAnnotation, Object result) {
         try {
             SysOperationLog entry = new SysOperationLog();
             UserContext user = SecurityUtils.getUser();
             entry.setOperatorId(user != null ? user.getUserId() : null);
             entry.setOperatorType(user != null ? user.getRole() : "SYSTEM");
-            entry.setCommunityId(resolveCommunityId(joinPoint, operationLogAnnotation, user));
+            entry.setCommunityId(resolveCommunityId(joinPoint, operationLogAnnotation, user, result));
             entry.setOperationType(operationLogAnnotation.operationType());
             entry.setTargetType(operationLogAnnotation.targetType());
-            entry.setTargetId(resolveLong(joinPoint, operationLogAnnotation.targetId()));
-            entry.setContent(jsonContent(resolveContent(joinPoint, operationLogAnnotation)));
+            entry.setTargetId(resolveLong(joinPoint, operationLogAnnotation.targetId(), result));
+            entry.setContent(jsonContent(resolveContent(joinPoint, operationLogAnnotation, result)));
             fillRequestMeta(entry);
             entry.setCreatedAt(LocalDateTime.now());
             operationLogMapper.insert(entry);
@@ -75,7 +77,7 @@ public class OperationLogAspect {
     }
 
     /* 解析 SpEL（#参数名/#result），表达式为空或求值失败返回 null */
-    private Object resolveSpel(JoinPoint joinPoint, String expression) {
+    private Object resolveSpel(JoinPoint joinPoint, String expression, Object result) {
         if (expression == null || expression.isBlank()) {
             return null;
         }
@@ -87,12 +89,12 @@ public class OperationLogAspect {
             String name = paramNames != null && i < paramNames.length ? paramNames[i] : "arg" + i;
             context.setVariable(name, args[i]);
         }
-        context.setVariable("result", null);
+        context.setVariable("result", result);
         return spelParser.parseExpression(expression).getValue(context);
     }
 
-    private Long resolveLong(JoinPoint joinPoint, String expression) {
-        Object value = resolveSpel(joinPoint, expression);
+    private Long resolveLong(JoinPoint joinPoint, String expression, Object result) {
+        Object value = resolveSpel(joinPoint, expression, result);
         if (value instanceof Number number) {
             return number.longValue();
         }
@@ -107,8 +109,8 @@ public class OperationLogAspect {
     }
 
     /* 社区归属：SpEL 显式指定优先；否则取操作人绑定社区（ADMIN 单绑定场景）；再否则空 */
-    private Long resolveCommunityId(JoinPoint joinPoint, OperationLog annotation, UserContext user) {
-        Long explicit = resolveLong(joinPoint, annotation.communityId());
+    private Long resolveCommunityId(JoinPoint joinPoint, OperationLog annotation, UserContext user, Object result) {
+        Long explicit = resolveLong(joinPoint, annotation.communityId(), result);
         if (explicit != null) {
             return explicit;
         }
@@ -119,12 +121,12 @@ public class OperationLogAspect {
         return null;
     }
 
-    private String resolveContent(JoinPoint joinPoint, OperationLog annotation) {
+    private String resolveContent(JoinPoint joinPoint, OperationLog annotation, Object result) {
         if (annotation.content() == null || annotation.content().isBlank()) {
             return joinPoint.getSignature().toShortString();
         }
         try {
-            Object value = resolveSpel(joinPoint, annotation.content());
+            Object value = resolveSpel(joinPoint, annotation.content(), result);
             if (value != null) {
                 return String.valueOf(value);
             }

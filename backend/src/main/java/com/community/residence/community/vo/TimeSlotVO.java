@@ -18,6 +18,9 @@ public class TimeSlotVO {
     @Schema(description = "资源ID")
     private Long resourceId;
 
+    @Schema(description = "所属社区ID")
+    private Long communityId;
+
     @Schema(description = "资源名称")
     private String resourceName;
 
@@ -40,6 +43,7 @@ public class TimeSlotVO {
         TimeSlotVO vo = new TimeSlotVO();
         vo.setId(entity.getId());
         vo.setResourceId(entity.getResourceId());
+        vo.setCommunityId(entity.getCommunityId());
         vo.setDayOfWeek(entity.getDayOfWeek());
         vo.setStartTime(entity.getStartTime());
         vo.setEndTime(entity.getEndTime());
