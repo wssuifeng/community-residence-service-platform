@@ -45,6 +45,12 @@ public class NotificationService {
     /** 合法站外模拟渠道（站内 WEBSOCKET 必达，不在配置范围） */
     private static final List<String> VALID_CHANNELS = List.of("EMAIL", "SMS");
 
+    /** 合法通知等级键（DEF-042 白名单）：与 create() 全部调用点的 type 实参集一致
+     *  （WORK_ORDER/NOTICE/FEEDBACK/RESERVATION/RESIDENCE/LEASE/SYSTEM——RESOURCE_RESERVATION
+     *  等为 sourceType 来源标识，不参与等级匹配），未知键 400 防配置漂移 */
+    private static final List<String> VALID_LEVELS = List.of(
+            "WORK_ORDER", "NOTICE", "FEEDBACK", "RESERVATION", "RESIDENCE", "LEASE", "SYSTEM");
+
     private final NotificationMapper notificationMapper;
     private final NotificationChannelLogMapper channelLogMapper;
     private final StringRedisTemplate redisTemplate;
@@ -192,9 +198,14 @@ public class NotificationService {
         }
     }
 
-    /** 渠道分级配置更新（仅超管，Controller 层声明；校验渠道合法后写回 sys_config） */
+    /** 渠道分级配置更新（仅超管，Controller 层声明；校验等级键与渠道合法后写回 sys_config） */
     public void updateChannelLevels(Map<String, List<String>> levels) {
         for (Map.Entry<String, List<String>> entry : levels.entrySet()) {
+            if (!VALID_LEVELS.contains(entry.getKey())) {
+                throw new com.community.residence.common.exception.BusinessException(
+                        com.community.residence.common.constant.ErrorCode.INVALID_PARAM,
+                        "非法通知等级：" + entry.getKey() + "（仅支持 " + VALID_LEVELS + "）");
+            }
             for (String channel : entry.getValue()) {
                 if (!VALID_CHANNELS.contains(channel)) {
                     throw new com.community.residence.common.exception.BusinessException(
