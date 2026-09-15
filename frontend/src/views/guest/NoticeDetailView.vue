@@ -18,13 +18,9 @@ const loadError = ref('')
 const prevNotice = ref<INotice | null>(null)
 const nextNotice = ref<INotice | null>(null)
 
-/* 置顶判定：兼容旧 priority 枚举与 is_pinned 布尔列 */
+/* 置顶判定：isPinned 真实字段（0/1）优先，旧布尔命名留兜底（优先级是展示属性，不参与置顶） */
 const isPinned = computed(
-  () =>
-    notice.value?.priority === 'HIGH' ||
-    notice.value?.priority === 'URGENT' ||
-    notice.value?.pinned === true ||
-    notice.value?.isPinned === true
+  () => notice.value?.isPinned === 1 || notice.value?.pinned === true
 )
 
 /** 正文按空行分段，保持后端纯文本排版的阅读节奏 */

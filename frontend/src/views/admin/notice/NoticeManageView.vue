@@ -17,10 +17,11 @@ import {
   updateNotice,
   withdrawNotice
 } from '@/api/notice'
-import { getCommunityList } from '@/api/community'
+import { getCommunityList, getBuildingList } from '@/api/community'
 import type {
   INotice,
   INoticeSaveRequest,
+  INoticeSaveTargetItem,
   INoticeViewer,
   NoticePriority,
   NoticeType,
@@ -45,7 +46,9 @@ import { useUserStore } from '@/store/user'
  * 编辑态（原创建/编辑表单整体迁入）/空态。
  * 原 NoticeListView/NoticeCreateView/NoticeDetailView 收编于此（任务 7）；
  * ?action=create 深链为任务 1 redirect 契约，编辑态经 ?action=edit&id= 同步。
- * 表单 priority/type/expireTime 照常提交（D2 裁决：后端后续适配）。
+ * 表单 priority/type/expireTime 照常提交（D2 裁决，V12 后端已接收）；
+ * DEF-039：V9 后补 isPinned 置顶开关 + targets 多社区/楼栋定向编辑 +
+ * 左栏 priority 筛选（排序由后端 is_pinned DESC 负责，前端不重排）。
  */
 
 const route = useRoute()
@@ -74,6 +77,8 @@ const page = ref(1)
 const size = ref(10)
 const total = ref(0)
 const keyword = ref('')
+/** 优先级筛选（后端真实参数 priority，DEF-031/V12） */
+const filterPriority = ref<NoticePriority | ''>('')
 
 async function load(): Promise<void> {
   loading.value = true
@@ -81,7 +86,8 @@ async function load(): Promise<void> {
     const result = await listNotices({
       page: page.value,
       size: size.value,
-      keyword: keyword.value || undefined
+      keyword: keyword.value || undefined,
+      priority: filterPriority.value || undefined
     })
     notices.value = result.records
     total.value = result.total
@@ -98,10 +104,10 @@ function handleSearch(): void {
   load()
 }
 
-/** 置顶判定：兼容旧 priority 枚举与 notice 表 is_pinned 布尔列（VO 暴露前恒缺省） */
+/** 置顶判定：isPinned 真实字段（0/1，V9 起 VO 返回）优先，旧布尔命名留兜底
+ *  （优先级是展示属性、置顶是排序属性，二者后端已分工，priority 不再参与判定） */
 function isPinned(notice: INotice): boolean {
-  return notice.priority === 'HIGH' || notice.priority === 'URGENT'
-    || notice.pinned === true || notice.isPinned === true
+  return notice.isPinned === 1 || notice.pinned === true
 }
 
 /** 状态 → StatusTag 语义色 */
@@ -217,6 +223,25 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
     form.value.broadcast = notice.communityId === null
     form.value.publishTime = notice.publishTime ? new Date(notice.publishTime) : null
     form.value.expireTime = notice.expireTime ? new Date(notice.expireTime) : null
+    /* DEF-039 回显：置顶开关（0/1 → 布尔）与 targets 拆分回两组选择
+       （V9 起 VO 真实返回；无 targets = 广播/单社区旧语义，保持空选择） */
+    form.value.isPinned = notice.isPinned === 1
+    form.value.targetCommunityIds = notice.targets
+      .filter((item) => item.targetType === 'COMMUNITY')
+      .map((item) => item.targetId)
+    form.value.targetBuildingIds = notice.targets
+      .filter((item) => item.targetType === 'BUILDING')
+      .map((item) => item.targetId)
+    /* 楼栋选项回显：拿不到社区列表时用 VO targetName 补位（楼栋归属社区不在
+       编辑者绑定范围外时无社区选项可选，name 兜底保证已选项可读） */
+    const knownBuildings = new Set(buildingOptions.value.map((item) => item.id))
+    const fallbackBuildings = notice.targets
+      .filter((item) => item.targetType === 'BUILDING' && item.targetName !== null
+        && !knownBuildings.has(item.targetId))
+      .map((item) => ({ id: item.targetId, name: item.targetName as string }))
+    if (fallbackBuildings.length > 0) {
+      buildingOptions.value = [...buildingOptions.value, ...fallbackBuildings]
+    }
     /* 编辑回显的社区选项：接口列表为空时用 VO 自带名称补位（原编辑页经独立路由进入
        未加载绑定社区，社区名显示为裸 ID，迁移时顺修） */
     if (notice.communityId !== null) {
@@ -383,9 +408,50 @@ const form = ref({
   communityId: null as number | null,
   /** 全系统广播开关（仅 SUPER_ADMIN 可见） */
   broadcast: false,
+  /** 置顶开关（isPinned 0/1，R25 v1.2） */
+  isPinned: false,
+  /** 社区级定向目标（COMMUNITY targets；空=按上方发布范围单社区） */
+  targetCommunityIds: [] as number[],
+  /** 楼栋级定向目标（BUILDING targets；可跨社区累加） */
+  targetBuildingIds: [] as number[],
   publishTime: new Date() as Date | null,
   expireTime: null as Date | null
 })
+
+/* 楼栋定向：选社区加载楼栋，选项跨社区累加（编辑回显不同社区楼栋时可复选） */
+const buildingCommunityId = ref<number | null>(null)
+const buildingOptions = ref<{ id: number; name: string }[]>([])
+const buildingsLoading = ref(false)
+
+async function handleBuildingCommunityChange(communityId: number | null): Promise<void> {
+  if (communityId === null) return
+  buildingsLoading.value = true
+  try {
+    const result = await getBuildingList(communityId, { page: 1, size: 200 })
+    const known = new Set(buildingOptions.value.map((item) => item.id))
+    buildingOptions.value = [
+      ...buildingOptions.value,
+      ...result.records
+        .filter((item) => !known.has(item.id))
+        .map((item) => ({ id: item.id, name: item.name }))
+    ]
+  } catch {
+    /* 楼栋加载失败静默：定向范围仍可仅用社区级 */
+  } finally {
+    buildingsLoading.value = false
+  }
+}
+
+/* 全系统广播与定向范围互斥：勾选广播时清空定向选择（广播 = 无 targets） */
+watch(
+  () => form.value.broadcast,
+  (broadcast) => {
+    if (broadcast) {
+      form.value.targetCommunityIds = []
+      form.value.targetBuildingIds = []
+    }
+  }
+)
 
 const submitting = ref(false)
 const publishing = ref(false)
@@ -410,16 +476,27 @@ function resetForm(): void {
   form.value.targetAudience = 'ALL'
   form.value.communityId = isSuperAdmin.value ? null : (boundCommunities.value[0]?.id ?? null)
   form.value.broadcast = false
+  form.value.isPinned = false
+  form.value.targetCommunityIds = []
+  form.value.targetBuildingIds = []
+  buildingCommunityId.value = null
+  buildingOptions.value = []
   form.value.publishTime = new Date()
   form.value.expireTime = null
 }
 
-/** 组装保存请求体 */
+/** 组装保存请求体（targets 优先；两组定向均空时回退 communityId 单目标旧写法） */
 function buildRequest(): INoticeSaveRequest {
+  const targets: INoticeSaveTargetItem[] = [
+    ...form.value.targetCommunityIds.map((id) => ({ targetType: 'COMMUNITY' as const, targetId: id })),
+    ...form.value.targetBuildingIds.map((id) => ({ targetType: 'BUILDING' as const, targetId: id }))
+  ]
   return {
     communityId: isSuperAdmin.value && form.value.broadcast
       ? null
       : form.value.communityId,
+    targets: targets.length > 0 ? targets : undefined,
+    isPinned: form.value.isPinned ? 1 : 0,
     title: form.value.title.trim(),
     content: form.value.content.trim(),
     type: form.value.type,
@@ -564,6 +641,21 @@ onMounted(async () => {
               </svg>
             </template>
           </el-input>
+          <!-- DEF-039：priority 真实过滤参数（DEF-031/V12），取值与表单优先级枚举对齐 -->
+          <el-select
+            v-model="filterPriority"
+            placeholder="优先级"
+            clearable
+            class="priority-filter"
+            @change="handleSearch"
+          >
+            <el-option
+              v-for="(label, value) in noticePriorityLabels"
+              :key="value"
+              :label="label"
+              :value="value"
+            />
+          </el-select>
         </div>
 
         <div v-loading="loading" class="notice-cards">
@@ -679,7 +771,17 @@ onMounted(async () => {
               <div class="meta-item">
                 <dt class="meta-label">发布范围</dt>
                 <dd class="meta-value">
-                  <span class="scope-chip">{{ current.communityName ?? '全系统广播' }}</span>
+                  <!-- DEF-039：targets 真实返回后逐条展示（社区/楼栋分组名），无目标=全系统广播 -->
+                  <template v-if="current.targets && current.targets.length > 0">
+                    <span
+                      v-for="target in current.targets"
+                      :key="target.targetType + target.targetId"
+                      class="scope-chip"
+                    >
+                      {{ target.targetName ?? (target.targetType === 'COMMUNITY' ? `社区#${target.targetId}` : `楼栋#${target.targetId}`) }}
+                    </span>
+                  </template>
+                  <span v-else class="scope-chip">全系统广播</span>
                 </dd>
               </div>
             </dl>
@@ -754,7 +856,13 @@ onMounted(async () => {
                     :value="value"
                   />
                 </el-select>
-                <span class="form-tip">高 / 紧急优先级公告在居民端置顶展示</span>
+                <span class="form-tip">展示属性；置顶展示由下方置顶开关控制</span>
+              </el-form-item>
+
+              <!-- DEF-039：置顶开关（R25 v1.2，置顶列表排最前） -->
+              <el-form-item label="置顶">
+                <el-switch v-model="form.isPinned" />
+                <span class="form-tip">开启后公告在列表中置顶展示（排序最前）</span>
               </el-form-item>
 
               <el-form-item label="定向范围">
@@ -766,7 +874,7 @@ onMounted(async () => {
                     :value="value"
                   />
                 </el-select>
-                <span class="form-tip">当前仅支持面向全部居民发布</span>
+                <span class="form-tip">公告面向定向范围内的全部居民</span>
               </el-form-item>
 
               <el-form-item label="发布范围">
@@ -803,6 +911,66 @@ onMounted(async () => {
                     当前账号未绑定社区，无法发布
                   </span>
                 </template>
+              </el-form-item>
+
+              <!-- DEF-039：定向目标（R25 v1.2 多社区/楼栋定向）；
+                   空选 = 仅上方发布范围单社区；全系统广播时隐藏（广播无 targets） -->
+              <el-form-item v-if="!form.broadcast" label="定向目标">
+                <div class="targets-editor">
+                  <el-select
+                    v-model="form.targetCommunityIds"
+                    multiple
+                    collapse-tags
+                    collapse-tags-tooltip
+                    clearable
+                    placeholder="定向社区（可多选）"
+                    class="target-select"
+                  >
+                    <el-option
+                      v-for="community in boundCommunities"
+                      :key="community.id"
+                      :label="community.name"
+                      :value="community.id"
+                    />
+                  </el-select>
+                  <div class="building-row">
+                    <el-select
+                      v-model="buildingCommunityId"
+                      placeholder="选择社区加载楼栋"
+                      clearable
+                      style="width: 180px"
+                      @change="handleBuildingCommunityChange"
+                    >
+                      <el-option
+                        v-for="community in boundCommunities"
+                        :key="community.id"
+                        :label="community.name"
+                        :value="community.id"
+                      />
+                    </el-select>
+                    <el-select
+                      v-model="form.targetBuildingIds"
+                      multiple
+                      collapse-tags
+                      collapse-tags-tooltip
+                      clearable
+                      filterable
+                      placeholder="定向楼栋（可跨社区多选）"
+                      class="target-select"
+                      :loading="buildingsLoading"
+                    >
+                      <el-option
+                        v-for="building in buildingOptions"
+                        :key="building.id"
+                        :label="building.name"
+                        :value="building.id"
+                      />
+                    </el-select>
+                  </div>
+                  <span class="form-tip is-block">
+                    定向社区/楼栋会在发布范围基础上叠加触达；两者均不选 = 仅发布范围所选社区
+                  </span>
+                </div>
               </el-form-item>
 
               <el-form-item label="发布时间" prop="publishTime">
@@ -928,7 +1096,14 @@ onMounted(async () => {
 }
 
 .list-search {
+  display: flex;
+  gap: var(--spacing-xs);
   margin: var(--spacing-md) 0;
+}
+
+.priority-filter {
+  width: 96px;
+  flex-shrink: 0;
 }
 
 .search-icon {
@@ -1006,7 +1181,7 @@ onMounted(async () => {
   color: var(--color-text-disabled);
 }
 
-/* 置顶红标（对照稿）：实心语义红 + 卡色文字，VO 暴露 is_pinned 后自动点亮 */
+/* 置顶红标（对照稿）：实心语义红 + 卡色文字（V9 起 isPinned 真实返回，DEF-039 点亮） */
 .pin-badge {
   flex-shrink: 0;
   padding: 1px var(--spacing-xs);
@@ -1087,6 +1262,15 @@ onMounted(async () => {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   font-weight: var(--font-weight-medium);
+}
+
+/* 多 targets 逐条 chip 展示（DEF-039），meta-item 内自动换行 */
+.meta-value .scope-chip {
+  margin: 0 var(--spacing-xs) var(--spacing-xs) 0;
+}
+
+.meta-value .scope-chip:last-child {
+  margin-right: 0;
 }
 
 .scope-chip {
@@ -1179,6 +1363,29 @@ onMounted(async () => {
 
 .form-tip.is-warning {
   color: var(--color-warning);
+}
+
+/* ---------- 定向目标编辑（DEF-039：社区多选 + 社区→楼栋多选，紧凑两行） ---------- */
+
+.targets-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.target-select {
+  width: 360px;
+  max-width: 100%;
+}
+
+.building-row {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.form-tip.is-block {
+  margin-left: 0;
 }
 
 /* ---------- 查看记录抽屉 ---------- */
