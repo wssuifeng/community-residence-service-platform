@@ -101,7 +101,7 @@ public class NoticeService {
         return toVO(notice);
     }
 
-    /* 更新公告：仅 DRAFT 可改；目标范围不可变更（重新建公告） */
+    /* 更新公告：仅 DRAFT 可改；目标范围随编辑重写（DEF-043：先删后插对齐 create 落库模式） */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "NOTICE", targetId = "#id", content = "'更新公告：' + #dto.title")
     public NoticeVO update(Long id, CreateNoticeDTO dto) {
@@ -110,7 +110,13 @@ public class NoticeService {
         if (!NoticeStatus.DRAFT.equals(notice.getStatus())) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "仅草稿状态的公告可修改");
         }
-        for (NoticeServiceTarget target : resolveTargets(dto)) {
+        List<NoticeServiceTarget> targets = resolveTargets(dto);
+        if (targets.isEmpty()) {
+            if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "社区管理员必须指定目标社区");
+            }
+        }
+        for (NoticeServiceTarget target : targets) {
             checkTargetAccess(target);
         }
         notice.setTitle(dto.getTitle());
@@ -121,6 +127,17 @@ public class NoticeService {
         notice.setPriority(StringUtils.hasText(dto.getPriority()) ? dto.getPriority() : "NORMAL");
         notice.setType(StringUtils.hasText(dto.getType()) ? dto.getType() : "ANNOUNCEMENT");
         noticeMapper.updateById(notice);
+        /* 目标重写（DEF-043）：先删后插——编辑定向生效，与 create 落库模式一致；
+           超管改为广播（targets 空）时清空全部目标行 */
+        noticeTargetMapper.delete(new LambdaQueryWrapper<NoticeTarget>()
+                .eq(NoticeTarget::getNoticeId, id));
+        for (NoticeServiceTarget target : targets) {
+            NoticeTarget entity = new NoticeTarget();
+            entity.setNoticeId(id);
+            entity.setTargetType(target.type());
+            entity.setTargetId(target.id());
+            noticeTargetMapper.insert(entity);
+        }
         return toVO(notice);
     }
 

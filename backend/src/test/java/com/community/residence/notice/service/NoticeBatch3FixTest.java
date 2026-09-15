@@ -179,6 +179,63 @@ class NoticeBatch3FixTest {
 
     /* ---- 脚手架 ---- */
 
+    @Test
+    @DisplayName("DEF-043：update 重写 targets——先删后插，编辑定向生效")
+    void update_rewritesTargets_deleteThenInsert() {
+        try (var mocked = mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole("SUPER_ADMIN")).thenReturn(true);
+
+            Notice draft = new Notice();
+            draft.setId(9L);
+            draft.setStatus("DRAFT");
+            draft.setPublisherId(1L);
+            when(noticeMapper.selectById(9L)).thenReturn(draft);
+            when(communityService.requireActiveCommunity(any())).thenReturn(null);
+
+            var dto = baseDto();
+            var t1 = new com.community.residence.notice.dto.CreateNoticeDTO.TargetItemDTO();
+            t1.setTargetType("COMMUNITY");
+            t1.setTargetId(1L);
+            var t2 = new com.community.residence.notice.dto.CreateNoticeDTO.TargetItemDTO();
+            t2.setTargetType("COMMUNITY");
+            t2.setTargetId(2L);
+            dto.setTargets(List.of(t1, t2));
+
+            noticeService.update(9L, dto);
+
+            /* 先删后插：删旧目标行一次，插入两条新目标 */
+            verify(noticeTargetMapper).delete(any());
+            ArgumentCaptor<NoticeTarget> captor = ArgumentCaptor.forClass(NoticeTarget.class);
+            verify(noticeTargetMapper, org.mockito.Mockito.times(2)).insert(captor.capture());
+            assertThat(captor.getAllValues())
+                    .extracting(NoticeTarget::getTargetId)
+                    .containsExactlyInAnyOrder(1L, 2L);
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-043：超管编辑为广播（targets 空）时清空目标行")
+    void update_emptyTargets_clearsRows() {
+        try (var mocked = mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole("SUPER_ADMIN")).thenReturn(true);
+
+            Notice draft = new Notice();
+            draft.setId(9L);
+            draft.setStatus("DRAFT");
+            draft.setPublisherId(1L);
+            when(noticeMapper.selectById(9L)).thenReturn(draft);
+
+            noticeService.update(9L, baseDto());
+
+            verify(noticeTargetMapper).delete(any());
+            verify(noticeTargetMapper, org.mockito.Mockito.never()).insert(any(NoticeTarget.class));
+        }
+    }
+
     private CreateNoticeDTO baseDto() {
         CreateNoticeDTO dto = new CreateNoticeDTO();
         dto.setTitle("测试公告");

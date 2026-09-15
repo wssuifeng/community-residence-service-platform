@@ -87,7 +87,7 @@ class ChannelLevelsTest {
     @DisplayName("非法渠道：PUT 更新被拒（仅 EMAIL/SMS）")
     void updateChannelLevels_invalidChannel_rejected() {
         assertThatThrownBy(() -> notificationService.updateChannelLevels(
-                Map.of("IMPORTANT", List.of("PUSH"))))
+                Map.of("WORK_ORDER", List.of("PUSH"))))
                 .isInstanceOf(com.community.residence.common.exception.BusinessException.class)
                 .hasMessageContaining("非法渠道");
         verify(sysConfigService, never()).upsert(anyString(), anyString(), anyString());
@@ -96,8 +96,32 @@ class ChannelLevelsTest {
     @Test
     @DisplayName("合法配置：经 upsert 写入 sys_config")
     void updateChannelLevels_valid_persisted() {
-        notificationService.updateChannelLevels(Map.of("IMPORTANT", List.of("SMS")));
+        notificationService.updateChannelLevels(Map.of("WORK_ORDER", List.of("SMS")));
         verify(sysConfigService).upsert(eqKey(), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("DEF-042：七个真实业务等级键全部放行")
+    void updateChannelLevels_allSevenLevels_accepted() {
+        notificationService.updateChannelLevels(Map.of(
+                "WORK_ORDER", List.of("EMAIL"),
+                "NOTICE", List.of("SMS"),
+                "FEEDBACK", List.of(),
+                "RESERVATION", List.of(),
+                "RESIDENCE", List.of(),
+                "LEASE", List.of(),
+                "SYSTEM", List.of()));
+        verify(sysConfigService).upsert(eqKey(), anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("DEF-042：未知等级键拒绝（防配置漂移，sourceType 误用即拒）")
+    void updateChannelLevels_unknownLevel_rejected() {
+        assertThatThrownBy(() -> notificationService.updateChannelLevels(
+                Map.of("RESOURCE_RESERVATION", List.of("SMS"))))
+                .isInstanceOf(com.community.residence.common.exception.BusinessException.class)
+                .hasMessageContaining("非法通知等级");
+        verify(sysConfigService, never()).upsert(anyString(), anyString(), anyString());
     }
 
     private String eqKey() {
