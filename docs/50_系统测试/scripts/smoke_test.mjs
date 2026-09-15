@@ -190,7 +190,16 @@ async function main() {
     });
     // 居民端功能开放（获得居住关系后可提交工单——用本社区类别）
     const myCat = await api('GET', '/api/v1/communities/2/service-categories');
-    const catId = (myCat.data?.records ?? myCat.data ?? [])[0]?.id ?? 44;
+    // R5 适配：新测试库（口径A）社区2无种子类别，且类别表含V12种子后 id 位移，固定 fallback 44 不再可靠；
+    // 改为：居民侧树为空时由 admin 先建一个类别（与 E4 同口径），杜绝 data.id 为 undefined
+    let catList = myCat.data?.records ?? myCat.data ?? [];
+    let catId = catList[0]?.id;
+    if (!catId) {
+      const catCreate = await api('POST', '/api/v1/service-categories', {
+        token: adminTok, body: { communityId: 2, name: '冒烟-E2补建类别', description: 'E2链路兜底' }, expectStatus: 200,
+      });
+      catId = catCreate.data.id;
+    }
     const wo = await api('POST', '/api/v1/work-orders', {
       token: nl.token,
       body: { categoryId: catId, title: '冒烟-E2居民工单', content: '入住后的第一张工单', contactPhone: '13800005555', address: 'TEST-清源里', priority: 'NORMAL' },
