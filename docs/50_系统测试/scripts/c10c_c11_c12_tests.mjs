@@ -36,7 +36,7 @@ const uniqPhone = () => '13' + String(800000000 + Math.floor(Math.random() * 999
 async function main() {
   const superTok = (await api('POST', '/api/v1/auth/admin/login', { body: { username: 'superadmin', password: 'Admin@123456' } })).data?.token;
   const admin1Tok = (await api('POST', '/api/v1/auth/admin/login', { body: { username: 'admin1', password: 'Admin123456' } })).data?.token;
-  const r1Tok = (await api('POST', '/api/v1/auth/resident/login', { body: { username: 'resident1', password: 'Resident123456' } })).data?.token;
+  let r1Tok = (await api('POST', '/api/v1/auth/resident/login', { body: { username: 'resident1', password: 'Resident123456' } })).data?.token;
 
   // ══ TC-C10-011 超管管理管理员全链路 ══
   {
@@ -161,7 +161,13 @@ async function main() {
   // TC-C11-003 上线补拉
   {
     const seqMax = q('SELECT COALESCE(MAX(seq),0) FROM notification');
-    const pull = await api('GET', '/api/v1/notifications/pull?afterSeq=0', { token: r1Tok });
+    // R5 适配：并行会话对 resident1 做权限变更吊销复验（auth_token_blacklist USER-R-1 PERMISSION_CHANGE）
+    // 会连带吊销本套件启动时签发的 r1Tok——pull 返回 401 时重登重试一次，排除并发干扰后断言
+    let pull = await api('GET', '/api/v1/notifications/pull?afterSeq=0', { token: r1Tok });
+    if (pull.status === 401) {
+      r1Tok = (await api('POST', '/api/v1/auth/resident/login', { body: { username: 'resident1', password: 'Resident123456' } })).data?.token;
+      pull = await api('GET', '/api/v1/notifications/pull?afterSeq=0', { token: r1Tok });
+    }
     const pullN = Array.isArray(pull.data) ? pull.data.length : (pull.data?.records ?? []).length;
     const dbMine = q(`SELECT COUNT(*) FROM notification WHERE user_id=1`);
     tc('TC-C11-003', '上线补拉按 seq 增量（afterSeq=0 全量）',

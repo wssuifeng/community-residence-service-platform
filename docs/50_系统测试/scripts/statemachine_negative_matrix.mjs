@@ -67,6 +67,19 @@ async function main() {
         if (vacant) break outer;
       }
     }
+    if (!vacant) {
+      // R5 适配：清源里空置房被历次执行耗尽时，由管理员现建一间（不清理既有数据，仅追加）
+      const bList2 = (await api('GET', '/api/v1/communities/2/buildings?page=1&size=50')).data?.records ?? [];
+      const b = bList2[0];
+      if (b) {
+        const us = (await api('GET', `/api/v1/buildings/${b.id}/units`)).data?.records ?? (await api('GET', `/api/v1/buildings/${b.id}/units`)).data ?? [];
+        const u = us[0];
+        if (u) {
+          const nh = await api('POST', '/api/v1/houses', { token: adminTok, body: { unitId: u.id, houseNumber: `SM${Date.now() % 10000}`, floor: 9, area: 60, roomCount: 1, layout: '一室', orientation: '南', status: 'VACANT', description: 'C2-012 自愈补房' } });
+          if (nh.data?.id) vacant = { id: nh.data.id };
+        }
+      }
+    }
     if (vacant) {
       const app = await api('POST', '/api/v1/residence-applications', { token: tok, body: { houseId: vacant.id, relationType: 'TENANT', remark: '状态机用' } });
       await api('PATCH', `/api/v1/residence-applications/${app.data.id}/approve`, { token: adminTok, body: { leaseStartDate: future(1), leaseEndDate: future(365), monthlyRent: 1000, deposit: 1000 } });
@@ -262,9 +275,40 @@ async function main() {
       vacant = (hs.data?.records ?? []).find(h => h.status === 'VACANT');
       if (vacant) break;
     }
+    if (!vacant) {
+      // R5 适配：固定单元无空置房时全社区动态找，仍无则补建（与 newResident 同口径）
+      const bList = (await api('GET', '/api/v1/communities/2/buildings?page=1&size=50')).data?.records ?? [];
+      outer2: for (const b of bList) {
+        const uList = (await api('GET', `/api/v1/buildings/${b.id}/units`)).data?.records ?? [];
+        for (const u of uList) {
+          const hs = await api('GET', `/api/v1/units/${u.id}/houses?page=1&size=100`);
+          vacant = (hs.data?.records ?? []).find(h => h.status === 'VACANT') ?? null;
+          if (vacant) break outer2;
+        }
+      }
+      if (!vacant) {
+        const b = bList[0];
+        if (b) {
+          const us = (await api('GET', `/api/v1/buildings/${b.id}/units`)).data?.records ?? [];
+          const u = us[0];
+          if (u) {
+            const nh = await api('POST', '/api/v1/houses', { token: adminTok, body: { unitId: u.id, houseNumber: `SMR${Date.now() % 10000}`, floor: 9, area: 60, roomCount: 1, layout: '一室', orientation: '南', status: 'VACANT', description: 'C2-012 终态构造补房' } });
+            if (nh.data?.id) vacant = { id: nh.data.id };
+          }
+        }
+      }
+    }
     // 终态再审批：直接用库内既有终态申请（历次执行产物）——APPROVED 与 REJECTED 各取一条
-    const approvedId = q("SELECT id FROM residence_application WHERE status='APPROVED' ORDER BY id LIMIT 1");
-    const rejectedId = q("SELECT id FROM residence_application WHERE status='REJECTED' ORDER BY id LIMIT 1");
+    // R5 适配：口径A 全新库首跑时无历史 REJECTED 申请，脚本自愈——用 R2+空置房现场构造一条被拒终态
+    let approvedId = q("SELECT id FROM residence_application WHERE status='APPROVED' ORDER BY id LIMIT 1");
+    let rejectedId = q("SELECT id FROM residence_application WHERE status='REJECTED' ORDER BY id LIMIT 1");
+    if (!rejectedId && vacant) {
+      const rejApp = await api('POST', '/api/v1/residence-applications', { token: R2.token, body: { houseId: vacant.id, relationType: 'TENANT', remark: 'C2-012 构造 REJECTED 终态' } });
+      if (rejApp.data?.id) {
+        await api('PATCH', `/api/v1/residence-applications/${rejApp.data.id}/reject`, { token: adminTok, body: { reason: 'C2-012 构造用驳回' } });
+        rejectedId = q("SELECT id FROM residence_application WHERE status='REJECTED' ORDER BY id LIMIT 1");
+      }
+    }
     if (!approvedId || !rejectedId) {
       tc('C2-012', '构造终态申请', false, '库内无 APPROVED/REJECTED 申请（数据耗尽）');
     } else {

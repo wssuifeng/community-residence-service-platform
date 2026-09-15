@@ -106,3 +106,16 @@ SELECT COALESCE(MAX(seq), 0) FROM notification;                       -- 记下�
 - 通知接口报 `uk_seq` 重复：忘记同步 Redis——`redis-cli SET notification:seq
   <库内 MAX(seq)>` 后重启后端；
 - 01 重跑未生效：检查是否连错库（`SELECT DATABASE();`）。
+
+## 历史遗留验证约束（第五轮回填，2026-09-15）
+
+- 通用执行环境变量：`TEST_BASE=http://localhost:8081`（默认 8080 为 Kimi 工作区）；
+  `BACKEND_LOG=/tmp/be8081.log`（SP-005 越权日志断言读实例日志）；mysql CLI 统一加
+  `--default-character-set=utf8mb4`（Git Bash 客户端默认 gbk，中文列名/值会 1406 截断）。
+- NF 压测：jmeter.bat 从 PATH 解析 java.exe（不看 JAVA_HOME），系统默认 JDK25 时
+  Groovy 报 class file 69——须 PATH 前置 jdk-17.0.4.1/bin 直启；tokens.csv 由 setUp
+  线程组自动重登生成（残留旧 token 会导致 401，跑前先删）；**nf_load.jmx 的 L6
+  取样器硬编码工单 ID 10429/10459（生成脚本按第四轮库快照）——测试库重建后 ID 空间
+  变化须补插对齐行或重新生成 jmx**（第五轮已补插 2 行对齐）。
+- track_c_ui.py 的 DEF-018 用例依赖社区 1 存在停用类别「绿化养护2171」（is_active=0，
+  纯净重建后须预置，POST /api/v1/service-categories 传 isActive=0）。
