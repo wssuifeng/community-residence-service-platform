@@ -7,7 +7,7 @@ import StatusTag from '@/components/common/StatusTag.vue'
 import { listHousings } from '@/api/housing'
 import { getCommunityList } from '@/api/community'
 import type { ICommunity } from '@/types/modules/community'
-import type { IHousing, HousingStatus } from '@/types/modules/housing'
+import type { IHousing, HousingRentType, HousingStatus } from '@/types/modules/housing'
 import { housingStatusLabels } from '@/types/modules/housing'
 
 /** 房源浏览（居民端）：与游客端列表同款——筛选条 + 卡片网格 + 分页；空图按序号轮换示例图 */
@@ -19,11 +19,13 @@ const size = ref(12)
 const keyword = ref('')
 const statusFilter = ref<HousingStatus | ''>('')
 const rentRange = ref('')
+const rentTypeFilter = ref<HousingRentType | ''>('')
+const layoutFilter = ref('')
 const communityFilter = ref(0)
 const communityOptions = ref<ICommunity[]>([])
 const loading = ref(false)
 
-/** 状态筛选选项：'' 表示全部（接口无房型参数，房型信息经 tags 展示、经关键字匹配） */
+/** 状态筛选选项：'' 表示全部 */
 const statusOptions: Array<{ label: string; value: HousingStatus | '' }> = [
   { label: '全部状态', value: '' },
   { label: housingStatusLabels.AVAILABLE, value: 'AVAILABLE' },
@@ -31,7 +33,18 @@ const statusOptions: Array<{ label: string; value: HousingStatus | '' }> = [
   { label: housingStatusLabels.RENTED, value: 'RENTED' }
 ]
 
-/** 租金区间选项：接口支持 minRent/maxRent，档位映射两个参数（接口无户型/朝向参数，不做对应控件） */
+/** 租售类型选项：后端 RENT/SALE 白名单（V9，R53） */
+const rentTypeOptions: Array<{ label: string; value: HousingRentType | '' }> = [
+  { label: '全部类型', value: '' },
+  { label: '出租', value: 'RENT' },
+  { label: '出售', value: 'SALE' }
+]
+
+/** 户型选项：后端无枚举约束（house.layout 自由文本、精确匹配），选项取种子数据实际值；
+ *  filterable + allow-create 支持输入列表外户型兜底（无匹配返回空集如实呈现） */
+const layoutOptions = ['2室1厅1卫', '3室2厅2卫']
+
+/** 租金区间选项：接口支持 minRent/maxRent，档位映射两个参数（朝向接口无参数，不做对应控件） */
 const rentRangeOptions = [
   { label: '全部租金', value: '' },
   { label: '2000 以下', value: '-2000' },
@@ -65,7 +78,9 @@ async function load(): Promise<void> {
       keyword: keyword.value === '' ? undefined : keyword.value,
       communityId: communityFilter.value > 0 ? communityFilter.value : undefined,
       minRent: rangeMin === '' ? undefined : Number(rangeMin),
-      maxRent: rangeMax === '' || rangeMax === undefined ? undefined : Number(rangeMax)
+      maxRent: rangeMax === '' || rangeMax === undefined ? undefined : Number(rangeMax),
+      rentType: rentTypeFilter.value === '' ? undefined : rentTypeFilter.value,
+      layout: layoutFilter.value === '' ? undefined : layoutFilter.value
     })
     housings.value = result.records
     total.value = result.total
@@ -115,7 +130,7 @@ onMounted(() => {
       <p class="list-sub">共 {{ total }} 套在售 · 挑选心仪的房源，预约时间实地看房</p>
     </header>
 
-    <!-- 筛选工具条：白卡横条铺满整行；社区/状态/租金/关键字有接口参数，户型/朝向无参数不做控件 -->
+    <!-- 筛选工具条：白卡横条铺满整行；社区/状态/租金/租售/户型/关键字有接口参数，朝向无参数不做控件 -->
     <div class="filter-bar">
       <el-select
         v-model="communityFilter"
@@ -165,6 +180,42 @@ onMounted(() => {
           :key="option.value"
           :label="option.label"
           :value="option.value"
+        />
+      </el-select>
+      <el-select
+        v-model="rentTypeFilter"
+        class="filter-select"
+        style="width: 150px"
+        @change="handleFilterChange"
+      >
+        <template #prefix>
+          <span class="filter-select-label">租售</span>
+        </template>
+        <el-option
+          v-for="option in rentTypeOptions"
+          :key="option.value"
+          :label="option.label"
+          :value="option.value"
+        />
+      </el-select>
+      <el-select
+        v-model="layoutFilter"
+        class="filter-select"
+        style="width: 180px"
+        filterable
+        allow-create
+        placeholder="户型"
+        @change="handleFilterChange"
+      >
+        <template #prefix>
+          <span class="filter-select-label">户型</span>
+        </template>
+        <el-option label="全部户型" value="" />
+        <el-option
+          v-for="layout in layoutOptions"
+          :key="layout"
+          :label="layout"
+          :value="layout"
         />
       </el-select>
       <SearchBar v-model="keyword" placeholder="搜索小区 / 地址 / 标题" @search="handleSearch" />

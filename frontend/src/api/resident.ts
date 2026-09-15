@@ -5,6 +5,8 @@ import type { PageResult } from '@/types/api'
 import type {
   IApplicationApproveDTO,
   IApplicationRejectDTO,
+  IAdminCreateResidentDTO,
+  IAdminCreateResidentVO,
   IChangePasswordDTO,
   IConfigValueResult,
   ICreateResidenceApplicationDTO,
@@ -15,6 +17,7 @@ import type {
   IResidenceRelation,
   IResidenceRelationQuery,
   IResident,
+  IResidentImportVO,
   IResidentQuery,
   ISysConfig,
   IUpdateConfigDTO,
@@ -55,6 +58,22 @@ export function getResidentList(params: IResidentQuery) {
 /** 冻结/解冻居民账号（接口设计.md 9.2.1.9） */
 export function updateResidentStatus(id: number, data: IUpdateResidentStatusDTO) {
   return http.patch<null>(`/residents/${id}/status`, data)
+}
+
+/** 管理员代建居民账号（R8 v1.2；初始密码服务端生成，明文仅本次返回供转交居民） */
+export function adminCreateResident(data: IAdminCreateResidentDTO): Promise<IAdminCreateResidentVO> {
+  return http.post<IAdminCreateResidentVO>('/residents/admin-create', data)
+}
+
+/**
+ * CSV 批量导入居民（R8 v1.2；UTF-8 CSV，表头：社区ID,姓名,手机号,证件号；
+ * 部分成功语义。FormData 传法与 api/upload.ts 一致，axios 自动带
+ * multipart/form-data 边界，勿手动设置 Content-Type）
+ */
+export function importResidents(file: File): Promise<IResidentImportVO> {
+  const formData = new FormData()
+  formData.append('file', file)
+  return http.post<IResidentImportVO>('/residents/import', formData)
 }
 
 /* ---------------------------------- 9.2.2 入住申请管理 ---------------------------------- */
