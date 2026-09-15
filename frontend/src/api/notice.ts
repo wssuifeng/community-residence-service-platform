@@ -22,7 +22,7 @@ export function getNotice(id: number) {
   return http.get<INotice>(`/notices/${id}`)
 }
 
-/** 公告列表分页查询（高优先级置顶，接口设计.md 9.5.1.5） */
+/** 公告列表分页查询（置顶排最前 + priority/isPinned/type 过滤，接口设计.md 9.5.1.5） */
 export function listNotices(params: INoticeQuery) {
   return http.get<PageResult<INotice>>('/notices', params)
 }

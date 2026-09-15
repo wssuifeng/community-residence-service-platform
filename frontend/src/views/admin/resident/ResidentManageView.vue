@@ -6,13 +6,20 @@ import AdminStatCard from '@/components/admin/AdminStatCard.vue'
 import ResidentListView from './ResidentListView.vue'
 import ResidenceApplicationListView from './ResidenceApplicationListView.vue'
 import ResidenceRelationListView from './ResidenceRelationListView.vue'
+import ResidentAdminCreateDialog from './ResidentAdminCreateDialog.vue'
+import ResidentImportDialog from './ResidentImportDialog.vue'
 import { getResidenceApplicationList, getResidentList } from '@/api/resident'
 
 /**
  * 居民管理容器：Tab 深链 ?tab=list|applications|relations（任务 1 契约，取值不得变更）。
  * 对照设计稿 04-居民管理：页头 + 3 统计卡 + 白卡 Tab 条（入住申请带待审核角标）+
  * 三列表 Tab。审批动作后经 reviewed 事件刷新统计卡与角标。
+ * 页头操作区：代建居民 / 批量导入（DEF-038，R8 v1.2；权限口径与后端
+ * @PreAuthorize 对齐，列表 Tab 的冻结按钮同为 ADMIN/SUPER_ADMIN）。
  */
+
+const createDialogVisible = ref(false)
+const importDialogVisible = ref(false)
 
 const TABS = ['list', 'applications', 'relations'] as const
 type TabName = (typeof TABS)[number]
@@ -95,11 +102,36 @@ function goRelations(residentId: number): void {
 }
 
 onMounted(loadStats)
+
+/* 代建/导入成功后刷新统计卡与列表 Tab（列表组件按 tab 挂载，切回/重进时自加载；
+   当前在 list Tab 时列表已挂载，通过 key 强制重建以拉取最新数据 */
+const listRefreshKey = ref(0)
+
+function refreshAfterMutation(): void {
+  loadStats()
+  if (activeTab.value === 'list') {
+    listRefreshKey.value += 1
+  }
+}
 </script>
 
 <template>
   <div class="admin-page">
-    <AdminPageHeader title="居民管理" />
+    <AdminPageHeader title="居民管理">
+      <el-button
+        v-permission="['ADMIN', 'SUPER_ADMIN']"
+        type="primary"
+        @click="createDialogVisible = true"
+      >
+        代建居民
+      </el-button>
+      <el-button
+        v-permission="['ADMIN', 'SUPER_ADMIN']"
+        @click="importDialogVisible = true"
+      >
+        批量导入
+      </el-button>
+    </AdminPageHeader>
 
     <!-- 统计卡：真实口径（见 script 决策注释） -->
     <div class="stat-row">
@@ -148,9 +180,12 @@ onMounted(loadStats)
       </button>
     </nav>
 
-    <ResidentListView v-if="activeTab === 'list'" @go-relations="goRelations" />
+    <ResidentListView v-if="activeTab === 'list'" :key="listRefreshKey" @go-relations="goRelations" />
     <ResidenceApplicationListView v-else-if="activeTab === 'applications'" @reviewed="loadStats" />
     <ResidenceRelationListView v-else :preset-resident-id="presetResidentId" />
+
+    <ResidentAdminCreateDialog v-model="createDialogVisible" @created="refreshAfterMutation" />
+    <ResidentImportDialog v-model="importDialogVisible" @imported="refreshAfterMutation" />
   </div>
 </template>
 

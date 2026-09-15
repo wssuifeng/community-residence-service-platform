@@ -65,3 +65,6 @@ export interface INotificationWsMessage {
   type: 'NOTIFICATION'
   data: INotificationBase
 }
+
+/** 渠道分级配置（R51）：等级 → 勾选的站外模拟渠道列表（仅 EMAIL/SMS，站内 WEBSOCKET 必达不可配置） */
+export type IChannelLevels = Record<string, string[]>
