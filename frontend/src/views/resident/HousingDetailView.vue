@@ -42,10 +42,10 @@ const statusTagType: Record<HousingStatus, 'completed' | 'pending' | 'canceled'>
   OFFLINE: 'canceled'
 }
 
-/** 出租方式标签（后端 HousingVO rentType 枚举，未识别值原样展示兜底） */
+/** 租售类型标签（后端 V9 rent_type 白名单 RENT/SALE，与列表页筛选用语一致；未识别值原样展示兜底） */
 const rentTypeLabels: Record<string, string> = {
-  RENT: '整租',
-  SHARED: '合租'
+  RENT: '出租',
+  SALE: '出售'
 }
 
 /** 图片兜底：无图房源使用官方示例图（与列表页一致，按房源 ID 固定取图） */

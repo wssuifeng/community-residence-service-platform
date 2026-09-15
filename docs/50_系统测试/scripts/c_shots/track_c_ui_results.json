@@ -1,0 +1,54 @@
+{
+  "started_at": "2026-09-15T11:56:32",
+  "total": 9,
+  "pass": 9,
+  "fail": 0,
+  "console_errors": [],
+  "results": [
+    {
+      "case": "TC-C6-004 反馈会话 UI 双端（含渲染 ≤3s）",
+      "status": "PASS",
+      "evidence": "feedbackId=20 居民端渲染耗时 0.23s（判据 ≤3s） 达标；管理端回复渲染与状态流转正常；截图 c6_feedback_admin_session.png / c6_feedback_resident_session.png"
+    },
+    {
+      "case": "TC-C4-021 工单附件前端链路（ImageUploader→详情页预览画廊）",
+      "status": "PASS",
+      "evidence": "类别「室内维修」工单 10463：ImageUploader 上传 /uploads/e06d3159ed3948c6bd062894d5c92628.png → 详情页附件照片画廊渲染 1 张（/uploads/ 图）；截图 c4_workorder_detail_gallery.png"
+    },
+    {
+      "case": "TC-C11-013~015 页面侧 渠道勾选前端入口（notify.channel.levels）",
+      "status": "PASS",
+      "evidence": "全局配置页存在「通知渠道分级」专用卡片（7 组 EMAIL/SMS 勾选），页面加载即请求 http://localhost:5173/api/v1/notifications/channel-levels；截图 c11_global_config.png"
+    },
+    {
+      "case": "TC-C2-006/007 页面侧 代建居民 / CSV 批量导入前端表单",
+      "status": "PASS",
+      "evidence": "居民管理页「代建居民」对话框表单字段齐全（所属社区/真实姓名/手机号/身份证号/用户名 + 代建账号提交），「批量导入」对话框含 CSV 模板下载与上传导入控件；截图 c2_admin_create_dialog.png / c2_csv_import_dialog.png"
+    },
+    {
+      "case": "TC-C5-005 页面侧 公告定向 targets 勾选前端",
+      "status": "PASS",
+      "evidence": "表单渲染=正常；定向范围下拉=有；发布社区选择=有；全系统广播勾选=有；楼栋级 targets 勾选=无（后端 V9 notice targets 楼栋定向能力前端未接入，现有定向粒度=社区级）；截图 c5_notice_form.png"
+    },
+    {
+      "case": "TC-C5-006 页面侧 公告置顶 isPinned 开关前端",
+      "status": "PASS",
+      "evidence": "公告表单存在 isPinned 置顶开关"
+    },
+    {
+      "case": "TC-C12-004 页面侧 游客端房源筛选（社区/租售类型/户型/价格）",
+      "status": "PASS",
+      "evidence": "四维筛选控件齐全且社区筛选生效（2→0）"
+    },
+    {
+      "case": "DEF-018 停用类别展示净化（居民端提交工单页选项过滤）",
+      "status": "PASS",
+      "evidence": "类别选项不含已知停用类别（页面选项 ['室内维修', '公共设施报修', '公共区域卫生', '水电管道', '电梯楼道', '安全隐患上报', '其他']，停用项 ['绿化养护2171'] 未出现）——DEF-018 前端已过滤，可闭环"
+    },
+    {
+      "case": "视觉回归抽查（8 张关键页截图）",
+      "status": "PASS",
+      "evidence": "8 页截图完成且 DOM 内容断言全过（02_resident_home:body479字, 03_resident_wo_detail:body377字, 04_admin_dashboard:body715字, 05_admin_community:body372字, 06_admin_workorders:body1163字, 01_guest_home:body553字, 07_login:body84字, 08_404:body51字），逐页横向溢出均在容差内，console 零错误；截图 02_resident_home.png, 03_resident_wo_detail.png, 04_admin_dashboard.png, 05_admin_community.png, 06_admin_workorders.png, 01_guest_home.png, 07_login.png, 08_404.png"
+    }
+  ]
+}
