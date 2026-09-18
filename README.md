@@ -107,5 +107,5 @@ Linux/Mac：`openssl rand -base64 32`；Windows（PowerShell）：
 
 **前端开发会话**：读取 `docs/00_总控.md` + `AGENTS.md` + `docs/30_系统设计/架构设计.md` + `docs/30_系统设计/接口设计.md` + `docs/30_系统设计/UI设计.md` + `docs/40_开发实施/_中控.md`
 
-**查看可开发模块**：`docs/40_开发实施/_中控.md` §5.2 模块状态追踪（⬜ = 待开发）
+**查看阶段进度**：`docs/00_总控.md` 阶段状态表（本文件不含状态信息）
 
