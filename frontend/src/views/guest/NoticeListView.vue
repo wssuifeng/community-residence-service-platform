@@ -310,8 +310,7 @@ onMounted(load)
    悬浮轮播区时完全显形 */
 .pinned-carousel {
   position: relative;
-  max-width: 880px;
-  margin: 0 auto var(--spacing-xl);
+  margin: 0 0 var(--spacing-xl);
 }
 
 .pinned-viewport {
@@ -363,9 +362,8 @@ onMounted(load)
   left: var(--spacing-md);
 }
 
-/* 右箭头避让右侧文字容器（42% 宽），不与其重叠 */
 .carousel-arrow.is-right {
-  right: calc(42% + var(--spacing-md));
+  right: var(--spacing-md);
 }
 
 .carousel-arrow svg {
@@ -455,6 +453,8 @@ onMounted(load)
   flex: 0 0 100%;
   display: block;
   aspect-ratio: 16 / 9;
+  /* 高度钳制：与列表同宽后 16:9 全宽过高，宽屏时按上限收高，图 object-fit 铺满 */
+  max-height: 500px;
   min-height: 260px;
   background: var(--color-bg-hover);
   border-radius: var(--radius-lg);
@@ -496,7 +496,8 @@ onMounted(load)
   flex-direction: column;
   justify-content: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-lg) var(--spacing-xl) calc(var(--spacing-xl) + 6%);
+  /* 右侧留出 64px 箭头通道：右箭头回到容器右缘后文字不与其重叠 */
+  padding: var(--spacing-lg) calc(var(--spacing-xl) + 40px) calc(var(--spacing-xl) + 6%) var(--spacing-xl);
   min-width: 0;
 }
 
@@ -680,10 +681,6 @@ onMounted(load)
     top: auto;
     justify-content: flex-end;
     padding-bottom: var(--spacing-xl);
-  }
-
-  .carousel-arrow.is-right {
-    right: var(--spacing-md);
   }
 }
 </style>
