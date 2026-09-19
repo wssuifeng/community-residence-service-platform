@@ -12,8 +12,12 @@ import type { IResident } from '@/types/modules/resident'
 /**
  * 预约子页（居民端三段预约流第三段，大表单治理示范）：
  * 必带 ?resourceId= 进入；左侧步骤轨（选日期 → 选时段 → 确认）+ 右侧单步内容。
- * 第一步自写月历（过去/无开放时段/约满日期禁选），第二步下拉选当日开放时段（含余量），
- * 第三步摘要卡确认提交。提交中禁点防重，成功后跳「我的预约」。
+ * 第一步自写月历（过去/无开放时段/约满日期禁选），第二步时段卡连续多选（R60：
+ * 相邻连续才可加选、本地 120 分钟上限前置拦截，单选即连续段数为 1 的特例），
+ * 第三步摘要卡确认提交（合并区间单条预约）。提交中禁点防重，成功后跳「我的预约」。
+ *
+ * 注意：连续多选规则与 HousingReservationView（看房域）为同规则双实现（R60 两域各一键），
+ * 一侧调整约束须同步另一侧。
  */
 
 const route = useRoute()
@@ -40,7 +44,7 @@ const step = ref(1)
 function canGoto(target: number): boolean {
   if (target === 1) return true
   if (target === 2) return selectedDate.value !== null
-  return selectedTimeslotId.value !== null
+  return selectedSlots.value.length > 0
 }
 
 function gotoStep(target: number): void {
@@ -142,17 +146,21 @@ watch([viewYear, viewMonth], () => {
 function pickDate(iso: string): void {
   if (dayState(iso) !== 'open') return
   selectedDate.value = iso
-  selectedTimeslotId.value = null
-  selectedSlot.value = null
+  selectedSlots.value = []
   void openStep2()
 }
 
-/* ------------------------------ 第二步：下拉选时段 ------------------------------ */
+/* ------------------------------ 第二步：时段卡连续多选（R60） ------------------------------ */
+
+/**
+ * 本地连续时长上限（分钟）：与 sys_config reservation.max_continuous_minutes 默认值 120
+ * 对齐（R60 两域各一键，本页为资源域）；本地仅做前置拦截，超限最终由后端兜底拒绝
+ */
+const MAX_CONTINUOUS_MINUTES = 120
 
 const daySlots = ref<IAvailableTimeslot[]>([])
 const dayLoading = ref(false)
-const selectedTimeslotId = ref<number | null>(null)
-const selectedSlot = ref<IAvailableTimeslot | null>(null)
+const selectedSlots = ref<IAvailableTimeslot[]>([])
 
 let daySeq = 0
 async function openStep2(): Promise<void> {
@@ -180,8 +188,9 @@ async function openStep2(): Promise<void> {
   }
 }
 
+/** 约满/停开禁选：状态非可约或余量耗尽一律置灰 */
 function slotFull(slot: IAvailableTimeslot): boolean {
-  return slot.status === 'FULL' || slot.currentBookings >= slot.maxBookings
+  return slot.status !== 'AVAILABLE' || slot.currentBookings >= slot.maxBookings
 }
 
 function slotLabel(slot: IAvailableTimeslot): string {
@@ -192,12 +201,87 @@ const allDaySlotsFull = computed(
   () => daySlots.value.length > 0 && daySlots.value.every((slot) => slotFull(slot))
 )
 
-/** 选中时段 → 进入第三步确认 */
-function pickSlot(timeslotId: number): void {
-  const slot = daySlots.value.find((item) => item.timeslotId === timeslotId) ?? null
-  if (!slot || slotFull(slot)) return
-  selectedTimeslotId.value = timeslotId
-  selectedSlot.value = slot
+/** "HH:mm[:ss]" → 当日分钟数（时段均在同一天内，跨天场景后端模板不支持） */
+function minutesOf(time: string): number {
+  const [hour, minute] = time.split(':').map(Number)
+  return hour * 60 + minute
+}
+
+/** 当前已选合并区间（连续不变式下即最早段 start / 最晚段 end） */
+const mergedStart = computed(() =>
+  selectedSlots.value.reduce<string | null>(
+    (min, slot) => (min === null || slot.startTime < min ? slot.startTime : min),
+    null
+  )
+)
+
+const mergedEnd = computed(() =>
+  selectedSlots.value.reduce<string | null>(
+    (max, slot) => (max === null || slot.endTime > max ? slot.endTime : max),
+    null
+  )
+)
+
+const mergedMinutes = computed(() =>
+  mergedStart.value && mergedEnd.value
+    ? minutesOf(mergedEnd.value) - minutesOf(mergedStart.value)
+    : 0
+)
+
+function isSelected(slot: IAvailableTimeslot): boolean {
+  return selectedSlots.value.some((item) => item.timeslotId === slot.timeslotId)
+}
+
+/** 移除可能把连续段拆成两截：保留最长连续段（并列取最早段），维持"选区恒连续"不变式 */
+function trimToLongestRun(slots: IAvailableTimeslot[]): IAvailableTimeslot[] {
+  const sorted = [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime))
+  let best: IAvailableTimeslot[] = []
+  let current: IAvailableTimeslot[] = []
+  for (const slot of sorted) {
+    const prev = current[current.length - 1]
+    if (prev && prev.endTime !== slot.startTime) {
+      if (current.length > best.length) best = current
+      current = []
+    }
+    current.push(slot)
+  }
+  if (current.length > best.length) best = current
+  return best
+}
+
+/** 时段卡点选：已选再点=取消；新选必须与已选集合相邻连续，且合并时长不得超上限 */
+function toggleSlot(slot: IAvailableTimeslot): void {
+  if (slotFull(slot)) return
+  if (isSelected(slot)) {
+    selectedSlots.value = trimToLongestRun(
+      selectedSlots.value.filter((item) => item.timeslotId !== slot.timeslotId)
+    )
+    return
+  }
+  if (selectedSlots.value.length > 0) {
+    const adjacent = selectedSlots.value.some(
+      (item) => item.endTime === slot.startTime || item.startTime === slot.endTime
+    )
+    if (!adjacent) {
+      ElMessage.warning('仅支持连续时段')
+      return
+    }
+    const spanStart = mergedStart.value && slot.startTime < mergedStart.value ? slot.startTime : mergedStart.value ?? slot.startTime
+    const spanEnd = mergedEnd.value && slot.endTime > mergedEnd.value ? slot.endTime : mergedEnd.value ?? slot.endTime
+    if (minutesOf(spanEnd) - minutesOf(spanStart) > MAX_CONTINUOUS_MINUTES) {
+      ElMessage.warning(`连续时段最长 ${MAX_CONTINUOUS_MINUTES} 分钟，请调整选择`)
+      return
+    }
+  }
+  selectedSlots.value = [...selectedSlots.value, slot]
+}
+
+/** 第 2 步显式推进（多选不能像旧单选那样选即跳转），校验时机保持点击即校验 */
+function goNextFromStep2(): void {
+  if (selectedSlots.value.length === 0) {
+    ElMessage.warning('请先选择至少一个开放时段')
+    return
+  }
   step.value = 3
 }
 
@@ -223,7 +307,7 @@ const phoneValid = computed(
 
 async function handleSubmit(): Promise<void> {
   if (submitting.value) return
-  if (!selectedDate.value || !selectedSlot.value) {
+  if (!selectedDate.value || !mergedStart.value || !mergedEnd.value) {
     ElMessage.warning('请先选择预约日期与时段')
     return
   }
@@ -233,11 +317,12 @@ async function handleSubmit(): Promise<void> {
   }
   submitting.value = true
   try {
+    /* R60：多选连续时段合并为单条预约（startTime=最早段 start，endTime=最晚段 end） */
     await createReservation({
       resourceId,
       reserveDate: selectedDate.value,
-      startTime: selectedSlot.value.startTime,
-      endTime: selectedSlot.value.endTime,
+      startTime: mergedStart.value,
+      endTime: mergedEnd.value,
       purpose: form.purpose.trim() || undefined,
       contactPhone: form.contactPhone.trim() || undefined,
       remark: form.remark.trim() || undefined
@@ -374,34 +459,39 @@ onMounted(async () => {
           </p>
         </div>
 
-        <!-- 第二步：时段下拉 -->
+        <!-- 第二步：时段卡连续多选（R60，自下拉单选升级） -->
         <div v-show="step === 2" class="panel-body">
           <h2 class="panel-title">选择 {{ selectedDate }}（{{ weekdayText }}）的开放时段</h2>
-          <div v-loading="dayLoading" class="slot-picker">
-            <el-select
-              :model-value="selectedTimeslotId"
-              placeholder="下拉选择开放时段"
-              class="slot-select"
-              @update:model-value="pickSlot"
+          <p class="panel-hint">
+            可多选相邻连续时段合并预约（最长 {{ MAX_CONTINUOUS_MINUTES }} 分钟），不支持跨段选择
+          </p>
+          <div v-loading="dayLoading" class="slot-grid">
+            <button
+              v-for="slot in daySlots"
+              :key="slot.timeslotId"
+              type="button"
+              class="slot-card"
+              :class="{
+                'is-selected': isSelected(slot),
+                'is-full': slotFull(slot)
+              }"
+              :disabled="slotFull(slot)"
+              @click="toggleSlot(slot)"
             >
-              <el-option
-                v-for="slot in daySlots"
-                :key="slot.timeslotId"
-                :value="slot.timeslotId"
-                :label="slotLabel(slot)"
-                :disabled="slotFull(slot)"
-              >
-                <span class="slot-option">
-                  <span class="slot-option-time">{{ slotLabel(slot) }}</span>
-                  <span class="slot-option-quota" :class="{ 'is-full': slotFull(slot) }">
-                    {{ slotFull(slot) ? '已约满' : `余 ${slot.maxBookings - slot.currentBookings}` }}
-                  </span>
-                </span>
-              </el-option>
-            </el-select>
-            <p v-if="!dayLoading && daySlots.length === 0" class="slot-hint">当日暂无开放时段</p>
-            <p v-else-if="allDaySlotsFull" class="slot-hint">当日时段已全部约满，请换一天或稍后再试</p>
+              <span class="slot-card-time">{{ slotLabel(slot) }}</span>
+              <span class="slot-card-quota">
+                {{ slotFull(slot) ? '已约满' : `余 ${slot.maxBookings - slot.currentBookings}` }}
+              </span>
+            </button>
+          </div>
+          <p v-if="!dayLoading && daySlots.length === 0" class="slot-hint">当日暂无开放时段</p>
+          <p v-else-if="allDaySlotsFull" class="slot-hint">当日时段已全部约满，请换一天或稍后再试</p>
+          <p v-else-if="selectedSlots.length > 0" class="slot-hint is-active">
+            已选 {{ selectedSlots.length }} 个时段，合计 {{ mergedMinutes }} 分钟（{{ mergedStart?.slice(0, 5) }} ~ {{ mergedEnd?.slice(0, 5) }}）
+          </p>
+          <div class="step2-actions">
             <button type="button" class="ghost-btn" @click="gotoStep(1)">重新选日期</button>
+            <el-button type="primary" round @click="goNextFromStep2">下一步</el-button>
           </div>
         </div>
 
@@ -419,7 +509,12 @@ onMounted(async () => {
             </div>
             <div class="summary-row">
               <dt>预约时段</dt>
-              <dd>{{ selectedSlot ? slotLabel(selectedSlot) : '—' }}</dd>
+              <dd>
+                <template v-if="mergedStart && mergedEnd">
+                  {{ mergedStart.slice(0, 5) }} ~ {{ mergedEnd.slice(0, 5) }}（{{ mergedMinutes }} 分钟）
+                </template>
+                <template v-else>—</template>
+              </dd>
             </div>
             <div class="summary-row">
               <dt>预约人</dt>
@@ -811,42 +906,86 @@ onMounted(async () => {
   color: var(--color-text-disabled);
 }
 
-/* 第二步：时段下拉 */
-.slot-picker {
+/* 第二步：时段卡网格（连续多选，R60） */
+.panel-hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--spacing-sm);
+  min-height: 120px;
+}
+
+.slot-card {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-  min-height: 160px;
-}
-
-.slot-select {
-  max-width: 420px;
-}
-
-.slot-option {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
+  gap: 3px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.slot-option-time {
+.slot-card:not(.is-full):hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-bg);
+}
+
+.slot-card.is-selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-bg);
+  box-shadow: var(--shadow-md);
+}
+
+.slot-card.is-full {
+  background-color: var(--color-bg);
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.slot-card-time {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   font-family: var(--font-family-mono);
+  color: var(--color-text-primary);
 }
 
-.slot-option-quota {
+.slot-card-quota {
   font-size: var(--font-size-xs);
   color: var(--color-success);
 }
 
-.slot-option-quota.is-full {
+.slot-card.is-full .slot-card-quota {
   color: var(--color-text-disabled);
+}
+
+.slot-card.is-selected .slot-card-time,
+.slot-card.is-selected .slot-card-quota {
+  color: var(--color-primary);
 }
 
 .slot-hint {
   margin: 0;
   color: var(--color-text-disabled);
   font-size: var(--font-size-sm);
+}
+
+.slot-hint.is-active {
+  color: var(--color-primary);
+}
+
+.step2-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
 }
 
 .ghost-btn {

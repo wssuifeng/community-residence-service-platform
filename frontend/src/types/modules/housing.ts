@@ -142,6 +142,31 @@ export interface IViewingAppointment {
   appointmentNumber: string
   /** 幽灵字段：后端 VO 不返回 visitorCount；居民端列表仍展示，保留原因同上 */
   visitorCount: number
+  /** 带看人（R59，v1.3 新增；未分配为 null，后端 VO 补齐后点亮） */
+  assigneeId?: number | null
+  assigneeName?: string | null
+}
+
+/** 带看会话消息（R59，v1.3；后端 ViewingMessageVO，会话参与者可读写） */
+export interface IViewingMessage {
+  id: number
+  appointmentId: number
+  senderId: number
+  senderName: string
+  content: string
+  createdAt: string
+}
+
+/** 带看人分配请求（R59；PATCH /viewing-appointments/{id}/assign，管理端） */
+export interface ViewingAppointmentAssignDTO {
+  assigneeId: number
+}
+
+/** 带看人候选选项（R59；最小暴露面仅 ID/姓名/角色） */
+export interface IViewingAssigneeOption {
+  id: number
+  realName: string
+  role: 'STAFF' | 'ADMIN'
 }
 
 /** 创建看房预约请求（接口设计.md 9.12.2.1 请求体，游客可提交） */
