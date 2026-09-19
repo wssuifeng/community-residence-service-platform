@@ -385,10 +385,10 @@ onMounted(load)
   justify-content: center;
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-lg);
-  background: rgba(15, 23, 42, 0.22);
+  background: rgba(15, 23, 42, 0.32);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  opacity: 0.8;
+  opacity: 0.9;
   transition: opacity 0.2s ease, background 0.15s ease;
 }
 
