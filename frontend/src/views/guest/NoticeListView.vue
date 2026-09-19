@@ -310,7 +310,8 @@ onMounted(load)
    悬浮轮播区时完全显形 */
 .pinned-carousel {
   position: relative;
-  margin-bottom: var(--spacing-xl);
+  max-width: 880px;
+  margin: 0 auto var(--spacing-xl);
 }
 
 .pinned-viewport {
@@ -374,33 +375,34 @@ onMounted(load)
 
 /* 缩略图导航：横拉列表内嵌贴底、与主轮播连成一体（用户裁决）；
    常态深透明虚化，悬浮轮播区/选中态显形 */
-/* 缩略图导航：底部居中长条，高透明度容器背景 + 同款虚化 */
+/* 缩略图导航：与轮播容器同宽的贴底长条（用户裁决 v4），
+   高度加大、缩略图卡放大；高透明度容器背景 + 同款虚化 */
 .pinned-thumbs {
   position: absolute;
-  left: 50%;
-  bottom: var(--spacing-md);
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 2;
   display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.18);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  opacity: 0.75;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0.8;
   transition: opacity 0.2s ease, background 0.15s ease;
 }
 
 .pinned-carousel:hover .pinned-thumbs,
 .pinned-thumbs:focus-within {
   opacity: 1;
-  background: rgba(15, 23, 42, 0.34);
+  background: rgba(15, 23, 42, 0.42);
 }
 
 .pinned-thumb {
   position: relative;
-  width: 72px;
+  width: 120px;
   padding: 0;
   border: 2px solid transparent;
   border-radius: var(--radius-md);
@@ -435,15 +437,15 @@ onMounted(load)
 
 .pinned-thumb-index {
   position: absolute;
-  right: 3px;
-  bottom: 3px;
-  min-width: 16px;
-  padding: 0 3px;
+  right: 4px;
+  bottom: 4px;
+  min-width: 20px;
+  padding: 0 4px;
   border-radius: var(--radius-sm);
   background: rgba(15, 23, 42, 0.65);
   color: #fff;
-  font-size: 11px;
-  line-height: 16px;
+  font-size: 12px;
+  line-height: 18px;
   text-align: center;
 }
 
@@ -453,7 +455,6 @@ onMounted(load)
   flex: 0 0 100%;
   display: block;
   aspect-ratio: 16 / 9;
-  max-height: 540px;
   min-height: 260px;
   background: var(--color-bg-hover);
   border-radius: var(--radius-lg);
