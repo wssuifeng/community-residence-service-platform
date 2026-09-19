@@ -385,17 +385,17 @@ onMounted(load)
   justify-content: center;
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-lg);
-  background: rgba(15, 23, 42, 0.32);
+  background: rgba(15, 23, 42, 0.16);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  opacity: 0.9;
+  opacity: 0.75;
   transition: opacity 0.2s ease, background 0.15s ease;
 }
 
 .pinned-carousel:hover .pinned-thumbs,
 .pinned-thumbs:focus-within {
-  opacity: 1;
-  background: rgba(15, 23, 42, 0.42);
+  opacity: 0.88;
+  background: rgba(15, 23, 42, 0.28);
 }
 
 .pinned-thumb {
