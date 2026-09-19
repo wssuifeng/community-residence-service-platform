@@ -52,6 +52,8 @@ public enum ErrorCode {
     /* ---- 预约管理 5401~5499 ---- */
     RESERVATION_CONFLICT(5401, "预约时段冲突"),
     RESERVATION_CANCELLED(5402, "预约已取消"),
+    RESERVATION_PAST_SLOT(5403, "不能预约已过去的日期或时段"),
+    RESERVATION_DATE_LIMIT(5404, "最多可提前 7 天预约"),
 
     /* ---- 评价管理 5501~5599 ---- */
     EVALUATION_NOT_ALLOWED(5501, "工单未完成，不可评价"),
