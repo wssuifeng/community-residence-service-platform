@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
@@ -12,11 +13,20 @@ import { housingStatusLabels } from '@/types/modules/housing'
 
 /** 房源列表（公开）：卡片网格 + 社区/状态/租金/租售/户型/关键字筛选 + 分页；无图房源按序号轮换示例图 */
 
+const route = useRoute()
+const router = useRouter()
+
+/** URL ?keyword= 读取（DEF-047 首页搜索透传；非字符串/空值归一为空串） */
+function keywordFromQuery(): string {
+  const value = route.query.keyword
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 const housings = ref<IHousing[]>([])
 const total = ref(0)
 const page = ref(1)
 const size = ref(12)
-const keyword = ref('')
+const keyword = ref(keywordFromQuery())
 const statusFilter = ref<HousingStatus | ''>('')
 const rentRange = ref('')
 const rentTypeFilter = ref<HousingRentType | ''>('')
@@ -93,6 +103,10 @@ async function load(): Promise<void> {
 
 function handleSearch(): void {
   page.value = 1
+  /* DEF-047：搜索关键词回写 URL（清空时移除参数），首页深链与刷新回显保持一致 */
+  router.replace({
+    query: { ...route.query, keyword: keyword.value.trim() === '' ? undefined : keyword.value.trim() }
+  })
   load()
 }
 
@@ -116,6 +130,20 @@ async function loadCommunities(): Promise<void> {
     communityOptions.value = []
   }
 }
+
+/* 浏览器前进/后退（或首页再次带参跳转）时组件被复用，query 变化需同步重查；
+   页内搜索触发的 replace 与输入框同值，此处不重复请求 */
+watch(
+  () => route.query.keyword,
+  (value) => {
+    const kw = typeof value === 'string' ? value.trim() : ''
+    if (kw !== keyword.value) {
+      keyword.value = kw
+      page.value = 1
+      load()
+    }
+  }
+)
 
 onMounted(() => {
   load()

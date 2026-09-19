@@ -22,6 +22,7 @@ import type {
   INotice,
   INoticeSaveRequest,
   INoticeSaveTargetItem,
+  INoticeTargetItem,
   INoticeViewer,
   NoticePriority,
   NoticeType,
@@ -224,21 +225,26 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
     form.value.publishTime = notice.publishTime ? new Date(notice.publishTime) : null
     form.value.expireTime = notice.expireTime ? new Date(notice.expireTime) : null
     /* DEF-039 回显：置顶开关（0/1 → 布尔）与 targets 拆分回两组选择
-       （V9 起 VO 真实返回；无 targets = 广播/单社区旧语义，保持空选择） */
+       （V9 起 VO 真实返回；无 targets = 广播/单社区旧语义，保持空选择）；
+       DEF-046：GUEST 纯标记回游客可见勾选 */
     form.value.isPinned = notice.isPinned === 1
+    form.value.guestVisible = notice.targets.some((item) => item.targetType === 'GUEST')
     form.value.targetCommunityIds = notice.targets
-      .filter((item) => item.targetType === 'COMMUNITY')
+      .filter((item): item is INoticeTargetItem & { targetId: number } =>
+        item.targetType === 'COMMUNITY' && item.targetId !== null)
       .map((item) => item.targetId)
     form.value.targetBuildingIds = notice.targets
-      .filter((item) => item.targetType === 'BUILDING')
+      .filter((item): item is INoticeTargetItem & { targetId: number } =>
+        item.targetType === 'BUILDING' && item.targetId !== null)
       .map((item) => item.targetId)
     /* 楼栋选项回显：拿不到社区列表时用 VO targetName 补位（楼栋归属社区不在
        编辑者绑定范围外时无社区选项可选，name 兜底保证已选项可读） */
     const knownBuildings = new Set(buildingOptions.value.map((item) => item.id))
     const fallbackBuildings = notice.targets
-      .filter((item) => item.targetType === 'BUILDING' && item.targetName !== null
-        && !knownBuildings.has(item.targetId))
-      .map((item) => ({ id: item.targetId, name: item.targetName as string }))
+      .filter((item): item is INoticeTargetItem & { targetId: number; targetName: string } =>
+        item.targetType === 'BUILDING' && item.targetId !== null
+          && item.targetName !== null && !knownBuildings.has(item.targetId))
+      .map((item) => ({ id: item.targetId, name: item.targetName }))
     if (fallbackBuildings.length > 0) {
       buildingOptions.value = [...buildingOptions.value, ...fallbackBuildings]
     }
@@ -388,6 +394,18 @@ const boundCommunityIds = computed(() => userStore.user?.boundCommunities ?? [])
 const boundCommunities = ref<{ id: number; name: string }[]>([])
 
 async function loadBoundCommunities(): Promise<void> {
+  /* DEF-046：游客可见勾选（超管专属）以社区定向公告为实际载体（纯广播本就游客可见），
+     超管无绑定社区，若不加载社区列表则发布范围/定向目标两个下拉均无选项，
+     勾选项形同虚设——超管改取全量社区列表，社区管理员仍按绑定社区过滤 */
+  if (isSuperAdmin.value) {
+    try {
+      const result = await getCommunityList({ page: 1, size: 200 })
+      boundCommunities.value = result.records.map((item) => ({ id: item.id, name: item.name }))
+    } catch {
+      boundCommunities.value = []
+    }
+    return
+  }
   if (boundCommunityIds.value.length === 0) return
   try {
     const result = await getCommunityList({ page: 1, size: 200 })
@@ -414,6 +432,8 @@ const form = ref({
   targetCommunityIds: [] as number[],
   /** 楼栋级定向目标（BUILDING targets；可跨社区累加） */
   targetBuildingIds: [] as number[],
+  /** 游客可见（GUEST 纯标记 target，DEF-046 V13；仅超管可勾选，ADMIN 勾选后端 403） */
+  guestVisible: false,
   publishTime: new Date() as Date | null,
   expireTime: null as Date | null
 })
@@ -442,13 +462,15 @@ async function handleBuildingCommunityChange(communityId: number | null): Promis
   }
 }
 
-/* 全系统广播与定向范围互斥：勾选广播时清空定向选择（广播 = 无 targets） */
+/* 全系统广播与定向范围互斥：勾选广播时清空定向选择（广播 = 无 targets；
+   游客可见标记同属 targets 一并清空——纯广播本身对游客可见） */
 watch(
   () => form.value.broadcast,
   (broadcast) => {
     if (broadcast) {
       form.value.targetCommunityIds = []
       form.value.targetBuildingIds = []
+      form.value.guestVisible = false
     }
   }
 )
@@ -479,18 +501,23 @@ function resetForm(): void {
   form.value.isPinned = false
   form.value.targetCommunityIds = []
   form.value.targetBuildingIds = []
+  form.value.guestVisible = false
   buildingCommunityId.value = null
   buildingOptions.value = []
   form.value.publishTime = new Date()
   form.value.expireTime = null
 }
 
-/** 组装保存请求体（targets 优先；两组定向均空时回退 communityId 单目标旧写法） */
+/** 组装保存请求体（targets 优先；两组定向均空时回退 communityId 单目标旧写法；
+ *  游客可见勾选追加 GUEST 纯标记 target（DEF-046，无 targetId，仅超管勾选生效）） */
 function buildRequest(): INoticeSaveRequest {
   const targets: INoticeSaveTargetItem[] = [
     ...form.value.targetCommunityIds.map((id) => ({ targetType: 'COMMUNITY' as const, targetId: id })),
     ...form.value.targetBuildingIds.map((id) => ({ targetType: 'BUILDING' as const, targetId: id }))
   ]
+  if (form.value.guestVisible) {
+    targets.push({ targetType: 'GUEST' })
+  }
   return {
     communityId: isSuperAdmin.value && form.value.broadcast
       ? null
@@ -590,8 +617,9 @@ const publishButtonLabel = computed(() =>
 /* ===================== 初始化：深链消费 + 首屏自动选中第一条 ===================== */
 
 onMounted(async () => {
-  /* ADMIN 编辑/创建都需要绑定社区选项（原编辑页缺失此加载致社区名显示裸 ID，迁移顺修） */
-  if (!isSuperAdmin.value) await loadBoundCommunities()
+  /* 社区选项：ADMIN 按绑定社区过滤；DEF-046 起超管也需加载（全量），否则
+     游客可见勾选（超管专属）因无可选社区而不可用 */
+  await loadBoundCommunities()
   const action = route.query.action
   if (action === 'create') {
     enterCreate(false)
@@ -771,14 +799,17 @@ onMounted(async () => {
               <div class="meta-item">
                 <dt class="meta-label">发布范围</dt>
                 <dd class="meta-value">
-                  <!-- DEF-039：targets 真实返回后逐条展示（社区/楼栋分组名），无目标=全系统广播 -->
+                  <!-- DEF-039：targets 真实返回后逐条展示（社区/楼栋分组名），无目标=全系统广播；
+                       DEF-046：GUEST 纯标记展示「游客可见」chip -->
                   <template v-if="current.targets && current.targets.length > 0">
                     <span
                       v-for="target in current.targets"
-                      :key="target.targetType + target.targetId"
+                      :key="`${target.targetType}-${target.targetId ?? 'g'}`"
                       class="scope-chip"
                     >
-                      {{ target.targetName ?? (target.targetType === 'COMMUNITY' ? `社区#${target.targetId}` : `楼栋#${target.targetId}`) }}
+                      {{ target.targetType === 'GUEST'
+                        ? '游客可见'
+                        : (target.targetName ?? (target.targetType === 'COMMUNITY' ? `社区#${target.targetId}` : `楼栋#${target.targetId}`)) }}
                     </span>
                   </template>
                   <span v-else class="scope-chip">全系统广播</span>
@@ -880,6 +911,7 @@ onMounted(async () => {
               <el-form-item label="发布范围">
                 <template v-if="isSuperAdmin">
                   <el-checkbox v-model="form.broadcast">全系统广播（所有社区）</el-checkbox>
+                  <span v-if="form.broadcast" class="form-tip">全系统广播公告对游客可见</span>
                   <el-select
                     v-if="!form.broadcast"
                     v-model="form.communityId"
@@ -970,6 +1002,15 @@ onMounted(async () => {
                   <span class="form-tip is-block">
                     定向社区/楼栋会在发布范围基础上叠加触达；两者均不选 = 仅发布范围所选社区
                   </span>
+                  <!-- DEF-046 游客可见（V13 GUEST 纯标记 target）：仅超管可勾选，
+                       ADMIN 勾选后端 403；广播公告本身对游客可见，故广播态隐藏 -->
+                  <el-checkbox
+                    v-permission="['SUPER_ADMIN']"
+                    v-model="form.guestVisible"
+                    class="guest-visible-check"
+                  >
+                    游客可见（免登录游客可查看此公告）
+                  </el-checkbox>
                 </div>
               </el-form-item>
 
@@ -1382,6 +1423,11 @@ onMounted(async () => {
   display: flex;
   gap: var(--spacing-xs);
   flex-wrap: wrap;
+}
+
+/* 游客可见勾选（DEF-046）：targets-editor 内顶格无表单缩进 */
+.guest-visible-check {
+  margin-left: 0;
 }
 
 .form-tip.is-block {

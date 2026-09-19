@@ -27,6 +27,13 @@ const images = computed<string[]>(() => {
   return housing.value.images.length > 0 ? housing.value.images : ['/images/housing-sample-1.png']
 })
 
+/** 多图导航（DEF-048）：首尾环绕切换；仅手动触发，本页不做自动轮播 */
+function stepImage(direction: 1 | -1): void {
+  const count = images.value.length
+  if (count <= 1) return
+  activeImage.value = (activeImage.value + direction + count) % count
+}
+
 /** 房源状态 → StatusTag 语义色 */
 const statusTagType: Record<HousingStatus, 'completed' | 'pending' | 'canceled'> = {
   AVAILABLE: 'completed',
@@ -122,7 +129,8 @@ onMounted(load)
 
     <template v-else-if="housing">
       <div class="detail-layout">
-        <!-- 左：16:9 主图 + 横向缩略图条（自写，点击切换；单图时隐藏缩略图条） -->
+        <!-- 左：16:9 主图 + 横向缩略图条（DEF-048：左右虚化悬浮箭头切换，多图时显示；
+             缩略图卡点击换主图，悬浮时虚化玻璃背景；单图不显示箭头与缩略图） -->
         <div class="gallery-wrap">
           <div class="gallery">
             <img :src="images[activeImage]" :alt="housing.title" class="gallery-main" />
@@ -132,6 +140,28 @@ onMounted(load)
               :label="housingStatusLabels[housing.status]"
               :type="statusTagType[housing.status]"
             />
+            <button
+              v-if="images.length > 1"
+              type="button"
+              class="gallery-arrow is-left"
+              aria-label="上一张"
+              @click="stepImage(-1)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <button
+              v-if="images.length > 1"
+              type="button"
+              class="gallery-arrow is-right"
+              aria-label="下一张"
+              @click="stepImage(1)"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
           </div>
           <div v-if="images.length > 1" class="gallery-thumbs">
             <button
@@ -374,18 +404,72 @@ onMounted(load)
   z-index: 1;
 }
 
-/* 缩略图条：横向滚动，hover 才显滚动条；选中态主色描边 */
+/* 左右切换箭头（DEF-048）：虚化毛玻璃圆钮，平时半透明，悬浮主图区时完全显形 */
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-circle);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.2s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.gallery:hover .gallery-arrow,
+.gallery-arrow:focus-visible {
+  opacity: 1;
+}
+
+.gallery-arrow:hover {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--color-primary);
+}
+
+.gallery-arrow.is-left {
+  left: var(--spacing-md);
+}
+
+.gallery-arrow.is-right {
+  right: var(--spacing-md);
+}
+
+.gallery-arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 缩略图卡条（DEF-048）：横向滚动，悬浮时整条虚化玻璃底衬 + 卡片上浮；
+   选中态主色描边 */
 .gallery-thumbs {
   display: flex;
   gap: var(--spacing-sm);
   margin-top: var(--spacing-sm);
-  padding-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-md);
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
+  background: transparent;
+  transition: background 0.2s ease;
 }
 
 .gallery-thumbs:hover {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   scrollbar-color: var(--color-text-disabled) transparent;
 }
 
@@ -412,7 +496,12 @@ onMounted(load)
   aspect-ratio: 4 / 3;
   background: var(--color-bg-hover);
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gallery-thumb:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
 
 .gallery-thumb.active {
@@ -562,6 +651,22 @@ onMounted(load)
   min-width: 0;
 }
 
+/* DEF-049：描述与配套设施两栏间的淡色竖直分隔线（对照设计稿 06-房源详情） */
+.description-col + .description-col {
+  position: relative;
+  padding-left: var(--spacing-xl);
+}
+
+.description-col + .description-col::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--spacing-xs);
+  bottom: var(--spacing-xs);
+  width: 1px;
+  background: var(--color-border);
+}
+
 .description-title {
   display: flex;
   align-items: center;
@@ -612,7 +717,7 @@ onMounted(load)
   height: 30px;
 }
 
-/* 响应式：窄屏图上信息下、信息网格 2 列、描述区降单栏 */
+/* 响应式：窄屏图上信息下、信息网格 2 列、描述区降单栏（分隔线随两栏布局一并取消） */
 @media (max-width: 1024px) {
   .detail-layout {
     grid-template-columns: 1fr;
@@ -624,6 +729,14 @@ onMounted(load)
 
   .description {
     grid-template-columns: 1fr;
+  }
+
+  .description-col + .description-col {
+    padding-left: 0;
+  }
+
+  .description-col + .description-col::before {
+    display: none;
   }
 }
 </style>

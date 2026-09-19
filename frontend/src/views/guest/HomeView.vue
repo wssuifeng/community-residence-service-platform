@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
@@ -20,6 +20,15 @@ const housingLoading = ref(false)
 const noticeLoading = ref(false)
 const searchKeyword = ref('')
 
+/** 搜索对象：房源列表与公告列表均已支持 keyword 参数（DEF-047），切换搜索落点 */
+type SearchScope = 'housing' | 'notice'
+const searchScope = ref<SearchScope>('housing')
+
+/** 搜索占位文案随对象切换，与列表页搜索能力一致（房源：标题/地址；公告：标题/内容） */
+const searchPlaceholder = computed(() =>
+  searchScope.value === 'notice' ? '搜索公告标题 / 内容' : '搜索房源标题 / 地址'
+)
+
 /** 房源状态 → StatusTag 语义色（可租=绿 / 已预订=黄 / 已出租、已下架=灰） */
 const statusTagType: Record<HousingStatus, 'completed' | 'pending' | 'canceled'> = {
   AVAILABLE: 'completed',
@@ -38,9 +47,20 @@ function coverImage(housing: IHousing, index: number): string {
   return housing.images[0] ?? `/images/housing-sample-${(index % 3) + 1}.png`
 }
 
-/* Hero 搜索：房源列表页暂无 URL query 关键字支持，统一落地到房源列表页继续筛选 */
+/* Hero 搜索实装（DEF-047）：按搜索对象跳转对应列表页并透传 keyword
+   （列表页经 URL query 回显并调 GET /housings?keyword= / GET /notices?keyword=）；
+   关键词为空时落对应列表页浏览全部 */
 function handleSearch(): void {
-  router.push('/guest/housings')
+  const keyword = searchKeyword.value.trim()
+  if (searchScope.value === 'notice') {
+    router.push(
+      keyword === '' ? '/guest/notices' : { path: '/guest/notices', query: { keyword } }
+    )
+    return
+  }
+  router.push(
+    keyword === '' ? '/guest/housings' : { path: '/guest/housings', query: { keyword } }
+  )
 }
 
 async function loadHousings(): Promise<void> {
@@ -81,6 +101,27 @@ onMounted(() => {
         <h1 class="hero-title">回家，是件值得期待的事</h1>
         <p class="hero-subtitle">报修 · 反馈 · 预约 · 看房，社区服务一站式办理</p>
         <form class="hero-search" role="search" @submit.prevent="handleSearch">
+          <!-- 搜索对象切换（DEF-047）：房源 / 公告双落点 -->
+          <div class="hero-search-scope" role="group" aria-label="搜索对象">
+            <button
+              type="button"
+              class="scope-option"
+              :class="{ active: searchScope === 'housing' }"
+              :aria-pressed="searchScope === 'housing'"
+              @click="searchScope = 'housing'"
+            >
+              房源
+            </button>
+            <button
+              type="button"
+              class="scope-option"
+              :class="{ active: searchScope === 'notice' }"
+              :aria-pressed="searchScope === 'notice'"
+              @click="searchScope = 'notice'"
+            >
+              公告
+            </button>
+          </div>
           <svg class="hero-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <circle cx="11" cy="11" r="7" />
             <line x1="21" y1="21" x2="16.5" y2="16.5" />
@@ -89,8 +130,8 @@ onMounted(() => {
             v-model="searchKeyword"
             type="search"
             class="hero-search-input"
-            placeholder="搜索房源、公告…"
-            aria-label="搜索房源、公告"
+            :placeholder="searchPlaceholder"
+            :aria-label="searchPlaceholder"
           />
           <button type="submit" class="hero-search-btn">搜索</button>
         </form>
@@ -278,6 +319,36 @@ onMounted(() => {
   width: 18px;
   height: 18px;
   color: var(--color-text-disabled);
+}
+
+/* 搜索对象切换：胶囊分段控件（毛玻璃内嵌），选中项主色实底 */
+.hero-search-scope {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: rgba(59, 109, 255, 0.1);
+}
+
+.scope-option {
+  padding: 4px var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.scope-option:hover {
+  color: var(--color-primary);
+}
+
+.scope-option.active {
+  background: var(--color-primary);
+  color: #fff;
 }
 
 .hero-search-input {
