@@ -35,7 +35,7 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @Operation(summary = "创建预约", description = "时段须落在资源可预约模板内，冲突检测")
+    @Operation(summary = "创建预约", description = "时段须落在资源可预约模板内，冲突检测；仅可约今天起 7 天内，过去日期/已结束时段拒绝")
     @PreAuthorize("hasRole('RESIDENT')")
     @PostMapping("/resource-reservations")
     public ApiResponse<ReservationVO> create(@RequestBody @Valid CreateReservationDTO dto) {

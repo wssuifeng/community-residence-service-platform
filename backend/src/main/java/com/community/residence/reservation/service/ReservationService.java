@@ -60,6 +60,9 @@ public class ReservationService {
     /** 违约冻结阈值配置键（缺省 3 次） */
     private static final String CONFIG_VIOLATION_MAX = "violation.max_count";
 
+    /** 预约可提前的最大天数（today+N 当日为边界，DEF-053 业务规则） */
+    private static final int MAX_ADVANCE_DAYS = 7;
+
     private final ResourceReservationMapper reservationMapper;
     private final ViolationRecordMapper violationRecordMapper;
     private final PublicResourceMapper resourceMapper;
@@ -70,7 +73,9 @@ public class ReservationService {
     private final RedissonClient redissonClient;
 
     /**
-     * 创建预约：Slot Grid 模型（08 §3.7 定案）。三道防线：
+     * 创建预约：Slot Grid 模型（08 §3.7 定案）。日期窗口（DEF-051/053）：
+     * 仅可约今天起 7 天内，过去日期与今日已结束时段服务端拒绝（endTime<=now
+     * 口径对齐 DEF-045 看房预约，进行中时段仍可约）。三道防线：
      * ① 栅格对齐校验（起止须为资源 slot_unit 整数倍，400）+ 模板覆盖校验；
      * ② Redisson 锁内对请求覆盖的每个栅格逐一检查 booked < capacity
      *    （同居民同资源同起始时段重复拦截 + 全局逐格容量检查）；
@@ -86,6 +91,23 @@ public class ReservationService {
         if (dto.getEndTime().isBefore(dto.getStartTime())
                 || dto.getEndTime().equals(dto.getStartTime())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "结束时间必须晚于开始时间");
+        }
+
+        /* DEF-051/053：预约日期窗口服务端权威校验（前端日期控件仅挡常规入口，
+           API 直调必须在此拦截）。判断顺序：过去日期 → 超出 7 天窗口
+           （today+7 当日含边界内可约）→ 今日已结束时段（endTime<=now 即过去，
+           与可约时段展示及看房预约 DEF-045 同口径） */
+        LocalDate today = LocalDate.now();
+        if (dto.getReserveDate().isBefore(today)) {
+            throw new BusinessException(ErrorCode.RESERVATION_PAST_SLOT,
+                    "不能预约过去日期，请选择今天起 " + MAX_ADVANCE_DAYS + " 天内的日期");
+        }
+        if (dto.getReserveDate().isAfter(today.plusDays(MAX_ADVANCE_DAYS))) {
+            throw new BusinessException(ErrorCode.RESERVATION_DATE_LIMIT,
+                    "最多可提前 " + MAX_ADVANCE_DAYS + " 天预约");
+        }
+        if (dto.getReserveDate().isEqual(today) && !dto.getEndTime().isAfter(LocalTime.now())) {
+            throw new BusinessException(ErrorCode.RESERVATION_PAST_SLOT, "不能预约已过去的时段");
         }
 
         /* 防线①a：起止须为资源栅格粒度整数倍（Slot Grid，08 §3.7） */
