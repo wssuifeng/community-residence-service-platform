@@ -11,6 +11,7 @@ import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.housing.vo.ViewingAppointmentVO;
 import com.community.residence.reservation.mapper.ViolationRecordMapper;
 import com.community.residence.resident.mapper.ResidentMapper;
+import com.community.residence.resident.service.SysConfigService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,8 @@ class ViewingAppointmentConflictFixTest {
     @Mock
     private ViolationRecordMapper violationRecordMapper;
     @Mock
+    private SysConfigService sysConfigService;
+    @Mock
     private RedissonClient redissonClient;
     @Mock
     private RLock lock;
@@ -77,6 +80,10 @@ class ViewingAppointmentConflictFixTest {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
+        /* R60 连续上限缺省 120 会先于冲突检测拦截 240 分钟「完全包含」用例，
+           本测试聚焦冲突矩阵，上限放宽为一天（1440 分钟） */
+        lenient().when(sysConfigService.getValue("viewing.max_continuous_minutes"))
+                .thenReturn("1440");
 
         housing = new Housing();
         housing.setId(1L);

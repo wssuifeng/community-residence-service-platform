@@ -44,6 +44,7 @@ public class DataScopeInterceptor implements InnerInterceptor {
             "notice", "notice_target", "notice_view_record",
             "feedback_attachment", "feedback_message",
             "violation_record", "unsatisfied_followup",
+            "viewing_message",
             "sys_user", "auth_token_blacklist",
             "notification", "notification_channel_log",
             "housing_timeslot", "sys_task_log");

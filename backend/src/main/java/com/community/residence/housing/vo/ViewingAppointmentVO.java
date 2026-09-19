@@ -28,6 +28,12 @@ public class ViewingAppointmentVO {
     @Schema(description = "房源标题")
     private String housingTitle;
 
+    @Schema(description = "带看人ID（null=未分配；R59）")
+    private Long assigneeId;
+
+    @Schema(description = "带看人姓名（未分配为空）")
+    private String assigneeName;
+
     @Schema(description = "所属社区ID")
     private Long communityId;
 
@@ -58,6 +64,7 @@ public class ViewingAppointmentVO {
         vo.setUserId(entity.getUserId());
         vo.setVisitorName(entity.getVisitorName());
         vo.setHousingId(entity.getHousingId());
+        vo.setAssigneeId(entity.getAssignedStaffId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setAppointmentDate(entity.getAppointmentDate());
         vo.setStartTime(entity.getStartTime());
