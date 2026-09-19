@@ -344,13 +344,13 @@ onMounted(load)
   color: var(--color-text-primary);
   box-shadow: var(--shadow-md);
   cursor: pointer;
-  opacity: 0.45;
+  opacity: 0.26;
   transition: opacity 0.2s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .pinned-carousel:hover .carousel-arrow,
 .carousel-arrow:focus-visible {
-  opacity: 1;
+  opacity: 0.85;
 }
 
 .carousel-arrow:hover {
@@ -362,8 +362,9 @@ onMounted(load)
   left: var(--spacing-md);
 }
 
+/* 右箭头避让右侧文字容器（42% 宽），不与其重叠 */
 .carousel-arrow.is-right {
-  right: var(--spacing-md);
+  right: calc(42% + var(--spacing-md));
 }
 
 .carousel-arrow svg {
@@ -373,26 +374,28 @@ onMounted(load)
 
 /* 缩略图导航：横拉列表内嵌贴底、与主轮播连成一体（用户裁决）；
    常态深透明虚化，悬浮轮播区/选中态显形 */
+/* 缩略图导航：底部居中长条，高透明度容器背景 + 同款虚化 */
 .pinned-thumbs {
   position: absolute;
-  left: var(--spacing-md);
+  left: 50%;
   bottom: var(--spacing-md);
+  transform: translateX(-50%);
   z-index: 2;
   display: flex;
   gap: var(--spacing-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.38);
+  background: rgba(15, 23, 42, 0.18);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  opacity: 0.55;
+  opacity: 0.75;
   transition: opacity 0.2s ease, background 0.15s ease;
 }
 
 .pinned-carousel:hover .pinned-thumbs,
 .pinned-thumbs:focus-within {
   opacity: 1;
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(15, 23, 42, 0.34);
 }
 
 .pinned-thumb {
@@ -449,7 +452,9 @@ onMounted(load)
   position: relative;
   flex: 0 0 100%;
   display: block;
-  min-height: 300px;
+  aspect-ratio: 16 / 9;
+  max-height: 540px;
+  min-height: 260px;
   background: var(--color-bg-hover);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -490,7 +495,7 @@ onMounted(load)
   flex-direction: column;
   justify-content: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-lg) var(--spacing-xl);
+  padding: var(--spacing-lg) var(--spacing-xl) calc(var(--spacing-xl) + 6%);
   min-width: 0;
 }
 
@@ -665,11 +670,19 @@ onMounted(load)
 /* 响应式：窄屏置顶卡降上下结构，缩略图导航维持居中 */
 @media (max-width: 768px) {
   .pinned-card {
+    aspect-ratio: auto;
     min-height: 240px;
   }
 
-  .pinned-cover {
-    inset: 0;
+  .pinned-main {
+    width: 100%;
+    top: auto;
+    justify-content: flex-end;
+    padding-bottom: var(--spacing-xl);
+  }
+
+  .carousel-arrow.is-right {
+    right: var(--spacing-md);
   }
 }
 </style>
