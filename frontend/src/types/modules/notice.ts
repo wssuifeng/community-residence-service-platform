@@ -48,24 +48,28 @@ export const targetAudienceLabels: Record<TargetAudience, string> = {
   ALL: '全部居民'
 }
 
-/** 公告目标范围类型（V9 R25 v1.2：COMMUNITY-社区, BUILDING-楼栋） */
-export type NoticeTargetType = 'COMMUNITY' | 'BUILDING'
+/**
+ * 公告目标范围类型（V9 R25 v1.2：COMMUNITY-社区, BUILDING-楼栋；
+ * DEF-046 V13：GUEST-游客可见，仅超管可勾选、无目标 ID 纯标记）
+ */
+export type NoticeTargetType = 'COMMUNITY' | 'BUILDING' | 'GUEST'
 
 /**
  * 公告目标范围项（后端 NoticeVO.TargetItem，V9 起真实返回）：
- * 无 targets 记录 = 全系统广播（仅超管）
+ * 无 targets 记录 = 全系统广播（仅超管）；
+ * GUEST 项为纯标记（DEF-046 V13），targetId/targetName 为 null
  */
 export interface INoticeTargetItem {
   targetType: NoticeTargetType
-  targetId: number
+  targetId: number | null
   /** 社区名/楼栋名，可空 */
   targetName: string | null
 }
 
-/** 公告目标范围项请求体（后端 TargetItemDTO 仅接收 targetType/targetId） */
+/** 公告目标范围项请求体（后端 TargetItemDTO；GUEST 纯标记不传 targetId） */
 export interface INoticeSaveTargetItem {
   targetType: NoticeTargetType
-  targetId: number
+  targetId?: number
 }
 
 /**
