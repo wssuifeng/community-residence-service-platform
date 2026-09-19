@@ -81,15 +81,15 @@ public class NoticeVO {
         return vo;
     }
 
-    /** 目标范围项（R25：COMMUNITY 社区 / BUILDING 楼栋） */
+    /** 目标范围项（R25：COMMUNITY 社区 / BUILDING 楼栋 / GUEST 游客可见） */
     @Data
     @Schema(description = "公告目标范围")
     public static class TargetItem {
 
-        @Schema(description = "目标类型：COMMUNITY-社区, BUILDING-楼栋")
+        @Schema(description = "目标类型：COMMUNITY-社区, BUILDING-楼栋, GUEST-游客可见（DEF-046）")
         private String targetType;
 
-        @Schema(description = "目标ID")
+        @Schema(description = "目标ID（GUEST 目标为空）")
         private Long targetId;
 
         @Schema(description = "目标名称（社区名/楼栋名，可空）")

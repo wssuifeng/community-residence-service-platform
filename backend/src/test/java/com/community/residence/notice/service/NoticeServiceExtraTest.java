@@ -119,14 +119,21 @@ class NoticeServiceExtraTest {
     }
 
     @Test
-    @DisplayName("详情：匿名访问未过期已发布公告成功（附社区与发布人名称）")
+    @DisplayName("详情：匿名访问未过期已发布公告成功（GUEST+COMMUNITY 开放游客场景，DEF-046 后口径）")
     void getById_publishedNotExpired_ok() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             mocked.when(() -> com.community.residence.common.context.SecurityUtils
                     .hasRole(anyString())).thenReturn(false);
             when(noticeMapper.selectById(1L)).thenReturn(published);
-            when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target));
+            /* DEF-046：游客仅见纯广播/含 GUEST 目标公告——纯 COMMUNITY 定向已改 404
+               （见 NoticeGuestVisibilityTest）；此处用 GUEST+COMMUNITY 组合保留
+               communityName 装配断言（游客可见且定向社区的公告） */
+            NoticeTarget guestTarget = new NoticeTarget();
+            guestTarget.setNoticeId(1L);
+            guestTarget.setTargetType("GUEST");
+            guestTarget.setTargetId(0L);
+            when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target, guestTarget));
             when(communityService.requireCommunity(1L)).thenReturn(community);
             com.community.residence.auth.entity.SysUser publisher =
                     new com.community.residence.auth.entity.SysUser();
