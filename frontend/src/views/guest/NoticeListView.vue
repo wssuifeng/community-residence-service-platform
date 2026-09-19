@@ -309,6 +309,7 @@ onMounted(load)
 /* 置顶轮播（DEF-050）：整宽视口一次一张卡；箭头/缩略图平时半透明虚化，
    悬浮轮播区时完全显形 */
 .pinned-carousel {
+  position: relative;
   margin-bottom: var(--spacing-xl);
 }
 
@@ -370,12 +371,28 @@ onMounted(load)
   height: 18px;
 }
 
-/* 缩略图导航：小封面卡 + 序号角标；平时半透明，悬浮轮播区/选中态显形 */
+/* 缩略图导航：横拉列表内嵌贴底、与主轮播连成一体（用户裁决）；
+   常态深透明虚化，悬浮轮播区/选中态显形 */
 .pinned-thumbs {
+  position: absolute;
+  left: var(--spacing-md);
+  bottom: var(--spacing-md);
+  z-index: 2;
   display: flex;
-  justify-content: center;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background: rgba(15, 23, 42, 0.38);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0.55;
+  transition: opacity 0.2s ease, background 0.15s ease;
+}
+
+.pinned-carousel:hover .pinned-thumbs,
+.pinned-thumbs:focus-within {
+  opacity: 1;
+  background: rgba(15, 23, 42, 0.55);
 }
 
 .pinned-thumb {
@@ -403,6 +420,7 @@ onMounted(load)
   border-color: var(--color-primary);
   opacity: 1;
   filter: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 
 .pinned-thumb img {
@@ -456,24 +474,23 @@ onMounted(load)
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.12) 45%, rgba(15, 23, 42, 0) 70%);
+  background: linear-gradient(to left, rgba(15, 23, 42, 0.58) 0%, rgba(15, 23, 42, 0.22) 42%, rgba(15, 23, 42, 0) 68%);
 }
 
-/* 文字描述虚化浮层：毛玻璃玻璃底，浮于实体背景之上 */
+/* 文字信息容器：右侧竖排、背景全透明（用户裁决——无容器底色，
+   可读性由卡片级右侧压暗渐变承载） */
 .pinned-main {
   position: absolute;
-  left: 0;
+  top: 0;
   right: 0;
   bottom: 0;
   z-index: 1;
+  width: 42%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md);
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(14px) saturate(1.25);
-  -webkit-backdrop-filter: blur(14px) saturate(1.25);
-  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  padding: var(--spacing-lg) var(--spacing-xl);
   min-width: 0;
 }
 
