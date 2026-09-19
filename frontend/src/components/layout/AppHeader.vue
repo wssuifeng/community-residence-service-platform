@@ -348,10 +348,21 @@ async function handleBellItemClick(item: {
   white-space: nowrap;
 }
 
-/* 平板端（768~1199px）：导航可横向滚动 */
-@media (min-width: 768px) and (max-width: 1199px) {
+/* 窄屏（<1200px，平板与手机）：导航项总宽超出可用空间时横向滚动兜底
+   （居民端导航增至 8 项），项保持单行不收缩，避免挤压换行 */
+@media (max-width: 1199px) {
   .app-header-nav {
     overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .app-header-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .app-header-nav-item {
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 }
 </style>
