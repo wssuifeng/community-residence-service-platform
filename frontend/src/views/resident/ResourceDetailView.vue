@@ -4,13 +4,17 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getResource, getTimeslotList } from '@/api/community'
 import { getMyResidenceRelations } from '@/api/resident'
+import { listAvailableTimeslots } from '@/api/reservation'
+import HorizontalScroller from '@/components/common/HorizontalScroller.vue'
 import type { IPublicResource, IResourceTimeslot, ResourceType } from '@/types/modules/community'
+import type { IAvailableTimeslot } from '@/types/modules/reservation'
 import { resourceTypeLabels } from '@/types/modules/community'
 
 /**
  * 资源详情（居民端三段预约流第二段，视觉对齐房源详情）：
- * 左资源主视觉（类型图标）+ 右信息面板；下方周循环开放时段表（周一~周日）；
- * 醒目「预约该资源」按钮进入预约子页。非本人入住社区的资源显示不可约空态。
+ * 左资源主视觉（类型图标）+ 右信息面板；下方「可约时段」横拉卡列表（未来 7 天，DEF-057）
+ * 与周循环开放时段表（周一~周日）；醒目「预约该资源」按钮进入预约子页。
+ * 非本人入住社区的资源显示不可约空态。
  */
 
 const route = useRoute()
@@ -65,6 +69,60 @@ function timeRange(slot: IResourceTimeslot): string {
   return `${slot.startTime.slice(0, 5)} ~ ${slot.endTime.slice(0, 5)}`
 }
 
+/* ---------- 可约时段横拉列表（DEF-057）：available-slots 接口按未来 7 天窗口 ---------- */
+
+function toDateInput(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+const BOOKABLE_WINDOW_DAYS = 7
+const windowStart = toDateInput(new Date())
+const windowEnd = toDateInput(new Date(Date.now() + BOOKABLE_WINDOW_DAYS * 24 * 60 * 60 * 1000))
+const todayISO = windowStart
+
+const WEEKDAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+
+const bookableSlots = ref<IAvailableTimeslot[]>([])
+const bookableLoading = ref(false)
+
+const sortedBookableSlots = computed(() =>
+  [...bookableSlots.value].sort(
+    (a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime)
+  )
+)
+
+function bookableFull(slot: IAvailableTimeslot): boolean {
+  return slot.status === 'FULL' || slot.currentBookings >= slot.maxBookings
+}
+
+function bookableDateText(date: string): string {
+  const parts = date.split('-')
+  const month = Number(parts[1])
+  const day = Number(parts[2])
+  return Number.isNaN(month) || Number.isNaN(day) ? date : `${month}月${day}日`
+}
+
+function bookableWeekday(date: string): string {
+  const parsed = new Date(`${date}T00:00:00`)
+  return Number.isNaN(parsed.getTime()) ? '' : WEEKDAY_NAMES[parsed.getDay()]
+}
+
+/* 可约时段为辅助展示信息，加载失败静默降级为空态，不阻塞详情主体 */
+async function loadBookableSlots(): Promise<void> {
+  bookableLoading.value = true
+  try {
+    bookableSlots.value = await listAvailableTimeslots(resourceId, {
+      startDate: windowStart,
+      endDate: windowEnd
+    })
+  } catch {
+    bookableSlots.value = []
+  } finally {
+    bookableLoading.value = false
+  }
+}
+
 async function load(): Promise<void> {
   loading.value = true
   try {
@@ -80,6 +138,7 @@ async function load(): Promise<void> {
     resource.value = detail
     const slotPage = await getTimeslotList(resourceId, { page: 1, size: 100 })
     templates.value = slotPage.records
+    void loadBookableSlots()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载资源详情失败')
   } finally {
@@ -169,6 +228,36 @@ onMounted(load)
           </div>
         </div>
       </div>
+
+      <!-- 可约时段横拉列表（DEF-057）：未来 7 天具体日期卡，毛玻璃箭头同款交互 -->
+      <section class="slots-section">
+        <h2 class="panel-title">
+          可约时段
+          <span class="bookable-window">未来 {{ BOOKABLE_WINDOW_DAYS }} 天</span>
+        </h2>
+        <div v-loading="bookableLoading" class="bookable-body">
+          <HorizontalScroller v-if="sortedBookableSlots.length > 0">
+            <article
+              v-for="slot in sortedBookableSlots"
+              :key="`${slot.date}#${slot.timeslotId}`"
+              class="bookable-card"
+              :class="{ 'is-full': bookableFull(slot) }"
+            >
+              <span class="bookable-date">
+                {{ bookableDateText(slot.date) }}
+                <em>{{ slot.date === todayISO ? '今天' : bookableWeekday(slot.date) }}</em>
+              </span>
+              <span class="bookable-time">
+                {{ slot.startTime.slice(0, 5) }} ~ {{ slot.endTime.slice(0, 5) }}
+              </span>
+              <span class="bookable-quota">
+                {{ bookableFull(slot) ? '已约满' : `余 ${slot.maxBookings - slot.currentBookings}` }}
+              </span>
+            </article>
+          </HorizontalScroller>
+          <p v-else class="slots-empty">未来 {{ BOOKABLE_WINDOW_DAYS }} 天暂无可约时段</p>
+        </div>
+      </section>
 
       <!-- 周循环开放时段表：周一~周日分组，仅列开放时段 -->
       <section class="slots-section">
@@ -369,6 +458,72 @@ onMounted(load)
 
 .panel-paragraph:last-child {
   margin-bottom: 0;
+}
+
+/* 可约时段横拉卡（DEF-057）：日期 + 时间 + 余量三行，约满置灰；仅展示，预约走三段子页 */
+.bookable-window {
+  margin-left: auto;
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.bookable-body {
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.bookable-card {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 118px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+.bookable-card.is-full {
+  background: var(--color-bg);
+  opacity: 0.55;
+}
+
+.bookable-date {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.bookable-date em {
+  font-style: normal;
+  color: var(--color-text-disabled);
+}
+
+.bookable-time {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-mono);
+  color: var(--color-text-primary);
+}
+
+.bookable-quota {
+  font-size: var(--font-size-xs);
+  color: var(--color-success);
+}
+
+.bookable-card.is-full .bookable-quota {
+  color: var(--color-text-disabled);
 }
 
 /* 周循环时段表 */
