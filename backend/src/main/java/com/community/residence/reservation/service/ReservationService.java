@@ -60,6 +60,12 @@ public class ReservationService {
     /** 违约冻结阈值配置键（缺省 3 次） */
     private static final String CONFIG_VIOLATION_MAX = "violation.max_count";
 
+    /** R60 连续时长上限配置键（缺省 120 分钟） */
+    private static final String CONFIG_MAX_CONTINUOUS = "reservation.max_continuous_minutes";
+
+    /** R60 连续时长上限缺省值（sys_config 键未初始化时生效） */
+    private static final int DEFAULT_MAX_CONTINUOUS_MINUTES = 120;
+
     /** 预约可提前的最大天数（today+N 当日为边界，DEF-053 业务规则） */
     private static final int MAX_ADVANCE_DAYS = 7;
 
@@ -93,6 +99,14 @@ public class ReservationService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "结束时间必须晚于开始时间");
         }
 
+        /* R60 连续时长上限（sys_config reservation.max_continuous_minutes，缺省 120）：
+           连续多段合并提交的超长请求 API 直调时由服务端兜底拒绝，消息含上限值 */
+        int maxMinutes = readMaxContinuousMinutes(CONFIG_MAX_CONTINUOUS);
+        if (java.time.Duration.between(dto.getStartTime(), dto.getEndTime()).toMinutes() > maxMinutes) {
+            throw new BusinessException(ErrorCode.RESERVATION_DURATION_LIMIT,
+                    "单次预约最长 " + maxMinutes + " 分钟");
+        }
+
         /* DEF-051/053：预约日期窗口服务端权威校验（前端日期控件仅挡常规入口，
            API 直调必须在此拦截）。判断顺序：过去日期 → 超出 7 天窗口
            （today+7 当日含边界内可约）→ 今日已结束时段（endTime<=now 即过去，
@@ -118,10 +132,11 @@ public class ReservationService {
                     "预约起止时间必须为预约最小单位（" + slotUnit + " 分钟）的整数倍");
         }
 
-        /* 防线①b：时段须完全落在该资源当日的某个可预约模板内 */
-        ResourceTimeslot template = findCoveringTemplate(resource.getId(),
-                dto.getReserveDate(), dto.getStartTime(), dto.getEndTime());
-        if (template == null) {
+        /* 防线①b：时段须落在该资源当日可约模板段的并集内（R60 区间覆盖：
+           相邻模板可跨段，段间有间隙拒绝；原单模板覆盖在连续多段合并提交
+           场景会误拒，升级为并集口径） */
+        if (!isCoveredByTemplate(resource.getId(), dto.getReserveDate(),
+                dto.getStartTime(), dto.getEndTime())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "所选时间不在资源可预约时段内");
         }
 
@@ -404,18 +419,19 @@ public class ReservationService {
         }
     }
 
-    /** 找到完全覆盖所选时间段的当日模板（返回 null 表示时段非法） */
-    private ResourceTimeslot findCoveringTemplate(Long resourceId, LocalDate date,
-                                                  LocalTime start, LocalTime end) {
+    /** 当日可约模板段并集是否完整覆盖 [start, end]（R60 区间覆盖，TimeslotCoverage 口径） */
+    private boolean isCoveredByTemplate(Long resourceId, LocalDate date,
+                                        LocalTime start, LocalTime end) {
         int dayOfWeek = date.getDayOfWeek().getValue();
-        return timeslotMapper.selectList(new LambdaQueryWrapper<ResourceTimeslot>()
-                        .eq(ResourceTimeslot::getResourceId, resourceId)
-                        .eq(ResourceTimeslot::getDayOfWeek, dayOfWeek)
-                        .eq(ResourceTimeslot::getIsAvailable, 1))
+        List<TimeslotCoverage.Segment> segments = timeslotMapper.selectList(
+                        new LambdaQueryWrapper<ResourceTimeslot>()
+                                .eq(ResourceTimeslot::getResourceId, resourceId)
+                                .eq(ResourceTimeslot::getDayOfWeek, dayOfWeek)
+                                .eq(ResourceTimeslot::getIsAvailable, 1))
                 .stream()
-                .filter(t -> !start.isBefore(t.getStartTime()) && !end.isAfter(t.getEndTime()))
-                .findFirst()
-                .orElse(null);
+                .map(t -> new TimeslotCoverage.Segment(t.getStartTime(), t.getEndTime()))
+                .toList();
+        return TimeslotCoverage.isCovered(segments, start, end);
     }
 
     /* 容量校验（confirm 用，排除自身）：Slot Grid 逐格口径——请求覆盖的每个
@@ -444,6 +460,22 @@ public class ReservationService {
             if (booked >= capacity) {
                 throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段预约已满");
             }
+        }
+    }
+
+    /* R60 连续时长上限读取：sys_config 键缺省/非法回落 120（freezeIfExceeded 同模式） */
+    private int readMaxContinuousMinutes(String key) {
+        String value = sysConfigService.getValue(key);
+        if (value == null) {
+            return DEFAULT_MAX_CONTINUOUS_MINUTES;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : DEFAULT_MAX_CONTINUOUS_MINUTES;
+        } catch (NumberFormatException e) {
+            log.warn("连续时长上限配置不合法，使用缺省 {}：key={}, value={}",
+                    DEFAULT_MAX_CONTINUOUS_MINUTES, key, value);
+            return DEFAULT_MAX_CONTINUOUS_MINUTES;
         }
     }
 

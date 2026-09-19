@@ -87,6 +87,10 @@ class ReservationConflictFixTest {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
+        /* R60 连续上限缺省 120 会先于冲突检测拦截 240 分钟「完全包含」用例，
+           本测试聚焦冲突矩阵，上限放宽为一天（1440 分钟） */
+        lenient().when(sysConfigService.getValue("reservation.max_continuous_minutes"))
+                .thenReturn("1440");
         resource = new PublicResource();
         resource.setId(1L);
         resource.setCommunityId(1L);

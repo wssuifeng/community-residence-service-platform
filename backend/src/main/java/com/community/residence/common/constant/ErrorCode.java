@@ -5,7 +5,7 @@ import lombok.Getter;
 
 /**
  * 统一错误码定义（接口设计.md §3：HTTP 层 400/401/403/404/500，
- * 业务错误码按模块分段 5001~5599）。
+ * 业务错误码按模块分段 5001~5899）。
  * 业务异常统一返回 HTTP 200 + 5xxx 业务码，由 GlobalExceptionHandler 映射。
  */
 @Getter
@@ -54,6 +54,7 @@ public enum ErrorCode {
     RESERVATION_CANCELLED(5402, "预约已取消"),
     RESERVATION_PAST_SLOT(5403, "不能预约已过去的日期或时段"),
     RESERVATION_DATE_LIMIT(5404, "最多可提前 7 天预约"),
+    RESERVATION_DURATION_LIMIT(5405, "单次预约超过连续时长上限"),
 
     /* ---- 评价管理 5501~5599 ---- */
     EVALUATION_NOT_ALLOWED(5501, "工单未完成，不可评价"),
@@ -64,7 +65,9 @@ public enum ErrorCode {
     BIND_ROLE_INVALID(5702, "仅社区管理员可绑定社区"),
 
     /* ---- 看房预约 5801~5899 ---- */
-    PAST_SLOT(5804, "不能预约已过去的时段");
+    PAST_SLOT(5804, "不能预约已过去的时段"),
+    VIEWING_ASSIGNEE_INVALID(5805, "目标账号不可分配"),
+    VIEWING_DURATION_LIMIT(5806, "单次看房预约超过连续时长上限");
 
     private final int code;
     private final String message;
