@@ -22,7 +22,7 @@ public class CreateNoticeDTO {
     @Schema(description = "目标社区ID（单目标旧写法，向后兼容；新调用请用 targets）")
     private Long communityId;
 
-    @Schema(description = "目标范围列表（R25 v1.2：多社区/楼栋定向；空=全系统广播仅超管）")
+    @Schema(description = "目标范围列表（R25 v1.2：多社区/楼栋定向；DEF-046：支持 GUEST 游客可见目标仅超管；空=全系统广播仅超管）")
     private List<TargetItemDTO> targets;
 
     @Schema(description = "置顶：0-普通, 1-置顶（R25 v1.2）")
@@ -61,12 +61,11 @@ public class CreateNoticeDTO {
     @Schema(description = "公告目标范围项")
     public static class TargetItemDTO {
 
-        @Schema(description = "目标类型：COMMUNITY-社区, BUILDING-楼栋")
+        @Schema(description = "目标类型：COMMUNITY-社区, BUILDING-楼栋, GUEST-游客可见（DEF-046，仅超管）")
         @NotBlank(message = "目标类型不能为空")
         private String targetType;
 
-        @Schema(description = "目标ID")
-        @NotNull(message = "目标ID不能为空")
+        @Schema(description = "目标ID（COMMUNITY/BUILDING 必填；GUEST 不传，落库固定 0）")
         private Long targetId;
     }
 }

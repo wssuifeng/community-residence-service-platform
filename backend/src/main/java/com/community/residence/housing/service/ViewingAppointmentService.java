@@ -58,6 +58,7 @@ public class ViewingAppointmentService {
 
     /**
      * 创建预约：居民取令牌身份；游客必填姓名电话；时段落在房源模板内 + 冲突检测。
+     * DEF-045：今日已结束时段（endTime<=now）拒绝（5804），与可约时段接口同口径。
      * R55 冲突校验复用 C7（R33）机制——「Redisson 分布式锁 + 数据库唯一约束
      * （V10 uk_viewing_slot）」双保险：锁内做区间重叠判定（与 C7 同口径，
      * 含半重叠/包含/被包含，仅首尾相接放行）后单条 INSERT 自动提交；
@@ -70,6 +71,12 @@ public class ViewingAppointmentService {
         }
         if (!dto.getEndTime().isAfter(dto.getStartTime())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "结束时间必须晚于开始时间");
+        }
+        /* DEF-045：今日已结束的时段不可预约（服务端权威，与 availableSlots 过滤同口径；
+           endTime<=now 即视为过去时段，预约日期非今天的时段不受影响） */
+        if (dto.getAppointmentDate().isEqual(LocalDate.now())
+                && !dto.getEndTime().isAfter(LocalTime.now())) {
+            throw new BusinessException(ErrorCode.PAST_SLOT);
         }
         HousingTimeslot template = findCoveringTemplate(dto.getHousingId(),
                 dto.getAppointmentDate(), dto.getStartTime(), dto.getEndTime());
