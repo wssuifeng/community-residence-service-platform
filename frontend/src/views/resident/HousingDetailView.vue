@@ -1,17 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import { useUserStore } from '@/store/user'
-import {
-  getHousingDetail,
-  recordHousingView,
-  listViewingAvailableSlots,
-  listHousingTimeslots,
-  createViewingAppointment
-} from '@/api/housing'
-import { getMyProfile } from '@/api/resident'
+import { getHousingDetail, recordHousingView, listViewingAvailableSlots, listHousingTimeslots } from '@/api/housing'
 import HorizontalScroller from '@/components/common/HorizontalScroller.vue'
 import type {
   IHousing,
@@ -22,12 +15,12 @@ import { housingStatusLabels } from '@/types/modules/housing'
 
 /**
  * 房源详情（居民端）：视觉与游客端一致（16:9 主图 + 缩略图 + 信息面板 + 描述/配套两栏）；
- * 右侧为居民版预约看房面板（DEF-056 详情页式交互：横拉时段卡点选 + 展开轻量确认，
- * 不再使用长表单；未登录引导登录）
+ * 右侧预约看房面板为入口式（R59/v1.3 裁决：DEF-056 详情页内点选+轻确认交互拆除），
+ * 醒目「预约看房」按钮跳三步预约页；下方横拉时段区仅作近两周可约时段展示（不可点选）。
+ * 未登录引导登录。
  */
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
 
 const housingId = Number(route.params.id)
@@ -99,17 +92,11 @@ function weekdayOf(date: string): string {
 
 const todayISO = toDateInput(new Date())
 
-/** 横拉时段卡：按日期 + 开始时间排序的扁平列表（DEF-057 横拉列表数据源） */
+/** 横拉时段卡：按日期 + 开始时间排序的扁平列表（展示区数据源，非点选） */
 const slotCards = computed(() =>
   [...slots.value].sort(
     (a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime)
   )
-)
-
-const selectedKey = ref<string | null>(null)
-
-const selectedSlot = computed<IAvailableViewingTimeslot | null>(
-  () => slots.value.find((slot) => cardKey(slot) === selectedKey.value) ?? null
 )
 
 async function loadSlots(): Promise<void> {
@@ -154,75 +141,6 @@ function slotDisabled(slot: IAvailableViewingTimeslot): boolean {
   return slot.status === 'FULL' || slot.currentBookings >= slot.maxBookings
 }
 
-function selectSlot(slot: IAvailableViewingTimeslot): void {
-  if (slotDisabled(slot)) return
-  selectedKey.value = cardKey(slot)
-}
-
-/** 取消选中：收起轻量确认区 */
-function cancelSelection(): void {
-  selectedKey.value = null
-}
-
-/* ------------------------------ 轻量确认（DEF-056） ------------------------------ */
-
-const form = reactive({
-  visitorName: '',
-  contactPhone: '',
-  remark: ''
-})
-const submitting = ref(false)
-
-async function loadProfile(): Promise<void> {
-  try {
-    const profile = await getMyProfile()
-    form.visitorName = profile.realName
-    form.contactPhone = profile.phone
-  } catch {
-    /* 未登录或资料加载失败时留空手填 */
-  }
-}
-
-/** 联系电话为后端必填（CreateViewingAppointmentDTO @NotBlank + 手机号格式），提交前本地校验 */
-const phoneValid = computed(
-  () => /^1[3-9]\d{9}$/.test(form.contactPhone.trim())
-)
-
-async function handleSubmit(): Promise<void> {
-  if (submitting.value) return
-  const slot = selectedSlot.value
-  if (!slot) {
-    ElMessage.warning('请先点选一个看房时段')
-    return
-  }
-  if (!form.visitorName.trim()) {
-    ElMessage.warning('请填写联系人姓名')
-    return
-  }
-  if (!phoneValid.value) {
-    ElMessage.warning('请填写正确的 11 位手机号')
-    return
-  }
-  submitting.value = true
-  try {
-    await createViewingAppointment({
-      housingId,
-      appointmentDate: slot.date,
-      startTime: slot.startTime,
-      endTime: slot.endTime,
-      visitorName: form.visitorName.trim(),
-      contactPhone: form.contactPhone.trim(),
-      remark: form.remark.trim() || undefined
-    })
-    ElMessage.success('看房预约已提交，等待管理员确认')
-    router.push('/resident/viewing-appointments')
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '提交看房预约失败')
-  } finally {
-    submitting.value = false
-  }
-}
-
 /* ------------------------------ 初始化 ------------------------------ */
 
 async function loadDetail(): Promise<void> {
@@ -242,7 +160,6 @@ async function loadDetail(): Promise<void> {
 onMounted(() => {
   loadDetail()
   loadSlots()
-  if (isResident.value) loadProfile()
 })
 </script>
 
@@ -320,28 +237,29 @@ onMounted(() => {
             </dl>
           </div>
 
-          <!-- 右下：预约看房面板（DEF-056 详情页式：横拉点选时段 → 展开轻量确认，无长表单） -->
+          <!-- 右下：预约看房面板（入口式：醒目按钮跳三步预约页；下方时段区仅展示可点约） -->
           <aside class="booking-panel">
             <h2 class="panel-title">预约看房</h2>
 
             <template v-if="isResident">
-              <p class="panel-hint">点选可约时段后填写联系方式提交，等待管理员确认</p>
+              <router-link :to="`/resident/housings/${housingId}/reserve`" class="reserve-btn-link">
+                <el-button type="primary" size="large" round class="reserve-btn">
+                  预约看房
+                </el-button>
+              </router-link>
+              <p class="panel-hint">进入预约页选择日期与时段，支持连续时段合并预约</p>
+
+              <!-- 近两周可约时段展示区（只读，不可点选；预约在三步页完成） -->
               <div v-loading="slotsLoading" class="panel-slots">
                 <p v-if="!slotsLoading && slotCards.length === 0" class="slots-empty">
                   未来 {{ SLOT_WINDOW_DAYS }} 天暂无可约时段
                 </p>
                 <HorizontalScroller v-else>
-                  <button
+                  <div
                     v-for="slot in slotCards"
                     :key="cardKey(slot)"
-                    type="button"
                     class="slot-card"
-                    :class="{
-                      'is-selected': selectedKey === cardKey(slot),
-                      'is-full': slotDisabled(slot)
-                    }"
-                    :disabled="slotDisabled(slot)"
-                    @click="selectSlot(slot)"
+                    :class="{ 'is-full': slotDisabled(slot) }"
                   >
                     <span class="slot-card-date">
                       {{ dateTextOf(slot.date) }}
@@ -353,52 +271,9 @@ onMounted(() => {
                     <span class="slot-card-quota">
                       {{ slotDisabled(slot) ? '已约满' : `余 ${slot.maxBookings - slot.currentBookings}` }}
                     </span>
-                  </button>
+                  </div>
                 </HorizontalScroller>
               </div>
-
-              <!-- 轻量确认区：选中时段后展开，仅联系人/联系电话/备注三项（DEF-056） -->
-              <transition name="confirm-fold">
-                <div v-if="selectedSlot" class="confirm-panel">
-                  <p class="confirm-slot-text">
-                    已选时段：{{ selectedSlot.date }}（{{ weekdayOf(selectedSlot.date) }}）
-                    {{ timeText(selectedSlot.startTime) }} ~ {{ timeText(selectedSlot.endTime) }}
-                  </p>
-                  <div class="confirm-fields">
-                    <el-input
-                      v-model="form.visitorName"
-                      placeholder="联系人姓名"
-                      maxlength="50"
-                    />
-                    <el-input
-                      v-model="form.contactPhone"
-                      placeholder="联系电话（必填）"
-                      maxlength="11"
-                    />
-                  </div>
-                  <el-input
-                    v-model="form.remark"
-                    type="textarea"
-                    :rows="2"
-                    placeholder="备注（选填）"
-                    maxlength="500"
-                    class="confirm-remark"
-                  />
-                  <div class="confirm-actions">
-                    <el-button
-                      type="primary"
-                      class="submit-btn"
-                      :loading="submitting"
-                      @click="handleSubmit"
-                    >
-                      提交看房预约
-                    </el-button>
-                    <el-button text :disabled="submitting" @click="cancelSelection">
-                      取消
-                    </el-button>
-                  </div>
-                </div>
-              </transition>
             </template>
 
             <template v-else>
@@ -675,9 +550,19 @@ onMounted(() => {
   margin-bottom: var(--spacing-sm);
 }
 
+/* 预约入口按钮：醒目整行（R59 裁决，入口式替代页内点选） */
+.reserve-btn-link {
+  display: block;
+}
+
+.reserve-btn {
+  width: 100%;
+}
+
 .panel-hint {
   font-size: var(--font-size-xs);
   color: var(--color-text-disabled);
+  margin-top: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
 }
 
@@ -686,7 +571,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-bottom: var(--spacing-md);
 }
 
 .slots-empty {
@@ -695,7 +579,7 @@ onMounted(() => {
   padding: var(--spacing-lg) 0;
 }
 
-/* 横拉时段卡（DEF-057）：日期 + 时间 + 余量三行，选中主色描边，约满置灰 */
+/* 横拉时段卡（展示区，只读）：日期 + 时间 + 余量三行，约满置灰 */
 .slot-card {
   flex-shrink: 0;
   display: flex;
@@ -707,24 +591,10 @@ onMounted(() => {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   background-color: #fff;
-  cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.slot-card:not(.is-full):hover {
-  border-color: var(--color-primary);
-  background-color: var(--color-primary-bg);
-}
-
-.slot-card.is-selected {
-  border-color: var(--color-primary);
-  background-color: var(--color-primary-bg);
-  box-shadow: var(--shadow-md);
 }
 
 .slot-card.is-full {
   background-color: var(--color-bg);
-  cursor: not-allowed;
   opacity: 0.55;
 }
 
@@ -758,55 +628,10 @@ onMounted(() => {
   color: var(--color-text-disabled);
 }
 
-/* 选中态统一主色文字 */
-.slot-card.is-selected .slot-card-date,
-.slot-card.is-selected .slot-card-time,
-.slot-card.is-selected .slot-card-date em {
-  color: var(--color-primary);
-}
-
-/* 轻量确认区（DEF-056）：选中时段后折叠展开 */
-.confirm-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-border);
-}
-
-.confirm-slot-text {
-  margin: 0;
-  color: var(--color-primary);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-  font-family: var(--font-family-mono);
-}
-
-.confirm-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-sm);
-}
-
-.confirm-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.submit-btn {
-  flex: 1;
-}
-
-/* 确认区折叠动画：高度 + 透明度过渡，收起时避免占位 */
-.confirm-fold-enter-active,
-.confirm-fold-leave-active {
-  transition: opacity 0.18s ease;
-}
-
-.confirm-fold-enter-from,
-.confirm-fold-leave-to {
-  opacity: 0;
+/* 时段卡文案配色 */
+.slot-card-date em {
+  font-style: normal;
+  color: var(--color-text-disabled);
 }
 
 .login-guide {
@@ -892,12 +717,6 @@ onMounted(() => {
   }
 
   .description {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .confirm-fields {
     grid-template-columns: 1fr;
   }
 }

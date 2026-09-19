@@ -1,12 +1,53 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import { listReservations, cancelReservation } from '@/api/reservation'
+import { listViewingAppointments } from '@/api/housing'
 import type { IResourceReservation, ReservationStatus } from '@/types/modules/reservation'
 import { reservationStatusLabels } from '@/types/modules/reservation'
+import type { IViewingAppointment } from '@/types/modules/housing'
+import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
 
-/** 我的预约：左日历（标记有预约的日期、点选单日筛选）+ 右预约卡列表（默认未来 7 天口径，DEF-052）+ 底部规则提示 */
+/**
+ * 我的预约（DEF-058 tab 合并）：「资源预约｜看房预约」双 tab。
+ * 资源 tab：左日历（标记有预约的日期、点选单日筛选）+ 右预约卡列表（默认未来 7 天口径，
+ * DEF-052）+ 底部规则提示；看房 tab（R59）：紧凑列表，行点击进详情页（带看会话所在）。
+ * tab 状态写入 URL query（?tab=viewing），旧列表路由重定向与本页互跳均可回显。
+ */
+
+const route = useRoute()
+const router = useRouter()
+
+/* ------------------------------ tab 状态（URL query 回显） ------------------------------ */
+
+type ListTab = 'resource' | 'viewing'
+
+const tab = ref<ListTab>(route.query.tab === 'viewing' ? 'viewing' : 'resource')
+
+function handleTabChange(value: string | number | boolean | undefined): void {
+  tab.value = value === 'viewing' ? 'viewing' : 'resource'
+  /* replace 免得来回切换污染历史栈；query 仅在看房 tab 携带 */
+  router.replace({
+    query: tab.value === 'viewing' ? { tab: 'viewing' } : undefined
+  })
+  if (tab.value === 'viewing') {
+    viewQuery.page = 1
+    loadViewing()
+  } else {
+    loadList()
+    void loadMarkedDates()
+  }
+}
+
+const headSub = computed(() =>
+  tab.value === 'viewing'
+    ? '看房预约记录，点击行查看详情并与带看人沟通'
+    : '社区公共资源预约记录，待审核与已预约的预约可取消'
+)
+
+/* ---------- 资源预约 tab（原「我的预约」全部功能保留） ---------- */
 
 const query = reactive({
   page: 1,
@@ -222,9 +263,44 @@ async function handleCancel(row: IResourceReservation): Promise<void> {
 
 const isEmpty = computed(() => !loading.value && records.value.length === 0)
 
+/* ---------- 看房预约 tab（R59 合并入本页）：紧凑列表，居民数据权限由后端承载 ---------- */
+
+const viewQuery = reactive({ page: 1, size: 10 })
+const viewTotal = ref(0)
+const viewRecords = ref<IViewingAppointment[]>([])
+const viewLoading = ref(false)
+
+async function loadViewing(): Promise<void> {
+  viewLoading.value = true
+  try {
+    const result = await listViewingAppointments({ page: viewQuery.page, size: viewQuery.size })
+    viewRecords.value = result.records
+    viewTotal.value = result.total
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '加载看房预约失败')
+  } finally {
+    viewLoading.value = false
+  }
+}
+
+function viewSlotText(row: IViewingAppointment): string {
+  return `${row.startTime.slice(0, 5)}-${row.endTime.slice(0, 5)}`
+}
+
+/** 行点击 → 看房预约详情页（预约信息 + 带看会话 + 取消入口） */
+function gotoViewingDetail(row: IViewingAppointment): void {
+  router.push(`/resident/viewing-appointments/${row.id}`)
+}
+
+const viewEmpty = computed(() => !viewLoading.value && viewRecords.value.length === 0)
+
 onMounted(() => {
-  loadList()
-  void loadMarkedDates()
+  if (tab.value === 'viewing') {
+    loadViewing()
+  } else {
+    loadList()
+    void loadMarkedDates()
+  }
 })
 </script>
 
@@ -233,13 +309,26 @@ onMounted(() => {
     <header class="page-head">
       <div>
         <h1>我的预约</h1>
-        <p class="page-head-sub">社区公共资源预约记录，待审核与已预约的预约可取消</p>
+        <p class="page-head-sub">{{ headSub }}</p>
       </div>
-      <router-link to="/resident/resources">
+      <router-link v-if="tab === 'resource'" to="/resident/resources">
         <el-button type="primary">＋ 预约公共资源</el-button>
+      </router-link>
+      <router-link v-else to="/resident/housings">
+        <el-button type="primary">去挑房源</el-button>
       </router-link>
     </header>
 
+    <!-- tab 切换（DEF-058）：状态写入 URL query 便于外跳回显 -->
+    <div class="tab-bar">
+      <el-radio-group :model-value="tab" @update:model-value="handleTabChange">
+        <el-radio-button value="resource">资源预约</el-radio-button>
+        <el-radio-button value="viewing">看房预约</el-radio-button>
+      </el-radio-group>
+    </div>
+
+    <!-- 资源预约 tab：原「我的预约」全部功能 -->
+    <template v-if="tab === 'resource'">
     <div class="reservation-grid">
       <!-- 左：日历容器（周一开头，今天蓝圈，有预约的日期打绿点） -->
       <div class="calendar-card card">
@@ -400,6 +489,57 @@ onMounted(() => {
       </svg>
       <span>预约规则：每人每天限约 2 个时段，违约 3 次将暂停预约资格。</span>
     </div>
+    </template>
+
+    <!-- 看房预约 tab（R59）：紧凑列表，行点击进详情页 -->
+    <template v-else>
+      <div class="viewing-card card">
+        <div v-loading="viewLoading" class="viewing-list">
+          <div v-if="viewEmpty" class="empty-state">
+            <p>还没有看房预约，挑一个心仪的房源预约看看吧</p>
+            <router-link to="/resident/housings">
+              <el-button type="primary" plain round>浏览房源</el-button>
+            </router-link>
+          </div>
+
+          <div
+            v-for="row in viewRecords"
+            v-else
+            :key="row.id"
+            class="viewing-row"
+            role="button"
+            tabindex="0"
+            @click="gotoViewingDetail(row)"
+            @keydown.enter="gotoViewingDetail(row)"
+          >
+            <div class="viewing-main">
+              <h2 class="viewing-title">{{ row.housingTitle }}</h2>
+              <p class="viewing-meta">
+                <span class="viewing-date">{{ row.appointmentDate }}</span>
+                <span class="viewing-slot">{{ viewSlotText(row) }}</span>
+                <span v-if="row.assigneeName" class="viewing-assignee">
+                  带看人：{{ row.assigneeName }}
+                </span>
+              </p>
+            </div>
+            <span class="status-pill" :data-status="row.status">
+              {{ viewingAppointmentStatusLabels[row.status] }}
+            </span>
+            <svg class="viewing-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+        </div>
+
+        <Pagination
+          v-model:page="viewQuery.page"
+          v-model:size="viewQuery.size"
+          :total="viewTotal"
+          @update:page="loadViewing"
+          @update:size="loadViewing"
+        />
+      </div>
+    </template>
   </section>
 </template>
 
@@ -755,6 +895,95 @@ onMounted(() => {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
+}
+
+/* tab 切换栏（DEF-058） */
+.tab-bar {
+  display: flex;
+}
+
+/* 看房预约 tab：紧凑行列表 */
+.viewing-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.viewing-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-height: 200px;
+}
+
+.viewing-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.viewing-row:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.viewing-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.viewing-title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viewing-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.viewing-date,
+.viewing-slot {
+  font-family: var(--font-family-mono);
+}
+
+.viewing-assignee {
+  color: var(--color-text-secondary);
+}
+
+.viewing-arrow {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-disabled);
+}
+
+/* 状态胶囊补看房预约状态色（与资源预约同色语义：待确认黄 / 已预约绿） */
+.status-pill[data-status='RESERVED'] {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.status-pill[data-status='TO_CONFIRM'] {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--color-warning);
 }
 
 /* 响应式：窄屏降单栏 */

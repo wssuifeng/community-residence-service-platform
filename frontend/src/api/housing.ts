@@ -11,6 +11,9 @@ import type {
   IHousingTimeslot,
   IAvailableViewingTimeslot,
   IViewingAppointment,
+  IViewingMessage,
+  IViewingAssigneeOption,
+  ViewingAppointmentAssignDTO,
   ViewingAppointmentCreateDTO,
   ViewingAppointmentListQuery,
   ViewingAppointmentReasonDTO
@@ -84,6 +87,26 @@ export function cancelViewingAppointment(id: number, data: ViewingAppointmentRea
 /** 标记看房违约（接口设计.md 9.12.2.7，CONFIRMED → VIOLATED） */
 export function violateViewingAppointment(id: number, data: ViewingAppointmentReasonDTO) {
   return http.patch<null>(`/viewing-appointments/${id}/violate`, data)
+}
+
+/** 分配带看人（R59，v1.3；ADMIN/SUPER_ADMIN，目标为启用状态的服务人员或社区管理员） */
+export function assignViewingAppointment(id: number, data: ViewingAppointmentAssignDTO) {
+  return http.patch<IViewingAppointment>(`/viewing-appointments/${id}/assign`, data)
+}
+
+/** 带看人候选列表（R59；ADMIN/SUPER_ADMIN，STAFF 全量 + 管辖该社区的启用 ADMIN） */
+export function listAssignableAssignees(communityId: number) {
+  return http.get<IViewingAssigneeOption[]>('/viewing-appointments/assignable-assignees', { communityId })
+}
+
+/** 带看会话消息列表（R59；预约居民与带看人可读，按时间正序） */
+export function listViewingMessages(id: number) {
+  return http.get<IViewingMessage[]>(`/viewing-appointments/${id}/messages`)
+}
+
+/** 发送带看会话消息（R59；预约居民与带看人可发） */
+export function sendViewingMessage(id: number, data: { content: string }) {
+  return http.post<IViewingMessage>(`/viewing-appointments/${id}/messages`, data)
 }
 
 /** 查询房源可预约看房时段（接口设计.md 9.12.2.8，公开） */
