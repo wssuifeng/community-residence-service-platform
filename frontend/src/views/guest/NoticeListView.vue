@@ -26,6 +26,17 @@ const size = ref(10)
 const keyword = ref(keywordFromQuery())
 const loading = ref(false)
 
+/** 置顶轮播背景（DEF-050 重设计）：背景实体感大图按标题语义映射（活动/安全/指南），无匹配按序号轮换 */
+const NOTICE_BG_POOLS = ['/notice_bg_activity.png', '/notice_bg_safety.png', '/notice_bg_guide.png']
+
+function noticeBgOf(notice: INotice, index: number): string {
+  const title = notice.title
+  if (title.includes('活动')) return '/notice_bg_activity.png'
+  if (title.includes('安全') || title.includes('消防')) return '/notice_bg_safety.png'
+  if (title.includes('指南') || title.includes('提示') || title.includes('教程')) return '/notice_bg_guide.png'
+  return NOTICE_BG_POOLS[index % NOTICE_BG_POOLS.length]
+}
+
 /** 置顶判定：isPinned 真实字段（0/1）优先，旧布尔命名留兜底（优先级是展示属性，不参与置顶） */
 function isPinned(notice: INotice): boolean {
   return notice.isPinned === 1 || notice.pinned === true
@@ -164,15 +175,15 @@ onMounted(load)
         <div class="pinned-viewport">
           <div class="pinned-track" :style="{ transform: `translateX(-${pinnedIndex * 100}%)` }">
             <router-link
-              v-for="notice in pinnedNotices"
+              v-for="(notice, index) in pinnedNotices"
               :key="notice.id"
               :to="`/guest/notices/${notice.id}`"
               class="pinned-card"
             >
-              <img class="pinned-cover" src="/images/notice-cover-default.png" :alt="notice.title" />
+              <img class="pinned-cover" :src="noticeBgOf(notice, index)" :alt="notice.title" />
+              <span class="pin-mark">置顶</span>
               <div class="pinned-main">
                 <div class="pinned-title-row">
-                  <span class="pin-mark">置顶</span>
                   <h2 class="pinned-title">{{ notice.title }}</h2>
                 </div>
                 <p class="pinned-excerpt">{{ notice.content }}</p>
@@ -219,7 +230,7 @@ onMounted(load)
             :aria-label="`查看置顶公告 ${index + 1}：${notice.title}`"
             @click="setPinned(index)"
           >
-            <img src="/images/notice-cover-default.png" alt="" />
+            <img :src="noticeBgOf(notice, index)" alt="" />
             <span class="pinned-thumb-index">{{ index + 1 }}</span>
           </button>
         </div>
@@ -415,13 +426,13 @@ onMounted(load)
   text-align: center;
 }
 
-/* 置顶整宽白卡：左封面（约 1/3 宽）+ 右三段文本，高度与期刊列表视觉平衡 */
+/* 置顶轮播卡重设计（用户裁决）：背景实体感大图铺满 + 文字描述毛玻璃虚化浮层 + 置顶徽章右上角 */
 .pinned-card {
+  position: relative;
   flex: 0 0 100%;
-  display: grid;
-  grid-template-columns: minmax(220px, 32%) 1fr;
-  background: #fff;
-  border: 1px solid var(--color-border);
+  display: block;
+  min-height: 300px;
+  background: var(--color-bg-hover);
   border-radius: var(--radius-lg);
   overflow: hidden;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
@@ -432,18 +443,37 @@ onMounted(load)
   transform: translateY(-1px);
 }
 
+/* 背景实体层：大图铺满 + 底部压暗渐变保证浮层文字可读 */
 .pinned-cover {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  min-height: 180px;
   object-fit: cover;
 }
 
+.pinned-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.12) 45%, rgba(15, 23, 42, 0) 70%);
+}
+
+/* 文字描述虚化浮层：毛玻璃玻璃底，浮于实体背景之上 */
 .pinned-main {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px) saturate(1.25);
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
   min-width: 0;
 }
 
@@ -454,30 +484,35 @@ onMounted(load)
   min-width: 0;
 }
 
+/* 置顶徽章：卡片右上角角标 */
 .pin-mark {
-  flex-shrink: 0;
-  padding: 1px var(--spacing-sm);
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 2;
+  padding: 2px var(--spacing-sm);
   border-radius: var(--radius-sm);
   background: var(--color-danger);
   color: #fff;
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-md);
 }
 
 .pinned-title {
-  flex: 1;
   min-width: 0;
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(15, 23, 42, 0.35);
 }
 
 .pinned-excerpt {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.92);
   line-height: var(--line-height-normal);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -489,9 +524,9 @@ onMounted(load)
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  margin-top: auto;
+  margin-top: var(--spacing-xs);
   font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .pinned-meta svg {
@@ -613,11 +648,11 @@ onMounted(load)
 /* 响应式：窄屏置顶卡降上下结构，缩略图导航维持居中 */
 @media (max-width: 768px) {
   .pinned-card {
-    grid-template-columns: 1fr;
+    min-height: 240px;
   }
 
   .pinned-cover {
-    min-height: 140px;
+    inset: 0;
   }
 }
 </style>
