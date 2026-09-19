@@ -6,7 +6,7 @@ import { listReservations, cancelReservation } from '@/api/reservation'
 import type { IResourceReservation, ReservationStatus } from '@/types/modules/reservation'
 import { reservationStatusLabels } from '@/types/modules/reservation'
 
-/** 我的预约：左日历（标记有预约的日期、点选筛选）+ 右预约卡列表 + 底部规则提示 */
+/** 我的预约：左日历（标记有预约的日期、点选单日筛选）+ 右预约卡列表（默认未来 7 天口径，DEF-052）+ 底部规则提示 */
 
 const query = reactive({
   page: 1,
@@ -34,6 +34,88 @@ function toISODate(year: number, month: number, day: number): string {
 
 const todayISO = toISODate(today.getFullYear(), today.getMonth(), today.getDate())
 
+/** ISO 日期字符串加 N 天（用于「未来 7 天」口径上界） */
+function plusDaysISO(iso: string, days: number): string {
+  const d = new Date(`${iso}T00:00:00`)
+  d.setDate(d.getDate() + days)
+  return toISODate(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+/* ---------- 日期口径筛选（DEF-052）：默认未来 7 天，可按月/按区间，可清空看全部 ---------- */
+
+type FilterMode = 'next7' | 'month' | 'range' | 'all'
+
+const filterMode = ref<FilterMode>('next7')
+/** 按月口径：YYYY-MM（el-date-picker value-format） */
+const monthValue = ref<string>(todayISO.slice(0, 7))
+/** 按区间口径：[起, 止]（进入该口径时预填未来 7 天，避免空参歧义） */
+const rangeValue = ref<[string, string] | null>([todayISO, plusDaysISO(todayISO, 7)])
+
+/**
+ * 当前生效的日期查询参数：日历点选单日优先（单日起止相同）；
+ * 「全部」口径与未选完的区间/月份不传日期参数（后端返回全部历史）
+ */
+const activeRange = computed<{ startDate?: string; endDate?: string }>(() => {
+  if (selectedDate.value) {
+    return { startDate: selectedDate.value, endDate: selectedDate.value }
+  }
+  switch (filterMode.value) {
+    case 'next7':
+      return { startDate: todayISO, endDate: plusDaysISO(todayISO, 7) }
+    case 'month': {
+      if (!monthValue.value) return {}
+      const [year, month] = monthValue.value.split('-').map(Number)
+      return {
+        startDate: toISODate(year, month - 1, 1),
+        endDate: toISODate(year, month - 1, new Date(year, month, 0).getDate())
+      }
+    }
+    case 'range': {
+      const [start, end] = rangeValue.value ?? []
+      return start && end ? { startDate: start, endDate: end } : {}
+    }
+    default:
+      return {}
+  }
+})
+
+/** 列表头筛选口径提示 */
+const filterHint = computed(() => {
+  if (selectedDate.value) {
+    return `已筛选：${selectedDate.value.slice(5).replace('-', '月')}日`
+  }
+  switch (filterMode.value) {
+    case 'next7':
+      return `口径：未来 7 天（${todayISO} ~ ${plusDaysISO(todayISO, 7)}）`
+    case 'month':
+      return monthValue.value ? `口径：${monthValue.value.replace('-', '年')}月` : '口径：按月'
+    case 'range': {
+      const [start, end] = rangeValue.value ?? []
+      return start && end ? `口径：${start} ~ ${end}` : '口径：自定义区间'
+    }
+    default:
+      return '展示全部历史预约'
+  }
+})
+
+/** 切换口径：按月/按区间缺省值兜底后立即生效 */
+function handleModeChange(): void {
+  if (filterMode.value === 'month' && !monthValue.value) {
+    monthValue.value = todayISO.slice(0, 7)
+  }
+  if (filterMode.value === 'range' && !rangeValue.value) {
+    rangeValue.value = [todayISO, plusDaysISO(todayISO, 7)]
+  }
+  query.page = 1
+  loadList()
+}
+
+/** 月/区间选择器变更（含清空）后立即生效 */
+function handleRangeParamChange(): void {
+  query.page = 1
+  loadList()
+}
+
 /* 日历格子：周一开头；空格补齐首周（getDay 周日=0 → 周一开头的偏移） */
 const calendarCells = computed(() => {
   const first = new Date(viewYear.value, viewMonth.value, 1)
@@ -53,7 +135,7 @@ function shiftMonth(delta: number): void {
   viewMonth.value = next.getMonth()
 }
 
-/* 点选某天筛选右侧列表（接口支持 startDate/endDate）；再点同一天或「全部」清除 */
+/* 日历点选单日为最高优先筛选（覆盖口径选择）；再点同一天或「全部」清除回到当前口径 */
 function toggleDate(iso: string): void {
   selectedDate.value = selectedDate.value === iso ? null : iso
   query.page = 1
@@ -90,8 +172,8 @@ async function loadList(): Promise<void> {
       page: query.page,
       size: query.size,
       status: query.status === '' ? undefined : query.status,
-      startDate: selectedDate.value ?? undefined,
-      endDate: selectedDate.value ?? undefined
+      startDate: activeRange.value.startDate,
+      endDate: activeRange.value.endDate
     })
     /* 按 id 去重兜底：防御后端异常返回重复行；正常数据 id 唯一，Set 过滤幂等不影响展示 */
     const seen = new Set<number>()
@@ -204,16 +286,14 @@ onMounted(() => {
           class="calendar-clear"
           @click="clearDateFilter"
         >
-          全部（清除日期筛选）
+          清除单日筛选（回到当前口径）
         </button>
       </div>
 
       <!-- 右：预约列表容器（同高 stretch，超高内部竖向滚动，分页条在容器底部） -->
       <div class="list-card card">
         <div class="list-card-head">
-          <span v-if="selectedDate" class="list-filter-hint">
-            已筛选：{{ selectedDate.slice(5).replace('-', '月') }}日
-          </span>
+          <span class="list-filter-hint">{{ filterHint }}</span>
           <el-select
             v-model="query.status"
             class="list-status-select"
@@ -230,9 +310,41 @@ onMounted(() => {
           </el-select>
         </div>
 
+        <!-- 日期口径筛选（DEF-052）：默认未来 7 天；按月/按区间选择；全部=清空日期参数看历史 -->
+        <div class="list-filter-bar">
+          <el-radio-group v-model="filterMode" size="small" @change="handleModeChange">
+            <el-radio-button value="next7">未来 7 天</el-radio-button>
+            <el-radio-button value="month">按月</el-radio-button>
+            <el-radio-button value="range">按日期</el-radio-button>
+            <el-radio-button value="all">全部</el-radio-button>
+          </el-radio-group>
+          <el-date-picker
+            v-if="filterMode === 'month'"
+            v-model="monthValue"
+            type="month"
+            value-format="YYYY-MM"
+            style="width: 200px"
+            placeholder="选择月份"
+            clearable
+            @change="handleRangeParamChange"
+          />
+          <el-date-picker
+            v-if="filterMode === 'range'"
+            v-model="rangeValue"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+            style="width: 280px"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            clearable
+            @change="handleRangeParamChange"
+          />
+        </div>
+
         <div v-loading="loading" class="list-scroll">
           <div v-if="isEmpty" class="empty-state">
-            <p>{{ selectedDate ? '当天没有预约记录' : '还没有预约记录，去发起一个吧' }}</p>
+            <p>{{ filterMode === 'all' && !selectedDate ? '还没有预约记录，去发起一个吧' : '所选范围内没有预约记录' }}</p>
           </div>
 
           <article v-for="row in records" v-else :key="row.id" class="reservation-card">
@@ -477,6 +589,15 @@ onMounted(() => {
   margin-right: auto;
   font-size: var(--font-size-xs);
   color: var(--color-primary);
+}
+
+/* 口径筛选栏：快捷口径 + 条件式日期选择器同行排布（选择器宽度用内联 style 控制） */
+.list-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .list-status-select {

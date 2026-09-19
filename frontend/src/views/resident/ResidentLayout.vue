@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import AppHeader from '@/components/layout/AppHeader.vue'
 
-/** 居民端布局：顶部导航 + 单栏内容区（UI设计.md §2.1） */
+/** 居民端布局：顶部导航 + 单栏内容区（UI设计.md §2.1）
+    导航按居民高频使用排序：浏览资源与管理预约邻位成组（预约公共资源 → 我的预约），
+    工单/反馈为日常服务链，公告/房源为信息浏览，消息收尾 */
 const navItems = [
   { label: '首页', to: '/resident/home' },
+  { label: '预约公共资源', to: '/resident/resources' },
+  { label: '我的预约', to: '/resident/reservations' },
   { label: '我的工单', to: '/resident/work-orders' },
   { label: '我的反馈', to: '/resident/feedbacks' },
-  { label: '我的预约', to: '/resident/reservations' },
   { label: '公告', to: '/resident/notices' },
   { label: '房源', to: '/resident/housings' },
   { label: '消息', to: '/resident/notifications' }
