@@ -70,6 +70,8 @@ class HousingPastSlotFixTest {
     @Mock
     private ViolationRecordMapper violationRecordMapper;
     @Mock
+    private com.community.residence.resident.service.SysConfigService sysConfigService;
+    @Mock
     private RedissonClient redissonClient;
     @Mock
     private RLock lock;

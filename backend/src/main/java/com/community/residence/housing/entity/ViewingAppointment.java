@@ -29,6 +29,9 @@ public class ViewingAppointment {
     @Schema(description = "游客手机号（游客预约时填写）")
     private String visitorPhone;
 
+    @Schema(description = "带看人ID（sys_user，null=未分配；R59）")
+    private Long assignedStaffId;
+
     @Schema(description = "房源ID")
     private Long housingId;
 
