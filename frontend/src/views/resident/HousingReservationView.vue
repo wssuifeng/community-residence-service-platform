@@ -2,39 +2,36 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getResource } from '@/api/community'
-import { listAvailableTimeslots, createReservation } from '@/api/reservation'
+import { getHousingDetail, listViewingAvailableSlots, createViewingAppointment } from '@/api/housing'
 import { getMyProfile } from '@/api/resident'
-import type { IPublicResource } from '@/types/modules/community'
-import type { IAvailableTimeslot } from '@/types/modules/reservation'
+import type { IHousing, IAvailableViewingTimeslot } from '@/types/modules/housing'
 import type { IResident } from '@/types/modules/resident'
 
 /**
- * 预约子页（居民端三段预约流第三段，大表单治理示范）：
- * 必带 ?resourceId= 进入；左侧步骤轨（选日期 → 选时段 → 确认）+ 右侧单步内容。
- * 第一步自写月历（过去/无开放时段/约满日期禁选），第二步时段卡连续多选（R60：
- * 相邻连续才可加选、本地 120 分钟上限前置拦截，单选即连续段数为 1 的特例），
- * 第三步摘要卡确认提交（合并区间单条预约）。提交中禁点防重，成功后跳「我的预约」。
+ * 预约看房（DEF-059/R60，v1.3）：交互复制资源预约三步模式（选日期 → 选时段 → 确认）。
+ * 必带路由参数 housingId 进入；第 2 步时段卡多选，仅允许相邻连续时段合并提交（R60）：
+ * 非连续点击拒绝并提示，本地连续时长上限 MAX_CONTINUOUS_MINUTES 前置拦截，
+ * 最终超限由后端按 sys_config 兜底拒绝；提交为合并区间单条预约，成功跳预约详情页。
  *
- * 注意：连续多选规则与 HousingReservationView（看房域）为同规则双实现（R60 两域各一键），
+ * 注意：连续多选规则与 ReservationCreateView（资源域）为同规则双实现（R60 两域各一键），
  * 一侧调整约束须同步另一侧。
  */
 
 const route = useRoute()
 const router = useRouter()
 
-const resourceId = Number(route.query.resourceId)
-/** 无 resourceId 直达（旧书签/直达链）→ 回资源列表 */
-const invalidEntry = !Number.isInteger(resourceId) || resourceId <= 0
+const housingId = Number(route.params.id)
+/** 无 housingId 直达（旧书签/坏链）→ 回房源列表 */
+const invalidEntry = !Number.isInteger(housingId) || housingId <= 0
 
-const resource = ref<IPublicResource | null>(null)
+const housing = ref<IHousing | null>(null)
 const profile = ref<IResident | null>(null)
 
 /* ------------------------------ 步骤轨 ------------------------------ */
 
 const STEPS = [
-  { step: 1, title: '选择日期', desc: '在日历上选择预约日期' },
-  { step: 2, title: '选择时段', desc: '挑选该日期的开放时段' },
+  { step: 1, title: '选择日期', desc: '在日历上选择看房日期' },
+  { step: 2, title: '选择时段', desc: '可多选相邻连续时段' },
   { step: 3, title: '确认提交', desc: '核对信息并提交预约' }
 ] as const
 
@@ -67,7 +64,7 @@ const todayISO = toISODate(today.getFullYear(), today.getMonth(), today.getDate(
 const viewYear = ref(today.getFullYear())
 const viewMonth = ref(today.getMonth())
 const selectedDate = ref<string | null>(null)
-const monthSlots = ref<IAvailableTimeslot[]>([])
+const monthSlots = ref<IAvailableViewingTimeslot[]>([])
 const monthLoading = ref(false)
 
 const isCurrentMonth = computed(
@@ -89,7 +86,7 @@ const calendarCells = computed(() => {
 
 /** 按日期索引当月时段 */
 const slotsByDate = computed(() => {
-  const map = new Map<string, IAvailableTimeslot[]>()
+  const map = new Map<string, IAvailableViewingTimeslot[]>()
   monthSlots.value.forEach((slot) => {
     const list = map.get(slot.date) ?? []
     list.push(slot)
@@ -103,8 +100,13 @@ function dayState(iso: string): 'past' | 'closed' | 'full' | 'open' {
   if (iso < todayISO) return 'past'
   const list = slotsByDate.value.get(iso)
   if (!list || list.length === 0) return 'closed'
-  return list.some((slot) => slot.currentBookings < slot.maxBookings) ? 'open' : 'full'
+  return list.some((slot) => !slotFull(slot)) ? 'open' : 'full'
 }
+
+/** 全月无可约提示（R60 口径：日期选择范围以接口返回数据为准，数据不足时前翻下月） */
+const monthHasOpen = computed(() =>
+  calendarCells.value.some((cell) => cell !== null && dayState(cell.iso) === 'open')
+)
 
 function shiftMonth(delta: number): void {
   const next = new Date(viewYear.value, viewMonth.value + delta, 1)
@@ -117,7 +119,7 @@ function backToCurrentMonth(): void {
   viewMonth.value = today.getMonth()
 }
 
-/** 月份切换重查当月时段；序号令牌防慢响应回填旧月数据 */
+/** 月份切换重查当月时段（本月口径从今天起查，不回看过去）；序号令牌防慢响应回填旧月数据 */
 let monthSeq = 0
 async function loadMonthSlots(): Promise<void> {
   const seq = monthSeq + 1
@@ -126,12 +128,15 @@ async function loadMonthSlots(): Promise<void> {
   const last = toISODate(viewYear.value, viewMonth.value, new Date(viewYear.value, viewMonth.value + 1, 0).getDate())
   monthLoading.value = true
   try {
-    const data = await listAvailableTimeslots(resourceId, { startDate: first, endDate: last })
+    const data = await listViewingAvailableSlots(housingId, {
+      startDate: isCurrentMonth.value ? todayISO : first,
+      endDate: last
+    })
     if (seq === monthSeq) monthSlots.value = data
   } catch (error) {
     if (seq === monthSeq) {
       monthSlots.value = []
-      ElMessage.error(error instanceof Error ? error.message : '加载开放时段失败')
+      ElMessage.error(error instanceof Error ? error.message : '加载可约时段失败')
     }
   } finally {
     if (seq === monthSeq) monthLoading.value = false
@@ -150,17 +155,17 @@ function pickDate(iso: string): void {
   void openStep2()
 }
 
-/* ------------------------------ 第二步：时段卡连续多选（R60） ------------------------------ */
+/* ------------------------------ 第二步：时段卡连续多选（R60 核心） ------------------------------ */
 
 /**
- * 本地连续时长上限（分钟）：与 sys_config reservation.max_continuous_minutes 默认值 120
- * 对齐（R60 两域各一键，本页为资源域）；本地仅做前置拦截，超限最终由后端兜底拒绝
+ * 本地连续时长上限（分钟）：与 sys_config viewing.max_continuous_minutes 默认值 120 对齐
+ * （R60 两域各一键，本页为看房域）；本地仅做前置拦截，超限最终由后端兜底拒绝
  */
 const MAX_CONTINUOUS_MINUTES = 120
 
-const daySlots = ref<IAvailableTimeslot[]>([])
+const daySlots = ref<IAvailableViewingTimeslot[]>([])
 const dayLoading = ref(false)
-const selectedSlots = ref<IAvailableTimeslot[]>([])
+const selectedSlots = ref<IAvailableViewingTimeslot[]>([])
 
 let daySeq = 0
 async function openStep2(): Promise<void> {
@@ -170,12 +175,12 @@ async function openStep2(): Promise<void> {
   daySeq = seq
   dayLoading.value = true
   try {
-    const data = await listAvailableTimeslots(resourceId, {
+    const data = await listViewingAvailableSlots(housingId, {
       startDate: selectedDate.value,
       endDate: selectedDate.value
     })
     if (seq === daySeq) {
-      /* 后端模板返回顺序不保证，按开始时间排序保证下拉展示稳定 */
+      /* 后端模板返回顺序不保证，按开始时间排序保证卡片展示稳定 */
       daySlots.value = data.sort((a, b) => a.startTime.localeCompare(b.startTime))
     }
   } catch (error) {
@@ -189,11 +194,11 @@ async function openStep2(): Promise<void> {
 }
 
 /** 约满/停开禁选：状态非可约或余量耗尽一律置灰 */
-function slotFull(slot: IAvailableTimeslot): boolean {
+function slotFull(slot: IAvailableViewingTimeslot): boolean {
   return slot.status !== 'AVAILABLE' || slot.currentBookings >= slot.maxBookings
 }
 
-function slotLabel(slot: IAvailableTimeslot): string {
+function slotLabel(slot: IAvailableViewingTimeslot): string {
   return `${slot.startTime.slice(0, 5)} ~ ${slot.endTime.slice(0, 5)}`
 }
 
@@ -228,15 +233,15 @@ const mergedMinutes = computed(() =>
     : 0
 )
 
-function isSelected(slot: IAvailableTimeslot): boolean {
+function isSelected(slot: IAvailableViewingTimeslot): boolean {
   return selectedSlots.value.some((item) => item.timeslotId === slot.timeslotId)
 }
 
 /** 移除可能把连续段拆成两截：保留最长连续段（并列取最早段），维持"选区恒连续"不变式 */
-function trimToLongestRun(slots: IAvailableTimeslot[]): IAvailableTimeslot[] {
+function trimToLongestRun(slots: IAvailableViewingTimeslot[]): IAvailableViewingTimeslot[] {
   const sorted = [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime))
-  let best: IAvailableTimeslot[] = []
-  let current: IAvailableTimeslot[] = []
+  let best: IAvailableViewingTimeslot[] = []
+  let current: IAvailableViewingTimeslot[] = []
   for (const slot of sorted) {
     const prev = current[current.length - 1]
     if (prev && prev.endTime !== slot.startTime) {
@@ -250,7 +255,7 @@ function trimToLongestRun(slots: IAvailableTimeslot[]): IAvailableTimeslot[] {
 }
 
 /** 时段卡点选：已选再点=取消；新选必须与已选集合相邻连续，且合并时长不得超上限 */
-function toggleSlot(slot: IAvailableTimeslot): void {
+function toggleSlot(slot: IAvailableViewingTimeslot): void {
   if (slotFull(slot)) return
   if (isSelected(slot)) {
     selectedSlots.value = trimToLongestRun(
@@ -276,10 +281,10 @@ function toggleSlot(slot: IAvailableTimeslot): void {
   selectedSlots.value = [...selectedSlots.value, slot]
 }
 
-/** 第 2 步显式推进（多选不能像旧单选那样选即跳转），校验时机保持点击即校验 */
+/** 第 2 步显式推进（多选不能像单选那样选即跳转），校验时机对齐资源三步页的点击即校验 */
 function goNextFromStep2(): void {
   if (selectedSlots.value.length === 0) {
-    ElMessage.warning('请先选择至少一个开放时段')
+    ElMessage.warning('请先选择至少一个可约时段')
     return
   }
   step.value = 3
@@ -288,8 +293,8 @@ function goNextFromStep2(): void {
 /* ------------------------------ 第三步：确认提交 ------------------------------ */
 
 const form = reactive({
+  visitorName: '',
   contactPhone: '',
-  purpose: '',
   remark: ''
 })
 
@@ -300,37 +305,42 @@ const weekdayText = computed(() => {
   return WEEKDAYS[(new Date(`${selectedDate.value}T00:00:00`).getDay() + 6) % 7]
 })
 
-/** 联系电话选填，填则须满足后端手机号格式（避免 400 才发现） */
-const phoneValid = computed(
-  () => form.contactPhone.trim() === '' || /^1[3-9]\d{9}$/.test(form.contactPhone.trim())
-)
+/** 联系电话后端必填（CreateViewingAppointmentDTO @NotBlank + 手机号格式），提交前本地校验 */
+const phoneValid = computed(() => /^1[3-9]\d{9}$/.test(form.contactPhone.trim()))
 
 async function handleSubmit(): Promise<void> {
   if (submitting.value) return
   if (!selectedDate.value || !mergedStart.value || !mergedEnd.value) {
-    ElMessage.warning('请先选择预约日期与时段')
+    ElMessage.warning('请先选择看房日期与时段')
+    return
+  }
+  if (!form.visitorName.trim()) {
+    ElMessage.warning('请填写联系人姓名')
     return
   }
   if (!phoneValid.value) {
-    ElMessage.warning('联系电话格式不正确（11 位手机号）')
+    ElMessage.warning('请填写正确的 11 位手机号')
     return
   }
   submitting.value = true
   try {
-    /* R60：多选连续时段合并为单条预约（startTime=最早段 start，endTime=最晚段 end） */
-    await createReservation({
-      resourceId,
-      reserveDate: selectedDate.value,
+    const created = await createViewingAppointment({
+      housingId,
+      appointmentDate: selectedDate.value,
       startTime: mergedStart.value,
       endTime: mergedEnd.value,
-      purpose: form.purpose.trim() || undefined,
-      contactPhone: form.contactPhone.trim() || undefined,
+      visitorName: form.visitorName.trim(),
+      contactPhone: form.contactPhone.trim(),
       remark: form.remark.trim() || undefined
     })
-    ElMessage.success('预约已提交，等待管理员审核')
-    router.push('/resident/reservations')
+    ElMessage.success('看房预约已提交，等待管理员确认')
+    /* 成功跳该预约详情页（带看会话所在）；响应异常缺 id 时回落看房 tab */
+    router.push(
+      created?.id ? `/resident/viewing-appointments/${created.id}` : '/resident/reservations?tab=viewing'
+    )
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '提交预约失败')
+    ElMessage.error(error instanceof Error ? error.message : '提交看房预约失败')
+  } finally {
     submitting.value = false
   }
 }
@@ -339,45 +349,46 @@ async function handleSubmit(): Promise<void> {
 
 onMounted(async () => {
   if (invalidEntry) {
-    router.replace('/resident/resources')
+    router.replace('/resident/housings')
     return
   }
   void loadMonthSlots()
   try {
-    resource.value = await getResource(resourceId)
+    housing.value = await getHousingDetail(housingId)
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '加载资源信息失败')
+    ElMessage.error(error instanceof Error ? error.message : '加载房源信息失败')
   }
   try {
     profile.value = await getMyProfile()
+    form.visitorName = profile.value.realName
     form.contactPhone = profile.value.phone
   } catch {
-    /* 资料加载失败不阻塞预约流程，联系电话可手填 */
+    /* 资料加载失败不阻塞预约流程，联系人与电话可手填 */
   }
 })
 </script>
 
 <template>
-  <section class="reservation-create">
+  <section class="housing-reserve">
     <nav class="breadcrumb">
-      <router-link to="/resident/resources">公共资源</router-link>
-      <template v-if="resource">
+      <router-link to="/resident/housings">房源列表</router-link>
+      <template v-if="housing">
         <span class="breadcrumb-sep">/</span>
-        <router-link :to="`/resident/resources/${resource.id}`">{{ resource.name }}</router-link>
+        <router-link :to="`/resident/housings/${housing.id}`">{{ housing.title }}</router-link>
       </template>
       <span class="breadcrumb-sep">/</span>
-      <span class="breadcrumb-current">发起预约</span>
+      <span class="breadcrumb-current">预约看房</span>
     </nav>
 
     <header class="page-head">
-      <h1>发起预约</h1>
+      <h1>预约看房</h1>
       <p class="page-head-sub">
-        <template v-if="resource">{{ resource.communityName }} · {{ resource.name }}</template>
-        <template v-else>正在加载资源信息…</template>
+        <template v-if="housing">{{ housing.communityName }} · {{ housing.title }}</template>
+        <template v-else>正在加载房源信息…</template>
       </p>
     </header>
 
-    <div class="create-layout">
+    <div class="reserve-layout">
       <!-- 左：步骤轨（已完成可点回跳，未解锁置灰） -->
       <aside class="step-rail">
         <button
@@ -452,6 +463,10 @@ onMounted(async () => {
             </button>
           </div>
 
+          <p v-if="!monthLoading && !monthHasOpen" class="calendar-empty-hint">
+            本月暂无可约时段，可点击「下月」翻看更远日期
+          </p>
+
           <p class="calendar-legend">
             <span class="legend-item"><span class="legend-dot"></span>有可约时段</span>
             <span class="legend-item"><span class="legend-full">满</span>当日时段已约满</span>
@@ -459,11 +474,11 @@ onMounted(async () => {
           </p>
         </div>
 
-        <!-- 第二步：时段卡连续多选（R60，自下拉单选升级） -->
+        <!-- 第二步：时段卡连续多选（R60） -->
         <div v-show="step === 2" class="panel-body">
-          <h2 class="panel-title">选择 {{ selectedDate }}（{{ weekdayText }}）的开放时段</h2>
+          <h2 class="panel-title">选择 {{ selectedDate }}（{{ weekdayText }}）的可约时段</h2>
           <p class="panel-hint">
-            可多选相邻连续时段合并预约（最长 {{ MAX_CONTINUOUS_MINUTES }} 分钟），不支持跨段选择
+            可多选相邻连续时段合并为一次看房（最长 {{ MAX_CONTINUOUS_MINUTES }} 分钟），不支持跨段选择
           </p>
           <div v-loading="dayLoading" class="slot-grid">
             <button
@@ -497,18 +512,18 @@ onMounted(async () => {
 
         <!-- 第三步：摘要确认 -->
         <div v-show="step === 3" class="panel-body">
-          <h2 class="panel-title">确认预约信息</h2>
+          <h2 class="panel-title">确认看房预约</h2>
           <dl class="summary">
             <div class="summary-row">
-              <dt>预约资源</dt>
-              <dd>{{ resource ? `${resource.communityName} · ${resource.name}` : '—' }}</dd>
+              <dt>看房房源</dt>
+              <dd>{{ housing ? `${housing.communityName} · ${housing.title}` : '—' }}</dd>
             </div>
             <div class="summary-row">
               <dt>预约日期</dt>
               <dd>{{ selectedDate }} {{ selectedDate ? `（${weekdayText}）` : '' }}</dd>
             </div>
             <div class="summary-row">
-              <dt>预约时段</dt>
+              <dt>看房时段</dt>
               <dd>
                 <template v-if="mergedStart && mergedEnd">
                   {{ mergedStart.slice(0, 5) }} ~ {{ mergedEnd.slice(0, 5) }}（{{ mergedMinutes }} 分钟）
@@ -517,29 +532,19 @@ onMounted(async () => {
               </dd>
             </div>
             <div class="summary-row">
-              <dt>预约人</dt>
-              <dd>{{ profile?.realName || '当前登录居民' }}</dd>
+              <dt>联系人</dt>
+              <dd>{{ profile?.realName || form.visitorName || '当前登录居民' }}</dd>
             </div>
           </dl>
 
           <div class="supplement">
             <el-form label-width="76px" class="supplement-form" @submit.prevent>
-              <el-form-item label="联系电话">
+              <el-form-item label="联系电话" required>
                 <el-input
                   v-model="form.contactPhone"
-                  placeholder="用于预约确认联系（选填）"
+                  placeholder="用于看房确认联系（必填）"
                   maxlength="11"
                   style="width: 240px"
-                />
-              </el-form-item>
-              <el-form-item label="使用用途">
-                <el-input
-                  v-model="form.purpose"
-                  type="textarea"
-                  :rows="2"
-                  placeholder="简单说明用途，帮助管理员审核（选填）"
-                  maxlength="200"
-                  show-word-limit
                 />
               </el-form-item>
               <el-form-item label="备注">
@@ -577,7 +582,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.reservation-create {
+.housing-reserve {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
@@ -604,6 +609,10 @@ onMounted(async () => {
 
 .breadcrumb-current {
   color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 24em;
 }
 
 .page-head h1 {
@@ -618,7 +627,7 @@ onMounted(async () => {
 }
 
 /* 左步骤轨 + 右内容卡 */
-.create-layout {
+.reserve-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
   gap: var(--spacing-md);
@@ -734,7 +743,13 @@ onMounted(async () => {
   color: var(--color-text-primary);
 }
 
-/* 月历：与「我的预约」日历同语言 */
+.panel-hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* 月历：与资源预约三步页同语言 */
 .calendar-head {
   display: flex;
   align-items: center;
@@ -870,6 +885,16 @@ onMounted(async () => {
   color: var(--color-text-disabled);
 }
 
+.calendar-empty-hint {
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
 .calendar-legend {
   display: flex;
   flex-wrap: wrap;
@@ -906,13 +931,7 @@ onMounted(async () => {
   color: var(--color-text-disabled);
 }
 
-/* 第二步：时段卡网格（连续多选，R60） */
-.panel-hint {
-  margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
+/* 第二步：时段卡网格（多选） */
 .slot-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -989,7 +1008,6 @@ onMounted(async () => {
 }
 
 .ghost-btn {
-  align-self: flex-start;
   padding: var(--spacing-xs) var(--spacing-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
@@ -1054,7 +1072,7 @@ onMounted(async () => {
 }
 
 @media (max-width: 900px) {
-  .create-layout {
+  .reserve-layout {
     grid-template-columns: 1fr;
   }
 

@@ -25,7 +25,10 @@ const residentRoutes: RouteRecordRaw[] = [
       { path: 'notifications', name: 'ResidentNotifications', component: () => import('@/views/resident/NotificationListView.vue'), meta: { title: '消息中心' } },
       { path: 'housings', name: 'ResidentHousings', component: () => import('@/views/resident/HousingListView.vue'), meta: { title: '房源浏览' } },
       { path: 'housings/:id', name: 'ResidentHousingDetail', component: () => import('@/views/resident/HousingDetailView.vue'), meta: { title: '房源详情' } },
-      { path: 'viewing-appointments', name: 'ResidentViewingAppointments', component: () => import('@/views/resident/ViewingAppointmentListView.vue'), meta: { title: '看房预约' } }
+      { path: 'housings/:id/reserve', name: 'ResidentHousingReserve', component: () => import('@/views/resident/HousingReservationView.vue'), meta: { title: '预约看房' } },
+      { path: 'viewing-appointments/:id', name: 'ResidentViewingAppointmentDetail', component: () => import('@/views/resident/ViewingAppointmentDetailView.vue'), meta: { title: '看房预约详情' } },
+      /* 独立看房预约列表页退役（R59，v1.3）：并入「我的预约」看房 tab */
+      { path: 'viewing-appointments', redirect: { path: '/resident/reservations', query: { tab: 'viewing' } } }
     ]
   }
 ]
