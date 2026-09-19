@@ -24,6 +24,26 @@ SELECT '安全提示 · 高层住户防火与电动车充电规范',
        1, 'PUBLISHED', NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY), 1, 'URGENT', 'ANNOUNCEMENT'
 WHERE NOT EXISTS (SELECT 1 FROM notice WHERE title = '安全提示 · 高层住户防火与电动车充电规范');
 
+-- 1b. 三条非置顶普通广播公告（is_pinned=0，进游客公告页下方期刊列表；
+--     置顶公告全部进轮播、期刊列表仅显示非置顶，故必须另有非置顶数据）
+INSERT INTO notice (title, content, publisher_id, status, publish_time, end_time, is_pinned, priority, type)
+SELECT '物业服务窗口与报修响应时限说明',
+       '物业服务中心工作时间为每日 8:30-17:30；\n报修工单承诺：急修 2 小时内响应、普通维修 24 小时内上门。\n超时未响应可在工单中催办或向管理方反馈。',
+       1, 'PUBLISHED', NOW(), DATE_ADD(NOW(), INTERVAL 90 DAY), 0, 'NORMAL', 'ANNOUNCEMENT'
+WHERE NOT EXISTS (SELECT 1 FROM notice WHERE title = '物业服务窗口与报修响应时限说明');
+
+INSERT INTO notice (title, content, publisher_id, status, publish_time, end_time, is_pinned, priority, type)
+SELECT '社区班车时刻调整通知（9 月版）',
+       '自本月起社区班车发车时刻调整如下：\n工作日 7:00 / 8:30 / 17:30 / 19:00 四班，周末 9:00 / 16:00 两班。\n乘车点为中心广场东侧站台，请提前 5 分钟候车。',
+       1, 'PUBLISHED', NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), 0, 'NORMAL', 'ANNOUNCEMENT'
+WHERE NOT EXISTS (SELECT 1 FROM notice WHERE title = '社区班车时刻调整通知（9 月版）');
+
+INSERT INTO notice (title, content, publisher_id, status, publish_time, end_time, is_pinned, priority, type)
+SELECT '社区图书室开放时间与借阅规则',
+       '社区图书室（文化活动中心二层）开放时间：每日 9:00-20:00（周一上午闭馆整理）。\n借阅规则：每证同时借阅 3 册，借期 21 天，可续借一次。\n公共资源预约模块可预约图书室研讨席位。',
+       1, 'PUBLISHED', NOW(), DATE_ADD(NOW(), INTERVAL 180 DAY), 0, 'LOW', 'ANNOUNCEMENT'
+WHERE NOT EXISTS (SELECT 1 FROM notice WHERE title = '社区图书室开放时间与借阅规则');
+
 -- 2. 多图展示房源（挂 V6 种子：阳光花园 102 房屋；images 五张冒烟展示图）
 INSERT INTO housing (community_id, house_id, title, description, monthly_rent, deposit, images, status, view_count, publish_time)
 SELECT c.id, h.id, '阳光花园 1 号楼 102 室 · 南向三居（多图实拍）',
