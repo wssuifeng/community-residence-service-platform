@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -190,6 +191,7 @@ public class HousingService {
      * 占用计数。housing_timeslot 无 max_bookings 列且预约创建按「每时段仅一条
      * 有效预约」做冲突检测，故 maxBookings 固定为 1（与创建口径一致）；
      * endDate 缺省展开 7 天；占用状态与创建冲突检测同口径（TO_CONFIRM/RESERVED）。
+     * DEF-045：今日已结束时段（endTime<=now）不返回，与创建侧过去时段校验同口径。
      */
     public List<AvailableSlotVO> availableSlots(Long housingId, LocalDate startDate, LocalDate endDate) {
         requireHousing(housingId);
@@ -205,6 +207,11 @@ public class HousingService {
                         .ge(ViewingAppointment::getAppointmentDate, startDate)
                         .le(ViewingAppointment::getAppointmentDate, end));
 
+        /* DEF-045：今日已结束的时段不再返回（end<=now 剔除而非标 FULL——
+           用户预期是"不能预约已过去的时段"即不展示）；明日及以后不受影响 */
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
         List<AvailableSlotVO> slots = new ArrayList<>();
         Set<String> occupyingStatus = Set.of("TO_CONFIRM", "RESERVED");
         for (LocalDate d = startDate; !d.isAfter(end); d = d.plusDays(1)) {
@@ -212,6 +219,9 @@ public class HousingService {
             int dayOfWeek = date.getDayOfWeek().getValue();
             for (HousingTimeslot template : templates) {
                 if (template.getDayOfWeek() != dayOfWeek) {
+                    continue;
+                }
+                if (date.isEqual(today) && !template.getEndTime().isAfter(now)) {
                     continue;
                 }
                 int current = (int) occupying.stream()

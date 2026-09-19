@@ -56,6 +56,17 @@ public class NoticeService {
     private static final String BROADCAST_FILTER_SQL =
             "NOT EXISTS (SELECT 1 FROM notice_target nt WHERE nt.notice_id = notice.id)";
 
+    /**
+     * 游客可见过滤（DEF-046）：无任何 COMMUNITY/BUILDING 定向行（纯广播）
+     * 或存在 GUEST 目标行（管理端显式开放游客，如使用教程）；社区/楼栋定向
+     * 公告对游客不可见。GUEST 行本身不影响"广播"判定（纯 GUEST 公告两类口径均命中）。
+     */
+    private static final String GUEST_VISIBLE_FILTER_SQL =
+            "(NOT EXISTS (SELECT 1 FROM notice_target nt WHERE nt.notice_id = notice.id "
+                    + "AND nt.target_type IN ('COMMUNITY', 'BUILDING')) "
+                    + "OR EXISTS (SELECT 1 FROM notice_target nt WHERE nt.notice_id = notice.id "
+                    + "AND nt.target_type = 'GUEST'))";
+
     private final NoticeMapper noticeMapper;
     private final NoticeTargetMapper noticeTargetMapper;
     private final NoticeViewRecordMapper viewRecordMapper;
@@ -95,7 +106,8 @@ public class NoticeService {
             NoticeTarget entity = new NoticeTarget();
             entity.setNoticeId(notice.getId());
             entity.setTargetType(target.type());
-            entity.setTargetId(target.id());
+            /* GUEST 目标无对应实体，target_id 列 NOT NULL 固定落 0（V13 注释口径） */
+            entity.setTargetId(target.id() != null ? target.id() : 0L);
             noticeTargetMapper.insert(entity);
         }
         return toVO(notice);
@@ -135,7 +147,8 @@ public class NoticeService {
             NoticeTarget entity = new NoticeTarget();
             entity.setNoticeId(id);
             entity.setTargetType(target.type());
-            entity.setTargetId(target.id());
+            /* GUEST 目标无对应实体，target_id 列 NOT NULL 固定落 0（V13 注释口径） */
+            entity.setTargetId(target.id() != null ? target.id() : 0L);
             noticeTargetMapper.insert(entity);
         }
         return toVO(notice);
@@ -170,10 +183,25 @@ public class NoticeService {
         return List.of();
     }
 
-    /* 逐项目标校验：类型合法（COMMUNITY/BUILDING）、社区运营中、ADMIN 限绑定范围（R24 v1.2） */
+    /* 逐项目标校验：类型合法（COMMUNITY/BUILDING/GUEST）、社区运营中、ADMIN 限绑定范围（R24 v1.2）。
+       GUEST（DEF-046 游客可见）属全局级操作仅超管（定义 v1.3 权责：全平台游客触达），
+       ADMIN 设置 403 拒绝并留应用日志 */
     private void checkTargetAccess(NoticeServiceTarget target) {
+        if ("GUEST".equals(target.type())) {
+            if (target.id() != null) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "GUEST 目标不携带目标ID");
+            }
+            if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+                log.warn("拒绝非超管设置游客可见公告目标：operatorId={}", SecurityUtils.getUserId());
+                throw new ForbiddenException("游客可见目标仅超级管理员可设置");
+            }
+            return;
+        }
         if (!"COMMUNITY".equals(target.type()) && !"BUILDING".equals(target.type())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "非法目标类型：" + target.type());
+        }
+        if (target.id() == null) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "目标ID不能为空");
         }
         if ("COMMUNITY".equals(target.type())) {
             communityService.requireActiveCommunity(target.id());
@@ -215,6 +243,7 @@ public class NoticeService {
     /**
      * 公告详情：普通访问仅 PUBLISHED 且未过期；
      * 居民限本人社区定向公告与全系统广播（R25 范围外不可见，DEF-003）；
+     * 游客/未登录限纯广播 + GUEST 显式可见（DEF-046，与列表同口径）；
      * ADMIN 越绑定社区按数据不可见 404（与写路径 403 区分口径）。
      */
     public NoticeVO getById(Long id) {
@@ -235,15 +264,17 @@ public class NoticeService {
                     || !visibleToResidentCommunities(notice, residentCommunityIds(SecurityUtils.getUserId()))) {
                 throw new ResourceNotFoundException("公告不存在或已下线");
             }
-        } else if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)) {
-            /* 游客/未登录：公开口径，仅状态与有效期过滤 */
+        } else if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
+                || !visibleToGuest(notice.getId())) {
+            /* 游客/未登录（DEF-046）：公开口径加可见性维度（纯广播 OR GUEST 目标） */
             throw new ResourceNotFoundException("公告不存在或已下线");
         }
         return toVO(notice);
     }
 
     /**
-     * 公告分页列表：匿名/普通用户仅 PUBLISHED 且未过期；
+     * 公告分页列表：匿名/普通用户仅 PUBLISHED 且未过期，游客另限纯广播 +
+     * GUEST 显式可见（DEF-046）；居民限本人社区定向 + 全系统广播（DEF-003）；
      * 管理端角色返回全部状态（ADMIN 限绑定社区，业务层经 notice_target 过滤）。
      */
     public PageVO<NoticeVO> page(long page, long size, Long communityId, String keyword,
@@ -293,6 +324,10 @@ public class NoticeService {
                 wrapper.and(w -> w.in(Notice::getId, visibleIds)
                         .or().apply(BROADCAST_FILTER_SQL));
             }
+        } else {
+            /* 游客/匿名（DEF-046）：仅纯广播 + 显式开放游客（GUEST 目标）的公告，
+               社区/楼栋定向公告不可见（原全量 PUBLISHED 口径过宽，用户手测裁决） */
+            wrapper.apply(GUEST_VISIBLE_FILTER_SQL);
         }
 
         Page<Notice> result = noticeMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
@@ -324,13 +359,21 @@ public class NoticeService {
                 id, publishTime, SecurityUtils.getUserId(), noticeTargetResidentIds(id).size());
     }
 
-    /** 公告目标居民：COMMUNITY 目标取社区在住居民（经 residence_relation），全系统广播取全部 ACTIVE 居民 */
+    /** 公告目标居民：COMMUNITY 目标取社区在住居民（经 residence_relation），
+     *  全系统广播取全部 ACTIVE 居民；仅 GUEST 目标的公告（DEF-046，居民不可见）
+     *  不向居民触达，其余无 COMMUNITY 目标情形维持全员口径不变 */
     private List<Long> noticeTargetResidentIds(Long noticeId) {
         List<NoticeTarget> targets = noticeTargetMapper.selectList(
                 new LambdaQueryWrapper<NoticeTarget>()
                         .eq(NoticeTarget::getNoticeId, noticeId)
                         .eq(NoticeTarget::getTargetType, "COMMUNITY"));
         if (targets.isEmpty()) {
+            Long guestRows = noticeTargetMapper.selectCount(new LambdaQueryWrapper<NoticeTarget>()
+                    .eq(NoticeTarget::getNoticeId, noticeId)
+                    .eq(NoticeTarget::getTargetType, "GUEST"));
+            if (guestRows != null && guestRows > 0) {
+                return List.of();
+            }
             return residentMapper.selectList(new LambdaQueryWrapper<Resident>()
                             .eq(Resident::getStatus, "ACTIVE"))
                     .stream().map(Resident::getId).toList();
@@ -456,6 +499,19 @@ public class NoticeService {
                 || targetCommunities.stream().anyMatch(communityIds::contains);
     }
 
+    /** 公告对游客可见（DEF-046）：无 COMMUNITY/BUILDING 定向行（纯广播）或存在 GUEST 目标行；
+     *  与列表 GUEST_VISIBLE_FILTER_SQL 同口径（详情与列表一致，防直连详情绕过） */
+    private boolean visibleToGuest(Long noticeId) {
+        List<NoticeTarget> targets = noticeTargetMapper.selectList(
+                new LambdaQueryWrapper<NoticeTarget>()
+                        .eq(NoticeTarget::getNoticeId, noticeId));
+        boolean hasScopedTarget = targets.stream().anyMatch(t ->
+                "COMMUNITY".equals(t.getTargetType()) || "BUILDING".equals(t.getTargetType()));
+        boolean hasGuestTarget = targets.stream().anyMatch(t ->
+                "GUEST".equals(t.getTargetType()));
+        return !hasScopedTarget || hasGuestTarget;
+    }
+
     /** 社区集合可见的定向公告 ID（COMMUNITY 目标 + BUILDING 目标归属社区在集合内） */
     private List<Long> targetedNoticeIdsForCommunities(List<Long> communityIds) {
         if (communityIds.isEmpty()) {
@@ -516,8 +572,11 @@ public class NoticeService {
                         buildingMapper.selectById(target.getTargetId());
                 name = building != null ? building.getName() : null;
             }
+            /* GUEST 目标行落库 target_id=0，读回按契约置空（写入侧即不携带 targetId） */
             targetItems.add(NoticeVO.TargetItem.of(
-                    target.getTargetType(), target.getTargetId(), name));
+                    target.getTargetType(),
+                    "GUEST".equals(target.getTargetType()) ? null : target.getTargetId(),
+                    name));
         }
         vo.setTargets(targetItems);
         SysUser publisher = sysUserMapper.selectById(notice.getPublisherId());

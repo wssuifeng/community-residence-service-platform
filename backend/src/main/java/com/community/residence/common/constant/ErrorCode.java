@@ -59,7 +59,10 @@ public enum ErrorCode {
 
     /* ---- 权限管理 5701~5799 ---- */
     SELF_FREEZE_FORBIDDEN(5701, "不可冻结自己的账号"),
-    BIND_ROLE_INVALID(5702, "仅社区管理员可绑定社区");
+    BIND_ROLE_INVALID(5702, "仅社区管理员可绑定社区"),
+
+    /* ---- 看房预约 5801~5899 ---- */
+    PAST_SLOT(5804, "不能预约已过去的时段");
 
     private final int code;
     private final String message;
