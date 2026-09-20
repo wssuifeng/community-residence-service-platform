@@ -128,6 +128,10 @@ function isActive(path: string): boolean {
   width: var(--admin-sidebar-width);
   flex-shrink: 0;
   background: var(--admin-sidebar-bg);
+  /* 固定于视口：长页面滚动时侧栏常驻可点，不再随内容滚走 */
+  position: sticky;
+  top: 60px;
+  height: calc(100vh - 60px);
   overflow-y: auto;
   padding: var(--spacing-lg) var(--spacing-sm);
 }
