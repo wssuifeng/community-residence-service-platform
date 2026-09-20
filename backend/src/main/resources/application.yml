@@ -25,6 +25,40 @@ auth:
 upload:
   dir: ./uploads
 
+# 支付渠道凭据配置（R61 租约续约支付；默认空 = 该渠道禁用，
+# GET /api/v1/payment/channels 返回 enabled=false，不报错不阻断。
+# 密钥经环境变量注入，禁止写入仓库；凭据齐全（各渠道必填项均非空）才启用渠道。
+# 支付宝沙箱可开通：网关 https://openapi-sandbox.dl.alipaydev.com + 测试买家账号；
+# 微信无公开沙箱：需商户号 + API 证书（apiclient_key.pem）。
+# 本地无公网回调，支付结果以主动查单为准（决策日志 2026-09-20 R61））
+payment:
+  # 公网部署时的异步通知地址（本地留空 = 查单替代回调；接入点见 PaymentController 预留注释）
+  # notify-url: https://your-domain.example.com/api/v1/payment/notify
+  alipay:
+    # 应用 APPID（支付宝开放平台）
+    app-id: ${PAYMENT_ALIPAY_APP_ID:}
+    # 网关：沙箱 https://openapi-sandbox.dl.alipaydev.com / 生产 https://openapi.alipay.com
+    gateway-url: ${PAYMENT_ALIPAY_GATEWAY_URL:}
+    # 应用私钥（PKCS8）
+    merchant-private-key: ${PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY:}
+    # 支付宝公钥（非应用公钥）
+    alipay-public-key: ${PAYMENT_ALIPAY_PUBLIC_KEY:}
+    # 支付完成后前端回跳地址
+    return-url: ${PAYMENT_ALIPAY_RETURN_URL:}
+  wechat:
+    # 商户号 mchid
+    mchid: ${PAYMENT_WECHAT_MCH_ID:}
+    # 应用 appid
+    appid: ${PAYMENT_WECHAT_APP_ID:}
+    # APIv3 密钥
+    api-v3-key: ${PAYMENT_WECHAT_API_V3_KEY:}
+    # 商户 API 证书序列号
+    merchant-serial-number: ${PAYMENT_WECHAT_MERCHANT_SERIAL_NO:}
+    # 商户 API 私钥（apiclient_key.pem 内容，与 private-key-path 二选一）
+    private-key: ${PAYMENT_WECHAT_PRIVATE_KEY:}
+    # 商户 API 私钥文件路径
+    private-key-path: ${PAYMENT_WECHAT_PRIVATE_KEY_PATH:}
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true

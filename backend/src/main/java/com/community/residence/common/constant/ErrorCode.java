@@ -71,7 +71,12 @@ public enum ErrorCode {
     VIEWING_ASSIGNEE_INVALID(5805, "目标账号不可分配"),
     VIEWING_DURATION_LIMIT(5806, "单次看房预约超过连续时长上限"),
     /* DEF-062：同账号同日跨房源/跨域时间重叠（预约人日程冲突，「影分身」拦截） */
-    VIEWING_SCHEDULE_CONFLICT(5807, "该时间段已有本人的其他预约安排");
+    VIEWING_SCHEDULE_CONFLICT(5807, "该时间段已有本人的其他预约安排"),
+
+    /* ---- 支付管理 5901~5999（R61 租约续约支付） ---- */
+    PAYMENT_CHANNEL_DISABLED(5901, "该支付渠道未配置"),
+    PAYMENT_CREATE_FAILED(5902, "发起支付失败，请稍后重试"),
+    PAYMENT_AMOUNT_MISMATCH(5903, "渠道支付金额与应付金额不一致");
 
     private final int code;
     private final String message;
