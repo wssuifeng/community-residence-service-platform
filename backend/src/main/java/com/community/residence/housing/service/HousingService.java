@@ -271,15 +271,16 @@ public class HousingService {
     }
 
     /**
-     * 按社区批量挂牌（R62）：为该社区内**无在架房源**的房屋按默认参数批量生成
-     * AVAILABLE 房源（title=「{楼栋}{单元}{房号}·精装房源」、月租/押金/租售类型
-     * 参数化、户型冗余自 house.layout）；幂等口径与单套挂牌一致——存在非 OFFLINE
-     * 房源的房屋跳过（仅 OFFLINE 下架记录的房屋可重新生成在架房源）。
-     * ADMIN 限绑定社区（checkCommunityAccess）。
+     * 按（社区/楼栋/单元/房屋）批量挂牌（R62）：为**无在架房源**的房屋按默认参数批量
+     * 生成 AVAILABLE 房源（title=「{楼栋}{单元}{房号}·精装房源[·后缀]」、月租/押金/
+     * 租售类型参数化、户型冗余自 house.layout）；幂等口径与单套挂牌一致——存在非
+     * OFFLINE 房源的房屋跳过（仅 OFFLINE 下架记录的房屋可重新生成在架房源）。
+     * 粒度收窄链：houseIds > unitIds > buildingIds > 整个社区（叠加时逐级过滤取交集）；
+     * 越权/跨社区 ID 一律拒绝。ADMIN 限绑定社区（checkCommunityAccess）。
      */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSING",
-            targetId = "#dto.communityId", content = "'按社区批量挂牌：' + #dto.communityId")
+            targetId = "#dto.communityId", content = "'批量挂牌：' + #dto.communityId")
     public BatchGenerateResultVO batchGenerate(BatchGenerateHousingDTO dto) {
         communityService.requireCommunity(dto.getCommunityId());
         SecurityUtils.checkCommunityAccess(dto.getCommunityId());
@@ -287,6 +288,52 @@ public class HousingService {
         List<House> houses = houseMapper.selectList(new LambdaQueryWrapper<House>()
                 .eq(House::getCommunityId, dto.getCommunityId())
                 .orderByAsc(House::getId));
+
+        /* 细粒度收窄：楼栋/单元/房屋三级过滤（逐级取交集）；跨社区 ID 拒绝 */
+        Set<Long> allowedUnitIds = null;
+        if (dto.getBuildingIds() != null && !dto.getBuildingIds().isEmpty()) {
+            Set<Long> found = buildingMapper.selectList(new LambdaQueryWrapper<Building>()
+                            .eq(Building::getCommunityId, dto.getCommunityId())
+                            .in(Building::getId, dto.getBuildingIds()))
+                    .stream().map(Building::getId).collect(java.util.stream.Collectors.toSet());
+            if (!found.containsAll(dto.getBuildingIds())) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该社区的楼栋");
+            }
+            allowedUnitIds = unitMapper.selectList(new LambdaQueryWrapper<Unit>()
+                            .in(Unit::getBuildingId, dto.getBuildingIds()))
+                    .stream().map(Unit::getId).collect(java.util.stream.Collectors.toSet());
+        }
+        if (dto.getUnitIds() != null && !dto.getUnitIds().isEmpty()) {
+            Set<Long> found = unitMapper.selectList(new LambdaQueryWrapper<Unit>()
+                            .eq(Unit::getCommunityId, dto.getCommunityId())
+                            .in(Unit::getId, dto.getUnitIds()))
+                    .stream().map(Unit::getId).collect(java.util.stream.Collectors.toSet());
+            if (!found.containsAll(dto.getUnitIds())) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该社区的单元");
+            }
+            /* 过滤集取请求集本身（已校验全部属于该社区），不依赖查询返回集的范围 */
+            Set<Long> requested = new java.util.HashSet<>(dto.getUnitIds());
+            allowedUnitIds = allowedUnitIds == null ? requested : intersect(allowedUnitIds, requested);
+        }
+        Set<Long> allowedHouseIds = null;
+        if (dto.getHouseIds() != null && !dto.getHouseIds().isEmpty()) {
+            Set<Long> found = houseMapper.selectList(new LambdaQueryWrapper<House>()
+                            .eq(House::getCommunityId, dto.getCommunityId())
+                            .in(House::getId, dto.getHouseIds()))
+                    .stream().map(House::getId).collect(java.util.stream.Collectors.toSet());
+            if (!found.containsAll(dto.getHouseIds())) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该社区的房屋");
+            }
+            allowedHouseIds = new java.util.HashSet<>(dto.getHouseIds());
+        }
+        if (allowedUnitIds != null) {
+            Set<Long> unitFilter = allowedUnitIds;
+            houses = houses.stream().filter(h -> unitFilter.contains(h.getUnitId())).toList();
+        }
+        if (allowedHouseIds != null) {
+            Set<Long> houseFilter = allowedHouseIds;
+            houses = houses.stream().filter(h -> houseFilter.contains(h.getId())).toList();
+        }
         if (houses.isEmpty()) {
             return BatchGenerateResultVO.of(0, 0);
         }
@@ -305,6 +352,8 @@ public class HousingService {
                         new LambdaQueryWrapper<Building>()
                                 .eq(Building::getCommunityId, dto.getCommunityId()))
                 .stream().collect(java.util.stream.Collectors.toMap(Building::getId, Building::getName));
+        String titleSuffix = StringUtils.hasText(dto.getTitleSuffix())
+                ? "·" + dto.getTitleSuffix().trim() : "";
 
         int created = 0;
         for (House house : houses) {
@@ -318,7 +367,7 @@ public class HousingService {
             Housing housing = new Housing();
             housing.setCommunityId(dto.getCommunityId());
             housing.setHouseId(house.getId());
-            housing.setTitle(buildingName + unitName + house.getHouseNumber() + "·精装房源");
+            housing.setTitle(buildingName + unitName + house.getHouseNumber() + "·精装房源" + titleSuffix);
             housing.setMonthlyRent(dto.getMonthlyRent());
             housing.setDeposit(dto.getDeposit());
             housing.setRentType(StringUtils.hasText(dto.getRentType()) ? dto.getRentType() : "RENT");
@@ -330,9 +379,16 @@ public class HousingService {
             created++;
         }
         int skipped = houses.size() - created;
-        log.info("按社区批量挂牌完成：communityId={}, created={}, skipped={}, operator={}",
-                dto.getCommunityId(), created, skipped, SecurityUtils.getUserId());
+        log.info("批量挂牌完成：communityId={}, buildings={}, units={}, houses={}, created={}, skipped={}, operator={}",
+                dto.getCommunityId(), dto.getBuildingIds(), dto.getUnitIds(), dto.getHouseIds(),
+                created, skipped, SecurityUtils.getUserId());
         return BatchGenerateResultVO.of(created, skipped);
+    }
+
+    private static Set<Long> intersect(Set<Long> a, Set<Long> b) {
+        Set<Long> result = new java.util.HashSet<>(a);
+        result.retainAll(b);
+        return result;
     }
 
     public Housing requireHousing(Long id) {
@@ -398,6 +454,8 @@ public class HousingService {
                     houseVO.setId(house.getId());
                     houseVO.setHouseNumber(house.getHouseNumber());
                     houseVO.setFloor(house.getFloor());
+                    houseVO.setArea(house.getArea());
+                    houseVO.setLayout(house.getLayout());
                     Housing housing = latestHousingByHouse.get(house.getId());
                     houseVO.setHousing(housing != null ? HousingSummaryVO.from(housing) : null);
                     houseVOs.add(houseVO);

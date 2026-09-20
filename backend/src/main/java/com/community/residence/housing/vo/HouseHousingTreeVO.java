@@ -17,6 +17,12 @@ public class HouseHousingTreeVO {
     @Schema(description = "楼层")
     private Integer floor;
 
+    @Schema(description = "建筑面积（㎡）")
+    private java.math.BigDecimal area;
+
+    @Schema(description = "户型")
+    private String layout;
+
     @Schema(description = "房源摘要（未挂牌为 null）")
     private HousingSummaryVO housing;
 }
