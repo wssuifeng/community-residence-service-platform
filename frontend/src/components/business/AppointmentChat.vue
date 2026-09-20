@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { listViewingMessages, sendViewingMessage } from '@/api/housing'
 import type { IViewingMessage } from '@/types/modules/housing'
 import { subscribe, isWsConnected } from '@/utils/websocket'
+import { formatDateTime } from '@/utils/date'
 import { useUserStore } from '@/store/user'
 
 /**
@@ -61,17 +63,26 @@ async function handleSend(): Promise<void> {
       messages.value.push(message)
     }
     void nextTick(scrollToBottom)
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '发送失败，请稍后重试')
   } finally {
     sending.value = false
   }
 }
 
-/** WS 载荷归一：{type, data} 包裹为主，兼容裸 VO（与反馈会话 extractWsMessage 同口径） */
+/** WS 载荷归一：{type, data} 包裹为主，兼容裸 VO（与反馈会话 extractWsMessage 同口径）；
+ * createdAt 非字符串（异常序列化形态）时丢弃该推送，交由轮询兜底拉全量，
+ * 避免畸形载荷进入列表后渲染链路异常 */
 function extractWsMessage(raw: unknown): IViewingMessage | null {
   const event = raw as { type?: string; data?: IViewingMessage }
-  if (event?.type === 'APPOINTMENT_MESSAGE' && event.data) return event.data
-  if (event?.type === undefined && typeof (raw as IViewingMessage)?.content === 'string') {
-    return raw as IViewingMessage
+  const candidate =
+    event?.type === 'APPOINTMENT_MESSAGE' && event.data
+      ? event.data
+      : event?.type === undefined && typeof (raw as IViewingMessage)?.content === 'string'
+        ? (raw as IViewingMessage)
+        : null
+  if (candidate && typeof candidate.createdAt === 'string' && typeof candidate.id === 'number') {
+    return candidate
   }
   return null
 }
@@ -125,7 +136,7 @@ onUnmounted(() => {
         :class="{ mine: isMine(message) }"
       >
         <div class="bubble">
-          <p class="bubble-meta">{{ message.senderName }} · {{ message.createdAt.slice(5, 16).replace('T', ' ') }}</p>
+          <p class="bubble-meta">{{ message.senderName }} · {{ formatDateTime(message.createdAt) }}</p>
           <p class="bubble-content">{{ message.content }}</p>
         </div>
       </div>

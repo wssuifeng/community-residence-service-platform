@@ -4,19 +4,14 @@ import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import { useUserStore } from '@/store/user'
-import { getHousingDetail, recordHousingView, listViewingAvailableSlots, listHousingTimeslots } from '@/api/housing'
-import HorizontalScroller from '@/components/common/HorizontalScroller.vue'
-import type {
-  IHousing,
-  HousingStatus,
-  IAvailableViewingTimeslot
-} from '@/types/modules/housing'
+import { getHousingDetail, recordHousingView } from '@/api/housing'
+import type { IHousing, HousingStatus } from '@/types/modules/housing'
 import { housingStatusLabels } from '@/types/modules/housing'
 
 /**
  * 房源详情（居民端）：视觉与游客端一致（16:9 主图 + 缩略图 + 信息面板 + 描述/配套两栏）；
  * 右侧预约看房面板为入口式（R59/v1.3 裁决：DEF-056 详情页内点选+轻确认交互拆除），
- * 醒目「预约看房」按钮跳三步预约页；下方横拉时段区仅作近两周可约时段展示（不可点选）。
+ * 醒目「预约看房」按钮跳三步预约页完成日期与时段选择（DEF-063：页内可约时段展示区移除）。
  * 未登录引导登录。
  */
 
@@ -53,94 +48,6 @@ const images = computed<string[]>(() => {
 
 const isResident = computed(() => userStore.isLoggedIn && userStore.role === 'RESIDENT')
 
-/* ------------------------------ 看房时段 ------------------------------ */
-
-function toDateInput(date: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
-
-const SLOT_WINDOW_DAYS = 14
-const windowStart = toDateInput(new Date())
-const windowEnd = toDateInput(new Date(Date.now() + SLOT_WINDOW_DAYS * 24 * 60 * 60 * 1000))
-
-const weekdayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-
-const slots = ref<IAvailableViewingTimeslot[]>([])
-const slotsLoading = ref(false)
-
-/* 选中标识须带日期：模板降级展开路径下同一时段模板会按日期重复出现，仅靠 timeslotId 会串档 */
-function cardKey(slot: IAvailableViewingTimeslot): string {
-  return `${slot.date}#${slot.timeslotId}`
-}
-
-function timeText(value: string): string {
-  return value.slice(0, 5)
-}
-
-function dateTextOf(date: string): string {
-  const parts = date.split('-')
-  const month = Number(parts[1])
-  const day = Number(parts[2])
-  return Number.isNaN(month) || Number.isNaN(day) ? date : `${month}月${day}日`
-}
-
-function weekdayOf(date: string): string {
-  const parsed = new Date(`${date}T00:00:00`)
-  return Number.isNaN(parsed.getTime()) ? '' : weekdayNames[parsed.getDay()]
-}
-
-const todayISO = toDateInput(new Date())
-
-/** 横拉时段卡：按日期 + 开始时间排序的扁平列表（展示区数据源，非点选） */
-const slotCards = computed(() =>
-  [...slots.value].sort(
-    (a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime)
-  )
-)
-
-async function loadSlots(): Promise<void> {
-  slotsLoading.value = true
-  try {
-    slots.value = await listViewingAvailableSlots(housingId, {
-      startDate: windowStart,
-      endDate: windowEnd
-    })
-  } catch {
-    /* available-slots 接口后端暂缺（BE-ISSUE-5）：降级取周循环模板自行展开未来窗口 */
-    try {
-      const templates = await listHousingTimeslots(housingId)
-      const expanded: IAvailableViewingTimeslot[] = []
-      const today = new Date()
-      for (let offset = 0; offset <= SLOT_WINDOW_DAYS; offset += 1) {
-        const day = new Date(today.getTime() + offset * 24 * 60 * 60 * 1000)
-        const dow = day.getDay()
-        for (const tpl of templates) {
-          if (tpl.dayOfWeek !== dow || !tpl.isAvailable) continue
-          expanded.push({
-            timeslotId: tpl.id,
-            date: toDateInput(day),
-            startTime: tpl.startTime,
-            endTime: tpl.endTime,
-            maxBookings: 1,
-            currentBookings: 0,
-            status: 'AVAILABLE'
-          })
-        }
-      }
-      slots.value = expanded
-    } catch {
-      /* 模板也取不到时保留空态 */
-    }
-  } finally {
-    slotsLoading.value = false
-  }
-}
-
-function slotDisabled(slot: IAvailableViewingTimeslot): boolean {
-  return slot.status === 'FULL' || slot.currentBookings >= slot.maxBookings
-}
-
 /* ------------------------------ 初始化 ------------------------------ */
 
 async function loadDetail(): Promise<void> {
@@ -159,7 +66,6 @@ async function loadDetail(): Promise<void> {
 
 onMounted(() => {
   loadDetail()
-  loadSlots()
 })
 </script>
 
@@ -237,7 +143,7 @@ onMounted(() => {
             </dl>
           </div>
 
-          <!-- 右下：预约看房面板（入口式：醒目按钮跳三步预约页；下方时段区仅展示可点约） -->
+          <!-- 右下：预约看房面板（入口式：醒目按钮跳三步预约页，DEF-063 移除页内可约时段展示区） -->
           <aside class="booking-panel">
             <h2 class="panel-title">预约看房</h2>
 
@@ -248,32 +154,6 @@ onMounted(() => {
                 </el-button>
               </router-link>
               <p class="panel-hint">进入预约页选择日期与时段，支持连续时段合并预约</p>
-
-              <!-- 近两周可约时段展示区（只读，不可点选；预约在三步页完成） -->
-              <div v-loading="slotsLoading" class="panel-slots">
-                <p v-if="!slotsLoading && slotCards.length === 0" class="slots-empty">
-                  未来 {{ SLOT_WINDOW_DAYS }} 天暂无可约时段
-                </p>
-                <HorizontalScroller v-else>
-                  <div
-                    v-for="slot in slotCards"
-                    :key="cardKey(slot)"
-                    class="slot-card"
-                    :class="{ 'is-full': slotDisabled(slot) }"
-                  >
-                    <span class="slot-card-date">
-                      {{ dateTextOf(slot.date) }}
-                      <em>{{ slot.date === todayISO ? '今天' : weekdayOf(slot.date) }}</em>
-                    </span>
-                    <span class="slot-card-time">
-                      {{ timeText(slot.startTime) }} ~ {{ timeText(slot.endTime) }}
-                    </span>
-                    <span class="slot-card-quota">
-                      {{ slotDisabled(slot) ? '已约满' : `余 ${slot.maxBookings - slot.currentBookings}` }}
-                    </span>
-                  </div>
-                </HorizontalScroller>
-              </div>
             </template>
 
             <template v-else>
@@ -563,75 +443,6 @@ onMounted(() => {
   font-size: var(--font-size-xs);
   color: var(--color-text-disabled);
   margin-top: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-}
-
-.panel-slots {
-  min-height: 96px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.slots-empty {
-  text-align: center;
-  color: var(--color-text-disabled);
-  padding: var(--spacing-lg) 0;
-}
-
-/* 横拉时段卡（展示区，只读）：日期 + 时间 + 余量三行，约满置灰 */
-.slot-card {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  min-width: 118px;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: #fff;
-}
-
-.slot-card.is-full {
-  background-color: var(--color-bg);
-  opacity: 0.55;
-}
-
-.slot-card-date {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-.slot-card-date em {
-  font-style: normal;
-  color: var(--color-text-disabled);
-}
-
-.slot-card-time {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-family-mono);
-  color: var(--color-text-primary);
-}
-
-.slot-card-quota {
-  font-size: var(--font-size-xs);
-  color: var(--color-success);
-}
-
-.slot-card.is-full .slot-card-quota {
-  color: var(--color-text-disabled);
-}
-
-/* 时段卡文案配色 */
-.slot-card-date em {
-  font-style: normal;
-  color: var(--color-text-disabled);
 }
 
 .login-guide {
