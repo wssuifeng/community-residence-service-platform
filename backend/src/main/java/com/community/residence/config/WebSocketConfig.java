@@ -1,12 +1,19 @@
 package com.community.residence.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+import java.util.List;
 
 /**
  * WebSocket/STOMP 配置（C11 通知实时推送 + C6 反馈会话 + C12 看房会话，
@@ -45,5 +52,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(webSocketAuthInterceptor, feedbackSubscriptionInterceptor,
                 appointmentSubscriptionInterceptor);
+    }
+
+    @Override
+    public boolean configureMessageConverters(List<MessageConverter> converters) {
+        /* STOMP 载荷序列化统一走带 JavaTimeModule 的 ObjectMapper：默认 converter 将
+           LocalDateTime 序列化为数组（如 [2026,9,20,7,53,36]），前端按 ISO 字符串解析
+           会触发渲染异常（R59 会话消息不实时显示的根因）；返回 true 表示替换默认链 */
+        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+        converter.setObjectMapper(new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
+        converters.add(converter);
+        return true;
     }
 }

@@ -62,6 +62,8 @@ class ReservationConflictFixTest {
     @Mock
     private ResourceTimeslotMapper timeslotMapper;
     @Mock
+    private com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
+    @Mock
     private ResidentMapper residentMapper;
     @Mock
     private SysConfigService sysConfigService;
@@ -87,6 +89,8 @@ class ReservationConflictFixTest {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
+        /* DEF-062 跨域日程冲突检查（无跨域看房预约，聚焦同资源冲突矩阵） */
+        lenient().when(viewingAppointmentMapper.selectCount(any())).thenReturn(0L);
         /* R60 连续上限缺省 120 会先于冲突检测拦截 240 分钟「完全包含」用例，
            本测试聚焦冲突矩阵，上限放宽为一天（1440 分钟） */
         lenient().when(sysConfigService.getValue("reservation.max_continuous_minutes"))

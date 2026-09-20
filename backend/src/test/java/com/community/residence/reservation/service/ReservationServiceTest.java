@@ -51,6 +51,8 @@ class ReservationServiceTest {
     @Mock
     private ResourceTimeslotMapper timeslotMapper;
     @Mock
+    private com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
+    @Mock
     private ResidentMapper residentMapper;
     @Mock
     private SysConfigService sysConfigService;
@@ -76,6 +78,8 @@ class ReservationServiceTest {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
+        /* DEF-062 跨域日程冲突检查（无跨域看房预约，走通正常路径） */
+        lenient().when(viewingAppointmentMapper.selectCount(any())).thenReturn(0L);
 
         resource = new com.community.residence.community.entity.PublicResource();
         resource.setId(1L);

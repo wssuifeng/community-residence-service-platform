@@ -8,6 +8,7 @@ import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.CommonStatus;
 import com.community.residence.common.constant.ErrorCode;
+import com.community.residence.common.constant.ReservationStatus;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
@@ -29,6 +30,8 @@ import com.community.residence.housing.vo.ViewingAppointmentVO;
 import com.community.residence.housing.vo.ViewingMessageVO;
 import com.community.residence.housing.vo.ViewingPushVO;
 import com.community.residence.messaging.service.WebSocketSessionService;
+import com.community.residence.reservation.entity.ResourceReservation;
+import com.community.residence.reservation.mapper.ResourceReservationMapper;
 import com.community.residence.reservation.entity.ViolationRecord;
 import com.community.residence.reservation.mapper.ViolationRecordMapper;
 import com.community.residence.reservation.service.TimeslotCoverage;
@@ -68,6 +71,10 @@ public class ViewingAppointmentService {
     /** 占用时段的预约状态集合（冲突检测口径） */
     private static final List<String> OCCUPYING_STATUS = List.of("TO_CONFIRM", "RESERVED");
 
+    /** 资源预约占用日程的状态集合（DEF-062 跨域日程冲突检查口径，C7 状态机常量） */
+    private static final List<String> RESOURCE_OCCUPYING_STATUS =
+            List.of(ReservationStatus.PENDING, ReservationStatus.RESERVED);
+
     /** R60 连续时长上限配置键（缺省 120 分钟） */
     private static final String CONFIG_MAX_CONTINUOUS = "viewing.max_continuous_minutes";
 
@@ -83,6 +90,7 @@ public class ViewingAppointmentService {
     private final SysAdminCommunityMapper sysAdminCommunityMapper;
     private final SysConfigService sysConfigService;
     private final ViolationRecordMapper violationRecordMapper;
+    private final ResourceReservationMapper resourceReservationMapper;
     private final RedissonClient redissonClient;
     private final com.community.residence.messaging.service.NotificationService notificationService;
     private final SimpMessagingTemplate messagingTemplate;
@@ -95,6 +103,9 @@ public class ViewingAppointmentService {
      * （V10 uk_viewing_slot）」双保险：锁内做区间重叠判定（与 C7 同口径，
      * 含半重叠/包含/被包含，仅首尾相接放行）后单条 INSERT 自动提交；
      * 完全同槽竞态漏网由唯一约束兜底。刻意不加 @Transactional（理由同 C7）。
+     * DEF-062：锁内落库前增「预约人日程冲突」检查（跨房源 + 跨域）——同账号
+     * 同日与任意看房预约或任意资源预约时间区间重叠即拒 5807（「影分身」拦截；
+     * 游客预约无账号不参与）。
      */
     public ViewingAppointmentVO create(CreateViewingAppointmentDTO dto) {
         Housing housing = housingMapper.selectById(dto.getHousingId());
@@ -127,6 +138,11 @@ public class ViewingAppointmentService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "所选时间不在房源可预约时段内");
         }
 
+        /* 预约人身份先行解析（DEF-062 日程冲突检查需要）：居民取令牌身份；
+           游客无账号（userId=null）不参与日程冲突检查 */
+        Long userId = SecurityUtils.getUser() != null && SecurityUtils.hasRole(RoleConstants.RESIDENT)
+                ? SecurityUtils.getUserId() : null;
+
         RLock lock = redissonClient.getLock(
                 "viewing:lock:housing:" + dto.getHousingId() + ":" + dto.getAppointmentDate());
         boolean locked = false;
@@ -152,10 +168,36 @@ public class ViewingAppointmentService {
                 throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "所选时段与已有看房预约重叠");
             }
 
+            /* DEF-062 预约人日程冲突（跨房源 + 跨域，锁内落库前）：同账号同日与
+               任意房源的看房预约（TO_CONFIRM/RESERVED）或任意资源的资源预约
+               （PENDING/RESERVED）时间区间重叠（start<other.end 且 end>other.start，
+               仅首尾相接放行）即拒绝；本条记录尚未落库天然不参与比对；
+               游客预约（userId=null）跳过。同房源重叠已由上方冲突检测先行拦截，
+               此处命中即跨房源/跨域安排 */
+            if (userId != null) {
+                Long crossHousing = appointmentMapper.selectCount(
+                        new LambdaQueryWrapper<ViewingAppointment>()
+                                .eq(ViewingAppointment::getUserId, userId)
+                                .eq(ViewingAppointment::getAppointmentDate, dto.getAppointmentDate())
+                                .lt(ViewingAppointment::getStartTime, dto.getEndTime())
+                                .gt(ViewingAppointment::getEndTime, dto.getStartTime())
+                                .in(ViewingAppointment::getStatus, OCCUPYING_STATUS));
+                Long crossDomain = resourceReservationMapper.selectCount(
+                        new LambdaQueryWrapper<ResourceReservation>()
+                                .eq(ResourceReservation::getUserId, userId)
+                                .eq(ResourceReservation::getReserveDate, dto.getAppointmentDate())
+                                .lt(ResourceReservation::getStartTime, dto.getEndTime())
+                                .gt(ResourceReservation::getEndTime, dto.getStartTime())
+                                .in(ResourceReservation::getStatus, RESOURCE_OCCUPYING_STATUS));
+                if (crossHousing > 0 || crossDomain > 0) {
+                    throw new BusinessException(ErrorCode.VIEWING_SCHEDULE_CONFLICT,
+                            "该时间段您已有其他预约安排，请调整时间");
+                }
+            }
+
             ViewingAppointment appointment = new ViewingAppointment();
-            if (SecurityUtils.getUser() != null
-                    && SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
-                appointment.setUserId(SecurityUtils.getUserId());
+            if (userId != null) {
+                appointment.setUserId(userId);
             } else {
                 /* 游客预约：user_id 空 + visitor 信息必填 */
                 if (!StringUtils.hasText(dto.getVisitorName())) {
