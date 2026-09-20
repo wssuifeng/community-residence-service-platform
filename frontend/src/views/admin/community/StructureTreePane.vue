@@ -84,6 +84,8 @@ const ACTION_ICONS = {
   trash: ['M3 6h18', 'M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2', 'M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6', 'M10 11v6', 'M14 11v6'],
   /* 状态变更（双向箭头，指向状态流转而非编辑字段） */
   swap: ['M4 8h13', 'M14 5l3 3-3 3', 'M20 16H7', 'M10 13l-3 3 3 3'],
+  /* 批量建房（叠层，区别于单套新增房屋） */
+  layers: ['M12 3l8 4.5-8 4.5-8-4.5L12 3', 'M4 12.5L12 17l8-4.5', 'M4 16.5L12 21l8-4.5'],
   chevron: ['M9 6l6 6-6 6']
 }
 
@@ -648,6 +650,12 @@ const houseBatchInitialUnitId = computed<number | ''>(() =>
 
 function openHouseBatchCreate(): void {
   houseBatchVisible.value = true
+}
+
+/** 单元节点「批量建房」：先选中该单元（右栏网格与对话框预选上下文同步到该单元），再开窗 */
+function openHouseBatchCreateForUnit(unit: IUnit, buildingNode: BuildingNode): void {
+  selectUnit(unit, buildingNode)
+  openHouseBatchCreate()
 }
 
 /* 批量建房单元可能不在当前网格视图内：仅同视图局部刷新，跨单元场景重载树与统计，
@@ -1405,6 +1413,18 @@ onMounted(() => {
                           >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                               <path v-for="(d, i) in NODE_ICONS.house" :key="i" :d="d" />
+                            </svg>
+                          </button>
+                          <button
+                            v-permission="['ADMIN', 'SUPER_ADMIN']"
+                            type="button"
+                            class="node-action"
+                            title="批量建房"
+                            aria-label="在该单元批量建房"
+                            @click="openHouseBatchCreateForUnit(unit, buildingNode)"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
                             </svg>
                           </button>
                           <button
