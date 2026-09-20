@@ -268,4 +268,35 @@ class HousingAvailableSlotsTest {
         assertThat(result.get(3).getStartTime()).isEqualTo(LocalTime.of(14, 0));
         assertThat(result.get(6).getStartTime()).isEqualTo(LocalTime.of(17, 0));
     }
+
+    /* ---- DEF-062：切片步进跨 24:00 不得死循环 ---- */
+
+    @Test
+    @DisplayName("深夜模板（22:00-23:30）切片步进不跨 24:00 绕回：只产出 22:00-23:00 一片")
+    void availableSlots_lateNightTemplate_noMidnightWrapLoop() {
+        LocalDate monday = LocalDate.of(2026, 9, 14);
+        when(housingMapper.selectById(1L)).thenReturn(new Housing());
+        when(timeslotMapper.selectList(any())).thenReturn(List.of(slot(9L, 1, "22:00", "23:30")));
+        when(appointmentMapper.selectList(any())).thenReturn(List.of());
+
+        List<AvailableSlotVO> result = housingService.availableSlots(1L, monday, monday);
+
+        /* 旧实现以「起点 +60 分钟 isAfter 模板终点」为终止条件，23:00+60 绕回 00:00
+           后条件永不为真 → 无限追加切片直至 OOM（2026-09-20 实测） */
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getStartTime()).isEqualTo(LocalTime.of(22, 0));
+        assertThat(result.get(0).getEndTime()).isEqualTo(LocalTime.of(23, 0));
+        assertThat(result.get(0).getTimeslotId()).isEqualTo(gridId(9L, LocalTime.of(22, 0)));
+    }
+
+    @Test
+    @DisplayName("模板终点不足 60 分钟落到次日：23:30-23:59 整段不产出切片（不绕回死循环）")
+    void availableSlots_templateEndBeyondMidnight_noSlice() {
+        LocalDate monday = LocalDate.of(2026, 9, 14);
+        when(housingMapper.selectById(1L)).thenReturn(new Housing());
+        when(timeslotMapper.selectList(any())).thenReturn(List.of(slot(9L, 1, "23:30", "23:59")));
+        when(appointmentMapper.selectList(any())).thenReturn(List.of());
+
+        assertThat(housingService.availableSlots(1L, monday, monday)).isEmpty();
+    }
 }

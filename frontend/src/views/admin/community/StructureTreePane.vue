@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 import AdminStatCard from '@/components/admin/AdminStatCard.vue'
 import StatusTag from '@/components/common/StatusTag.vue'
 import CommunityEditDialog from '@/views/admin/community/CommunityEditDialog.vue'
@@ -10,6 +11,7 @@ import UnitEditDialog from '@/views/admin/community/UnitEditDialog.vue'
 import BuildingCreateDialog from '@/views/admin/community/BuildingCreateDialog.vue'
 import UnitBatchDialog from '@/views/admin/community/UnitBatchDialog.vue'
 import HouseEditDialog from '@/views/admin/community/HouseEditDialog.vue'
+import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
 import {
   deleteBuilding,
   deleteCommunity,
@@ -18,14 +20,23 @@ import {
   getBuildingList,
   getCommunityList,
   getHouseList,
+  getHouseStatusHistory,
   getUnitList,
-  updateCommunityStatus
+  updateCommunityStatus,
+  updateHouseStatus
 } from '@/api/community'
-import type { IBuilding, ICommunity, IHouse, IUnit } from '@/types/modules/community'
+import type {
+  IBuilding,
+  ICommunity,
+  IHouse,
+  IHouseStatusHistory,
+  IUnit
+} from '@/types/modules/community'
 import { communityStatusLabels, houseStatusLabels } from '@/types/modules/community'
 import type { CommunityStatus, HouseStatus } from '@/types/modules/community'
 import { getDashboardStats } from '@/api/statistics'
 import type { IDashboardStats } from '@/types/modules/statistics'
+import { formatDateTime } from '@/utils/date'
 import { useGridSelection } from '@/composables/useGridSelection'
 
 /**
@@ -35,6 +46,8 @@ import { useGridSelection } from '@/composables/useGridSelection'
  * 收编于此（对话框抽为独立组件，删除确认文案原样保留）。
  * 楼栋删除自 R4-D2 升级：空楼栋直删确认；非空走级联范围确认 + 前端自底向上
  * 编排（房屋→单元→楼栋，非后端事务，失败汇报剩余明细，见后端适配清单）。
+ * 房屋能力自 2026-09-20 起由「房屋管理」Tab 全量并入本总览：树为三级定位（不另设
+ * 社区/楼栋/单元下拉筛选），房屋的增删改、状态变更与变更历史、批量建房均在网格内闭环。
  */
 
 const route = useRoute()
@@ -60,13 +73,17 @@ const ICONS = {
 const NODE_ICONS = {
   community: ['M3 11l9-8 9 8', 'M5 9.7V20h14V9.7'],
   building: ['M5 21V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v14', 'M3 21h18', 'M8 10h2', 'M8 14h2'],
-  unit: ['M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16', 'M3 21h18', 'M9 21v-5a3 3 0 0 1 6 0v5']
+  unit: ['M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16', 'M3 21h18', 'M9 21v-5a3 3 0 0 1 6 0v5'],
+  /* 房屋（单元节点「新增房屋」钮）：与网格块同一视觉语义，区别于「+」新增单元 */
+  house: ['M3 11l9-8 9 8', 'M5 9.7V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.7', 'M10 21v-6h4v6']
 }
 
 const ACTION_ICONS = {
   plus: ['M12 5v14', 'M5 12h14'],
   pen: ['M12 20h9', 'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z'],
   trash: ['M3 6h18', 'M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2', 'M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6', 'M10 11v6', 'M14 11v6'],
+  /* 状态变更（双向箭头，指向状态流转而非编辑字段） */
+  swap: ['M4 8h13', 'M14 5l3 3-3 3', 'M20 16H7', 'M10 13l-3 3 3 3'],
   chevron: ['M9 6l6 6-6 6']
 }
 
@@ -474,6 +491,7 @@ const houseInfoUnitName = computed(() => (houseInfo.value ? unitNameOfHouse(hous
 function openHouseInfo(house: IHouse): void {
   houseInfo.value = house
   houseInfoVisible.value = true
+  loadHouseHistory(house.id)
 }
 
 /* 卡片点击分流（R4-D3）：Ctrl/Cmd+左键切换多选；普通左键保持开信息卡；
@@ -523,7 +541,7 @@ function handleHouseSaved(unitId: number): void {
   loadStats()
 }
 
-/* 房屋删除：确认文案与 HouseListView 原样一致（引用保护由后端报错） */
+/* 房屋删除：确认文案沿用原「房屋管理」Tab 口径（引用保护由后端报错） */
 async function handleHouseDelete(house: IHouse): Promise<void> {
   try {
     await ElMessageBox.confirm(
@@ -613,6 +631,111 @@ function houseStatusTagType(status: HouseStatus): 'info' | 'completed' | 'pendin
   if (status === 'RESERVED') return 'pending'
   if (status === 'MAINTENANCE') return 'processing'
   return 'info'
+}
+
+/* ============ 房屋批量建房入口（原「房屋管理」Tab 能力并入，2026-09-20） ============ */
+
+const houseBatchVisible = ref(false)
+
+/** 预选上下文：当前选中节点逐级回推（单元 > 楼栋 > 社区），对话框内可改选 */
+const houseBatchInitialCommunityId = computed<number | ''>(() => selected.value?.communityId ?? '')
+const houseBatchInitialBuildingId = computed<number | ''>(
+  () => selectedBuildingNode.value?.building.id ?? ''
+)
+const houseBatchInitialUnitId = computed<number | ''>(() =>
+  selected.value?.type === 'unit' ? selected.value.unitId : ''
+)
+
+function openHouseBatchCreate(): void {
+  houseBatchVisible.value = true
+}
+
+/* 批量建房单元可能不在当前网格视图内：仅同视图局部刷新，跨单元场景重载树与统计，
+   避免把当前单元的房屋清单误换成批量目标的单元数据 */
+function handleHouseBatchSaved(unitId: number): void {
+  const sel = selected.value
+  if (sel?.type === 'unit' && sel.unitId !== unitId) {
+    loadTree()
+  } else if (sel?.type === 'unit' || sel?.type === 'building') {
+    reloadUnitHouses(unitId)
+  } else {
+    loadTree()
+  }
+  loadStats()
+}
+
+/* ============ 房屋状态变更与变更历史（原「房屋管理」Tab 能力并入，2026-09-20） ============
+   状态变更走 updateHouseStatus 留痕接口（房屋编辑不含 status），变更历史读
+   /houses/{id}/status-history；两处入口（网格悬浮钮 / 信息卡）共用同一表单。 */
+
+const statusDialogVisible = ref(false)
+const statusSubmitting = ref(false)
+const statusTarget = ref<IHouse | null>(null)
+const statusFormRef = ref<FormInstance>()
+const statusForm = reactive<{ status: HouseStatus; remark: string }>({
+  status: 'VACANT',
+  remark: ''
+})
+
+const statusRules: FormRules = {
+  status: [{ required: true, message: '请选择房屋状态', trigger: 'change' }]
+}
+
+function openHouseStatus(house: IHouse): void {
+  statusTarget.value = house
+  statusForm.status = house.status
+  statusForm.remark = ''
+  statusDialogVisible.value = true
+}
+
+async function handleHouseStatusSubmit(): Promise<void> {
+  const target = statusTarget.value
+  if (!target) return
+  const valid = await statusFormRef.value?.validate().catch(() => false)
+  if (!valid) return
+  statusSubmitting.value = true
+  try {
+    await updateHouseStatus(target.id, {
+      status: statusForm.status,
+      remark: statusForm.remark || undefined
+    })
+    ElMessage.success('房屋状态已更新')
+    statusDialogVisible.value = false
+    reloadUnitHouses(target.unitId)
+    loadStats()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '状态变更失败')
+  } finally {
+    statusSubmitting.value = false
+  }
+}
+
+/* 信息卡内直达状态变更（触屏无悬浮态时的兜底路径），先收卡再走同一表单 */
+function statusFromInfo(): void {
+  const house = houseInfo.value
+  if (!house) return
+  houseInfoVisible.value = false
+  openHouseStatus(house)
+}
+
+/* 变更历史：随信息卡打开拉取，序号防护避免快速切换房屋时回写串号 */
+const houseHistory = ref<IHouseStatusHistory[]>([])
+const houseHistoryLoading = ref(false)
+let houseHistorySeq = 0
+
+async function loadHouseHistory(houseId: number): Promise<void> {
+  const seq = ++houseHistorySeq
+  houseHistoryLoading.value = true
+  houseHistory.value = []
+  try {
+    const result = await getHouseStatusHistory(houseId, { page: 1, size: 20 })
+    if (seq !== houseHistorySeq) return
+    houseHistory.value = result.records
+  } catch {
+    if (seq === houseHistorySeq) houseHistory.value = []
+  } finally {
+    if (seq === houseHistorySeq) houseHistoryLoading.value = false
+  }
 }
 
 /* ===================== 统计卡（楼栋/房屋/入住率走看板统计接口，单元由树聚合） ===================== */
@@ -1276,6 +1399,18 @@ onMounted(() => {
                             v-permission="['ADMIN', 'SUPER_ADMIN']"
                             type="button"
                             class="node-action"
+                            title="新增房屋"
+                            aria-label="在该单元新增房屋"
+                            @click="openHouseCreate(unit)"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path v-for="(d, i) in NODE_ICONS.house" :key="i" :d="d" />
+                            </svg>
+                          </button>
+                          <button
+                            v-permission="['ADMIN', 'SUPER_ADMIN']"
+                            type="button"
+                            class="node-action"
                             title="编辑单元"
                             aria-label="编辑单元"
                             @click="openUnitEdit(unit, buildingNode)"
@@ -1311,9 +1446,19 @@ onMounted(() => {
       <div class="detail-col">
         <div class="detail-toolbar">
           <span class="detail-crumb">{{ crumbText || '未选择节点' }}</span>
-          <el-button v-if="selectedCommunity" link type="primary" @click="goCommunitySettings">
-            社区设置
-          </el-button>
+          <span class="detail-toolbar-actions">
+            <!-- 批量建房（原「房屋管理」Tab 入口并入）：按当前选中节点预选单元/楼栋/社区 -->
+            <el-button
+              v-permission="['ADMIN', 'SUPER_ADMIN']"
+              size="small"
+              @click="openHouseBatchCreate"
+            >
+              批量建房
+            </el-button>
+            <el-button v-if="selectedCommunity" link type="primary" @click="goCommunitySettings">
+              社区设置
+            </el-button>
+          </span>
         </div>
 
         <!-- 社区详情卡 -->
@@ -1588,6 +1733,18 @@ onMounted(() => {
                         <button
                           v-permission="['ADMIN', 'SUPER_ADMIN']"
                           type="button"
+                          class="block-action"
+                          title="状态变更"
+                          :aria-label="`变更房屋状态 ${house.houseNumber}`"
+                          @click.stop="openHouseStatus(house)"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path v-for="(d, i) in ACTION_ICONS.swap" :key="i" :d="d" />
+                          </svg>
+                        </button>
+                        <button
+                          v-permission="['ADMIN', 'SUPER_ADMIN']"
+                          type="button"
                           class="block-action is-danger"
                           title="删除房屋"
                           :aria-label="`删除房屋 ${house.houseNumber}`"
@@ -1808,6 +1965,26 @@ onMounted(() => {
         <el-descriptions-item label="朝向">{{ houseInfo.orientation || '-' }}</el-descriptions-item>
         <el-descriptions-item label="描述" :span="2">{{ houseInfo.description || '-' }}</el-descriptions-item>
       </el-descriptions>
+
+      <!-- 状态变更历史（原「房屋管理」Tab 的「历史」抽屉并入信息卡） -->
+      <div v-loading="houseHistoryLoading" class="info-history">
+        <h4 class="info-history-title">状态变更历史</h4>
+        <ul v-if="houseHistory.length > 0" class="info-history-list">
+          <li v-for="item in houseHistory" :key="item.id" class="info-history-item">
+            <span class="info-history-status">
+              {{ item.oldStatus ? houseStatusLabels[item.oldStatus] : '初始' }}
+              →
+              {{ houseStatusLabels[item.newStatus] }}
+            </span>
+            <span class="info-history-meta">
+              {{ formatDateTime(item.createdAt) }} · {{ item.operatorName }}
+              <template v-if="item.remark"> · {{ item.remark }}</template>
+            </span>
+          </li>
+        </ul>
+        <p v-else-if="!houseHistoryLoading" class="info-history-empty">暂无状态变更记录</p>
+      </div>
+
       <template #footer>
         <el-button
           v-permission="['ADMIN', 'SUPER_ADMIN']"
@@ -1816,6 +1993,14 @@ onMounted(() => {
           @click="editFromInfo"
         >
           编辑
+        </el-button>
+        <el-button
+          v-permission="['ADMIN', 'SUPER_ADMIN']"
+          type="warning"
+          plain
+          @click="statusFromInfo"
+        >
+          状态变更
         </el-button>
         <el-button
           v-permission="['ADMIN', 'SUPER_ADMIN']"
@@ -1828,6 +2013,56 @@ onMounted(() => {
         <el-button @click="houseInfoVisible = false">关闭</el-button>
       </template>
     </el-dialog>
+
+    <!-- 房屋状态变更（原「房屋管理」Tab 能力并入）：备注留痕，文案与其一致 -->
+    <el-dialog
+      v-model="statusDialogVisible"
+      :title="statusTarget ? `状态变更：${statusTarget.houseNumber}` : '状态变更'"
+      width="440px"
+    >
+      <el-form
+        ref="statusFormRef"
+        :model="statusForm"
+        :rules="statusRules"
+        label-width="100px"
+      >
+        <el-form-item label="房屋状态" prop="status">
+          <el-select v-model="statusForm.status" style="width: 100%">
+            <el-option
+              v-for="(label, value) in houseStatusLabels"
+              :key="value"
+              :label="label"
+              :value="value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="变更备注">
+          <el-input
+            v-model="statusForm.remark"
+            type="textarea"
+            :rows="2"
+            placeholder="请输入变更原因（选填）"
+            maxlength="100"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="statusDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="statusSubmitting" @click="handleHouseStatusSubmit">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 批量建房（原「房屋管理」Tab 入口并入）：预选当前选中单元/楼栋/社区 -->
+    <HouseBatchDialog
+      v-model="houseBatchVisible"
+      :communities="tree.map((node) => node.community)"
+      :initial-community-id="houseBatchInitialCommunityId"
+      :initial-building-id="houseBatchInitialBuildingId"
+      :initial-unit-id="houseBatchInitialUnitId"
+      @saved="handleHouseBatchSaved"
+    />
   </section>
 </template>
 
@@ -2114,6 +2349,13 @@ onMounted(() => {
   white-space: nowrap;
 }
 
+.detail-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: var(--spacing-sm);
+}
+
 .metric-row {
   display: flex;
   align-items: flex-start;
@@ -2276,7 +2518,8 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 56px;
+  /* 最小宽度容纳悬浮三操作（编辑/状态/删除），避免按钮溢出块体 */
+  min-width: 66px;
   height: 34px;
   padding: 0 var(--spacing-sm);
   border-radius: var(--radius-md);
@@ -2308,7 +2551,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   border-radius: inherit;
   background-color: color-mix(in srgb, var(--admin-card-bg) 82%, transparent);
   opacity: 0;
@@ -2326,8 +2569,8 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border: none;
   border-radius: var(--radius-sm);
@@ -2616,6 +2859,56 @@ onMounted(() => {
 
 .cascade-report-list li {
   line-height: 1.8;
+}
+
+/* ---------- 房屋信息卡：状态变更历史（并入原「房屋管理」历史抽屉） ---------- */
+
+.info-history {
+  margin-top: var(--spacing-md);
+  min-height: 48px;
+}
+
+.info-history-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.info-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow: auto;
+  list-style: none;
+}
+
+.info-history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: var(--spacing-sm);
+  border-left: 2px solid var(--color-border-light, var(--color-border));
+}
+
+.info-history-status {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.info-history-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.info-history-empty {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
 }
 
 /* ---------- 响应式 ---------- */

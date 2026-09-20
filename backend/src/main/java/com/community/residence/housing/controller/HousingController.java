@@ -48,7 +48,9 @@ public class HousingController {
 
     @Operation(summary = "按社区批量挂牌（R62）",
             description = "为社区内无在架房源的房屋批量生成 AVAILABLE 房源（默认月租/押金/租售类型参数化，"
-                    + "标题「{楼栋}{单元}{房号}·精装房源」）；已有在架房源的房屋跳过（幂等）；ADMIN 限绑定社区")
+                    + "标题「{楼栋}{单元}{房号}·精装房源」）；已有在架房源的房屋跳过（幂等）；ADMIN 限绑定社区。"
+                    + "可同时为本次新建房源建立可预约看房时段（createTimeslots 缺省 true，"
+                    + "timeslotMode 缺省 DEFAULT=工作日 09:00-12:00 + 14:00-18:00）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/batch-generate")
     public ApiResponse<BatchGenerateResultVO> batchGenerate(
@@ -101,11 +103,12 @@ public class HousingController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "记录房源浏览", description = "公开；游客/居民均可")
+    @Operation(summary = "记录房源浏览",
+            description = "公开；游客/居民均可。返回计入本次后的最新浏览数，口径为"
+                    + "「DB 值 + 未回写 Redis 增量」（回写任务 5 分钟周期，故展示实时合并增量）")
     @PostMapping("/{id}/view")
-    public ApiResponse<Void> recordView(@PathVariable Long id) {
-        housingService.recordView(id);
-        return ApiResponse.success();
+    public ApiResponse<Long> recordView(@PathVariable Long id) {
+        return ApiResponse.success(housingService.recordView(id));
     }
 
     @Operation(summary = "查询看房可预约时段", description = "公开；周循环模板按日期范围展开 + 占用计数（接口设计 9.12.2.8）")
