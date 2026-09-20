@@ -72,3 +72,19 @@ WHERE h2.title = '阳光花园 1 号楼 102 室 · 南向三居（多图实拍�
 -- 验证查询（执行后人工核对）：
 -- SELECT id, title, is_pinned FROM notice WHERE is_pinned = 1 AND status = 'PUBLISHED';
 -- SELECT id, title, images FROM housing WHERE title LIKE '%多图实拍%';
+
+-- 4. 0.1 元月租在租约（R61 续租支付链路手测：低金额走支付宝沙箱；
+--    resident1=演示居民 id=1，社区1 房屋 101/102/201，三态各一条）
+INSERT INTO lease_record (tenant_id, community_id, house_id, start_date, end_date, monthly_rent, deposit, status, remark)
+SELECT 1, 1, 1, DATE_SUB(CURDATE(), INTERVAL 100 DAY), DATE_ADD(CURDATE(), INTERVAL 280 DAY), 0.10, 0.10, 'ACTIVE', '手测-支付链路-正常在租'
+WHERE NOT EXISTS (SELECT 1 FROM lease_record WHERE remark = '手测-支付链路-正常在租');
+
+INSERT INTO lease_record (tenant_id, community_id, house_id, start_date, end_date, monthly_rent, deposit, status, remark)
+SELECT 1, 1, 2, DATE_SUB(CURDATE(), INTERVAL 340 DAY), DATE_ADD(CURDATE(), INTERVAL 25 DAY), 0.10, 0.10, 'ACTIVE', '手测-支付链路-即将到期'
+WHERE NOT EXISTS (SELECT 1 FROM lease_record WHERE remark = '手测-支付链路-即将到期');
+
+INSERT INTO lease_record (tenant_id, community_id, house_id, start_date, end_date, monthly_rent, deposit, status, remark)
+SELECT 1, 1, 3, DATE_SUB(CURDATE(), INTERVAL 400 DAY), DATE_SUB(CURDATE(), INTERVAL 5 DAY), 0.10, 0.10, 'ACTIVE', '手测-支付链路-已到期'
+WHERE NOT EXISTS (SELECT 1 FROM lease_record WHERE remark = '手测-支付链路-已到期');
+
+-- 验证查询：SELECT id, house_id, end_date, monthly_rent, status FROM lease_record WHERE remark LIKE '手测-支付链路%';
