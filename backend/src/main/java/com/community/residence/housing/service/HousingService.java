@@ -10,9 +10,11 @@ import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.community.entity.Building;
+import com.community.residence.community.entity.Community;
 import com.community.residence.community.entity.House;
 import com.community.residence.community.entity.Unit;
 import com.community.residence.community.mapper.BuildingMapper;
+import com.community.residence.community.mapper.CommunityMapper;
 import com.community.residence.community.mapper.HouseMapper;
 import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.community.service.CommunityService;
@@ -27,6 +29,8 @@ import com.community.residence.housing.mapper.HousingTimeslotMapper;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.housing.vo.BatchGenerateResultVO;
 import com.community.residence.housing.vo.BuildingHousingTreeVO;
+import com.community.residence.housing.vo.HouseManageItemVO;
+import com.community.residence.housing.vo.HousingBriefVO;
 import com.community.residence.housing.vo.HousingSummaryVO;
 import com.community.residence.housing.vo.HousingVO;
 import com.community.residence.housing.vo.HouseHousingTreeVO;
@@ -49,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /** 房源业务逻辑：上架管理 + 游客浏览（游客只见可租/已预订房源） */
@@ -71,10 +76,18 @@ public class HousingService {
         粒度固定 60 分钟） */
     private static final int VIEWING_SLOT_MINUTES = 60;
 
+    /** 房屋管理列表挂牌筛选三态（接口设计.md 9.15.3）；缺省 all */
+    private static final Set<String> LISTING_MODES = Set.of("all", "listed", "unlisted");
+
+    /** 已挂牌判定子查询（外层主表为 house）：存在 housing 记录即视为已挂牌 */
+    private static final String EXISTS_LISTED_HOUSING_SQL =
+            "SELECT 1 FROM housing h WHERE h.house_id = house.id";
+
     private final HousingMapper housingMapper;
     private final HouseMapper houseMapper;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
+    private final CommunityMapper communityMapper;
     private final HousingTimeslotMapper timeslotMapper;
     private final ViewingAppointmentMapper appointmentMapper;
     private final CommunityService communityService;
@@ -467,6 +480,110 @@ public class HousingService {
             tree.add(buildingVO);
         }
         return tree;
+    }
+
+    /**
+     * 房屋管理分页列表（接口设计.md 9.15.3）：房屋为主线，挂牌信息为可选子对象
+     * （未挂牌 housing 为 null），供管理端「房屋与房源」带图卡片 + 筛选布局使用。
+     * 过滤：社区（空=全部管辖社区）/楼栋/单元/房号关键字 + 挂牌三态
+     * （all 全部，listed 存在 housing 记录，unlisted 无 housing 记录——NOT EXISTS
+     * 子查询随分页下推到 SQL，不做页内内存过滤，total 保持全集口径）。
+     * 稳定分页排序：社区 → 单元 → 房号 升序。
+     * 数据范围：house 表含 community_id 且不在 DataScopeInterceptor 跳过名单，
+     * ADMIN 绑定社区过滤由拦截器在 SQL 层注入（未绑定传越权 communityId 得空页）。
+     */
+    public PageVO<HouseManageItemVO> pageHouseManage(Long communityId, Long buildingId, Long unitId,
+                                                     String keyword, String listing, long page, long size) {
+        String listingMode = StringUtils.hasText(listing) ? listing.trim().toLowerCase() : "all";
+        if (!LISTING_MODES.contains(listingMode)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "挂牌状态仅支持 all/listed/unlisted");
+        }
+        long pageSize = Math.min(size, 100);
+        String houseNumberKeyword = StringUtils.hasText(keyword) ? keyword.trim() : null;
+        LambdaQueryWrapper<House> wrapper = new LambdaQueryWrapper<House>()
+                .eq(communityId != null, House::getCommunityId, communityId)
+                .eq(unitId != null, House::getUnitId, unitId)
+                .like(houseNumberKeyword != null, House::getHouseNumber, houseNumberKeyword)
+                .orderByAsc(House::getCommunityId)
+                .orderByAsc(House::getUnitId)
+                .orderByAsc(House::getHouseNumber);
+        if (buildingId != null) {
+            /* house 无楼栋外键：先把楼栋下单元集合解析出来再收窄（单条查询，非逐行） */
+            List<Long> buildingUnitIds = unitMapper.selectList(new LambdaQueryWrapper<Unit>()
+                            .eq(Unit::getBuildingId, buildingId))
+                    .stream().map(Unit::getId).toList();
+            if (buildingUnitIds.isEmpty()) {
+                return PageVO.of(List.of(), 0, page, pageSize);
+            }
+            wrapper.in(House::getUnitId, buildingUnitIds);
+        }
+        if ("listed".equals(listingMode)) {
+            wrapper.exists(EXISTS_LISTED_HOUSING_SQL);
+        } else if ("unlisted".equals(listingMode)) {
+            wrapper.notExists(EXISTS_LISTED_HOUSING_SQL);
+        }
+        Page<House> result = houseMapper.selectPage(new Page<>(page, pageSize), wrapper);
+        return PageVO.of(assembleManageItems(result.getRecords()), result.getTotal(),
+                result.getCurrent(), result.getSize());
+    }
+
+    /**
+     * 房屋管理列表装配：单元/楼栋/社区名称与挂牌房源均按主键批量取回（各一条查询，
+     * 无逐行查询即无 N+1）；同一房屋多条挂牌记录取 id 最大者（与一体化树同口径）。
+     */
+    private List<HouseManageItemVO> assembleManageItems(List<House> houses) {
+        if (houses.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, Unit> unitsById = new HashMap<>();
+        for (Unit unit : unitMapper.selectList(new LambdaQueryWrapper<Unit>()
+                .in(Unit::getId, houses.stream().map(House::getUnitId).distinct().toList()))) {
+            unitsById.put(unit.getId(), unit);
+        }
+        Map<Long, String> buildingNames = new HashMap<>();
+        List<Long> buildingIds = unitsById.values().stream()
+                .map(Unit::getBuildingId).filter(Objects::nonNull).distinct().toList();
+        if (!buildingIds.isEmpty()) {
+            for (Building building : buildingMapper.selectList(new LambdaQueryWrapper<Building>()
+                    .in(Building::getId, buildingIds))) {
+                buildingNames.put(building.getId(), building.getName());
+            }
+        }
+        Map<Long, String> communityNames = new HashMap<>();
+        for (Community community : communityMapper.selectList(new LambdaQueryWrapper<Community>()
+                .in(Community::getId, houses.stream().map(House::getCommunityId).distinct().toList()))) {
+            communityNames.put(community.getId(), community.getName());
+        }
+        Map<Long, Housing> latestHousingByHouse = new HashMap<>();
+        for (Housing housing : housingMapper.selectList(new LambdaQueryWrapper<Housing>()
+                .in(Housing::getHouseId, houses.stream().map(House::getId).toList())
+                .orderByAsc(Housing::getId))) {
+            latestHousingByHouse.put(housing.getHouseId(), housing);
+        }
+
+        List<HouseManageItemVO> items = new ArrayList<>(houses.size());
+        for (House house : houses) {
+            HouseManageItemVO item = new HouseManageItemVO();
+            item.setHouseId(house.getId());
+            item.setCommunityId(house.getCommunityId());
+            item.setCommunityName(communityNames.get(house.getCommunityId()));
+            item.setUnitId(house.getUnitId());
+            Unit unit = unitsById.get(house.getUnitId());
+            if (unit != null) {
+                item.setUnitName(unit.getName());
+                item.setBuildingId(unit.getBuildingId());
+                item.setBuildingName(buildingNames.get(unit.getBuildingId()));
+            }
+            item.setHouseNumber(house.getHouseNumber());
+            item.setFloor(house.getFloor());
+            item.setArea(house.getArea());
+            item.setLayout(house.getLayout());
+            item.setHouseStatus(house.getStatus());
+            Housing housing = latestHousingByHouse.get(house.getId());
+            item.setHousing(housing != null ? HousingBriefVO.from(housing) : null);
+            items.add(item);
+        }
+        return items;
     }
 
     private boolean isManager() {
