@@ -14,16 +14,17 @@
 **核心功能（C1~C12）**：社区基础信息管理、居民与居住关系管理、租住管理、服务申请与工单管理、公告广播管理、居民反馈管理、公共资源预约管理、服务评价管理、社区运营统计、用户与权限管理、消息与通知中心、房源展示与看房预约。
 
 **技术架构**：前后端分离单体架构
-- **后端**（`backend/`，Maven + mvnw）：Spring Boot 4.0.6 + MyBatis-Plus 3.5.16 + MySQL 8.4+ + Redis 7（Redisson 4.5.0）+ Flyway + springdoc-openapi
+- **后端**（`backend/`，Maven + mvnw）：Spring Boot 4.0.6 + MyBatis-Plus 3.5.16 + MySQL 8.4+（本项目验证于 9.x，connector 9.6.0）+ Redis 7（Redisson 4.5.0）+ Flyway + springdoc-openapi
 - **前端**（`frontend/`，npm + Vite）：Vue 3.5 + Vite 8 + TypeScript + Element Plus 2.14（可用不依赖）
 
 ## 怎么跑
 
-**前端**（已可运行；三端功能视图全部实现——游客端/居民端/服务人员端/管理端
-58 个功能视图（另登录注册与 403/404 页）+ API 封装；P1 联调复测 12/12 流程
-通过（阶段性测试），P2 文件上传、运营看板图表、WebSocket 实时通知亦已完成
-（阶段性 E2E 验证；全需求系统性测试归 50 系统测试阶段）；R30 反馈会话
-实时消息前端已就绪（WS 推送+轮询兜底，联调待后端反馈 WS 交付））：
+**前端**（已可运行；三端功能视图 **65+**（原 58 功能视图 + 2026-09-19/20 批次
+新增 7 页：居民端「我的租约」「续租支付」弹窗、看房预约详情页、看房三步预约页、
+会话详情页与管理端会话中心、房屋房源一体化页；服务人员端另增「我的带看」工作台）
++ API 封装；P1 联调复测 12/12 流程通过（阶段性测试），P2 文件上传、运营看板图表、
+WebSocket 实时通知亦已完成（阶段性 E2E 验证；全需求系统性测试归 50 系统测试阶段）；
+R30 反馈会话实时消息前端已就绪并已联调验收（2026-09-10，WS 推送 + 轮询兜底））：
 
 ```bash
 cd frontend
@@ -47,8 +48,8 @@ export JWT_SECRET="your_jwt_secret_key"    # JWT 签名密钥（≥32 字符；d
 # set JWT_SECRET=your_jwt_secret_key
 
 cd backend
-./mvnw spring-boot:run   # 端口 8080；Flyway 自动建 40 张表 + 初始数据 + 种子超管
-                         # （superadmin / Admin@123456，生产首登必改）；
+./mvnw spring-boot:run   # 端口 8080；Flyway 自动执行 V1~V17（45 张表）+ 初始数据
+                         # + 种子超管（superadmin / Admin@123456，生产首登必改）；
                          # 接口文档 http://localhost:8080/swagger-ui.html
 ```
 
@@ -64,7 +65,20 @@ P2 集成能力已交付（2026-09-09）：文件上传（POST /api/v1/upload + 
 实时推送（R30，/ws 订阅 /topic/feedback/{id}，订阅鉴权限会话参与者）、
 看房可约时段接口（GET /housings/{id}/available-slots，周模板展开 + 占用计数）；
 缺陷修复：公告删除 FK 冲突（BE-ISSUE-8）等。
-单元测试 113 用例全过（阶段性测试，全需求系统性测试归 50 系统测试阶段，
+
+2026-09-19/20 批次增量能力（R59~R63，需求规格 v1.3~v1.5）：
+- **R59 带看人分配与带看沟通会话**：管理端将看房预约分配给带看人（启用
+  服务人员/管辖社区管理员），双方可实时会话（WS + 轮询兜底）；
+- **R60 连续时段预约**：资源预约与看房预约支持相邻时段连续多选合并提交，
+  单次时长上限可配（`sys_config` 两键，默认 120 分钟）；
+- **R61 租约续看与真实支付双渠道**：居民端「我的租约」+ 续约申请，支付宝
+  电脑网站支付 / 微信 Native 扫码，支付成功顺延租期并通知双方（配置见下节）；
+- **R62 房源社区一体化与全社区开放**：管理端在社区结构内直接管理房屋房源
+  挂牌、按社区/单元/房屋批量挂牌，游客与居民端房源浏览覆盖全社区并支持筛选；
+- **R63 多方会话群聊**：看房预约自动建群（居民 + 社区管理员，分配带看人入群），
+  管理端可从预约直接进群，居民端可「联系社区管理员」直通（消息中心双 tab）。
+
+单元测试 383 用例全过（阶段性测试，全需求系统性测试归 50 系统测试阶段，
 见 40_中控 §5.4 测试范围口径）。
 
 连接配置在 `backend/src/main/resources/application-dev.yml`（数据库密码从 `DB_PASSWORD` 读取，JWT 密钥从 `JWT_SECRET` 读取）。
@@ -77,24 +91,27 @@ P2 集成能力已交付（2026-09-09）：文件上传（POST /api/v1/upload + 
 **支付宝（电脑网站支付）**——个人可申请沙箱：
 1. [支付宝开放平台](https://open.alipay.com/) 注册 → 控制台「沙箱环境」自助开通；
 2. 支付宝密钥工具生成 RSA2 应用私钥/公钥，沙箱应用处配置公钥、记录「支付宝公钥」；
-3. 启动前设置环境变量：
+3. 启动前设置环境变量（名称与 `application.yml` 的 `payment.alipay.*` 占位符
+   一致）：
    ```
-   PAYMENT_ALIPAY_APPID=沙箱应用APPID
+   PAYMENT_ALIPAY_APP_ID=沙箱应用APPID
    PAYMENT_ALIPAY_GATEWAY_URL=https://openapi-sandbox.dl.alipaydev.com/gateway.do
    PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY=应用私钥
    PAYMENT_ALIPAY_PUBLIC_KEY=支付宝公钥
    ```
-   （变量名以 `application.yml` 的 `payment.alipay.*` 占位符为准：`PAYMENT_ALIPAY_APP_ID` / `PAYMENT_ALIPAY_GATEWAY_URL` / `PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY` / `PAYMENT_ALIPAY_PUBLIC_KEY`；生产网关为 `https://openapi.alipay.com`，需企业资质网页应用）
+   （生产网关为 `https://openapi.alipay.com`，需企业资质网页应用；
+   可选 `PAYMENT_ALIPAY_RETURN_URL` 为支付完成后前端回跳地址）
 4. 沙箱页提供测试买家账号，支付流程可完整走通。
 
 **微信支付（Native 扫码）**——需商户资质，无公开沙箱：
 ```
-PAYMENT_WECHAT_APPID=公众号/应用AppID
-PAYMENT_WECHAT_MCHID=商户号
+PAYMENT_WECHAT_MCH_ID=商户号
+PAYMENT_WECHAT_APP_ID=公众号/应用AppID
 PAYMENT_WECHAT_API_V3_KEY=APIv3密钥
-PAYMENT_WECHAT_MERCHANT_SERIAL_NUMBER=商户证书序列号
+PAYMENT_WECHAT_MERCHANT_SERIAL_NO=商户API证书序列号
 PAYMENT_WECHAT_PRIVATE_KEY=商户API私钥（apiclient_key.pem 内容）
 ```
+（私钥亦可用 `PAYMENT_WECHAT_PRIVATE_KEY_PATH` 指定证书文件路径，二选一）
 
 本地开发无需公网回调：支付确认走「后端主动查单 + 前端轮询」；
 公网部署按 `PaymentController` 注释中预留的 notify 接入点补充回调验签即可。
