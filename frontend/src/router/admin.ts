@@ -34,6 +34,9 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: 'residents/:id', name: 'AdminResidentDetail', component: () => import('@/views/admin/resident/ResidentDetailView.vue'), meta: { title: '居民详情' } },
       { path: 'housings/:id', name: 'AdminHousingDetail', component: () => import('@/views/admin/housing/HousingDetailView.vue'), meta: { title: '房源详情' } },
       { path: 'notifications', name: 'AdminNotifications', component: () => import('@/views/admin/notification/NotificationListView.vue'), meta: { title: '通知列表' } },
+      // R63 多方会话中心：看房群聊 + 居民直通（v1.5）
+      { path: 'conversations', name: 'AdminConversations', component: () => import('@/views/admin/conversation/ConversationListView.vue'), meta: { title: '消息会话' } },
+      { path: 'conversations/:id', name: 'AdminConversationDetail', component: () => import('@/views/admin/conversation/ConversationListView.vue'), meta: { title: '消息会话' } },
 
       // ---- 旧路径兼容 redirect（零断链：既有页面/登录跳转的旧路径全部落地到新容器） ----
       { path: 'statistics/dashboard', redirect: '/admin/dashboard' },

@@ -3,17 +3,26 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
-import AppointmentChat from '@/components/business/AppointmentChat.vue'
+import ConversationChat from '@/components/business/ConversationChat.vue'
 import { getViewingAppointmentDetail, cancelViewingAppointment } from '@/api/housing'
 import type { IViewingAppointment, ViewingAppointmentStatus } from '@/types/modules/housing'
 import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
 import { formatDateTime } from '@/utils/date'
 
 /**
- * 看房预约详情（R59，v1.3）：预约信息卡 + 带看沟通会话 + 取消入口。
- * 会话直接复用 AppointmentChat（WS 推送 + 轮询兜底 + 403 只读降级，组件内自处理，
- * 未分配带看人时降级只读提示「无会话对象」）；可取消口径与原列表页一致（待确认/已预约）。
+ * 看房预约详情（R59 v1.3 → R63 v1.5 群聊化）：预约信息卡 + 看房群聊 + 取消入口。
+ * R63 起会话模型升级多方会话：群聊（居民+社区管理员+带看人）挂 conversationId，
+ * 直接复用 ConversationChat（WS 推送 + 轮询兜底 + 403 只读降级，组件内自处理）。
+ * conversationId 为空（游客预约/存量未建群数据）时展示只读占位提示。
  */
+
+/**
+ * 详情行本地扩展：后端 ViewingAppointmentVO 将补 conversationId（V16），
+ * types 禁改，故在视图内扩展；空值走未开通沟通群的只读占位。
+ */
+interface ResidentViewingRow extends IViewingAppointment {
+  conversationId?: number
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -22,7 +31,7 @@ const appointmentId = Number(route.params.id)
 /** 非法直达（旧书签/坏链）→ 回我的预约看房 tab */
 const invalidEntry = !Number.isInteger(appointmentId) || appointmentId <= 0
 
-const detail = ref<IViewingAppointment | null>(null)
+const detail = ref<ResidentViewingRow | null>(null)
 const loading = ref(true)
 const cancelling = ref(false)
 
@@ -141,9 +150,10 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 右：带看沟通会话（R59；组件内自处理 WS/轮询/403 只读，未分配时为只读提示） -->
+        <!-- 右：看房群聊（R63 多方会话；conversationId 缺失时只读占位） -->
         <div class="chat-wrap">
-          <AppointmentChat :appointment-id="appointmentId" />
+          <ConversationChat v-if="detail.conversationId" :conversation-id="detail.conversationId" />
+          <div v-else class="chat-placeholder">该预约暂未开通沟通群</div>
         </div>
       </div>
     </template>
@@ -265,6 +275,20 @@ onMounted(() => {
 
 .chat-wrap {
   min-width: 0;
+}
+
+/* 未开通沟通群的只读占位：与 ConversationChat 卡片同构，避免右侧塌陷 */
+.chat-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: var(--spacing-lg);
+  background: #fff;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-disabled);
 }
 
 @media (max-width: 991px) {
