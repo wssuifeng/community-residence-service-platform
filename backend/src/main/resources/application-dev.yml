@@ -32,3 +32,12 @@ spring:
 logging:
   level:
     com.community.residence: debug
+
+# 支付渠道凭据（dev）：默认双渠道禁用（payment.* 模板见 application.yml；
+# 支付宝沙箱可开通——配置 PAYMENT_ALIPAY_* 四项环境变量后自动启用；
+# 微信需商户号+API 证书（PAYMENT_WECHAT_* 五项），本地通常禁用）。
+# 渠道状态可启动后经 GET /api/v1/payment/channels 验证。
+# payment:
+#   notify-url: 公网部署时的异步通知地址（本地查单替代回调）
+#   alipay:
+#     gateway-url: https://openapi-sandbox.dl.alipaydev.com
