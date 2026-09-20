@@ -37,6 +37,10 @@ interface TreeHouse {
   id: number
   houseNumber: string
   floor: number
+  /** 建筑面积（㎡，可空） */
+  area?: number | null
+  /** 户型（可空） */
+  layout?: string | null
   /** 无房源为 null（界面展示「未挂牌」） */
   housing: HouseHousingSummary | null
 }
@@ -63,13 +67,6 @@ interface HousingSavePayload {
   deposit?: number
   images: string
   rentType?: HousingRentType
-}
-
-const HOUSING_TAG_TYPE: Record<HousingStatus, 'completed' | 'pending' | 'processing' | 'canceled'> = {
-  AVAILABLE: 'completed',
-  RESERVED: 'pending',
-  RENTED: 'processing',
-  OFFLINE: 'canceled'
 }
 
 const rentTypeOptions = (Object.keys(housingRentTypeLabels) as HousingRentType[]).map((value) => ({
@@ -290,26 +287,64 @@ async function handleToggleStatus(house: TreeHouse, community: ICommunity): Prom
   }
 }
 
-/* ===================== 批量挂牌（按社区） ===================== */
+/* ===================== 批量挂牌（细粒度 + 标题后缀） ===================== */
 
-/* 契约：POST /housings/batch-generate {communityId, monthlyRent, deposit, rentType?}
-   → {created, skipped}（R62 v1.5，待 api 层收编为 batchGenerateHousings） */
+/* 契约：POST /housings/batch-generate
+   {communityId, monthlyRent, deposit, rentType?, buildingIds?, unitIds?, houseIds?, titleSuffix?}
+   → {created, skipped}（R62 v1.5；收窄链 houseIds > unitIds > buildingIds > 整社区） */
 const batchVisible = ref(false)
 const batchSubmitting = ref(false)
 const batchCommunity = ref<ICommunity | null>(null)
+/** 范围模式：整社区（unitIds 空）/ 按单元（勾选单元） */
+const batchScopeMode = ref<'community' | 'units'>('community')
 const batchForm = reactive({
   monthlyRent: undefined as number | undefined,
   deposit: undefined as number | undefined,
-  rentType: 'RENT' as HousingRentType
+  rentType: 'RENT' as HousingRentType,
+  titleSuffix: '',
+  /** 空=整社区；非空=仅选中单元（细粒度挂牌） */
+  unitIds: [] as number[]
 })
 
-function openBatchDialog(community: ICommunity): void {
+/** 弹窗内复选用的单元选项（社区展开后已有树则复用，未展开时即时拉取） */
+const batchUnits = computed<TreeUnit[]>(() => {
+  const communityId = batchCommunity.value?.id
+  if (communityId == null) return []
+  return (buildings.value[communityId] ?? []).flatMap((b) => b.units)
+})
+
+async function openBatchDialog(community: ICommunity): Promise<void> {
   batchCommunity.value = community
   batchForm.monthlyRent = undefined
   batchForm.deposit = undefined
   batchForm.rentType = 'RENT'
+  batchForm.titleSuffix = ''
+  batchForm.unitIds = []
+  batchScopeMode.value = 'community'
+  /* 细粒度选择依赖结构树：未加载先拉取（选中态默认整社区） */
+  if (!buildings.value[community.id]) {
+    await loadTree(community.id)
+  }
   batchVisible.value = true
 }
+
+/** 切回整社区口径：清空单元勾选 */
+function selectWholeCommunity(): void {
+  batchForm.unitIds = []
+  batchScopeMode.value = 'community'
+}
+
+function selectAllUnits(): void {
+  batchForm.unitIds = batchUnits.value.map((u) => u.id)
+}
+
+const batchScopeText = computed(() => {
+  if (batchForm.unitIds.length === 0) return '整社区：全部未挂牌房屋'
+  const unlisted = batchUnits.value
+    .filter((u) => batchForm.unitIds.includes(u.id))
+    .reduce((sum, u) => sum + u.houses.filter((h) => !h.housing).length, 0)
+  return `已选 ${batchForm.unitIds.length} 个单元，其中未挂牌房屋 ${unlisted} 套`
+})
 
 async function handleBatchSubmit(): Promise<void> {
   const community = batchCommunity.value
@@ -326,7 +361,9 @@ async function handleBatchSubmit(): Promise<void> {
         communityId: community.id,
         monthlyRent: batchForm.monthlyRent,
         deposit: batchForm.deposit ?? null,
-        rentType: batchForm.rentType
+        rentType: batchForm.rentType,
+        unitIds: batchForm.unitIds.length > 0 ? batchForm.unitIds : undefined,
+        titleSuffix: batchForm.titleSuffix.trim() === '' ? undefined : batchForm.titleSuffix.trim()
       }
     )
     ElMessage.success(`批量挂牌完成：新建 ${result.created} 套，跳过 ${result.skipped} 套（已有房源）`)
@@ -399,50 +436,54 @@ async function handleBatchSubmit(): Promise<void> {
           >
             该社区暂无楼栋或房屋数据加载失败
           </p>
-          <div v-for="building in buildings[community.id] ?? []" :key="building.id" class="building-block">
-            <h4 class="building-name">{{ building.name }}</h4>
-            <p v-if="building.units.length === 0" class="unit-empty">暂无单元</p>
-            <div v-for="unit in building.units" :key="unit.id" class="unit-block">
-              <p class="unit-name">{{ unit.name }}</p>
-              <p v-if="unit.houses.length === 0" class="unit-empty">暂无房屋</p>
-              <div v-else class="house-rows">
-                <div v-for="house in unit.houses" :key="house.id" class="house-row">
-                  <span class="house-number">{{ house.houseNumber }}</span>
-                  <span class="house-floor">{{ house.floor }} 层</span>
-                  <StatusTag
-                    v-if="house.housing"
-                    :label="housingStatusLabels[house.housing.status]"
-                    :type="HOUSING_TAG_TYPE[house.housing.status]"
-                  />
-                  <StatusTag v-else label="未挂牌" type="canceled" />
-                  <span v-if="house.housing" class="house-rent"
-                    >¥{{ formatRent(house.housing.monthlyRent) }}/月</span
-                  >
-                  <span class="row-actions">
-                    <el-button
-                      v-permission="['ADMIN', 'SUPER_ADMIN']"
-                      link
-                      type="primary"
-                      size="small"
-                      @click="openHousingDialog(house, building, unit, community)"
+            <div v-for="building in buildings[community.id] ?? []" :key="building.id" class="building-block">
+              <h4 class="building-name">{{ building.name }}</h4>
+              <p v-if="building.units.length === 0" class="unit-empty">暂无单元</p>
+              <div v-for="unit in building.units" :key="unit.id" class="unit-block">
+                <p class="unit-name">{{ unit.name }}</p>
+                <p v-if="unit.houses.length === 0" class="unit-empty">暂无房屋</p>
+                <div v-else class="house-rows">
+                  <div v-for="house in unit.houses" :key="house.id" class="house-row">
+                    <span class="house-number">{{ house.houseNumber }}</span>
+                    <span class="house-meta">{{ house.floor }} 层</span>
+                    <span class="house-meta">{{ house.area != null ? `${house.area} ㎡` : '—' }}</span>
+                    <span class="house-meta house-layout">{{ house.layout || '—' }}</span>
+                    <span
+                      class="housing-state"
+                      :data-state="house.housing ? house.housing.status : 'UNLISTED'"
                     >
-                      {{ house.housing ? '编辑房源' : '挂牌' }}
-                    </el-button>
-                    <el-button
-                      v-if="house.housing"
-                      v-permission="['ADMIN', 'SUPER_ADMIN']"
-                      link
-                      :type="house.housing.status === 'OFFLINE' ? 'success' : 'warning'"
-                      size="small"
-                      @click="handleToggleStatus(house, community)"
+                      <i class="state-dot" aria-hidden="true"></i>
+                      {{ house.housing ? housingStatusLabels[house.housing.status] : '未挂牌' }}
+                    </span>
+                    <span v-if="house.housing" class="house-rent"
+                      >¥{{ formatRent(house.housing.monthlyRent) }}/月</span
                     >
-                      {{ house.housing.status === 'OFFLINE' ? '上架' : '下架' }}
-                    </el-button>
-                  </span>
+                    <span v-else class="house-rent house-rent-empty">—</span>
+                    <span class="row-actions">
+                      <el-button
+                        v-permission="['ADMIN', 'SUPER_ADMIN']"
+                        link
+                        type="primary"
+                        size="small"
+                        @click="openHousingDialog(house, building, unit, community)"
+                      >
+                        {{ house.housing ? '编辑' : '挂牌' }}
+                      </el-button>
+                      <el-button
+                        v-if="house.housing"
+                        v-permission="['ADMIN', 'SUPER_ADMIN']"
+                        link
+                        :type="house.housing.status === 'OFFLINE' ? 'success' : 'warning'"
+                        size="small"
+                        @click="handleToggleStatus(house, community)"
+                      >
+                        {{ house.housing.status === 'OFFLINE' ? '上架' : '下架' }}
+                      </el-button>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </article>
 
@@ -486,12 +527,37 @@ async function handleBatchSubmit(): Promise<void> {
       </template>
     </el-dialog>
 
-    <!-- 批量挂牌：为社区内无房源房屋批量生成 AVAILABLE 房源 -->
-    <el-dialog v-model="batchVisible" title="批量挂牌" width="480px" destroy-on-close>
+    <!-- 批量挂牌：细粒度（整社区/指定单元）+ 标题后缀，为无房源房屋批量生成在售房源 -->
+    <el-dialog v-model="batchVisible" title="批量挂牌" width="560px" destroy-on-close>
       <p class="dialog-context">
-        为「{{ batchCommunity?.name }}」下全部无房源房屋按默认参数生成在售（可租）房源，已有房源的房屋自动跳过。
+        为「{{ batchCommunity?.name }}」范围内无在架房源的房屋按默认参数生成在售（可租）房源，
+        已有房源的房屋自动跳过。
       </p>
-      <el-form label-width="80px">
+      <el-form label-width="90px">
+        <el-form-item label="挂牌范围">
+          <div class="batch-scope">
+            <el-radio-group v-model="batchScopeMode" size="small">
+              <el-radio-button value="community">整社区</el-radio-button>
+              <el-radio-button value="units">按单元</el-radio-button>
+            </el-radio-group>
+            <p class="batch-scope-text">{{ batchScopeText }}</p>
+          </div>
+        </el-form-item>
+        <el-form-item v-if="batchScopeMode === 'units'" label="选择单元">
+          <div class="unit-picker">
+            <div class="unit-picker-tools">
+              <el-button link type="primary" size="small" @click="selectAllUnits">全选</el-button>
+              <el-button link size="small" @click="selectWholeCommunity">重置</el-button>
+            </div>
+            <el-checkbox-group v-model="batchForm.unitIds" class="unit-picker-grid">
+              <el-checkbox v-for="unit in batchUnits" :key="unit.id" :value="unit.id">
+                {{ unit.name }}
+                <span class="unit-picker-count">（{{ unit.houses.filter((h) => !h.housing).length }} 套未挂牌）</span>
+              </el-checkbox>
+            </el-checkbox-group>
+            <p v-if="batchUnits.length === 0" class="unit-picker-empty">该社区暂无可选单元</p>
+          </div>
+        </el-form-item>
         <el-form-item label="默认月租" required>
           <el-input-number v-model="batchForm.monthlyRent" :min="0" :step="100" />
           <span class="form-unit">元/月</span>
@@ -506,6 +572,17 @@ async function handleBatchSubmit(): Promise<void> {
               {{ option.label }}
             </el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="标题后缀">
+          <el-input
+            v-model="batchForm.titleSuffix"
+            maxlength="32"
+            show-word-limit
+            placeholder="选填，如：特价 / 朝南 / 近地铁"
+          />
+          <p class="form-hint">
+            生成标题形如「1 号楼1 单元101·精装房源{{ batchForm.titleSuffix.trim() ? '·' + batchForm.titleSuffix.trim() : '' }}」
+          </p>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -610,7 +687,7 @@ async function handleBatchSubmit(): Promise<void> {
   text-overflow: ellipsis;
 }
 
-/* ---------- 一体化树 ---------- */
+/* ---------- 一体化树（设计稿：紧凑数据密集 + 层级引导线） ---------- */
 
 .community-body {
   padding: 0 var(--spacing-lg) var(--spacing-lg);
@@ -625,8 +702,10 @@ async function handleBatchSubmit(): Promise<void> {
   color: var(--color-text-disabled);
 }
 
+/* 楼栋：左侧竖线引导层级（设计稿口径） */
 .building-block {
-  padding-top: var(--spacing-md);
+  padding: var(--spacing-sm) 0 var(--spacing-sm) var(--spacing-md);
+  border-left: 2px solid var(--color-bg-hover);
 }
 
 .building-name {
@@ -636,13 +715,18 @@ async function handleBatchSubmit(): Promise<void> {
   color: var(--color-text-primary);
 }
 
+/* 单元：再缩进一级，弱化为小标签 */
 .unit-block {
-  padding-left: var(--spacing-lg);
+  padding-left: var(--spacing-md);
 }
 
 .unit-name {
+  display: inline-block;
   margin: var(--spacing-xs) 0;
-  font-size: var(--font-size-xs);
+  padding: 1px var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-hover);
+  font-size: 11px;
   color: var(--color-text-secondary);
 }
 
@@ -651,12 +735,18 @@ async function handleBatchSubmit(): Promise<void> {
   flex-direction: column;
 }
 
+/* 房屋行：紧凑五列（房号/楼层/面积/户型/状态/租金）+ 行尾操作 */
 .house-row {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-xs) 0;
-  border-bottom: 1px dashed var(--color-border);
+  padding: 6px var(--spacing-sm);
+  border-bottom: 1px solid #f1f3f1;
+  border-radius: var(--radius-sm);
+}
+
+.house-row:hover {
+  background: var(--color-bg);
 }
 
 .house-row:last-child {
@@ -664,21 +754,76 @@ async function handleBatchSubmit(): Promise<void> {
 }
 
 .house-number {
-  min-width: 56px;
+  min-width: 64px;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
 }
 
-.house-floor {
-  width: 48px;
+/* 楼层/面积/户型：固定窄列，对齐成表 */
+.house-meta {
+  width: 56px;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+}
+
+.house-layout {
+  width: 88px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 房源状态：圆点 + 文字（设计稿口径，替代胶囊以提升信息密度） */
+.housing-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: 72px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.state-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-disabled);
+  flex-shrink: 0;
+}
+
+.housing-state[data-state='AVAILABLE'] .state-dot {
+  background: var(--color-success);
+}
+
+.housing-state[data-state='AVAILABLE'] {
+  color: var(--color-success);
+}
+
+.housing-state[data-state='RESERVED'] .state-dot {
+  background: var(--color-warning);
+}
+
+.housing-state[data-state='RENTED'] .state-dot {
+  background: var(--color-primary);
+}
+
+.housing-state[data-state='OFFLINE'] .state-dot,
+.housing-state[data-state='UNLISTED'] .state-dot {
+  background: transparent;
+  border: 1.5px solid var(--color-text-disabled);
 }
 
 .house-rent {
+  width: 92px;
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+}
+
+.house-rent-empty {
+  color: var(--color-text-disabled);
 }
 
 .row-actions {
@@ -695,12 +840,66 @@ async function handleBatchSubmit(): Promise<void> {
   margin: 0 0 var(--spacing-md);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
 }
 
 .form-unit {
   margin-left: var(--spacing-sm);
   color: var(--color-text-disabled);
   font-size: var(--font-size-xs);
+}
+
+.form-hint {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
+/* 挂牌范围：模式切换 + 范围摘要 */
+.batch-scope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.batch-scope-text {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* 单元多选（细粒度挂牌）：两列网格 + 未挂牌计数 */
+.unit-picker {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+}
+
+.unit-picker-tools {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.unit-picker-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px var(--spacing-md);
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.unit-picker-count {
+  color: var(--color-text-disabled);
+  font-size: 11px;
+}
+
+.unit-picker-empty {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
 }
 
 /* ---------- 响应式 ---------- */
