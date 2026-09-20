@@ -30,6 +30,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class LeaseController {
 
     private final LeaseService leaseService;
+    private final com.community.residence.payment.service.PaymentService paymentService;
+
+    /**
+     * 发起租约续约支付（R61，接口设计.md 9.13.2）：仅本人已生效租约；
+     * 金额服务端按月租×月数计算；同租约已有待支付单时幂等返回该单；
+     * 支付宝返回跳转表单，微信返回二维码链接。
+     */
+    @Operation(summary = "发起租约续约支付", description = "居民端在线续租：选月数与渠道创建支付单，"
+            + "金额服务端计算防篡改；待支付单幂等返回")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @PostMapping("/{id}/renew-payments")
+    public ApiResponse<com.community.residence.payment.vo.LeasePaymentVO> createRenewPayment(
+            @PathVariable Long id,
+            @RequestBody @Valid com.community.residence.payment.dto.CreateRenewPaymentDTO dto) {
+        return ApiResponse.success(paymentService.createRenewPayment(id, dto));
+    }
 
     @Operation(summary = "创建租住记录", description = "管理员登记，初始待审核")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")

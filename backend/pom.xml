@@ -25,6 +25,8 @@
         <redisson.version>4.5.0</redisson.version>
         <jjwt.version>0.12.6</jjwt.version>
         <springdoc.version>3.0.3</springdoc.version>
+        <alipay-sdk.version>4.40.1006.ALL</alipay-sdk.version>
+        <wechatpay-java.version>0.2.17</wechatpay-java.version>
     </properties>
 
     <dependencies>
@@ -129,6 +131,20 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
+        </dependency>
+
+        <!-- 支付渠道 SDK（R61 租约续约支付，决策日志 2026-09-20；凭据未配置时渠道禁用） -->
+        <!-- 支付宝：电脑网站支付 alipay.trade.page.pay（沙箱可测） -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>${alipay-sdk.version}</version>
+        </dependency>
+        <!-- 微信支付：Native 下单 v3（wechatpay-java 传递依赖 wechatpay-java-core 同版本） -->
+        <dependency>
+            <groupId>com.github.wechatpay-apiv3</groupId>
+            <artifactId>wechatpay-java</artifactId>
+            <version>${wechatpay-java.version}</version>
         </dependency>
 
         <!-- 工具 -->
