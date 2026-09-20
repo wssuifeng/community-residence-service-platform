@@ -83,3 +83,40 @@ export interface IRenewLeaseDTO {
 export interface IExpiringLeaseQuery extends PageQuery {
   days?: number
 }
+
+/* ---------------------------------- R61 续约支付（v1.4） ---------------------------------- */
+
+/** 支付渠道（R61：支付宝电脑网站支付 / 微信 Native 扫码） */
+export type PaymentChannel = 'ALIPAY' | 'WECHAT'
+
+/** 支付单状态（R61：待支付→支付成功 / 已关闭；渠道侧失败保留在查询结果中） */
+export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'CLOSED'
+
+/** 支付渠道可用性（GET /payment/channels 元素：凭据未配置 enabled=false 禁用明示） */
+export interface IPaymentChannelOption {
+  channel: PaymentChannel
+  enabled: boolean
+}
+
+/** 发起续约支付请求（POST /leases/{id}/renew-payments；金额服务端按月租×月数计算，
+ * 客户端不可传金额——防篡改口径） */
+export interface IRenewPaymentCreateDTO {
+  months: number
+  channel: PaymentChannel
+}
+
+/** 支付单（后端 LeasePaymentVO；alipayForm/qrCode 按渠道二选一返回） */
+export interface ILeasePayment {
+  paymentNo: string
+  leaseId: number
+  channel: PaymentChannel
+  months: number
+  amount: number
+  status: PaymentStatus
+  /** 支付宝渠道：自动提交跳转表单 HTML（alipay.trade.page.pay 响应） */
+  alipayForm?: string
+  /** 微信渠道：Native 下单 code_url（前端渲染二维码） */
+  qrCode?: string
+  createdAt: string
+  paidAt?: string | null
+}
