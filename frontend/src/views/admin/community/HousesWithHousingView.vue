@@ -101,6 +101,42 @@ const expanded = ref<Record<number, boolean>>({})
 const buildings = ref<Record<number, TreeBuilding[]>>({})
 const treeLoading = ref<Record<number, boolean>>({})
 
+/** 房屋行筛选（大社区展开行数多，按房号/状态收敛）：空='' 全部 */
+const filterKeyword = ref('')
+const filterState = ref<'' | 'LISTED' | 'UNLISTED' | HousingStatus>('')
+
+const stateFilterOptions: Array<{ value: '' | 'LISTED' | 'UNLISTED' | HousingStatus; label: string }> = [
+  { value: '', label: '全部状态' },
+  { value: 'LISTED', label: '已挂牌' },
+  { value: 'UNLISTED', label: '未挂牌' },
+  { value: 'AVAILABLE', label: housingStatusLabels.AVAILABLE },
+  { value: 'OFFLINE', label: housingStatusLabels.OFFLINE }
+]
+
+function matchFilter(house: TreeHouse): boolean {
+  const keyword = filterKeyword.value.trim().toLowerCase()
+  if (keyword !== '' && !house.houseNumber.toLowerCase().includes(keyword)) return false
+  switch (filterState.value) {
+    case '':
+      return true
+    case 'LISTED':
+      return house.housing !== null
+    case 'UNLISTED':
+      return house.housing === null
+    default:
+      return house.housing?.status === filterState.value
+  }
+}
+
+function filteredHouses(unit: TreeUnit): TreeHouse[] {
+  return unit.houses.filter(matchFilter)
+}
+
+/** 单元在筛选下是否有可见房屋（用于隐藏空单元） */
+function unitHasMatch(unit: TreeUnit): boolean {
+  return filteredHouses(unit).length > 0
+}
+
 async function loadTree(communityId: number): Promise<void> {
   treeLoading.value[communityId] = true
   try {
@@ -295,23 +331,45 @@ async function handleToggleStatus(house: TreeHouse, community: ICommunity): Prom
 const batchVisible = ref(false)
 const batchSubmitting = ref(false)
 const batchCommunity = ref<ICommunity | null>(null)
-/** 范围模式：整社区（unitIds 空）/ 按单元（勾选单元） */
-const batchScopeMode = ref<'community' | 'units'>('community')
+/** 范围模式：整社区 / 按楼栋（多选）/ 按单元（选定楼栋下多选，两级联动筛选） */
+const batchScopeMode = ref<'community' | 'buildings' | 'units'>('community')
+/** 按单元模式的楼栋筛选（界面过滤用，空=不限楼栋） */
+const batchBuildingFilter = ref<number | null>(null)
 const batchForm = reactive({
   monthlyRent: undefined as number | undefined,
   deposit: undefined as number | undefined,
   rentType: 'RENT' as HousingRentType,
   titleSuffix: '',
-  /** 空=整社区；非空=仅选中单元（细粒度挂牌） */
+  /** 按楼栋模式：选中楼栋 */
+  buildingIds: [] as number[],
+  /** 按单元模式：选中单元 */
   unitIds: [] as number[]
 })
 
-/** 弹窗内复选用的单元选项（社区展开后已有树则复用，未展开时即时拉取） */
-const batchUnits = computed<TreeUnit[]>(() => {
+/** 弹窗内复选用的楼栋列表（社区展开后已有树则复用，未展开时即时拉取） */
+const batchBuildings = computed<TreeBuilding[]>(() => {
   const communityId = batchCommunity.value?.id
   if (communityId == null) return []
-  return (buildings.value[communityId] ?? []).flatMap((b) => b.units)
+  return buildings.value[communityId] ?? []
 })
+
+/** 按单元模式：受楼栋筛选联动的单元列表（未选楼栋=全部楼栋下的单元） */
+const batchUnits = computed<TreeUnit[]>(() => {
+  const list = batchBuildings.value
+  const filtered = batchBuildingFilter.value == null
+    ? list
+    : list.filter((b) => b.id === batchBuildingFilter.value)
+  return filtered.flatMap((b) => b.units)
+})
+
+/** 单元/楼栋的未挂牌房屋计数（选项与范围摘要共用） */
+function unlistedCount(unit: TreeUnit): number {
+  return unit.houses.filter((h) => !h.housing).length
+}
+
+function buildingUnlistedCount(building: TreeBuilding): number {
+  return building.units.reduce((sum, u) => sum + unlistedCount(u), 0)
+}
 
 async function openBatchDialog(community: ICommunity): Promise<void> {
   batchCommunity.value = community
@@ -319,19 +377,29 @@ async function openBatchDialog(community: ICommunity): Promise<void> {
   batchForm.deposit = undefined
   batchForm.rentType = 'RENT'
   batchForm.titleSuffix = ''
+  batchForm.buildingIds = []
   batchForm.unitIds = []
+  batchBuildingFilter.value = null
   batchScopeMode.value = 'community'
-  /* 细粒度选择依赖结构树：未加载先拉取（选中态默认整社区） */
+  /* 层级筛选依赖结构树：未加载先拉取 */
   if (!buildings.value[community.id]) {
     await loadTree(community.id)
   }
   batchVisible.value = true
 }
 
-/** 切回整社区口径：清空单元勾选 */
-function selectWholeCommunity(): void {
+/** 切换范围模式时清理不属于当前模式的选择，避免残留生效 */
+function handleScopeModeChange(): void {
+  if (batchScopeMode.value !== 'buildings') batchForm.buildingIds = []
+  if (batchScopeMode.value !== 'units') {
+    batchForm.unitIds = []
+    batchBuildingFilter.value = null
+  }
+}
+
+/** 楼栋筛选变更：清空已选单元（避免选到筛选外的单元） */
+function handleBuildingFilterChange(): void {
   batchForm.unitIds = []
-  batchScopeMode.value = 'community'
 }
 
 function selectAllUnits(): void {
@@ -339,11 +407,24 @@ function selectAllUnits(): void {
 }
 
 const batchScopeText = computed(() => {
-  if (batchForm.unitIds.length === 0) return '整社区：全部未挂牌房屋'
-  const unlisted = batchUnits.value
-    .filter((u) => batchForm.unitIds.includes(u.id))
-    .reduce((sum, u) => sum + u.houses.filter((h) => !h.housing).length, 0)
-  return `已选 ${batchForm.unitIds.length} 个单元，其中未挂牌房屋 ${unlisted} 套`
+  switch (batchScopeMode.value) {
+    case 'community':
+      return '整社区：全部未挂牌房屋'
+    case 'buildings': {
+      if (batchForm.buildingIds.length === 0) return '请选择楼栋'
+      const unlisted = batchBuildings.value
+        .filter((b) => batchForm.buildingIds.includes(b.id))
+        .reduce((sum, b) => sum + buildingUnlistedCount(b), 0)
+      return `已选 ${batchForm.buildingIds.length} 个楼栋，其中未挂牌房屋 ${unlisted} 套`
+    }
+    default: {
+      if (batchForm.unitIds.length === 0) return '请选择单元'
+      const unlisted = batchUnits.value
+        .filter((u) => batchForm.unitIds.includes(u.id))
+        .reduce((sum, u) => sum + unlistedCount(u), 0)
+      return `已选 ${batchForm.unitIds.length} 个单元，其中未挂牌房屋 ${unlisted} 套`
+    }
+  }
 })
 
 async function handleBatchSubmit(): Promise<void> {
@@ -351,6 +432,14 @@ async function handleBatchSubmit(): Promise<void> {
   if (!community) return
   if (batchForm.monthlyRent == null) {
     ElMessage.warning('请填写默认月租金')
+    return
+  }
+  if (batchScopeMode.value === 'buildings' && batchForm.buildingIds.length === 0) {
+    ElMessage.warning('请选择楼栋')
+    return
+  }
+  if (batchScopeMode.value === 'units' && batchForm.unitIds.length === 0) {
+    ElMessage.warning('请选择单元')
     return
   }
   batchSubmitting.value = true
@@ -362,7 +451,8 @@ async function handleBatchSubmit(): Promise<void> {
         monthlyRent: batchForm.monthlyRent,
         deposit: batchForm.deposit ?? null,
         rentType: batchForm.rentType,
-        unitIds: batchForm.unitIds.length > 0 ? batchForm.unitIds : undefined,
+        buildingIds: batchScopeMode.value === 'buildings' ? batchForm.buildingIds : undefined,
+        unitIds: batchScopeMode.value === 'units' ? batchForm.unitIds : undefined,
         titleSuffix: batchForm.titleSuffix.trim() === '' ? undefined : batchForm.titleSuffix.trim()
       }
     )
@@ -430,20 +520,42 @@ async function handleBatchSubmit(): Promise<void> {
         </header>
 
         <div v-if="expanded[community.id]" v-loading="treeLoading[community.id]" class="community-body">
+          <!-- 房屋筛选：房号关键字 + 房源状态（大社区展开行多，先收窄再浏览） -->
+          <div class="tree-filters">
+            <el-input
+              v-model="filterKeyword"
+              class="tree-filter-keyword"
+              size="small"
+              placeholder="按房号筛选，如 102"
+              clearable
+            />
+            <el-select v-model="filterState" size="small" class="tree-filter-state">
+              <el-option
+                v-for="option in stateFilterOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+              />
+            </el-select>
+          </div>
+
           <p
             v-if="!treeLoading[community.id] && (buildings[community.id] ?? []).length === 0"
             class="body-empty"
           >
             该社区暂无楼栋或房屋数据加载失败
           </p>
-            <div v-for="building in buildings[community.id] ?? []" :key="building.id" class="building-block">
-              <h4 class="building-name">{{ building.name }}</h4>
-              <p v-if="building.units.length === 0" class="unit-empty">暂无单元</p>
-              <div v-for="unit in building.units" :key="unit.id" class="unit-block">
-                <p class="unit-name">{{ unit.name }}</p>
-                <p v-if="unit.houses.length === 0" class="unit-empty">暂无房屋</p>
-                <div v-else class="house-rows">
-                  <div v-for="house in unit.houses" :key="house.id" class="house-row">
+          <div v-for="building in buildings[community.id] ?? []" :key="building.id" class="building-block">
+            <h4 class="building-name">{{ building.name }}</h4>
+            <p v-if="building.units.length === 0" class="unit-empty">暂无单元</p>
+            <div
+              v-for="unit in building.units.filter(unitHasMatch)"
+              :key="unit.id"
+              class="unit-block"
+            >
+              <p class="unit-name">{{ unit.name }}</p>
+              <div class="house-rows">
+                <div v-for="house in filteredHouses(unit)" :key="house.id" class="house-row">
                     <span class="house-number">{{ house.houseNumber }}</span>
                     <span class="house-meta">{{ house.floor }} 层</span>
                     <span class="house-meta">{{ house.area != null ? `${house.area} ㎡` : '—' }}</span>
@@ -536,28 +648,64 @@ async function handleBatchSubmit(): Promise<void> {
       <el-form label-width="90px">
         <el-form-item label="挂牌范围">
           <div class="batch-scope">
-            <el-radio-group v-model="batchScopeMode" size="small">
+            <el-radio-group v-model="batchScopeMode" size="small" @change="handleScopeModeChange">
               <el-radio-button value="community">整社区</el-radio-button>
+              <el-radio-button value="buildings">按楼栋</el-radio-button>
               <el-radio-button value="units">按单元</el-radio-button>
             </el-radio-group>
             <p class="batch-scope-text">{{ batchScopeText }}</p>
           </div>
         </el-form-item>
-        <el-form-item v-if="batchScopeMode === 'units'" label="选择单元">
-          <div class="unit-picker">
-            <div class="unit-picker-tools">
-              <el-button link type="primary" size="small" @click="selectAllUnits">全选</el-button>
-              <el-button link size="small" @click="selectWholeCommunity">重置</el-button>
-            </div>
-            <el-checkbox-group v-model="batchForm.unitIds" class="unit-picker-grid">
-              <el-checkbox v-for="unit in batchUnits" :key="unit.id" :value="unit.id">
-                {{ unit.name }}
-                <span class="unit-picker-count">（{{ unit.houses.filter((h) => !h.housing).length }} 套未挂牌）</span>
-              </el-checkbox>
-            </el-checkbox-group>
-            <p v-if="batchUnits.length === 0" class="unit-picker-empty">该社区暂无可选单元</p>
-          </div>
+
+        <!-- 按楼栋：楼栋多选（带单元数/未挂牌数） -->
+        <el-form-item v-if="batchScopeMode === 'buildings'" label="选择楼栋">
+          <el-checkbox-group v-model="batchForm.buildingIds" class="pick-list">
+            <el-checkbox v-for="building in batchBuildings" :key="building.id" :value="building.id">
+              {{ building.name }}
+              <span class="pick-count">
+                （{{ building.units.length }} 单元 · {{ buildingUnlistedCount(building) }} 套未挂牌）
+              </span>
+            </el-checkbox>
+          </el-checkbox-group>
+          <p v-if="batchBuildings.length === 0" class="pick-empty">该社区暂无楼栋</p>
         </el-form-item>
+
+        <!-- 按单元：先楼栋筛选（联动），再选单元 -->
+        <template v-if="batchScopeMode === 'units'">
+          <el-form-item label="楼栋筛选">
+            <el-select
+              v-model="batchBuildingFilter"
+              clearable
+              placeholder="全部楼栋"
+              style="width: 220px"
+              @change="handleBuildingFilterChange"
+            >
+              <el-option
+                v-for="building in batchBuildings"
+                :key="building.id"
+                :label="`${building.name}（${building.units.length} 单元）`"
+                :value="building.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="选择单元">
+            <div class="pick-panel">
+              <div class="pick-panel-tools">
+                <span class="pick-panel-hint">共 {{ batchUnits.length }} 个单元</span>
+                <el-button link type="primary" size="small" @click="selectAllUnits">全选</el-button>
+                <el-button link size="small" @click="batchForm.unitIds = []">清空</el-button>
+              </div>
+              <el-checkbox-group v-model="batchForm.unitIds" class="pick-list pick-list-scroll">
+                <el-checkbox v-for="unit in batchUnits" :key="unit.id" :value="unit.id">
+                  {{ unit.name }}
+                  <span class="pick-count">（{{ unlistedCount(unit) }} 套未挂牌）</span>
+                </el-checkbox>
+              </el-checkbox-group>
+              <p v-if="batchUnits.length === 0" class="pick-empty">所选楼栋下暂无单元</p>
+            </div>
+          </el-form-item>
+        </template>
+
         <el-form-item label="默认月租" required>
           <el-input-number v-model="batchForm.monthlyRent" :min="0" :step="100" />
           <span class="form-unit">元/月</span>
@@ -868,38 +1016,49 @@ async function handleBatchSubmit(): Promise<void> {
   color: var(--color-text-secondary);
 }
 
-/* 单元多选（细粒度挂牌）：两列网格 + 未挂牌计数 */
-.unit-picker {
+/* 选择列表（楼栋/单元共性）：单列紧凑 + 计数小字 */
+.pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.pick-list-scroll {
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.pick-count {
+  color: var(--color-text-disabled);
+  font-size: 11px;
+}
+
+.pick-empty {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
+/* 按单元：楼栋筛选 + 单元面板 */
+.pick-panel {
   width: 100%;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm);
 }
 
-.unit-picker-tools {
+.pick-panel-tools {
   display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-xs);
+  align-items: center;
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xs);
 }
 
-.unit-picker-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px var(--spacing-md);
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-.unit-picker-count {
-  color: var(--color-text-disabled);
-  font-size: 11px;
-}
-
-.unit-picker-empty {
-  margin: 0;
+.pick-panel-hint {
+  margin-right: auto;
   font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
 /* ---------- 响应式 ---------- */
