@@ -48,7 +48,8 @@ public class DataScopeInterceptor implements InnerInterceptor {
             "sys_user", "auth_token_blacklist",
             "notification", "notification_channel_log",
             "housing_timeslot", "sys_task_log",
-            "lease_payment");
+            "lease_payment",
+            "conversation", "conversation_participant", "conversation_message");
 
     @Override
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter,

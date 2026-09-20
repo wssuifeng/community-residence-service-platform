@@ -1,5 +1,6 @@
 package com.community.residence.config;
 
+import com.community.residence.config.ConversationSubscriptionInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -16,12 +17,15 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import java.util.List;
 
 /**
- * WebSocket/STOMP 配置（C11 通知实时推送 + C6 反馈会话 + C12 看房会话，
- * 架构设计.md §3.4）。统一端点 /ws（SockJS 兼容）：通知走 /user/queue/notifications
- * 用户专属队列，反馈会话走 /topic/feedback/{feedbackId} 主题（订阅鉴权见
- * FeedbackSubscriptionInterceptor），看房会话走 /topic/appointment/{appointmentId}
- * 主题（订阅鉴权见 AppointmentSubscriptionInterceptor，R59）；
- * 认证在 CONNECT 帧由 WebSocketAuthInterceptor 完成。
+ * WebSocket/STOMP 配置（C11 通知实时推送 + C6 反馈会话 + C12 看房会话 +
+ * R63 多方会话，架构设计.md §3.4）。统一端点 /ws（SockJS 兼容）：通知走
+ * /user/queue/notifications 用户专属队列，反馈会话走 /topic/feedback/{feedbackId}
+ * 主题（订阅鉴权见 FeedbackSubscriptionInterceptor），看房会话走
+ * /topic/appointment/{appointmentId} 主题（订阅鉴权见
+ * AppointmentSubscriptionInterceptor，R59），多方会话走
+ * /topic/conversation/{conversationId} 主题（订阅鉴权见
+ * ConversationSubscriptionInterceptor，R63）；认证在 CONNECT 帧由
+ * WebSocketAuthInterceptor 完成。
  */
 @Configuration
 @EnableWebSocketMessageBroker
@@ -31,6 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
     private final FeedbackSubscriptionInterceptor feedbackSubscriptionInterceptor;
     private final AppointmentSubscriptionInterceptor appointmentSubscriptionInterceptor;
+    private final ConversationSubscriptionInterceptor conversationSubscriptionInterceptor;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -51,7 +56,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(webSocketAuthInterceptor, feedbackSubscriptionInterceptor,
-                appointmentSubscriptionInterceptor);
+                appointmentSubscriptionInterceptor, conversationSubscriptionInterceptor);
     }
 
     @Override

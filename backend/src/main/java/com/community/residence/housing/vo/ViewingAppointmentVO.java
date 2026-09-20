@@ -34,6 +34,9 @@ public class ViewingAppointmentVO {
     @Schema(description = "带看人姓名（未分配为空）")
     private String assigneeName;
 
+    @Schema(description = "关联会话ID（R63 看房群聊；游客预约/未建群为空）")
+    private Long conversationId;
+
     @Schema(description = "所属社区ID")
     private Long communityId;
 
@@ -65,6 +68,7 @@ public class ViewingAppointmentVO {
         vo.setVisitorName(entity.getVisitorName());
         vo.setHousingId(entity.getHousingId());
         vo.setAssigneeId(entity.getAssignedStaffId());
+        vo.setConversationId(entity.getConversationId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setAppointmentDate(entity.getAppointmentDate());
         vo.setStartTime(entity.getStartTime());

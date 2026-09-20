@@ -65,6 +65,8 @@ class ViewingAppointmentConflictFixTest {
     private RedissonClient redissonClient;
     @Mock
     private RLock lock;
+    @Mock
+    private com.community.residence.conversation.service.ConversationService conversationService;
 
     @InjectMocks
     private ViewingAppointmentService service;
