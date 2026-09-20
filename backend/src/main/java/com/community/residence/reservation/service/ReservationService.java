@@ -15,6 +15,8 @@ import com.community.residence.community.entity.PublicResource;
 import com.community.residence.community.entity.ResourceTimeslot;
 import com.community.residence.community.mapper.PublicResourceMapper;
 import com.community.residence.community.mapper.ResourceTimeslotMapper;
+import com.community.residence.housing.entity.ViewingAppointment;
+import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.reservation.dto.CreateReservationDTO;
 import com.community.residence.reservation.entity.ResourceReservation;
 import com.community.residence.reservation.entity.ViolationRecord;
@@ -57,6 +59,9 @@ public class ReservationService {
     private static final List<String> OCCUPYING_STATUS =
             List.of(ReservationStatus.PENDING, ReservationStatus.RESERVED);
 
+    /** 看房预约占用日程的状态集合（DEF-062 跨域日程冲突检查口径，C12 状态机常量） */
+    private static final List<String> VIEWING_OCCUPYING_STATUS = List.of("TO_CONFIRM", "RESERVED");
+
     /** 违约冻结阈值配置键（缺省 3 次） */
     private static final String CONFIG_VIOLATION_MAX = "violation.max_count";
 
@@ -73,6 +78,7 @@ public class ReservationService {
     private final ViolationRecordMapper violationRecordMapper;
     private final PublicResourceMapper resourceMapper;
     private final ResourceTimeslotMapper timeslotMapper;
+    private final ViewingAppointmentMapper viewingAppointmentMapper;
     private final ResidentMapper residentMapper;
     private final SysConfigService sysConfigService;
     private final NotificationService notificationService;
@@ -81,10 +87,12 @@ public class ReservationService {
     /**
      * 创建预约：Slot Grid 模型（08 §3.7 定案）。日期窗口（DEF-051/053）：
      * 仅可约今天起 7 天内，过去日期与今日已结束时段服务端拒绝（endTime<=now
-     * 口径对齐 DEF-045 看房预约，进行中时段仍可约）。三道防线：
+     * 口径对齐 DEF-045 看房预约，进行中时段仍可约）。四道防线：
      * ① 栅格对齐校验（起止须为资源 slot_unit 整数倍，400）+ 模板覆盖校验；
      * ② Redisson 锁内对请求覆盖的每个栅格逐一检查 booked < capacity
      *    （同居民同资源同起始时段重复拦截 + 全局逐格容量检查）；
+     * ②' 预约人日程冲突检查（DEF-062，锁内落库前）：同账号同日跨资源/
+     *    跨域时间区间重叠拒绝 5406（「影分身」拦截）；
      * ③ V11 uk_reservation_user_slot 唯一约束兜底（同用户同槽并发重复）。
      * 并发防护沿用 DEF-005 锁模式：刻意不加 @Transactional——方法仅一条 INSERT，
      * 锁内自动提交保证锁释放前已落库行对后到并发请求可见。
@@ -166,6 +174,35 @@ public class ReservationService {
             if (mineOverlap > 0) {
                 throw new BusinessException(ErrorCode.DATA_EXISTS,
                         "同一时段已有本人的预约，不可重复预约该时段");
+            }
+
+            /* 防线②a'：预约人日程冲突（DEF-062，跨资源 + 跨域，锁内落库前）——
+               同账号同日与任意资源的资源预约（PENDING/RESERVED）或任意房源的
+               看房预约（TO_CONFIRM/RESERVED）时间区间重叠（start<other.end 且
+               end>other.start，仅首尾相接放行）即拒 5406；本条记录尚未落库天然
+               不参与比对；同资源同槽重叠已由防线②a先行拦截，此处命中即
+               跨资源/跨域的「影分身」安排 */
+            Long crossResource = reservationMapper.selectCount(
+                    new LambdaQueryWrapper<ResourceReservation>()
+                            .eq(ResourceReservation::getUserId, userId)
+                            .eq(ResourceReservation::getReserveDate, dto.getReserveDate())
+                            .lt(ResourceReservation::getStartTime, dto.getEndTime())
+                            .gt(ResourceReservation::getEndTime, dto.getStartTime())
+                            .in(ResourceReservation::getStatus, OCCUPYING_STATUS));
+            if (crossResource > 0) {
+                throw new BusinessException(ErrorCode.RESERVATION_SCHEDULE_CONFLICT,
+                        "该时间段您已有其他预约安排，请调整时间");
+            }
+            Long crossDomain = viewingAppointmentMapper.selectCount(
+                    new LambdaQueryWrapper<ViewingAppointment>()
+                            .eq(ViewingAppointment::getUserId, userId)
+                            .eq(ViewingAppointment::getAppointmentDate, dto.getReserveDate())
+                            .lt(ViewingAppointment::getStartTime, dto.getEndTime())
+                            .gt(ViewingAppointment::getEndTime, dto.getStartTime())
+                            .in(ViewingAppointment::getStatus, VIEWING_OCCUPYING_STATUS));
+            if (crossDomain > 0) {
+                throw new BusinessException(ErrorCode.RESERVATION_SCHEDULE_CONFLICT,
+                        "该时间段您已有其他预约安排，请调整时间");
             }
 
             /* 防线②b：锁内逐栅格容量检查——请求覆盖的每个栅格 booked < capacity

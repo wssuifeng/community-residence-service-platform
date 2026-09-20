@@ -25,6 +25,7 @@ import com.community.residence.housing.mapper.HousingMapper;
 import com.community.residence.housing.mapper.HousingTimeslotMapper;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.housing.vo.HousingVO;
+import com.community.residence.reservation.service.SlotGrids;
 import com.community.residence.reservation.vo.AvailableSlotVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /** 房源业务逻辑：上架管理 + 游客浏览（游客只见可租/已预订房源） */
 @Slf4j
@@ -56,6 +56,11 @@ public class HousingService {
 
     /** 浏览计数 Redis 键前缀（架构设计.md §3.3.1，HousingViewFlushTask 每 5 分钟回写） */
     public static final String VIEW_COUNT_KEY_PREFIX = "housing:view:";
+
+    /** 看房切片粒度（分钟，DEF-061：V6 模板为 3~4 小时长段，整段暴露导致只能约整段
+        且超 R60 连续上限，对齐 C7 Slot Grid 口径栅格化；housing_timeslot 无 slot_unit 列，
+        粒度固定 60 分钟） */
+    private static final int VIEWING_SLOT_MINUTES = 60;
 
     private final HousingMapper housingMapper;
     private final HouseMapper houseMapper;
@@ -187,11 +192,14 @@ public class HousingService {
     }
 
     /**
-     * 看房可预约时段（接口设计 9.12.2.8，BE-ISSUE-5）：周模板按日期范围展开 +
-     * 占用计数。housing_timeslot 无 max_bookings 列且预约创建按「每时段仅一条
-     * 有效预约」做冲突检测，故 maxBookings 固定为 1（与创建口径一致）；
+     * 看房可预约时段（接口设计 9.12.2.8，BE-ISSUE-5 + DEF-061）：周模板按日期范围展开 +
+     * 60 分钟栅格切片（对齐 C7 Slot Grid 口径）——模板段 [start,end) 切为
+     * [start,start+60m)、[start+60m,start+120m)…，尾段不足 60 分钟不产出切片；
+     * 占用按「与切片时间区间重叠」计数（覆盖即占用，看房 capacity=1：一条跨两片的
+     * 预约使两片均满）；maxBookings 固定 1（与创建口径一致）；timeslotId 为
+     * 「模板ID×10000+当日分钟数」的栅格标识（前端选择键，非数据库主键）。
      * endDate 缺省展开 7 天；占用状态与创建冲突检测同口径（TO_CONFIRM/RESERVED）。
-     * DEF-045：今日已结束时段（endTime<=now）不返回，与创建侧过去时段校验同口径。
+     * DEF-045：今日已结束切片（end<=now）不返回，与创建侧过去时段校验同口径。
      */
     public List<AvailableSlotVO> availableSlots(Long housingId, LocalDate startDate, LocalDate endDate) {
         requireHousing(housingId);
@@ -203,38 +211,53 @@ public class HousingService {
         List<ViewingAppointment> occupying = appointmentMapper.selectList(
                 new LambdaQueryWrapper<ViewingAppointment>()
                         .eq(ViewingAppointment::getHousingId, housingId)
-                        .in(ViewingAppointment::getStatus, "TO_CONFIRM", "RESERVED")
+                        .in(ViewingAppointment::getStatus, ACTIVE_APPOINTMENT_STATUS)
                         .ge(ViewingAppointment::getAppointmentDate, startDate)
                         .le(ViewingAppointment::getAppointmentDate, end));
 
-        /* DEF-045：今日已结束的时段不再返回（end<=now 剔除而非标 FULL——
+        /* DEF-045：今日已结束的切片不再返回（end<=now 剔除而非标 FULL——
            用户预期是"不能预约已过去的时段"即不展示）；明日及以后不受影响 */
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
 
         List<AvailableSlotVO> slots = new ArrayList<>();
-        Set<String> occupyingStatus = Set.of("TO_CONFIRM", "RESERVED");
         for (LocalDate d = startDate; !d.isAfter(end); d = d.plusDays(1)) {
             final LocalDate date = d;
             int dayOfWeek = date.getDayOfWeek().getValue();
+            List<ViewingAppointment> dayOccupying = occupying.stream()
+                    /* 状态过滤与查询条件同口径（防御性复核，保持 BE-ISSUE-5 行为） */
+                    .filter(a -> ACTIVE_APPOINTMENT_STATUS.contains(a.getStatus()))
+                    .filter(a -> a.getAppointmentDate().equals(date)).toList();
             for (HousingTimeslot template : templates) {
                 if (template.getDayOfWeek() != dayOfWeek) {
                     continue;
                 }
-                if (date.isEqual(today) && !template.getEndTime().isAfter(now)) {
-                    continue;
+                /* DEF-061 切片：自模板起点起按 60 分钟步长产出切片，切片终点超出模板
+                   终点即尾段不足 60 分钟，丢弃不产出 */
+                for (LocalTime s = template.getStartTime();
+                        !s.plusMinutes(VIEWING_SLOT_MINUTES).isAfter(template.getEndTime());
+                        s = s.plusMinutes(VIEWING_SLOT_MINUTES)) {
+                    LocalTime slotStart = s;
+                    LocalTime slotEnd = s.plusMinutes(VIEWING_SLOT_MINUTES);
+                    if (date.isEqual(today) && !slotEnd.isAfter(now)) {
+                        continue;
+                    }
+                    /* 重叠计数：预约区间与切片区间有交集（半开区间 start<slotEnd && end>slotStart）
+                       即计入该切片占用，跨片预约使其覆盖的每片均计 1 */
+                    int current = (int) dayOccupying.stream()
+                            .filter(a -> a.getStartTime().isBefore(slotEnd)
+                                    && a.getEndTime().isAfter(slotStart))
+                            .count();
+                    slots.add(new AvailableSlotVO(
+                            SlotGrids.gridId(template.getId(), slotStart), date,
+                            slotStart, slotEnd, 1, current,
+                            current >= 1 ? "FULL" : "AVAILABLE"));
                 }
-                int current = (int) occupying.stream()
-                        .filter(a -> occupyingStatus.contains(a.getStatus()))
-                        .filter(a -> a.getAppointmentDate().equals(date)
-                                && a.getStartTime().equals(template.getStartTime())
-                                && a.getEndTime().equals(template.getEndTime()))
-                        .count();
-                slots.add(new AvailableSlotVO(template.getId(), date,
-                        template.getStartTime(), template.getEndTime(),
-                        1, current, current >= 1 ? "FULL" : "AVAILABLE"));
             }
         }
+        /* 同日按开始时间稳定排序（对齐 C7 availableSlots 口径） */
+        slots.sort(java.util.Comparator.comparing(AvailableSlotVO::getDate)
+                .thenComparing(AvailableSlotVO::getStartTime));
         return slots;
     }
 

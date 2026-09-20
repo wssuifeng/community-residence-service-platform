@@ -55,6 +55,8 @@ public enum ErrorCode {
     RESERVATION_PAST_SLOT(5403, "不能预约已过去的日期或时段"),
     RESERVATION_DATE_LIMIT(5404, "最多可提前 7 天预约"),
     RESERVATION_DURATION_LIMIT(5405, "单次预约超过连续时长上限"),
+    /* DEF-062：同账号同日跨资源/跨域时间重叠（预约人日程冲突，「影分身」拦截） */
+    RESERVATION_SCHEDULE_CONFLICT(5406, "该时间段已有本人的其他预约安排"),
 
     /* ---- 评价管理 5501~5599 ---- */
     EVALUATION_NOT_ALLOWED(5501, "工单未完成，不可评价"),
@@ -67,7 +69,9 @@ public enum ErrorCode {
     /* ---- 看房预约 5801~5899 ---- */
     PAST_SLOT(5804, "不能预约已过去的时段"),
     VIEWING_ASSIGNEE_INVALID(5805, "目标账号不可分配"),
-    VIEWING_DURATION_LIMIT(5806, "单次看房预约超过连续时长上限");
+    VIEWING_DURATION_LIMIT(5806, "单次看房预约超过连续时长上限"),
+    /* DEF-062：同账号同日跨房源/跨域时间重叠（预约人日程冲突，「影分身」拦截） */
+    VIEWING_SCHEDULE_CONFLICT(5807, "该时间段已有本人的其他预约安排");
 
     private final int code;
     private final String message;
