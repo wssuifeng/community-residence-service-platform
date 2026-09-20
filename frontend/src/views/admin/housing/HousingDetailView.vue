@@ -273,7 +273,8 @@ async function loadRelatedViewings(): Promise<void> {
 }
 
 function goBack(): void {
-  router.push('/admin/housings')
+  /* 默认 Tab 为看房预约（R62 后房源挂牌归社区结构），返回落「全局房源」Tab */
+  router.push({ path: '/admin/housings', query: { tab: 'list' } })
 }
 
 function goAllViewings(): void {

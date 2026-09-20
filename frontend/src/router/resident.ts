@@ -24,6 +24,8 @@ const residentRoutes: RouteRecordRaw[] = [
       { path: 'notices', name: 'ResidentNotices', component: () => import('@/views/resident/NoticeListView.vue'), meta: { title: '公告通知' } },
       { path: 'notices/:id', name: 'ResidentNoticeDetail', component: () => import('@/views/resident/NoticeDetailView.vue'), meta: { title: '公告详情' } },
       { path: 'notifications', name: 'ResidentNotifications', component: () => import('@/views/resident/NotificationListView.vue'), meta: { title: '消息中心' } },
+      /* R63 多方会话：看房群聊/居民-社区管理员直通的独立会话页 */
+      { path: 'conversations/:id', name: 'ResidentConversationDetail', component: () => import('@/views/resident/ConversationDetailView.vue'), meta: { title: '沟通会话' } },
       { path: 'housings', name: 'ResidentHousings', component: () => import('@/views/resident/HousingListView.vue'), meta: { title: '房源浏览' } },
       { path: 'housings/:id', name: 'ResidentHousingDetail', component: () => import('@/views/resident/HousingDetailView.vue'), meta: { title: '房源详情' } },
       { path: 'housings/:id/reserve', name: 'ResidentHousingReserve', component: () => import('@/views/resident/HousingReservationView.vue'), meta: { title: '预约看房' } },

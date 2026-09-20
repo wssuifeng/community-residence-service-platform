@@ -8,14 +8,17 @@ import ViewingAppointmentListView from './ViewingAppointmentListView.vue'
 import { listHousings, listViewingAppointments } from '@/api/housing'
 
 /**
- * 房源管理容器：Tab 深链 ?tab=list|viewings（任务 1 契约，取值不得变更）。
+ * 房源与看房容器：Tab 深链 ?tab=viewings|list（任务 1 契约，取值不得变更）。
+ * R62 房源挂牌管理并入社区结构后：本页不再以独立房源模块形态呈现——
+ * 默认 Tab 为看房预约处置；「全局房源」Tab 降级为跨社区总览视图（顶部说明 +
+ * 社区筛选），挂牌维护入口指向 社区结构 → 房屋与房源。
  * 对照设计稿 09-房源管理：页头 + 4 统计卡 + 白卡 Tab 条（看房预约 Tab 带待确认角标）。
  * 稿例「在租/待租/已租/本月看房」为 AI 即兴，统计卡按真实状态枚举
  * （可租/已预订/已出租）取计数，第四卡按简报取看房预约累计（接口无时间参数不造假）；
  * 已下架不占卡位，可经列表状态筛选查看。子 Tab 动作后经 changed 事件刷新统计与角标。
  */
 
-const TABS = ['list', 'viewings'] as const
+const TABS = ['viewings', 'list'] as const
 type TabName = (typeof TABS)[number]
 
 const route = useRoute()
@@ -34,6 +37,11 @@ function switchTab(tab: TabName): void {
   if (tab === activeTab.value) return
   router.replace({ query: { ...route.query, tab } })
   loadStats()
+}
+
+/** R62：一体化挂牌管理入口（社区结构 → 房屋与房源 Tab） */
+function goCommunityHousing(): void {
+  void router.push({ name: 'AdminCommunity', query: { tab: 'housing' } })
 }
 
 /* ---------- 统计卡（真实口径）：状态计数走房源列表 size=1 查询 total；
@@ -86,8 +94,8 @@ onMounted(loadStats)
 <template>
   <div class="admin-page">
     <AdminPageHeader
-      title="房源管理"
-      subtitle="维护对外展示的房源信息，管理上下架与看房预约"
+      title="房源与看房"
+      subtitle="看房预约处置 · 全局房源总览（房源挂牌管理已并入社区结构）"
     />
 
     <!-- 统计卡：真实口径（见 script 决策注释） -->
@@ -102,18 +110,18 @@ onMounted(loadStats)
       />
     </div>
 
+    <!-- 并入说明（R62）：仅「全局房源」Tab 展示，指向社区结构内的一体化挂牌管理 -->
+    <div v-if="activeTab === 'list'" class="merged-notice">
+      <span class="merged-notice-text">
+        房源挂牌管理已并入「社区结构 → 房屋与房源」：按 社区→楼栋→单元→房屋 树形完成挂牌/编辑/上下架与批量挂牌。本页为跨社区「全局房源」总览视图（支持社区筛选），仍可进行详情、时段与删除操作。
+      </span>
+      <el-button type="primary" link class="merged-notice-link" @click="goCommunityHousing">
+        前往社区结构 →
+      </el-button>
+    </div>
+
     <!-- 白卡 Tab 条：观感与居民管理/运营看板一致（激活蓝字 + 底部 2px 下划线） -->
-    <nav class="tab-bar" role="tablist" aria-label="房源管理视图切换">
-      <button
-        type="button"
-        role="tab"
-        class="tab-item"
-        :class="{ active: activeTab === 'list' }"
-        :aria-selected="activeTab === 'list'"
-        @click="switchTab('list')"
-      >
-        房源列表
-      </button>
+    <nav class="tab-bar" role="tablist" aria-label="房源与看房视图切换">
       <button
         type="button"
         role="tab"
@@ -125,14 +133,47 @@ onMounted(loadStats)
         看房预约
         <span v-if="toConfirmTotal > 0" class="tab-badge">{{ toConfirmTotal }}</span>
       </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab-item"
+        :class="{ active: activeTab === 'list' }"
+        :aria-selected="activeTab === 'list'"
+        @click="switchTab('list')"
+      >
+        全局房源
+      </button>
     </nav>
 
-    <HousingListView v-if="activeTab === 'list'" @changed="loadStats" />
-    <ViewingAppointmentListView v-else @changed="loadStats" />
+    <ViewingAppointmentListView v-if="activeTab === 'viewings'" @changed="loadStats" />
+    <HousingListView v-else @changed="loadStats" />
   </div>
 </template>
 
 <style scoped>
+/* 并入说明条（R62）：浅品牌蓝底 + 右侧入口链接 */
+.merged-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-primary-bg);
+  border-radius: var(--radius-lg);
+}
+
+.merged-notice-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.merged-notice-link {
+  flex-shrink: 0;
+}
+
 .stat-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
