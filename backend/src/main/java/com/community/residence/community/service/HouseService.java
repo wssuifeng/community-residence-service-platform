@@ -196,12 +196,26 @@ public class HouseService {
             com.community.residence.community.dto.BatchCreateHousesDTO dto) {
         Unit unit = requireUnit(dto.getUnitId());
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());
+        return insertHouses(unit, dto.getHouses(), null);
+    }
+
+    /**
+     * 单元内房屋逐条写入（单单元批量创建与结构链批量生成共用，去重与失败语义同一套）：
+     * 逐行 Validator 校验 → 批内房号去重（seenNumbers，保留首次出现者）→ 落库，
+     * 单行失败不中断、逐行反馈原因（部分成功语义）。
+     *
+     * preloadedNumbers 为调用方批量预载的该单元库内房号：非空时以内存集合判定重名
+     * （大批量写入不产生逐行 select 的 N+1），null 时走逐行 requireHouseNumberAvailable
+     * 库内唯一校验（原单单元批量创建口径不变）。
+     */
+    public com.community.residence.community.vo.BatchCreateResultVO insertHouses(
+            Unit unit, List<CreateHouseDTO> items, java.util.Set<String> preloadedNumbers) {
         List<com.community.residence.community.vo.BatchCreateResultVO.Row> rows = new java.util.ArrayList<>();
         /* 本批次已出现的房号（同单元内请求自身去重，保留首次出现者） */
         java.util.Set<String> seenNumbers = new java.util.HashSet<>();
         int success = 0;
-        for (int i = 0; i < dto.getHouses().size(); i++) {
-            CreateHouseDTO item = dto.getHouses().get(i);
+        for (int i = 0; i < items.size(); i++) {
+            CreateHouseDTO item = items.get(i);
             String violation = RowValidator.validate(item);
             if (violation != null) {
                 rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(
@@ -215,7 +229,15 @@ public class HouseService {
                 continue;
             }
             try {
-                requireHouseNumberAvailable(unit.getId(), houseNumber, null);
+                if (preloadedNumbers != null) {
+                    if (houseNumber != null && preloadedNumbers.contains(houseNumber)) {
+                        rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(
+                                i + 1, "该单元下房号已存在：" + houseNumber));
+                        continue;
+                    }
+                } else {
+                    requireHouseNumberAvailable(unit.getId(), houseNumber, null);
+                }
                 House house = new House();
                 house.setUnitId(unit.getId());
                 house.setCommunityId(unit.getCommunityId());
@@ -232,7 +254,7 @@ public class HouseService {
             }
         }
         log.info("房屋批量创建：unitId={}, total={}, success={}, operator={}",
-                unit.getId(), dto.getHouses().size(), success, SecurityUtils.getUserId());
-        return com.community.residence.community.vo.BatchCreateResultVO.of(dto.getHouses().size(), success, rows);
+                unit.getId(), items.size(), success, SecurityUtils.getUserId());
+        return com.community.residence.community.vo.BatchCreateResultVO.of(items.size(), success, rows);
     }
 }

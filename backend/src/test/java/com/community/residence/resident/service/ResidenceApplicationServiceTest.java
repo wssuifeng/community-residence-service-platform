@@ -3,13 +3,19 @@ package com.community.residence.resident.service;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.HouseStatusConstant;
 import com.community.residence.common.exception.BusinessException;
+import com.community.residence.community.entity.Community;
 import com.community.residence.community.entity.House;
 import com.community.residence.community.mapper.HouseMapper;
+import com.community.residence.housing.entity.Housing;
+import com.community.residence.housing.mapper.HousingMapper;
+import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
+import com.community.residence.lease.service.LeaseChangeLogService;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.dto.ApproveApplicationDTO;
 import com.community.residence.resident.dto.CreateApplicationDTO;
 import com.community.residence.resident.entity.ResidenceApplication;
+import com.community.residence.resident.entity.ResidenceRelation;
 import com.community.residence.resident.mapper.ResidenceApplicationMapper;
 import com.community.residence.resident.mapper.ResidenceRelationMapper;
 import com.community.residence.resident.mapper.ResidentMapper;
@@ -20,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -32,6 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** 入住申请业务逻辑测试：审核状态机、重复在审拒绝、审批联动 */
@@ -53,6 +62,10 @@ class ResidenceApplicationServiceTest {
     private BuildingMapper buildingMapper;
     @Mock
     private LeaseRecordMapper leaseRecordMapper;
+    @Mock
+    private HousingMapper housingMapper;
+    @Mock
+    private LeaseChangeLogService changeLogService;
     @Mock
     private CommunityService communityService;
     @Mock
@@ -80,6 +93,86 @@ class ResidenceApplicationServiceTest {
         pendingApplication.setHouseId(1L);
         pendingApplication.setRelationType("TENANT");
         pendingApplication.setStatus("PENDING");
+    }
+
+    @Test
+    @DisplayName("提交申请：社区开启自动通过时提交即审批通过并生成租约")
+    void create_autoApproveCommunity_createsLeaseImmediately() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+            when(applicationMapper.selectCount(any())).thenReturn(0L);
+            when(communityService.requireCommunity(1L)).thenReturn(autoApproveCommunity());
+            Housing listing = new Housing();
+            listing.setId(9L);
+            listing.setHouseId(1L);
+            listing.setMonthlyRent(new BigDecimal("2500.00"));
+            listing.setDeposit(new BigDecimal("5000.00"));
+            when(housingMapper.selectOne(any())).thenReturn(listing);
+
+            CreateApplicationDTO dto = new CreateApplicationDTO();
+            dto.setHouseId(1L);
+            dto.setRelationType("TENANT");
+
+            applicationService.create(dto);
+
+            /* 租约按社区默认租期（3 个月）生成，租金/押金取房源挂牌值 */
+            ArgumentCaptor<LeaseRecord> leaseCaptor = ArgumentCaptor.forClass(LeaseRecord.class);
+            verify(leaseRecordMapper).insert(leaseCaptor.capture());
+            LeaseRecord lease = leaseCaptor.getValue();
+            assertThat(lease.getStatus()).isEqualTo("ACTIVE");
+            assertThat(lease.getMonthlyRent()).isEqualByComparingTo("2500.00");
+            assertThat(lease.getDeposit()).isEqualByComparingTo("5000.00");
+            assertThat(lease.getStartDate()).isEqualTo(LocalDate.now());
+            assertThat(lease.getEndDate()).isEqualTo(LocalDate.now().plusMonths(3));
+
+            /* 居住关系建立、房屋翻转为已入住、申请落 APPROVED */
+            verify(relationMapper).insert(any(ResidenceRelation.class));
+            assertThat(vacantHouse.getStatus()).isEqualTo(HouseStatusConstant.OCCUPIED);
+            ArgumentCaptor<ResidenceApplication> appCaptor = ArgumentCaptor.forClass(ResidenceApplication.class);
+            verify(applicationMapper).updateById(appCaptor.capture());
+            assertThat(appCaptor.getValue().getStatus()).isEqualTo("APPROVED");
+            assertThat(appCaptor.getValue().getReviewerId()).isNull();
+        }
+    }
+
+    @Test
+    @DisplayName("提交申请：社区未开启自动通过时保持待审核（不生成租约）")
+    void create_manualApproveCommunity_staysPending() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+            when(applicationMapper.selectCount(any())).thenReturn(0L);
+            when(communityService.requireCommunity(1L)).thenReturn(manualCommunity());
+
+            CreateApplicationDTO dto = new CreateApplicationDTO();
+            dto.setHouseId(1L);
+            dto.setRelationType("TENANT");
+
+            applicationService.create(dto);
+
+            verify(leaseRecordMapper, never()).insert(any(LeaseRecord.class));
+            verify(relationMapper, never()).insert(any(ResidenceRelation.class));
+            assertThat(vacantHouse.getStatus()).isEqualTo(HouseStatusConstant.VACANT);
+        }
+    }
+
+    private Community autoApproveCommunity() {
+        Community community = new Community();
+        community.setId(1L);
+        community.setAutoApproveResidence(1);
+        community.setDefaultLeaseMonths(3);
+        return community;
+    }
+
+    private Community manualCommunity() {
+        Community community = new Community();
+        community.setId(1L);
+        community.setAutoApproveResidence(0);
+        community.setDefaultLeaseMonths(12);
+        return community;
     }
 
     @Test

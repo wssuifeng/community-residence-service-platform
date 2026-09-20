@@ -95,6 +95,14 @@ public class LeaseController {
         return ApiResponse.success();
     }
 
+    @Operation(summary = "租约变更历史", description = "字段级前后值留痕：登记/属性编辑/续租/状态流转/协议签约")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/{id}/changes")
+    public ApiResponse<java.util.List<com.community.residence.lease.vo.LeaseChangeVO>> changes(
+            @PathVariable Long id) {
+        return ApiResponse.success(leaseService.changes(id));
+    }
+
     @Operation(summary = "即将到期租住列表", description = "按到期日期升序")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/expiring")

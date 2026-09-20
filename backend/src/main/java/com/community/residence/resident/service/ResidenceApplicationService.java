@@ -12,14 +12,18 @@ import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.community.entity.Building;
+import com.community.residence.community.entity.Community;
 import com.community.residence.community.entity.House;
 import com.community.residence.community.entity.Unit;
 import com.community.residence.community.mapper.BuildingMapper;
 import com.community.residence.community.mapper.HouseMapper;
 import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.community.service.CommunityService;
+import com.community.residence.housing.entity.Housing;
+import com.community.residence.housing.mapper.HousingMapper;
 import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
+import com.community.residence.lease.service.LeaseChangeLogService;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.dto.ApproveApplicationDTO;
 import com.community.residence.resident.dto.CreateApplicationDTO;
@@ -37,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,6 +55,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ResidenceApplicationService {
 
+    /** 自动通过路径的兜底默认租期（月）：社区未配置时使用 */
+    private static final int DEFAULT_LEASE_MONTHS = 12;
+
     private final ResidenceApplicationMapper applicationMapper;
     private final ResidenceRelationMapper relationMapper;
     private final ResidentMapper residentMapper;
@@ -57,7 +65,9 @@ public class ResidenceApplicationService {
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final LeaseRecordMapper leaseRecordMapper;
+    private final HousingMapper housingMapper;
     private final CommunityService communityService;
+    private final LeaseChangeLogService changeLogService;
     private final NotificationService notificationService;
 
     /* 提交申请：房屋须空置；同一房屋同一居民不可重复在审 */
@@ -89,7 +99,42 @@ public class ResidenceApplicationService {
         application.setStatus("PENDING");
         application.setRemark(dto.getRemark());
         applicationMapper.insert(application);
+
+        /* 社区开启「入住申请自动通过」（R62 补，社区级开关）：提交即完成审批，
+           免去人工审核；租期按社区默认月数推导，租金与押金取房源挂牌值（未挂牌则待管理方补录） */
+        Community community = communityService.requireCommunity(house.getCommunityId());
+        if (community.getAutoApproveResidence() != null && community.getAutoApproveResidence() == 1) {
+            autoApprove(application, house, community);
+        }
         return toVO(application);
+    }
+
+    /* 自动通过：与人工审批走同一内核，仅租期与租金来源不同、审核人留空（无人工审核者） */
+    private void autoApprove(ResidenceApplication application, House house, Community community) {
+        int months = community.getDefaultLeaseMonths() == null || community.getDefaultLeaseMonths() < 1
+                ? DEFAULT_LEASE_MONTHS : community.getDefaultLeaseMonths();
+        LocalDate startDate = LocalDate.now();
+        BigDecimal monthlyRent = BigDecimal.ZERO;
+        BigDecimal deposit = null;
+        Housing listing = housingMapper.selectOne(new LambdaQueryWrapper<Housing>()
+                .eq(Housing::getHouseId, house.getId())
+                .orderByDesc(Housing::getId)
+                .last("LIMIT 1"));
+        if (listing != null) {
+            if (listing.getMonthlyRent() != null) {
+                monthlyRent = listing.getMonthlyRent();
+            }
+            deposit = listing.getDeposit();
+        }
+        applyApproval(application, house, startDate, startDate.plusMonths(months), monthlyRent, deposit,
+                null, "社区已开启入住申请自动通过，系统自动审批");
+        notificationService.create(application.getResidentId(), application.getCommunityId(),
+                "入住申请已自动通过",
+                "房屋 " + house.getHouseNumber() + " 的入住申请已由社区自动审批通过"
+                        + ("TENANT".equals(application.getRelationType()) ? "，租约已生成" : ""),
+                "RESIDENCE", "RESIDENCE_APPLICATION", application.getId());
+        log.info("入住申请自动通过：applicationId={}, houseId={}, leaseMonths={}, rent={}",
+                application.getId(), house.getId(), months, monthlyRent);
     }
 
     /** 申请详情：居民限本人，ADMIN 限绑定社区 */
@@ -128,13 +173,29 @@ public class ResidenceApplicationService {
             throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已被入住，无法通过申请");
         }
 
+        applyApproval(application, house, dto.getLeaseStartDate(), dto.getLeaseEndDate(),
+                dto.getMonthlyRent(), dto.getDeposit(), SecurityUtils.getUserId(), dto.getRemark());
+        notificationService.create(application.getResidentId(), application.getCommunityId(),
+                "入住申请已通过", "您的入住申请（房屋 " + house.getHouseNumber() + "）已审批通过",
+                "RESIDENCE", "RESIDENCE_APPLICATION", id);
+        log.info("入住申请已通过：applicationId={}, operator={}", id, SecurityUtils.getUserId());
+        return toVO(application);
+    }
+
+    /**
+     * 审批通过内核：建立居住关系 + 租住记录（仅 TENANT）+ 房屋状态翻转 + 申请落终态。
+     * 人工审批与社区自动审批共用，差异仅在租期/租金来源与审核人是否留痕（自动审批无人工审核者）。
+     */
+    private void applyApproval(ResidenceApplication application, House house, LocalDate startDate,
+                               LocalDate endDate, BigDecimal monthlyRent, BigDecimal deposit,
+                               Long reviewerId, String reviewRemark) {
         /* 居住关系：TENANT 建租住记录；OWNER/FAMILY 建关系即可（租约由 C3 独立登记） */
         ResidenceRelation relation = new ResidenceRelation();
         relation.setResidentId(application.getResidentId());
         relation.setCommunityId(application.getCommunityId());
         relation.setHouseId(application.getHouseId());
         relation.setRelationType(application.getRelationType());
-        relation.setMoveInDate(dto.getLeaseStartDate());
+        relation.setMoveInDate(startDate);
         relation.setIsPrimary(1);
         relationMapper.insert(relation);
 
@@ -143,29 +204,27 @@ public class ResidenceApplicationService {
             lease.setTenantId(application.getResidentId());
             lease.setCommunityId(application.getCommunityId());
             lease.setHouseId(application.getHouseId());
-            lease.setStartDate(dto.getLeaseStartDate());
-            lease.setEndDate(dto.getLeaseEndDate());
-            lease.setMonthlyRent(dto.getMonthlyRent());
-            lease.setDeposit(dto.getDeposit());
+            lease.setStartDate(startDate);
+            lease.setEndDate(endDate);
+            lease.setMonthlyRent(monthlyRent);
+            lease.setDeposit(deposit);
             lease.setStatus("ACTIVE");
+            lease.setAgreementStatus("NONE");
             lease.setRemark("入住申请审批通过自动建立");
             leaseRecordMapper.insert(lease);
+            changeLogService.logCreate(lease, "入住申请审批通过自动建立");
         }
 
         house.setStatus(HouseStatusConstant.OCCUPIED);
         houseMapper.updateById(house);
 
         application.setStatus("APPROVED");
-        application.setReviewerId(SecurityUtils.getUserId());
+        application.setReviewerId(reviewerId);
         application.setReviewTime(LocalDateTime.now());
-        application.setReviewRemark(dto.getRemark());
+        application.setReviewRemark(reviewRemark);
         applicationMapper.updateById(application);
-        notificationService.create(application.getResidentId(), application.getCommunityId(),
-                "入住申请已通过", "您的入住申请（房屋 " + house.getHouseNumber() + "）已审批通过",
-                "RESIDENCE", "RESIDENCE_APPLICATION", id);
-        log.info("入住申请已通过：applicationId={}, relationId={}, operator={}",
-                id, relation.getId(), SecurityUtils.getUserId());
-        return toVO(application);
+        log.info("入住申请审批内核完成：applicationId={}, relationId={}, reviewer={}",
+                application.getId(), relation.getId(), reviewerId);
     }
 
     /* 审批拒绝：终态不可变更 */

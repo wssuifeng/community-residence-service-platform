@@ -6,18 +6,32 @@ import type { FormInstance, FormRules } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import { createLease, getLeaseList, renewLease, updateLease, updateLeaseStatus } from '@/api/lease'
 import { getCommunityList } from '@/api/community'
+import { uploadFile } from '@/api/upload'
 import type { ILeaseRecord, LeaseStatus } from '@/types/modules/lease'
-import { formatDate, formatDateTime } from '@/utils/date'
+import { leaseStatusLabels } from '@/types/modules/lease'
+import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
+import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
+import { formatDate } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import SearchBar from '@/components/common/SearchBar.vue'
+import FilterPanel from '@/components/common/FilterPanel.vue'
 
 /**
- * 租住管理（设计稿 05）：页头 + 到期提醒条 + 白卡 4 Tab + 单表格。
- * Tab 为客户端分组、单一数据源（全量拉取一次）：在租 = ACTIVE 且无到期标注；
- * 即将到期/已到期 = ACTIVE 且 expiryFlag=EXPIRING/EXPIRED（后端日期派生标注，
- * 非状态值——分组取后端标注，绝不把标注当 status 传参）；历史 = 待审核/已搬出/已归档/已驳回。
+ * 租住管理（管理端主入口）：页头 + 到期提醒条 + 多条件筛选 + 白卡 4 Tab + 单表格。
+ *
+ * 分组口径（Tab 为客户端分组、单一数据源全量拉取一次）：在租 = ACTIVE 且无到期标注；
+ * 即将到期/已到期 = ACTIVE 且 expiryFlag=EXPIRING/EXPIRED（后端日期派生标注，非状态值——
+ * 分组取后端标注，绝不把标注当 status 传参）；历史 = 待审核/已搬出/已归档/已驳回。
  * 分组阈值与后端到期提醒任务口径一致（sys_config lease.reminder_days，默认 30 天）。
+ *
+ * 筛选区（状态/社区/签约状态/到期区间/关键词）在 Tab 分组之上叠加，均为客户端过滤：
+ * 后端列表仅支持 status/residentId/houseId 三个查询条件，关键字与区间无服务端参数。
+ * 租约详情不在此页承载（页内 Dialog 信息密度过低），统一跳独立详情页 /admin/leases/:id。
  */
+
+/** 语义色档（StatusTag type 取值） */
+type TagType = 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled' | 'info'
 
 const TABS = ['active', 'expiring', 'expired', 'history'] as const
 type TabName = (typeof TABS)[number]
@@ -47,6 +61,7 @@ const EXPIRING_WINDOW_DAYS = 30
 const leases = ref<ILeaseRecord[]>([])
 const loading = ref(false)
 const communityNames = ref<Record<number, string>>({})
+const communityOptions = ref<{ id: number; name: string }[]>([])
 
 /* 后端分页上限 100：循环翻页取全量，供四 Tab 分组与角标计数（量级为社区级，循环有 50 页保险上限）。
    序号令牌并发防护：动作后未 await 的 reload 与前一次拉取重叠时，仅最新一次的结果落地，
@@ -74,20 +89,21 @@ async function load(): Promise<void> {
   }
 }
 
-/* 社区名映射（VO 只带 communityId）：房屋列按「社区 + 楼栋单元房号」两行真实组合 */
-async function loadCommunityNames(): Promise<void> {
+/* 社区名映射 + 筛选下拉选项（VO 只带 communityId） */
+async function loadCommunities(): Promise<void> {
   try {
     const result = await getCommunityList({ page: 1, size: 100 })
     const map: Record<number, string> = {}
     for (const item of result.records) map[item.id] = item.name
     communityNames.value = map
+    communityOptions.value = result.records.map((item) => ({ id: item.id, name: item.name }))
   } catch {
     /* 映射失败不阻塞列表，社区名显示占位符 */
   }
 }
 
 function communityName(row: ILeaseRecord): string {
-  return communityNames.value[row.communityId] ?? '—'
+  return row.communityName ?? communityNames.value[row.communityId] ?? '—'
 }
 
 /* 剩余天数：按本地零点对齐计算（与后端 expiryFlag 判定口径一致） */
@@ -129,49 +145,104 @@ function handleBannerView(): void {
   switchTab(bannerTarget.value)
 }
 
-/* ---------- 当前 Tab 行 + 客户端分页 ---------- */
+/* ---------- 筛选区（在 Tab 分组之上叠加） ---------- */
 
-const page = ref(1)
-const size = ref(10)
-const historyStatus = ref<LeaseStatus | ''>('')
+const statusOptions = (Object.keys(leaseStatusLabels) as LeaseStatus[]).map((value) => ({
+  value,
+  label: leaseStatusLabels[value]
+}))
+const agreementOptions = (
+  Object.keys(leaseAgreementSignStatusLabels) as LeaseAgreementSignStatus[]
+).map((value) => ({ value, label: leaseAgreementSignStatusLabels[value] }))
+
+const status = ref<LeaseStatus | ''>('')
+/* 社区筛选：el-select 清空回填 undefined（非 null），故用 undefined 表示未筛选 */
+const communityId = ref<number | undefined>(undefined)
+const agreementFilter = ref<LeaseAgreementSignStatus | ''>('')
+/* 到期区间：按租期结束日期过滤（后端无该查询参数，客户端比对 YYYY-MM-DD 字符串） */
+const expiryRange = ref<[string, string] | null>(null)
+const keyword = ref('')
+
+const hasFilter = computed(
+  () =>
+    status.value !== '' ||
+    communityId.value != null ||
+    agreementFilter.value !== '' ||
+    expiryRange.value !== null ||
+    keyword.value.trim() !== ''
+)
+
+function resetFilters(): void {
+  status.value = ''
+  communityId.value = undefined
+  agreementFilter.value = ''
+  expiryRange.value = null
+  keyword.value = ''
+}
 
 const tabRows = computed<ILeaseRecord[]>(() => {
-  let rows: ILeaseRecord[]
   switch (activeTab.value) {
     case 'expiring':
-      rows = expiringLeases.value
-      break
+      return expiringLeases.value
     case 'expired':
-      rows = expiredLeases.value
-      break
+      return expiredLeases.value
     case 'history':
-      rows = historyStatus.value
-        ? historyLeases.value.filter((row) => row.status === historyStatus.value)
-        : historyLeases.value
-      break
+      return historyLeases.value
     default:
-      rows = activeLeases.value
+      return activeLeases.value
+  }
+})
+
+const filteredRows = computed<ILeaseRecord[]>(() => {
+  let rows = tabRows.value
+  if (status.value) rows = rows.filter((row) => row.status === status.value)
+  if (communityId.value != null) rows = rows.filter((row) => row.communityId === communityId.value)
+  if (agreementFilter.value) {
+    rows = rows.filter((row) => (row.agreementStatus ?? 'NONE') === agreementFilter.value)
+  }
+  const range = expiryRange.value
+  if (range) {
+    const [from, to] = range
+    rows = rows.filter((row) => {
+      const end = formatDate(row.endDate)
+      return end >= from && end <= to
+    })
+  }
+  const kw = keyword.value.trim().toLowerCase()
+  if (kw) {
+    rows = rows.filter(
+      (row) =>
+        (row.tenantName ?? '').toLowerCase().includes(kw) ||
+        (row.houseLocation ?? '').toLowerCase().includes(kw) ||
+        leaseNo(row.id).toLowerCase().includes(kw)
+    )
   }
   return rows
 })
 
+/* ---------- 客户端分页 ---------- */
+
+const page = ref(1)
+const size = ref(10)
+
 const pagedRows = computed(() =>
-  tabRows.value.slice((page.value - 1) * size.value, page.value * size.value)
+  filteredRows.value.slice((page.value - 1) * size.value, page.value * size.value)
 )
 
-watch([activeTab, historyStatus], () => {
+/* 仅筛选条件或 Tab 变化时回到第一页（数据重载不重置页码，避免动作后跳页） */
+watch([activeTab, status, communityId, agreementFilter, expiryRange, keyword], () => {
   page.value = 1
 })
 
-const emptyText = computed(
-  () =>
-    ({
-      active: '暂无在租租约',
-      expiring: '暂无即将到期租约',
-      expired: '暂无已到期租约',
-      history: '暂无历史租约'
-    })[activeTab.value]
-)
+const emptyText = computed(() => {
+  if (hasFilter.value) return '无符合筛选条件的租约'
+  return {
+    active: '暂无在租租约',
+    expiring: '暂无即将到期租约',
+    expired: '暂无已到期租约',
+    history: '暂无历史租约'
+  }[activeTab.value]
+})
 
 /* ---------- 展示辅助 ---------- */
 
@@ -180,23 +251,18 @@ function leaseNo(id: number): string {
   return `ZL${String(id).padStart(4, '0')}`
 }
 
-function rentText(value?: number): string {
+function moneyText(value?: number | null): string {
   return value == null ? '—' : `¥ ${value.toLocaleString('zh-CN')}`
 }
 
-interface TagView {
-  label: string
-  type: 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled' | 'info'
-}
-
 /** 状态 → 标签语义色：ACTIVE 细分到期标注（即将到期黄 / 已到期红 / 在租绿），其余按状态机 */
-function statusTagView(row: ILeaseRecord): TagView {
+function statusTagView(row: ILeaseRecord): { label: string; type: TagType } {
   if (row.status === 'ACTIVE') {
     if (row.expiryFlag === 'EXPIRING') return { label: '即将到期', type: 'pending' }
     if (row.expiryFlag === 'EXPIRED') return { label: '已到期', type: 'rejected' }
     return { label: '在租', type: 'completed' }
   }
-  const map: Record<Exclude<LeaseStatus, 'ACTIVE'>, TagView> = {
+  const map: Record<Exclude<LeaseStatus, 'ACTIVE'>, { label: string; type: TagType }> = {
     PENDING: { label: '待审核', type: 'pending' },
     MOVED_OUT: { label: '已搬出', type: 'canceled' },
     ARCHIVED: { label: '已归档', type: 'canceled' },
@@ -205,42 +271,57 @@ function statusTagView(row: ILeaseRecord): TagView {
   return map[row.status]
 }
 
-function expiryFlagText(row: ILeaseRecord): string {
-  if (row.expiryFlag === 'EXPIRING') return `即将到期（${EXPIRING_WINDOW_DAYS} 天内）`
-  if (row.expiryFlag === 'EXPIRED') return '已到期'
-  return '—'
+/** 签约状态语义色：未发起灰、待签署黄、单方已确认蓝、已签署绿、已撤回灰 */
+const AGREEMENT_TAG_TYPE: Record<LeaseAgreementSignStatus, TagType> = {
+  NONE: 'canceled',
+  PENDING: 'pending',
+  PARTIAL: 'processing',
+  SIGNED: 'completed',
+  CANCELLED: 'canceled'
 }
 
-/* 剩余天数进度条：绿 >90 天 / 橙 30~90 天 / 红 <30 天与已到期负数；刻度按一年封顶 */
-type BarTone = 'is-green' | 'is-orange' | 'is-red'
+function agreementStatusOf(row: ILeaseRecord): LeaseAgreementSignStatus {
+  return row.agreementStatus ?? 'NONE'
+}
 
-function barTone(row: ILeaseRecord): BarTone {
+/** 剩余天数色调：≤30 天（含已到期负数）醒目红，31~90 天橙，其余中性 */
+function remainTone(row: ILeaseRecord): 'is-danger' | 'is-warning' | 'is-normal' {
   const days = remainingDays(row.endDate)
-  if (days > 90) return 'is-green'
-  if (days >= 30) return 'is-orange'
-  return 'is-red'
+  if (days <= EXPIRING_WINDOW_DAYS) return 'is-danger'
+  if (days <= 90) return 'is-warning'
+  return 'is-normal'
 }
 
-function barWidth(row: ILeaseRecord): string {
+function remainText(row: ILeaseRecord): string {
   const days = remainingDays(row.endDate)
-  const pct = (Math.min(Math.max(days, 0), 365) / 365) * 100
-  return `${Math.max(pct, 3)}%`
+  if (days < 0) return `已超期 ${Math.abs(days)} 天`
+  if (days === 0) return '今天到期'
+  return `剩余 ${days} 天`
 }
 
-function barText(row: ILeaseRecord): string {
-  return `${remainingDays(row.endDate)}天`
+/** 行底色提示：已到期淡红、即将到期淡黄（仅 ACTIVE 行有到期标注） */
+function rowClassName({ row }: { row: ILeaseRecord }): string {
+  if (row.status !== 'ACTIVE') return ''
+  if (row.expiryFlag === 'EXPIRED') return 'row-expired'
+  if (row.expiryFlag === 'EXPIRING') return 'row-expiring'
+  return ''
 }
 
-/* ---------- 状态流转动作（全部二次确认，备注可选经 prompt 收集） ---------- */
+/* ---------- 跳转 ---------- */
 
-/* 归档仅对已搬出行提供入口（在租行走「退租→归档」常规路径；状态机保留 ACTIVE→ARCHIVED） */
+function goDetail(row: ILeaseRecord): void {
+  router.push(`/admin/leases/${row.id}`)
+}
+
+/* ---------- 状态流转动作（全部二次确认，保持既有状态机口径不放宽） ---------- */
+
 async function transitionStatus(
   row: ILeaseRecord,
-  status: LeaseStatus,
+  target: LeaseStatus,
   successText: string
 ): Promise<void> {
   try {
-    await updateLeaseStatus(row.id, { status })
+    await updateLeaseStatus(row.id, { status: target })
     ElMessage.success(successText)
     load()
   } catch (error) {
@@ -377,7 +458,7 @@ async function handleRenewSubmit(): Promise<void> {
       deposit: renewForm.deposit!,
       remark: renewForm.remark.trim() || undefined
     })
-    ElMessage.success('租约已续租')
+    ElMessage.success('租约已续租，续租记录已记入变更历史')
     renewVisible.value = false
     load()
   } catch (error) {
@@ -385,7 +466,7 @@ async function handleRenewSubmit(): Promise<void> {
   }
 }
 
-/* ---------- 新建/编辑对话框（后端 CreateLeaseDTO 契约；合同附件字段后端 VO 不回显，界面不提供） ---------- */
+/* ---------- 新建/编辑对话框 ---------- */
 
 interface LeaseForm {
   residentId: number | undefined
@@ -394,12 +475,15 @@ interface LeaseForm {
   endDate: string
   monthlyRent: number | undefined
   deposit: number | undefined
+  contractUrl: string
   remark: string
 }
 
 const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const formRef = ref<FormInstance>()
+const uploadingContract = ref(false)
+const contractInput = ref<HTMLInputElement | null>(null)
 const form = reactive<LeaseForm>({
   residentId: undefined,
   houseId: undefined,
@@ -407,15 +491,50 @@ const form = reactive<LeaseForm>({
   endDate: '',
   monthlyRent: undefined,
   deposit: undefined,
+  contractUrl: '',
   remark: ''
 })
+
+/** 编辑态可变更字段（与后端 UpdateLeaseDTO 允许变更的字段一致：登记主体不可改） */
+const isEditing = computed(() => editingId.value !== null)
 
 const formRules: FormRules = {
   residentId: [{ required: true, message: '请输入租客 ID', trigger: 'blur' }],
   houseId: [{ required: true, message: '请输入房屋 ID', trigger: 'blur' }],
   startDate: [{ required: true, message: '请选择租期开始日期', trigger: 'change' }],
-  endDate: [{ required: true, message: '请选择租期结束日期', trigger: 'change' }],
-  monthlyRent: [{ required: true, message: '请输入月租金', trigger: 'blur' }]
+  endDate: [
+    { required: true, message: '请选择租期结束日期', trigger: 'change' },
+    {
+      validator: (_rule, value: string, callback) => {
+        if (value && form.startDate && value <= form.startDate) {
+          callback(new Error('租期结束日期必须晚于开始日期'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change'
+    }
+  ],
+  monthlyRent: [
+    {
+      required: true,
+      validator: (_rule, value: number | undefined, callback) => {
+        if (value == null) callback(new Error('请输入月租金'))
+        else if (value < 0) callback(new Error('月租金不能为负数'))
+        else callback()
+      },
+      trigger: 'blur'
+    }
+  ],
+  deposit: [
+    {
+      validator: (_rule, value: number | undefined, callback) => {
+        if (value != null && value < 0) callback(new Error('押金不能为负数'))
+        else callback()
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 function openCreate(): void {
@@ -427,6 +546,7 @@ function openCreate(): void {
     endDate: '',
     monthlyRent: undefined,
     deposit: undefined,
+    contractUrl: '',
     remark: ''
   })
   dialogVisible.value = true
@@ -441,18 +561,38 @@ function openEdit(row: ILeaseRecord): void {
     endDate: formatDate(row.endDate),
     monthlyRent: row.monthlyRent,
     deposit: row.deposit ?? undefined,
+    contractUrl: row.contractUrl ?? '',
     remark: row.remark ?? ''
   })
   dialogVisible.value = true
 }
 
+/* 合同附件：走通用上传，回填可访问 URL（也可手工粘贴外部链接） */
+async function handleContractUpload(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  if (file.size > 10 * 1024 * 1024) {
+    ElMessage.warning('单个文件不能超过 10MB')
+    return
+  }
+  uploadingContract.value = true
+  try {
+    const result = await uploadFile(file, 'DOCUMENT')
+    form.contractUrl = result.fileUrl
+    ElMessage.success('合同附件已上传，保存后生效')
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '上传失败')
+  } finally {
+    uploadingContract.value = false
+  }
+}
+
 async function handleSubmit(): Promise<void> {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
-  if (form.endDate <= form.startDate) {
-    ElMessage.error('租期结束日期必须晚于开始日期')
-    return
-  }
+  /* 全字段提交：后端 UpdateLeaseDTO 要求 residentId/houseId 齐全，缺省视为清空 */
   const payload = {
     residentId: form.residentId!,
     houseId: form.houseId!,
@@ -460,6 +600,7 @@ async function handleSubmit(): Promise<void> {
     endDate: form.endDate,
     monthlyRent: form.monthlyRent!,
     deposit: form.deposit ?? undefined,
+    contractUrl: form.contractUrl.trim() || undefined,
     remark: form.remark.trim() || undefined
   }
   try {
@@ -468,7 +609,7 @@ async function handleSubmit(): Promise<void> {
       ElMessage.success('租约已创建，待审核')
     } else {
       await updateLease(editingId.value, payload)
-      ElMessage.success('租约已更新')
+      ElMessage.success('租约属性已更新，本次变更已记入变更历史')
     }
     dialogVisible.value = false
     load()
@@ -477,25 +618,16 @@ async function handleSubmit(): Promise<void> {
   }
 }
 
-/* ---------- 详情 ---------- */
-
-const detailVisible = ref(false)
-const detailRow = ref<ILeaseRecord | null>(null)
-
-function openDetail(row: ILeaseRecord): void {
-  detailRow.value = row
-  detailVisible.value = true
-}
-
 onMounted(() => {
   load()
-  loadCommunityNames()
+  loadCommunities()
 })
 </script>
 
 <template>
   <section class="admin-lease">
-    <AdminPageHeader title="租住管理" subtitle="租约全生命周期">
+    <AdminPageHeader title="租住管理" subtitle="租约属性 · 到期 · 续退租 · 协议签约">
+      <el-button @click="router.push('/admin/agreement-templates')">协议模板</el-button>
       <el-button
         v-permission="['ADMIN', 'SUPER_ADMIN']"
         type="primary"
@@ -534,6 +666,29 @@ onMounted(() => {
         </svg>
       </button>
     </div>
+
+    <!-- 筛选区：叠加在 Tab 分组之上的客户端过滤 -->
+    <FilterPanel resettable @reset="resetFilters">
+      <el-select v-model="status" placeholder="全部状态" clearable class="filter-select">
+        <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
+      <el-select v-model="communityId" placeholder="全部社区" clearable filterable class="filter-select">
+        <el-option v-for="item in communityOptions" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+      <el-select v-model="agreementFilter" placeholder="全部签约状态" clearable class="filter-select-wide">
+        <el-option v-for="item in agreementOptions" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
+      <el-date-picker
+        v-model="expiryRange"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="到期起始日"
+        end-placeholder="到期截止日"
+        value-format="YYYY-MM-DD"
+        class="filter-range"
+      />
+      <SearchBar v-model="keyword" placeholder="搜索租户/房号/租约号…" />
+    </FilterPanel>
 
     <!-- 白卡 Tab 条：客户端分组计数（与列表口径同源） -->
     <nav class="tab-bar" role="tablist" aria-label="租住管理视图切换">
@@ -582,22 +737,19 @@ onMounted(() => {
     </nav>
 
     <div class="table-panel">
-      <!-- 历史 Tab 状态筛选：客户端过滤同源分组（后端列表无关键字参数） -->
-      <div v-if="activeTab === 'history'" class="history-toolbar">
-        <span class="toolbar-label">状态</span>
-        <el-select v-model="historyStatus" clearable placeholder="全部状态" class="toolbar-select">
-          <el-option label="待审核" value="PENDING" />
-          <el-option label="已搬出" value="MOVED_OUT" />
-          <el-option label="已归档" value="ARCHIVED" />
-          <el-option label="已驳回" value="REJECTED" />
-        </el-select>
-      </div>
-
-      <el-table v-loading="loading" :data="pagedRows">
-        <el-table-column label="租约号" width="110">
-          <template #default="{ row }">{{ leaseNo(row.id) }}</template>
+      <!-- 列顺序按管理者关注度：租户/房屋 → 租期 → 金额 → 签约 → 状态 → 操作 -->
+      <el-table
+        v-loading="loading"
+        :data="pagedRows"
+        :row-class-name="rowClassName"
+        @row-click="goDetail"
+      >
+        <el-table-column label="租约号" width="100">
+          <template #default="{ row }">
+            <el-link type="primary" @click.stop="goDetail(row)">{{ leaseNo(row.id) }}</el-link>
+          </template>
         </el-table-column>
-        <el-table-column label="租户" min-width="120">
+        <el-table-column label="租户" min-width="110">
           <template #default="{ row }">
             <div class="two-line-cell">
               <span class="cell-primary">{{ row.tenantName || '—' }}</span>
@@ -605,34 +757,43 @@ onMounted(() => {
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="房屋" min-width="190">
+        <el-table-column label="房屋位置" min-width="185">
           <template #default="{ row }">
             <div class="two-line-cell">
-              <span class="cell-primary">{{ communityName(row) }}</span>
-              <span class="cell-secondary">{{ row.houseLocation || '—' }}</span>
+              <span class="cell-primary">{{ row.houseLocation || '—' }}</span>
+              <span class="cell-secondary">{{ communityName(row) }}</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="起止日期" width="150">
+        <el-table-column label="租期" min-width="190">
           <template #default="{ row }">
             <div class="two-line-cell">
-              <span class="cell-primary">{{ formatDate(row.startDate) }}</span>
-              <span class="cell-secondary">至 {{ formatDate(row.endDate) }}</span>
+              <span class="cell-primary">
+                {{ formatDate(row.startDate) }} ~ {{ formatDate(row.endDate) }}
+              </span>
+              <span v-if="row.status === 'ACTIVE'" class="remain-chip" :class="remainTone(row)">
+                {{ remainText(row) }}
+              </span>
+              <span v-else class="cell-secondary">已结束计租</span>
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="月租金" width="100" align="right">
-          <template #default="{ row }">{{ rentText(row.monthlyRent) }}</template>
-        </el-table-column>
-        <el-table-column label="剩余天数" width="190">
+        <el-table-column label="月租金" width="115" align="right">
           <template #default="{ row }">
-            <div v-if="row.status === 'ACTIVE'" class="remain-cell">
-              <div class="remain-track">
-                <span class="remain-fill" :class="barTone(row)" :style="{ width: barWidth(row) }" />
-              </div>
-              <span class="remain-days">{{ barText(row) }}</span>
-            </div>
-            <span v-else class="remain-none">—</span>
+            <span class="money-cell">{{ moneyText(row.monthlyRent) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="押金" width="115" align="right">
+          <template #default="{ row }">
+            <span class="money-cell">{{ moneyText(row.deposit) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="签约状态" width="115">
+          <template #default="{ row }">
+            <StatusTag
+              :label="leaseAgreementSignStatusLabels[agreementStatusOf(row)]"
+              :type="AGREEMENT_TAG_TYPE[agreementStatusOf(row)]"
+            />
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100">
@@ -640,15 +801,16 @@ onMounted(() => {
             <StatusTag :label="statusTagView(row).label" :type="statusTagView(row).type" />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="250" fixed="right">
+        <el-table-column label="操作" width="248" fixed="right">
           <template #default="{ row }">
+            <el-button text type="primary" size="small" @click.stop="goDetail(row)">详情</el-button>
             <template v-if="row.status === 'PENDING'">
               <el-button
                 v-permission="['ADMIN', 'SUPER_ADMIN']"
                 text
                 type="success"
                 size="small"
-                @click="handleApprove(row)"
+                @click.stop="handleApprove(row)"
               >
                 通过
               </el-button>
@@ -657,18 +819,9 @@ onMounted(() => {
                 text
                 type="danger"
                 size="small"
-                @click="handleReject(row)"
+                @click.stop="handleReject(row)"
               >
                 驳回
-              </el-button>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                text
-                type="primary"
-                size="small"
-                @click="openEdit(row)"
-              >
-                编辑
               </el-button>
             </template>
             <template v-else-if="row.status === 'ACTIVE'">
@@ -677,7 +830,7 @@ onMounted(() => {
                 text
                 type="primary"
                 size="small"
-                @click="openRenew(row)"
+                @click.stop="openRenew(row)"
               >
                 续租
               </el-button>
@@ -686,7 +839,7 @@ onMounted(() => {
                 text
                 type="warning"
                 size="small"
-                @click="handleMoveOut(row)"
+                @click.stop="handleMoveOut(row)"
               >
                 退租
               </el-button>
@@ -697,12 +850,22 @@ onMounted(() => {
                 text
                 type="info"
                 size="small"
-                @click="handleArchive(row)"
+                @click.stop="handleArchive(row)"
               >
                 归档
               </el-button>
             </template>
-            <el-button text type="primary" size="small" @click="openDetail(row)">详情</el-button>
+            <!-- 编辑仅对未归档租约开放（已归档租约属性冻结，后端同样拒绝） -->
+            <el-button
+              v-if="row.status !== 'ARCHIVED'"
+              v-permission="['ADMIN', 'SUPER_ADMIN']"
+              text
+              type="primary"
+              size="small"
+              @click.stop="openEdit(row)"
+            >
+              编辑
+            </el-button>
           </template>
         </el-table-column>
         <template #empty>
@@ -710,21 +873,40 @@ onMounted(() => {
         </template>
       </el-table>
 
-      <Pagination v-model:page="page" v-model:size="size" :total="tabRows.length" />
+      <Pagination v-model:page="page" v-model:size="size" :total="filteredRows.length" />
     </div>
 
-    <!-- 新建/编辑 -->
+    <!-- 新建/编辑：编辑态仅允许变更租期起止、月租金、押金、合同附件、备注 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="editingId === null ? '新建租住记录' : '编辑租住记录'"
-      width="560px"
+      :title="isEditing ? `编辑租约 · ${leaseNo(editingId!)}` : '新建租住记录'"
+      width="600px"
     >
+      <el-alert
+        v-if="isEditing"
+        type="info"
+        :closable="false"
+        show-icon
+        class="form-alert"
+        title="可变更：租期起止、月租金、押金、合同附件、备注"
+        description="保存后系统自动记录一条字段级变更历史（前后值 + 操作人 + 时间），可在租约详情页查看。租客与房屋为登记主体，不可变更。"
+      />
+      <el-alert
+        v-else
+        type="warning"
+        :closable="false"
+        show-icon
+        class="form-alert"
+        title="登记后进入待审核状态"
+        description="租客 ID 与房屋 ID 可在居民管理 / 房源管理中查询；通过审核后租约生效并开始计租。"
+      />
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
         <el-form-item label="租客 ID" prop="residentId">
           <el-input-number
             v-model="form.residentId"
             :min="1"
             :controls="false"
+            :disabled="isEditing"
             placeholder="租客账号 ID（居民列表可查）"
             style="width: 100%"
           />
@@ -734,6 +916,7 @@ onMounted(() => {
             v-model="form.houseId"
             :min="1"
             :controls="false"
+            :disabled="isEditing"
             placeholder="房屋 ID（房屋列表可查）"
             style="width: 100%"
           />
@@ -752,7 +935,7 @@ onMounted(() => {
             v-model="form.endDate"
             type="date"
             value-format="YYYY-MM-DD"
-            placeholder="选择结束日期"
+            placeholder="选择结束日期（须晚于开始日期）"
             style="width: 100%"
           />
         </el-form-item>
@@ -761,18 +944,37 @@ onMounted(() => {
             v-model="form.monthlyRent"
             :min="0"
             :controls="false"
-            placeholder="元/月"
+            placeholder="元/月（不可为负）"
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="押金">
+        <el-form-item label="押金" prop="deposit">
           <el-input-number
             v-model="form.deposit"
             :min="0"
             :controls="false"
-            placeholder="选填，元"
+            placeholder="选填，元（不可为负）"
             style="width: 100%"
           />
+        </el-form-item>
+        <el-form-item label="合同附件">
+          <div class="contract-row">
+            <el-input
+              v-model="form.contractUrl"
+              placeholder="线下签署的合同链接 / 上传后自动回填"
+              clearable
+            />
+            <input
+              ref="contractInput"
+              type="file"
+              hidden
+              accept=".pdf,.doc,.docx,.txt"
+              @change="handleContractUpload"
+            />
+            <el-button :loading="uploadingContract" @click="contractInput?.click()">
+              上传
+            </el-button>
+          </div>
         </el-form-item>
         <el-form-item label="备注">
           <el-input
@@ -843,29 +1045,6 @@ onMounted(() => {
         <el-button type="primary" @click="handleRenewSubmit">确认续租</el-button>
       </template>
     </el-dialog>
-
-    <!-- 详情 -->
-    <el-dialog v-model="detailVisible" title="租约详情" width="640px">
-      <el-descriptions v-if="detailRow" :column="2" border>
-        <el-descriptions-item label="租约号">{{ leaseNo(detailRow.id) }}（ID {{ detailRow.id }}）</el-descriptions-item>
-        <el-descriptions-item label="状态">
-          <StatusTag :label="statusTagView(detailRow).label" :type="statusTagView(detailRow).type" />
-        </el-descriptions-item>
-        <el-descriptions-item label="租户">{{ detailRow.tenantName || '—' }}（ID {{ detailRow.tenantId }}）</el-descriptions-item>
-        <el-descriptions-item label="社区">{{ communityName(detailRow) }}</el-descriptions-item>
-        <el-descriptions-item label="房屋">{{ detailRow.houseLocation || '—' }}</el-descriptions-item>
-        <el-descriptions-item label="到期标注">{{ expiryFlagText(detailRow) }}</el-descriptions-item>
-        <el-descriptions-item label="租期开始">{{ formatDate(detailRow.startDate) }}</el-descriptions-item>
-        <el-descriptions-item label="租期结束">{{ formatDate(detailRow.endDate) }}</el-descriptions-item>
-        <el-descriptions-item label="月租金">{{ rentText(detailRow.monthlyRent) }}</el-descriptions-item>
-        <el-descriptions-item label="押金">{{ rentText(detailRow.deposit) }}</el-descriptions-item>
-        <el-descriptions-item label="登记时间" :span="2">{{ formatDateTime(detailRow.createdAt) }}</el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">{{ detailRow.remark || '—' }}</el-descriptions-item>
-      </el-descriptions>
-      <template #footer>
-        <el-button @click="detailVisible = false">关闭</el-button>
-      </template>
-    </el-dialog>
   </section>
 </template>
 
@@ -926,6 +1105,19 @@ onMounted(() => {
 .banner-link svg {
   width: 14px;
   height: 14px;
+}
+
+/* 筛选控件宽度统一（与工单管理同口径） */
+.filter-select {
+  width: 140px;
+}
+
+.filter-select-wide {
+  width: 150px;
+}
+
+.filter-range {
+  width: 280px;
 }
 
 /* 白卡 Tab 条：观感与居民管理/工单管理一致（激活蓝字 + 底部 2px 下划线） */
@@ -1000,20 +1192,13 @@ onMounted(() => {
   padding: var(--spacing-md) var(--spacing-md) 0;
 }
 
-.history-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-xs) var(--spacing-sm);
+/* 到期行底色提示：已到期淡红 / 即将到期淡黄（仅提示，不改变状态语义） */
+.table-panel :deep(.el-table__row.row-expired) {
+  background-color: var(--color-danger-soft);
 }
 
-.toolbar-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-.toolbar-select {
-  width: 140px;
+.table-panel :deep(.el-table__row.row-expiring) {
+  background-color: var(--color-warning-soft);
 }
 
 /* 两行单元格（主行 + 次行） */
@@ -1028,6 +1213,7 @@ onMounted(() => {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   line-height: var(--line-height-tight);
+  font-variant-numeric: tabular-nums;
 }
 
 .cell-secondary {
@@ -1038,51 +1224,45 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-/* 剩余天数进度条：细条 + 条尾数字（历史行无剩余概念显示占位符） */
-.remain-cell {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.remain-track {
-  flex: 1;
-  height: 6px;
+/* 剩余天数胶囊：≤30 天红（含超期）、≤90 天橙、其余中性 */
+.remain-chip {
+  align-self: flex-start;
+  padding: 1px var(--spacing-sm);
   border-radius: var(--radius-pill);
-  background-color: var(--color-bg-subtle);
-  overflow: hidden;
-}
-
-.remain-fill {
-  display: block;
-  height: 100%;
-  min-width: 4px;
-  border-radius: var(--radius-pill);
-}
-
-.remain-fill.is-green {
-  background-color: var(--color-success);
-}
-
-.remain-fill.is-orange {
-  background-color: var(--color-warning);
-}
-
-.remain-fill.is-red {
-  background-color: var(--color-danger);
-}
-
-.remain-days {
-  flex-shrink: 0;
-  min-width: 44px;
   font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+}
+
+.remain-chip.is-danger {
+  color: var(--color-danger);
+  background-color: var(--color-danger-soft);
+  font-weight: var(--font-weight-medium);
+}
+
+.remain-chip.is-warning {
+  color: var(--color-warning);
+  background-color: var(--color-warning-soft);
+}
+
+.remain-chip.is-normal {
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-subtle);
+}
+
+.money-cell {
+  font-size: var(--font-size-sm);
   color: var(--color-text-primary);
-  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.remain-none {
-  color: var(--color-text-secondary);
+.form-alert {
+  margin-bottom: var(--spacing-md);
+}
+
+.contract-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
 }
 
 .renew-alert {

@@ -3,21 +3,25 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import AdminStatCard from '@/components/admin/AdminStatCard.vue'
 import StatusTag from '@/components/common/StatusTag.vue'
+import Pagination from '@/components/common/Pagination.vue'
 import CommunityEditDialog from '@/views/admin/community/CommunityEditDialog.vue'
 import BuildingEditDialog from '@/views/admin/community/BuildingEditDialog.vue'
 import UnitEditDialog from '@/views/admin/community/UnitEditDialog.vue'
-import BuildingCreateDialog from '@/views/admin/community/BuildingCreateDialog.vue'
 import UnitBatchDialog from '@/views/admin/community/UnitBatchDialog.vue'
 import HouseEditDialog from '@/views/admin/community/HouseEditDialog.vue'
 import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
+import StructureGenerateDialog from '@/views/admin/community/StructureGenerateDialog.vue'
+import BatchResultDialog from '@/views/admin/community/BatchResultDialog.vue'
 import {
+  batchDeleteCommunities,
+  batchUpdateCommunityStatus,
   deleteBuilding,
   deleteCommunity,
   deleteHouse,
   deleteUnit,
   getBuildingList,
+  getCommunity,
   getCommunityList,
   getHouseList,
   getHouseStatusHistory,
@@ -26,6 +30,7 @@ import {
   updateHouseStatus
 } from '@/api/community'
 import type {
+  IBatchFailure,
   IBuilding,
   ICommunity,
   IHouse,
@@ -35,269 +40,504 @@ import type {
 import { communityStatusLabels, houseStatusLabels } from '@/types/modules/community'
 import type { CommunityStatus, HouseStatus } from '@/types/modules/community'
 import { getDashboardStats } from '@/api/statistics'
-import type { IDashboardStats } from '@/types/modules/statistics'
 import { formatDateTime } from '@/utils/date'
 import { useGridSelection } from '@/composables/useGridSelection'
+import { useUserStore } from '@/store/user'
 
 /**
- * 社区结构 Tab（对照设计稿 design-mockups/admin/01-社区结构.png）：
- * 顶部 4 统计卡 + 左右主从布局（左 300px 三级结构树 / 右详情卡 + 房屋状态网格）。
- * CommunityListView/BuildingListView/UnitListView 的 CRUD 与二次确认逻辑
- * 收编于此（对话框抽为独立组件，删除确认文案原样保留）。
- * 楼栋删除自 R4-D2 升级：空楼栋直删确认；非空走级联范围确认 + 前端自底向上
- * 编排（房屋→单元→楼栋，非后端事务，失败汇报剩余明细，见后端适配清单）。
- * 房屋能力自 2026-09-20 起由「房屋管理」Tab 全量并入本总览：树为三级定位（不另设
- * 社区/楼栋/单元下拉筛选），房屋的增删改、状态变更与变更历史、批量建房均在网格内闭环。
+ * 社区管理主面板（2026-09-21 布局重做，替代原「结构总览」三级平铺树）。
+ *
+ * 信息架构（左列表 + 右详情，窄屏上下堆叠）：
+ *   ① 左栏社区列表：关键字/状态筛选 + 分页 + 每社区概览计数 + 选中态；超管可多选批量管理；
+ *   ② 右栏选中社区详情：社区头部（状态、联系方式、入住申请自动化、关键数字）→
+ *      结构目录（楼栋手风琴，展开到单元，两级均带 单元/房屋/空置 计数，点击即筛选）→
+ *      房屋结果区（房号搜索 / 楼层 / 状态 / 关键字，网格展示与批量操作）。
+ *
+ * 为什么不再是平铺树：社区多时首屏是一长列，单元全部铺开更无法定位。现在列表可搜可筛可翻页，
+ * 结构目录只呈现「当前选中社区」且默认折叠，任何层级都通过同层级筛选切换、筛选口径处处带计数。
+ *
+ * 三级结构的增删改与房屋状态变更/历史、批量建房等能力全部保留；创建链路由
+ * StructureGenerateDialog（一次请求建成 楼栋→单元→房屋）承担主入口，
+ * 单轴弹窗退为「已有楼栋/单元内补建」的专项入口。
  */
 
-const route = useRoute()
-const router = useRouter()
-
-/* ===================== 图标（24×24 stroke path） ===================== */
-
 const ICONS = {
-  building: [
-    'M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16',
-    'M15 9h3a1 1 0 0 1 1 1v11',
-    'M3 21h18',
-    'M8 7h2',
-    'M8 11h2',
-    'M8 15h2'
-  ],
-  unit: ['M4 4h7v7H4z', 'M13 4h7v7h-7z', 'M4 13h7v7H4z', 'M13 13h7v7h-7z'],
   home: ['M3 11l9-8 9 8', 'M5 9.7V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.7', 'M10 21v-6h4v6'],
-  donut: ['M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z', 'M12 3v9h9'],
-  sitemap: ['M9 3h6v5H9z', 'M3 16h6v5H3z', 'M15 16h6v5h-6z', 'M12 8v3', 'M6 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2']
-}
-
-const NODE_ICONS = {
-  community: ['M3 11l9-8 9 8', 'M5 9.7V20h14V9.7'],
-  building: ['M5 21V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v14', 'M3 21h18', 'M8 10h2', 'M8 14h2'],
-  unit: ['M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16', 'M3 21h18', 'M9 21v-5a3 3 0 0 1 6 0v5'],
-  /* 房屋（单元节点「新增房屋」钮）：与网格块同一视觉语义，区别于「+」新增单元 */
-  house: ['M3 11l9-8 9 8', 'M5 9.7V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.7', 'M10 21v-6h4v6']
+  search: ['M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14z', 'M20 20l-4.2-4.2'],
+  sitemap: [
+    'M9 3h6v5H9z',
+    'M3 16h6v5H3z',
+    'M15 16h6v5h-6z',
+    'M12 8v3',
+    'M6 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2'
+  ]
 }
 
 const ACTION_ICONS = {
   plus: ['M12 5v14', 'M5 12h14'],
   pen: ['M12 20h9', 'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z'],
-  trash: ['M3 6h18', 'M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2', 'M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6', 'M10 11v6', 'M14 11v6'],
-  /* 状态变更（双向箭头，指向状态流转而非编辑字段） */
+  trash: [
+    'M3 6h18',
+    'M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2',
+    'M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6',
+    'M10 11v6',
+    'M14 11v6'
+  ],
   swap: ['M4 8h13', 'M14 5l3 3-3 3', 'M20 16H7', 'M10 13l-3 3 3 3'],
-  /* 批量建房（叠层，区别于单套新增房屋） */
   layers: ['M12 3l8 4.5-8 4.5-8-4.5L12 3', 'M4 12.5L12 17l8-4.5', 'M4 16.5L12 21l8-4.5'],
   chevron: ['M9 6l6 6-6 6']
 }
 
-/* ===================== 结构树数据（社区→楼栋→单元三级） ===================== */
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
+
+/** 批量管理社区仅超管可用（数据级影响面最大，不允许社区管理员自助） */
+const isSuperAdmin = computed(() => userStore.role === 'SUPER_ADMIN')
+
+/* ===================== 左栏：社区列表（服务端筛选 + 分页 + 概览计数） ===================== */
+
+/** 列表行 = 社区 + 概览计数（计数来自看板聚合接口的社区维度口径，非前端推算） */
+interface CommunityRow {
+  community: ICommunity
+  buildingCount: number
+  houseCount: number
+  /** 入住率分子（已入住房屋数） */
+  occupiedCount: number
+  /** 概览计数加载中（展示占位而非 0，避免把「未知」读成「没有」） */
+  statsLoading: boolean
+}
+
+const communityRows = ref<CommunityRow[]>([])
+const listLoading = ref(false)
+const listError = ref('')
+const listTotal = ref(0)
+
+const query = reactive({
+  keyword: '',
+  status: '' as '' | CommunityStatus,
+  page: 1,
+  size: 10
+})
+
+const statusFilters: { value: '' | CommunityStatus; label: string }[] = [
+  { value: '', label: '全部' },
+  { value: 'ACTIVE', label: '运营中' },
+  { value: 'INACTIVE', label: '已停用' }
+]
+
+const selectedCommunityId = ref<number | null>(null)
+const selectedCommunity = ref<ICommunity | null>(null)
+
+/* 并发防护：列表与行计数为两段加载，筛选/翻页切换后旧序列的写入作废 */
+let listSeq = 0
+let rowStatsSeq = 0
+
+/** 列表筛选/翻页后重新拉取社区；选中社区不在本页时保持选中（详情与列表解耦） */
+async function loadCommunities(): Promise<void> {
+  const seq = ++listSeq
+  listLoading.value = true
+  listError.value = ''
+  try {
+    const result = await getCommunityList({
+      page: query.page,
+      size: query.size,
+      keyword: query.keyword.trim() || undefined,
+      status: query.status || undefined
+    })
+    if (seq !== listSeq) return
+    communityRows.value = result.records.map((community) => ({
+      community,
+      buildingCount: 0,
+      houseCount: 0,
+      occupiedCount: 0,
+      statsLoading: true
+    }))
+    listTotal.value = result.total
+    /* 选中社区对象随最新列表刷新（编辑后名称/状态即时同步到详情头部） */
+    const refreshed = result.records.find((item) => item.id === selectedCommunityId.value)
+    if (refreshed) selectedCommunity.value = refreshed
+    if (selectedCommunityId.value === null && result.records.length > 0) {
+      selectCommunity(result.records[0])
+    } else if (selectedCommunityId.value === null) {
+      clearDetail()
+    }
+    loadRowStats(seq)
+  } catch (error) {
+    if (seq !== listSeq) return
+    communityRows.value = []
+    listTotal.value = 0
+    listError.value = error instanceof Error ? error.message : '加载社区列表失败'
+  } finally {
+    if (seq === listSeq) listLoading.value = false
+  }
+}
+
+/** 概览计数：逐社区取看板聚合（服务端精确值，前端不按分页数据推算） */
+async function loadRowStats(seq: number): Promise<void> {
+  const statsSeq = ++rowStatsSeq
+  const rows = communityRows.value
+  await Promise.all(
+    rows.map(async (row) => {
+      try {
+        const stats = await getDashboardStats({ communityId: row.community.id })
+        if (seq !== listSeq || statsSeq !== rowStatsSeq) return
+        row.buildingCount = stats.buildingCount
+        row.houseCount = stats.houseCount
+        row.occupiedCount = stats.occupiedHouseCount
+      } catch {
+        /* 计数失败不打断列表：行内展示占位，用户仍可进入结构与操作 */
+      } finally {
+        if (seq === listSeq && statsSeq === rowStatsSeq) row.statsLoading = false
+      }
+    })
+  )
+}
+
+function resetListQuery(): void {
+  query.keyword = ''
+  query.status = ''
+  query.page = 1
+  loadCommunities()
+}
+
+function handleSearch(): void {
+  query.page = 1
+  loadCommunities()
+}
+
+function handleStatusFilter(value: '' | CommunityStatus): void {
+  if (query.status === value) return
+  query.status = value
+  query.page = 1
+  loadCommunities()
+}
+
+function handlePageChange(page: number): void {
+  query.page = page
+  loadCommunities()
+}
+
+function handleSizeChange(size: number): void {
+  query.size = size
+  query.page = 1
+  loadCommunities()
+}
+
+const filtered = computed(() => query.keyword.trim() !== '' || query.status !== '')
+
+function selectCommunity(community: ICommunity, force = false): void {
+  const changed = selectedCommunityId.value !== community.id
+  selectedCommunityId.value = community.id
+  selectedCommunity.value = community
+  if (!changed && !force) return
+  resetHouseFilters()
+  activeBuildingId.value = null
+  activeUnitId.value = null
+  expandedBuildings.value = {}
+  loadStructure(community.id)
+}
+
+function clearDetail(): void {
+  selectedCommunityId.value = null
+  selectedCommunity.value = null
+  buildings.value = []
+  structureError.value = ''
+  resetHouseFilters()
+}
+
+/** 深链 ?communityId= 与「查看该社区结构」：定位到指定社区（不在当前页则单独取回并置顶） */
+async function focusCommunity(communityId: number): Promise<void> {
+  const inPage = communityRows.value.find((row) => row.community.id === communityId)
+  if (inPage) {
+    selectCommunity(inPage.community)
+    return
+  }
+  try {
+    const community = await getCommunity(communityId)
+    communityRows.value = [
+      {
+        community,
+        buildingCount: 0,
+        houseCount: 0,
+        occupiedCount: 0,
+        statsLoading: true
+      },
+      ...communityRows.value.filter((row) => row.community.id !== communityId)
+    ]
+    selectCommunity(community)
+    const stats = await getDashboardStats({ communityId })
+    const row = communityRows.value.find((item) => item.community.id === communityId)
+    if (row) {
+      row.buildingCount = stats.buildingCount
+      row.houseCount = stats.houseCount
+      row.occupiedCount = stats.occupiedHouseCount
+      row.statsLoading = false
+    }
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '定位社区失败')
+  }
+}
+
+/* ===================== 右栏：选中社区的结构（楼栋 → 单元 → 房屋） ===================== */
+
+interface UnitNode {
+  unit: IUnit
+  houses: IHouse[]
+}
 
 interface BuildingNode {
   building: IBuilding
-  units: IUnit[]
+  units: UnitNode[]
 }
 
-interface CommunityNode {
-  community: ICommunity
-  buildings: BuildingNode[]
-}
+const buildings = ref<BuildingNode[]>([])
+const structureLoading = ref(false)
+const structureError = ref('')
+/** 是否已成功加载过当前社区结构（区分「未加载」与「确实为空」两种空态） */
+const structureLoaded = ref(false)
 
-const tree = ref<CommunityNode[]>([])
-const treeLoading = ref(false)
+let structureSeq = 0
 
-/* 并发防护：树为三级串行加载，重载时旧序列的后续写入作废 */
-let treeSeq = 0
-
-async function loadTree(): Promise<void> {
-  const seq = ++treeSeq
-  treeLoading.value = true
+/** 结构加载按选中社区整体拉取：计数与筛选得以在本地精确计算，且只覆盖一个社区 */
+async function loadStructure(communityId: number): Promise<void> {
+  const seq = ++structureSeq
+  /* 整体重载即作废在途的单元级局部刷新，防止旧单元的房屋回写到新结构上 */
+  unitReloadSeq += 1
+  structureLoading.value = true
+  structureError.value = ''
+  structureLoaded.value = false
+  buildings.value = []
   try {
-    /* 管理端社区规模有限（数据级权限过滤后更少），单页拉取（Building/Unit 列表视图同口径） */
-    const result = await getCommunityList({ page: 1, size: 200 })
-    if (seq !== treeSeq) return
-    const communities = result.records
-    tree.value = communities.map((community) => ({ community, buildings: [] }))
-
-    /* 楼栋层并行填充（每社区整体赋值，保证经 reactive 代理触发更新） */
-    await Promise.all(
-      communities.map(async (community, index) => {
-        let buildingNodes: BuildingNode[] = []
-        try {
-          const buildingResult = await getBuildingList(community.id, { page: 1, size: 200 })
-          if (seq !== treeSeq) return
-          buildingNodes = await Promise.all(
-            buildingResult.records.map(async (building) => {
-              let units: IUnit[] = []
-              try {
-                units = (await getUnitList(building.id, { page: 1, size: 200 })).records
-              } catch {
-                units = []
-              }
-              return { building, units }
-            })
-          )
-        } catch {
-          buildingNodes = []
-        }
-        if (seq !== treeSeq) return
-        const node = tree.value[index]
-        if (node) node.buildings = buildingNodes
+    const buildingList = (await getBuildingList(communityId, { page: 1, size: 200 })).records
+    const nodes = await Promise.all(
+      buildingList.map(async (building) => {
+        const units = (await getUnitList(building.id, { page: 1, size: 200 })).records
+        const unitNodes = await Promise.all(
+          units.map(async (unit) => ({
+            unit,
+            houses: (await getHouseList(unit.id, { page: 1, size: 200 })).records
+          }))
+        )
+        return { building, units: unitNodes }
       })
     )
-    if (seq !== treeSeq) return
-    ensureSelection()
-  } catch {
-    if (seq !== treeSeq) return
-    tree.value = []
-    selected.value = null
+    if (seq !== structureSeq) return
+    buildings.value = nodes
+    structureLoaded.value = true
+  } catch (error) {
+    if (seq !== structureSeq) return
+    buildings.value = []
+    structureError.value = error instanceof Error ? error.message : '加载结构失败'
   } finally {
-    if (seq === treeSeq) treeLoading.value = false
+    if (seq === structureSeq) structureLoading.value = false
   }
 }
 
-/** 单元总数：由树数据聚合（统计接口无单元项；分页上限 200/楼栋，量级内为精确值） */
-const unitTotal = computed(() =>
-  tree.value.reduce(
-    (sum, communityNode) =>
-      sum + communityNode.buildings.reduce((buildingSum, b) => buildingSum + b.units.length, 0),
-    0
+function retryStructure(): void {
+  if (selectedCommunityId.value !== null) loadStructure(selectedCommunityId.value)
+}
+
+/* 局部刷新单个单元的房屋（房屋增删改后不整社区重载，保持筛选与展开态）。
+   独立序列号：与结构整体加载互不作废，避免两侧并发时把对方结果丢弃 */
+let unitReloadSeq = 0
+
+async function reloadUnitHouses(unitId: number): Promise<void> {
+  const seq = ++unitReloadSeq
+  try {
+    const houses = (await getHouseList(unitId, { page: 1, size: 200 })).records
+    if (seq !== unitReloadSeq) return
+    for (const building of buildings.value) {
+      const unitNode = building.units.find((item) => item.unit.id === unitId)
+      if (unitNode) {
+        unitNode.houses = houses
+        break
+      }
+    }
+    /* 楼层/状态筛选在新数据下可能已无命中：回落到全部，避免空网格无从解释 */
+    if (activeFloor.value !== null && !houses.some((house) => house.floor === activeFloor.value)) {
+      activeFloor.value = null
+    }
+  } catch {
+    /* 局部刷新失败保留现列表，用户可整体刷新 */
+  }
+}
+
+/** 房屋扁平清单：后端 HouseVO 不含楼栋/单元名，此处由结构上下文补全（展示与跳转都依赖它） */
+interface HouseEntry {
+  house: IHouse
+  buildingId: number
+  buildingName: string
+  unitId: number
+  unitName: string
+}
+
+const houseEntries = computed<HouseEntry[]>(() =>
+  buildings.value.flatMap((building) =>
+    building.units.flatMap((unitNode) =>
+      unitNode.houses.map((house) => ({
+        house,
+        buildingId: building.building.id,
+        buildingName: building.building.name,
+        unitId: unitNode.unit.id,
+        unitName: unitNode.unit.name
+      }))
+    )
   )
 )
 
-/* ===================== 选中态与展开态 ===================== */
+/** 楼栋计数：单元数 / 房屋数 / 空置数（结构目录每行右侧的筛选依据） */
+interface StructureCount {
+  units: number
+  houses: number
+  vacant: number
+}
 
-type Selection =
-  | { type: 'community'; communityId: number }
-  | { type: 'building'; communityId: number; buildingId: number }
-  | { type: 'unit'; communityId: number; buildingId: number; unitId: number }
-  | null
+const buildingCounts = computed<Map<number, StructureCount>>(() => {
+  const map = new Map<number, StructureCount>()
+  for (const building of buildings.value) {
+    let houses = 0
+    let vacant = 0
+    for (const unitNode of building.units) {
+      houses += unitNode.houses.length
+      vacant += unitNode.houses.filter((house) => house.status === 'VACANT').length
+    }
+    map.set(building.building.id, { units: building.units.length, houses, vacant })
+  }
+  return map
+})
 
-const selected = ref<Selection>(null)
-const expanded = ref<Record<string, boolean>>({})
+const unitCounts = computed<Map<number, StructureCount>>(() => {
+  const map = new Map<number, StructureCount>()
+  for (const building of buildings.value) {
+    for (const unitNode of building.units) {
+      map.set(unitNode.unit.id, {
+        units: 0,
+        houses: unitNode.houses.length,
+        vacant: unitNode.houses.filter((house) => house.status === 'VACANT').length
+      })
+    }
+  }
+  return map
+})
 
-const selectedCommunity = computed(
-  () => tree.value.find((node) => node.community.id === selected.value?.communityId) ?? null
+/* ---------------- 筛选状态（同一层级用选择器切换，绝不平铺全部单元） ---------------- */
+
+const expandedBuildings = ref<Record<number, boolean>>({})
+const activeBuildingId = ref<number | null>(null)
+const activeUnitId = ref<number | null>(null)
+const houseKeyword = ref('')
+const activeFloor = ref<number | null>(null)
+const activeStatus = ref<HouseStatus | null>(null)
+
+function toggleBuilding(buildingId: number): void {
+  expandedBuildings.value[buildingId] = !expandedBuildings.value[buildingId]
+}
+
+function selectBuilding(buildingId: number | null): void {
+  activeBuildingId.value = buildingId
+  activeUnitId.value = null
+  if (buildingId !== null) expandedBuildings.value[buildingId] = true
+}
+
+function selectUnit(unitId: number | null): void {
+  activeUnitId.value = unitId
+}
+
+/** 当前筛选是否偏离默认（用于「清除筛选」按钮的显隐） */
+const filtersActive = computed(
+  () =>
+    activeBuildingId.value !== null ||
+    activeUnitId.value !== null ||
+    activeFloor.value !== null ||
+    activeStatus.value !== null ||
+    houseKeyword.value.trim() !== ''
 )
-const selectedBuildingNode = computed(() => {
-  const sel = selected.value
-  if (!sel || sel.type === 'community') return null
-  return (
-    selectedCommunity.value?.buildings.find((node) => node.building.id === sel.buildingId) ?? null
+
+function resetHouseFilters(): void {
+  houseKeyword.value = ''
+  activeFloor.value = null
+  activeStatus.value = null
+  clearHouseSelection()
+}
+
+function clearAllFilters(): void {
+  resetHouseFilters()
+  activeBuildingId.value = null
+  activeUnitId.value = null
+}
+
+const activeBuildingName = computed(
+  () => buildings.value.find((item) => item.building.id === activeBuildingId.value)?.building.name ?? ''
+)
+
+const activeUnitName = computed(() => {
+  const unitId = activeUnitId.value
+  if (unitId === null) return ''
+  for (const building of buildings.value) {
+    const hit = building.units.find((item) => item.unit.id === unitId)
+    if (hit) return hit.unit.name
+  }
+  return ''
+})
+
+/** 楼栋 + 单元两级筛选后的房屋（楼层/状态/关键字在其上继续收窄） */
+const scopeEntries = computed(() =>
+  houseEntries.value.filter(
+    (entry) =>
+      (activeBuildingId.value === null || entry.buildingId === activeBuildingId.value) &&
+      (activeUnitId.value === null || entry.unitId === activeUnitId.value)
+  )
+)
+
+const filteredEntries = computed(() => {
+  const keyword = houseKeyword.value.trim().toLowerCase()
+  return scopeEntries.value.filter(
+    (entry) =>
+      (activeFloor.value === null || entry.house.floor === activeFloor.value) &&
+      (activeStatus.value === null || entry.house.status === activeStatus.value) &&
+      (keyword === '' || entry.house.houseNumber.toLowerCase().includes(keyword))
   )
 })
-const selectedUnit = computed(() => {
-  const sel = selected.value
-  if (!sel || sel.type !== 'unit') return null
-  return selectedBuildingNode.value?.units.find((unit) => unit.id === sel.unitId) ?? null
+
+/** 楼层选项取自「楼栋+单元」范围：切换楼层不会让其它楼层选项消失 */
+const floorOptions = computed(() =>
+  [...new Set(scopeEntries.value.map((entry) => entry.house.floor))].sort((a, b) => b - a)
+)
+
+const statusOptions = computed(() =>
+  (['VACANT', 'OCCUPIED', 'RESERVED', 'MAINTENANCE'] as HouseStatus[]).map((value) => ({
+    value,
+    label: houseStatusLabels[value],
+    count: scopeEntries.value.filter(
+      (entry) => entry.house.status === value && (activeFloor.value === null || entry.house.floor === activeFloor.value)
+    ).length
+  }))
+)
+
+const scopeSummary = computed(() => {
+  const entries = filteredEntries.value
+  const occupied = entries.filter((entry) => entry.house.status === 'OCCUPIED').length
+  const vacant = entries.filter((entry) => entry.house.status === 'VACANT').length
+  return { total: entries.length, occupied, vacant }
 })
 
-type ActiveView = 'community' | 'building' | 'unit' | 'none'
-const activeView = computed<ActiveView>(() => {
-  if (selected.value?.type === 'unit' && selectedUnit.value) return 'unit'
-  if (selected.value?.type === 'building' && selectedBuildingNode.value) return 'building'
-  if (selected.value?.type === 'community' && selectedCommunity.value) return 'community'
-  return 'none'
+/** 社区关键数字（空置与入住率在房屋状态面上，与结构计数同源） */
+const communityMetrics = computed(() => {
+  const total = houseEntries.value.length
+  const occupied = houseEntries.value.filter((entry) => entry.house.status === 'OCCUPIED').length
+  const vacant = houseEntries.value.filter((entry) => entry.house.status === 'VACANT').length
+  return {
+    buildings: buildings.value.length,
+    units: buildings.value.reduce((sum, building) => sum + building.units.length, 0),
+    houses: total,
+    vacant,
+    occupancy: total === 0 ? null : (occupied / total) * 100
+  }
 })
 
-const crumbText = computed(() => {
-  const parts: string[] = []
-  if (selectedCommunity.value) parts.push(selectedCommunity.value.community.name)
-  if (selectedBuildingNode.value) parts.push(selectedBuildingNode.value.building.name)
-  if (selectedUnit.value) parts.push(selectedUnit.value.name)
-  return parts.join('  /  ')
-})
+/* ---------------- 房屋网格（按单元分组，复用既有框选/多选能力） ---------------- */
 
-function expandCommunity(communityNode: CommunityNode): void {
-  expanded.value[`c${communityNode.community.id}`] = true
-  const firstBuilding = communityNode.buildings[0]
-  if (firstBuilding) expanded.value[`b${firstBuilding.building.id}`] = true
-}
-
-function selectCommunityNode(communityNode: CommunityNode): void {
-  expanded.value[`c${communityNode.community.id}`] = true
-  selected.value = { type: 'community', communityId: communityNode.community.id }
-}
-
-function selectBuildingNode(buildingNode: BuildingNode): void {
-  expanded.value[`c${buildingNode.building.communityId}`] = true
-  expanded.value[`b${buildingNode.building.id}`] = true
-  selected.value = {
-    type: 'building',
-    communityId: buildingNode.building.communityId,
-    buildingId: buildingNode.building.id
-  }
-}
-
-function selectUnit(unit: IUnit, buildingNode: BuildingNode): void {
-  expanded.value[`c${buildingNode.building.communityId}`] = true
-  expanded.value[`b${buildingNode.building.id}`] = true
-  selected.value = {
-    type: 'unit',
-    communityId: buildingNode.building.communityId,
-    buildingId: buildingNode.building.id,
-    unitId: unit.id
-  }
-}
-
-/* 加载完成后的选中维护：深链 ?communityId= 优先，否则首个社区下钻首楼栋；
-   重载后选中节点已删除时逐级回退 */
-function ensureSelection(): void {
-  const sel = selected.value
-  if (sel) {
-    const communityNode = tree.value.find((node) => node.community.id === sel.communityId)
-    if (!communityNode) {
-      selected.value = null
-      selectFirst()
-      return
-    }
-    if (sel.type !== 'community') {
-      const selBuildingId = sel.buildingId
-      const selUnitId = sel.type === 'unit' ? sel.unitId : null
-      const buildingNode = communityNode.buildings.find(
-        (node) => node.building.id === selBuildingId
-      )
-      if (!buildingNode) {
-        selectCommunityNode(communityNode)
-        return
-      }
-      if (selUnitId !== null && !buildingNode.units.some((unit) => unit.id === selUnitId)) {
-        selectBuildingNode(buildingNode)
-      }
-    }
-    return
-  }
-  selectFirst()
-}
-
-function selectFirst(): void {
-  if (tree.value.length === 0) {
-    selected.value = null
-    return
-  }
-  /* 旧路径 /admin/buildings?communityId=x redirect 承接的 query 在此消费：预选指定社区 */
-  const queryCommunityId = Number(route.query.communityId)
-  const target =
-    (Number.isFinite(queryCommunityId) && queryCommunityId > 0
-      ? tree.value.find((node) => node.community.id === queryCommunityId)
-      : undefined) ?? tree.value[0]
-  expandCommunity(target)
-  /* 对照设计稿首屏：默认下钻到首个楼栋（右栏展示楼栋详情 + 房屋网格） */
-  const firstBuilding = target.buildings[0]
-  if (firstBuilding) {
-    selectBuildingNode(firstBuilding)
-  } else {
-    selectCommunityNode(target)
-  }
-}
-
-/* ===================== 房屋数据（随选中节点懒加载） ===================== */
-
-const houses = ref<IHouse[]>([])
-const housesLoading = ref(false)
-let housesSeq = 0
-
-/* ---------- 房屋网格多选（R4-D3）：Ctrl/Cmd+点选 + 空白区框选 + 批量删除 ----------
-   单元视图网格与楼栋视图多单元区块网格由 gridGroups 两种数据形态流经同一渲染容器，
-   消费同一份 useGridSelection 状态；组合框本身以容器元素为作用域，可独立复用 */
 const gridBodyRef = ref<HTMLElement | null>(null)
 const {
   selectedIds: selectedHouseIds,
@@ -312,86 +552,15 @@ const {
   onGridPointerCancel: onHouseGridPointerCancel
 } = useGridSelection(gridBodyRef)
 
-/* 切换社区/楼栋/单元（含树重载后的选中回退）时清空选区 */
-watch(selected, async (sel) => {
-  const seq = ++housesSeq
-  activeFloor.value = null
-  houses.value = []
+/* 筛选变化后清空选区：避免批量删除作用于当前不可见的房屋 */
+watch([activeBuildingId, activeUnitId, activeFloor, activeStatus, houseKeyword], () => {
   clearHouseSelection()
-  if (!sel || sel.type === 'community') return
-  housesLoading.value = true
-  try {
-    if (sel.type === 'unit') {
-      const result = await getHouseList(sel.unitId, { page: 1, size: 200 })
-      if (seq !== housesSeq) return
-      houses.value = result.records
-    } else {
-      const units = selectedBuildingNode.value?.units ?? []
-      if (units.length === 0) return
-      const results = await Promise.all(
-        units.map((unit) => getHouseList(unit.id, { page: 1, size: 200 }).catch(() => null))
-      )
-      if (seq !== housesSeq) return
-      houses.value = results.flatMap((result) => result?.records ?? [])
-    }
-  } finally {
-    if (seq === housesSeq) housesLoading.value = false
-  }
 })
 
-/* 局部刷新（第三轮 C4）：网格增删改后仅重拉受影响单元的房屋，
-   楼栋视图按 unitId 原地替换（不整页重载、不重置楼层筛选）；楼层被删空时筛选自动回落全部 */
-async function reloadUnitHouses(unitId: number): Promise<void> {
-  const sel = selected.value
-  if (!sel) return
-  const seq = ++housesSeq
-  housesLoading.value = true
-  try {
-    const result = await getHouseList(unitId, { page: 1, size: 200 })
-    if (seq !== housesSeq) return
-    if (sel.type === 'unit') {
-      houses.value = result.records
-    } else {
-      houses.value = houses.value.filter((house) => house.unitId !== unitId).concat(result.records)
-    }
-    if (
-      activeFloor.value !== null &&
-      !houses.value.some((house) => house.floor === activeFloor.value)
-    ) {
-      activeFloor.value = null
-    }
-  } catch {
-    /* 局部刷新失败保留现列表（树切换会整体重载），不打断用户操作 */
-  } finally {
-    if (seq === housesSeq) housesLoading.value = false
-  }
-}
-
-/* ===================== 房屋状态网格（楼层行 × 房号列） ===================== */
-
-/* 真实 HouseStatus 枚举映射（设计稿例图含「欠费」，系统无此状态，按实际枚举对齐；
-   配色与运营看板 houseStatusDistribution 同一口径：绿=已入住/灰=空置/紫=预留/橙=维护中） */
-const HOUSE_BLOCK_CLASS: Record<HouseStatus, string> = {
-  OCCUPIED: 'is-occupied',
-  VACANT: 'is-vacant',
-  RESERVED: 'is-reserved',
-  MAINTENANCE: 'is-maintenance'
-}
-
-/* 图例按「已入住→空置→预留→维护中」排序（对照设计稿阅读顺序，非枚举字面序） */
-const LEGEND_ORDER: HouseStatus[] = ['OCCUPIED', 'VACANT', 'RESERVED', 'MAINTENANCE']
-
-const LEGEND_ITEMS = LEGEND_ORDER.map((value) => ({ value, label: houseStatusLabels[value] }))
-
-const activeFloor = ref<number | null>(null)
-
-/* 楼层筛选变化时清空选区：避免操作条对当前不可见（被筛出）的选中房屋执行删除 */
-watch(activeFloor, () => clearHouseSelection())
-
-/* 局部刷新后剪除已不存在的房屋 id（悬浮钮单删选中项时保持操作条计数真实） */
-watch(houses, (list) => {
+/* 结构局部刷新后剪除已不存在的房屋 id（悬浮钮单删选中项时保持操作条计数真实） */
+watch(houseEntries, (list) => {
   if (selectedHouseIds.value.size === 0) return
-  const alive = new Set(list.map((house) => house.id))
+  const alive = new Set(list.map((entry) => entry.house.id))
   let changed = false
   const next = new Set<number>()
   selectedHouseIds.value.forEach((id) => {
@@ -404,229 +573,55 @@ watch(houses, (list) => {
   if (changed) selectedHouseIds.value = next
 })
 
-const floorOptions = computed(() =>
-  [...new Set(houses.value.map((house) => house.floor))].sort((a, b) => b - a)
-)
-
-const scopeHouses = computed(() =>
-  activeFloor.value === null
-    ? houses.value
-    : houses.value.filter((house) => house.floor === activeFloor.value)
-)
-
-const scopeOccupiedCount = computed(
-  () => scopeHouses.value.filter((house) => house.status === 'OCCUPIED').length
-)
-
-interface GridRow {
-  floor: number
-  houses: IHouse[]
-}
-
 interface GridGroup {
   key: string
   title: string
-  /** 分组所属单元（「＋」快速添加房屋的目标单元，第三轮 C4） */
+  /** 分组所属单元（「＋」快速添加房屋的目标单元） */
   unit: IUnit
-  rows: GridRow[]
-}
-
-function floorRowsOf(list: IHouse[]): GridRow[] {
-  const byFloor = new Map<number, IHouse[]>()
-  for (const house of list) {
-    const bucket = byFloor.get(house.floor)
-    if (bucket) {
-      bucket.push(house)
-    } else {
-      byFloor.set(house.floor, [house])
-    }
-  }
-  return [...byFloor.entries()]
-    .sort((a, b) => b[0] - a[0])
-    .map(([floor, list]) => ({
-      floor,
-      houses: [...list].sort((a, b) => a.houseNumber.localeCompare(b.houseNumber, undefined, { numeric: true }))
-    }))
+  entries: HouseEntry[]
 }
 
 const gridGroups = computed<GridGroup[]>(() => {
-  if (activeView.value === 'unit' && selectedUnit.value) {
-    return [
-      {
-        key: `u${selectedUnit.value.id}`,
-        title: selectedUnit.value.name,
-        unit: selectedUnit.value,
-        rows: floorRowsOf(scopeHouses.value)
-      }
-    ]
+  const groups = new Map<number, GridGroup>()
+  for (const entry of filteredEntries.value) {
+    const existing = groups.get(entry.unitId)
+    if (existing) {
+      existing.entries.push(entry)
+      continue
+    }
+    const unitNode = buildings.value
+      .find((building) => building.building.id === entry.buildingId)
+      ?.units.find((item) => item.unit.id === entry.unitId)
+    if (!unitNode) continue
+    groups.set(entry.unitId, {
+      key: `u${entry.unitId}`,
+      /* 全部楼栋视图下带上楼栋名，避免同名单元在多栋间混淆 */
+      title: activeBuildingId.value === null ? `${entry.buildingName} · ${entry.unitName}` : entry.unitName,
+      unit: unitNode.unit,
+      entries: [entry]
+    })
   }
-  if (activeView.value === 'building' && selectedBuildingNode.value) {
-    /* 不再过滤无房单元：空单元保留分组标题与「＋」入口（网格内直接给空单元添第一套房） */
-    return selectedBuildingNode.value.units.map((unit) => ({
-      key: `u${unit.id}`,
-      title: unit.name,
-      unit,
-      rows: floorRowsOf(scopeHouses.value.filter((house) => house.unitId === unit.id))
-    }))
-  }
-  return []
+  /* 分组内按楼层与房号排序（与结构总览楼层行阅读顺序一致） */
+  return [...groups.values()].map((group) => ({
+    ...group,
+    entries: [...group.entries].sort(
+      (a, b) =>
+        b.house.floor - a.house.floor ||
+        a.house.houseNumber.localeCompare(b.house.houseNumber, undefined, { numeric: true })
+    )
+  }))
 })
 
-/* 房屋块点击：无房屋详情路由 → 弹信息卡（简报允许的交互，见任务报告）。
-   楼栋/单元展示名取树上下文（后端 HouseVO 无名称字段，unitName 可空） */
-const houseInfoVisible = ref(false)
-const houseInfo = ref<IHouse | null>(null)
-
-const houseInfoBuildingName = computed(() => selectedBuildingNode.value?.building.name ?? '-')
-
-function unitNameOfHouse(house: IHouse): string {
-  return (
-    selectedBuildingNode.value?.units.find((unit) => unit.id === house.unitId)?.name ??
-    selectedUnit.value?.name ??
-    house.unitName ??
-    '-'
-  )
+const HOUSE_BLOCK_CLASS: Record<HouseStatus, string> = {
+  OCCUPIED: 'is-occupied',
+  VACANT: 'is-vacant',
+  RESERVED: 'is-reserved',
+  MAINTENANCE: 'is-maintenance'
 }
 
-const houseInfoUnitName = computed(() => (houseInfo.value ? unitNameOfHouse(houseInfo.value) : '-'))
-
-function openHouseInfo(house: IHouse): void {
-  houseInfo.value = house
-  houseInfoVisible.value = true
-  loadHouseHistory(house.id)
-}
-
-/* 卡片点击分流（R4-D3）：Ctrl/Cmd+左键切换多选；普通左键保持开信息卡；
-   悬浮编辑/删除钮自带 .stop，不受分流影响 */
-function onHouseBlockClick(event: MouseEvent, house: IHouse): void {
-  if (event.ctrlKey || event.metaKey) {
-    toggleHouseSelection(house.id)
-    return
-  }
-  openHouseInfo(house)
-}
-
-/* ============ 房屋便捷操作（第三轮 C4）：卡片悬浮编辑/删除 + 单元「＋」快速添加 ============ */
-
-const houseDialogVisible = ref(false)
-const houseEditing = ref<IHouse | null>(null)
-const houseUnitContext = ref<{
-  buildingName: string
-  unitId: number
-  unitName: string
-} | null>(null)
-
-/** 网格分组标题「＋」：目标单元即分组单元（单元网格头与楼栋详情卡每单元区块共用） */
-function openHouseCreate(unit: IUnit): void {
-  houseEditing.value = null
-  houseUnitContext.value = {
-    buildingName: selectedBuildingNode.value?.building.name ?? '-',
-    unitId: unit.id,
-    unitName: unit.name
-  }
-  houseDialogVisible.value = true
-}
-
-function openHouseEdit(house: IHouse): void {
-  houseEditing.value = house
-  houseUnitContext.value = {
-    buildingName: selectedBuildingNode.value?.building.name ?? '-',
-    unitId: house.unitId,
-    unitName: unitNameOfHouse(house)
-  }
-  houseDialogVisible.value = true
-}
-
-/** 保存后局部刷新受影响单元（房屋总数统计卡同步校准） */
-function handleHouseSaved(unitId: number): void {
-  reloadUnitHouses(unitId)
-  loadStats()
-}
-
-/* 房屋删除：确认文案沿用原「房屋管理」Tab 口径（引用保护由后端报错） */
-async function handleHouseDelete(house: IHouse): Promise<void> {
-  try {
-    await ElMessageBox.confirm(
-      `确定删除房屋「${house.houseNumber}」？若该房屋存在居住/租住关系，删除将被拒绝。`,
-      '删除房屋',
-      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
-    )
-  } catch {
-    return
-  }
-  try {
-    await deleteHouse(house.id)
-    ElMessage.success('房屋已删除')
-    reloadUnitHouses(house.unitId)
-    loadStats()
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '删除失败')
-  }
-}
-
-/* 批量删除（R4-D3）：一次确认（口径沿用单删的引用保护提示，带数量）→ 逐条调用
-   删除接口（单条失败不中断）→ 汇报成功/失败明细 → 局部刷新受影响单元 → 选区清空 */
-const batchDeleteRunning = ref(false)
-
-async function handleHouseBatchDelete(): Promise<void> {
-  const targets = houses.value.filter((house) => selectedHouseIds.value.has(house.id))
-  if (targets.length === 0 || batchDeleteRunning.value) return
-  try {
-    await ElMessageBox.confirm(
-      `确定删除选中的 ${targets.length} 套房屋？若房屋存在居住/租住关系，删除将被拒绝。`,
-      '批量删除房屋',
-      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
-    )
-  } catch {
-    return
-  }
-  batchDeleteRunning.value = true
-  const failed: { houseNumber: string; reason: string }[] = []
-  let deleted = 0
-  for (const house of targets) {
-    try {
-      await deleteHouse(house.id)
-      deleted += 1
-    } catch (error) {
-      failed.push({
-        houseNumber: house.houseNumber,
-        reason: error instanceof Error ? error.message : '删除失败'
-      })
-    }
-  }
-  batchDeleteRunning.value = false
-  if (failed.length === 0) {
-    ElMessage.success(`已删除 ${deleted} 套房屋`)
-  } else {
-    /* 部分失败：alert 非阻塞展示明细（失败房屋留存在网格中），刷新与清选紧随其后 */
-    ElMessageBox.alert(
-      `批量删除完成：成功 ${deleted} 套，失败 ${failed.length} 套。失败房屋：${failed
-        .map((item) => `${item.houseNumber}（${item.reason}）`)
-        .join('、')}`,
-      '批量删除结果',
-      { type: 'warning', confirmButtonText: '知道了' }
-    ).catch(() => {})
-  }
-  const affectedUnitIds = [...new Set(targets.map((house) => house.unitId))]
-  affectedUnitIds.forEach((unitId) => reloadUnitHouses(unitId))
-  loadStats()
-  clearHouseSelection()
-}
-
-/* 信息卡内直达编辑/删除（触屏无悬浮态时的兜底路径），先收卡再走同一处理器 */
-function editFromInfo(): void {
-  const house = houseInfo.value
-  if (!house) return
-  houseInfoVisible.value = false
-  openHouseEdit(house)
-}
-
-function deleteFromInfo(): void {
-  const house = houseInfo.value
-  if (!house) return
-  houseInfoVisible.value = false
-  void handleHouseDelete(house)
-}
+const LEGEND_ITEMS = (['OCCUPIED', 'VACANT', 'RESERVED', 'MAINTENANCE'] as HouseStatus[]).map(
+  (value) => ({ value, label: houseStatusLabels[value] })
+)
 
 function houseStatusTagType(status: HouseStatus): 'info' | 'completed' | 'pending' | 'processing' {
   if (status === 'OCCUPIED') return 'completed'
@@ -635,46 +630,44 @@ function houseStatusTagType(status: HouseStatus): 'info' | 'completed' | 'pendin
   return 'info'
 }
 
-/* ============ 房屋批量建房入口（原「房屋管理」Tab 能力并入，2026-09-20） ============ */
+/* ---------------- 房屋详情卡 / 状态变更 / 变更历史 ---------------- */
 
-const houseBatchVisible = ref(false)
+const houseInfoVisible = ref(false)
+const houseInfoEntry = ref<HouseEntry | null>(null)
 
-/** 预选上下文：当前选中节点逐级回推（单元 > 楼栋 > 社区），对话框内可改选 */
-const houseBatchInitialCommunityId = computed<number | ''>(() => selected.value?.communityId ?? '')
-const houseBatchInitialBuildingId = computed<number | ''>(
-  () => selectedBuildingNode.value?.building.id ?? ''
-)
-const houseBatchInitialUnitId = computed<number | ''>(() =>
-  selected.value?.type === 'unit' ? selected.value.unitId : ''
-)
+const houseHistory = ref<IHouseStatusHistory[]>([])
+const houseHistoryLoading = ref(false)
+let houseHistorySeq = 0
 
-function openHouseBatchCreate(): void {
-  houseBatchVisible.value = true
-}
-
-/** 单元节点「批量建房」：先选中该单元（右栏网格与对话框预选上下文同步到该单元），再开窗 */
-function openHouseBatchCreateForUnit(unit: IUnit, buildingNode: BuildingNode): void {
-  selectUnit(unit, buildingNode)
-  openHouseBatchCreate()
-}
-
-/* 批量建房单元可能不在当前网格视图内：仅同视图局部刷新，跨单元场景重载树与统计，
-   避免把当前单元的房屋清单误换成批量目标的单元数据 */
-function handleHouseBatchSaved(unitId: number): void {
-  const sel = selected.value
-  if (sel?.type === 'unit' && sel.unitId !== unitId) {
-    loadTree()
-  } else if (sel?.type === 'unit' || sel?.type === 'building') {
-    reloadUnitHouses(unitId)
-  } else {
-    loadTree()
+async function loadHouseHistory(houseId: number): Promise<void> {
+  const seq = ++houseHistorySeq
+  houseHistoryLoading.value = true
+  houseHistory.value = []
+  try {
+    const result = await getHouseStatusHistory(houseId, { page: 1, size: 20 })
+    if (seq !== houseHistorySeq) return
+    houseHistory.value = result.records
+  } catch {
+    if (seq === houseHistorySeq) houseHistory.value = []
+  } finally {
+    if (seq === houseHistorySeq) houseHistoryLoading.value = false
   }
-  loadStats()
 }
 
-/* ============ 房屋状态变更与变更历史（原「房屋管理」Tab 能力并入，2026-09-20） ============
-   状态变更走 updateHouseStatus 留痕接口（房屋编辑不含 status），变更历史读
-   /houses/{id}/status-history；两处入口（网格悬浮钮 / 信息卡）共用同一表单。 */
+function openHouseInfo(entry: HouseEntry): void {
+  houseInfoEntry.value = entry
+  houseInfoVisible.value = true
+  loadHouseHistory(entry.house.id)
+}
+
+/** 卡片点击分流：Ctrl/Cmd+左键切换多选；普通左键开信息卡；悬浮钮自带 .stop */
+function onHouseBlockClick(event: MouseEvent, entry: HouseEntry): void {
+  if (event.ctrlKey || event.metaKey) {
+    toggleHouseSelection(entry.house.id)
+    return
+  }
+  openHouseInfo(entry)
+}
 
 const statusDialogVisible = ref(false)
 const statusSubmitting = ref(false)
@@ -710,7 +703,7 @@ async function handleHouseStatusSubmit(): Promise<void> {
     ElMessage.success('房屋状态已更新')
     statusDialogVisible.value = false
     reloadUnitHouses(target.unitId)
-    loadStats()
+    refreshSelectedRowStats()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '状态变更失败')
   } finally {
@@ -718,61 +711,123 @@ async function handleHouseStatusSubmit(): Promise<void> {
   }
 }
 
-/* 信息卡内直达状态变更（触屏无悬浮态时的兜底路径），先收卡再走同一表单 */
 function statusFromInfo(): void {
-  const house = houseInfo.value
-  if (!house) return
+  const entry = houseInfoEntry.value
+  if (!entry) return
   houseInfoVisible.value = false
-  openHouseStatus(house)
+  openHouseStatus(entry.house)
 }
 
-/* 变更历史：随信息卡打开拉取，序号防护避免快速切换房屋时回写串号 */
-const houseHistory = ref<IHouseStatusHistory[]>([])
-const houseHistoryLoading = ref(false)
-let houseHistorySeq = 0
+function editFromInfo(): void {
+  const entry = houseInfoEntry.value
+  if (!entry) return
+  houseInfoVisible.value = false
+  openHouseEdit(entry)
+}
 
-async function loadHouseHistory(houseId: number): Promise<void> {
-  const seq = ++houseHistorySeq
-  houseHistoryLoading.value = true
-  houseHistory.value = []
+function deleteFromInfo(): void {
+  const entry = houseInfoEntry.value
+  if (!entry) return
+  houseInfoVisible.value = false
+  void handleHouseDelete(entry)
+}
+
+/* ---------------- 房屋增删改 ---------------- */
+
+const houseDialogVisible = ref(false)
+const houseEditing = ref<IHouse | null>(null)
+const houseUnitContext = ref<{ buildingName: string; unitId: number; unitName: string } | null>(null)
+
+function openHouseCreate(unit: IUnit, buildingName: string): void {
+  houseEditing.value = null
+  houseUnitContext.value = { buildingName, unitId: unit.id, unitName: unit.name }
+  houseDialogVisible.value = true
+}
+
+function openHouseEdit(entry: HouseEntry): void {
+  houseEditing.value = entry.house
+  houseUnitContext.value = {
+    buildingName: entry.buildingName,
+    unitId: entry.unitId,
+    unitName: entry.unitName
+  }
+  houseDialogVisible.value = true
+}
+
+function handleHouseSaved(unitId: number): void {
+  reloadUnitHouses(unitId)
+  refreshSelectedRowStats()
+}
+
+async function handleHouseDelete(entry: HouseEntry): Promise<void> {
   try {
-    const result = await getHouseStatusHistory(houseId, { page: 1, size: 20 })
-    if (seq !== houseHistorySeq) return
-    houseHistory.value = result.records
+    await ElMessageBox.confirm(
+      `确定删除房屋「${entry.house.houseNumber}」？若该房屋存在居住/租住关系，删除将被拒绝。`,
+      '删除房屋',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+    )
   } catch {
-    if (seq === houseHistorySeq) houseHistory.value = []
-  } finally {
-    if (seq === houseHistorySeq) houseHistoryLoading.value = false
+    return
+  }
+  try {
+    await deleteHouse(entry.house.id)
+    ElMessage.success('房屋已删除')
+    reloadUnitHouses(entry.unitId)
+    refreshSelectedRowStats()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '删除失败')
   }
 }
 
-/* ===================== 统计卡（楼栋/房屋/入住率走看板统计接口，单元由树聚合） ===================== */
+const batchDeleteRunning = ref(false)
 
-const dashboard = ref<IDashboardStats | null>(null)
-const statsLoading = ref(false)
-
-async function loadStats(): Promise<void> {
-  statsLoading.value = true
+/* 批量删除：一次确认（口径同单删的引用保护提示，带数量）→ 逐条删除（单条失败不中断）
+   → 汇报成功/失败明细 → 局部刷新受影响单元 → 选区清空 */
+async function handleHouseBatchDelete(): Promise<void> {
+  const targets = filteredEntries.value.filter((entry) => selectedHouseIds.value.has(entry.house.id))
+  if (targets.length === 0 || batchDeleteRunning.value) return
   try {
-    dashboard.value = await getDashboardStats()
+    await ElMessageBox.confirm(
+      `确定删除选中的 ${targets.length} 套房屋？若房屋存在居住/租住关系，删除将被拒绝。`,
+      '批量删除房屋',
+      { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
+    )
   } catch {
-    dashboard.value = null
-  } finally {
-    statsLoading.value = false
+    return
   }
+  batchDeleteRunning.value = true
+  const failed: { houseNumber: string; reason: string }[] = []
+  let deleted = 0
+  for (const entry of targets) {
+    try {
+      await deleteHouse(entry.house.id)
+      deleted += 1
+    } catch (error) {
+      failed.push({
+        houseNumber: entry.house.houseNumber,
+        reason: error instanceof Error ? error.message : '删除失败'
+      })
+    }
+  }
+  batchDeleteRunning.value = false
+  if (failed.length === 0) {
+    ElMessage.success(`已删除 ${deleted} 套房屋`)
+  } else {
+    ElMessageBox.alert(
+      `批量删除完成：成功 ${deleted} 套，失败 ${failed.length} 套。失败房屋：${failed
+        .map((item) => `${item.houseNumber}（${item.reason}）`)
+        .join('、')}`,
+      '批量删除结果',
+      { type: 'warning', confirmButtonText: '知道了' }
+    ).catch(() => {})
+  }
+  const affectedUnitIds = [...new Set(targets.map((entry) => entry.unitId))]
+  affectedUnitIds.forEach((unitId) => reloadUnitHouses(unitId))
+  refreshSelectedRowStats()
+  clearHouseSelection()
 }
 
-const occupancyNum = computed(() => {
-  const total = dashboard.value?.houseCount ?? 0
-  if (!total) return null
-  return ((dashboard.value?.occupiedHouseCount ?? 0) / total) * 100
-})
-
-const occupancyLabel = computed(() =>
-  occupancyNum.value === null ? '-' : occupancyNum.value.toFixed(1)
-)
-
-/* ===================== 社区/楼栋/单元 增删改（对话框 + 级联删除确认） ===================== */
+/* ===================== 社区 / 楼栋 / 单元 增删改 ===================== */
 
 const communityDialogVisible = ref(false)
 const communityEditing = ref<ICommunity | null>(null)
@@ -787,104 +842,122 @@ function openCommunityEdit(community: ICommunity): void {
   communityDialogVisible.value = true
 }
 
+function handleCommunitySaved(entity: ICommunity): void {
+  if (selectedCommunityId.value === entity.id) {
+    selectedCommunity.value = entity
+  } else {
+    selectCommunity(entity, true)
+  }
+  loadCommunities()
+}
+
+/** 选中社区概览计数刷新（结构与房屋变动后行概览同步，避免两处数字打架） */
+function refreshSelectedRowStats(): void {
+  const row = communityRows.value.find((item) => item.community.id === selectedCommunityId.value)
+  if (!row) return
+  row.statsLoading = true
+  const communityId = row.community.id
+  getDashboardStats({ communityId })
+    .then((stats) => {
+      row.buildingCount = stats.buildingCount
+      row.houseCount = stats.houseCount
+      row.occupiedCount = stats.occupiedHouseCount
+    })
+    .catch(() => {})
+    .finally(() => {
+      row.statsLoading = false
+    })
+}
+
 const buildingDialogVisible = ref(false)
 const buildingEditing = ref<IBuilding | null>(null)
-const buildingDefaultCommunityId = ref<number | null>(null)
 
-function openBuildingCreate(community: ICommunity): void {
+function openBuildingCreate(): void {
   buildingEditing.value = null
-  buildingDefaultCommunityId.value = community.id
   buildingDialogVisible.value = true
 }
 
 function openBuildingEdit(building: IBuilding): void {
   buildingEditing.value = building
-  buildingDefaultCommunityId.value = building.communityId
   buildingDialogVisible.value = true
+}
+
+function handleBuildingSaved(entity: IBuilding): void {
+  expandedBuildings.value[entity.id] = true
+  selectBuilding(entity.id)
+  refreshStructure()
 }
 
 const unitDialogVisible = ref(false)
 const unitEditing = ref<IUnit | null>(null)
-const unitDefaultCommunityId = ref<number | null>(null)
 const unitDefaultBuildingId = ref<number | null>(null)
 
-function openUnitCreate(buildingNode: BuildingNode): void {
+function openUnitCreate(buildingId: number): void {
   unitEditing.value = null
-  unitDefaultCommunityId.value = buildingNode.building.communityId
-  unitDefaultBuildingId.value = buildingNode.building.id
+  unitDefaultBuildingId.value = buildingId
   unitDialogVisible.value = true
 }
 
-function openUnitEdit(unit: IUnit, buildingNode: BuildingNode): void {
+function openUnitEdit(unit: IUnit, buildingId: number): void {
   unitEditing.value = unit
-  unitDefaultCommunityId.value = buildingNode.building.communityId
-  unitDefaultBuildingId.value = buildingNode.building.id
+  unitDefaultBuildingId.value = buildingId
   unitDialogVisible.value = true
-}
-
-/* ============ 整栋创建（第三轮 C3，升级自 A7 批量建楼）/ 批量建单元（A7 7.2） ============ */
-
-const buildingCreateVisible = ref(false)
-const unitBatchVisible = ref(false)
-
-/** 整栋创建入口（树工具条）：一次生成楼栋+单元+房屋基础数据，预选当前选中社区 */
-function openWholeBuildingCreate(): void {
-  buildingCreateVisible.value = true
-}
-
-const buildingCreateDefaultCommunityId = computed<number | null>(
-  () => selected.value?.communityId ?? tree.value[0]?.community.id ?? null
-)
-
-/** 批量建单元入口（楼栋详情卡）：目标楼栋为当前选中楼栋 */
-const unitBatchTargetBuilding = computed<IBuilding | null>(
-  () => selectedBuildingNode.value?.building ?? null
-)
-
-function openUnitBatchCreate(): void {
-  if (!selectedBuildingNode.value) return
-  unitBatchVisible.value = true
-}
-
-/* 保存后：展开目标社区/楼栋并刷新树与统计（选中节点由 ensureSelection 维护） */
-function handleBuildingCreateSaved(communityId: number): void {
-  expanded.value[`c${communityId}`] = true
-  loadTree()
-  loadStats()
-}
-
-function handleUnitBatchSaved(buildingId: number): void {
-  const building = selectedBuildingNode.value?.building
-  if (building) {
-    expanded.value[`c${building.communityId}`] = true
-  }
-  expanded.value[`b${buildingId}`] = true
-  loadTree()
-  loadStats()
-}
-
-/* 保存后刷新树/统计，并展开到被保存的节点（新建后立即可见） */
-function handleCommunitySaved(entity: ICommunity): void {
-  expanded.value[`c${entity.id}`] = true
-  loadTree()
-  loadStats()
-}
-
-function handleBuildingSaved(entity: IBuilding): void {
-  expanded.value[`c${entity.communityId}`] = true
-  expanded.value[`b${entity.id}`] = true
-  loadTree()
-  loadStats()
 }
 
 function handleUnitSaved(entity: IUnit): void {
-  expanded.value[`c${entity.communityId}`] = true
-  expanded.value[`b${entity.buildingId}`] = true
-  loadTree()
-  loadStats()
+  expandedBuildings.value[entity.buildingId] = true
+  refreshStructure()
 }
 
-/* 社区删除：级联删除能力（R1/R6 v1.1），确认文案与 CommunityListView 原样一致 */
+function refreshStructure(): void {
+  if (selectedCommunityId.value === null) return
+  loadStructure(selectedCommunityId.value)
+  refreshSelectedRowStats()
+}
+
+/* ---------------- 单元批量建 / 房屋批量建 ---------------- */
+
+const unitBatchVisible = ref(false)
+const unitBatchTarget = ref<IBuilding | null>(null)
+
+function openUnitBatchCreate(building: IBuilding): void {
+  unitBatchTarget.value = building
+  unitBatchVisible.value = true
+}
+
+function handleUnitBatchSaved(buildingId: number): void {
+  expandedBuildings.value[buildingId] = true
+  refreshStructure()
+}
+
+const houseBatchVisible = ref(false)
+
+/** 单元内补建房屋：预选当前筛选到的楼栋/单元（无筛选时留空由用户选择） */
+function openHouseBatchCreate(): void {
+  houseBatchVisible.value = true
+}
+
+/* 目标单元可能不在当前筛选内：整体重载结构，避免把当前结果误换成批量目标的数据 */
+function handleHouseBatchSaved(_unitId: number): void {
+  refreshStructure()
+}
+
+const structureGenerateVisible = ref(false)
+
+function openStructureGenerate(): void {
+  structureGenerateVisible.value = true
+}
+
+function handleStructureGenerated(): void {
+  refreshStructure()
+}
+
+function handleViewStructure(communityId: number): void {
+  focusCommunity(communityId)
+}
+
+/* ---------------- 社区删除 / 启用停用 ---------------- */
+
 async function handleCommunityDelete(community: ICommunity): Promise<void> {
   try {
     await ElMessageBox.confirm(
@@ -898,14 +971,13 @@ async function handleCommunityDelete(community: ICommunity): Promise<void> {
   try {
     await deleteCommunity(community.id)
     ElMessage.success('社区已删除')
-    loadTree()
-    loadStats()
+    if (selectedCommunityId.value === community.id) clearDetail()
+    loadCommunities()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '删除失败')
   }
 }
 
-/* 社区启用/停用：沿用 CommunityListView 确认文案与接口 */
 async function handleCommunityToggle(community: ICommunity): Promise<void> {
   const next: CommunityStatus = community.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
   const action = next === 'ACTIVE' ? '启用' : '停用'
@@ -921,19 +993,190 @@ async function handleCommunityToggle(community: ICommunity): Promise<void> {
   try {
     await updateCommunityStatus(community.id, { status: next })
     ElMessage.success(`社区已${action}`)
-    loadTree()
+    loadCommunities()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : `${action}失败`)
   }
 }
 
-/* ============ 楼栋删除（R4-D2）：空楼栋直删 + 非空级联范围确认与自底向上编排 ============
+/* ===================== 批量管理社区（仅超管） ===================== */
+
+const batchSelection = ref<Set<number>>(new Set())
+const batchRunning = ref(false)
+
+/** 单次批量上限（后端约束：ids 非空且最多 50 个，越界直接拒绝） */
+const MAX_BATCH = 50
+
+const batchSelectedCount = computed(() => batchSelection.value.size)
+
+/** 跨页累计选择可能超过后端单次上限：提交前拦住并明示原因 */
+function batchOverLimit(ids: number[]): boolean {
+  if (ids.length > MAX_BATCH) {
+    ElMessage.error(`单次最多批量处理 ${MAX_BATCH} 个社区（当前已选 ${ids.length} 个），请减少选择后重试`)
+    return true
+  }
+  return false
+}
+
+function isBatchSelected(communityId: number): boolean {
+  return batchSelection.value.has(communityId)
+}
+
+function toggleBatchSelection(communityId: number): void {
+  const next = new Set(batchSelection.value)
+  if (next.has(communityId)) {
+    next.delete(communityId)
+  } else {
+    next.add(communityId)
+  }
+  batchSelection.value = next
+}
+
+const pageAllSelected = computed(
+  () => communityRows.value.length > 0 && communityRows.value.every((row) => isBatchSelected(row.community.id))
+)
+
+function togglePageSelection(): void {
+  const next = new Set(batchSelection.value)
+  if (pageAllSelected.value) {
+    communityRows.value.forEach((row) => next.delete(row.community.id))
+  } else {
+    communityRows.value.forEach((row) => next.add(row.community.id))
+  }
+  batchSelection.value = next
+}
+
+function clearBatchSelection(): void {
+  batchSelection.value = new Set()
+}
+
+/* 后端批量端点按「部分成功」返回：逐条原因必须落到用户可见的清单，不能只报成功/失败 */
+const batchResultVisible = ref(false)
+const batchResult = reactive({
+  successCount: 0,
+  successText: '',
+  intro: '',
+  warning: '',
+  failures: [] as IBatchFailure[]
+})
+
+/** 失败项只带 ID 时补社区名，让「哪个失败了」无需另行查号 */
+function resolveFailures(failures: IBatchFailure[]): IBatchFailure[] {
+  return failures.map((item) => {
+    if (item.name) return item
+    const row = communityRows.value.find((entry) => entry.community.id === item.id)
+    return row ? { ...item, name: row.community.name } : item
+  })
+}
+
+function showBatchResult(payload: {
+  successCount: number
+  successText: string
+  intro: string
+  warning?: string
+  failures: IBatchFailure[]
+}): void {
+  batchResult.successCount = payload.successCount
+  batchResult.successText = payload.successText
+  batchResult.intro = payload.intro
+  batchResult.warning = payload.warning ?? ''
+  batchResult.failures = resolveFailures(payload.failures)
+  batchResultVisible.value = true
+}
+
+const batchSelectedNames = computed(() =>
+  communityRows.value.filter((row) => isBatchSelected(row.community.id)).map((row) => row.community.name)
+)
+
+async function handleBatchStatus(status: CommunityStatus): Promise<void> {
+  const ids = [...batchSelection.value]
+  if (ids.length === 0 || batchRunning.value) return
+  if (batchOverLimit(ids)) return
+  const action = status === 'ACTIVE' ? '批量启用' : '批量停用'
+  try {
+    await ElMessageBox.confirm(
+      `将${action}选中的 ${ids.length} 个社区${
+        batchSelectedNames.value.length > 0 ? `：${batchSelectedNames.value.join('、')}` : ''
+      }？${status === 'INACTIVE' ? '停用后这些社区的相关业务将不可用。' : ''}`,
+      `${action}社区`,
+      { type: 'warning', confirmButtonText: action, cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  batchRunning.value = true
+  try {
+    const result = await batchUpdateCommunityStatus(ids, status)
+    showBatchResult({
+      successCount: result.successIds.length,
+      successText: `个社区已${status === 'ACTIVE' ? '启用' : '停用'}`,
+      intro: `${action}：已提交 ${ids.length} 个社区。`,
+      failures: result.failures
+    })
+    clearBatchSelection()
+    loadCommunities()
+    if (selectedCommunity.value && ids.includes(selectedCommunity.value.id)) {
+      selectedCommunity.value = { ...selectedCommunity.value, status }
+    }
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : `${action}失败`)
+  } finally {
+    batchRunning.value = false
+  }
+}
+
+/* 批量删除是级联删除：两步确认，第二步写明不可恢复（数据面无回退路径） */
+async function handleBatchDelete(): Promise<void> {
+  const ids = [...batchSelection.value]
+  if (ids.length === 0 || batchRunning.value) return
+  if (batchOverLimit(ids)) return
+  try {
+    await ElMessageBox.confirm(
+      `将【级联删除】选中的 ${ids.length} 个社区${
+        batchSelectedNames.value.length > 0 ? `：${batchSelectedNames.value.join('、')}` : ''
+      }。这会一并删除这些社区下的全部楼栋、单元、房屋、公共资源、房源及关联业务数据。`,
+      '批量删除社区（级联删除）',
+      { type: 'error', confirmButtonText: '我已了解，继续', cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  try {
+    await ElMessageBox.confirm(
+      `最终确认：这 ${ids.length} 个社区及其全部下级数据将被永久删除，不可恢复、不可撤销。确定执行？`,
+      '不可恢复操作',
+      { type: 'error', confirmButtonText: '确认级联删除', cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  batchRunning.value = true
+  try {
+    const result = await batchDeleteCommunities(ids)
+    showBatchResult({
+      successCount: result.successIds.length,
+      successText: '个社区已级联删除',
+      intro: `批量删除：已提交 ${ids.length} 个社区。`,
+      warning: '级联删除不可恢复；未完成的社区及其下级数据仍完整保留，可按失败原因处理后重试。',
+      failures: result.failures
+    })
+    if (selectedCommunityId.value !== null && ids.includes(selectedCommunityId.value)) {
+      clearDetail()
+    }
+    clearBatchSelection()
+    loadCommunities()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '批量删除失败')
+  } finally {
+    batchRunning.value = false
+  }
+}
+
+/* ===================== 楼栋删除（空楼栋直删 + 非空前端编排级联） =====================
 
    后端现状（BuildingService.delete）：无单元直接软删成功，有单元即拒（5102），
-   无事务性级联端点（BEAUTIFY_NOTES「后端适配清单·楼栋删除事务级联」）。
-   非空楼栋由前端自底向上编排：逐单元删房屋 → 删单元 → 最后删楼栋。
-   该编排不是后端事务：任一步失败即停止并汇报剩余明细，树刷新到实际状态，
-   已删除部分不可自动回滚——后端级联端点就绪后本编排可整体替换。 */
+   无事务性级联端点。非空楼栋由前端自底向上编排：逐单元删房屋 → 删单元 → 最后删楼栋。
+   该编排不是后端事务：任一步失败即停止并汇报剩余明细，已删部分不可自动回滚。 */
 
 type BuildingDeletePhase = 'loading' | 'error' | 'confirm' | 'running' | 'done'
 
@@ -941,7 +1184,6 @@ const buildingDeleteVisible = ref(false)
 const buildingDeletePhase = ref<BuildingDeletePhase>('loading')
 const buildingDeleteNode = ref<BuildingNode | null>(null)
 
-/** 级联计划：树内单元顺序 + 逐单元房屋清单（范围展示与执行共用同一数据源） */
 interface BuildingCascadeGroup {
   unit: IUnit
   houses: IHouse[]
@@ -951,16 +1193,10 @@ const buildingCascadePlan = ref<BuildingCascadeGroup[]>([])
 const buildingCascadeError = ref('')
 const buildingCascadeCompleted = ref(0)
 const buildingCascadeTotal = ref(0)
+const buildingCascadeFailure = ref<{ unitIndex: number; houseIndex: number; reason: string } | null>(
+  null
+)
 
-/** 中断定位：houseIndex=该单元房屋数表示房屋已清但单元删除失败；
-    unitIndex=计划长度表示单元全删、仅剩楼栋本体删除失败 */
-const buildingCascadeFailure = ref<{
-  unitIndex: number
-  houseIndex: number
-  reason: string
-} | null>(null)
-
-/** 范围统计序列号：对话框取消/关闭后，在途统计的回写作废 */
 let cascadeSeq = 0
 
 const buildingCascadeHouseCount = computed(() =>
@@ -973,7 +1209,6 @@ const buildingCascadePercent = computed(() =>
     : Math.round((buildingCascadeCompleted.value / buildingCascadeTotal.value) * 100)
 )
 
-/* 中断汇报的已完成数：失败单元之前的单元已全部删除，房屋按失败定位累计 */
 const buildingCascadeDeletedUnits = computed(() => buildingCascadeFailure.value?.unitIndex ?? 0)
 
 const buildingCascadeDeletedHouses = computed(() => {
@@ -986,8 +1221,6 @@ const buildingCascadeDeletedHouses = computed(() => {
   return count
 })
 
-/* 中断汇报的剩余明细：自失败单元起，房屋自失败房号起
-   （单元删除失败时该单元房屋已清空，仅剩单元本身） */
 const buildingCascadeRemainingHouses = computed<BuildingCascadeGroup[]>(() => {
   const fail = buildingCascadeFailure.value
   if (!fail) return []
@@ -1010,13 +1243,11 @@ function buildingCascadeErrorText(error: unknown): string {
   return error instanceof Error ? error.message : '删除失败'
 }
 
-/* 楼栋删除统一入口（树节点悬浮钮 + 详情卡删除钮）：空楼栋走原直删确认，非空走级联对话框 */
-async function handleBuildingDelete(buildingNode: BuildingNode): Promise<void> {
-  if (buildingNode.units.length === 0) {
-    /* 空楼栋：后端无单元即软删成功，直删路径（口径：为空直删、不可恢复） */
+async function handleBuildingDelete(node: BuildingNode): Promise<void> {
+  if (node.units.length === 0) {
     try {
       await ElMessageBox.confirm(
-        `该楼栋为空（无单元），将直接删除楼栋「${buildingNode.building.name}」，删除后不可恢复。确定删除？`,
+        `该楼栋为空（无单元），将直接删除楼栋「${node.building.name}」，删除后不可恢复。确定删除？`,
         '删除楼栋',
         { type: 'warning', confirmButtonText: '删除', cancelButtonText: '取消' }
       )
@@ -1024,37 +1255,35 @@ async function handleBuildingDelete(buildingNode: BuildingNode): Promise<void> {
       return
     }
     try {
-      await deleteBuilding(buildingNode.building.id)
+      await deleteBuilding(node.building.id)
       ElMessage.success('楼栋已删除')
-      loadTree()
-      loadStats()
+      refreshStructure()
     } catch (error) {
       ElMessage.error(buildingCascadeErrorText(error))
     }
     return
   }
-  buildingDeleteNode.value = buildingNode
+  buildingDeleteNode.value = node
   buildingCascadeFailure.value = null
   buildingCascadeCompleted.value = 0
   buildingDeleteVisible.value = true
-  await prepareBuildingCascade(buildingNode)
+  await prepareBuildingCascade(node)
 }
 
-/* 范围统计：逐单元拉齐房屋清单（与树单元加载同口径 size 上限），作为展示与执行计划 */
-async function prepareBuildingCascade(buildingNode: BuildingNode): Promise<void> {
+/** 范围统计：逐单元拉齐房屋清单（与结构加载同口径），作为展示与执行计划 */
+async function prepareBuildingCascade(node: BuildingNode): Promise<void> {
   const seq = ++cascadeSeq
   buildingDeletePhase.value = 'loading'
   buildingCascadeError.value = ''
   try {
     const plan = await Promise.all(
-      buildingNode.units.map(async (unit) => ({
-        unit,
-        houses: (await getHouseList(unit.id, { page: 1, size: 200 })).records
+      node.units.map(async (unitNode) => ({
+        unit: unitNode.unit,
+        houses: (await getHouseList(unitNode.unit.id, { page: 1, size: 200 })).records
       }))
     )
     if (seq !== cascadeSeq) return
     buildingCascadePlan.value = plan
-    /* 进度分母 = 房屋 + 单元 + 楼栋本体 */
     buildingCascadeTotal.value =
       plan.reduce((sum, group) => sum + group.houses.length, 0) + plan.length + 1
     buildingDeletePhase.value = 'confirm'
@@ -1070,13 +1299,10 @@ function retryBuildingCascade(): void {
   if (node) void prepareBuildingCascade(node)
 }
 
-/* 对话框任意路径关闭后在途统计作废（loading 态取消不留脏状态） */
 function handleBuildingDeleteClose(): void {
   cascadeSeq += 1
 }
 
-/* 自底向上编排：逐单元删房屋 → 删单元 → 删楼栋。任一步失败即停止（停止点即剩余起点），
-   树与统计先刷新到实际状态，再于对话框内汇报剩余明细（非事务，不回滚已删部分） */
 async function runBuildingCascade(): Promise<void> {
   const node = buildingDeleteNode.value
   if (!node || buildingDeletePhase.value === 'running') return
@@ -1120,8 +1346,7 @@ async function runBuildingCascade(): Promise<void> {
     }
   }
 
-  loadTree()
-  loadStats()
+  refreshStructure()
 
   if (fail) {
     buildingCascadeFailure.value = fail
@@ -1135,7 +1360,6 @@ async function runBuildingCascade(): Promise<void> {
   )
 }
 
-/* 单元删除：确认文案与 UnitListView 原样一致（引用保护由后端报错） */
 async function handleUnitDelete(unit: IUnit): Promise<void> {
   try {
     await ElMessageBox.confirm(
@@ -1149,140 +1373,413 @@ async function handleUnitDelete(unit: IUnit): Promise<void> {
   try {
     await deleteUnit(unit.id)
     ElMessage.success('单元已删除')
-    loadTree()
-    loadStats()
+    refreshStructure()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '删除失败')
   }
 }
 
-/* ===================== 社区设置入口（隐藏下钻 /admin/communities/:id） ===================== */
+/* ===================== 社区设置入口（隐藏下钻页） ===================== */
 
 function goCommunitySettings(): void {
-  if (!selectedCommunity.value) return
-  router.push(`/admin/communities/${selectedCommunity.value.community.id}`)
+  if (selectedCommunity.value) {
+    router.push(`/admin/communities/${selectedCommunity.value.id}`)
+  }
 }
 
-onMounted(() => {
-  loadTree()
-  loadStats()
+/* ===================== 初始化 ===================== */
+
+onMounted(async () => {
+  await loadCommunities()
+  /* 旧深链（/admin/houses?communityId=x 等 redirect 承接）与详情页「前往社区结构」在此消费 */
+  const deepLink = Number(route.query.communityId)
+  if (Number.isFinite(deepLink) && deepLink > 0) {
+    focusCommunity(deepLink)
+  }
 })
 </script>
 
 <template>
-  <section class="tree-pane">
-    <!-- 顶部 4 统计卡 -->
-    <div v-loading="statsLoading" class="stat-row">
-      <AdminStatCard
-        label="楼栋"
-        :value="dashboard?.buildingCount ?? 0"
-        unit="栋"
-        :icon="ICONS.building"
-        accent="primary"
-      />
-      <AdminStatCard
-        label="单元"
-        :value="unitTotal"
-        unit="个"
-        :icon="ICONS.unit"
-        accent="success"
-      />
-      <AdminStatCard
-        label="房屋总数"
-        :value="dashboard?.houseCount ?? 0"
-        unit="套"
-        :icon="ICONS.home"
-        accent="warning"
-      />
-      <AdminStatCard
-        label="入住率"
-        :value="occupancyLabel"
-        unit="%"
-        :icon="ICONS.donut"
-        accent="primary"
-      >
-        <template #extra>
-          <span
-            v-if="occupancyNum !== null"
-            class="occupancy-donut"
-            :style="{ '--pct': occupancyNum }"
-            :title="`已入住 ${dashboard?.occupiedHouseCount ?? 0} / 共 ${dashboard?.houseCount ?? 0} 套`"
-          />
-        </template>
-      </AdminStatCard>
-    </div>
+  <section class="manage">
+    <!-- ==================== 左栏：社区列表（筛选 → 分页 → 选中） ==================== -->
+    <aside class="rail">
+      <header class="rail-head">
+        <div class="rail-title-line">
+          <h3 class="rail-title">社区</h3>
+          <span class="rail-total">共 {{ listTotal }} 个</span>
+        </div>
+        <el-button
+          v-permission="['SUPER_ADMIN']"
+          type="primary"
+          size="small"
+          @click="openCommunityCreate"
+        >
+          新增社区
+        </el-button>
+      </header>
 
-    <!-- 左右主从布局 -->
-    <div class="master-detail">
-      <!-- 左栏：社区→楼栋→单元三级树 -->
-      <aside class="tree-panel">
-        <header class="tree-head">
-          <h3 class="panel-title">
-            <span class="panel-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path v-for="(d, i) in ICONS.sitemap" :key="i" :d="d" />
-              </svg>
-            </span>
-            社区结构
-          </h3>
-          <div class="tree-head-actions">
-            <el-button
-              v-permission="['ADMIN', 'SUPER_ADMIN']"
-              size="small"
-              @click="openWholeBuildingCreate"
+      <div class="rail-filters">
+        <el-input
+          v-model="query.keyword"
+          size="small"
+          placeholder="搜索社区名称 / 地址"
+          clearable
+          @keyup.enter="handleSearch"
+          @clear="handleSearch"
+        >
+          <template #prefix>
+            <svg
+              class="field-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
             >
-              整栋创建
-            </el-button>
-            <el-button
-              v-permission="['SUPER_ADMIN']"
-              type="primary"
-              size="small"
-              @click="openCommunityCreate"
+              <path v-for="(d, i) in ICONS.search" :key="i" :d="d" />
+            </svg>
+          </template>
+        </el-input>
+        <div class="status-chips" role="group" aria-label="按状态筛选社区">
+          <button
+            v-for="item in statusFilters"
+            :key="item.value"
+            type="button"
+            class="chip-btn"
+            :class="{ active: query.status === item.value }"
+            @click="handleStatusFilter(item.value)"
+          >
+            {{ item.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 批量操作条（仅超管）：多选后浮出，动作全部按「部分成功」汇报 -->
+      <div v-if="isSuperAdmin" class="batch-bar" :class="{ 'is-active': batchSelectedCount > 0 }">
+        <template v-if="batchSelectedCount > 0">
+          <span class="batch-count">已选 {{ batchSelectedCount }} 个</span>
+          <div class="batch-actions">
+            <button type="button" class="text-btn" :disabled="batchRunning" @click="handleBatchStatus('ACTIVE')">
+              批量启用
+            </button>
+            <button type="button" class="text-btn" :disabled="batchRunning" @click="handleBatchStatus('INACTIVE')">
+              批量停用
+            </button>
+            <button
+              type="button"
+              class="text-btn is-danger"
+              :disabled="batchRunning"
+              @click="handleBatchDelete"
             >
+              批量删除
+            </button>
+            <button type="button" class="text-btn is-muted" @click="clearBatchSelection">取消选择</button>
+          </div>
+        </template>
+        <template v-else>
+          <el-checkbox
+            :model-value="pageAllSelected"
+            :indeterminate="batchSelectedCount > 0 && !pageAllSelected"
+            :disabled="communityRows.length === 0"
+            size="small"
+            @change="togglePageSelection"
+          >
+            全选本页
+          </el-checkbox>
+          <span class="batch-tip">勾选社区后可批量启用 / 停用 / 删除</span>
+        </template>
+      </div>
+
+      <div class="rail-body">
+        <div v-if="listLoading" class="rail-skeleton">
+          <el-skeleton :rows="5" animated />
+        </div>
+
+        <div v-else-if="listError" class="rail-state">
+          <p class="state-title">社区列表加载失败</p>
+          <p class="state-text">{{ listError }}</p>
+          <el-button size="small" @click="loadCommunities">重试</el-button>
+        </div>
+
+        <div v-else-if="communityRows.length === 0" class="rail-state">
+          <template v-if="filtered">
+            <p class="state-title">没有匹配的社区</p>
+            <p class="state-text">换个关键字，或把状态筛选切回「全部」。</p>
+            <el-button size="small" @click="resetListQuery">清空筛选</el-button>
+          </template>
+          <template v-else>
+            <p class="state-title">还没有社区</p>
+            <p class="state-text">
+              先新增一个社区，再进入「批量建房」一次生成楼栋、单元与房屋。
+            </p>
+            <el-button v-permission="['SUPER_ADMIN']" type="primary" size="small" @click="openCommunityCreate">
               新增社区
             </el-button>
-          </div>
-        </header>
+          </template>
+        </div>
 
-        <div v-loading="treeLoading" class="tree-body">
-          <p v-if="!treeLoading && tree.length === 0" class="tree-empty">暂无社区，请先新建</p>
-          <ul v-else class="tree-root" role="tree" aria-label="社区结构树">
-            <li v-for="communityNode in tree" :key="communityNode.community.id">
+        <ul v-else class="rail-list">
+          <li v-for="row in communityRows" :key="row.community.id">
+            <div
+              class="community-item"
+              :class="{ 'is-active': row.community.id === selectedCommunityId }"
+            >
+              <el-checkbox
+                v-if="isSuperAdmin"
+                class="item-check"
+                :model-value="isBatchSelected(row.community.id)"
+                @change="toggleBatchSelection(row.community.id)"
+                @click.stop
+              />
+              <button type="button" class="item-main" @click="selectCommunity(row.community)">
+                <span class="item-line">
+                  <span class="item-name">{{ row.community.name }}</span>
+                  <StatusTag
+                    :label="communityStatusLabels[row.community.status]"
+                    :type="row.community.status === 'ACTIVE' ? 'completed' : 'canceled'"
+                  />
+                </span>
+                <span class="item-meta">
+                  <template v-if="row.statsLoading">统计中…</template>
+                  <template v-else>
+                    {{ row.buildingCount }} 栋 · {{ row.houseCount }} 套 · 入住率
+                    {{ row.houseCount === 0 ? '-' : `${Math.round((row.occupiedCount / row.houseCount) * 100)}%` }}
+                  </template>
+                </span>
+                <span class="item-address">{{ row.community.address }}</span>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <Pagination
+        v-if="listTotal > query.size"
+        :page="query.page"
+        :size="query.size"
+        :total="listTotal"
+        layout="prev, pager, next"
+        @update:page="handlePageChange"
+        @update:size="handleSizeChange"
+      />
+    </aside>
+
+    <!-- ==================== 右栏：选中社区详情 ==================== -->
+    <main class="detail">
+      <article v-if="!selectedCommunity" class="panel empty-panel">
+        <el-empty
+          :description="
+            communityRows.length === 0
+              ? '还没有社区数据。新增社区后即可在这里管理楼栋、单元与房屋。'
+              : '从左侧选择一个社区，查看其楼栋、单元与房屋结构。'
+          "
+        />
+      </article>
+
+      <template v-else>
+        <!-- 社区头部：状态与联系方式 + 关键数字（视觉重心） -->
+        <article class="panel head-card">
+          <header class="head-top">
+            <div class="head-identity">
+              <h2 class="head-name">
+                {{ selectedCommunity.name }}
+                <StatusTag
+                  :label="communityStatusLabels[selectedCommunity.status]"
+                  :type="selectedCommunity.status === 'ACTIVE' ? 'completed' : 'canceled'"
+                />
+              </h2>
+              <p class="head-meta">
+                <span>{{ selectedCommunity.address }}</span>
+                <span v-if="selectedCommunity.contactPerson">联系人 {{ selectedCommunity.contactPerson }}</span>
+                <span v-if="selectedCommunity.contactPhone">{{ selectedCommunity.contactPhone }}</span>
+                <span>
+                  入住申请
+                  {{ selectedCommunity.autoApproveResidence ? `提交即通过（默认 ${selectedCommunity.defaultLeaseMonths ?? 12} 个月）` : '人工审核' }}
+                </span>
+              </p>
+            </div>
+            <div class="head-actions">
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                type="primary"
+                size="small"
+                @click="openStructureGenerate"
+              >
+                批量建房
+              </el-button>
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                size="small"
+                @click="openCommunityEdit(selectedCommunity)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                size="small"
+                :type="selectedCommunity.status === 'ACTIVE' ? 'danger' : 'success'"
+                plain
+                @click="handleCommunityToggle(selectedCommunity)"
+              >
+                {{ selectedCommunity.status === 'ACTIVE' ? '停用' : '启用' }}
+              </el-button>
+              <el-button
+                v-permission="['SUPER_ADMIN']"
+                size="small"
+                type="danger"
+                plain
+                @click="handleCommunityDelete(selectedCommunity)"
+              >
+                删除
+              </el-button>
+              <el-button link type="primary" size="small" @click="goCommunitySettings">
+                社区设置
+              </el-button>
+            </div>
+          </header>
+
+          <div v-if="structureLoading && !structureLoaded" class="metric-strip">
+            <el-skeleton :rows="1" animated />
+          </div>
+          <div v-else class="metric-strip">
+            <div class="metric-cell">
+              <b>{{ communityMetrics.buildings }}</b>
+              <span>栋楼栋</span>
+            </div>
+            <div class="metric-cell">
+              <b>{{ communityMetrics.units }}</b>
+              <span>个单元</span>
+            </div>
+            <div class="metric-cell">
+              <b>{{ communityMetrics.houses }}</b>
+              <span>套房屋</span>
+            </div>
+            <div class="metric-cell">
+              <b>{{ communityMetrics.vacant }}</b>
+              <span>套空置</span>
+            </div>
+            <div class="metric-cell">
+              <b>{{ communityMetrics.occupancy === null ? '-' : communityMetrics.occupancy.toFixed(1) }}</b>
+              <span>% 入住率</span>
+              <i
+                v-if="communityMetrics.occupancy !== null"
+                class="occupancy-donut"
+                :style="{ '--pct': communityMetrics.occupancy }"
+                :title="`已入住房屋占全部房屋的比例`"
+              />
+            </div>
+          </div>
+        </article>
+
+        <!-- 结构目录：楼栋 → 单元两级选择器（每级带计数，点击即筛选） -->
+        <article class="panel outline-panel">
+          <header class="panel-head">
+            <h3 class="panel-title">
+              <span class="panel-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path v-for="(d, i) in ICONS.sitemap" :key="i" :d="d" />
+                </svg>
+              </span>
+              结构目录
+            </h3>
+            <div class="panel-actions">
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                size="small"
+                @click="openBuildingCreate"
+              >
+                新增楼栋
+              </el-button>
+              <el-button
+                v-if="filtersActive"
+                size="small"
+                link
+                type="primary"
+                @click="clearAllFilters"
+              >
+                清除筛选
+              </el-button>
+            </div>
+          </header>
+
+          <div v-if="structureLoading && !structureLoaded" class="outline-skeleton">
+            <el-skeleton :rows="4" animated />
+          </div>
+
+          <div v-else-if="structureError" class="outline-state">
+            <p class="state-title">结构加载失败</p>
+            <p class="state-text">{{ structureError }}</p>
+            <el-button size="small" @click="retryStructure">重试</el-button>
+          </div>
+
+          <div v-else-if="!structureLoading && buildings.length === 0" class="outline-state">
+            <p class="state-title">该社区还没有楼栋</p>
+            <p class="state-text">
+              用右上角「批量建房」一次生成 楼栋 → 单元 → 房屋；也可以点「新增楼栋」单独建一栋。
+            </p>
+          </div>
+
+          <ul v-else-if="buildings.length > 0" class="outline">
+            <!-- 全部楼栋：清除楼栋筛选，回到整个社区 -->
+            <li>
+              <div class="outline-row is-root" :class="{ 'is-active': activeBuildingId === null }">
+                <span class="row-toggle is-leaf" aria-hidden="true" />
+                <button type="button" class="row-label" @click="selectBuilding(null)">
+                  全部楼栋
+                </button>
+                <span class="row-counts">
+                  <b>{{ buildings.length }}</b> 栋 · <b>{{ communityMetrics.units }}</b> 单元 ·
+                  <b>{{ communityMetrics.houses }}</b> 套 · 空置 <b>{{ communityMetrics.vacant }}</b>
+                </span>
+              </div>
+            </li>
+
+            <li v-for="node in buildings" :key="node.building.id">
               <div
-                class="tree-node is-community"
+                class="outline-row is-building"
                 :class="{
-                  selected: activeView === 'community' && selectedCommunity?.community.id === communityNode.community.id,
-                  'is-inactive': communityNode.community.status === 'INACTIVE'
+                  'is-active': activeBuildingId === node.building.id,
+                  'is-open': expandedBuildings[node.building.id]
                 }"
-                role="treeitem"
-                :aria-expanded="!!expanded[`c${communityNode.community.id}`]"
               >
                 <button
                   type="button"
-                  class="node-toggle"
-                  :aria-label="expanded[`c${communityNode.community.id}`] ? '收起' : '展开'"
-                  @click="expanded[`c${communityNode.community.id}`] = !expanded[`c${communityNode.community.id}`]"
+                  class="row-toggle"
+                  :aria-label="expandedBuildings[node.building.id] ? '收起单元' : '展开单元'"
+                  :aria-expanded="!!expandedBuildings[node.building.id]"
+                  @click="toggleBuilding(node.building.id)"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ 'is-open': expanded[`c${communityNode.community.id}`] }">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    :class="{ 'is-open': expandedBuildings[node.building.id] }"
+                  >
                     <path v-for="(d, i) in ACTION_ICONS.chevron" :key="i" :d="d" />
                   </svg>
                 </button>
-                <span class="node-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path v-for="(d, i) in NODE_ICONS.community" :key="i" :d="d" />
-                  </svg>
-                </span>
-                <button type="button" class="node-label" @click="selectCommunityNode(communityNode)">
-                  {{ communityNode.community.name }}
+                <button type="button" class="row-label" @click="selectBuilding(node.building.id)">
+                  {{ node.building.name }}
                 </button>
-                <span class="node-actions">
+                <span class="row-counts">
+                  <b>{{ buildingCounts.get(node.building.id)?.units ?? 0 }}</b> 单元 ·
+                  <b>{{ buildingCounts.get(node.building.id)?.houses ?? 0 }}</b> 套 · 空置
+                  <b>{{ buildingCounts.get(node.building.id)?.vacant ?? 0 }}</b>
+                  <span class="row-floors">{{ node.building.floors }} 层</span>
+                </span>
+                <span class="row-actions">
                   <button
                     v-permission="['ADMIN', 'SUPER_ADMIN']"
                     type="button"
-                    class="node-action"
-                    title="新增楼栋"
-                    aria-label="新增楼栋"
-                    @click="openBuildingCreate(communityNode.community)"
+                    class="icon-btn"
+                    title="新增单元"
+                    aria-label="新增单元"
+                    @click="openUnitCreate(node.building.id)"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path v-for="(d, i) in ACTION_ICONS.plus" :key="i" :d="d" />
@@ -1291,22 +1788,34 @@ onMounted(() => {
                   <button
                     v-permission="['ADMIN', 'SUPER_ADMIN']"
                     type="button"
-                    class="node-action"
-                    title="编辑社区"
-                    aria-label="编辑社区"
-                    @click="openCommunityEdit(communityNode.community)"
+                    class="icon-btn"
+                    title="批量建单元"
+                    aria-label="批量建单元"
+                    @click="openUnitBatchCreate(node.building)"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
+                    </svg>
+                  </button>
+                  <button
+                    v-permission="['ADMIN', 'SUPER_ADMIN']"
+                    type="button"
+                    class="icon-btn"
+                    title="编辑楼栋"
+                    aria-label="编辑楼栋"
+                    @click="openBuildingEdit(node.building)"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
                     </svg>
                   </button>
                   <button
-                    v-permission="['SUPER_ADMIN']"
+                    v-permission="['ADMIN', 'SUPER_ADMIN']"
                     type="button"
-                    class="node-action is-danger"
-                    title="删除社区"
-                    aria-label="删除社区"
-                    @click="handleCommunityDelete(communityNode.community)"
+                    class="icon-btn is-danger"
+                    title="删除楼栋"
+                    aria-label="删除楼栋"
+                    @click="handleBuildingDelete(node)"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
@@ -1315,367 +1824,182 @@ onMounted(() => {
                 </span>
               </div>
 
-              <ul v-if="expanded[`c${communityNode.community.id}`]" class="tree-children" role="group">
-                <li v-if="communityNode.buildings.length === 0" class="tree-branch-empty">暂无楼栋</li>
-                <li v-for="buildingNode in communityNode.buildings" :key="buildingNode.building.id">
-                  <div
-                    class="tree-node is-building"
-                    :class="{
-                      /* 楼栋为选中单元的祖先时同步高亮（对照设计稿选中链路） */
-                      selected: selectedBuildingNode?.building.id === buildingNode.building.id
-                    }"
-                    role="treeitem"
-                    :aria-expanded="!!expanded[`b${buildingNode.building.id}`]"
-                  >
-                    <button
-                      type="button"
-                      class="node-toggle"
-                      :aria-label="expanded[`b${buildingNode.building.id}`] ? '收起' : '展开'"
-                      @click="expanded[`b${buildingNode.building.id}`] = !expanded[`b${buildingNode.building.id}`]"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ 'is-open': expanded[`b${buildingNode.building.id}`] }">
-                        <path v-for="(d, i) in ACTION_ICONS.chevron" :key="i" :d="d" />
-                      </svg>
-                    </button>
-                    <span class="node-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path v-for="(d, i) in NODE_ICONS.building" :key="i" :d="d" />
-                      </svg>
-                    </span>
-                    <button type="button" class="node-label" @click="selectBuildingNode(buildingNode)">
-                      {{ buildingNode.building.name }}
-                    </button>
-                    <span class="node-actions">
-                      <button
-                        v-permission="['ADMIN', 'SUPER_ADMIN']"
-                        type="button"
-                        class="node-action"
-                        title="新增单元"
-                        aria-label="新增单元"
-                        @click="openUnitCreate(buildingNode)"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path v-for="(d, i) in ACTION_ICONS.plus" :key="i" :d="d" />
-                        </svg>
-                      </button>
-                      <button
-                        v-permission="['ADMIN', 'SUPER_ADMIN']"
-                        type="button"
-                        class="node-action"
-                        title="编辑楼栋"
-                        aria-label="编辑楼栋"
-                        @click="openBuildingEdit(buildingNode.building)"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
-                        </svg>
-                      </button>
-                      <button
-                        v-permission="['ADMIN', 'SUPER_ADMIN']"
-                        type="button"
-                        class="node-action is-danger"
-                        title="删除楼栋"
-                        aria-label="删除楼栋"
-                        @click="handleBuildingDelete(buildingNode)"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
-                        </svg>
-                      </button>
-                    </span>
-                  </div>
-
-                  <ul v-if="expanded[`b${buildingNode.building.id}`]" class="tree-children" role="group">
-                    <li v-if="buildingNode.units.length === 0" class="tree-branch-empty">暂无单元</li>
-                    <li v-for="unit in buildingNode.units" :key="unit.id">
-                      <div
-                        class="tree-node is-unit"
-                        :class="{ selected: activeView === 'unit' && selectedUnit?.id === unit.id }"
-                        role="treeitem"
-                      >
-                        <span class="node-toggle is-leaf" aria-hidden="true" />
-                        <span class="node-icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path v-for="(d, i) in NODE_ICONS.unit" :key="i" :d="d" />
-                          </svg>
-                        </span>
-                        <button type="button" class="node-label" @click="selectUnit(unit, buildingNode)">
-                          {{ unit.name }}
-                        </button>
-                        <span class="node-actions">
-                          <button
-                            v-permission="['ADMIN', 'SUPER_ADMIN']"
-                            type="button"
-                            class="node-action"
-                            title="新增房屋"
-                            aria-label="在该单元新增房屋"
-                            @click="openHouseCreate(unit)"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in NODE_ICONS.house" :key="i" :d="d" />
-                            </svg>
-                          </button>
-                          <button
-                            v-permission="['ADMIN', 'SUPER_ADMIN']"
-                            type="button"
-                            class="node-action"
-                            title="批量建房"
-                            aria-label="在该单元批量建房"
-                            @click="openHouseBatchCreateForUnit(unit, buildingNode)"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
-                            </svg>
-                          </button>
-                          <button
-                            v-permission="['ADMIN', 'SUPER_ADMIN']"
-                            type="button"
-                            class="node-action"
-                            title="编辑单元"
-                            aria-label="编辑单元"
-                            @click="openUnitEdit(unit, buildingNode)"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
-                            </svg>
-                          </button>
-                          <button
-                            v-permission="['ADMIN', 'SUPER_ADMIN']"
-                            type="button"
-                            class="node-action is-danger"
-                            title="删除单元"
-                            aria-label="删除单元"
-                            @click="handleUnitDelete(unit)"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
-                            </svg>
-                          </button>
-                        </span>
-                      </div>
-                    </li>
-                  </ul>
+              <ul v-if="expandedBuildings[node.building.id]" class="outline-children">
+                <li v-if="node.units.length === 0" class="outline-hint">
+                  该楼栋暂无单元，用行内「批量建单元」按序号区间生成，或点「＋」单独新增。
                 </li>
+                <template v-else>
+                  <li>
+                    <div
+                      class="outline-row is-unit is-root"
+                      :class="{ 'is-active': activeBuildingId === node.building.id && activeUnitId === null }"
+                    >
+                      <span class="row-toggle is-leaf" aria-hidden="true" />
+                      <button type="button" class="row-label" @click="selectUnit(null)">
+                        全部单元
+                      </button>
+                      <span class="row-counts">
+                        <b>{{ buildingCounts.get(node.building.id)?.houses ?? 0 }}</b> 套 · 空置
+                        <b>{{ buildingCounts.get(node.building.id)?.vacant ?? 0 }}</b>
+                      </span>
+                    </div>
+                  </li>
+                  <li v-for="unitNode in node.units" :key="unitNode.unit.id">
+                    <div
+                      class="outline-row is-unit"
+                      :class="{ 'is-active': activeUnitId === unitNode.unit.id }"
+                    >
+                      <span class="row-toggle is-leaf" aria-hidden="true" />
+                      <button type="button" class="row-label" @click="selectUnit(unitNode.unit.id)">
+                        {{ unitNode.unit.name }}
+                      </button>
+                      <span class="row-counts">
+                        <b>{{ unitCounts.get(unitNode.unit.id)?.houses ?? 0 }}</b> 套 · 空置
+                        <b>{{ unitCounts.get(unitNode.unit.id)?.vacant ?? 0 }}</b>
+                      </span>
+                      <span class="row-actions">
+                        <button
+                          v-permission="['ADMIN', 'SUPER_ADMIN']"
+                          type="button"
+                          class="icon-btn"
+                          title="新增房屋"
+                          aria-label="新增房屋"
+                          @click="openHouseCreate(unitNode.unit, node.building.name)"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path v-for="(d, i) in ICONS.home" :key="i" :d="d" />
+                          </svg>
+                        </button>
+                        <button
+                          v-permission="['ADMIN', 'SUPER_ADMIN']"
+                          type="button"
+                          class="icon-btn"
+                          title="批量建房"
+                          aria-label="在该单元批量建房"
+                          @click="selectUnit(unitNode.unit.id); openHouseBatchCreate()"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
+                          </svg>
+                        </button>
+                        <button
+                          v-permission="['ADMIN', 'SUPER_ADMIN']"
+                          type="button"
+                          class="icon-btn"
+                          title="编辑单元"
+                          aria-label="编辑单元"
+                          @click="openUnitEdit(unitNode.unit, node.building.id)"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
+                          </svg>
+                        </button>
+                        <button
+                          v-permission="['ADMIN', 'SUPER_ADMIN']"
+                          type="button"
+                          class="icon-btn is-danger"
+                          title="删除单元"
+                          aria-label="删除单元"
+                          @click="handleUnitDelete(unitNode.unit)"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
+                          </svg>
+                        </button>
+                      </span>
+                    </div>
+                  </li>
+                </template>
               </ul>
             </li>
           </ul>
-        </div>
-      </aside>
-
-      <!-- 右栏：详情卡 + 房屋状态网格 -->
-      <div class="detail-col">
-        <div class="detail-toolbar">
-          <span class="detail-crumb">{{ crumbText || '未选择节点' }}</span>
-          <span class="detail-toolbar-actions">
-            <!-- 批量建房（原「房屋管理」Tab 入口并入）：按当前选中节点预选单元/楼栋/社区 -->
-            <el-button
-              v-permission="['ADMIN', 'SUPER_ADMIN']"
-              size="small"
-              @click="openHouseBatchCreate"
-            >
-              批量建房
-            </el-button>
-            <el-button v-if="selectedCommunity" link type="primary" @click="goCommunitySettings">
-              社区设置
-            </el-button>
-          </span>
-        </div>
-
-        <!-- 社区详情卡 -->
-        <article v-if="activeView === 'community' && selectedCommunity" class="panel">
-          <header class="panel-header">
-            <h3 class="panel-title">
-              {{ selectedCommunity.community.name }}
-              <StatusTag
-                :label="communityStatusLabels[selectedCommunity.community.status]"
-                :type="selectedCommunity.community.status === 'ACTIVE' ? 'completed' : 'canceled'"
-              />
-            </h3>
-            <div class="card-actions">
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                @click="openCommunityEdit(selectedCommunity.community)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                :type="selectedCommunity.community.status === 'ACTIVE' ? 'danger' : 'success'"
-                @click="handleCommunityToggle(selectedCommunity.community)"
-              >
-                {{ selectedCommunity.community.status === 'ACTIVE' ? '停用' : '启用' }}
-              </el-button>
-              <el-button
-                v-permission="['SUPER_ADMIN']"
-                size="small"
-                type="danger"
-                plain
-                @click="handleCommunityDelete(selectedCommunity.community)"
-              >
-                删除
-              </el-button>
-            </div>
-          </header>
-          <el-descriptions :column="2" border>
-            <el-descriptions-item label="社区地址" :span="2">
-              {{ selectedCommunity.community.address }}
-            </el-descriptions-item>
-            <el-descriptions-item label="联系人">
-              {{ selectedCommunity.community.contactPerson || '-' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="联系电话">
-              {{ selectedCommunity.community.contactPhone || '-' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="社区简介" :span="2">
-              {{ selectedCommunity.community.description || '-' }}
-            </el-descriptions-item>
-          </el-descriptions>
         </article>
 
-        <!-- 楼栋详情卡 -->
-        <article v-else-if="activeView === 'building' && selectedBuildingNode" class="panel">
-          <header class="panel-header">
-            <h3 class="panel-title">{{ selectedBuildingNode.building.name }} · 详情</h3>
-            <div class="card-actions">
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                type="primary"
-                @click="openUnitBatchCreate"
-              >
-                批量建单元
-              </el-button>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                type="primary"
-                plain
-                @click="openBuildingEdit(selectedBuildingNode.building)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                type="danger"
-                plain
-                @click="handleBuildingDelete(selectedBuildingNode)"
-              >
-                删除
-              </el-button>
-            </div>
-          </header>
-          <div class="metric-row">
-            <div class="metric">
-              <span>楼号</span>
-              <b>{{ selectedBuildingNode.building.name }}</b>
-            </div>
-            <div class="metric">
-              <span>楼层数</span>
-              <b>{{ selectedBuildingNode.building.floors }} 层</b>
-            </div>
-            <div class="metric">
-              <span>单元数</span>
-              <b>{{ selectedBuildingNode.units.length }} 单元</b>
-            </div>
-            <div v-if="selectedBuildingNode.building.description" class="metric is-wide">
-              <span>描述</span>
-              <b>{{ selectedBuildingNode.building.description }}</b>
-            </div>
-          </div>
-        </article>
-
-        <!-- 单元详情卡 -->
-        <article v-else-if="activeView === 'unit' && selectedUnit" class="panel">
-          <header class="panel-header">
-            <h3 class="panel-title">{{ selectedUnit.name }} · 详情</h3>
-            <div class="card-actions">
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                type="primary"
-                @click="openUnitEdit(selectedUnit, selectedBuildingNode!)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                type="danger"
-                plain
-                @click="handleUnitDelete(selectedUnit)"
-              >
-                删除
-              </el-button>
-            </div>
-          </header>
-          <div class="metric-row">
-            <div class="metric">
-              <span>单元名称</span>
-              <b>{{ selectedUnit.name }}</b>
-            </div>
-            <div class="metric">
-              <span>所属楼栋</span>
-              <b>{{ selectedBuildingNode?.building.name }}</b>
-            </div>
-            <div v-if="selectedUnit.description" class="metric is-wide">
-              <span>描述</span>
-              <b>{{ selectedUnit.description }}</b>
-            </div>
-          </div>
-        </article>
-
-        <!-- 空态 -->
-        <article v-else class="panel">
-          <el-empty
-            :description="tree.length ? '请在左侧选择社区 / 楼栋 / 单元' : '暂无社区数据，请先新建社区'"
-          />
-        </article>
-
-        <!-- 房屋状态网格（楼栋/单元选中时展示） -->
-        <article
-          v-if="activeView === 'building' || activeView === 'unit'"
-          v-loading="housesLoading"
-          class="panel grid-panel"
-        >
-          <header class="panel-header">
+        <!-- 房屋结果区：筛选（楼栋/单元来自结构目录，此处为房号/楼层/状态） -->
+        <article class="panel houses-panel">
+          <header class="panel-head">
             <h3 class="panel-title">
               <span class="panel-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path v-for="(d, i) in ICONS.home" :key="i" :d="d" />
                 </svg>
               </span>
-              房屋状态
+              房屋
             </h3>
-            <div v-if="floorOptions.length > 0" class="floor-chips" role="group" aria-label="楼层筛选">
+            <div class="panel-actions">
+              <el-input
+                v-model="houseKeyword"
+                size="small"
+                class="number-search"
+                placeholder="搜索房号，如 101 / 12"
+                clearable
+              />
+              <el-button v-if="filtersActive" size="small" link type="primary" @click="clearAllFilters">
+                清除筛选
+              </el-button>
+            </div>
+          </header>
+
+          <!-- 筛选回路：楼栋 / 单元来自结构目录；这里只呈现结果口径与剩余维度 -->
+          <div class="filter-scope">
+            <span class="scope-crumb">
+              {{ activeBuildingId === null ? '全部楼栋' : activeBuildingName }}
+              <template v-if="activeUnitId !== null"> / {{ activeUnitName }}</template>
+            </span>
+            <span class="scope-summary">
+              共 {{ scopeSummary.total }} 套 · 已入住 {{ scopeSummary.occupied }} · 空置
+              {{ scopeSummary.vacant }}
+              <template v-if="!structureLoading"> · 全部 {{ houseEntries.length }} 套</template>
+            </span>
+          </div>
+
+          <div class="filter-row">
+            <div v-if="floorOptions.length > 0" class="chips" role="group" aria-label="按楼层筛选">
               <button
                 type="button"
-                class="floor-chip"
+                class="chip-btn"
                 :class="{ active: activeFloor === null }"
                 @click="activeFloor = null"
               >
-                全部
+                全部楼层
               </button>
               <button
                 v-for="floor in floorOptions"
                 :key="floor"
                 type="button"
-                class="floor-chip"
+                class="chip-btn"
                 :class="{ active: activeFloor === floor }"
                 @click="activeFloor = activeFloor === floor ? null : floor"
               >
                 {{ floor }}层
               </button>
             </div>
-          </header>
+          </div>
 
-          <p v-if="houses.length > 0" class="grid-summary">
-            共 {{ scopeHouses.length }} 套 · 已入住 {{ scopeOccupiedCount }} 套
-          </p>
+          <div class="filter-row">
+            <div class="chips" role="group" aria-label="按房屋状态筛选">
+              <button
+                type="button"
+                class="chip-btn"
+                :class="{ active: activeStatus === null }"
+                @click="activeStatus = null"
+              >
+                全部状态
+              </button>
+              <button
+                v-for="item in statusOptions"
+                :key="item.value"
+                type="button"
+                class="chip-btn"
+                :class="{ active: activeStatus === item.value }"
+                @click="activeStatus = activeStatus === item.value ? null : item.value"
+              >
+                {{ item.label }}
+                <span class="chip-count">{{ item.count }}</span>
+              </button>
+            </div>
+          </div>
 
-          <!-- 网格多选容器（R4-D3）：空白区按下左键拖拽 = 框选；卡片与按钮上的按下不启动框选 -->
           <div
             ref="gridBodyRef"
             class="grid-body"
@@ -1685,66 +2009,79 @@ onMounted(() => {
             @pointerup="onHouseGridPointerUp"
             @pointercancel="onHouseGridPointerCancel"
           >
-            <p v-if="!housesLoading && gridGroups.length === 0" class="grid-empty">
-              {{
-                activeView === 'building' && selectedBuildingNode?.units.length === 0
-                  ? '该楼栋暂无单元，可在左侧楼栋节点新增'
-                  : '暂无房屋数据'
-              }}
-            </p>
+            <div v-if="structureLoading && !structureLoaded" class="grid-skeleton">
+              <el-skeleton :rows="4" animated />
+            </div>
+
+            <div v-else-if="!structureLoading && gridGroups.length === 0" class="grid-state">
+              <template v-if="houseEntries.length === 0">
+                <p class="state-title">该社区还没有房屋</p>
+                <p class="state-text">
+                  用「批量建房」按楼层与户数一次生成，或在单元行内点房屋图标单独添加。
+                </p>
+              </template>
+              <template v-else>
+                <p class="state-title">当前筛选下没有房屋</p>
+                <p class="state-text">放宽楼层 / 状态筛选，或清空房号关键字后再看。</p>
+                <el-button size="small" @click="clearAllFilters">清除筛选</el-button>
+              </template>
+            </div>
+
             <div v-for="group in gridGroups" :key="group.key" class="grid-group">
               <h4 class="grid-group-title">
                 {{ group.title }}
+                <span class="grid-group-count">{{ group.entries.length }} 套</span>
                 <button
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
                   type="button"
-                  class="group-add"
+                  class="icon-btn"
                   title="添加房屋"
                   :aria-label="`在${group.title}添加房屋`"
-                  @click="openHouseCreate(group.unit)"
+                  @click="openHouseCreate(group.unit, activeBuildingName || selectedCommunity?.name || '')"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path v-for="(d, i) in ACTION_ICONS.plus" :key="i" :d="d" />
                   </svg>
                 </button>
               </h4>
-              <p v-if="group.rows.length === 0" class="grid-group-empty">暂无房屋</p>
               <div class="grid-rows">
-                <div v-for="row in group.rows" :key="row.floor" class="grid-row">
-                  <span class="grid-floor">{{ row.floor }}层</span>
+                <div
+                  v-for="floor in [...new Set(group.entries.map((entry) => entry.house.floor))].sort((a, b) => b - a)"
+                  :key="floor"
+                  class="grid-row"
+                >
+                  <span class="grid-floor">{{ floor }}层</span>
                   <div class="grid-cells">
                     <div
-                      v-for="house in row.houses"
-                      :key="house.id"
+                      v-for="entry in group.entries.filter((item) => item.house.floor === floor)"
+                      :key="entry.house.id"
                       class="grid-block"
                       :class="[
-                        HOUSE_BLOCK_CLASS[house.status],
-                        { 'is-selected': isHouseGridSelected(house.id) }
+                        HOUSE_BLOCK_CLASS[entry.house.status],
+                        { 'is-selected': isHouseGridSelected(entry.house.id) }
                       ]"
                       role="button"
                       tabindex="0"
-                      :data-house-id="house.id"
-                      :title="`${house.houseNumber} · ${houseStatusLabels[house.status]}`"
-                      @click="onHouseBlockClick($event, house)"
-                      @keydown.enter.prevent="openHouseInfo(house)"
-                      @keydown.space.prevent="openHouseInfo(house)"
+                      :data-house-id="entry.house.id"
+                      :title="`${entry.house.houseNumber} · ${houseStatusLabels[entry.house.status]}`"
+                      @click="onHouseBlockClick($event, entry)"
+                      @keydown.enter.prevent="openHouseInfo(entry)"
+                      @keydown.space.prevent="openHouseInfo(entry)"
                     >
-                      {{ house.houseNumber }}
-                      <!-- 多选勾选角标（R4-D3）：选中/框选预览时显形 -->
-                      <span v-if="isHouseGridSelected(house.id)" class="block-check" aria-hidden="true">
+                      {{ entry.house.houseNumber }}
+                      <span v-if="isHouseGridSelected(entry.house.id)" class="block-check" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
                           <path d="M5 12.5l4.5 4.5L19 7.5" />
                         </svg>
                       </span>
-                      <!-- 悬浮快捷操作（触屏走信息卡兜底入口）：遮罩随 hover/focus 显形 -->
                       <span class="block-actions">
                         <button
                           v-permission="['ADMIN', 'SUPER_ADMIN']"
                           type="button"
                           class="block-action"
                           title="编辑房屋"
-                          :aria-label="`编辑房屋 ${house.houseNumber}`"
-                          @click.stop="openHouseEdit(house)"
+                          :aria-label="`编辑房屋 ${entry.house.houseNumber}`"
+                          @click.stop="openHouseEdit(entry)"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
@@ -1755,8 +2092,8 @@ onMounted(() => {
                           type="button"
                           class="block-action"
                           title="状态变更"
-                          :aria-label="`变更房屋状态 ${house.houseNumber}`"
-                          @click.stop="openHouseStatus(house)"
+                          :aria-label="`变更房屋状态 ${entry.house.houseNumber}`"
+                          @click.stop="openHouseStatus(entry.house)"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path v-for="(d, i) in ACTION_ICONS.swap" :key="i" :d="d" />
@@ -1767,8 +2104,8 @@ onMounted(() => {
                           type="button"
                           class="block-action is-danger"
                           title="删除房屋"
-                          :aria-label="`删除房屋 ${house.houseNumber}`"
-                          @click.stop="handleHouseDelete(house)"
+                          :aria-label="`删除房屋 ${entry.house.houseNumber}`"
+                          @click.stop="handleHouseDelete(entry)"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
@@ -1781,7 +2118,6 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- 橡皮筋选框（R4-D3）：拖拽中的半透明品牌蓝矩形，仅视觉不拦截事件 -->
             <div
               v-if="gridMarquee.active"
               class="marquee-rect"
@@ -1800,9 +2136,9 @@ onMounted(() => {
               <i class="legend-dot" :class="HOUSE_BLOCK_CLASS[item.value]" />
               {{ item.label }}
             </li>
+            <li class="legend-note">Ctrl / Cmd + 点击 或 在空白处拖拽可多选</li>
           </ul>
 
-          <!-- 批量操作条（R4-D3）：选中 ≥1 套时浮出，sticky 于网格底部 -->
           <transition name="sel-bar">
             <div v-if="selectedHouseCount > 0" class="selection-bar" role="toolbar" aria-label="房屋批量操作">
               <span class="selection-count">已选 {{ selectedHouseCount }} 套</span>
@@ -1821,50 +2157,45 @@ onMounted(() => {
             </div>
           </transition>
         </article>
-      </div>
-    </div>
+      </template>
+    </main>
 
-    <!-- 社区新建/编辑 -->
+    <!-- ==================== 对话框 ==================== -->
+
     <CommunityEditDialog
       v-model="communityDialogVisible"
       :community="communityEditing"
       @saved="handleCommunitySaved"
     />
 
-    <!-- 楼栋新建/编辑 -->
     <BuildingEditDialog
       v-model="buildingDialogVisible"
-      :communities="tree.map((node) => node.community)"
+      :communities="selectedCommunity ? [selectedCommunity] : []"
       :building="buildingEditing"
-      :default-community-id="buildingDefaultCommunityId"
+      :default-community-id="selectedCommunityId"
       @saved="handleBuildingSaved"
     />
 
-    <!-- 单元新建/编辑 -->
     <UnitEditDialog
       v-model="unitDialogVisible"
-      :communities="tree.map((node) => node.community)"
+      :communities="selectedCommunity ? [selectedCommunity] : []"
       :unit="unitEditing"
-      :default-community-id="unitDefaultCommunityId"
+      :default-community-id="selectedCommunityId"
       :default-building-id="unitDefaultBuildingId"
       @saved="handleUnitSaved"
     />
 
-    <!-- 整栋创建（第三轮 C3，升级自 A7 批量建楼）：循环既有创建接口，逐个失败不中断 -->
-    <BuildingCreateDialog
-      v-model="buildingCreateVisible"
-      :communities="tree.map((node) => node.community)"
-      :default-community-id="buildingCreateDefaultCommunityId"
-      @saved="handleBuildingCreateSaved"
-    />
-    <!-- 批量建单元（A7 7.2；第三轮 C3 前缀默认取楼栋名） -->
-    <UnitBatchDialog
-      v-model="unitBatchVisible"
-      :building="unitBatchTargetBuilding"
-      @saved="handleUnitBatchSaved"
+    <!-- 批量建单元：只对已有楼栋按序号区间补单元（结构生成弹窗不覆盖此场景） -->
+    <UnitBatchDialog v-model="unitBatchVisible" :building="unitBatchTarget" @saved="handleUnitBatchSaved" />
+
+    <!-- 结构生成（批量建房主入口）：一次请求建成 楼栋 → 单元 → 房屋 -->
+    <StructureGenerateDialog
+      v-model="structureGenerateVisible"
+      :community="selectedCommunity"
+      @saved="handleStructureGenerated"
+      @view-structure="handleViewStructure"
     />
 
-    <!-- 房屋快速添加/编辑（第三轮 C4：网格便捷操作；单元上下文由入口锁定） -->
     <HouseEditDialog
       v-model="houseDialogVisible"
       :house="houseEditing"
@@ -1872,8 +2203,26 @@ onMounted(() => {
       @saved="handleHouseSaved"
     />
 
-    <!-- 楼栋级联删除（R4-D2）：范围确认 → 编排进度 → 中断汇报；
-         非后端事务，失败时剩余明细与树同步呈现实际状态 -->
+    <HouseBatchDialog
+      v-model="houseBatchVisible"
+      :communities="selectedCommunity ? [selectedCommunity] : []"
+      :initial-community-id="selectedCommunityId ?? ''"
+      :initial-building-id="activeBuildingId ?? ''"
+      :initial-unit-id="activeUnitId ?? ''"
+      @saved="handleHouseBatchSaved"
+    />
+
+    <!-- 批量管理结果（部分成功语义：成功量 + 逐条失败原因） -->
+    <BatchResultDialog
+      v-model="batchResultVisible"
+      :success-count="batchResult.successCount"
+      :success-text="batchResult.successText"
+      :intro="batchResult.intro"
+      :warning="batchResult.warning"
+      :failures="batchResult.failures"
+    />
+
+    <!-- 楼栋级联删除：范围确认 → 编排进度 → 中断汇报 -->
     <el-dialog
       v-model="buildingDeleteVisible"
       title="删除楼栋（级联删除）"
@@ -1909,7 +2258,7 @@ onMounted(() => {
         </div>
         <p class="cascade-warning">
           删除按自底向上执行（先清空房屋、再删单元、最后删楼栋）。当前由前端逐个调用删除接口完成，
-          并非后端事务：中途失败将立即停止、停留在部分删除状态且已删除部分不会自动回滚，届时将列出剩余明细。
+          并非后端事务：中途失败将立即停止、停留在部分删除状态且已删除部分不会自动回滚。
         </p>
       </div>
 
@@ -1925,7 +2274,7 @@ onMounted(() => {
         <p class="cascade-error-text">删除中断：{{ buildingCascadeFailure?.reason }}</p>
         <p class="cascade-report-line">
           已删除 {{ buildingCascadeDeletedHouses }} 套房屋、{{ buildingCascadeDeletedUnits }} 个单元。
-          本次删除并非后端事务，已删除部分不会回滚，剩余内容如下（树已刷新到实际状态）：
+          本次删除并非后端事务，已删除部分不会回滚，剩余内容如下（结构已刷新到实际状态）：
         </p>
         <ul v-if="buildingCascadeRemainingHouses.length > 0" class="cascade-report-list">
           <li v-for="group in buildingCascadeRemainingHouses" :key="group.unit.id">
@@ -1947,46 +2296,39 @@ onMounted(() => {
         </template>
         <template v-else-if="buildingDeletePhase !== 'running'">
           <el-button @click="buildingDeleteVisible = false">取消</el-button>
-          <el-button
-            v-if="buildingDeletePhase === 'error'"
-            type="primary"
-            @click="retryBuildingCascade"
-          >
+          <el-button v-if="buildingDeletePhase === 'error'" type="primary" @click="retryBuildingCascade">
             重试
           </el-button>
-          <el-button
-            v-if="buildingDeletePhase === 'confirm'"
-            type="danger"
-            @click="runBuildingCascade"
-          >
+          <el-button v-if="buildingDeletePhase === 'confirm'" type="danger" @click="runBuildingCascade">
             确认删除
           </el-button>
         </template>
       </template>
     </el-dialog>
 
-    <!-- 房屋信息卡（无房屋详情路由，块点击弹卡） -->
+    <!-- 房屋信息卡（含状态变更历史） -->
     <el-dialog v-model="houseInfoVisible" title="房屋信息" width="480px">
-      <el-descriptions v-if="houseInfo" :column="2" border>
-        <el-descriptions-item label="门牌号">{{ houseInfo.houseNumber }}</el-descriptions-item>
+      <el-descriptions v-if="houseInfoEntry" :column="2" border>
+        <el-descriptions-item label="门牌号">{{ houseInfoEntry.house.houseNumber }}</el-descriptions-item>
         <el-descriptions-item label="状态">
           <StatusTag
-            :label="houseStatusLabels[houseInfo.status]"
-            :type="houseStatusTagType(houseInfo.status)"
+            :label="houseStatusLabels[houseInfoEntry.house.status]"
+            :type="houseStatusTagType(houseInfoEntry.house.status)"
           />
         </el-descriptions-item>
-        <el-descriptions-item label="楼栋">{{ houseInfoBuildingName }}</el-descriptions-item>
-        <el-descriptions-item label="单元">{{ houseInfoUnitName }}</el-descriptions-item>
-        <el-descriptions-item label="所在楼层">{{ houseInfo.floor }} 层</el-descriptions-item>
+        <el-descriptions-item label="楼栋">{{ houseInfoEntry.buildingName }}</el-descriptions-item>
+        <el-descriptions-item label="单元">{{ houseInfoEntry.unitName }}</el-descriptions-item>
+        <el-descriptions-item label="所在楼层">{{ houseInfoEntry.house.floor }} 层</el-descriptions-item>
         <el-descriptions-item label="建筑面积">
-          {{ houseInfo.area != null ? `${houseInfo.area} ㎡` : '-' }}
+          {{ houseInfoEntry.house.area != null ? `${houseInfoEntry.house.area} ㎡` : '-' }}
         </el-descriptions-item>
-        <el-descriptions-item label="户型">{{ houseInfo.layout || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="朝向">{{ houseInfo.orientation || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="描述" :span="2">{{ houseInfo.description || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="户型">{{ houseInfoEntry.house.layout || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="朝向">{{ houseInfoEntry.house.orientation || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="描述" :span="2">
+          {{ houseInfoEntry.house.description || '-' }}
+        </el-descriptions-item>
       </el-descriptions>
 
-      <!-- 状态变更历史（原「房屋管理」Tab 的「历史」抽屉并入信息卡） -->
       <div v-loading="houseHistoryLoading" class="info-history">
         <h4 class="info-history-title">状态变更历史</h4>
         <ul v-if="houseHistory.length > 0" class="info-history-list">
@@ -2006,46 +2348,26 @@ onMounted(() => {
       </div>
 
       <template #footer>
-        <el-button
-          v-permission="['ADMIN', 'SUPER_ADMIN']"
-          type="primary"
-          plain
-          @click="editFromInfo"
-        >
+        <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" plain @click="editFromInfo">
           编辑
         </el-button>
-        <el-button
-          v-permission="['ADMIN', 'SUPER_ADMIN']"
-          type="warning"
-          plain
-          @click="statusFromInfo"
-        >
+        <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="warning" plain @click="statusFromInfo">
           状态变更
         </el-button>
-        <el-button
-          v-permission="['ADMIN', 'SUPER_ADMIN']"
-          type="danger"
-          plain
-          @click="deleteFromInfo"
-        >
+        <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="danger" plain @click="deleteFromInfo">
           删除
         </el-button>
         <el-button @click="houseInfoVisible = false">关闭</el-button>
       </template>
     </el-dialog>
 
-    <!-- 房屋状态变更（原「房屋管理」Tab 能力并入）：备注留痕，文案与其一致 -->
+    <!-- 房屋状态变更：备注留痕 -->
     <el-dialog
       v-model="statusDialogVisible"
       :title="statusTarget ? `状态变更：${statusTarget.houseNumber}` : '状态变更'"
       width="440px"
     >
-      <el-form
-        ref="statusFormRef"
-        :model="statusForm"
-        :rules="statusRules"
-        label-width="100px"
-      >
+      <el-form ref="statusFormRef" :model="statusForm" :rules="statusRules" label-width="100px">
         <el-form-item label="房屋状态" prop="status">
           <el-select v-model="statusForm.status" style="width: 100%">
             <el-option
@@ -2073,28 +2395,18 @@ onMounted(() => {
         </el-button>
       </template>
     </el-dialog>
-
-    <!-- 批量建房（原「房屋管理」Tab 入口并入）：预选当前选中单元/楼栋/社区 -->
-    <HouseBatchDialog
-      v-model="houseBatchVisible"
-      :communities="tree.map((node) => node.community)"
-      :initial-community-id="houseBatchInitialCommunityId"
-      :initial-building-id="houseBatchInitialBuildingId"
-      :initial-unit-id="houseBatchInitialUnitId"
-      @saved="handleHouseBatchSaved"
-    />
   </section>
 </template>
 
 <style scoped>
-.tree-pane {
-  display: flex;
-  flex-direction: column;
+/* 圆角与层级一致：白卡 12px / 行与按钮 8px / 标签胶囊。数字一律等宽字体取对齐感。 */
+.manage {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
   gap: var(--spacing-lg);
-  min-height: 320px;
+  align-items: start;
+  min-height: 360px;
 }
-
-/* ---------- 通用白卡容器（与运营看板 panel 同款） ---------- */
 
 .panel {
   min-width: 0;
@@ -2104,7 +2416,7 @@ onMounted(() => {
   box-shadow: var(--shadow-card);
 }
 
-.panel-header {
+.panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2133,122 +2445,413 @@ onMounted(() => {
   height: 16px;
 }
 
-.card-actions {
+.panel-actions {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
 }
 
-/* ---------- 第一行：统计卡 ---------- */
-
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--spacing-lg);
+.field-icon {
+  width: 13px;
+  height: 13px;
+  color: var(--color-text-secondary);
 }
 
-/* 迷你入住率环：conic-gradient 按 token 着色（运营看板占用率卡同款） */
-.occupancy-donut {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-circle);
-  background: conic-gradient(var(--color-primary) calc(var(--pct) * 1%), var(--color-bg-subtle) 0);
-  -webkit-mask: radial-gradient(closest-side, transparent 60%, currentColor 61%);
-  mask: radial-gradient(closest-side, transparent 60%, currentColor 61%);
-}
+/* ---------- 左栏 ---------- */
 
-/* ---------- 主从布局 ---------- */
-
-.master-detail {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: var(--spacing-lg);
-  align-items: start;
-}
-
-/* ---------- 左栏：结构树 ---------- */
-
-.tree-panel {
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
   padding: var(--spacing-lg);
   background-color: var(--admin-card-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }
 
-.tree-head {
+.rail-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
 }
 
-.tree-head-actions {
+.rail-title-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.rail-title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.rail-total {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.rail-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.status-chips,
+.chips {
   display: flex;
   align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-hover);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.chip-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.chip-btn.active {
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.chip-count {
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+}
+
+/* 批量操作条：未选中时是一个安静的提示条，选中后升格为操作区 */
+.batch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  min-height: 30px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+}
+
+.batch-bar.is-active {
+  background-color: var(--color-primary-bg);
+}
+
+.batch-count {
   flex-shrink: 0;
-  gap: 0;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
 }
 
-.tree-body {
-  max-height: 620px;
-  overflow: auto;
+.batch-tip {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
-.tree-empty {
-  margin: 0;
-  padding: var(--spacing-lg) 0;
-  text-align: center;
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.text-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.text-btn.is-danger {
+  color: var(--color-danger);
+}
+
+.text-btn.is-muted {
+  color: var(--color-text-secondary);
+}
+
+.text-btn:disabled {
   color: var(--color-text-disabled);
-  font-size: var(--font-size-sm);
+  cursor: not-allowed;
 }
 
-.tree-root,
-.tree-children {
+.rail-body {
+  min-height: 120px;
+}
+
+.rail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.tree-children {
-  padding-left: var(--spacing-lg);
-}
-
-.tree-node {
+.community-item {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: var(--spacing-xs);
-  height: 34px;
-  padding: 0 var(--spacing-xs);
+  padding: 2px 0;
   border-radius: var(--radius-md);
-  cursor: default;
+  transition: background-color 0.15s ease;
 }
 
-.tree-node:hover {
+.community-item:hover {
   background-color: var(--color-bg-hover);
 }
 
-.tree-node.selected {
+/* 选中态：品牌浅底 + 左侧色条，与「当前正在看的社区」一一对应 */
+.community-item.is-active {
+  background-color: var(--color-primary-bg);
+  box-shadow: inset 2px 0 0 var(--color-primary);
+}
+
+.item-check {
+  display: flex;
+  align-items: center;
+  padding-left: var(--spacing-xs);
+}
+
+.item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  padding: var(--spacing-sm);
+  border: none;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item-line {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.item-name {
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-meta {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.item-address {
+  overflow: hidden;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rail-state,
+.outline-state,
+.grid-state {
+  padding: var(--spacing-lg) 0;
+  text-align: center;
+}
+
+.state-title {
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.state-text {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 右栏 ---------- */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+}
+
+.empty-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+
+.head-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.head-identity {
+  min-width: 0;
+}
+
+.head-name {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.head-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* 关键数字：大字等宽，单位退为小字，环显示入住率 */
+.metric-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-xl);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.metric-cell {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.metric-cell b {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+.metric-cell span {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.occupancy-donut {
+  align-self: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-circle);
+  background: conic-gradient(var(--color-primary) calc(var(--pct) * 1%), var(--color-bg-subtle) 0);
+  -webkit-mask: radial-gradient(closest-side, transparent 60%, currentColor 61%);
+  mask: radial-gradient(closest-side, transparent 60%, currentColor 61%);
+}
+
+/* ---------- 结构目录（两级选择器） ---------- */
+
+.outline,
+.outline-children {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outline-children {
+  margin-left: var(--spacing-md);
+  padding-left: var(--spacing-md);
+  border-left: 1px solid var(--color-border);
+}
+
+.outline-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-height: 36px;
+  padding: 0 var(--spacing-xs) 0 var(--spacing-xs);
+  border-radius: var(--radius-md);
+}
+
+.outline-row:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.outline-row.is-active {
   background-color: var(--color-primary-bg);
 }
 
-.tree-node.selected .node-label,
-.tree-node.selected .node-icon {
+.outline-row.is-active .row-label {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.outline-row.is-root .row-label {
+  color: var(--color-text-secondary);
+}
+
+.outline-row.is-root.is-active .row-label {
   color: var(--color-primary);
 }
 
-.tree-node.is-inactive .node-label {
-  color: var(--color-text-disabled);
-}
-
-.node-toggle {
+.row-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   padding: 0;
   border: none;
   background: none;
@@ -2256,34 +2859,23 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.node-toggle.is-leaf {
+.row-toggle.is-leaf {
   pointer-events: none;
 }
 
-.node-toggle svg {
+.row-toggle svg {
   width: 12px;
   height: 12px;
   transition: transform 0.15s ease;
 }
 
-.node-toggle svg.is-open {
+.row-toggle svg.is-open {
   transform: rotate(90deg);
 }
 
-.node-icon {
-  display: inline-flex;
+.row-label {
   flex-shrink: 0;
-  color: var(--color-text-secondary);
-}
-
-.node-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.node-label {
-  flex: 1;
-  min-width: 0;
+  max-width: 40%;
   padding: 0;
   border: none;
   background: none;
@@ -2291,13 +2883,35 @@ onMounted(() => {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
   text-align: left;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
   cursor: pointer;
 }
 
-.node-actions {
+.row-counts {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-counts b {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.row-floors {
+  margin-left: var(--spacing-sm);
+  color: var(--color-text-disabled);
+}
+
+.outline-row.is-unit {
+  padding-left: var(--spacing-lg);
+}
+
+.row-actions {
   display: inline-flex;
   flex-shrink: 0;
   gap: 2px;
@@ -2305,12 +2919,12 @@ onMounted(() => {
   transition: opacity 0.15s ease;
 }
 
-.tree-node:hover .node-actions,
-.tree-node.selected .node-actions {
+.outline-row:hover .row-actions,
+.outline-row.is-active .row-actions {
   opacity: 1;
 }
 
-.node-action {
+.icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2324,145 +2938,67 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.node-action:hover {
+.icon-btn:hover {
   background-color: var(--color-primary-bg);
   color: var(--color-primary);
 }
 
-.node-action.is-danger:hover {
+.icon-btn.is-danger:hover {
   background-color: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
-.node-action svg {
+.icon-btn svg {
   width: 13px;
   height: 13px;
 }
 
-.tree-branch-empty {
-  padding: var(--spacing-xs) 0 var(--spacing-xs) var(--spacing-sm);
+.outline-hint {
+  padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
 }
 
-/* ---------- 右栏 ---------- */
+/* ---------- 房屋结果区 ---------- */
 
-.detail-col {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-  min-width: 0;
+.number-search {
+  width: 180px;
 }
 
-.detail-toolbar {
+.filter-scope {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
 }
 
-.detail-crumb {
+.scope-crumb {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.detail-toolbar-actions {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  gap: var(--spacing-sm);
-}
-
-.metric-row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-xl);
-  flex-wrap: wrap;
-}
-
-.metric {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  min-width: 72px;
-}
-
-.metric.is-wide {
-  flex: 1;
-  min-width: 160px;
-}
-
-.metric span {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.metric b {
-  font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
 
-/* ---------- 房屋状态网格 ---------- */
-
-.floor-chips {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  flex-wrap: wrap;
-}
-
-.floor-chip {
-  height: 26px;
-  padding: 0 12px;
-  border: none;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-bg-hover);
-  font-family: inherit;
+.scope-summary {
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.floor-chip:hover {
-  color: var(--color-text-primary);
-}
-
-.floor-chip.active {
-  background-color: var(--color-primary-bg);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-medium);
-}
-
-.grid-summary {
-  margin: 0 0 var(--spacing-md);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+.filter-row + .filter-row {
+  margin-top: var(--spacing-xs);
 }
 
 .grid-body {
   position: relative;
   min-height: 120px;
+  margin-top: var(--spacing-md);
 }
 
-.grid-empty {
-  margin: 0;
-  padding: var(--spacing-lg) 0;
-  text-align: center;
-  color: var(--color-text-disabled);
-  font-size: var(--font-size-sm);
-}
-
-.grid-group {
-  margin-bottom: var(--spacing-lg);
-}
-
-.grid-group:last-child {
-  margin-bottom: 0;
+.grid-group + .grid-group {
+  margin-top: var(--spacing-lg);
 }
 
 .grid-group-title {
@@ -2475,36 +3011,11 @@ onMounted(() => {
   color: var(--color-text-primary);
 }
 
-/* 分组标题旁「＋」快速添加房屋（第三轮 C4）：与树节点操作钮同款交互 */
-.group-add {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.group-add:hover {
-  background-color: var(--color-primary-bg);
-  color: var(--color-primary);
-}
-
-.group-add svg {
-  width: 13px;
-  height: 13px;
-}
-
-.grid-group-empty {
-  margin: 0;
-  padding: var(--spacing-xs) 0;
+.grid-group-count {
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
 }
 
 .grid-rows {
@@ -2521,7 +3032,8 @@ onMounted(() => {
 
 .grid-floor {
   flex-shrink: 0;
-  width: 36px;
+  width: 38px;
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   text-align: right;
@@ -2538,12 +3050,11 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* 最小宽度容纳悬浮三操作（编辑/状态/删除），避免按钮溢出块体 */
   min-width: 66px;
   height: 34px;
   padding: 0 var(--spacing-sm);
   border-radius: var(--radius-md);
-  font-family: inherit;
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
@@ -2558,13 +3069,15 @@ onMounted(() => {
   transform: translateY(-1px);
 }
 
+.grid-block:active {
+  transform: translateY(0);
+}
+
 .grid-block:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
 
-/* 悬浮快捷操作遮罩（第三轮 C4）：visibility 联动 opacity，
-   隐态不放行点击（不拦截块本体点击弹信息卡） */
 .block-actions {
   position: absolute;
   inset: 0;
@@ -2652,6 +3165,10 @@ onMounted(() => {
   color: var(--color-text-secondary);
 }
 
+.legend-note {
+  color: var(--color-text-secondary);
+}
+
 .legend-dot {
   width: 10px;
   height: 10px;
@@ -2674,15 +3191,13 @@ onMounted(() => {
   background-color: var(--color-warning);
 }
 
-/* ---------- 网格多选（R4-D3）：橡皮筋选框 / 选中态 / 批量操作条 ---------- */
+/* ---------- 网格多选 ---------- */
 
-/* 框选拖拽中：十字光标提示 + 禁文本选择 */
 .grid-body.is-marquee {
   cursor: crosshair;
   user-select: none;
 }
 
-/* 橡皮筋：半透明品牌蓝矩形 + 品牌蓝描边（仅视觉，pointer-events 放行给容器） */
 .marquee-rect {
   position: absolute;
   z-index: 4;
@@ -2692,13 +3207,11 @@ onMounted(() => {
   pointer-events: none;
 }
 
-/* 选中态：品牌蓝描边环叠加在语义底色之上（不改底色，状态色仍可辨） */
 .grid-block.is-selected,
 .grid-block.is-selected:hover {
   box-shadow: 0 0 0 2px var(--color-primary);
 }
 
-/* 勾选角标：卡片右上角小圆点 + 对勾（token 取色，白用卡底色） */
 .block-check {
   position: absolute;
   top: -6px;
@@ -2719,7 +3232,6 @@ onMounted(() => {
   height: 9px;
 }
 
-/* 批量操作条：sticky 浮出于网格底部，滚动时保持可见 */
 .selection-bar {
   position: sticky;
   bottom: var(--spacing-md);
@@ -2738,6 +3250,7 @@ onMounted(() => {
 
 .selection-count {
   flex-shrink: 0;
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-primary);
@@ -2748,7 +3261,6 @@ onMounted(() => {
   align-items: center;
 }
 
-/* 操作条浮入/浮出（v-if 切换） */
 .sel-bar-enter-active,
 .sel-bar-leave-active {
   transition: opacity 0.18s ease, transform 0.18s ease;
@@ -2760,7 +3272,7 @@ onMounted(() => {
   transform: translateY(6px);
 }
 
-/* ---------- 楼栋级联删除对话框（R4-D2，token 取色） ---------- */
+/* ---------- 楼栋级联删除对话框 ---------- */
 
 .cascade-state {
   display: flex;
@@ -2881,7 +3393,7 @@ onMounted(() => {
   line-height: 1.8;
 }
 
-/* ---------- 房屋信息卡：状态变更历史（并入原「房屋管理」历史抽屉） ---------- */
+/* ---------- 房屋信息卡：状态变更历史 ---------- */
 
 .info-history {
   margin-top: var(--spacing-md);
@@ -2928,24 +3440,60 @@ onMounted(() => {
 .info-history-empty {
   margin: 0;
   font-size: var(--font-size-xs);
-  color: var(--color-text-disabled);
+  color: var(--color-text-secondary);
 }
 
-/* ---------- 响应式 ---------- */
+/* 触屏无悬浮态：行内操作钮常驻显示（否则楼栋/单元操作在移动端不可达） */
+@media (hover: none) {
+  .row-actions,
+  .block-actions {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* ---------- 响应式：< 1200px 退化为上下堆叠 ---------- */
 
 @media (max-width: 1199px) {
-  .stat-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .manage {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .master-detail {
-    grid-template-columns: minmax(0, 1fr);
+  .metric-strip {
+    gap: var(--spacing-lg);
   }
 }
 
 @media (max-width: 767px) {
-  .stat-row {
-    grid-template-columns: minmax(0, 1fr);
+  .head-actions,
+  .panel-actions {
+    width: 100%;
+  }
+
+  .number-search {
+    width: 100%;
+  }
+
+  .metric-strip {
+    gap: var(--spacing-md);
+  }
+}
+
+/* 降低动效偏好：交互反馈退化为瞬时变化（本页面动效仅用于状态切换提示） */
+@media (prefers-reduced-motion: reduce) {
+  .community-item,
+  .chip-btn,
+  .grid-block,
+  .row-toggle svg,
+  .row-actions,
+  .block-actions,
+  .sel-bar-enter-active,
+  .sel-bar-leave-active {
+    transition: none;
+  }
+
+  .cascade-spinner {
+    animation: none;
   }
 }
 </style>

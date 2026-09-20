@@ -149,11 +149,15 @@
     ├── messaging/       # C11 消息与通知中心
     ├── housing/         # C12 房源展示与看房预约
     ├── payment/         # C3 扩展 · 租约续约支付（R61，接口设计 §9.13）
+    ├── agreement/       # C3 扩展 · 租赁协议轻量版（R64，接口设计 §9.17）
     └── conversation/    # C11 扩展 · 多方会话（R63，接口设计 §9.14）
     ```
     每个业务模块包含：`controller/` + `service/` + `mapper/` + `entity/` + `dto/` + `vo/`
-    （payment 与 conversation 为 2026-09-20 批次新增模块，冻结的架构设计.md §2
-    定义为 C1~C12 十二模块，二者按「域扩展」口径挂靠 C3 / C11，不新增 C 编号）
+    （payment / conversation / agreement 为 2026-09-20/21 批次新增模块，冻结的
+    架构设计.md §2 定义为 C1~C12 十二模块，三者按「域扩展」口径挂靠原有编号
+    ——payment 与 agreement 挂 C3、conversation 挂 C11，**不新增 C 编号**；**人员常驻社区绑定、擅长类别与排班（R65）落在 `workorder/` 包内**
+    ——`StaffCapabilityController`/`StaffScheduleController` + `staff_community` /
+    `staff_service_category` / `staff_schedule` 三表，属 C4 域内扩展，不单开模块）
 
   - **前端目录结构**（`frontend/src/`，基于 30_系统设计/UI设计.md §2）：
     ```
@@ -176,7 +180,7 @@
     │   │                     # P1 前端实施全部完成，约 190 个接口函数；
     │   │                     # P2 增 upload.ts 通用上传）
     │   └── auth.ts          # 认证（居民/管理员登录注册登出）
-    ├── views/               # 页面组件（按三端分目录；**功能视图 65+**
+    ├── views/               # 页面组件（按三端分目录；**功能视图 69+**
     │   │                     # = 原 58 功能视图（2026-09-07 P1 全部实现，
     │   │                     # 时点 64、2026-09-09 冗余清理删 6 页；联调复测
     │   │                     # 12/12 通过）+ 2026-09-19/20 批次新增 7 页
@@ -184,7 +188,12 @@
     │   │                     # ViewingAppointmentDetailView /
     │   │                     # HousingReservationView / ConversationDetailView，
     │   │                     # 管理端 ConversationListView /
-    │   │                     # HousesWithHousingView）；服务人员端同期另增
+    │   │                     # HousesWithHousingView）+ 2026-09-21 批次新增 4 页
+    │   │                     # （管理端 lease/LeaseDetailView 租约详情、
+    │   │                     # lease/AgreementTemplateView 协议模板、
+    │   │                     # workorder/StaffScheduleView 人员排班、
+    │   │                     # workorder/StaffCapabilityView 服务人员绑定）；
+    │   │                     # 服务人员端同期另增
     │   │                     # ViewingsWorkbenchView「我的带看」工作台；
     │   │                     # 另登录注册 2 页 + 403/404）
     │   ├── resident/        # 居民端
@@ -192,12 +201,23 @@
     │   ├── staff/           # 服务人员端
     │   ├── admin/           # 管理端（按 C1~C12 模块分子目录，2026-09-20 增
     │   │                     # conversation/ 会话中心与 community/ 房屋房源
-    │   │                     # 一体化页；auth/ 子目录为 C10 系统用户/操作日志）
+    │   │                     # 一体化页；2026-09-21 增 lease/LeaseDetailView
+    │   │                     # 租约详情页与 lease/AgreementTemplateView 协议模板页、
+    │   │                     # workorder/StaffScheduleView 人员排班与
+    │   │                     # workorder/StaffCapabilityView 服务人员（绑定）、
+    │   │                     # community/StructureGenerateDialog 结构链一次性
+    │   │                     # 批量生成；auth/ 子目录为 C10 系统用户/操作日志）；
+    │   │                     # 管理端侧栏菜单名（AppSidebar）：看板 / 社区管理 /
+    │   │                     # 工单调度 / 人员排班 / 服务人员 / 居民 / 租住 /
+    │   │                     # 协议模板 / 公告 / 反馈 / 预约 / 房源 / 评价 /
+    │   │                     # 消息中心 / 消息会话 / 系统（「系统」为超管独占，按角色过滤）
     │   ├── auth/            # 登录注册（LoginView/RegisterView 2 页）
     │   ├── ForbiddenView/NotFoundView  # 全局 403/404
     ├── components/          # 组件（通用组件层与业务组件 P1 已实现）
     │   ├── layout/          # 布局组件（AppHeader/AppSidebar）
-    │   ├── business/        # 业务组件（NotificationList 三端复用）
+    │   ├── business/        # 业务组件（NotificationList 三端复用；
+    │   │                     # 2026-09-20/21 增 AppointmentChat、
+    │   │                     # ConversationChat、AgreementSignPanel 协议签约面板）
     │   └── common/          # 通用组件（StatusTag/Pagination/SearchBar/
     │                         # FilterPanel/StatCard/Uploader 系列/EChart）
     ├── utils/               # 工具函数（request/auth/permission/responsive/
@@ -214,12 +234,12 @@
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
   | 环境变量配置 | `export DB_PASSWORD="your_password"` + `export JWT_SECRET="your_secret_key"`（≥32 字符）(Linux/Mac)；Windows 用 `set` | 数据库密码必需；JWT 密钥 dev 未设置时用仅限本机的默认值（生产 profile 拒绝默认密钥，见架构设计 §7）；Redis 可选 `REDIS_HOST/REDIS_PORT/REDIS_PASSWORD`（默认 localhost:6379 无密码） |
-  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 **V1~V17 共 17 个迁移、45 张表**，无需手动跑脚本：V1（40 张表 DDL）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V4/V5（house 户型朝向字段、看房游客支持）+ V6（五角色演示种子：admin1/Admin123456 绑社区、staff1/Staff123456、resident1/Resident123456 已入住 + 游客可见的公告/房源/看房时段 + 健身房资源与时段）+ V7（种子社区默认服务类别目录 7 类，需求 R17）+ V8（日志留存配置 log.retention_days=730）+ V9（公告置顶/多目标定向列 + 房源租售类型与户型列）+ V10~V11（预约并发唯一约束 + C2 时段栅格 slot_unit）+ V12（公告表单字段 priority/type）+ V13（公告 GUEST 游客可见目标，R12/DEF-046）+ V14（带看人列与看房沟通消息表，R59）+ V15（租约续约支付单表 lease_payment，R61）+ V16（多方会话三表与看房群聊回填，R63）+ V17（房号同单元唯一 uk_unit_house_number，R62 补）；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
+  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 **V1~V19 共 19 个迁移、51 张表**，无需手动跑脚本：V1（40 张表 DDL）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V4/V5（house 户型朝向字段、看房游客支持）+ V6（五角色演示种子：admin1/Admin123456 绑社区、staff1/Staff123456、resident1/Resident123456 已入住 + 游客可见的公告/房源/看房时段 + 健身房资源与时段）+ V7（种子社区默认服务类别目录 7 类，需求 R17）+ V8（日志留存配置 log.retention_days=730）+ V9（公告置顶/多目标定向列 + 房源租售类型与户型列）+ V10~V11（预约并发唯一约束 + C2 时段栅格 slot_unit）+ V12（公告表单字段 priority/type）+ V13（公告 GUEST 游客可见目标，R12/DEF-046）+ V14（带看人列与看房沟通消息表，R59）+ V15（租约续约支付单表 lease_payment，R61）+ V16（多方会话三表与看房群聊回填，R63）+ V17（房号同单元唯一 uk_unit_house_number，R62 补）+ V18（社区自动审批两列 + 租约签约状态列 + 租约变更历史/协议模板/租约协议三表，R64/R62 补）+ V19（人员常驻社区/擅长类别/排班三表 + 存量派单回填，R65）；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
   | 支付渠道环境变量（可选） | 支付宝：`PAYMENT_ALIPAY_APP_ID` / `PAYMENT_ALIPAY_GATEWAY_URL` / `PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY` / `PAYMENT_ALIPAY_PUBLIC_KEY`（另可选 `PAYMENT_ALIPAY_RETURN_URL`）；微信：`PAYMENT_WECHAT_MCH_ID` / `PAYMENT_WECHAT_APP_ID` / `PAYMENT_WECHAT_API_V3_KEY` / `PAYMENT_WECHAT_MERCHANT_SERIAL_NO` / `PAYMENT_WECHAT_PRIVATE_KEY`（或 `PAYMENT_WECHAT_PRIVATE_KEY_PATH`） | 租约续约在线支付（R61）的可选凭据，不配置则两渠道禁用（渠道卡片置灰明示）；支付宝沙箱个人可自助开通、微信需商户资质；**变量名以 `backend/src/main/resources/application.yml` 的 `payment.*` 占位符为准**，配置步骤与沙箱网关见 `README.md`「支付渠道配置」节 |
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
-  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；V6 演示种子账号：超管 `superadmin / Admin@123456`（V3，生产首登必改）、社区管理员 `admin1 / Admin123456`、服务人员 `staff1 / Staff123456`、居民 `resident1 / Resident123456`（已入住）、游客无需账号。**C1~C12 后端业务接口已全量实现（2026-09-07：V1~V7 迁移 40+ 表、六大状态机、功能级+数据级权限；E1/E2/E4/E6/E10b 端到端冒烟通过；2026-09-09 联调复测 12/12 流程全过（阶段性联调）；文件上传 POST /api/v1/upload（本地磁盘 ./uploads，/uploads/** 静态访问）+ 工单附件（四角色：居民限提交人/服务人员限被派单人）与反馈附件（附件独立管理，已办结禁增删）上传/删除均已实现，BE-ISSUE-9/10 闭环），前端对接以 swagger-ui 与 `接口设计.md` 为准；状态枚举以 Flyway 迁移脚本注释与架构设计 §6 为准（见决策日志 2026-09-07 口径裁决）。P2 后端已交付（2026-09-09）：四定时任务（租期判定 01:00 / 到期提醒 01:30 / 公告下线每小时 / 浏览回写每 5 分钟；Redisson 锁防重入 + sys_task_log 执行日志）+ WebSocket 实时通知（/ws 端点 SockJS + STOMP，CONNECT 帧认证，订阅 /user/queue/notifications；推送失败由 HTTP 轮询兜底）+ 反馈会话实时推送（R30，2026-09-10：订阅 /topic/feedback/{id}，destination 级鉴权限会话参与者，载荷 FEEDBACK_MESSAGE type/data 包裹）+ 缺陷修复（公告删除 FK 冲突 BE-ISSUE-8、看房可约时段接口 BE-ISSUE-5）；社区级联删除端点（DELETE /api/v1/communities/{id}，仅超管，R1/R6 v1.1，2026-09-10）+ 日志留存清理任务（LogRetentionCleanTask 每日 03:00，阈值 sys_config log.retention_days 默认 730 天，清理后通知超管，R58，2026-09-10）+ 1c 四项（2026-09-10）：管理员代建居民与 CSV 批量导入（POST /api/v1/residents/admin-create + /import，R8 v1.2，部分成功语义逐行反馈）、通知渠道分级配置（GET/PUT /api/v1/notifications/channel-levels，sys_config notify.channel.levels，R51，公告发布按勾选写渠道留痕）、公告多社区/楼栋定向与置顶（V9 notice.is_pinned + targets 列表，R24/R25）、房源户型/租售类型筛选（V9 housing.rent_type+layout，R53）；阶段性单元测试 113 用例全过（全需求测试归 50 阶段）。P2 前端（2026-09-09 全部完成）：文件上传链路（工单/反馈附件三端接入）+ 运营看板社区筛选与占用率卡片 + WebSocket 实时通知前端（utils/websocket.ts + store/notification.ts + AppHeader 铃铛，推送/轮询双保障）；阶段性综合 E2E 14/14 + typecheck/build 全绿（全需求测试归 50 阶段）；通知 unread/pull 后端返回纯数组，api 层已适配（见决策日志 2026-09-09）。**2026-09-19/20 批次增量能力（R59~R63，细节见 50_系统测试/_中控.md §4 批次 b~d 与决策日志同日条目）**：R59 带看人分配与带看沟通会话（V14 viewing_message + WS /topic/appointment/{id}）+ R60 连续时段预约（相邻时段合并提交、单次上限 sys_config 两键默认 120 分钟）+ R61 租约续看与真实支付双渠道（V15 lease_payment，支付宝电脑网站支付/微信 Native 扫码，凭据门控 + 主动查单）+ R62 房源社区一体化与全社区开放（V16 批量挂牌 batch-generate + 社区房屋房源一体化树）+ R63 多方会话群聊与居民-管理员直通（V16 conversation 三表 + 看房群聊，管理端会话中心 /admin/conversations）；V17 房号同单元唯一（uk_unit_house_number）；阶段性后端单测 383/383、前端 build 全绿（R59~R63 用例与复验归 50 阶段步骤 7/8 后续批次）** |
+  | 访问入口 | 开发环境 http://localhost:5173 | 路由：游客 `/guest`、登录 `/auth/login`、居民 `/resident`、服务人员 `/staff`、管理端 `/admin`；V6 演示种子账号：超管 `superadmin / Admin@123456`（V3，生产首登必改）、社区管理员 `admin1 / Admin123456`、服务人员 `staff1 / Staff123456`、居民 `resident1 / Resident123456`（已入住）、游客无需账号。**C1~C12 后端业务接口已全量实现（2026-09-07：V1~V7 迁移 40+ 表、六大状态机、功能级+数据级权限；E1/E2/E4/E6/E10b 端到端冒烟通过；2026-09-09 联调复测 12/12 流程全过（阶段性联调）；文件上传 POST /api/v1/upload（本地磁盘 ./uploads，/uploads/** 静态访问）+ 工单附件（四角色：居民限提交人/服务人员限被派单人）与反馈附件（附件独立管理，已办结禁增删）上传/删除均已实现，BE-ISSUE-9/10 闭环），前端对接以 swagger-ui 与 `接口设计.md` 为准；状态枚举以 Flyway 迁移脚本注释与架构设计 §6 为准（见决策日志 2026-09-07 口径裁决）。P2 后端已交付（2026-09-09）：四定时任务（租期判定 01:00 / 到期提醒 01:30 / 公告下线每小时 / 浏览回写每 5 分钟；Redisson 锁防重入 + sys_task_log 执行日志）+ WebSocket 实时通知（/ws 端点 SockJS + STOMP，CONNECT 帧认证，订阅 /user/queue/notifications；推送失败由 HTTP 轮询兜底）+ 反馈会话实时推送（R30，2026-09-10：订阅 /topic/feedback/{id}，destination 级鉴权限会话参与者，载荷 FEEDBACK_MESSAGE type/data 包裹）+ 缺陷修复（公告删除 FK 冲突 BE-ISSUE-8、看房可约时段接口 BE-ISSUE-5）；社区级联删除端点（DELETE /api/v1/communities/{id}，仅超管，R1/R6 v1.1，2026-09-10）+ 日志留存清理任务（LogRetentionCleanTask 每日 03:00，阈值 sys_config log.retention_days 默认 730 天，清理后通知超管，R58，2026-09-10）+ 1c 四项（2026-09-10）：管理员代建居民与 CSV 批量导入（POST /api/v1/residents/admin-create + /import，R8 v1.2，部分成功语义逐行反馈）、通知渠道分级配置（GET/PUT /api/v1/notifications/channel-levels，sys_config notify.channel.levels，R51，公告发布按勾选写渠道留痕）、公告多社区/楼栋定向与置顶（V9 notice.is_pinned + targets 列表，R24/R25）、房源户型/租售类型筛选（V9 housing.rent_type+layout，R53）；阶段性单元测试 113 用例全过（全需求测试归 50 阶段）。P2 前端（2026-09-09 全部完成）：文件上传链路（工单/反馈附件三端接入）+ 运营看板社区筛选与占用率卡片 + WebSocket 实时通知前端（utils/websocket.ts + store/notification.ts + AppHeader 铃铛，推送/轮询双保障）；阶段性综合 E2E 14/14 + typecheck/build 全绿（全需求测试归 50 阶段）；通知 unread/pull 后端返回纯数组，api 层已适配（见决策日志 2026-09-09）。**2026-09-19/20 批次增量能力（R59~R63，细节见 50_系统测试/_中控.md §4 批次 b~d 与决策日志同日条目）**：R59 带看人分配与带看沟通会话（V14 viewing_message + WS /topic/appointment/{id}）+ R60 连续时段预约（相邻时段合并提交、单次上限 sys_config 两键默认 120 分钟）+ R61 租约续看与真实支付双渠道（V15 lease_payment，支付宝电脑网站支付/微信 Native 扫码，凭据门控 + 主动查单）+ R62 房源社区一体化与全社区开放（V16 批量挂牌 batch-generate + 社区房屋房源一体化树）+ R63 多方会话群聊与居民-管理员直通（V16 conversation 三表 + 看房群聊，管理端会话中心 /admin/conversations）；V17 房号同单元唯一（uk_unit_house_number）；阶段性后端单测 383/383、前端 build 全绿（R59~R63 用例与复验归 50 阶段步骤 7/8 后续批次）。**2026-09-21 批次增量能力（R64/R65/R62 补，细节见 50_系统测试/_中控.md §4 批次 e 与决策日志同日条目）**：R64 租赁协议轻量版（V18 三表，模板附件查看/下载 + 正文 `{{变量}}` 渲染为**快照** + 双方在线确认留痕 + 管理方撤回；**平台内确认留痕不构成《电子签名法》意义的可靠电子签名**，边界已声明）+ R62 补 社区级入住申请自动通过（V18：community.auto_approve_residence / default_lease_months）+ R65 工单调度与人员排班（V19 三表：常驻社区/擅长类别绑定 + 五班次排班 + 工单调度标记与等待时长 + 派单候选四档推荐）+ 管理端三页重做（社区管理含批量删除/批量启停/结构链一次性批量生成、租住管理转管租约属性 + 字段级变更历史、工单列表改调度工作台）；DEF-066 社区级联删除漏纳 V18/V19 新表已修复（新增回归用例含级联顺序断言）；阶段性后端单测 **487/487**、前端 typecheck + build 全绿、接口冒烟 34/34（R64/R65/R62 补用例与复验归 50 阶段步骤 7/8 批次 e）** |
 
 ## 四、业务模型快速参考（基于 30_系统设计/数据库设计.md，表名以其 §3 与已执行
 的 Flyway 迁移脚本为准：小写无前缀、单数形式，2026-09-07 对齐）
@@ -228,8 +248,8 @@
 |------|----------|------|
 | C1 社区基础信息 | `community`、`building`、`unit`、`house`、`public_resource` | 社区→楼栋→单元→房屋四级结构 + 公共资源 |
 | C2 居民管理 | `resident`、`residence_application`、`residence_relation` | 居民账号 + 入住申请 + 居住关系 |
-| C3 租住管理 | `lease_record`、`lease_reminder` | 租住记录 + 到期提醒去重表 |
-| C4 工单管理 | `service_category`、`work_order`、`work_order_process`、`work_order_attachment`、`work_order_assignment` | 服务类别树 + 工单 + 处理记录 + 附件 + 派单关系 |
+| C3 租住管理 | `lease_record`、`lease_reminder`、`lease_payment`、`lease_change_log`、`agreement_template`、`lease_agreement` | 租住记录 + 到期提醒去重 + 续约支付单 + 租约属性变更历史（字段级留痕）+ 协议模板 + 租约协议（R64 轻量在线确认） |
+| C4 工单管理 | `service_category`、`work_order`、`work_order_process`、`work_order_attachment`、`work_order_assignment`、`staff_community`、`staff_service_category`、`staff_schedule` | 服务类别树 + 工单 + 处理记录 + 附件 + 派单关系 + 人员常驻社区/擅长类别绑定 + 排班（R65 调度） |
 | C5 公告管理 | `notice`、`notice_target`、`notice_view_record` | 公告 + 目标范围 + 查看记录 |
 | C6 反馈管理 | `feedback`、`feedback_message`、`feedback_attachment` | 反馈单 + 会话消息 + 附件 |
 | C7 资源预约 | `resource_timeslot`、`resource_reservation`、`violation_record` | 资源时段配置 + 预约记录 + 违约处置 |

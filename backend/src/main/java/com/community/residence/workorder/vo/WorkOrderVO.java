@@ -56,6 +56,18 @@ public class WorkOrderVO {
     @Schema(description = "当前处理人姓名")
     private String assigneeName;
 
+    @Schema(description = "当前处理人今日班次标签（空=当日未排班）")
+    private String assigneeShiftLabel;
+
+    @Schema(description = "当前处理人在手工单数（不含已完成/已关闭/已驳回/已取消）")
+    private Integer assigneeActiveOrders;
+
+    @Schema(description = "调度标记：OVERDUE-超时（待受理/待派单超 30 分钟 / 已派单超 2 小时未接单 / 处理中超 24 小时）, URGENT-紧急未完结, NEW-近 2 小时新建, NORMAL-常规")
+    private String dispatchFlag;
+
+    @Schema(description = "进入当前状态以来的分钟数（无法判定时以提交时间计）")
+    private Long waitedMinutes;
+
     @Schema(description = "提交时间")
     private LocalDateTime createdAt;
 

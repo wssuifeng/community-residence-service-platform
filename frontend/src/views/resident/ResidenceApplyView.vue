@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getHousingDetail } from '@/api/housing'
+import { getCommunity } from '@/api/community'
 import { createResidenceApplication } from '@/api/resident'
 import type { IHousing } from '@/types/modules/housing'
 import { housingRentTypeLabels } from '@/types/modules/housing'
@@ -10,9 +11,11 @@ import type { RelationType } from '@/types/modules/resident'
 import { relationTypeLabels } from '@/types/modules/resident'
 
 /**
- * 申请租住（R62 补：居民端此前缺少直接的租住申请入口）。
+ * 申请租住（R62 补：居民端此前缺少直接的租住申请入口；R62 补 v2：社区级自动通过）。
  * 流程：选择身份（租客 / 业主 / 家属）→ 提交入住申请 → 管理方审核通过后
- * 生成居住关系与租约（租期从审核通过起算）。本页只发起申请，不即时入驻。
+ * 生成居住关系与租约（租期从审核通过起算）。
+ * 社区开启「入住申请自动通过」后提交即时生效，本页据社区配置切换文案与结果态，
+ * 结果态以提交响应的 status 为准（不靠前端猜测社区开关）。
  */
 
 const route = useRoute()
@@ -23,6 +26,10 @@ const housing = ref<IHousing | null>(null)
 const loading = ref(true)
 const submitting = ref(false)
 const submitted = ref(false)
+/** 提交后是否即时通过（社区自动审批路径）：决定结果态文案与后续引导 */
+const autoApproved = ref(false)
+/** 社区是否开启自动通过（提交前提示文案用；取不到时按人工审核口径展示） */
+const communityAutoApprove = ref(false)
 
 const form = reactive({
   relationType: 'TENANT' as RelationType,
@@ -42,6 +49,7 @@ async function loadHousing(): Promise<void> {
   loading.value = true
   try {
     housing.value = await getHousingDetail(housingId)
+    await loadCommunityPolicy(housing.value.communityId)
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载房源失败')
   } finally {
@@ -49,17 +57,30 @@ async function loadHousing(): Promise<void> {
   }
 }
 
+/* 社区自动审批开关（GET /communities/{id} 对居民开放）：仅影响文案，判定仍以后端提交结果为准 */
+async function loadCommunityPolicy(communityId: number | undefined): Promise<void> {
+  if (!communityId) return
+  try {
+    const community = await getCommunity(communityId)
+    communityAutoApprove.value = community.autoApproveResidence === 1
+  } catch {
+    /* 取不到社区配置不影响申请主流程，按人工审核口径提示 */
+    communityAutoApprove.value = false
+  }
+}
+
 async function handleSubmit(): Promise<void> {
   if (!housing.value || submitting.value) return
   submitting.value = true
   try {
-    await createResidenceApplication({
+    const application = await createResidenceApplication({
       houseId: housing.value.houseId,
       relationType: form.relationType,
       remark: form.remark.trim() === '' ? undefined : form.remark.trim()
     })
+    autoApproved.value = application.status === 'APPROVED'
     submitted.value = true
-    ElMessage.success('申请已提交，等待管理方审核')
+    ElMessage.success(autoApproved.value ? '申请已通过，租约已生成' : '申请已提交，等待管理方审核')
   } catch (error) {
     /* 后端业务错误（已在住/存在在审申请/房屋不可租）直接展示其 message */
     ElMessage.error(error instanceof Error ? error.message : '申请提交失败')
@@ -89,16 +110,26 @@ onMounted(() => {
 
     <header class="page-head">
       <h1>申请租住</h1>
-      <p class="page-head-sub">提交后由社区管理方审核，审核通过即生成居住关系与租约</p>
+      <p class="page-head-sub">
+        {{ communityAutoApprove
+          ? '本社区入住申请即时生效：提交后立即生成居住关系与租约'
+          : '提交后由社区管理方审核，审核通过即生成居住关系与租约' }}
+      </p>
     </header>
 
-    <!-- 提交成功态：明确后续路径 -->
+    <!-- 提交成功态：区分自动通过与待审核两条路径，明确后续去哪看结果 -->
     <div v-if="submitted" class="result-card card">
-      <h2>申请已提交</h2>
-      <p>管理方审核通过后，您将收到通知，并可在「我的租约」中查看租期与租金。</p>
+      <h2>{{ autoApproved ? '申请已通过，租约已生成' : '申请已提交' }}</h2>
+      <p v-if="autoApproved">
+        本社区已开启入住申请自动通过，租约已生效。可在「我的租约」查看租期、租金与押金，
+        并留意管理方发起的租赁协议确认。
+      </p>
+      <p v-else>
+        管理方审核通过后，您将收到通知，并可在「我的租约」中查看租期与租金。
+      </p>
       <div class="result-actions">
-        <el-button type="primary" @click="router.push('/resident/housings')">继续看房源</el-button>
-        <el-button @click="router.push('/resident/notifications')">查看消息</el-button>
+        <el-button type="primary" @click="router.push('/resident/leases')">查看我的租约</el-button>
+        <el-button @click="router.push('/resident/housings')">继续看房源</el-button>
       </div>
     </div>
 
@@ -159,9 +190,16 @@ onMounted(() => {
         </el-form>
 
         <div class="form-tip">
-          <p>· 申请提交后进入「待审核」，管理方审核通过才会生成租约；</p>
-          <p>· 审核期间可在「我的消息」中查看进度，同一房屋重复申请会被拒绝；</p>
-          <p>· 租期与租金以审核通过后生成的租约为准，可在「我的租约」中查看与续租。</p>
+          <template v-if="communityAutoApprove">
+            <p>· 本社区已开启入住申请自动通过，提交后立即生成居住关系与租约；</p>
+            <p>· 租期按社区默认租期起算，租金与押金取房源当前挂牌值；</p>
+            <p>· 租约生效后可在「我的租约」查看，并在管理方发起协议后在线确认租赁协议。</p>
+          </template>
+          <template v-else>
+            <p>· 申请提交后进入「待审核」，管理方审核通过才会生成租约；</p>
+            <p>· 审核期间可在「我的消息」中查看进度，同一房屋重复申请会被拒绝；</p>
+            <p>· 租期与租金以审核通过后生成的租约为准，可在「我的租约」中查看与续租。</p>
+          </template>
         </div>
 
         <div class="form-actions">

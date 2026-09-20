@@ -58,6 +58,10 @@ class WorkOrderServiceExtraTest {
     private NotificationService notificationService;
     @Mock
     private com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
+    @Mock
+    private StaffCapabilityService staffCapabilityService;
+    @Mock
+    private StaffScheduleService staffScheduleService;
 
     @InjectMocks
     private WorkOrderService workOrderService;
@@ -141,7 +145,7 @@ class WorkOrderServiceExtraTest {
                     .hasRole(RoleConstants.STAFF)).thenReturn(true);
             when(assignmentMapper.selectList(any())).thenReturn(List.of());
 
-            var vo = workOrderService.page(1, 10, null, null, null, null, null, null, null);
+            var vo = workOrderService.page(1, 10, null, null, null, null, null, null, null, null, null);
             assertThat(vo.getTotal()).isEqualTo(0);
         }
     }
@@ -162,14 +166,17 @@ class WorkOrderServiceExtraTest {
                         p.setTotal(1);
                         return p;
                     });
-            when(categoryMapper.selectById(1L)).thenReturn(category);
+            /* 列表装载改为批量查询（避免 N+1）：类别/居民姓名按 ID 集合一次查出 */
+            when(categoryMapper.selectList(any())).thenReturn(List.of(category));
             Resident r = new Resident();
+            r.setId(1L);
             r.setRealName("Zhang");
-            when(residentMapper.selectById(1L)).thenReturn(r);
+            when(residentMapper.selectList(any())).thenReturn(List.of(r));
 
-            var vo = workOrderService.page(1, 10, null, null, null, null, null, null, null);
+            var vo = workOrderService.page(1, 10, null, null, null, null, null, null, null, null, null);
             assertThat(vo.getTotal()).isEqualTo(1);
             assertThat(vo.getRecords().get(0).getCategoryName()).isNotNull();
+            assertThat(vo.getRecords().get(0).getResidentName()).isEqualTo("Zhang");
         }
     }
 

@@ -2,9 +2,13 @@ package com.community.residence.community.controller;
 
 import com.community.residence.common.result.ApiResponse;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.community.dto.BatchCommunityIdsDTO;
+import com.community.residence.community.dto.BatchCommunityStatusDTO;
 import com.community.residence.community.dto.CreateCommunityDTO;
 import com.community.residence.community.dto.UpdateCommunityStatusDTO;
+import com.community.residence.community.service.CommunityBatchService;
 import com.community.residence.community.service.CommunityService;
+import com.community.residence.community.vo.BatchOperationResultVO;
 import com.community.residence.community.vo.CommunityVO;
 import com.community.residence.housing.service.HousingService;
 import com.community.residence.housing.vo.BuildingHousingTreeVO;
@@ -35,6 +39,7 @@ import java.util.List;
 public class CommunityController {
 
     private final CommunityService communityService;
+    private final CommunityBatchService communityBatchService;
     private final HousingService housingService;
 
     @Operation(summary = "房屋与房源一体化树（R62）",
@@ -108,5 +113,25 @@ public class CommunityController {
     public ApiResponse<Void> delete(@PathVariable Long id) {
         communityService.delete(id);
         return ApiResponse.success();
+    }
+
+    @Operation(summary = "批量删除社区（级联）",
+            description = "仅超级管理员；逐社区独立事务级联删除（复用单社区删除的级联清单），"
+                    + "一个失败不影响其余社区（部分成功语义，逐项返回失败原因）；ids 非空、单次上限 50")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PostMapping("/batch-delete")
+    public ApiResponse<BatchOperationResultVO> batchDelete(
+            @RequestBody @Valid BatchCommunityIdsDTO dto) {
+        return ApiResponse.success(communityBatchService.batchDelete(dto));
+    }
+
+    @Operation(summary = "批量更新社区状态",
+            description = "仅超级管理员；批量停用/启用（ACTIVE/INACTIVE），逐社区独立事务，"
+                    + "一个失败不影响其余社区（部分成功语义）；ids 非空、单次上限 50")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PatchMapping("/batch-status")
+    public ApiResponse<BatchOperationResultVO> batchUpdateStatus(
+            @RequestBody @Valid BatchCommunityStatusDTO dto) {
+        return ApiResponse.success(communityBatchService.batchUpdateStatus(dto));
     }
 }

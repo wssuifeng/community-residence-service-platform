@@ -49,6 +49,8 @@ class LeaseStateMachineFixTest {
     private UnitMapper unitMapper;
     @Mock
     private BuildingMapper buildingMapper;
+    @Mock
+    private LeaseChangeLogService changeLogService;
 
     @InjectMocks
     private LeaseService leaseService;

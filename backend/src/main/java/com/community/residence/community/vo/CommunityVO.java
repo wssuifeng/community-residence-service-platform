@@ -32,6 +32,12 @@ public class CommunityVO {
     @Schema(description = "状态：ACTIVE-运营中, INACTIVE-已停用")
     private String status;
 
+    @Schema(description = "入住申请自动通过：0-关闭（人工审核）, 1-开启（提交即通过）")
+    private Integer autoApproveResidence;
+
+    @Schema(description = "自动通过时的默认租期月数")
+    private Integer defaultLeaseMonths;
+
     @Schema(description = "创建时间")
     private LocalDateTime createdAt;
 
@@ -47,6 +53,8 @@ public class CommunityVO {
         vo.setContactPerson(entity.getContactPerson());
         vo.setDescription(entity.getDescription());
         vo.setStatus(entity.getStatus());
+        vo.setAutoApproveResidence(entity.getAutoApproveResidence());
+        vo.setDefaultLeaseMonths(entity.getDefaultLeaseMonths());
         vo.setCreatedAt(entity.getCreatedAt());
         vo.setUpdatedAt(entity.getUpdatedAt());
         return vo;

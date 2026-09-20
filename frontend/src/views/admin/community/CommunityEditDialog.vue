@@ -26,7 +26,9 @@ const form = reactive<ICreateCommunityDTO>({
   address: '',
   contactPhone: '',
   contactPerson: '',
-  description: ''
+  description: '',
+  autoApproveResidence: 0,
+  defaultLeaseMonths: 12
 })
 
 const rules: FormRules = {
@@ -34,7 +36,7 @@ const rules: FormRules = {
   address: [{ required: true, message: '请输入社区地址', trigger: 'blur' }]
 }
 
-/* 每次打开按编辑目标重置表单（新建为全空） */
+/* 每次打开按编辑目标重置表单（新建为全空，自动化变量回落默认值） */
 watch(visible, (value) => {
   if (!value) return
   form.name = props.community?.name ?? ''
@@ -42,6 +44,8 @@ watch(visible, (value) => {
   form.contactPhone = props.community?.contactPhone ?? ''
   form.contactPerson = props.community?.contactPerson ?? ''
   form.description = props.community?.description ?? ''
+  form.autoApproveResidence = props.community?.autoApproveResidence ?? 0
+  form.defaultLeaseMonths = props.community?.defaultLeaseMonths ?? 12
   formRef.value?.clearValidate()
 })
 
@@ -56,7 +60,9 @@ async function handleSubmit(): Promise<void> {
       address: form.address.trim(),
       contactPhone: (form.contactPhone ?? '').trim() || undefined,
       contactPerson: (form.contactPerson ?? '').trim() || undefined,
-      description: (form.description ?? '').trim() || undefined
+      description: (form.description ?? '').trim() || undefined,
+      autoApproveResidence: form.autoApproveResidence ? 1 : 0,
+      defaultLeaseMonths: form.defaultLeaseMonths ?? 12
     }
     let saved: ICommunity
     if (props.community) {
@@ -100,6 +106,25 @@ async function handleSubmit(): Promise<void> {
           maxlength="200"
         />
       </el-form-item>
+
+      <el-divider content-position="left">入住申请自动化</el-divider>
+      <el-form-item label="自动通过">
+        <el-switch
+          v-model="form.autoApproveResidence"
+          :active-value="1"
+          :inactive-value="0"
+          active-text="提交即通过"
+          inactive-text="人工审核"
+        />
+      </el-form-item>
+      <el-form-item v-if="form.autoApproveResidence" label="默认租期">
+        <el-input-number v-model="form.defaultLeaseMonths" :min="1" :max="120" :step="1" />
+        <span class="form-hint">个月（自动通过时按此推导租期止期；租金与押金取房源挂牌值）</span>
+      </el-form-item>
+      <p v-else class="form-hint form-hint-block">
+        关闭时居民提交租住申请进入「待审核」，由管理方在入住申请中人工审批；
+        开启后提交即时通过，并自动生成居住关系与租约。
+      </p>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
@@ -107,3 +132,20 @@ async function handleSubmit(): Promise<void> {
     </template>
   </el-dialog>
 </template>
+
+<style scoped>
+.form-hint {
+  margin-left: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.form-hint-block {
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  line-height: var(--line-height-relaxed);
+  margin-left: 0;
+}
+</style>
