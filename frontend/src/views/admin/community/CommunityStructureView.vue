@@ -7,15 +7,16 @@ import HousesWithHousingView from '@/views/admin/community/HousesWithHousingView
 import PublicResourceListView from '@/views/admin/community/PublicResourceListView.vue'
 
 /**
- * 社区结构容器：Tab 深链 ?tab=tree|housing|resources。
- * 结构总览 Tab 对照设计稿 01-社区结构重排（StructureTreePane）；房屋与房源 Tab 为
+ * 社区管理容器：Tab 深链 ?tab=tree|housing|resources。
+ * 社区结构 Tab 为社区管理主体（StructureTreePane：社区筛选列表 + 批量管理 +
+ * 选中社区的楼栋/单元/房屋三级浏览与批量建房）；房屋与房源 Tab 为
  * R62 房源挂牌一体化视图（HousesWithHousingView，行内展开树 + 批量挂牌）；
  * 公共资源 Tab 原样嵌入既有列表视图（数据绑定/筛选/CRUD 零删减，仅外壳统一）。
  *
- * 「房屋管理」（houses）原 Tab 于 2026-09-20 并入结构总览（房屋增删改、状态变更与
- * 变更历史、批量建房均在总览闭环），不再作为独立入口暴露；取值 houses 作为已归档
+ * 「房屋管理」（houses）原 Tab 于 2026-09-20 并入社区结构 Tab（房屋增删改、状态变更与
+ * 变更历史、批量建房均在结构内闭环），不再作为独立入口暴露；取值 houses 作为已归档
  * Tab 的别名继续被接受（书签/外链/`/admin/houses` 旧路径 redirect 不断链），落点即
- * 结构总览，并在落地后把 URL 归一为 ?tab=tree（replace，不产生历史记录）。
+ * 社区结构 Tab，并在落地后把 URL 归一为 ?tab=tree（replace，不产生历史记录）。
  */
 
 const TABS = ['tree', 'housing', 'resources'] as const
@@ -58,10 +59,13 @@ function switchTab(tab: TabName): void {
 
 <template>
   <div class="admin-page">
-    <AdminPageHeader title="社区结构" subtitle="楼栋 · 单元 · 房屋 · 公共资源一体化管理" />
+    <AdminPageHeader
+      title="社区管理"
+      subtitle="社区、楼栋、单元、房屋一体化管理 · 支持批量建房与批量启用/停用/删除"
+    />
 
     <!-- 白卡 Tab 条：观感与运营看板一致（激活蓝字 + 底部 2px 下划线） -->
-    <nav class="tab-bar" role="tablist" aria-label="社区结构视图切换">
+    <nav class="tab-bar" role="tablist" aria-label="社区管理视图切换">
       <button
         type="button"
         role="tab"
@@ -70,7 +74,7 @@ function switchTab(tab: TabName): void {
         :aria-selected="activeTab === 'tree'"
         @click="switchTab('tree')"
       >
-        结构总览
+        社区结构
       </button>
       <button
         type="button"

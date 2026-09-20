@@ -3,27 +3,25 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
-import {
-  assignWorkOrder,
-  closeWorkOrder,
-  getWorkOrder,
-  getWorkOrderTimeline,
-  listWorkOrderAttachments,
-  rejectWorkOrder
-} from '@/api/workorder'
-import { getSysUserList } from '@/api/sysuser'
+import StaffPickerDrawer from '@/views/admin/workorder/StaffPickerDrawer.vue'
+import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, listWorkOrderAttachments, rejectWorkOrder } from '@/api/workorder'
 import type {
+  DispatchFlag,
   IWorkOrder,
   IWorkOrderAttachment,
   IWorkOrderProcess,
   WorkOrderPriority,
   WorkOrderStatus
 } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
-import type { ISysUser } from '@/types/modules/auth'
+import { dispatchFlagColors, dispatchFlagLabels, workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
+import { canAssignOrder, formatWaited, isReassignOrder } from './dispatch'
 import { formatDateTime } from '@/utils/date'
 
-/** 工单详情（UI设计.md §4.3.5，对照 design-mockups/admin/03 任务 4）：面包屑 + 状态条 + 工单信息 / 处理时间线 / 管理操作三栏 */
+/**
+ * 工单详情（UI设计.md §4.3.5）：面包屑 + 状态条 + 工单信息 / 处理时间线 / 管理操作三栏。
+ * 状态条与列表看板共用调度口径（dispatchFlag / waitedMinutes）：超时工单在详情页同样一眼可见，
+ * 派单走与列表同一个候选抽屉组件，档位与班次呈现两处完全一致。
+ */
 
 const route = useRoute()
 
@@ -48,23 +46,26 @@ const attachments = ref<IWorkOrderAttachment[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 
-/* 派单对话框 */
-const assignDialogVisible = ref(false)
-const staffList = ref<ISysUser[]>([])
-const staffLoading = ref(false)
-const assignForm = ref({ assigneeId: null as number | null, remark: '' })
-const assigning = ref(false)
+/* 派单/改派：候选抽屉与列表共用（候选、备注、提交全在组件内） */
+const pickerVisible = ref(false)
 
 const imageAttachments = computed(() => attachments.value.filter((item) => item.fileType === 'IMAGE'))
 const documentAttachments = computed(() => attachments.value.filter((item) => item.fileType === 'DOCUMENT'))
 const sortedTimeline = computed(() => [...timeline.value].sort((a, b) => a.createdAt.localeCompare(b.createdAt)))
 
+/* 调度标记与等待时长（列表看板同口径，超时工单在详情页同样显眼） */
+const dispatchFlag = computed<DispatchFlag>(() => order.value?.dispatchFlag ?? 'NORMAL')
+const flagColor = computed(() => dispatchFlagColors[dispatchFlag.value])
+const waitedText = computed(() => formatWaited(order.value?.waitedMinutes))
+/** 处理人当日班次：后端空值=未排班，需明示而非留白 */
+const assigneeShift = computed(() => order.value?.assigneeShiftLabel || '未排班')
+
 /* 状态机：待受理/待派单可派单与驳回；已派单可改派（后端 assign 同一端点）；已完成可关闭 */
-const canAssign = computed(() => order.value?.status === 'PENDING' || order.value?.status === 'TO_ASSIGN')
-const canReassign = computed(() => order.value?.status === 'ASSIGNED')
+const canAssign = computed(() => !!order.value && canAssignOrder(order.value))
+const canReassign = computed(() => !!order.value && isReassignOrder(order.value))
 const canReject = computed(() => order.value?.status === 'PENDING' || order.value?.status === 'TO_ASSIGN')
 const canClose = computed(() => order.value?.status === 'COMPLETED')
-const hasAction = computed(() => canAssign.value || canReassign.value || canReject.value || canClose.value)
+const hasAction = computed(() => canAssign.value || canReject.value || canClose.value)
 
 /* 紧急程度 → 状态条配色档，与 staff 端工单详情同一口径 */
 function toneOf(priority: WorkOrderPriority): 'urgent' | 'normal' | 'low' {
@@ -87,42 +88,6 @@ async function fetchDetail(): Promise<void> {
     ElMessage.error(error instanceof Error ? error.message : '工单详情加载失败')
   } finally {
     loading.value = false
-  }
-}
-
-async function openAssignDialog(): Promise<void> {
-  assignForm.value = { assigneeId: null, remark: '' }
-  assignDialogVisible.value = true
-
-  staffLoading.value = true
-  try {
-    const result = await getSysUserList({ role: 'STAFF', status: 'ACTIVE', page: 1, size: 100 })
-    staffList.value = result.records
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '服务人员列表加载失败')
-  } finally {
-    staffLoading.value = false
-  }
-}
-
-async function handleAssign(): Promise<void> {
-  if (!assignForm.value.assigneeId) {
-    ElMessage.warning('请选择服务人员')
-    return
-  }
-  assigning.value = true
-  try {
-    await assignWorkOrder(orderId, {
-      assigneeId: assignForm.value.assigneeId,
-      remark: assignForm.value.remark.trim() || undefined
-    })
-    ElMessage.success(canReassign.value ? '改派成功' : '派单成功')
-    assignDialogVisible.value = false
-    fetchDetail()
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '派单失败')
-  } finally {
-    assigning.value = false
   }
 }
 
@@ -183,8 +148,8 @@ onMounted(fetchDetail)
     </nav>
 
     <template v-if="order">
-      <!-- 顶部状态条：优先级胶囊 + 标题 + 关键元信息 + 状态标签 -->
-      <article class="status-strip" :class="`is-${toneOf(order.priority)}`">
+      <!-- 顶部状态条：调度标记 + 优先级胶囊 + 标题 + 关键元信息 + 状态标签 -->
+      <article class="status-strip" :class="[`is-${toneOf(order.priority)}`, `flag-${dispatchFlag}`]">
         <span class="status-priority">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
@@ -198,9 +163,20 @@ onMounted(fetchDetail)
             提交人 {{ order.residentName }}
             <span class="meta-sep">·</span>
             {{ formatDateTime(order.createdAt) }}
+            <template v-if="waitedText">
+              <span class="meta-sep">·</span>
+              <span class="strip-waited" :class="{ 'is-overdue': dispatchFlag === 'OVERDUE' }">
+                已等待 {{ waitedText }}
+              </span>
+            </template>
           </p>
         </div>
-        <StatusTag class="status-flag" :label="workOrderStatusLabels[order.status]" :type="statusSemantic[order.status]" />
+        <span class="strip-flags">
+          <span class="flag-badge" :style="{ backgroundColor: flagColor.bg, color: flagColor.fg }">
+            {{ dispatchFlagLabels[dispatchFlag] }}
+          </span>
+          <StatusTag :label="workOrderStatusLabels[order.status]" :type="statusSemantic[order.status]" />
+        </span>
       </article>
 
       <div class="detail-grid">
@@ -229,7 +205,16 @@ onMounted(fetchDetail)
             </div>
             <div class="info-row">
               <dt>当前处理人</dt>
-              <dd>{{ order.assigneeName ?? '尚未指派' }}</dd>
+              <dd>
+                <template v-if="order.assigneeName">
+                  {{ order.assigneeName }}
+                  <span class="shift-chip">{{ assigneeShift }}</span>
+                  <span class="load-chip" :class="{ 'is-busy': (order.assigneeActiveOrders ?? 0) >= 5 }">
+                    在手工单 {{ order.assigneeActiveOrders ?? 0 }}
+                  </span>
+                </template>
+                <span v-else>尚未指派</span>
+              </dd>
             </div>
           </dl>
 
@@ -309,7 +294,7 @@ onMounted(fetchDetail)
             管理操作
           </h2>
 
-          <el-button v-if="canAssign || canReassign" type="primary" size="large" class="action-btn" @click="openAssignDialog">
+          <el-button v-if="canAssign" type="primary" size="large" class="action-btn" @click="pickerVisible = true">
             {{ canReassign ? '改派工单' : '派单' }}
           </el-button>
           <el-button v-if="canReject" type="danger" plain size="large" class="action-btn" :loading="actionLoading" @click="handleReject">
@@ -328,33 +313,8 @@ onMounted(fetchDetail)
       </div>
     </template>
 
-    <el-dialog v-model="assignDialogVisible" :title="`派单 · ${order?.orderNo ?? ''}`" width="480px">
-      <el-form label-width="90px" @submit.prevent>
-        <el-form-item label="服务人员" required>
-          <el-select
-            v-model="assignForm.assigneeId"
-            :loading="staffLoading"
-            placeholder="选择服务人员"
-            filterable
-            class="staff-select"
-          >
-            <el-option
-              v-for="staff in staffList"
-              :key="staff.id"
-              :label="`${staff.realName}（${staff.username}${staff.phone ? ' · ' + staff.phone : ''}）`"
-              :value="staff.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="派单备注">
-          <el-input v-model="assignForm.remark" type="textarea" :rows="3" maxlength="200" show-word-limit placeholder="派单要求（可选）" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="assignDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="assigning" @click="handleAssign">{{ canReassign ? '确认改派' : '确认派单' }}</el-button>
-      </template>
-    </el-dialog>
+    <!-- 派单/改派：与工单调度列表共用同一候选抽屉，档位与班次呈现保持一致 -->
+    <StaffPickerDrawer v-model="pickerVisible" :order="order" @assigned="fetchDetail" />
   </section>
 </template>
 
@@ -424,6 +384,16 @@ onMounted(fetchDetail)
   background-color: var(--color-text-disabled);
 }
 
+/* 超时/紧急：状态条左侧色带 + 淡底，进详情第一眼就看到 */
+.status-strip.flag-OVERDUE {
+  background-color: var(--color-danger-soft);
+  box-shadow: inset 4px 0 0 var(--status-rejected), var(--shadow-card);
+}
+
+.status-strip.flag-URGENT {
+  box-shadow: inset 4px 0 0 var(--color-warning), var(--shadow-card);
+}
+
 .strip-main {
   flex: 1;
   min-width: 0;
@@ -437,6 +407,10 @@ onMounted(fetchDetail)
   line-height: var(--line-height-tight);
 }
 
+.status-strip.flag-OVERDUE .status-title {
+  color: #b91c1c;
+}
+
 .strip-meta {
   margin: var(--spacing-xs) 0 0;
   font-size: var(--font-size-sm);
@@ -448,8 +422,50 @@ onMounted(fetchDetail)
   color: var(--color-text-disabled);
 }
 
-.status-flag {
+/* 等待时长：常规灰字，超时红字加粗 */
+.strip-waited {
+  color: var(--color-text-secondary);
+}
+
+.strip-waited.is-overdue {
+  color: #b91c1c;
+  font-weight: var(--font-weight-bold);
+}
+
+.strip-flags {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
   flex-shrink: 0;
+}
+
+.flag-badge {
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+/* 处理人班次与在手负载（详情信息行内联展示） */
+.shift-chip {
+  margin-left: var(--spacing-sm);
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-success-soft);
+  color: #047857;
+  font-size: var(--font-size-xs);
+}
+
+.load-chip {
+  margin-left: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
+.load-chip.is-busy {
+  color: var(--color-warning);
+  font-weight: var(--font-weight-medium);
 }
 
 /* 主区三栏：工单信息 / 处理时间线 / 管理操作，等高对齐 */
@@ -683,10 +699,6 @@ onMounted(fetchDetail)
   line-height: var(--line-height-normal);
 }
 
-.staff-select {
-  width: 100%;
-}
-
 @media (max-width: 1199px) {
   .detail-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -710,7 +722,7 @@ onMounted(fetchDetail)
     flex-wrap: wrap;
   }
 
-  .status-flag {
+  .strip-flags {
     margin-left: 0;
   }
 }

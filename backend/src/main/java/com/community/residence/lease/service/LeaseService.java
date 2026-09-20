@@ -62,6 +62,7 @@ public class LeaseService {
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final com.community.residence.community.mapper.CommunityMapper communityMapper;
+    private final LeaseChangeLogService changeLogService;
 
     /* 登记租约：房屋与租客须存在；初始 PENDING 待审核 */
     @Transactional(rollbackFor = Exception.class)
@@ -92,6 +93,7 @@ public class LeaseService {
         lease.setRemark(dto.getRemark());
         lease.setStatus("PENDING");
         leaseMapper.insert(lease);
+        changeLogService.logCreate(lease, "管理方登记租约");
         return toVO(lease);
     }
 
@@ -110,6 +112,7 @@ public class LeaseService {
         if (!dto.getEndDate().isAfter(dto.getStartDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期必须晚于开始日期");
         }
+        LeaseRecord snapshot = snapshot(lease);
         lease.setStartDate(dto.getStartDate());
         lease.setEndDate(dto.getEndDate());
         lease.setMonthlyRent(dto.getMonthlyRent());
@@ -117,6 +120,7 @@ public class LeaseService {
         lease.setContractUrl(dto.getContractUrl());
         lease.setRemark(dto.getRemark());
         leaseMapper.updateById(lease);
+        changeLogService.logAttributeChanges(snapshot, lease, "管理方编辑租约属性");
         return toVO(lease);
     }
 
@@ -136,6 +140,7 @@ public class LeaseService {
         if (!dto.getNewEndDate().isAfter(lease.getEndDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "新结束日期必须晚于原结束日期");
         }
+        LeaseRecord snapshot = snapshot(lease);
         lease.setEndDate(dto.getNewEndDate());
         lease.setMonthlyRent(dto.getMonthlyRent());
         lease.setDeposit(dto.getDeposit());
@@ -143,6 +148,7 @@ public class LeaseService {
             lease.setRemark(dto.getRemark());
         }
         leaseMapper.updateById(lease);
+        changeLogService.logRenew(snapshot, lease, "续租：" + dto.getNewEndDate());
         log.info("租约已续租：leaseId={}, newEndDate={}, operator={}",
                 id, dto.getNewEndDate(), SecurityUtils.getUserId());
         return toVO(lease);
@@ -189,8 +195,19 @@ public class LeaseService {
             lease.setRemark(dto.getRemark());
         }
         leaseMapper.updateById(lease);
+        changeLogService.logStatus(id, current, target, dto.getRemark());
         log.info("租住状态流转：leaseId={}, {} -> {}, operator={}",
                 id, current, target, SecurityUtils.getUserId());
+    }
+
+    /** 租约变更历史（字段级前后值）：RESIDENT 限本人，ADMIN 限绑定社区 */
+    public java.util.List<com.community.residence.lease.vo.LeaseChangeVO> changes(Long id) {
+        LeaseRecord lease = requireLease(id);
+        checkReadAccess(lease);
+        if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
+            SecurityUtils.checkCommunityAccess(lease.getCommunityId());
+        }
+        return changeLogService.list(id);
     }
 
     /** 即将到期列表：ACTIVE 且结束日期在窗口内（到期提醒定时任务复用本查询语义） */
@@ -202,6 +219,18 @@ public class LeaseService {
                 .orderByAsc(LeaseRecord::getEndDate);
         Page<LeaseRecord> result = leaseMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
         return PageVO.of(result.convert(this::toVO));
+    }
+
+    /* 变更留痕用的字段快照：只拷贝参与 diff 的属性，避免误带主键参与比较 */
+    private LeaseRecord snapshot(LeaseRecord lease) {
+        LeaseRecord copy = new LeaseRecord();
+        copy.setId(lease.getId());
+        copy.setStartDate(lease.getStartDate());
+        copy.setEndDate(lease.getEndDate());
+        copy.setMonthlyRent(lease.getMonthlyRent());
+        copy.setDeposit(lease.getDeposit());
+        copy.setRemark(lease.getRemark());
+        return copy;
     }
 
     public LeaseRecord requireLease(Long id) {

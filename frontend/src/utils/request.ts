@@ -79,17 +79,17 @@ export const http = {
   get<T>(url: string, params?: object): Promise<T> {
     return request<T>({ method: 'GET', url, params })
   },
-  post<T>(url: string, data?: unknown): Promise<T> {
-    return request<T>({ method: 'POST', url, data })
+  post<T>(url: string, data?: unknown, params?: object): Promise<T> {
+    return request<T>({ method: 'POST', url, data, params })
   },
-  put<T>(url: string, data?: unknown): Promise<T> {
-    return request<T>({ method: 'PUT', url, data })
+  put<T>(url: string, data?: unknown, params?: object): Promise<T> {
+    return request<T>({ method: 'PUT', url, data, params })
   },
-  patch<T>(url: string, data?: unknown): Promise<T> {
-    return request<T>({ method: 'PATCH', url, data })
+  patch<T>(url: string, data?: unknown, params?: object): Promise<T> {
+    return request<T>({ method: 'PATCH', url, data, params })
   },
-  delete<T>(url: string): Promise<T> {
-    return request<T>({ method: 'DELETE', url })
+  delete<T>(url: string, params?: object): Promise<T> {
+    return request<T>({ method: 'DELETE', url, params })
   }
 }
 

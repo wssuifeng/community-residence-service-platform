@@ -70,6 +70,10 @@ class WorkOrderBatch2FixTest {
     private FileUploadService fileUploadService;
     @Mock
     private ResidenceRelationMapper residenceRelationMapper;
+    @Mock
+    private StaffCapabilityService staffCapabilityService;
+    @Mock
+    private StaffScheduleService staffScheduleService;
 
     @InjectMocks
     private WorkOrderService service;

@@ -52,6 +52,12 @@ public class LeaseVO {
     @Schema(description = "到期标注：EXPIRING-即将到期(30天内), EXPIRED-已到期；其余为空（日期自动判定，非状态值）")
     private String expiryFlag;
 
+    @Schema(description = "协议签约状态：NONE-未发起, PENDING-待确认, PARTIAL-单方已确认, SIGNED-双方已确认, CANCELLED-已撤回")
+    private String agreementStatus;
+
+    @Schema(description = "合同附件URL")
+    private String contractUrl;
+
     @Schema(description = "备注")
     private String remark;
 
@@ -69,6 +75,8 @@ public class LeaseVO {
         vo.setMonthlyRent(entity.getMonthlyRent());
         vo.setDeposit(entity.getDeposit());
         vo.setStatus(entity.getStatus());
+        vo.setAgreementStatus(entity.getAgreementStatus());
+        vo.setContractUrl(entity.getContractUrl());
         vo.setRemark(entity.getRemark());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;

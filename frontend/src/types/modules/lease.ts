@@ -1,5 +1,6 @@
 /** C3 租住管理类型定义（对齐后端实测契约：LeaseController/LeaseVO/CreateLeaseDTO/UpdateLeaseStatusDTO） */
 import type { PageQuery } from '@/types/api'
+import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
 
 /* ---------------------------------- 状态枚举 ---------------------------------- */
 
@@ -42,7 +43,46 @@ export interface ILeaseRecord {
   status: LeaseStatus
   /** 到期标注（仅 ACTIVE 判定，其余为空） */
   expiryFlag?: LeaseExpiryFlag | null
+  /** 协议签约状态（V18：NONE-未发起协议，其余与协议状态同义；展示用，不参与状态机） */
+  agreementStatus?: LeaseAgreementSignStatus
+  /** 合同附件URL（线下签署的合同可挂此处） */
+  contractUrl?: string | null
   remark?: string
+  createdAt: string
+}
+
+/* ------------------------- 租约属性变更历史（V18，字段级留痕） ------------------------- */
+
+/** 变更类型：CREATE-登记, ATTRIBUTE-属性变更, RENEW-续租, STATUS-状态流转, AGREEMENT-协议签约 */
+export type LeaseChangeType = 'CREATE' | 'ATTRIBUTE' | 'RENEW' | 'STATUS' | 'AGREEMENT'
+
+/** 变更类型中文标签 */
+export const leaseChangeTypeLabels: Record<LeaseChangeType, string> = {
+  CREATE: '登记租约',
+  ATTRIBUTE: '属性变更',
+  RENEW: '续租',
+  STATUS: '状态流转',
+  AGREEMENT: '协议签约'
+}
+
+/** 变更操作人身份 */
+export type LeaseChangeOperatorType = 'ADMIN' | 'RESIDENT' | 'SYSTEM'
+
+/** 租约变更记录（GET /leases/{id}/changes；属性变更逐字段一条，oldValue/newValue 为字符串快照） */
+export interface ILeaseChange {
+  id: number
+  changeType: LeaseChangeType
+  /** 字段名（登记/状态/协议等非单字段变更时为 null） */
+  fieldName?: string | null
+  /** 字段中文名 */
+  fieldLabel?: string | null
+  oldValue?: string | null
+  newValue?: string | null
+  /** 变更原因/备注 */
+  reason?: string | null
+  operatorId?: number | null
+  operatorName?: string | null
+  operatorType: LeaseChangeOperatorType
   createdAt: string
 }
 

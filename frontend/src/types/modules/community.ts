@@ -69,6 +69,10 @@ export interface ICommunity {
   contactPerson?: string
   description?: string
   status: CommunityStatus
+  /** 入住申请自动通过：0-关闭（人工审核）, 1-开启（提交即通过），V18 新增 */
+  autoApproveResidence?: number
+  /** 自动通过时的默认租期月数（人工审核路径不使用），V18 新增 */
+  defaultLeaseMonths?: number
   createdAt: string
   updatedAt: string
 }
@@ -80,6 +84,10 @@ export interface ICreateCommunityDTO {
   contactPhone?: string
   contactPerson?: string
   description?: string
+  /** 入住申请自动通过开关（0/1；缺省 0） */
+  autoApproveResidence?: number
+  /** 自动通过默认租期月数（1~120；缺省 12） */
+  defaultLeaseMonths?: number
 }
 
 /** 更新社区请求（接口设计.md 9.1.1.2，请求体同创建） */
@@ -271,3 +279,85 @@ export type IUpdateTimeslotDTO = ICreateTimeslotDTO
 
 /** 资源时段列表查询参数（后端按资源分页，无额外过滤参数） */
 export type ITimeslotQuery = PageQuery
+
+/* ==================== 批量管理社区（V19 批次，仅超管） ==================== */
+
+/** 批量操作失败项 */
+export interface IBatchFailure {
+  /** 社区ID（结构批量生成时可能为空） */
+  id?: number
+  name?: string
+  reason: string
+  level?: string
+}
+
+/** 批量操作结果（部分成功语义：成功 ID 与逐条失败原因） */
+export interface IBatchOperationResult {
+  successIds: number[]
+  failures: IBatchFailure[]
+}
+
+/* ==================== 结构链一次性批量生成（V19 批次） ==================== */
+
+/**
+ * 结构批量生成请求（POST /structures/batch-generate）。
+ * 语义：按楼栋序号区间生成楼栋，可选为每栋生成 N 个单元，可选为每单元生成
+ * 楼层×每层户数 的房屋；房号 = 前缀 + 楼层 + 补零(序号)（宽度默认 2，与结构总览一致）。
+ */
+export interface IStructureBatchGenerateDTO {
+  communityId: number
+  /** 楼栋名前缀（如 "C10"） */
+  buildingNamePrefix?: string
+  /** 楼栋起始序号 */
+  buildingStartNo: number
+  /** 楼栋结束序号（与起始合计上限 60 栋） */
+  buildingEndNo: number
+  /** 楼栋名后缀（如 "号楼"） */
+  buildingNameSuffix?: string
+  /** 每栋生成单元数（0 或缺省=不生成单元） */
+  unitCountPerBuilding?: number
+  unitNamePrefix?: string
+  /** 单元名后缀（缺省「单元」，即 1单元/2单元） */
+  unitNameSuffix?: string
+  /** 每单元楼层数（0 或缺省=不生成房屋） */
+  floorsPerUnit?: number
+  /** 每层户数 */
+  housesPerFloor?: number
+  /** 房号前缀（如 "A-"） */
+  houseNumberPrefix?: string
+  /** 房号序号补零宽度（缺省 2） */
+  houseNumberWidth?: number
+  /**
+   * 跳过项表达式（逗号/顿号/空格分隔，与结构总览精确建房同语法）：
+   * `4`=第4层整层；`04`=所有楼层的 4 号；`*:4`=所有楼层 4 号；`4:1`=第4层1号；
+   * `104`=基础门牌号（1层4号）；`A-101`=完整房号精确匹配
+   */
+  skipItems?: string
+  /** 房屋初始状态（缺省 VACANT） */
+  houseStatus?: HouseStatus
+  /** 房屋建筑面积（生成房屋时必填，后端 CreateHouseDTO 约束） */
+  area?: number
+  roomCount?: number
+  description?: string
+  /** true=仅预览不落库（零写入） */
+  dryRun?: boolean
+}
+
+/** 结构批量生成结果（dryRun 时仅预览字段有效） */
+export interface IStructureBatchGenerateResult {
+  dryRun: boolean
+  buildingsCreated: number
+  unitsCreated: number
+  housesCreated: number
+  /** 预览：楼栋名（最多 20 条） */
+  previewBuildings: string[]
+  /** 预览：单元位置（最多 20 条） */
+  previewUnits: string[]
+  /** 预览：房屋完整位置（最多 50 条） */
+  previewHouses: string[]
+  /** 被跳过表达式排除的房屋数 */
+  skippedCount: number
+  /** 因同单元房号已存在而跳过的数量 */
+  dedupedCount: number
+  failures: IBatchFailure[]
+}

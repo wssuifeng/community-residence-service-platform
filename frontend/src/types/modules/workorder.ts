@@ -97,8 +97,70 @@ export interface IWorkOrder {
   status: WorkOrderStatus
   assigneeId: number | null
   assigneeName: string | null
+  /**
+   * 调度标记（V19，列表/详情均回填，供调度视图一眼抓重点）：
+   * OVERDUE-超时（待受理/待派单>30min、已派单>120min 未接单、处理中>1440min）、
+   * URGENT-紧急且未完结、NEW-近 2 小时新建、NORMAL-常规
+   */
+  dispatchFlag?: DispatchFlag
+  /** 进入当前状态以来的分钟数（无时间线记录时以创建时间兜底） */
+  waitedMinutes?: number
+  /** 当前处理人今日班次标签（为空=当日未排班） */
+  assigneeShiftLabel?: string | null
+  /** 当前处理人在手工单数（未完结工单数） */
+  assigneeActiveOrders?: number
   createdAt: string
   updatedAt: string
+}
+
+/* ------------------------ 调度视图（V19）：标记与派单候选 ------------------------ */
+
+/** 调度标记（后端口径见 WorkOrderService 阈值常量） */
+export type DispatchFlag = 'OVERDUE' | 'URGENT' | 'NEW' | 'NORMAL'
+
+/** 调度标记中文标签 */
+export const dispatchFlagLabels: Record<DispatchFlag, string> = {
+  OVERDUE: '超时',
+  URGENT: '紧急',
+  NEW: '新单',
+  NORMAL: '常规'
+}
+
+/** 调度标记配色（列表强调色，OVERDUE 红色最重） */
+export const dispatchFlagColors: Record<DispatchFlag, { bg: string; fg: string }> = {
+  OVERDUE: { bg: 'rgba(239, 68, 68, 0.12)', fg: '#b91c1c' },
+  URGENT: { bg: 'rgba(249, 115, 22, 0.14)', fg: '#c2410c' },
+  NEW: { bg: 'rgba(59, 130, 246, 0.12)', fg: '#1d4ed8' },
+  NORMAL: { bg: 'rgba(148, 163, 184, 0.16)', fg: '#475569' }
+}
+
+/** 工单列表排序口径（V19；不传=DEFAULT 保持原倒序） */
+export type WorkOrderSort = 'DEFAULT' | 'WAIT_DESC' | 'PRIORITY'
+
+/**
+ * 派单候选（V19 档位推荐，GET /work-orders/assignable-staff）。
+ * recommendLevel 越小越推荐：1=常驻本社区且擅长该类别，2=常驻本社区，3=擅长该类别，4=其他
+ */
+export interface IStaffOption {
+  id: number
+  realName: string
+  recommendLevel?: number
+  matchedCommunity?: boolean
+  matchedCategory?: boolean
+  /** 常驻社区名称（顿号/逗号拼接） */
+  communityNames?: string
+  /** 今日班次标签（为空=未排班） */
+  todayShiftLabel?: string | null
+  /** 在手工单数 */
+  activeOrderCount?: number
+}
+
+/** 派单候选推荐档位标签 */
+export const staffRecommendLevelLabels: Record<number, string> = {
+  1: '常驻本社区 · 擅长该类别',
+  2: '常驻本社区',
+  3: '擅长该类别',
+  4: '其他人员'
 }
 
 /** 提交工单请求（后端 CreateWorkOrderDTO：content/priority/address） */
@@ -125,6 +187,10 @@ export interface IWorkOrderQuery extends PageQuery {
   priority?: WorkOrderPriority
   categoryId?: number
   keyword?: string
+  /** 按当前处理人过滤（V19） */
+  assigneeId?: number
+  /** 排序口径（V19）：DEFAULT-按ID倒序（默认）, WAIT_DESC-等待最久在前, PRIORITY-紧急优先 */
+  sort?: WorkOrderSort
 }
 
 /** 派单请求（接口设计.md 9.4.2.5） */

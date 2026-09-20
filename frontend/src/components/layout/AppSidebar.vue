@@ -19,10 +19,15 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { path: '/admin/dashboard', title: '看板', icon: 'dashboard' },
-  { path: '/admin/community', title: '社区结构', icon: 'community' },
-  { path: '/admin/work-orders', title: '工单', icon: 'workorder' },
+  { path: '/admin/community', title: '社区管理', icon: 'community' },
+  { path: '/admin/work-orders', title: '工单调度', icon: 'workorder' },
+  // V19 物业管理：排班与人员能力（长期对接人员是日常工单的调度基础）
+  { path: '/admin/staff-schedules', title: '人员排班', icon: 'schedule' },
+  { path: '/admin/staff-capabilities', title: '服务人员', icon: 'staff' },
   { path: '/admin/residents', title: '居民', icon: 'residents' },
   { path: '/admin/leases', title: '租住', icon: 'lease' },
+  // V18/R64 协议模板：全局模板仅超管可维护
+  { path: '/admin/agreement-templates', title: '协议模板', icon: 'agreement', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { path: '/admin/notices', title: '公告', icon: 'notice' },
   { path: '/admin/feedbacks', title: '反馈', icon: 'feedback' },
   { path: '/admin/reservations', title: '预约', icon: 'reservation' },
@@ -45,6 +50,7 @@ function isActive(path: string): boolean {
   if (route.path === path || route.path.startsWith(`${path}/`)) return true
   // 社区详情挂在 /admin/communities/:id（复数段），与菜单路径 /admin/community 不同段，单独归入点亮
   if (path === '/admin/community') return route.path.startsWith('/admin/communities/')
+  // 租约详情挂在 /admin/leases/:id，与菜单路径同段，前缀匹配已覆盖
   return false
 }
 </script>
@@ -77,6 +83,19 @@ function isActive(path: string): boolean {
             <rect x="5.5" y="4.5" width="13" height="16.5" rx="2" />
             <rect x="9" y="2.5" width="6" height="3.5" rx="1.2" />
             <path d="M9 11h6M9 15h4" />
+          </svg>
+          <svg v-else-if="item.icon === 'schedule'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+            <path d="M3.5 10h17M8 3.2v3.6M16 3.2v3.6M8.6 14h2.2M13.4 14h2.2M8.6 17.2h2.2" />
+          </svg>
+          <svg v-else-if="item.icon === 'staff'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9.4" cy="8.2" r="3.3" />
+            <path d="M3.4 19.6a6 6 0 0 1 12 0" />
+            <path d="M16.4 5.6a3.2 3.2 0 0 1 0 6.2M18.2 19.6a5.6 5.6 0 0 0-1.8-4.1" />
+          </svg>
+          <svg v-else-if="item.icon === 'agreement'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 3.4h7.6L18.6 8v12a1.6 1.6 0 0 1-1.6 1.6H6A1.6 1.6 0 0 1 4.4 20V5A1.6 1.6 0 0 1 6 3.4Z" />
+            <path d="M13.2 3.6V8.4h4.8M8 14.4h4M8 17.4h2.6M14.4 16.6l1.4 1.4 2.6-3" />
           </svg>
           <svg v-else-if="item.icon === 'residents'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="8" r="3.6" />

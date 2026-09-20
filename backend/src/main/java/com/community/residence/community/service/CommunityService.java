@@ -2,6 +2,10 @@ package com.community.residence.community.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.community.residence.agreement.entity.AgreementTemplate;
+import com.community.residence.agreement.entity.LeaseAgreement;
+import com.community.residence.agreement.mapper.AgreementTemplateMapper;
+import com.community.residence.agreement.mapper.LeaseAgreementMapper;
 import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.entity.SysOperationLog;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
@@ -44,8 +48,10 @@ import com.community.residence.housing.entity.ViewingAppointment;
 import com.community.residence.housing.mapper.HousingMapper;
 import com.community.residence.housing.mapper.HousingTimeslotMapper;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
+import com.community.residence.lease.entity.LeaseChangeLog;
 import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.entity.LeaseReminder;
+import com.community.residence.lease.mapper.LeaseChangeLogMapper;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
 import com.community.residence.lease.mapper.LeaseReminderMapper;
 import com.community.residence.messaging.entity.Notification;
@@ -67,11 +73,17 @@ import com.community.residence.resident.mapper.ResidenceRelationMapper;
 import com.community.residence.statistics.entity.StatisticsSnapshot;
 import com.community.residence.statistics.mapper.StatisticsSnapshotMapper;
 import com.community.residence.workorder.entity.ServiceCategory;
+import com.community.residence.workorder.entity.StaffCommunity;
+import com.community.residence.workorder.entity.StaffSchedule;
+import com.community.residence.workorder.entity.StaffServiceCategory;
 import com.community.residence.workorder.entity.WorkOrder;
 import com.community.residence.workorder.entity.WorkOrderAssignment;
 import com.community.residence.workorder.entity.WorkOrderAttachment;
 import com.community.residence.workorder.entity.WorkOrderProcess;
 import com.community.residence.workorder.mapper.ServiceCategoryMapper;
+import com.community.residence.workorder.mapper.StaffCommunityMapper;
+import com.community.residence.workorder.mapper.StaffScheduleMapper;
+import com.community.residence.workorder.mapper.StaffServiceCategoryMapper;
 import com.community.residence.workorder.mapper.WorkOrderAssignmentMapper;
 import com.community.residence.workorder.mapper.WorkOrderAttachmentMapper;
 import com.community.residence.workorder.mapper.WorkOrderMapper;
@@ -93,6 +105,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
+
+    /** 自动通过路径的默认租期（月）：请求未指定时回落到此值 */
+    private static final int DEFAULT_LEASE_MONTHS = 12;
 
     private final CommunityMapper communityMapper;
     private final BuildingMapper buildingMapper;
@@ -127,6 +142,13 @@ public class CommunityService {
     private final NotificationMapper notificationMapper;
     private final SysAdminCommunityMapper sysAdminCommunityMapper;
     private final SysOperationLogMapper sysOperationLogMapper;
+    /* V18/V19 新增表的级联清理依赖（外键指向 community / lease_record / service_category） */
+    private final StaffCommunityMapper staffCommunityMapper;
+    private final StaffScheduleMapper staffScheduleMapper;
+    private final StaffServiceCategoryMapper staffServiceCategoryMapper;
+    private final AgreementTemplateMapper agreementTemplateMapper;
+    private final LeaseAgreementMapper leaseAgreementMapper;
+    private final LeaseChangeLogMapper leaseChangeLogMapper;
 
     /** 创建社区（仅超管，功能级权限在 Controller 声明） */
     @Transactional(rollbackFor = Exception.class)
@@ -216,6 +238,14 @@ public class CommunityService {
             }
             workOrderMapper.deleteBatchIds(orderIds);
         }
+        /* 服务类别删除前先解除「人员擅长类别」绑定（V19 staff_service_category 外键指向类别） */
+        List<Long> categoryIds = serviceCategoryMapper.selectList(
+                new LambdaQueryWrapper<ServiceCategory>().eq(ServiceCategory::getCommunityId, id))
+                .stream().map(ServiceCategory::getId).toList();
+        if (!categoryIds.isEmpty()) {
+            staffServiceCategoryMapper.delete(new LambdaQueryWrapper<StaffServiceCategory>()
+                    .in(StaffServiceCategory::getCategoryId, categoryIds));
+        }
         serviceCategoryMapper.delete(new LambdaQueryWrapper<ServiceCategory>()
                 .eq(ServiceCategory::getCommunityId, id));
 
@@ -279,7 +309,8 @@ public class CommunityService {
             viewingAppointmentMapper.deleteBatchIds(viewingIds);
         }
 
-        /* ---- C2/C3 居住与租住（V1 #9/10/12/13）：提醒 → 租约 → 入住申请/居住关系
+        /* ---- C2/C3 居住与租住（V1 #9/10/12/13 + V18 协议/变更历史）：提醒 → 协议与变更历史 → 租约
+                → 入住申请/居住关系
                 （resident 账号不删：跨社区共享账号体系，归属经 residence_relation 表达） ---- */
         List<Long> leaseIds = leaseRecordMapper.selectList(
                 new LambdaQueryWrapper<LeaseRecord>().eq(LeaseRecord::getCommunityId, id))
@@ -287,8 +318,20 @@ public class CommunityService {
         if (!leaseIds.isEmpty()) {
             leaseReminderMapper.delete(new LambdaQueryWrapper<LeaseReminder>()
                     .in(LeaseReminder::getLeaseId, leaseIds));
+            /* V18 两表外键指向租约，必须早于租约物理删除 */
+            leaseAgreementMapper.delete(new LambdaQueryWrapper<LeaseAgreement>()
+                    .in(LeaseAgreement::getLeaseId, leaseIds));
+            leaseChangeLogMapper.delete(new LambdaQueryWrapper<LeaseChangeLog>()
+                    .in(LeaseChangeLog::getLeaseId, leaseIds));
             leaseRecordMapper.deleteBatchIds(leaseIds);
         }
+        /* V19 人员绑定/排班 + V18 协议模板：直接以 community_id 归属 */
+        staffCommunityMapper.delete(new LambdaQueryWrapper<StaffCommunity>()
+                .eq(StaffCommunity::getCommunityId, id));
+        staffScheduleMapper.delete(new LambdaQueryWrapper<StaffSchedule>()
+                .eq(StaffSchedule::getCommunityId, id));
+        agreementTemplateMapper.delete(new LambdaQueryWrapper<AgreementTemplate>()
+                .eq(AgreementTemplate::getCommunityId, id));
         residenceApplicationMapper.delete(new LambdaQueryWrapper<ResidenceApplication>()
                 .eq(ResidenceApplication::getCommunityId, id));
         residenceRelationMapper.delete(new LambdaQueryWrapper<ResidenceRelation>()
@@ -358,5 +401,11 @@ public class CommunityService {
         community.setContactPhone(dto.getContactPhone());
         community.setContactPerson(dto.getContactPerson());
         community.setDescription(dto.getDescription());
+        /* 自动化开关：字段缺省按「关闭 + 12 个月」落库，避免前端旧版本漏传时写成 NULL */
+        community.setAutoApproveResidence(dto.getAutoApproveResidence() == null ? 0 : dto.getAutoApproveResidence());
+        community.setDefaultLeaseMonths(
+                dto.getDefaultLeaseMonths() == null || dto.getDefaultLeaseMonths() < 1
+                        ? DEFAULT_LEASE_MONTHS
+                        : dto.getDefaultLeaseMonths());
     }
 }
