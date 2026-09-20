@@ -69,6 +69,36 @@ P2 集成能力已交付（2026-09-09）：文件上传（POST /api/v1/upload + 
 
 连接配置在 `backend/src/main/resources/application-dev.yml`（数据库密码从 `DB_PASSWORD` 读取，JWT 密钥从 `JWT_SECRET` 读取）。
 
+### 支付渠道配置（租约续约支付，可选项）
+
+租约在线续约支付（R61）默认双渠道禁用（`GET /api/v1/payment/channels`
+返回 enabled=false，前端渠道卡片置灰明示），配置凭据后自动启用：
+
+**支付宝（电脑网站支付）**——个人可申请沙箱：
+1. [支付宝开放平台](https://open.alipay.com/) 注册 → 控制台「沙箱环境」自助开通；
+2. 支付宝密钥工具生成 RSA2 应用私钥/公钥，沙箱应用处配置公钥、记录「支付宝公钥」；
+3. 启动前设置环境变量：
+   ```
+   PAYMENT_ALIPAY_APPID=沙箱应用APPID
+   PAYMENT_ALIPAY_GATEWAY_URL=https://openapi-sandbox.dl.alipaydev.com/gateway.do
+   PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY=应用私钥
+   PAYMENT_ALIPAY_ALIPAY_PUBLIC_KEY=支付宝公钥
+   ```
+   （生产网关为 `https://openapi.alipay.com/gateway.do`，需企业资质网页应用）
+4. 沙箱页提供测试买家账号，支付流程可完整走通。
+
+**微信支付（Native 扫码）**——需商户资质，无公开沙箱：
+```
+PAYMENT_WECHAT_APPID=公众号/应用AppID
+PAYMENT_WECHAT_MCHID=商户号
+PAYMENT_WECHAT_API_V3_KEY=APIv3密钥
+PAYMENT_WECHAT_MERCHANT_SERIAL_NUMBER=商户证书序列号
+PAYMENT_WECHAT_PRIVATE_KEY=商户API私钥（apiclient_key.pem 内容）
+```
+
+本地开发无需公网回调：支付确认走「后端主动查单 + 前端轮询」；
+公网部署按 `PaymentController` 注释中预留的 notify 接入点补充回调验签即可。
+
 ### 生成 JWT_SECRET
 
 Linux/Mac：`openssl rand -base64 32`；Windows（PowerShell）：

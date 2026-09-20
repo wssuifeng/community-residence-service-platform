@@ -10,6 +10,7 @@ const residentRoutes: RouteRecordRaw[] = [
       { path: '', redirect: '/resident/home' },
       { path: 'home', name: 'ResidentHome', component: () => import('@/views/resident/HomeView.vue'), meta: { title: '首页' } },
       { path: 'profile', name: 'ResidentProfile', component: () => import('@/views/resident/ProfileView.vue'), meta: { title: '个人中心' } },
+      { path: 'leases', name: 'ResidentLeases', component: () => import('@/views/resident/LeaseListView.vue'), meta: { title: '我的租约' } },
       { path: 'work-orders', name: 'ResidentWorkOrders', component: () => import('@/views/resident/WorkOrderListView.vue'), meta: { title: '我的工单' } },
       { path: 'work-orders/create', name: 'ResidentWorkOrderCreate', component: () => import('@/views/resident/WorkOrderCreateView.vue'), meta: { title: '提交工单' } },
       { path: 'work-orders/:id', name: 'ResidentWorkOrderDetail', component: () => import('@/views/resident/WorkOrderDetailView.vue'), meta: { title: '工单详情' } },
