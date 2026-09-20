@@ -61,6 +61,7 @@ public class LeaseService {
     private final HouseMapper houseMapper;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
+    private final com.community.residence.community.mapper.CommunityMapper communityMapper;
 
     /* 登记租约：房屋与租客须存在；初始 PENDING 待审核 */
     @Transactional(rollbackFor = Exception.class)
@@ -231,6 +232,12 @@ public class LeaseService {
                 Building building = buildingMapper.selectById(unit.getBuildingId());
                 String buildingName = building != null ? building.getName() : "";
                 vo.setHouseLocation(buildingName + unit.getName() + house.getHouseNumber());
+            }
+            /* 社区名（居民端租约卡片按社区分组展示，R61 界面重设计补） */
+            com.community.residence.community.entity.Community community =
+                    communityMapper.selectById(house.getCommunityId());
+            if (community != null) {
+                vo.setCommunityName(community.getName());
             }
         }
         /* 到期标注（仅 ACTIVE 判定，架构设计 §6：非状态值） */
