@@ -56,6 +56,8 @@ class ViewingNotificationFixTest {
     private RLock lock;
     @Mock
     private NotificationService notificationService;
+    @Mock
+    private com.community.residence.conversation.service.ConversationService conversationService;
 
     @InjectMocks
     private ViewingAppointmentService service;

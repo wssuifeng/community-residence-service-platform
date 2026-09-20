@@ -15,6 +15,8 @@ import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.conversation.entity.Conversation;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.housing.dto.CreateViewingAppointmentDTO;
 import com.community.residence.housing.dto.CreateViewingMessageDTO;
 import com.community.residence.housing.entity.Housing;
@@ -60,8 +62,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * 看房预约业务逻辑：待确认→已预约→已完成 + 已取消/已违约（六大状态机 #5，
  * 复用 C7 冲突检测模式）。居民预约绑定 user_id；游客预约记录 visitor 信息。
- * R59：管理端分配带看人（assigned_staff_id）+ 预约居民与带看人会话消息
- * （WS 实时推送 + HTTP 轮询兜底，复制 R30 反馈会话模式）。
+ * R59：管理端分配带看人（assigned_staff_id）+ 预约居民与带看人会话消息。
+ * R63：会话模型升级多方会话——预约创建即建群（居民 + 该社区启用管理员），
+ * 分配带看人时带看人入群（conversation.conversation_id 关联，
+ * /topic/conversation/{id}，见 ConversationService）；R59 的
+ * viewing_message 单聊端点（messages）保留兼容存量前端，已标注迁移注释。
  */
 @Slf4j
 @Service
@@ -95,6 +100,7 @@ public class ViewingAppointmentService {
     private final com.community.residence.messaging.service.NotificationService notificationService;
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketSessionService webSocketSessionService;
+    private final ConversationService conversationService;
 
     /**
      * 创建预约：居民取令牌身份；游客必填姓名电话；时段落在房源模板内 + 冲突检测。
@@ -219,6 +225,16 @@ public class ViewingAppointmentService {
             } catch (DuplicateKeyException e) {
                 /* 完全同槽并发竞态被 V10 唯一约束拦截（锁失效时的最后防线） */
                 throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段已被预约");
+            }
+            /* R63 预约创建即建群：居民 + 该社区启用管理员入群（游客预约
+               userId=null 跳过不建群，conversation_id 保持空）；
+               建群在锁内落库之后，预约 insert 已完成 conversation_id 可回写 */
+            Conversation conversation = conversationService.createViewingGroup(
+                    appointment.getId(), appointment.getCommunityId(),
+                    appointment.getUserId(), housing.getTitle());
+            if (conversation != null) {
+                appointment.setConversationId(conversation.getId());
+                appointmentMapper.updateById(appointment);
             }
             return toVO(appointment);
         } finally {
@@ -375,6 +391,12 @@ public class ViewingAppointmentService {
         appointment.setAssignedStaffId(assigneeId);
         appointmentMapper.updateById(appointment);
 
+        /* R63 带看人入群（幂等，复用 addParticipant 撞号忽略语义）；
+           未建群（游客预约）无会话可入，跳过 */
+        if (appointment.getConversationId() != null) {
+            conversationService.addParticipant(appointment.getConversationId(), assigneeId);
+        }
+
         notificationService.create(assigneeId, appointment.getCommunityId(),
                 "您已被分配为看房带看人",
                 "您已被分配为 " + appointment.getAppointmentDate() + " 看房预约的带看人，可与预约人沟通看房事宜",
@@ -411,7 +433,9 @@ public class ViewingAppointmentService {
     }
 
     /**
-     * 会话消息列表（R59）：时间正序（按 id 升序，自增单调）非分页。
+     * 会话消息列表（R59，已被 R63 多方会话取代——前端已迁移
+     * /conversations/{conversationId}/messages，本端点保留兼容存量数据）：
+     * 时间正序（按 id 升序，自增单调）非分页。
      * 可读=预约居民、带看人、或该房源所在社区的 ADMIN/SUPER_ADMIN；其余 403。
      */
     public List<ViewingMessageVO> listMessages(Long appointmentId) {
@@ -426,10 +450,12 @@ public class ViewingAppointmentService {
     }
 
     /**
-     * 发送会话消息（R59）：可发=仅预约居民或带看人本人（管理员可读不可发，
-     * 除非其本人即被分配为该预约的带看人）。落库后 WS 推送到
-     * /topic/appointment/{id}（载荷 {type:'APPOINTMENT_MESSAGE', data:VO}，
-     * 复制 R30 反馈会话模式：双方均离线不推送、推送失败不回滚，前端轮询兜底）。
+     * 发送会话消息（R59，已被 R63 多方会话取代——前端已迁移
+     * POST /conversations/{conversationId}/messages，本端点保留兼容存量数据）：
+     * 可发=仅预约居民或带看人本人（管理员可读不可发，除非其本人即被分配为
+     * 该预约的带看人）。落库后 WS 推送到 /topic/appointment/{id}
+     * （载荷 {type:'APPOINTMENT_MESSAGE', data:VO}，复制 R30 反馈会话模式：
+     * 双方均离线不推送、推送失败不回滚，前端轮询兜底）。
      */
     @Transactional(rollbackFor = Exception.class)
     public ViewingMessageVO sendMessage(Long appointmentId, CreateViewingMessageDTO dto) {

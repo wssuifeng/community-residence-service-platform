@@ -66,16 +66,18 @@ public class ViewingAppointmentController {
         return ApiResponse.success(appointmentService.assignableAssignees(communityId));
     }
 
-    @Operation(summary = "会话消息列表",
-            description = "R59：预约居民/带看人/社区管理员可读，时间正序非分页；非参与者 403")
+    @Operation(summary = "会话消息列表（R59 旧口径，保留兼容）",
+            description = "已被 R63 多方会话取代（GET /conversations/{conversationId}/messages）；"
+                    + "R59：预约居民/带看人/社区管理员可读，时间正序非分页；非参与者 403")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}/messages")
     public ApiResponse<List<ViewingMessageVO>> messages(@PathVariable Long id) {
         return ApiResponse.success(appointmentService.listMessages(id));
     }
 
-    @Operation(summary = "发送会话消息",
-            description = "R59：仅预约居民或带看人可发送；WS 实时推送 /topic/appointment/{id} + HTTP 轮询兜底")
+    @Operation(summary = "发送会话消息（R59 旧口径，保留兼容）",
+            description = "已被 R63 多方会话取代（POST /conversations/{conversationId}/messages）；"
+                    + "R59：仅预约居民或带看人可发送；WS 实时推送 /topic/appointment/{id} + HTTP 轮询兜底")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/{id}/messages")
     public ApiResponse<ViewingMessageVO> sendMessage(@PathVariable Long id,

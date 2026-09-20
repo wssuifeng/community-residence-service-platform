@@ -2,9 +2,11 @@ package com.community.residence.housing.controller;
 
 import com.community.residence.common.result.ApiResponse;
 import com.community.residence.common.result.PageVO;
+import com.community.residence.housing.dto.BatchGenerateHousingDTO;
 import com.community.residence.housing.dto.CreateHousingDTO;
 import com.community.residence.housing.dto.UpdateHousingStatusDTO;
 import com.community.residence.housing.service.HousingService;
+import com.community.residence.housing.vo.BatchGenerateResultVO;
 import com.community.residence.housing.vo.HousingVO;
 import com.community.residence.reservation.vo.AvailableSlotVO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +44,16 @@ public class HousingController {
     @PostMapping
     public ApiResponse<HousingVO> create(@RequestBody @Valid CreateHousingDTO dto) {
         return ApiResponse.success(housingService.create(dto));
+    }
+
+    @Operation(summary = "按社区批量挂牌（R62）",
+            description = "为社区内无在架房源的房屋批量生成 AVAILABLE 房源（默认月租/押金/租售类型参数化，"
+                    + "标题「{楼栋}{单元}{房号}·精装房源」）；已有在架房源的房屋跳过（幂等）；ADMIN 限绑定社区")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/batch-generate")
+    public ApiResponse<BatchGenerateResultVO> batchGenerate(
+            @RequestBody @Valid BatchGenerateHousingDTO dto) {
+        return ApiResponse.success(housingService.batchGenerate(dto));
     }
 
     @Operation(summary = "更新房源")

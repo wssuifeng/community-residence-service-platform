@@ -16,6 +16,7 @@ import com.community.residence.community.mapper.BuildingMapper;
 import com.community.residence.community.mapper.HouseMapper;
 import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.community.service.CommunityService;
+import com.community.residence.housing.dto.BatchGenerateHousingDTO;
 import com.community.residence.housing.dto.CreateHousingDTO;
 import com.community.residence.housing.dto.UpdateHousingStatusDTO;
 import com.community.residence.housing.entity.Housing;
@@ -24,7 +25,12 @@ import com.community.residence.housing.entity.ViewingAppointment;
 import com.community.residence.housing.mapper.HousingMapper;
 import com.community.residence.housing.mapper.HousingTimeslotMapper;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
+import com.community.residence.housing.vo.BatchGenerateResultVO;
+import com.community.residence.housing.vo.BuildingHousingTreeVO;
+import com.community.residence.housing.vo.HousingSummaryVO;
 import com.community.residence.housing.vo.HousingVO;
+import com.community.residence.housing.vo.HouseHousingTreeVO;
+import com.community.residence.housing.vo.UnitHousingTreeVO;
 import com.community.residence.reservation.service.SlotGrids;
 import com.community.residence.reservation.vo.AvailableSlotVO;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +46,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** 房源业务逻辑：上架管理 + 游客浏览（游客只见可租/已预订房源） */
 @Slf4j
@@ -261,12 +270,145 @@ public class HousingService {
         return slots;
     }
 
+    /**
+     * 按社区批量挂牌（R62）：为该社区内**无在架房源**的房屋按默认参数批量生成
+     * AVAILABLE 房源（title=「{楼栋}{单元}{房号}·精装房源」、月租/押金/租售类型
+     * 参数化、户型冗余自 house.layout）；幂等口径与单套挂牌一致——存在非 OFFLINE
+     * 房源的房屋跳过（仅 OFFLINE 下架记录的房屋可重新生成在架房源）。
+     * ADMIN 限绑定社区（checkCommunityAccess）。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSING",
+            targetId = "#dto.communityId", content = "'按社区批量挂牌：' + #dto.communityId")
+    public BatchGenerateResultVO batchGenerate(BatchGenerateHousingDTO dto) {
+        communityService.requireCommunity(dto.getCommunityId());
+        SecurityUtils.checkCommunityAccess(dto.getCommunityId());
+
+        List<House> houses = houseMapper.selectList(new LambdaQueryWrapper<House>()
+                .eq(House::getCommunityId, dto.getCommunityId())
+                .orderByAsc(House::getId));
+        if (houses.isEmpty()) {
+            return BatchGenerateResultVO.of(0, 0);
+        }
+        /* 在架房源房屋集（非 OFFLINE，与 create 唯一性口径一致） */
+        List<Long> houseIds = houses.stream().map(House::getId).toList();
+        Set<Long> listedHouseIds = housingMapper.selectList(new LambdaQueryWrapper<Housing>()
+                        .in(Housing::getHouseId, houseIds)
+                        .ne(Housing::getStatus, "OFFLINE"))
+                .stream().map(Housing::getHouseId).collect(java.util.stream.Collectors.toSet());
+
+        /* 标题需要 楼栋/单元 名称：批量装载本社区结构映射（避免逐房查询） */
+        Map<Long, Unit> unitsById = unitMapper.selectList(new LambdaQueryWrapper<Unit>()
+                        .eq(Unit::getCommunityId, dto.getCommunityId()))
+                .stream().collect(java.util.stream.Collectors.toMap(Unit::getId, u -> u));
+        Map<Long, String> buildingNames = buildingMapper.selectList(
+                        new LambdaQueryWrapper<Building>()
+                                .eq(Building::getCommunityId, dto.getCommunityId()))
+                .stream().collect(java.util.stream.Collectors.toMap(Building::getId, Building::getName));
+
+        int created = 0;
+        for (House house : houses) {
+            if (listedHouseIds.contains(house.getId())) {
+                continue;
+            }
+            Unit unit = unitsById.get(house.getUnitId());
+            String buildingName = unit != null
+                    ? buildingNames.getOrDefault(unit.getBuildingId(), "") : "";
+            String unitName = unit != null ? unit.getName() : "";
+            Housing housing = new Housing();
+            housing.setCommunityId(dto.getCommunityId());
+            housing.setHouseId(house.getId());
+            housing.setTitle(buildingName + unitName + house.getHouseNumber() + "·精装房源");
+            housing.setMonthlyRent(dto.getMonthlyRent());
+            housing.setDeposit(dto.getDeposit());
+            housing.setRentType(StringUtils.hasText(dto.getRentType()) ? dto.getRentType() : "RENT");
+            housing.setLayout(house.getLayout());
+            housing.setStatus("AVAILABLE");
+            housing.setViewCount(0);
+            housing.setPublishTime(LocalDateTime.now());
+            housingMapper.insert(housing);
+            created++;
+        }
+        int skipped = houses.size() - created;
+        log.info("按社区批量挂牌完成：communityId={}, created={}, skipped={}, operator={}",
+                dto.getCommunityId(), created, skipped, SecurityUtils.getUserId());
+        return BatchGenerateResultVO.of(created, skipped);
+    }
+
     public Housing requireHousing(Long id) {
         Housing housing = housingMapper.selectById(id);
         if (housing == null) {
             throw new ResourceNotFoundException("房源不存在");
         }
         return housing;
+    }
+
+    /**
+     * 房源社区一体化树（R62）：楼栋→单元→房屋层级，房屋节点内嵌房源摘要
+     * （未挂牌为 null）。ADMIN 限绑定社区（checkCommunityAccess）；层级按
+     * id 升序稳定输出。每房屋取**最新一条**房源（id 最大；一房多挂牌仅在
+     * 历史下架场景出现，最新记录反映当前挂牌状态）。
+     */
+    public List<BuildingHousingTreeVO> housesWithHousing(Long communityId) {
+        communityService.requireCommunity(communityId);
+        SecurityUtils.checkCommunityAccess(communityId);
+
+        List<Building> buildings = buildingMapper.selectList(
+                new LambdaQueryWrapper<Building>()
+                        .eq(Building::getCommunityId, communityId)
+                        .orderByAsc(Building::getId));
+        List<Unit> units = unitMapper.selectList(new LambdaQueryWrapper<Unit>()
+                .eq(Unit::getCommunityId, communityId)
+                .orderByAsc(Unit::getId));
+        List<House> houses = houseMapper.selectList(new LambdaQueryWrapper<House>()
+                .eq(House::getCommunityId, communityId)
+                .orderByAsc(House::getId));
+        List<Housing> housings = housingMapper.selectList(new LambdaQueryWrapper<Housing>()
+                .eq(Housing::getCommunityId, communityId)
+                .orderByAsc(Housing::getId));
+
+        /* 房屋 → 最新房源（id 最大者，循环内覆盖实现） */
+        Map<Long, Housing> latestHousingByHouse = new HashMap<>();
+        for (Housing housing : housings) {
+            latestHousingByHouse.put(housing.getHouseId(), housing);
+        }
+        /* 单元 → 房屋分组（保持 id 升序，groupBy linked 保持插入序） */
+        Map<Long, List<House>> housesByUnit = new HashMap<>();
+        for (House house : houses) {
+            housesByUnit.computeIfAbsent(house.getUnitId(), k -> new ArrayList<>()).add(house);
+        }
+        Map<Long, List<Unit>> unitsByBuilding = new HashMap<>();
+        for (Unit unit : units) {
+            unitsByBuilding.computeIfAbsent(unit.getBuildingId(), k -> new ArrayList<>()).add(unit);
+        }
+
+        List<BuildingHousingTreeVO> tree = new ArrayList<>(buildings.size());
+        for (Building building : buildings) {
+            BuildingHousingTreeVO buildingVO = new BuildingHousingTreeVO();
+            buildingVO.setId(building.getId());
+            buildingVO.setName(building.getName());
+            List<UnitHousingTreeVO> unitVOs = new ArrayList<>();
+            for (Unit unit : unitsByBuilding.getOrDefault(building.getId(), List.of())) {
+                UnitHousingTreeVO unitVO = new UnitHousingTreeVO();
+                unitVO.setId(unit.getId());
+                unitVO.setName(unit.getName());
+                List<HouseHousingTreeVO> houseVOs = new ArrayList<>();
+                for (House house : housesByUnit.getOrDefault(unit.getId(), List.of())) {
+                    HouseHousingTreeVO houseVO = new HouseHousingTreeVO();
+                    houseVO.setId(house.getId());
+                    houseVO.setHouseNumber(house.getHouseNumber());
+                    houseVO.setFloor(house.getFloor());
+                    Housing housing = latestHousingByHouse.get(house.getId());
+                    houseVO.setHousing(housing != null ? HousingSummaryVO.from(housing) : null);
+                    houseVOs.add(houseVO);
+                }
+                unitVO.setHouses(houseVOs);
+                unitVOs.add(unitVO);
+            }
+            buildingVO.setUnits(unitVOs);
+            tree.add(buildingVO);
+        }
+        return tree;
     }
 
     private boolean isManager() {

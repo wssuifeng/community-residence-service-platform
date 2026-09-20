@@ -32,6 +32,9 @@ public class ViewingAppointment {
     @Schema(description = "带看人ID（sys_user，null=未分配；R59）")
     private Long assignedStaffId;
 
+    @Schema(description = "关联会话ID（R63 看房群聊；游客预约为空）")
+    private Long conversationId;
+
     @Schema(description = "房源ID")
     private Long housingId;
 
