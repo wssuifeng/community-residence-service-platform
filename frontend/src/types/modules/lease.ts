@@ -25,6 +25,8 @@ export interface ILeaseRecord {
   id: number
   /** 租客ID */
   tenantId: number
+  /** 社区名称（居民端租约卡片按社区分组展示，后端 LeaseVO 2026-09-20 补） */
+  communityName?: string
   /** 租客姓名 */
   tenantName: string
   communityId: number
