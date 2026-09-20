@@ -11,7 +11,9 @@ import type { IBuilding, ICommunity, IHouse, IUnit } from '@/types/modules/commu
  * 预览确认后循环调既有 createHouse——逐个失败不中断，结束汇报成功/失败数。
  *
  * 精确建房（跳过/前后缀/单条取消）全部在生成前收敛为一份行清单：
- * 楼层范围 → 整层跳过 → 指定房号跳过 → 跨楼层撞号去重 → 预览单条取消；
+ * 楼层范围 → 跳过项（整层/指定房号）→ 跨楼层撞号去重 → 预览单条取消；
+ * 跳过项为单一输入框，语法见 SKIP_SYNTAX_HINT；预览区同时列出生成项与跳过项
+ * （跳过项灰字删除线）并给出总数，收敛结果提交前对用户完全可见。
  * 提交仍为逐条 createHouse，未改动任何接口契约与部分成功语义。
  * 分区布局（目标单元/生成规则/公共属性 + 预览），遵守大表单治理原则。
  */
@@ -47,10 +49,8 @@ const form = reactive({
   /** 房号前缀/后缀：拼接在基础门牌号两侧（A- + 101 + A → A-101A） */
   prefix: '',
   suffix: '',
-  /** 跳过楼层（整层）：逗号/空格/顿号分隔的数字列表 */
-  skipFloors: '',
-  /** 跳过房号：可填基础门牌号（101）或含前后缀的完整门牌号（A-101） */
-  skipHouses: '',
+  /** 跳过项：整层 / 指定房号混写，语法见 SKIP_SYNTAX_HINT */
+  skip: '',
   area: undefined as number | undefined,
   layout: '',
   orientation: ''
@@ -69,9 +69,22 @@ const rules: FormRules = {
   orientation: [{ max: 10, message: '朝向不超过 10 字', trigger: 'blur' }]
 }
 
+/** 跳过项语法（对话框内原样展示，避免实现与提示漂移）：
+ *  4      → 第 4 层整层
+ *  4:1    → 第 4 层 1 号（精确到单套）
+ *  04     → 所有楼层的 4 号（两位补零即序号；序号 ≥ 10 写作 *:12）
+ *  *:4    → 所有楼层的 4 号（通配楼层写法，等价于 04）
+ *  104    → 基础门牌号（1 层 4 号，等价于 1:4）
+ *  A-101  → 含前后缀的完整门牌号
+ *  分隔符：逗号 / 顿号 / 空格；无法识别的片段原样提示忽略，不阻断生成。 */
+const SKIP_SYNTAX_HINT =
+  '4 整层 ｜ 4:1 第4层1号 ｜ 04 所有层4号 ｜ 104 基础房号 ｜ A-101 完整房号；逗号/顿号/空格分隔'
+
 interface GenerateRow {
   floor: number
-  /** 基础门牌号（楼层 + 两位序号，不含前后缀）：跳过房号可按此形式填写 */
+  /** 该层房号序号（跳过项按序号跨层匹配时使用） */
+  seq: number
+  /** 基础门牌号（楼层 + 两位序号，不含前后缀） */
   base: string
   /** 最终门牌号（拼接前后缀后提交后端） */
   houseNumber: string
@@ -90,27 +103,87 @@ function parseTokens(raw: string): string[] {
     .filter(Boolean)
 }
 
-/** 整层跳过：仅识别正整数，非法片段在下拉提示中回显（不阻断生成） */
-const skippedFloors = computed(() => {
-  const floors: number[] = []
-  for (const token of parseTokens(form.skipFloors)) {
-    const value = Number(token)
-    if (Number.isInteger(value) && value > 0) floors.push(value)
+/** 跳过项种类：整层 / 跨层序号 / 指定层房号 / 基础门牌号 / 完整门牌号 */
+type SkipRuleKind = 'floor' | 'seq' | 'spot' | 'base' | 'number'
+
+interface SkipRule {
+  /** 用户原始输入片段（未命中与非法提示回显用） */
+  raw: string
+  kind: SkipRuleKind
+  floor?: number
+  seq?: number
+  /** base / number 的比对文本（大写） */
+  text?: string
+}
+
+const SPOT_PATTERN = /^(\*|\d{1,2})\s*[:：]\s*(\d{1,2})$/
+/** 两位补零（01~09）即序号；一位数或无前导零的两位数是楼层 */
+const PADDED_SEQ_PATTERN = /^0\d$/
+
+/* 跳过项分类（位数即语义）：1~2 位纯数字＝整层楼层；两位补零或 *:n＝跨层序号；
+   3~4 位＝基础门牌号（门牌号 = 楼层 + 两位序号，最短 3 位、最长 4 位）；
+   含非数字字符＝完整门牌号（前后缀场景） */
+function parseSkipRules(raw: string): { rules: SkipRule[]; invalid: string[] } {
+  const rules: SkipRule[] = []
+  const invalid: string[] = []
+  for (const token of parseTokens(raw)) {
+    const spot = SPOT_PATTERN.exec(token)
+    if (spot) {
+      const seq = Number(spot[2])
+      if (seq > 0) {
+        const floor = spot[1] === '*' ? undefined : Number(spot[1])
+        rules.push(
+          floor === undefined
+            ? { raw: token, kind: 'seq', seq }
+            : { raw: token, kind: 'spot', floor, seq }
+        )
+      } else {
+        invalid.push(token)
+      }
+      continue
+    }
+    if (/^\d+$/.test(token)) {
+      const value = Number(token)
+      if (value <= 0 || token.length > 4) {
+        invalid.push(token)
+      } else if (PADDED_SEQ_PATTERN.test(token)) {
+        rules.push({ raw: token, kind: 'seq', seq: value })
+      } else if (token.length <= 2) {
+        rules.push({ raw: token, kind: 'floor', floor: value })
+      } else {
+        rules.push({ raw: token, kind: 'base', text: token.toUpperCase() })
+      }
+      continue
+    }
+    rules.push({ raw: token, kind: 'number', text: token.toUpperCase() })
   }
-  return floors
-})
+  return { rules, invalid }
+}
 
-const invalidFloorTokens = computed(() =>
-  parseTokens(form.skipFloors).filter((token) => {
-    const value = Number(token)
-    return !(Number.isInteger(value) && value > 0)
-  })
-)
+const skipRules = computed(() => parseSkipRules(form.skip))
 
-/** 跳过房号：大小写不敏感比对，完整门牌号与基础门牌号均命中 */
-const skippedHouseNumbers = computed(() =>
-  parseTokens(form.skipHouses).map((token) => token.toUpperCase())
-)
+const invalidSkipTokens = computed(() => skipRules.value.invalid)
+
+function skipRuleMatches(rule: SkipRule, row: GenerateRow): boolean {
+  if (rule.kind === 'floor') return row.floor === rule.floor
+  if (rule.kind === 'seq') return row.seq === rule.seq
+  if (rule.kind === 'spot') return row.floor === rule.floor && row.seq === rule.seq
+  if (rule.kind === 'base') return row.base.toUpperCase() === rule.text
+  return row.houseNumber.toUpperCase() === rule.text
+}
+
+/** 命中该行的首个跳过项（预览标注跳过原因用），未命中返回 null */
+function firstSkipRule(row: GenerateRow): SkipRule | null {
+  return skipRules.value.rules.find((rule) => skipRuleMatches(rule, row)) ?? null
+}
+
+/** 跳过项语义回显（预览悬浮提示与统计文案共用） */
+function skipRuleLabel(rule: SkipRule): string {
+  if (rule.kind === 'floor') return `${rule.floor} 层整层`
+  if (rule.kind === 'seq') return `每层 ${String(rule.seq).padStart(2, '0')} 号`
+  if (rule.kind === 'spot') return `${rule.floor} 层 ${rule.seq} 号`
+  return `房号 ${rule.text}`
+}
 
 /** 全量网格（未做任何排除），仅用于统计被规则排除的套数 */
 const allRows = computed<GenerateRow[]>(() => {
@@ -118,47 +191,62 @@ const allRows = computed<GenerateRow[]>(() => {
   for (let floor = form.floorStart; floor <= form.floorEnd; floor += 1) {
     for (let seq = form.roomStart; seq <= form.roomEnd; seq += 1) {
       const base = baseHouseNumberOf(floor, seq)
-      rows.push({ floor, base, houseNumber: `${form.prefix}${base}${form.suffix}` })
+      rows.push({ floor, seq, base, houseNumber: `${form.prefix}${base}${form.suffix}` })
     }
   }
   return rows
 })
 
-function isRuleExcluded(row: GenerateRow): boolean {
-  if (skippedFloors.value.includes(row.floor)) return true
-  const number = row.houseNumber.toUpperCase()
-  return (
-    skippedHouseNumbers.value.includes(number) ||
-    skippedHouseNumbers.value.includes(row.base.toUpperCase())
-  )
-}
+/** 未命中任何生成行的跳过项：写法或范围有误时提示，避免用户以为已生效 */
+const unmatchedSkipTokens = computed(() =>
+  skipRules.value.rules
+    .filter((rule) => !allRows.value.some((row) => skipRuleMatches(rule, row)))
+    .map((rule) => rule.raw)
+)
+
+/* 规则收敛：一次遍历同时产出保留行与被去重剔除的行（预览与提交共用同一清单）。
+   门牌号由楼层 + 两位序号拼成，跨楼层理论上可能撞号，按首次出现保留，
+   避免提交重号被后端同单元唯一约束拒绝 */
+const filteredRows = computed(() => {
+  const seen = new Set<string>()
+  const kept: GenerateRow[] = []
+  const deduped: GenerateRow[] = []
+  for (const row of allRows.value) {
+    if (firstSkipRule(row)) continue
+    if (seen.has(row.houseNumber)) {
+      deduped.push(row)
+      continue
+    }
+    seen.add(row.houseNumber)
+    kept.push(row)
+  }
+  return { kept, deduped }
+})
+
+const ruleFilteredRows = computed(() => filteredRows.value.kept)
+const dedupedRows = computed(() => filteredRows.value.deduped)
+
+/** 撞号去重剔除条数（预览统计文案用） */
+const dedupedCount = computed(() => dedupedRows.value.length)
 
 /** 预览单条取消（增量排除；生成规则变更后失效，见下方 watch） */
 const cancelledNumbers = ref<string[]>([])
 
-/* 规则去重：门牌号 = 楼层 + 两位序号，跨楼层理论上可能撞号，按首次出现保留，
-   避免提交重号被后端同单元唯一约束拒绝 */
-const ruleFilteredRows = computed<GenerateRow[]>(() => {
-  const seen = new Set<string>()
-  const rows: GenerateRow[] = []
+/** 规则跳过按原因拆分：整层跳过与指定房号跳过（预览统计文案用） */
+const skippedByRulesBreakdown = computed(() => {
+  let floor = 0
+  let house = 0
   for (const row of allRows.value) {
-    if (isRuleExcluded(row)) continue
-    if (seen.has(row.houseNumber)) continue
-    seen.add(row.houseNumber)
-    rows.push(row)
+    const rule = firstSkipRule(row)
+    if (!rule) continue
+    if (rule.kind === 'floor') {
+      floor += 1
+    } else {
+      house += 1
+    }
   }
-  return rows
+  return { floor, house }
 })
-
-/** 规则跳过的套数（整层跳过 + 指定房号跳过），与去重、手动取消分开计数 */
-const skippedByRulesCount = computed(
-  () => allRows.value.length - allRows.value.filter((row) => !isRuleExcluded(row)).length
-)
-
-const dedupedCount = computed(
-  () =>
-    allRows.value.filter((row) => !isRuleExcluded(row)).length - ruleFilteredRows.value.length
-)
 
 const generatedRows = computed<GenerateRow[]>(() =>
   ruleFilteredRows.value.filter((row) => !cancelledNumbers.value.includes(row.houseNumber))
@@ -170,13 +258,47 @@ const cancelledCount = computed(
 
 const overLimit = computed(() => generatedRows.value.length > MAX_GENERATE)
 
-/* 预览折叠：默认铺开前 PREVIEW_LIMIT 套，展开后全量可见 */
+/** 跳过项预览行：规则跳过 / 撞号去重 / 手动取消合成一张清单，渲染时统一灰字删除线 */
+interface SkippedPreviewRow {
+  houseNumber: string
+  reason: string
+}
+
+const skippedPreviewRows = computed<SkippedPreviewRow[]>(() => {
+  const rows: SkippedPreviewRow[] = []
+  for (const row of allRows.value) {
+    const rule = firstSkipRule(row)
+    if (rule) {
+      rows.push({ houseNumber: row.houseNumber, reason: `跳过（${skipRuleLabel(rule)}）` })
+    }
+  }
+  for (const row of dedupedRows.value) {
+    rows.push({ houseNumber: row.houseNumber, reason: '撞号去重（与已保留行门牌号重复）' })
+  }
+  for (const row of ruleFilteredRows.value) {
+    if (cancelledNumbers.value.includes(row.houseNumber)) {
+      rows.push({ houseNumber: row.houseNumber, reason: '手动取消' })
+    }
+  }
+  return rows
+})
+
+const skippedTotal = computed(() => skippedPreviewRows.value.length)
+
+/* 预览折叠：默认生成项与跳过项各铺开前 PREVIEW_LIMIT 套，展开后全量可见 */
 const previewExpanded = ref(false)
 const previewRows = computed(() =>
   previewExpanded.value ? generatedRows.value : generatedRows.value.slice(0, PREVIEW_LIMIT)
 )
-const previewHiddenCount = computed(() =>
-  Math.max(0, generatedRows.value.length - PREVIEW_LIMIT)
+const previewSkippedRows = computed(() =>
+  previewExpanded.value
+    ? skippedPreviewRows.value
+    : skippedPreviewRows.value.slice(0, PREVIEW_LIMIT)
+)
+const previewHiddenCount = computed(
+  () =>
+    Math.max(0, generatedRows.value.length - PREVIEW_LIMIT) +
+    Math.max(0, skippedPreviewRows.value.length - PREVIEW_LIMIT)
 )
 
 /* 生成规则（范围/前后缀）变更后，原单条取消记录已不对应同一批门牌号，整体失效 */
@@ -279,8 +401,7 @@ watch(visible, (value) => {
   form.roomEnd = 4
   form.prefix = ''
   form.suffix = ''
-  form.skipFloors = ''
-  form.skipHouses = ''
+  form.skip = ''
   form.area = undefined
   form.layout = ''
   form.orientation = ''
@@ -443,23 +564,19 @@ async function handleSubmit(): Promise<void> {
         </div>
         <span class="batch-hint">拼接在基础门牌号两侧：前缀 A- 与后缀 A → A-101A</span>
       </el-form-item>
-      <el-form-item label="整层跳过">
+      <el-form-item label="跳过">
         <el-input
-          v-model="form.skipFloors"
-          placeholder="如：4, 14（该层全部不生成）"
-          maxlength="80"
-        />
-        <span v-if="invalidFloorTokens.length > 0" class="batch-hint is-warning">
-          忽略无法识别的楼层：{{ invalidFloorTokens.join('、') }}
-        </span>
-      </el-form-item>
-      <el-form-item label="跳过房号">
-        <el-input
-          v-model="form.skipHouses"
-          placeholder="如：104, 404（可填基础房号或含前后缀的完整房号）"
+          v-model="form.skip"
+          :placeholder="`如：14 或 4:1,4:3 或 04（${SKIP_SYNTAX_HINT}）`"
           maxlength="120"
         />
-        <span class="batch-hint">逗号/空格/顿号分隔；与现有房屋重名的号码可在此排除</span>
+        <span class="batch-hint">{{ SKIP_SYNTAX_HINT }}</span>
+        <span v-if="invalidSkipTokens.length > 0" class="batch-hint is-warning">
+          忽略无法识别的跳过项：{{ invalidSkipTokens.join('、') }}
+        </span>
+        <span v-if="unmatchedSkipTokens.length > 0" class="batch-hint is-warning">
+          未命中当前生成范围（未生效）：{{ unmatchedSkipTokens.join('、') }}
+        </span>
       </el-form-item>
 
       <div class="batch-section">公共属性（全部房屋统一）</div>
@@ -477,48 +594,62 @@ async function handleSubmit(): Promise<void> {
 
     <div class="batch-preview">
       <p class="batch-preview-title">
-        将生成 {{ generatedRows.length }} 套房屋
+        将生成 <b>{{ generatedRows.length }}</b> 套房屋<template v-if="skippedTotal > 0">
+          ，跳过 <b>{{ skippedTotal }}</b> 套（整层 {{ skippedByRulesBreakdown.floor }} ·
+          指定房号 {{ skippedByRulesBreakdown.house }} · 撞号去重 {{ dedupedCount }} · 手动取消
+          {{ cancelledCount }}）</template
+        >
         <span v-if="overLimit" class="batch-warning">（超过上限 {{ MAX_GENERATE }}，请缩小范围）</span>
       </p>
-      <p
-        v-if="skippedByRulesCount > 0 || dedupedCount > 0 || cancelledCount > 0"
-        class="batch-preview-excluded"
-      >
-        <span>
-          规则跳过 {{ skippedByRulesCount }} 套<template v-if="dedupedCount > 0">
-            ，撞号去重 {{ dedupedCount }} 套</template
-          ><template v-if="cancelledCount > 0">，已手动取消 {{ cancelledCount }} 套</template>
-        </span>
-        <el-button
-          v-if="cancelledCount > 0"
-          link
-          type="primary"
-          size="small"
-          @click="restoreCancelled"
-        >
-          恢复已取消
-        </el-button>
-      </p>
 
-      <div v-if="generatedRows.length > 0" class="preview-chips">
-        <span
-          v-for="row in previewRows"
-          :key="row.houseNumber"
-          class="preview-chip"
-          :title="`${row.floor} 层 · 点 × 取消该套`"
-        >
-          {{ row.houseNumber }}
-          <button
-            type="button"
-            class="chip-remove"
-            :aria-label="`取消生成 ${row.houseNumber}`"
-            @click="cancelRow(row)"
+      <div v-if="generatedRows.length > 0" class="preview-group">
+        <span class="preview-group-label">生成（{{ generatedRows.length }}）</span>
+        <div class="preview-chips">
+          <span
+            v-for="row in previewRows"
+            :key="row.houseNumber"
+            class="preview-chip"
+            :title="`${row.floor} 层 · 点 × 取消该套`"
           >
-            ×
-          </button>
-        </span>
+            {{ row.houseNumber }}
+            <button
+              type="button"
+              class="chip-remove"
+              :aria-label="`取消生成 ${row.houseNumber}`"
+              @click="cancelRow(row)"
+            >
+              ×
+            </button>
+          </span>
+        </div>
       </div>
       <p v-else class="batch-preview-more">当前生成清单为空，请调整范围或跳过规则</p>
+
+      <!-- 跳过项（规则跳过 / 撞号去重 / 手动取消）：灰字删除线只读展示，点选与提交均不受影响 -->
+      <div v-if="skippedPreviewRows.length > 0" class="preview-group">
+        <span class="preview-group-label">
+          跳过（{{ skippedPreviewRows.length }}）
+          <el-button
+            v-if="cancelledCount > 0"
+            link
+            type="primary"
+            size="small"
+            @click="restoreCancelled"
+          >
+            恢复已取消
+          </el-button>
+        </span>
+        <div class="preview-chips">
+          <span
+            v-for="(row, index) in previewSkippedRows"
+            :key="`${row.houseNumber}-${index}`"
+            class="preview-chip is-skipped"
+            :title="row.reason"
+          >
+            {{ row.houseNumber }}
+          </span>
+        </div>
+      </div>
 
       <el-button
         v-if="previewHiddenCount > 0 || previewExpanded"
@@ -528,7 +659,11 @@ async function handleSubmit(): Promise<void> {
         class="preview-toggle"
         @click="previewExpanded = !previewExpanded"
       >
-        {{ previewExpanded ? '收起预览' : `展开全部 ${generatedRows.length} 套` }}
+        {{
+          previewExpanded
+            ? '收起预览'
+            : `展开全部（生成 ${generatedRows.length} · 跳过 ${skippedTotal}）`
+        }}
       </el-button>
 
       <p v-if="duplicatedNumbers.length > 0" class="batch-warning">
@@ -595,12 +730,16 @@ async function handleSubmit(): Promise<void> {
   color: var(--color-text-secondary);
 }
 
-/* 跳过/取消统计行：与预览 chip 区分层级，弱化展示 */
-.batch-preview-excluded {
+/* 预览分组：生成项（可逐条取消）与跳过项（只读灰字删除线）各占一组 */
+.preview-group + .preview-group {
+  margin-top: var(--spacing-sm);
+}
+
+.preview-group-label {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  margin: 0 0 var(--spacing-sm);
+  margin-bottom: 2px;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
@@ -622,6 +761,14 @@ async function handleSubmit(): Promise<void> {
   background-color: var(--admin-card-bg);
   font-size: var(--font-size-xs);
   color: var(--color-text-primary);
+}
+
+/* 跳过项：灰字删除线，与生成项一眼可分（悬浮 title 给出跳过原因） */
+.preview-chip.is-skipped {
+  padding: 2px 8px;
+  background-color: transparent;
+  color: var(--color-text-disabled);
+  text-decoration: line-through;
 }
 
 .chip-remove {
