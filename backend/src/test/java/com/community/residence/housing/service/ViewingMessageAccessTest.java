@@ -85,6 +85,8 @@ class ViewingMessageAccessTest {
     private SimpMessagingTemplate messagingTemplate;
     @Mock
     private WebSocketSessionService webSocketSessionService;
+    @Mock
+    private com.community.residence.conversation.service.ConversationService conversationService;
 
     @InjectMocks
     private ViewingAppointmentService service;

@@ -6,6 +6,8 @@ import com.community.residence.community.dto.CreateCommunityDTO;
 import com.community.residence.community.dto.UpdateCommunityStatusDTO;
 import com.community.residence.community.service.CommunityService;
 import com.community.residence.community.vo.CommunityVO;
+import com.community.residence.housing.service.HousingService;
+import com.community.residence.housing.vo.BuildingHousingTreeVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /** 社区管理控制器：社区 CRUD 与停用/启用（接口设计.md 9.1.1） */
 @Tag(name = "社区管理", description = "社区基础信息管理接口")
 @RestController
@@ -30,6 +34,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommunityController {
 
     private final CommunityService communityService;
+    private final HousingService housingService;
+
+    @Operation(summary = "房屋与房源一体化树（R62）",
+            description = "社区内 楼栋→单元→房屋 层级，房屋节点内嵌房源摘要（未挂牌为 null）；"
+                    + "ADMIN 限绑定社区，房源独立管理页并入社区结构的读通道")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/{id}/houses-with-housing")
+    public ApiResponse<List<BuildingHousingTreeVO>> housesWithHousing(@PathVariable Long id) {
+        return ApiResponse.success(housingService.housesWithHousing(id));
+    }
 
     @Operation(summary = "创建社区", description = "仅超级管理员可创建社区")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
