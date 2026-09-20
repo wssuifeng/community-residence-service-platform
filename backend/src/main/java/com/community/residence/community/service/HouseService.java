@@ -44,6 +44,7 @@ public class HouseService {
     public HouseVO create(CreateHouseDTO dto) {
         Unit unit = requireUnit(dto.getUnitId());
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());
+        requireHouseNumberAvailable(unit.getId(), dto.getHouseNumber(), null);
         House house = new House();
         house.setUnitId(unit.getId());
         house.setCommunityId(unit.getCommunityId());
@@ -51,6 +52,23 @@ public class HouseService {
         house.setStatus(StringUtils.hasText(dto.getStatus()) ? dto.getStatus() : HouseStatusConstant.VACANT);
         houseMapper.insert(house);
         return HouseVO.from(house);
+    }
+
+    /**
+     * 房号唯一校验（R62，V17 uk_unit_house_number）：房屋号在单元内唯一；
+     * excludeId 供更新场景排除自身（新建传 null）。
+     */
+    private void requireHouseNumberAvailable(Long unitId, String houseNumber, Long excludeId) {
+        if (!StringUtils.hasText(houseNumber)) {
+            return;
+        }
+        House existing = houseMapper.selectOne(new LambdaQueryWrapper<House>()
+                .eq(House::getUnitId, unitId)
+                .eq(House::getHouseNumber, houseNumber)
+                .last("LIMIT 1"));
+        if (existing != null && !existing.getId().equals(excludeId)) {
+            throw new BusinessException(ErrorCode.DATA_EXISTS, "该单元下房号已存在：" + houseNumber);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -61,6 +79,7 @@ public class HouseService {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "房屋不允许变更所属单元");
         }
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
+        requireHouseNumberAvailable(house.getUnitId(), dto.getHouseNumber(), house.getId());
         applyDto(house, dto);
         houseMapper.updateById(house);
         return HouseVO.from(house);
@@ -171,12 +190,15 @@ public class HouseService {
     /**
      * 房屋批量创建（D-端点2，50 阶段第三批）：部分成功语义对齐 R8 CSV 导入先例。
      * DEF-032：逐行 Validator 校验（area @NotNull 等字段规则），坏行逐行反馈。
+     * R62（V17）：房号同单元唯一——请求内重复与库内已存在均逐行失败反馈。
      */
     public com.community.residence.community.vo.BatchCreateResultVO batchCreate(
             com.community.residence.community.dto.BatchCreateHousesDTO dto) {
         Unit unit = requireUnit(dto.getUnitId());
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());
         List<com.community.residence.community.vo.BatchCreateResultVO.Row> rows = new java.util.ArrayList<>();
+        /* 本批次已出现的房号（同单元内请求自身去重，保留首次出现者） */
+        java.util.Set<String> seenNumbers = new java.util.HashSet<>();
         int success = 0;
         for (int i = 0; i < dto.getHouses().size(); i++) {
             CreateHouseDTO item = dto.getHouses().get(i);
@@ -186,7 +208,14 @@ public class HouseService {
                         i + 1, violation));
                 continue;
             }
+            String houseNumber = item.getHouseNumber();
+            if (StringUtils.hasText(houseNumber) && !seenNumbers.add(houseNumber)) {
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(
+                        i + 1, "本批次内房号重复：" + houseNumber));
+                continue;
+            }
             try {
+                requireHouseNumberAvailable(unit.getId(), houseNumber, null);
                 House house = new House();
                 house.setUnitId(unit.getId());
                 house.setCommunityId(unit.getCommunityId());
@@ -196,6 +225,8 @@ public class HouseService {
                 houseMapper.insert(house);
                 rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.success(i + 1, house.getId()));
                 success++;
+            } catch (BusinessException e) {
+                rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(i + 1, e.getMessage()));
             } catch (Exception e) {
                 rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(i + 1, e.getMessage()));
             }
