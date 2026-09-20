@@ -91,14 +91,51 @@ async function load(): Promise<void> {
   }
 }
 
-/* 社区下拉选项：社区列表接口居民可访问，拉取失败降级为不过滤 */
+/* 社区下拉选项：社区列表接口居民可访问，拉取失败降级为不过滤。
+   R62 全社区开放要求筛选器覆盖全量社区：接口分页返回，翻页累加至 total（护栏 5 页防死循环） */
 async function loadCommunities(): Promise<void> {
   try {
-    const result = await getCommunityList({ page: 1, size: 50 })
-    communityOptions.value = result.records
+    const all: ICommunity[] = []
+    let page = 1
+    while (page <= 5) {
+      const result = await getCommunityList({ page, size: 100 })
+      all.push(...result.records)
+      if (all.length >= result.total) break
+      page += 1
+    }
+    communityOptions.value = all
   } catch {
     communityOptions.value = []
   }
+}
+
+/* 社区房源计数（R62：无房源社区在筛选器显示「0 套房源」提示）。
+   列表接口无按社区计数端点，取全量房源（翻页累加，护栏 10 页）后前端聚合；
+   计数失败降级为不显示计数后缀，不影响筛选行为 */
+const communityHousingCounts = ref(new Map<number, number>())
+
+async function loadCommunityHousingCounts(): Promise<void> {
+  try {
+    const counts = new Map<number, number>()
+    let page = 1
+    while (page <= 10) {
+      const result = await listHousings({ page, size: 200 })
+      for (const housing of result.records) {
+        counts.set(housing.communityId, (counts.get(housing.communityId) ?? 0) + 1)
+      }
+      if (result.records.length === 0 || page * 200 >= result.total) break
+      page += 1
+    }
+    communityHousingCounts.value = counts
+  } catch {
+    communityHousingCounts.value = new Map()
+  }
+}
+
+/** 筛选器社区选项标签：计数可用时附「N 套房源」（0 套即无房源提示），失败降级纯社区名 */
+function communityOptionLabel(community: ICommunity): string {
+  const count = communityHousingCounts.value.get(community.id)
+  return count === undefined ? community.name : `${community.name}（${count} 套房源）`
 }
 
 function handleSearch(): void {
@@ -120,6 +157,7 @@ function handleSizeChange(): void {
 onMounted(() => {
   load()
   void loadCommunities()
+  void loadCommunityHousingCounts()
 })
 </script>
 
@@ -145,7 +183,7 @@ onMounted(() => {
         <el-option
           v-for="community in communityOptions"
           :key="community.id"
-          :label="community.name"
+          :label="communityOptionLabel(community)"
           :value="community.id"
         />
       </el-select>

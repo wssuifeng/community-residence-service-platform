@@ -30,6 +30,8 @@ const menuItems: MenuItem[] = [
   { path: '/admin/evaluations', title: '评价', icon: 'evaluation' },
   // 消息中心：ADMIN/SUPER_ADMIN 均可见（复用隐藏路由 /admin/notifications，验收第三轮 C2）
   { path: '/admin/notifications', title: '消息中心', icon: 'notification' },
+  // R63 消息会话中心：看房群聊 + 居民直通（v1.5）
+  { path: '/admin/conversations', title: '消息会话', icon: 'chat' },
   { path: '/admin/system', title: '系统', icon: 'system', roles: ['SUPER_ADMIN'] }
 ]
 
@@ -106,6 +108,9 @@ function isActive(path: string): boolean {
           <svg v-else-if="item.icon === 'notification'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17.8 9.4a5.8 5.8 0 0 0-11.6 0c0 6.4-2.4 8-2.4 8h16.4s-2.4-1.6-2.4-8Z" />
             <path d="M10.4 20.4a1.8 1.8 0 0 0 3.2 0" />
+          </svg>
+          <svg v-else-if="item.icon === 'chat'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.4 7.5 0 0 1-8.4 7.5c-1.1 0-2.2-.2-3.1-.5L4 20l1.6-4.1A7.3 7.3 0 0 1 4.2 11.5 8.4 7.5 0 0 1 12.6 4 8.4 7.5 0 0 1 21 11.5Z" />
           </svg>
           <svg v-else-if="item.icon === 'system'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3.2" />
