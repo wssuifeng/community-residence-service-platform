@@ -13,7 +13,9 @@ import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
 /**
  * 我的预约（DEF-058 tab 合并）：「资源预约｜看房预约」双 tab。
  * 资源 tab：左日历（标记有预约的日期、点选单日筛选）+ 右预约卡列表（默认未来 7 天口径，
- * DEF-052）+ 底部规则提示；看房 tab（R59）：紧凑列表，行点击进详情页（带看会话所在）。
+ * DEF-052；2026-09-20 用户反馈重设计：按资源分组为单卡——同资源不同时段合并展示、
+ * 不再每条预约重复铺开资源信息；组内与组间均按「日期+开始时间」正序，时间早的在前）
+ * + 底部规则提示；看房 tab（R59）：紧凑列表，行点击进详情页（带看会话所在）。
  * tab 状态写入 URL query（?tab=viewing），旧列表路由重定向与本页互跳均可回显。
  */
 
@@ -263,6 +265,39 @@ async function handleCancel(row: IResourceReservation): Promise<void> {
 
 const isEmpty = computed(() => !loading.value && records.value.length === 0)
 
+/* ---------- 列表分组（2026-09-20 用户反馈）：同资源多时段合并单卡，时间正序 ---------- */
+
+interface ReservationGroup {
+  resourceId: number
+  resourceName: string
+  slots: IResourceReservation[]
+}
+
+/** 单条预约的排序键：日期 + 开始时间（升序=时间早的在前） */
+function slotAsc(a: IResourceReservation, b: IResourceReservation): number {
+  return (
+    (a.reserveDate ?? a.reservationDate).localeCompare(b.reserveDate ?? b.reservationDate) ||
+    a.startTime.localeCompare(b.startTime)
+  )
+}
+
+/**
+ * 按资源分组为卡片（同资源不同时段合并展示，资源信息不再重复）；
+ * 组内时段正序，组间按组内最早时段正序。服务端分页口径内分组——
+ * 同资源记录跨页时当前页只呈现本页部分（与租约页历史折叠同口径）。
+ */
+const groupedReservations = computed<ReservationGroup[]>(() => {
+  const buckets = new Map<number, ReservationGroup>()
+  for (const row of records.value) {
+    const bucket = buckets.get(row.resourceId)
+    if (bucket) bucket.slots.push(row)
+    else buckets.set(row.resourceId, { resourceId: row.resourceId, resourceName: row.resourceName, slots: [row] })
+  }
+  return [...buckets.values()]
+    .map((group) => ({ ...group, slots: [...group.slots].sort(slotAsc) }))
+    .sort((a, b) => slotAsc(a.slots[0], b.slots[0]))
+})
+
 /* ---------- 看房预约 tab（R59 合并入本页）：紧凑列表，居民数据权限由后端承载 ---------- */
 
 const viewQuery = reactive({ page: 1, size: 10 })
@@ -436,8 +471,9 @@ onMounted(() => {
             <p>{{ filterMode === 'all' && !selectedDate ? '还没有预约记录，去发起一个吧' : '所选范围内没有预约记录' }}</p>
           </div>
 
-          <article v-for="row in records" v-else :key="row.id" class="reservation-card">
-            <!-- 资源无图片字段：用资源类型 SVG 占位块 -->
+          <!-- 分组卡：单资源一卡，时段为行（同资源多时段合并，避免重复展示资源信息） -->
+          <article v-for="group in groupedReservations" v-else :key="group.resourceId" class="reservation-card">
+            <!-- 资源无图片字段：用资源类型 SVG 占位块（每资源一次） -->
             <span class="resource-thumb">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" />
@@ -446,27 +482,29 @@ onMounted(() => {
               </svg>
             </span>
             <div class="card-main">
-              <h2 class="card-title">{{ row.resourceName }}</h2>
-              <p class="card-slot">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 3" />
-                </svg>
-                {{ slotText(row) }}
-              </p>
-              <span class="status-pill" :data-status="row.status">
-                {{ reservationStatusLabels[row.status] }}
-              </span>
-            </div>
-            <div class="card-actions">
-              <el-button
-                v-if="canCancel(row)"
-                text
-                type="primary"
-                @click="handleCancel(row)"
-              >
-                取消预约
-              </el-button>
+              <h2 class="card-title">{{ group.resourceName }}</h2>
+              <div class="slot-list">
+                <div v-for="row in group.slots" :key="row.id" class="slot-item">
+                  <p class="card-slot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 7v5l3 3" />
+                    </svg>
+                    {{ slotText(row) }}
+                  </p>
+                  <span class="status-pill" :data-status="row.status">
+                    {{ reservationStatusLabels[row.status] }}
+                  </span>
+                  <el-button
+                    v-if="canCancel(row)"
+                    text
+                    type="primary"
+                    @click="handleCancel(row)"
+                  >
+                    取消预约
+                  </el-button>
+                </div>
+              </div>
             </div>
           </article>
         </div>
@@ -844,6 +882,32 @@ onMounted(() => {
   height: 14px;
 }
 
+/* 时段行列表：同资源多时段合并为单卡后，时段逐行展示（时间正序） */
+.slot-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xs) 0;
+}
+
+.slot-item:first-child {
+  padding-top: 0;
+}
+
+.slot-item + .slot-item {
+  border-top: 1px dashed var(--color-border);
+}
+
+.slot-item .el-button {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
 /* 状态胶囊：已预约绿 / 待审核黄 / 其余灰（已拒绝、已违约用红色系） */
 .status-pill {
   align-self: flex-start;
@@ -873,10 +937,6 @@ onMounted(() => {
 .status-pill[data-status='VIOLATED'] {
   background: rgba(239, 68, 68, 0.1);
   color: var(--color-danger);
-}
-
-.card-actions {
-  flex-shrink: 0;
 }
 
 /* 底部规则提示条 */
