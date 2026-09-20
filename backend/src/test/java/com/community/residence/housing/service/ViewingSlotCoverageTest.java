@@ -103,6 +103,21 @@ class ViewingSlotCoverageTest {
     }
 
     @Test
+    @DisplayName("DEF-061 切片后创建合并区间：V6 双段长模板（09:00-12:00）内 09:00-11:00 合并请求通过")
+    void create_slicedTemplate_mergedInterval_ok() {
+        /* available-slots 已栅格化为 60 分钟切片，用户跨片多选后按合并区间提交
+           （09:00+10:00 两片合并 09:00-11:00）：区间覆盖按模板段（非切片）判定，
+           单段 09:00-12:00 完整覆盖请求区间 → 放行 */
+        stubTemplates(List.of(
+                template(LocalTime.of(9, 0), LocalTime.of(12, 0)),
+                template(LocalTime.of(14, 0), LocalTime.of(18, 0))));
+
+        ViewingAppointmentVO vo = invokeCreate(LocalTime.of(9, 0), LocalTime.of(11, 0));
+
+        assertThat(vo.getStatus()).isEqualTo("TO_CONFIRM");
+    }
+
+    @Test
     @DisplayName("段间有间隙（09:00-10:00 + 10:30-11:30，请求 09:30-11:00）：拒绝")
     void create_gapBetweenSegments_rejected() {
         stubTemplates(List.of(

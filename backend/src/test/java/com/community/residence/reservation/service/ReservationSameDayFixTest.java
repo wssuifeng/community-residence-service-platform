@@ -55,6 +55,8 @@ class ReservationSameDayFixTest {
     @Mock
     private ResourceTimeslotMapper timeslotMapper;
     @Mock
+    private com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
+    @Mock
     private ResidentMapper residentMapper;
     @Mock
     private SysConfigService sysConfigService;
@@ -79,6 +81,8 @@ class ReservationSameDayFixTest {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         }
+        /* DEF-062 跨域日程冲突检查（无跨域看房预约，聚焦同资源口径） */
+        lenient().when(viewingAppointmentMapper.selectCount(any())).thenReturn(0L);
         resource = new PublicResource();
         resource.setId(1L);
         resource.setCommunityId(1L);
