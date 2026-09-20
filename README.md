@@ -82,9 +82,9 @@ P2 集成能力已交付（2026-09-09）：文件上传（POST /api/v1/upload + 
    PAYMENT_ALIPAY_APPID=沙箱应用APPID
    PAYMENT_ALIPAY_GATEWAY_URL=https://openapi-sandbox.dl.alipaydev.com/gateway.do
    PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY=应用私钥
-   PAYMENT_ALIPAY_ALIPAY_PUBLIC_KEY=支付宝公钥
+   PAYMENT_ALIPAY_PUBLIC_KEY=支付宝公钥
    ```
-   （生产网关为 `https://openapi.alipay.com/gateway.do`，需企业资质网页应用）
+   （变量名以 `application.yml` 的 `payment.alipay.*` 占位符为准：`PAYMENT_ALIPAY_APP_ID` / `PAYMENT_ALIPAY_GATEWAY_URL` / `PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY` / `PAYMENT_ALIPAY_PUBLIC_KEY`；生产网关为 `https://openapi.alipay.com`，需企业资质网页应用）
 4. 沙箱页提供测试买家账号，支付流程可完整走通。
 
 **微信支付（Native 扫码）**——需商户资质，无公开沙箱：
