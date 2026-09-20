@@ -2,6 +2,7 @@
 import { http } from '@/utils/request'
 import type { PageResult } from '@/types/api'
 import type {
+  IBatchOperationResult,
   IBuilding,
   IBuildingDTO,
   IBuildingQuery,
@@ -17,6 +18,8 @@ import type {
   IPublicResourceDTO,
   IPublicResourceQuery,
   IResourceTimeslot,
+  IStructureBatchGenerateDTO,
+  IStructureBatchGenerateResult,
   ITimeslotQuery,
   IUnit,
   IUnitDTO,
@@ -24,6 +27,7 @@ import type {
   IUpdateHouseStatusDTO,
   IUpdateTimeslotDTO
 } from '@/types/modules/community'
+import type { CommunityStatus } from '@/types/modules/community'
 
 /* ---------------------------------- 9.1.1 社区管理 ---------------------------------- */
 
@@ -55,6 +59,26 @@ export function updateCommunityStatus(id: number, data: IUpdateCommunityStatusDT
 /** 删除社区（需求 v1.1 R1/R6：仅超管，级联删除下级结构与关联业务数据；端点由 50 阶段步骤 1b 后端并行交付） */
 export function deleteCommunity(id: number) {
   return http.delete<null>(`/communities/${id}`)
+}
+
+/** 批量删除社区（仅超管，部分成功语义：逐社区独立事务，返回成功 ID 与失败原因） */
+export function batchDeleteCommunities(ids: number[]) {
+  return http.post<IBatchOperationResult>('/communities/batch-delete', { ids })
+}
+
+/** 批量启用/停用社区（仅超管，部分成功语义） */
+export function batchUpdateCommunityStatus(ids: number[], status: CommunityStatus) {
+  return http.patch<IBatchOperationResult>('/communities/batch-status', { ids, status })
+}
+
+/* ------------------------------ 结构链一次性批量生成 ------------------------------ */
+
+/**
+ * 结构链批量生成（结构总览「批量建房」）：一次生成 楼栋 → 单元 → 房屋 整条链，
+ * 支持跳过项精确排除房号；dryRun=true 时仅返回预览、零写入
+ */
+export function batchGenerateStructure(data: IStructureBatchGenerateDTO) {
+  return http.post<IStructureBatchGenerateResult>('/structures/batch-generate', data)
 }
 
 /* ---------------------------------- 9.1.2 楼栋管理 ---------------------------------- */

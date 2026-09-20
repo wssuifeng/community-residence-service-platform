@@ -59,6 +59,10 @@ class WorkOrderBatch3FixTest {
     private FileUploadService fileUploadService;
     @Mock
     private com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
+    @Mock
+    private StaffCapabilityService staffCapabilityService;
+    @Mock
+    private StaffScheduleService staffScheduleService;
 
     @InjectMocks
     private WorkOrderService workOrderService;
@@ -78,7 +82,7 @@ class WorkOrderBatch3FixTest {
                     staff(1L, "张服务", "STAFF", "ACTIVE"),
                     staff(2L, "李服务", "STAFF", "ACTIVE")));
 
-            List<StaffOptionVO> options = workOrderService.assignableStaff(null);
+            List<StaffOptionVO> options = workOrderService.assignableStaff(null, null);
 
             assertThat(options).hasSize(2);
             assertThat(options.get(0).getId()).isEqualTo(1L);
@@ -87,8 +91,8 @@ class WorkOrderBatch3FixTest {
     }
 
     @Test
-    @DisplayName("DEF-025：ADMIN 未传社区 + 单一绑定社区 → 该社区派过单的服务人员优先置前")
-    void assignableStaff_experiencedFirst() {
+    @DisplayName("V19：常驻本社区的人员优先（staff_community 绑定档位），范围外 STAFF 仍可选")
+    void assignableStaff_communityBoundFirst() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             mocked.when(() -> com.community.residence.common.context.SecurityUtils
@@ -98,21 +102,18 @@ class WorkOrderBatch3FixTest {
             when(sysUserMapper.selectList(any())).thenReturn(List.of(
                     staff(1L, "新人甲", "STAFF", "ACTIVE"),
                     staff(2L, "熟手乙", "STAFF", "ACTIVE")));
+            /* 熟手乙常驻 1 号社区（V19 绑定表已由派单流水回填），新人甲无绑定 */
+            when(staffCapabilityService.communityIdsByStaff(any()))
+                    .thenReturn(java.util.Map.of(2L, List.of(1L)));
 
-            WorkOrder order = new WorkOrder();
-            order.setId(10L);
-            order.setCommunityId(1L);
-            when(workOrderMapper.selectList(any())).thenReturn(List.of(order));
-            WorkOrderAssignment assignment = new WorkOrderAssignment();
-            assignment.setWorkOrderId(10L);
-            assignment.setAssigneeId(2L);
-            when(assignmentMapper.selectList(any())).thenReturn(List.of(assignment));
+            List<StaffOptionVO> options = workOrderService.assignableStaff(null, null);
 
-            List<StaffOptionVO> options = workOrderService.assignableStaff(null);
-
-            /* 熟手乙（社区派过单）优先，但新人甲仍在列表（R20 仅要求启用状态，不硬过滤） */
+            /* 熟手乙档位 2 优先，但新人甲仍在列表（R20 仅要求启用状态，不硬过滤） */
             assertThat(options).hasSize(2);
             assertThat(options.get(0).getId()).isEqualTo(2L);
+            assertThat(options.get(0).getRecommendLevel()).isEqualTo(2);
+            assertThat(options.get(0).getMatchedCommunity()).isTrue();
+            assertThat(options.get(1).getRecommendLevel()).isEqualTo(4);
         }
     }
 
@@ -178,7 +179,7 @@ class WorkOrderBatch3FixTest {
             });
 
             var vo = workOrderService.page(1, 10, null, "ACCEPTED,IN_PROGRESS",
-                    null, null, null, null, null);
+                    null, null, null, null, null, null, null);
             assertThat(vo.getTotal()).isEqualTo(0);
         }
     }
@@ -198,7 +199,8 @@ class WorkOrderBatch3FixTest {
             });
 
             var vo = workOrderService.page(1, 10, null, null, null, null, null,
-                    java.time.LocalDateTime.now().minusDays(1), java.time.LocalDateTime.now());
+                    java.time.LocalDateTime.now().minusDays(1), java.time.LocalDateTime.now(),
+                    null, null);
             assertThat(vo.getTotal()).isEqualTo(0);
         }
     }

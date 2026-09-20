@@ -4,11 +4,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import LeaseRenewDialog from './LeaseRenewDialog.vue'
+import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
 import { getLeaseList } from '@/api/lease'
 import { listMyPayments } from '@/api/payment'
 import { formatDateTime } from '@/utils/date'
 import { leaseStatusLabels } from '@/types/modules/lease'
+import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
 import type { ILeasePayment, ILeaseRecord, PaymentChannel, PaymentStatus } from '@/types/modules/lease'
+import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
 
 /**
  * 我的租约（R61，v1.4；2026-09-20 按 mockup-to-page 重设计）：
@@ -83,6 +86,18 @@ function toggleExpand(row: ILeaseRecord): void {
 
 function toggleHistory(key: string): void {
   expandedHistory.value = expandedHistory.value === key ? null : key
+}
+
+/** 协议签约状态标签（NONE 不展示，避免每张卡都挂一个无信息量的「未发起协议」） */
+function agreementLabel(row: ILeaseRecord): string | null {
+  const status = row.agreementStatus
+  if (!status || status === 'NONE') return null
+  return leaseAgreementSignStatusLabels[status as LeaseAgreementSignStatus]
+}
+
+/** 需要居民处理的签约状态：待确认 / 单方已确认（另一方还没签） */
+function agreementNeedsAction(row: ILeaseRecord): boolean {
+  return row.agreementStatus === 'PENDING' || row.agreementStatus === 'PARTIAL'
 }
 
 /** 距止期天数（负值=已过期） */
@@ -279,6 +294,13 @@ onMounted(() => {
               <span v-if="expiryOf(group.current)" class="expiry-badge" :data-flag="expiryOf(group.current)">
                 {{ expiryOf(group.current) === 'EXPIRING' ? '即将到期' : '已到期' }}
               </span>
+              <span
+                v-if="agreementLabel(group.current)"
+                class="agreement-badge"
+                :class="{ 'is-action': agreementNeedsAction(group.current) }"
+              >
+                协议{{ agreementLabel(group.current) }}
+              </span>
               <span class="status-pill" :data-status="group.current.status">
                 {{ leaseStatusLabels[group.current.status] }}
               </span>
@@ -355,6 +377,14 @@ onMounted(() => {
                 <dd>{{ group.current.remark?.trim() || '无' }}</dd>
               </div>
             </dl>
+
+            <!-- 租赁协议（R64 轻量版）：居民侧查看协议正文与在线确认，确认动作在面板内自处理 -->
+            <AgreementSignPanel
+              :lease-id="group.current.id"
+              role="RESIDENT"
+              :community-id="group.current.communityId"
+              @changed="loadLeases"
+            />
           </div>
         </article>
 
@@ -571,6 +601,22 @@ onMounted(() => {
 .expiry-badge[data-flag='EXPIRED'] {
   background: rgba(239, 68, 68, 0.1);
   color: var(--color-danger);
+}
+
+/* 协议签约徽章：待办态（待确认/单方已确认）用主色强调，已签署为中性绿 */
+.agreement-badge {
+  flex-shrink: 0;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: rgba(52, 211, 153, 0.14);
+  color: #047857;
+}
+
+.agreement-badge.is-action {
+  background: rgba(59, 130, 246, 0.14);
+  color: #1d4ed8;
 }
 
 /* 状态胶囊：在租/支付成功绿，待审核/待支付黄，搬出/归档/已关闭灰，驳回红 */

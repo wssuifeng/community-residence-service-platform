@@ -3,6 +3,7 @@ import { http } from '@/utils/request'
 import type { PageResult } from '@/types/api'
 import type {
   IExpiringLeaseQuery,
+  ILeaseChange,
   ILeaseQuery,
   ILeaseRecord,
   ILeaseRecordDTO,
@@ -43,4 +44,9 @@ export function updateLeaseStatus(id: number, data: IUpdateLeaseStatusDTO) {
 /** 即将到期租住分页列表（按到期日期升序） */
 export function getExpiringLeaseList(params?: IExpiringLeaseQuery) {
   return http.get<PageResult<ILeaseRecord>>('/leases/expiring', params)
+}
+
+/** 租约变更历史（V18 字段级前后值留痕，倒序；居民限本人租约） */
+export function getLeaseChanges(id: number) {
+  return http.get<ILeaseChange[]>(`/leases/${id}/changes`)
 }

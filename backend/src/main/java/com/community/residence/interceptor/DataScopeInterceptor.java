@@ -49,7 +49,11 @@ public class DataScopeInterceptor implements InnerInterceptor {
             "notification", "notification_channel_log",
             "housing_timeslot", "sys_task_log",
             "lease_payment",
-            "conversation", "conversation_participant", "conversation_message");
+            "conversation", "conversation_participant", "conversation_message",
+            /* V18/V19：协议模板需同时可见全局模板（community_id 为空），
+               租约变更历史与服务人员类别绑定表无 community_id 列，
+               三者均由业务层显式约束可见性 */
+            "agreement_template", "lease_change_log", "staff_service_category");
 
     @Override
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter,

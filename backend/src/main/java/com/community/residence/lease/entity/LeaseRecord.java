@@ -47,6 +47,9 @@ public class LeaseRecord {
     @Schema(description = "合同附件URL")
     private String contractUrl;
 
+    @Schema(description = "协议签约状态：NONE-未发起, PENDING-待确认, PARTIAL-单方已确认, SIGNED-双方已确认, CANCELLED-已撤回")
+    private String agreementStatus;
+
     @Schema(description = "备注")
     private String remark;
 

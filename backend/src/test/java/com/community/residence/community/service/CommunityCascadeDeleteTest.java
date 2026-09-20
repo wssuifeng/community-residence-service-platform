@@ -3,6 +3,10 @@ package com.community.residence.community.service;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.AbstractLambdaWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.community.residence.agreement.entity.AgreementTemplate;
+import com.community.residence.agreement.entity.LeaseAgreement;
+import com.community.residence.agreement.mapper.AgreementTemplateMapper;
+import com.community.residence.agreement.mapper.LeaseAgreementMapper;
 import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.entity.SysOperationLog;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
@@ -39,8 +43,10 @@ import com.community.residence.housing.entity.ViewingAppointment;
 import com.community.residence.housing.mapper.HousingMapper;
 import com.community.residence.housing.mapper.HousingTimeslotMapper;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
+import com.community.residence.lease.entity.LeaseChangeLog;
 import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.entity.LeaseReminder;
+import com.community.residence.lease.mapper.LeaseChangeLogMapper;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
 import com.community.residence.lease.mapper.LeaseReminderMapper;
 import com.community.residence.messaging.entity.Notification;
@@ -59,11 +65,17 @@ import com.community.residence.resident.mapper.ResidenceRelationMapper;
 import com.community.residence.statistics.entity.StatisticsSnapshot;
 import com.community.residence.statistics.mapper.StatisticsSnapshotMapper;
 import com.community.residence.workorder.entity.ServiceCategory;
+import com.community.residence.workorder.entity.StaffCommunity;
+import com.community.residence.workorder.entity.StaffSchedule;
+import com.community.residence.workorder.entity.StaffServiceCategory;
 import com.community.residence.workorder.entity.WorkOrder;
 import com.community.residence.workorder.entity.WorkOrderAssignment;
 import com.community.residence.workorder.entity.WorkOrderAttachment;
 import com.community.residence.workorder.entity.WorkOrderProcess;
 import com.community.residence.workorder.mapper.ServiceCategoryMapper;
+import com.community.residence.workorder.mapper.StaffCommunityMapper;
+import com.community.residence.workorder.mapper.StaffScheduleMapper;
+import com.community.residence.workorder.mapper.StaffServiceCategoryMapper;
 import com.community.residence.workorder.mapper.WorkOrderAssignmentMapper;
 import com.community.residence.workorder.mapper.WorkOrderAttachmentMapper;
 import com.community.residence.workorder.mapper.WorkOrderMapper;
@@ -93,6 +105,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.InOrder;
 
 /**
  * 社区级联删除测试（R1/R6 v1.1）：级联清单全覆盖、删除顺序（子表先于父表）、
@@ -170,6 +183,19 @@ class CommunityCascadeDeleteTest {
     private SysAdminCommunityMapper sysAdminCommunityMapper;
     @Mock
     private SysOperationLogMapper sysOperationLogMapper;
+    /* V18/V19 新增表：外键指向 community / lease_record / service_category，级联必须覆盖 */
+    @Mock
+    private StaffCommunityMapper staffCommunityMapper;
+    @Mock
+    private StaffScheduleMapper staffScheduleMapper;
+    @Mock
+    private StaffServiceCategoryMapper staffServiceCategoryMapper;
+    @Mock
+    private AgreementTemplateMapper agreementTemplateMapper;
+    @Mock
+    private LeaseAgreementMapper leaseAgreementMapper;
+    @Mock
+    private LeaseChangeLogMapper leaseChangeLogMapper;
 
     @InjectMocks
     private CommunityService communityService;
@@ -372,5 +398,41 @@ class CommunityCascadeDeleteTest {
            绑定解除是唯一的账号侧动作） */
         verify(sysAdminCommunityMapper).delete(any());
         verify(communityMapper).deleteById(9L);
+    }
+
+    @Test
+    @DisplayName("V18/V19 新表纳入级联：排班/人员绑定/协议模板按社区直删，协议与变更历史随租约先删")
+    void delete_cascadesV18V19Tables() {
+        LeaseRecord lease = new LeaseRecord();
+        lease.setId(77L);
+        lease.setCommunityId(9L);
+        ServiceCategory category = new ServiceCategory();
+        category.setId(33L);
+        category.setCommunityId(9L);
+
+        when(leaseRecordMapper.selectList(any())).thenReturn(List.of(lease));
+        when(serviceCategoryMapper.selectList(any())).thenReturn(List.of(category));
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+
+            communityService.delete(9L);
+        }
+
+        /* 外键指向租约的两表必须在租约物理删除之前清掉，否则 FK 违约 */
+        InOrder inOrder = inOrder(leaseAgreementMapper, leaseChangeLogMapper, leaseRecordMapper);
+        inOrder.verify(leaseAgreementMapper).delete(any());
+        inOrder.verify(leaseChangeLogMapper).delete(any());
+        inOrder.verify(leaseRecordMapper).deleteBatchIds(any());
+
+        /* 人员擅长类别绑定须先于服务类别删除（外键指向 service_category） */
+        InOrder categoryOrder = inOrder(staffServiceCategoryMapper, serviceCategoryMapper);
+        categoryOrder.verify(staffServiceCategoryMapper).delete(any());
+        categoryOrder.verify(serviceCategoryMapper).delete(any());
+
+        /* 直接以 community_id 归属的三张表按社区清理 */
+        verify(staffCommunityMapper).delete(any());
+        verify(staffScheduleMapper).delete(any());
+        verify(agreementTemplateMapper).delete(any());
     }
 }

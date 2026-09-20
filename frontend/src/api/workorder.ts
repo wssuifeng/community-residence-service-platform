@@ -4,6 +4,7 @@ import type {
   IServiceCategory,
   IServiceCategorySaveRequest,
   IServiceCategoryTreeNode,
+  IStaffOption,
   IWorkOrder,
   IWorkOrderAssignRequest,
   IWorkOrderAttachment,
@@ -103,6 +104,14 @@ export function cancelWorkOrder(id: number, data: IWorkOrderReasonRequest) {
 /** 查询工单处理时间线（接口设计.md 9.4.2.13） */
 export function getWorkOrderTimeline(id: number) {
   return http.get<IWorkOrderProcess[]>(`/work-orders/${id}/timeline`)
+}
+
+/**
+ * 派单候选清单（V19 档位推荐）：常驻本社区且擅长该类别（1）→ 常驻（2）→ 擅长（3）→ 其他（4），
+ * 同档内按在手工单数升序；带今日班次标签供调度判断在岗情况
+ */
+export function listAssignableStaff(params?: { communityId?: number; categoryId?: number }) {
+  return http.get<IStaffOption[]>('/work-orders/assignable-staff', params)
 }
 
 /** 上传工单附件（图片 ≤5MB，文档 ≤10MB，接口设计.md 9.4.3.1） */

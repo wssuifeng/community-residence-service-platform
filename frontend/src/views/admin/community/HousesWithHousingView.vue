@@ -603,8 +603,8 @@ async function handleBatchSubmit(): Promise<void> {
           <p class="card-community">{{ item.communityName }}</p>
           <p class="card-meta">
             <span>{{ item.floor }} 层</span>
-            <span>{{ item.area != null ? `${item.area} ㎡` : '—' }}</span>
-            <span class="card-layout">{{ item.layout || '—' }}</span>
+            <span>{{ item.area != null ? `${item.area} ㎡` : '-' }}</span>
+            <span class="card-layout">{{ item.layout || '-' }}</span>
           </p>
           <p class="card-price">
             <template v-if="item.housing">

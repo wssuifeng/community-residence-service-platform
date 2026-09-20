@@ -4,8 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.community.residence.auth.entity.SysUser;
 import com.community.residence.auth.mapper.SysUserMapper;
+import com.community.residence.common.constant.CommonStatus;
+import com.community.residence.common.constant.DispatchFlag;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.RoleConstants;
+import com.community.residence.common.constant.WorkOrderPriority;
 import com.community.residence.common.constant.WorkOrderStatus;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
@@ -39,9 +42,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +69,23 @@ public class WorkOrderService {
 
     /** 工单号撞号重试上限（DEF-026） */
     private static final int ORDER_NO_RETRY_LIMIT = 5;
+
+    /** 终态集合：不在此集合即「未完结」（在手工单计数与调度标记判定） */
+    private static final Set<String> TERMINAL_STATUSES = Set.of(
+            WorkOrderStatus.COMPLETED, WorkOrderStatus.CLOSED,
+            WorkOrderStatus.REJECTED, WorkOrderStatus.CANCELLED);
+
+    /** 调度超时阈值（分钟）：待受理/待派单未受理、已派单未接单、处理中未完成 */
+    private static final long OVERDUE_ACCEPT_MINUTES = 30;
+    private static final long OVERDUE_ASSIGN_MINUTES = 120;
+    private static final long OVERDUE_PROCESS_MINUTES = 1440;
+
+    /** 新建工单标记窗口（分钟） */
+    private static final long NEW_ORDER_MINUTES = 120;
+
+    /** 列表排序取值（sort 参数）：等待时长降序、紧急优先 */
+    private static final String SORT_WAIT_DESC = "WAIT_DESC";
+    private static final String SORT_PRIORITY = "PRIORITY";
 
     /** 状态机合法流转表（key 当前状态 → value 可达状态集合）。
         权威口径见架构设计 §6.1 / 01_工单状态机.lifecycle.json：
@@ -91,6 +115,8 @@ public class WorkOrderService {
     private final NotificationService notificationService;
     private final FileUploadService fileUploadService;
     private final com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
+    private final StaffCapabilityService staffCapabilityService;
+    private final StaffScheduleService staffScheduleService;
 
     /* 提交工单：初始 PENDING 待受理；工单号 WO+日期+随机序号。
        R9「申请通过后获得居民端功能入口」+ R12 居住私有数据口径（DEF-001）：
@@ -198,9 +224,13 @@ public class WorkOrderService {
         attachmentMapper.deleteById(attachmentId);
     }
 
+    /* 工单分页：sort 为空/DEFAULT 保持 id 倒序（既有行为不变）；WAIT_DESC 等待时长降序
+       （以提交时间升序近似，等待最久者置前）；PRIORITY 紧急优先 + 提交时间升序。
+       assigneeId 为处理人筛选（工单表无处理人列，先取派单记录命中的工单 ID 集合） */
     public PageVO<WorkOrderVO> page(long page, long size, String status, String statuses,
                                     String priority, Long categoryId, String keyword,
-                                    LocalDateTime startTime, LocalDateTime endTime) {
+                                    LocalDateTime startTime, LocalDateTime endTime,
+                                    Long assigneeId, String sort) {
         List<String> statusList = splitStatuses(statuses);
         LambdaQueryWrapper<WorkOrder> wrapper = new LambdaQueryWrapper<WorkOrder>()
                 .eq(StringUtils.hasText(status), WorkOrder::getStatus, status)
@@ -212,8 +242,17 @@ public class WorkOrderService {
                 .and(StringUtils.hasText(keyword), w -> w
                         .like(WorkOrder::getTitle, keyword)
                         .or().like(WorkOrder::getContent, keyword)
-                        .or().like(WorkOrder::getOrderNo, keyword))
-                .orderByDesc(WorkOrder::getId);
+                        .or().like(WorkOrder::getOrderNo, keyword));
+        if (assigneeId != null) {
+            List<Long> assignedOrderIds = assignmentMapper.selectList(
+                            new LambdaQueryWrapper<WorkOrderAssignment>()
+                                    .eq(WorkOrderAssignment::getAssigneeId, assigneeId))
+                    .stream().map(WorkOrderAssignment::getWorkOrderId).distinct().toList();
+            if (assignedOrderIds.isEmpty()) {
+                return PageVO.of(List.of(), 0, page, size);
+            }
+            wrapper.in(WorkOrder::getId, assignedOrderIds);
+        }
         /* RESIDENT 限本人；STAFF 限派给本人（工单表无法直查派单表，先取派单ID集合） */
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             wrapper.eq(WorkOrder::getResidentId, SecurityUtils.getUserId());
@@ -227,8 +266,24 @@ public class WorkOrderService {
             }
             wrapper.in(WorkOrder::getId, orderIds);
         }
+        applySort(wrapper, sort);
         Page<WorkOrder> result = workOrderMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
-        return PageVO.of(result.convert(this::toVO));
+        return PageVO.of(result.getRecords() == null ? List.of() : toVOList(result.getRecords()),
+                result.getTotal(), result.getCurrent(), result.getSize());
+    }
+
+    /* 排序装配：取值由 SORT_* 常量枚举，非枚举值回落默认 id 倒序。
+       PRIORITY 的「紧急优先」为 CASE 表达式，Lambda 列名无法表达，走 last 拼装
+       （取值来自常量，无注入面） */
+    private void applySort(LambdaQueryWrapper<WorkOrder> wrapper, String sort) {
+        if (SORT_WAIT_DESC.equalsIgnoreCase(sort)) {
+            wrapper.orderByAsc(WorkOrder::getCreatedAt).orderByDesc(WorkOrder::getId);
+        } else if (SORT_PRIORITY.equalsIgnoreCase(sort)) {
+            wrapper.last("ORDER BY (CASE WHEN priority = '" + WorkOrderPriority.URGENT
+                    + "' THEN 0 ELSE 1 END) ASC, created_at ASC, id ASC");
+        } else {
+            wrapper.orderByDesc(WorkOrder::getId);
+        }
     }
 
     /* 派单：PENDING/TO_ASSIGN → ASSIGNED；ASSIGNED → ASSIGNED 为改派（重新派单覆盖
@@ -380,48 +435,65 @@ public class WorkOrderService {
     }
 
     /**
-     * 可派单服务人员选项（DEF-025 方案 A，R20）：启用状态 STAFF 账号；
-     * ADMIN 场景按绑定社区内派过单的服务人员优先置前（引导就近派单），
-     * 范围外 STAFF 仍可选（R20 判据仅要求启用状态，STAFF 数据权限走派单关系
-     * 不做社区绑定，2026-09-14 核实）；最小暴露面：仅 ID + 姓名。
+     * 可派单服务人员选项（R20 + V19 调度推荐）：启用状态 STAFF 账号，最小暴露面。
+     * 推荐档位（越小越推荐）：1-常驻本社区且擅长该类别、2-常驻本社区、
+     * 3-擅长该类别、4-其他；同档位按在手工单数升序（负载均衡），再按账号 ID 稳定排序。
+     * 社区/类别绑定、社区名称、今日班次、在手工单数各自批量查询，无逐人查库。
+     * 范围外 STAFF 仍保留在候选池（R20 判据仅要求启用状态，不做硬过滤）；
+     * ADMIN 未显式传社区时以其唯一绑定社区作为匹配社区。
      */
-    public List<StaffOptionVO> assignableStaff(Long communityId) {
-        List<com.community.residence.auth.entity.SysUser> staffList =
-                sysUserMapper.selectList(new LambdaQueryWrapper<com.community.residence.auth.entity.SysUser>()
-                        .eq(com.community.residence.auth.entity.SysUser::getRole, RoleConstants.STAFF)
-                        .eq(com.community.residence.auth.entity.SysUser::getStatus, "ACTIVE")
-                        .orderByAsc(com.community.residence.auth.entity.SysUser::getId));
+    public List<StaffOptionVO> assignableStaff(Long communityId, Long categoryId) {
+        List<SysUser> staffList = sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getRole, RoleConstants.STAFF)
+                .eq(SysUser::getStatus, CommonStatus.ACTIVE)
+                .orderByAsc(SysUser::getId));
         if (staffList.isEmpty()) {
             return List.of();
         }
-        Long filterCommunityId = communityId;
-        if (filterCommunityId == null && SecurityUtils.hasRole(RoleConstants.ADMIN)) {
+        Long matchCommunityId = communityId;
+        if (matchCommunityId == null && SecurityUtils.hasRole(RoleConstants.ADMIN)) {
             /* 未显式传社区时：ADMIN 取其绑定社区（单绑定直接用，多绑定不预置） */
             var bound = SecurityUtils.getCommunityIds();
-            filterCommunityId = bound.size() == 1 ? bound.iterator().next() : null;
+            matchCommunityId = bound.size() == 1 ? bound.iterator().next() : null;
         }
-        if (filterCommunityId == null) {
-            return staffList.stream()
-                    .map(s -> StaffOptionVO.of(s.getId(), s.getRealName())).toList();
+        List<Long> staffIds = staffList.stream().map(SysUser::getId).toList();
+        Map<Long, List<Long>> communityBindings = staffCapabilityService.communityIdsByStaff(staffIds);
+        Map<Long, List<Long>> categoryBindings = staffCapabilityService.categoryIdsByStaff(staffIds);
+        Map<Long, String> communityNames = staffCapabilityService.communityNamesByStaff(staffIds);
+        Map<Long, String> shiftLabels = staffScheduleService.shiftLabelsOn(
+                staffIds, matchCommunityId, LocalDate.now());
+        Map<Long, Long> activeOrders = activeOrderCountByAssignee(staffIds);
+
+        List<StaffOptionVO> options = new ArrayList<>(staffList.size());
+        for (SysUser staff : staffList) {
+            boolean matchedCommunity = matchCommunityId != null
+                    && communityBindings.getOrDefault(staff.getId(), List.of()).contains(matchCommunityId);
+            boolean matchedCategory = categoryId != null
+                    && categoryBindings.getOrDefault(staff.getId(), List.of()).contains(categoryId);
+            StaffOptionVO vo = StaffOptionVO.of(staff.getId(), staff.getRealName());
+            vo.setRecommendLevel(recommendLevel(matchedCommunity, matchedCategory));
+            vo.setMatchedCommunity(matchedCommunity);
+            vo.setMatchedCategory(matchedCategory);
+            vo.setCommunityNames(communityNames.get(staff.getId()));
+            vo.setTodayShiftLabel(shiftLabels.get(staff.getId()));
+            vo.setActiveOrderCount(activeOrders.getOrDefault(staff.getId(), 0L).intValue());
+            options.add(vo);
         }
-        /* 绑定社区内派过单的服务人员优先（派单关系引导，非硬过滤） */
-        List<Long> communityOrderIds = workOrderMapper.selectList(
-                        new LambdaQueryWrapper<WorkOrder>()
-                                .eq(WorkOrder::getCommunityId, filterCommunityId))
-                .stream().map(WorkOrder::getId).toList();
-        java.util.Set<Long> experienced = communityOrderIds.isEmpty()
-                ? java.util.Set.of()
-                : assignmentMapper.selectList(new LambdaQueryWrapper<WorkOrderAssignment>()
-                                .in(WorkOrderAssignment::getWorkOrderId, communityOrderIds))
-                        .stream().map(WorkOrderAssignment::getAssigneeId)
-                        .collect(java.util.stream.Collectors.toSet());
-        return staffList.stream()
-                .sorted(java.util.Comparator
-                        .comparing((com.community.residence.auth.entity.SysUser s)
-                                -> experienced.contains(s.getId()) ? 0 : 1)
-                        .thenComparing(com.community.residence.auth.entity.SysUser::getId))
-                .map(s -> StaffOptionVO.of(s.getId(), s.getRealName()))
-                .toList();
+        options.sort(Comparator.comparing(StaffOptionVO::getRecommendLevel)
+                .thenComparing(StaffOptionVO::getActiveOrderCount)
+                .thenComparing(StaffOptionVO::getId));
+        return options;
+    }
+
+    /* 推荐档位：常驻+擅长 > 常驻 > 擅长 > 其他 */
+    private int recommendLevel(boolean matchedCommunity, boolean matchedCategory) {
+        if (matchedCommunity && matchedCategory) {
+            return 1;
+        }
+        if (matchedCommunity) {
+            return 2;
+        }
+        return matchedCategory ? 3 : 4;
     }
 
     public WorkOrder requireOrder(Long id) {
@@ -548,28 +620,181 @@ public class WorkOrderService {
     }
 
     private WorkOrderVO toVO(WorkOrder order) {
-        WorkOrderVO vo = WorkOrderVO.from(order);
-        Resident resident = residentMapper.selectById(order.getResidentId());
-        if (resident != null) {
-            vo.setResidentName(resident.getRealName());
+        List<WorkOrderVO> records = toVOList(List.of(order));
+        return records.isEmpty() ? WorkOrderVO.from(order) : records.get(0);
+    }
+
+    /* 工单视图装配（批量）：居民姓名、类别名称、当前处理人（派单表末条）、处理人姓名、
+       处理人今日班次、处理人在手工单数、状态进入时间各一次批量查询，逐单仅内存装配 */
+    private List<WorkOrderVO> toVOList(List<WorkOrder> orders) {
+        if (orders.isEmpty()) {
+            return List.of();
         }
-        ServiceCategory category = categoryMapper.selectById(order.getCategoryId());
-        if (category != null) {
-            vo.setCategoryName(category.getName());
+        Map<Long, String> residentNames = residentNames(
+                orders.stream().map(WorkOrder::getResidentId).distinct().toList());
+        Map<Long, String> categoryNames = categoryNames(
+                orders.stream().map(WorkOrder::getCategoryId).distinct().toList());
+        Map<Long, Long> assignees = latestAssignees(orders.stream().map(WorkOrder::getId).toList());
+        List<Long> assigneeIds = assignees.values().stream().distinct().toList();
+        Map<Long, String> assigneeNames = sysUserNames(assigneeIds);
+        Map<Long, String> shiftLabels = staffScheduleService.shiftLabelsOn(
+                assigneeIds, null, LocalDate.now());
+        Map<Long, Long> activeOrders = activeOrderCountByAssignee(assigneeIds);
+        Map<Long, LocalDateTime> enteredAt = statusEnteredTimes(orders);
+
+        List<WorkOrderVO> records = new ArrayList<>(orders.size());
+        for (WorkOrder order : orders) {
+            WorkOrderVO vo = WorkOrderVO.from(order);
+            vo.setResidentName(residentNames.get(order.getResidentId()));
+            vo.setCategoryName(categoryNames.get(order.getCategoryId()));
+            Long assigneeId = assignees.get(order.getId());
+            if (assigneeId != null) {
+                vo.setAssigneeId(assigneeId);
+                vo.setAssigneeName(assigneeNames.get(assigneeId));
+                vo.setAssigneeShiftLabel(shiftLabels.get(assigneeId));
+                vo.setAssigneeActiveOrders(activeOrders.getOrDefault(assigneeId, 0L).intValue());
+            }
+            fillDispatch(vo, order, enteredAt.get(order.getId()));
+            records.add(vo);
         }
-        WorkOrderAssignment latest = assignmentMapper.selectOne(
+        return records;
+    }
+
+    private Map<Long, String> residentNames(List<Long> residentIds) {
+        if (residentIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, String> names = new HashMap<>();
+        for (Resident resident : residentMapper.selectList(new LambdaQueryWrapper<Resident>()
+                .in(Resident::getId, residentIds))) {
+            names.put(resident.getId(), resident.getRealName());
+        }
+        return names;
+    }
+
+    private Map<Long, String> categoryNames(List<Long> categoryIds) {
+        if (categoryIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, String> names = new HashMap<>();
+        for (ServiceCategory category : categoryMapper.selectList(new LambdaQueryWrapper<ServiceCategory>()
+                .in(ServiceCategory::getId, categoryIds))) {
+            names.put(category.getId(), category.getName());
+        }
+        return names;
+    }
+
+    private Map<Long, String> sysUserNames(List<Long> userIds) {
+        if (userIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, String> names = new HashMap<>();
+        for (SysUser user : sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>()
+                .in(SysUser::getId, userIds))) {
+            names.put(user.getId(), user.getRealName());
+        }
+        return names;
+    }
+
+    /* 各工单当前处理人：一次批量查询派单表，内存中按派单 ID 递增取每单末条（改派覆盖） */
+    private Map<Long, Long> latestAssignees(List<Long> orderIds) {
+        if (orderIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, Long> result = new HashMap<>();
+        for (WorkOrderAssignment assignment : assignmentMapper.selectList(
                 new LambdaQueryWrapper<WorkOrderAssignment>()
-                        .eq(WorkOrderAssignment::getWorkOrderId, order.getId())
-                        .orderByDesc(WorkOrderAssignment::getId)
-                        .last("LIMIT 1"));
-        if (latest != null) {
-            vo.setAssigneeId(latest.getAssigneeId());
-            SysUser assignee = sysUserMapper.selectById(latest.getAssigneeId());
-            if (assignee != null) {
-                vo.setAssigneeName(assignee.getRealName());
+                        .in(WorkOrderAssignment::getWorkOrderId, orderIds)
+                        .orderByAsc(WorkOrderAssignment::getId))) {
+            if (assignment.getAssigneeId() != null) {
+                result.put(assignment.getWorkOrderId(), assignment.getAssigneeId());
             }
         }
-        return vo;
+        return result;
+    }
+
+    /* 未完结工单按当前处理人计数：先取相关人员派单涉及的工单、再筛未完结、
+       最后按每单最新派单记录归属计数（三次批量查询，不逐人查库） */
+    private Map<Long, Long> activeOrderCountByAssignee(List<Long> staffIds) {
+        if (staffIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> involvedOrderIds = assignmentMapper.selectList(
+                        new LambdaQueryWrapper<WorkOrderAssignment>()
+                                .in(WorkOrderAssignment::getAssigneeId, staffIds))
+                .stream().map(WorkOrderAssignment::getWorkOrderId).distinct().toList();
+        if (involvedOrderIds.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> activeOrderIds = workOrderMapper.selectList(new LambdaQueryWrapper<WorkOrder>()
+                        .select(WorkOrder::getId)
+                        .in(WorkOrder::getId, involvedOrderIds)
+                        .notIn(WorkOrder::getStatus, TERMINAL_STATUSES))
+                .stream().map(WorkOrder::getId).toList();
+        if (activeOrderIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, Long> counts = new HashMap<>();
+        for (Long assigneeId : latestAssignees(activeOrderIds).values()) {
+            if (staffIds.contains(assigneeId)) {
+                counts.merge(assigneeId, 1L, Long::sum);
+            }
+        }
+        return counts;
+    }
+
+    /* 状态进入时间：处理时间线中「流转到当前状态」的最新记录时间；
+       无对应记录时回落提交时间（由调用方 fillDispatch 兜底） */
+    private Map<Long, LocalDateTime> statusEnteredTimes(List<WorkOrder> orders) {
+        Map<Long, String> statusByOrder = new HashMap<>();
+        orders.forEach(order -> statusByOrder.put(order.getId(), order.getStatus()));
+        Map<Long, LocalDateTime> enteredAt = new HashMap<>();
+        for (WorkOrderProcess process : processMapper.selectList(new LambdaQueryWrapper<WorkOrderProcess>()
+                .in(WorkOrderProcess::getWorkOrderId, statusByOrder.keySet())
+                .orderByAsc(WorkOrderProcess::getId))) {
+            String currentStatus = statusByOrder.get(process.getWorkOrderId());
+            if (process.getCreatedAt() == null || process.getNewStatus() == null
+                    || !process.getNewStatus().equals(currentStatus)) {
+                continue;
+            }
+            enteredAt.merge(process.getWorkOrderId(), process.getCreatedAt(),
+                    (a, b) -> a.isAfter(b) ? a : b);
+        }
+        return enteredAt;
+    }
+
+    /* 等待时长与调度标记：等待时长以状态进入时间（无则提交时间）计，
+       OVERDUE 按当前状态各自阈值判定，URGENT 限未完结的紧急单，NEW 为近 2 小时新建 */
+    private void fillDispatch(WorkOrderVO vo, WorkOrder order, LocalDateTime enteredAt) {
+        LocalDateTime base = enteredAt != null ? enteredAt : order.getCreatedAt();
+        Long waitedMinutes = base == null ? null
+                : Duration.between(base, LocalDateTime.now()).toMinutes();
+        vo.setWaitedMinutes(waitedMinutes);
+        vo.setDispatchFlag(resolveDispatchFlag(order, waitedMinutes));
+    }
+
+    private String resolveDispatchFlag(WorkOrder order, Long waitedMinutes) {
+        if (waitedMinutes != null && isOverdue(order.getStatus(), waitedMinutes)) {
+            return DispatchFlag.OVERDUE;
+        }
+        if (WorkOrderPriority.URGENT.equals(order.getPriority())
+                && !TERMINAL_STATUSES.contains(order.getStatus())) {
+            return DispatchFlag.URGENT;
+        }
+        if (order.getCreatedAt() != null && Duration.between(order.getCreatedAt(),
+                LocalDateTime.now()).toMinutes() <= NEW_ORDER_MINUTES) {
+            return DispatchFlag.NEW;
+        }
+        return DispatchFlag.NORMAL;
+    }
+
+    private boolean isOverdue(String status, long waitedMinutes) {
+        return switch (status == null ? "" : status) {
+            case WorkOrderStatus.PENDING, WorkOrderStatus.TO_ASSIGN -> waitedMinutes > OVERDUE_ACCEPT_MINUTES;
+            case WorkOrderStatus.ASSIGNED -> waitedMinutes > OVERDUE_ASSIGN_MINUTES;
+            case WorkOrderStatus.IN_PROGRESS -> waitedMinutes > OVERDUE_PROCESS_MINUTES;
+            default -> false;
+        };
     }
 
     private ProcessRecordVO toProcessVO(WorkOrderProcess process) {

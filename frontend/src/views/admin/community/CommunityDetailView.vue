@@ -14,7 +14,7 @@ import CommunityEditDialog from '@/views/admin/community/CommunityEditDialog.vue
 /**
  * 社区详情（隐藏下钻）：基本信息 + 该社区楼栋列表（任务 3 换壳美化：
  * AdminPageHeader + 白卡 token，数据绑定零删减；编辑对话框收编为共用
- * CommunityEditDialog，返回目标改为社区结构容器）。
+ * CommunityEditDialog，返回目标为社区管理页）。
  */
 const route = useRoute()
 const router = useRouter()
@@ -34,12 +34,12 @@ async function loadCommunity(): Promise<void> {
   }
 }
 
-/* 面包屑返回：社区结构容器（任务 3 新 IA 的上级页面） */
+/* 面包屑返回：社区管理页（本页的上级页面） */
 function goBack(): void {
   router.push({ name: 'AdminCommunity' })
 }
 
-/* 楼栋入口：直达社区结构树并预选本社区（?communityId= 由树消费） */
+/* 楼栋入口：直达社区管理页并选中本社区（?communityId= 由社区列表消费） */
 function goBuildings(): void {
   router.push({
     name: 'AdminCommunity',
@@ -95,7 +95,7 @@ onMounted(() => {
         <path d="M19 12H5" />
         <path d="M12 19l-7-7 7-7" />
       </svg>
-      返回社区结构
+      返回社区管理
     </button>
 
     <AdminPageHeader :title="community?.name ?? '社区详情'" subtitle="社区基础信息与楼栋结构">
@@ -117,6 +117,13 @@ onMounted(() => {
         <el-descriptions-item label="社区地址" :span="2">{{ community.address }}</el-descriptions-item>
         <el-descriptions-item label="联系人">{{ community.contactPerson || '-' }}</el-descriptions-item>
         <el-descriptions-item label="联系电话">{{ community.contactPhone || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="入住申请" :span="2">
+          {{
+            community.autoApproveResidence
+              ? `提交即通过（默认租期 ${community.defaultLeaseMonths ?? 12} 个月）`
+              : '人工审核'
+          }}
+        </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ formatDateTime(community.createdAt) }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ formatDateTime(community.updatedAt) }}</el-descriptions-item>
         <el-descriptions-item label="社区简介" :span="2">{{ community.description || '-' }}</el-descriptions-item>
