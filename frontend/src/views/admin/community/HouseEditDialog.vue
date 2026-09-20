@@ -9,10 +9,10 @@ import { houseStatusLabels } from '@/types/modules/community'
 /**
  * 房屋新建/编辑小对话框（第三轮 C4，结构总览网格便捷操作用）：
  * 所属单元由网格入口锁定（楼栋/单元上下文已知，后端 update 亦拒绝变更 unitId），
- * 免去房屋管理 Tab 的社区→楼栋→单元三级联动。新建只留快速字段（门牌/楼层/面积/状态，
+ * 免去三级联动选择。新建只留快速字段（门牌/楼层/面积/状态，
  * CreateHouseDTO 必填项为 unitId/houseNumber/floor/area，status 可选默认空置）；
- * 编辑字段与 HouseListView 编辑对话框同契约（updateHouse，不含 status——
- * 状态变更须走 updateHouseStatus 留痕接口）。
+ * 编辑字段与原「房屋管理」Tab 编辑对话框同契约（updateHouse，不含 status——
+ * 状态变更须走 updateHouseStatus 留痕接口，入口在总览网格悬浮钮/信息卡）。
  */
 
 const props = defineProps<{
@@ -87,7 +87,7 @@ async function handleSubmit(): Promise<void> {
   submitting.value = true
   try {
     if (props.house) {
-      /* 编辑不含 status（状态变更须留痕）；文本空串原样提交（清空生效，与 HouseListView 编辑对话框同口径） */
+      /* 编辑不含 status（状态变更须留痕）；文本空串原样提交（清空生效，与总览编辑表单同口径） */
       const payload: IHouseDTO = {
         unitId: props.house.unitId,
         houseNumber: form.houseNumber,

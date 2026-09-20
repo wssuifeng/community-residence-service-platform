@@ -78,8 +78,12 @@ async function load(): Promise<void> {
   loading.value = true
   try {
     housing.value = await getHousingDetail(id)
-    /* 浏览量记录为尽力而为的埋点，失败不阻塞游客浏览 */
-    recordHousingView(id).catch(() => undefined)
+    /* 浏览量记录为尽力而为的埋点，失败不阻塞游客浏览；返回值实时计数就地刷新 */
+    recordHousingView(id)
+      .then((count) => {
+        if (housing.value) housing.value.viewCount = count
+      })
+      .catch(() => undefined)
     void loadSlots(id)
   } catch (error) {
     loadError.value = error instanceof Error ? error.message : '房源加载失败'

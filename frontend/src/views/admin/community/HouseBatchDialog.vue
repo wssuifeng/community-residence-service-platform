@@ -6,9 +6,13 @@ import { createHouse, getBuildingList, getHouseList, getUnitList } from '@/api/c
 import type { IBuilding, ICommunity, IHouse, IUnit } from '@/types/modules/community'
 
 /**
- * 房屋批量生成对话框（第二轮验收任务 A7 步骤 7.3）：
+ * 房屋批量生成对话框（第二轮验收任务 A7 步骤 7.3；2026-09-20 精确建房增强）：
  * 选单元 + 楼层范围 + 每层房号序号起止（如 1~6 层 × 序号 1~4 → 101~104/…/601~604），
- * 生成预览表确认后循环调既有 createHouse——逐个失败不中断，结束汇报成功/失败数。
+ * 预览确认后循环调既有 createHouse——逐个失败不中断，结束汇报成功/失败数。
+ *
+ * 精确建房（跳过/前后缀/单条取消）全部在生成前收敛为一份行清单：
+ * 楼层范围 → 整层跳过 → 指定房号跳过 → 跨楼层撞号去重 → 预览单条取消；
+ * 提交仍为逐条 createHouse，未改动任何接口契约与部分成功语义。
  * 分区布局（目标单元/生成规则/公共属性 + 预览），遵守大表单治理原则。
  */
 const props = defineProps<{
@@ -27,6 +31,9 @@ const emit = defineEmits<{ saved: [unitId: number] }>()
 /** 单次生成上限：循环创建为逐请求提交，超大批量应分批（防误操作 + 请求风暴） */
 const MAX_GENERATE = 100
 
+/** 预览折叠阈值：默认只铺开前若干套，其余展示套数由用户主动展开 */
+const PREVIEW_LIMIT = 24
+
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const progress = ref(0)
@@ -37,6 +44,13 @@ const form = reactive({
   floorEnd: 1,
   roomStart: 1,
   roomEnd: 4,
+  /** 房号前缀/后缀：拼接在基础门牌号两侧（A- + 101 + A → A-101A） */
+  prefix: '',
+  suffix: '',
+  /** 跳过楼层（整层）：逗号/空格/顿号分隔的数字列表 */
+  skipFloors: '',
+  /** 跳过房号：可填基础门牌号（101）或含前后缀的完整门牌号（A-101） */
+  skipHouses: '',
   area: undefined as number | undefined,
   layout: '',
   orientation: ''
@@ -55,28 +69,143 @@ const rules: FormRules = {
   orientation: [{ max: 10, message: '朝向不超过 10 字', trigger: 'blur' }]
 }
 
+interface GenerateRow {
+  floor: number
+  /** 基础门牌号（楼层 + 两位序号，不含前后缀）：跳过房号可按此形式填写 */
+  base: string
+  /** 最终门牌号（拼接前后缀后提交后端） */
+  houseNumber: string
+}
+
 /** 门牌号构成：楼层 + 两位序号（floor 2 × 序号 3 → 203），预览与创建共用 */
-function houseNumberOf(floor: number, seq: number): string {
+function baseHouseNumberOf(floor: number, seq: number): string {
   return `${floor}${String(seq).padStart(2, '0')}`
 }
 
-const generatedRows = computed<{ floor: number; houseNumber: string }[]>(() => {
-  const rows: { floor: number; houseNumber: string }[] = []
+/* 输入解析：中英文逗号、顿号、空格（含连续）皆作分隔；空片段忽略 */
+function parseTokens(raw: string): string[] {
+  return raw
+    .split(/[,，、\s]+/)
+    .map((token) => token.trim())
+    .filter(Boolean)
+}
+
+/** 整层跳过：仅识别正整数，非法片段在下拉提示中回显（不阻断生成） */
+const skippedFloors = computed(() => {
+  const floors: number[] = []
+  for (const token of parseTokens(form.skipFloors)) {
+    const value = Number(token)
+    if (Number.isInteger(value) && value > 0) floors.push(value)
+  }
+  return floors
+})
+
+const invalidFloorTokens = computed(() =>
+  parseTokens(form.skipFloors).filter((token) => {
+    const value = Number(token)
+    return !(Number.isInteger(value) && value > 0)
+  })
+)
+
+/** 跳过房号：大小写不敏感比对，完整门牌号与基础门牌号均命中 */
+const skippedHouseNumbers = computed(() =>
+  parseTokens(form.skipHouses).map((token) => token.toUpperCase())
+)
+
+/** 全量网格（未做任何排除），仅用于统计被规则排除的套数 */
+const allRows = computed<GenerateRow[]>(() => {
+  const rows: GenerateRow[] = []
   for (let floor = form.floorStart; floor <= form.floorEnd; floor += 1) {
     for (let seq = form.roomStart; seq <= form.roomEnd; seq += 1) {
-      rows.push({ floor, houseNumber: houseNumberOf(floor, seq) })
+      const base = baseHouseNumberOf(floor, seq)
+      rows.push({ floor, base, houseNumber: `${form.prefix}${base}${form.suffix}` })
     }
   }
   return rows
 })
 
+function isRuleExcluded(row: GenerateRow): boolean {
+  if (skippedFloors.value.includes(row.floor)) return true
+  const number = row.houseNumber.toUpperCase()
+  return (
+    skippedHouseNumbers.value.includes(number) ||
+    skippedHouseNumbers.value.includes(row.base.toUpperCase())
+  )
+}
+
+/** 预览单条取消（增量排除；生成规则变更后失效，见下方 watch） */
+const cancelledNumbers = ref<string[]>([])
+
+/* 规则去重：门牌号 = 楼层 + 两位序号，跨楼层理论上可能撞号，按首次出现保留，
+   避免提交重号被后端同单元唯一约束拒绝 */
+const ruleFilteredRows = computed<GenerateRow[]>(() => {
+  const seen = new Set<string>()
+  const rows: GenerateRow[] = []
+  for (const row of allRows.value) {
+    if (isRuleExcluded(row)) continue
+    if (seen.has(row.houseNumber)) continue
+    seen.add(row.houseNumber)
+    rows.push(row)
+  }
+  return rows
+})
+
+/** 规则跳过的套数（整层跳过 + 指定房号跳过），与去重、手动取消分开计数 */
+const skippedByRulesCount = computed(
+  () => allRows.value.length - allRows.value.filter((row) => !isRuleExcluded(row)).length
+)
+
+const dedupedCount = computed(
+  () =>
+    allRows.value.filter((row) => !isRuleExcluded(row)).length - ruleFilteredRows.value.length
+)
+
+const generatedRows = computed<GenerateRow[]>(() =>
+  ruleFilteredRows.value.filter((row) => !cancelledNumbers.value.includes(row.houseNumber))
+)
+
+const cancelledCount = computed(
+  () => ruleFilteredRows.value.length - generatedRows.value.length
+)
+
 const overLimit = computed(() => generatedRows.value.length > MAX_GENERATE)
+
+/* 预览折叠：默认铺开前 PREVIEW_LIMIT 套，展开后全量可见 */
+const previewExpanded = ref(false)
+const previewRows = computed(() =>
+  previewExpanded.value ? generatedRows.value : generatedRows.value.slice(0, PREVIEW_LIMIT)
+)
+const previewHiddenCount = computed(() =>
+  Math.max(0, generatedRows.value.length - PREVIEW_LIMIT)
+)
+
+/* 生成规则（范围/前后缀）变更后，原单条取消记录已不对应同一批门牌号，整体失效 */
+watch(
+  () => [form.floorStart, form.floorEnd, form.roomStart, form.roomEnd, form.prefix, form.suffix].join('|'),
+  () => {
+    cancelledNumbers.value = []
+  }
+)
+
+function cancelRow(row: GenerateRow): void {
+  if (!cancelledNumbers.value.includes(row.houseNumber)) {
+    cancelledNumbers.value = [...cancelledNumbers.value, row.houseNumber]
+  }
+}
+
+function restoreCancelled(): void {
+  cancelledNumbers.value = []
+}
 
 /* 与所选单元现有房屋的重名预检（仅提示不阻断，失败由循环汇总汇报） */
 const existingHouseNumbers = ref<string[]>([])
-const duplicatedRows = computed(() =>
-  generatedRows.value.filter((row) => existingHouseNumbers.value.includes(row.houseNumber))
-)
+const duplicatedNumbers = computed(() => [
+  ...new Set(
+    generatedRows.value
+      .filter((row) => existingHouseNumbers.value.includes(row.houseNumber))
+      .map((row) => row.houseNumber)
+  )
+])
 
 async function handleFormCommunityChange(): Promise<void> {
   formBuildingId.value = ''
@@ -148,12 +277,18 @@ watch(visible, (value) => {
   form.floorEnd = 1
   form.roomStart = 1
   form.roomEnd = 4
+  form.prefix = ''
+  form.suffix = ''
+  form.skipFloors = ''
+  form.skipHouses = ''
   form.area = undefined
   form.layout = ''
   form.orientation = ''
   formBuildings.value = []
   formUnits.value = []
   existingHouseNumbers.value = []
+  cancelledNumbers.value = []
+  previewExpanded.value = false
   /* 回显三级联动选项：按初始上下文逐级拉取（无上下文则留空让用户选择） */
   const init = async (): Promise<void> => {
     if (formCommunityId.value !== '') {
@@ -186,6 +321,10 @@ watch(visible, (value) => {
 async function handleSubmit(): Promise<void> {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid || form.unitId === undefined) return
+  if (generatedRows.value.length === 0) {
+    ElMessage.error('当前生成清单为空，请调整楼层/房号范围或跳过规则')
+    return
+  }
   if (overLimit.value) {
     ElMessage.error(`单次最多生成 ${MAX_GENERATE} 套，请缩小楼层/房号范围`)
     return
@@ -229,7 +368,7 @@ async function handleSubmit(): Promise<void> {
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="批量生成房屋" width="600px" :close-on-click-modal="false">
+  <el-dialog v-model="visible" title="批量生成房屋" width="680px" :close-on-click-modal="false">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="96px">
       <div class="batch-section">目标单元</div>
       <el-form-item label="所属社区">
@@ -297,6 +436,31 @@ async function handleSubmit(): Promise<void> {
         </div>
         <span class="batch-hint">门牌号 = 楼层 + 两位序号（1 层序号 1~4 → 101~104）</span>
       </el-form-item>
+      <el-form-item label="房号前后缀">
+        <div class="range-inputs">
+          <el-input v-model="form.prefix" placeholder="前缀（选填）" maxlength="6" style="width: 140px" />
+          <el-input v-model="form.suffix" placeholder="后缀（选填）" maxlength="6" style="width: 140px" />
+        </div>
+        <span class="batch-hint">拼接在基础门牌号两侧：前缀 A- 与后缀 A → A-101A</span>
+      </el-form-item>
+      <el-form-item label="整层跳过">
+        <el-input
+          v-model="form.skipFloors"
+          placeholder="如：4, 14（该层全部不生成）"
+          maxlength="80"
+        />
+        <span v-if="invalidFloorTokens.length > 0" class="batch-hint is-warning">
+          忽略无法识别的楼层：{{ invalidFloorTokens.join('、') }}
+        </span>
+      </el-form-item>
+      <el-form-item label="跳过房号">
+        <el-input
+          v-model="form.skipHouses"
+          placeholder="如：104, 404（可填基础房号或含前后缀的完整房号）"
+          maxlength="120"
+        />
+        <span class="batch-hint">逗号/空格/顿号分隔；与现有房屋重名的号码可在此排除</span>
+      </el-form-item>
 
       <div class="batch-section">公共属性（全部房屋统一）</div>
       <el-form-item label="建筑面积" prop="area">
@@ -316,21 +480,70 @@ async function handleSubmit(): Promise<void> {
         将生成 {{ generatedRows.length }} 套房屋
         <span v-if="overLimit" class="batch-warning">（超过上限 {{ MAX_GENERATE }}，请缩小范围）</span>
       </p>
-      <el-table v-if="generatedRows.length > 0" :data="generatedRows.slice(0, 8)" size="small" max-height="200">
-        <el-table-column prop="floor" label="楼层" width="80" />
-        <el-table-column prop="houseNumber" label="门牌号" min-width="100" />
-      </el-table>
-      <p v-if="generatedRows.length > 8" class="batch-preview-more">
-        仅预览前 8 行，共 {{ generatedRows.length }} 套
+      <p
+        v-if="skippedByRulesCount > 0 || dedupedCount > 0 || cancelledCount > 0"
+        class="batch-preview-excluded"
+      >
+        <span>
+          规则跳过 {{ skippedByRulesCount }} 套<template v-if="dedupedCount > 0">
+            ，撞号去重 {{ dedupedCount }} 套</template
+          ><template v-if="cancelledCount > 0">，已手动取消 {{ cancelledCount }} 套</template>
+        </span>
+        <el-button
+          v-if="cancelledCount > 0"
+          link
+          type="primary"
+          size="small"
+          @click="restoreCancelled"
+        >
+          恢复已取消
+        </el-button>
       </p>
-      <p v-if="duplicatedRows.length > 0" class="batch-warning">
-        与现有房屋重名：{{ duplicatedRows.map((row) => row.houseNumber).join('、') }}，创建时可能被拒绝
+
+      <div v-if="generatedRows.length > 0" class="preview-chips">
+        <span
+          v-for="row in previewRows"
+          :key="row.houseNumber"
+          class="preview-chip"
+          :title="`${row.floor} 层 · 点 × 取消该套`"
+        >
+          {{ row.houseNumber }}
+          <button
+            type="button"
+            class="chip-remove"
+            :aria-label="`取消生成 ${row.houseNumber}`"
+            @click="cancelRow(row)"
+          >
+            ×
+          </button>
+        </span>
+      </div>
+      <p v-else class="batch-preview-more">当前生成清单为空，请调整范围或跳过规则</p>
+
+      <el-button
+        v-if="previewHiddenCount > 0 || previewExpanded"
+        link
+        type="primary"
+        size="small"
+        class="preview-toggle"
+        @click="previewExpanded = !previewExpanded"
+      >
+        {{ previewExpanded ? '收起预览' : `展开全部 ${generatedRows.length} 套` }}
+      </el-button>
+
+      <p v-if="duplicatedNumbers.length > 0" class="batch-warning">
+        与现有房屋重名：{{ duplicatedNumbers.join('、') }}，创建时可能被拒绝
       </p>
     </div>
 
     <template #footer>
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" :disabled="overLimit" :loading="submitting" @click="handleSubmit">
+      <el-button
+        type="primary"
+        :disabled="overLimit || generatedRows.length === 0"
+        :loading="submitting"
+        @click="handleSubmit"
+      >
         {{ submitting ? `生成中（${progress}/${generatedRows.length}）` : '确定生成' }}
       </el-button>
     </template>
@@ -352,6 +565,10 @@ async function handleSubmit(): Promise<void> {
   font-size: var(--font-size-xs);
   line-height: 1.5;
   color: var(--color-text-secondary);
+}
+
+.batch-hint.is-warning {
+  color: var(--color-warning);
 }
 
 .range-inputs {
@@ -376,6 +593,61 @@ async function handleSubmit(): Promise<void> {
   font-size: var(--font-size-xs);
   line-height: 1.6;
   color: var(--color-text-secondary);
+}
+
+/* 跳过/取消统计行：与预览 chip 区分层级，弱化展示 */
+.batch-preview-excluded {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.preview-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  max-height: 180px;
+  overflow: auto;
+}
+
+.preview-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px 2px 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--admin-card-bg);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+}
+
+.chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-circle);
+  background: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.chip-remove:hover {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.preview-toggle {
+  margin-top: var(--spacing-xs);
 }
 
 .batch-preview-more {

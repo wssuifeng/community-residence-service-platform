@@ -55,8 +55,12 @@ async function loadDetail(): Promise<void> {
   try {
     housing.value = await getHousingDetail(housingId)
     activeImage.value = 0
-    /* 记录浏览（公开接口，失败静默） */
-    recordHousingView(housingId).catch(() => undefined)
+    /* 记录浏览（公开接口，失败静默）；返回值为实时计数，就地刷新使本次浏览可见 */
+    recordHousingView(housingId)
+      .then((count) => {
+        if (housing.value) housing.value.viewCount = count
+      })
+      .catch(() => undefined)
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载房源详情失败')
   } finally {
@@ -143,9 +147,9 @@ onMounted(() => {
             </dl>
           </div>
 
-          <!-- 右下：预约看房面板（入口式：醒目按钮跳三步预约页，DEF-063 移除页内可约时段展示区） -->
+          <!-- 右下：看房与租住入口（DEF-063 入口式；R62 补「申请租住」） -->
           <aside class="booking-panel">
-            <h2 class="panel-title">预约看房</h2>
+            <h2 class="panel-title">看房与租住</h2>
 
             <template v-if="isResident">
               <router-link :to="`/resident/housings/${housingId}/reserve`" class="reserve-btn-link">
@@ -154,6 +158,17 @@ onMounted(() => {
                 </el-button>
               </router-link>
               <p class="panel-hint">进入预约页选择日期与时段，支持连续时段合并预约</p>
+
+              <router-link
+                v-if="housing?.status === 'AVAILABLE'"
+                :to="`/resident/housings/${housingId}/apply`"
+                class="apply-btn-link"
+              >
+                <el-button size="large" round plain class="apply-btn">申请租住</el-button>
+              </router-link>
+              <p v-if="housing?.status === 'AVAILABLE'" class="panel-hint panel-hint-sub">
+                提交租住申请，管理方审核通过后生成租约
+              </p>
             </template>
 
             <template v-else>
@@ -443,6 +458,22 @@ onMounted(() => {
   font-size: var(--font-size-xs);
   color: var(--color-text-disabled);
   margin-top: var(--spacing-sm);
+}
+
+/* 申请租住：次级入口（主入口为预约看房） */
+.apply-btn-link {
+  display: block;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px dashed var(--color-border);
+}
+
+.apply-btn {
+  width: 100%;
+}
+
+.panel-hint-sub {
+  margin-top: var(--spacing-xs);
 }
 
 .login-guide {

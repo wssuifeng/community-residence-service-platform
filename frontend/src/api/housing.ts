@@ -49,9 +49,10 @@ export function updateHousingStatus(id: number, data: HousingStatusUpdateDTO) {
   return http.patch<null>(`/housings/${id}/status`, data)
 }
 
-/** 记录房源浏览（接口设计.md 9.12.1.7，公开） */
+/** 记录房源浏览（接口设计.md 9.12.1.7，公开）：返回实时浏览数
+ *  （DB 值 + 未回写 Redis 增量），进入详情即含本次浏览 */
 export function recordHousingView(id: number) {
-  return http.post<null>(`/housings/${id}/view`)
+  return http.post<number>(`/housings/${id}/view`)
 }
 
 /** 创建看房预约（接口设计.md 9.12.2.1，居民/游客可提交） */
