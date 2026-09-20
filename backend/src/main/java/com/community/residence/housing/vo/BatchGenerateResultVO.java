@@ -18,7 +18,10 @@ public class BatchGenerateResultVO {
     @Schema(description = "跳过数（已有在架房源的房屋）")
     private Integer skipped;
 
-    public static BatchGenerateResultVO of(int created, int skipped) {
-        return new BatchGenerateResultVO(created, skipped);
+    @Schema(description = "新建可预约看房时段数（createTimeslots=false 时为 0；跳过的房屋不建时段）")
+    private Integer timeslotsCreated;
+
+    public static BatchGenerateResultVO of(int created, int skipped, int timeslotsCreated) {
+        return new BatchGenerateResultVO(created, skipped, timeslotsCreated);
     }
 }

@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -82,6 +83,21 @@ public class HousingService {
     /** 已挂牌判定子查询（外层主表为 house）：存在 housing 记录即视为已挂牌 */
     private static final String EXISTS_LISTED_HOUSING_SQL =
             "SELECT 1 FROM housing h WHERE h.house_id = house.id";
+
+    /** 批量挂牌时段来源（接口设计.md 9.15.1）；缺省 DEFAULT */
+    private static final Set<String> TIMESLOT_MODES = Set.of("DEFAULT", "CUSTOM");
+
+    /** 批量挂牌默认看房时段（用户口径：默认勾选，工作日 09:00-12:00 与 14:00-18:00 两段） */
+    private static final List<TimeslotSpec> DEFAULT_TIMESLOTS = buildDefaultTimeslots();
+
+    private static List<TimeslotSpec> buildDefaultTimeslots() {
+        List<TimeslotSpec> specs = new ArrayList<>();
+        for (int dayOfWeek = 1; dayOfWeek <= 5; dayOfWeek++) {
+            specs.add(new TimeslotSpec(dayOfWeek, LocalTime.of(9, 0), LocalTime.of(12, 0)));
+            specs.add(new TimeslotSpec(dayOfWeek, LocalTime.of(14, 0), LocalTime.of(18, 0)));
+        }
+        return List.copyOf(specs);
+    }
 
     private final HousingMapper housingMapper;
     private final HouseMapper houseMapper;
@@ -157,7 +173,7 @@ public class HousingService {
         if (!isManager() && !PUBLIC_STATUS.contains(housing.getStatus())) {
             throw new ResourceNotFoundException("房源不存在或已下线");
         }
-        return toVO(housing);
+        return toVO(housing, pendingViewDelta(id));
     }
 
     /** 房源分页列表（公开；游客默认只见可租/已预订） */
@@ -183,7 +199,9 @@ public class HousingService {
             wrapper.in(Housing::getStatus, PUBLIC_STATUS);
         }
         Page<Housing> result = housingMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
-        return PageVO.of(result.convert(this::toVO));
+        /* 未回写增量按页内 id 集合 multiGet 一次取回（N2：不做逐行查询） */
+        Map<Long, Long> viewDeltas = pendingViewDeltas(result.getRecords());
+        return PageVO.of(result.convert(h -> toVO(h, viewDeltas.get(h.getId()))));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -197,19 +215,89 @@ public class HousingService {
                 id, dto.getStatus(), SecurityUtils.getUserId());
     }
 
-    /* 浏览计数：直接累加（高并发场景 P2 升级 Redis 计数 + 定时回写） */
-    @Transactional(rollbackFor = Exception.class)
     /* 记录浏览：INCR Redis 计数器（架构设计.md §3.3.1），定时任务每 5 分钟回写 view_count；
-       降级：Redis 不可用时直接累加数据库，保证计数不丢 */
-    public void recordView(Long id) {
-        requireHousing(id);
+       降级：Redis 不可用时直接累加数据库，保证计数不丢。
+       返回计入本次后的最新浏览数（展示口径 = DB 值 + 未回写 Redis 增量），
+       供前端进入详情页后即时反映实时计数（不必等回写任务的一个周期） */
+    @Transactional(rollbackFor = Exception.class)
+    public Long recordView(Long id) {
+        Housing housing = requireHousing(id);
         try {
-            redisTemplate.opsForValue().increment(VIEW_COUNT_KEY_PREFIX + id);
+            Long increment = redisTemplate.opsForValue().increment(VIEW_COUNT_KEY_PREFIX + id);
+            return (long) effectiveViewCount(housing.getViewCount(), increment);
         } catch (RedisConnectionFailureException e) {
             log.warn("Redis 不可用，浏览计数直写数据库：housingId={}", id);
             housingMapper.update(null, new LambdaUpdateWrapper<Housing>()
                     .eq(Housing::getId, id)
                     .setSql("view_count = view_count + 1"));
+            /* 直写分支回读数据库新值（并发累加下回读比本地 +1 更准；回读失败退回 +1） */
+            Housing latest = housingMapper.selectById(id);
+            return latest != null
+                    ? (long) effectiveViewCount(latest.getViewCount(), null)
+                    : (long) effectiveViewCount(housing.getViewCount(), 1L);
+        }
+    }
+
+    /**
+     * 展示口径 = DB 值 + 未回写 Redis 增量（回写任务 5 分钟周期，故 DB 值可能滞后至多
+     * 一个周期；此处把增量并回展示值，避免任意端进入详情/列表看到滞后计数）。
+     * 增量缺失或非法按 0 计；结果非负且按 Integer 上限封顶，避免溢出为负。
+     */
+    private int effectiveViewCount(Integer dbCount, Long pendingDelta) {
+        long total = (dbCount != null ? dbCount : 0L) + (pendingDelta != null ? pendingDelta : 0L);
+        return (int) Math.min(Math.max(total, 0L), Integer.MAX_VALUE);
+    }
+
+    /** 单房源未回写增量（详情单键 get）；Redis 异常回落 null（只读路径不抛错，按 DB 值展示） */
+    private Long pendingViewDelta(Long housingId) {
+        try {
+            return parseViewDelta(redisTemplate.opsForValue().get(VIEW_COUNT_KEY_PREFIX + housingId));
+        } catch (Exception e) {
+            log.warn("读取浏览计数增量失败，展示回落数据库值：housingId={}", housingId, e);
+            return null;
+        }
+    }
+
+    /** 批量版未回写增量（列表按页内 id 集合 multiGet 批量取，避免逐行查询）；异常回落空表 */
+    private Map<Long, Long> pendingViewDeltas(List<Housing> housings) {
+        if (housings == null || housings.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> ids = housings.stream().map(Housing::getId)
+                .filter(Objects::nonNull).distinct().toList();
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, Long> deltas = new HashMap<>();
+        try {
+            List<String> values = redisTemplate.opsForValue()
+                    .multiGet(ids.stream().map(id -> VIEW_COUNT_KEY_PREFIX + id).toList());
+            if (values == null) {
+                return Map.of();
+            }
+            for (int i = 0; i < ids.size() && i < values.size(); i++) {
+                Long delta = parseViewDelta(values.get(i));
+                if (delta != null && delta != 0L) {
+                    deltas.put(ids.get(i), delta);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("批量读取浏览计数增量失败，展示回落数据库值：count={}", ids.size(), e);
+            return Map.of();
+        }
+        return deltas;
+    }
+
+    /** 增量文本解析：null/空白/非法一律按 0 计（键值异常不阻断展示路径） */
+    private Long parseViewDelta(String text) {
+        if (!StringUtils.hasText(text)) {
+            return null;
+        }
+        try {
+            return Long.parseLong(text.trim());
+        } catch (NumberFormatException e) {
+            log.warn("浏览计数键值非法，展示按 0 计：value={}", text);
+            return null;
         }
     }
 
@@ -222,6 +310,7 @@ public class HousingService {
      * 「模板ID×10000+当日分钟数」的栅格标识（前端选择键，非数据库主键）。
      * endDate 缺省展开 7 天；占用状态与创建冲突检测同口径（TO_CONFIRM/RESERVED）。
      * DEF-045：今日已结束切片（end<=now）不返回，与创建侧过去时段校验同口径。
+     * DEF-062：切片步进按模板跨度分钟数推进，起点跨 24:00 不再死循环（详见切片循环注释）。
      */
     public List<AvailableSlotVO> availableSlots(Long housingId, LocalDate startDate, LocalDate endDate) {
         requireHousing(housingId);
@@ -255,12 +344,18 @@ public class HousingService {
                     continue;
                 }
                 /* DEF-061 切片：自模板起点起按 60 分钟步长产出切片，切片终点超出模板
-                   终点即尾段不足 60 分钟，丢弃不产出 */
-                for (LocalTime s = template.getStartTime();
-                        !s.plusMinutes(VIEWING_SLOT_MINUTES).isAfter(template.getEndTime());
-                        s = s.plusMinutes(VIEWING_SLOT_MINUTES)) {
-                    LocalTime slotStart = s;
-                    LocalTime slotEnd = s.plusMinutes(VIEWING_SLOT_MINUTES);
+                   终点即尾段不足 60 分钟，丢弃不产出。
+                   DEF-062：步进以「模板跨度内的分钟偏移」推进，不用 LocalTime 时刻比较
+                   作终止条件——切片起点 +60 分钟跨过 24:00 会绕回当天早间（如 23:17
+                   →00:17），`!isAfter(end)` 永不为真 → 死循环狂塞切片直至 OOM
+                   （2026-09-20 实测：模板 22:17-23:17 在 21:47 触发）。 */
+                long templateMinutes = Duration.between(
+                        template.getStartTime(), template.getEndTime()).toMinutes();
+                for (long offset = 0;
+                        offset + VIEWING_SLOT_MINUTES <= templateMinutes;
+                        offset += VIEWING_SLOT_MINUTES) {
+                    LocalTime slotStart = template.getStartTime().plusMinutes(offset);
+                    LocalTime slotEnd = slotStart.plusMinutes(VIEWING_SLOT_MINUTES);
                     if (date.isEqual(today) && !slotEnd.isAfter(now)) {
                         continue;
                     }
@@ -290,6 +385,8 @@ public class HousingService {
      * OFFLINE 房源的房屋跳过（仅 OFFLINE 下架记录的房屋可重新生成在架房源）。
      * 粒度收窄链：houseIds > unitIds > buildingIds > 整个社区（叠加时逐级过滤取交集）；
      * 越权/跨社区 ID 一律拒绝。ADMIN 限绑定社区（checkCommunityAccess）。
+     * 可同时为**本次新建**房源建立可预约看房时段（createTimeslots 缺省 true，
+     * timeslotMode 缺省 DEFAULT=周一至周五 09:00-12:00 + 14:00-18:00）；跳过的房屋不建时段。
      */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSING",
@@ -297,6 +394,8 @@ public class HousingService {
     public BatchGenerateResultVO batchGenerate(BatchGenerateHousingDTO dto) {
         communityService.requireCommunity(dto.getCommunityId());
         SecurityUtils.checkCommunityAccess(dto.getCommunityId());
+        /* 时段参数先校验（越界 400 早失败，不落任何房源） */
+        List<TimeslotSpec> timeslotSpecs = resolveTimeslotSpecs(dto);
 
         List<House> houses = houseMapper.selectList(new LambdaQueryWrapper<House>()
                 .eq(House::getCommunityId, dto.getCommunityId())
@@ -348,7 +447,7 @@ public class HousingService {
             houses = houses.stream().filter(h -> houseFilter.contains(h.getId())).toList();
         }
         if (houses.isEmpty()) {
-            return BatchGenerateResultVO.of(0, 0);
+            return BatchGenerateResultVO.of(0, 0, 0);
         }
         /* 在架房源房屋集（非 OFFLINE，与 create 唯一性口径一致） */
         List<Long> houseIds = houses.stream().map(House::getId).toList();
@@ -369,6 +468,7 @@ public class HousingService {
                 ? "·" + dto.getTitleSuffix().trim() : "";
 
         int created = 0;
+        List<Long> createdHousingIds = new ArrayList<>();
         for (House house : houses) {
             if (listedHouseIds.contains(house.getId())) {
                 continue;
@@ -389,13 +489,104 @@ public class HousingService {
             housing.setViewCount(0);
             housing.setPublishTime(LocalDateTime.now());
             housingMapper.insert(housing);
+            createdHousingIds.add(housing.getId());
             created++;
         }
+        /* 仅本次新建房源建时段：跳过的房屋（已有在架房源）不动其既有时段配置 */
+        int timeslotsCreated = createTimeslotRows(createdHousingIds, timeslotSpecs);
         int skipped = houses.size() - created;
-        log.info("批量挂牌完成：communityId={}, buildings={}, units={}, houses={}, created={}, skipped={}, operator={}",
+        log.info("批量挂牌完成：communityId={}, buildings={}, units={}, houses={}, created={}, skipped={}, "
+                        + "timeslotsCreated={}, operator={}",
                 dto.getCommunityId(), dto.getBuildingIds(), dto.getUnitIds(), dto.getHouseIds(),
-                created, skipped, SecurityUtils.getUserId());
-        return BatchGenerateResultVO.of(created, skipped);
+                created, skipped, timeslotsCreated, SecurityUtils.getUserId());
+        return BatchGenerateResultVO.of(created, skipped, timeslotsCreated);
+    }
+
+    /**
+     * 解析批量挂牌要建立的看房时段：createTimeslots 缺省视为 true（默认勾选），
+     * timeslotMode 缺省 DEFAULT（工作日 09:00-12:00 + 14:00-18:00）；
+     * CUSTOM 须给出非空 timeslots，且 dayOfWeek 1~7、start<end，越界一律 400。
+     * 显式 createTimeslots=false 时返回空表（此时不校验时段列表内容）。
+     */
+    private List<TimeslotSpec> resolveTimeslotSpecs(BatchGenerateHousingDTO dto) {
+        String mode = StringUtils.hasText(dto.getTimeslotMode())
+                ? dto.getTimeslotMode().trim().toUpperCase() : "DEFAULT";
+        if (!TIMESLOT_MODES.contains(mode)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "时段来源仅支持 DEFAULT/CUSTOM");
+        }
+        if (Boolean.FALSE.equals(dto.getCreateTimeslots())) {
+            return List.of();
+        }
+        if ("DEFAULT".equals(mode)) {
+            return DEFAULT_TIMESLOTS;
+        }
+        List<BatchGenerateHousingDTO.TimeslotItem> items = dto.getTimeslots();
+        if (items == null || items.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "自定义时段不能为空");
+        }
+        List<TimeslotSpec> specs = new ArrayList<>(items.size());
+        for (BatchGenerateHousingDTO.TimeslotItem item : items) {
+            if (item == null || item.getDayOfWeek() == null
+                    || item.getDayOfWeek() < 1 || item.getDayOfWeek() > 7) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "星期几取值 1~7");
+            }
+            if (item.getStartTime() == null || item.getEndTime() == null) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "开始时间与结束时间不能为空");
+            }
+            if (!item.getStartTime().isBefore(item.getEndTime())) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "开始时间必须早于结束时间");
+            }
+            specs.add(new TimeslotSpec(item.getDayOfWeek(), item.getStartTime(), item.getEndTime()));
+        }
+        return specs;
+    }
+
+    /**
+     * 为本次新建房源批量建立可预约看房时段（is_available=1）。
+     * 幂等：同房源 + 同星期 + 同起止时间已存在则跳过（重复执行不堆叠时段）；
+     * 既有记录一次查询取回（按 housingId IN，避免逐房查询），本批次内新建的键同步入集合。
+     */
+    private int createTimeslotRows(List<Long> housingIds, List<TimeslotSpec> specs) {
+        if (specs.isEmpty() || housingIds == null || housingIds.isEmpty()) {
+            return 0;
+        }
+        List<Long> targetHousingIds = housingIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (targetHousingIds.isEmpty()) {
+            return 0;
+        }
+        Set<String> existingKeys = new java.util.HashSet<>();
+        for (HousingTimeslot existing : timeslotMapper.selectList(new LambdaQueryWrapper<HousingTimeslot>()
+                .in(HousingTimeslot::getHousingId, targetHousingIds))) {
+            existingKeys.add(timeslotKey(existing.getHousingId(), existing.getDayOfWeek(),
+                    existing.getStartTime(), existing.getEndTime()));
+        }
+        int created = 0;
+        for (Long housingId : targetHousingIds) {
+            for (TimeslotSpec spec : specs) {
+                if (!existingKeys.add(timeslotKey(housingId, spec.dayOfWeek(),
+                        spec.startTime(), spec.endTime()))) {
+                    continue;
+                }
+                HousingTimeslot timeslot = new HousingTimeslot();
+                timeslot.setHousingId(housingId);
+                timeslot.setDayOfWeek(spec.dayOfWeek());
+                timeslot.setStartTime(spec.startTime());
+                timeslot.setEndTime(spec.endTime());
+                timeslot.setIsAvailable(1);
+                timeslotMapper.insert(timeslot);
+                created++;
+            }
+        }
+        return created;
+    }
+
+    /** 时段去重键（房源 + 星期 + 起止）：与 housing_timeslot 唯一性口径一致 */
+    private String timeslotKey(Long housingId, Integer dayOfWeek, LocalTime startTime, LocalTime endTime) {
+        return housingId + "|" + dayOfWeek + "|" + startTime + "|" + endTime;
+    }
+
+    /** 批量挂牌时段项（内部值对象，避免直接落 DTO） */
+    private record TimeslotSpec(Integer dayOfWeek, LocalTime startTime, LocalTime endTime) {
     }
 
     private static Set<Long> intersect(Set<Long> a, Set<Long> b) {
@@ -600,7 +791,13 @@ public class HousingService {
     }
 
     private HousingVO toVO(Housing housing) {
+        return toVO(housing, null);
+    }
+
+    /** 详情/列表装配：pendingDelta 为未回写 Redis 增量（null=按 DB 值展示） */
+    private HousingVO toVO(Housing housing, Long pendingDelta) {
         HousingVO vo = HousingVO.from(housing);
+        vo.setViewCount(effectiveViewCount(housing.getViewCount(), pendingDelta));
         var community = communityService.requireCommunity(housing.getCommunityId());
         vo.setCommunityName(community.getName());
         House house = houseMapper.selectById(housing.getHouseId());

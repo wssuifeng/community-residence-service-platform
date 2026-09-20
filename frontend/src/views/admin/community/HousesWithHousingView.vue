@@ -300,11 +300,12 @@ async function handleToggleStatus(item: HouseManageItem): Promise<void> {
   }
 }
 
-/* ===================== 批量挂牌（层级范围 + 标题后缀） ===================== */
+/* ===================== 批量挂牌（层级范围 + 标题后缀 + 可预约看房时段） ===================== */
 
 /* 契约：POST /housings/batch-generate
-   {communityId, monthlyRent, deposit, rentType?, buildingIds?, unitIds?, houseIds?, titleSuffix?}
-   → {created, skipped}（R62 v1.5；收窄链 houseIds > unitIds > buildingIds > 整社区） */
+   {communityId, monthlyRent, deposit, rentType?, buildingIds?, unitIds?, houseIds?, titleSuffix?,
+    createTimeslots?, timeslotMode?: 'DEFAULT'|'CUSTOM', timeslots?: [{dayOfWeek,startTime,endTime}]}
+   → {created, skipped, timeslotsCreated}（R62 v1.5；收窄链 houseIds > unitIds > buildingIds > 整社区） */
 interface BatchTreeHouse {
   id: number
   houseNumber: string
@@ -334,8 +335,32 @@ const batchForm = reactive({
   rentType: 'RENT' as HousingRentType,
   titleSuffix: '',
   buildingIds: [] as number[],
-  unitIds: [] as number[]
+  unitIds: [] as number[],
+  /** 同时建立可预约看房时段（默认勾选，用户口径） */
+  createTimeslots: true,
+  timeslotMode: 'DEFAULT' as 'DEFAULT' | 'CUSTOM',
+  /** 自定义时段行（dayOfWeek 1~7 = 周一~周日） */
+  timeslots: [] as Array<{ dayOfWeek: number; startTime: string; endTime: string }>
 })
+
+/** 自定义时段默认行（给出可编辑起点，用户按需调整/增删） */
+function addTimeslotRow(): void {
+  batchForm.timeslots.push({ dayOfWeek: 1, startTime: '09:00:00', endTime: '12:00:00' })
+}
+
+function removeTimeslotRow(index: number): void {
+  batchForm.timeslots.splice(index, 1)
+}
+
+const WEEKDAY_OPTIONS = [
+  { value: 1, label: '周一' },
+  { value: 2, label: '周二' },
+  { value: 3, label: '周三' },
+  { value: 4, label: '周四' },
+  { value: 5, label: '周五' },
+  { value: 6, label: '周六' },
+  { value: 7, label: '周日' }
+]
 
 const batchBuildings = computed<BatchTreeBuilding[]>(() => batchTree.value)
 
@@ -376,6 +401,10 @@ async function openBatchDialogFor(community: ICommunity): Promise<void> {
   batchForm.titleSuffix = ''
   batchForm.buildingIds = []
   batchForm.unitIds = []
+  /* 时段默认：勾选 + 默认口径（周一~周五 09:00-12:00 / 14:00-18:00） */
+  batchForm.createTimeslots = true
+  batchForm.timeslotMode = 'DEFAULT'
+  batchForm.timeslots = []
   batchBuildingFilter.value = null
   batchScopeMode.value = 'community'
   batchVisible.value = true
@@ -445,9 +474,20 @@ async function handleBatchSubmit(): Promise<void> {
     ElMessage.warning('请选择单元')
     return
   }
+  if (batchForm.createTimeslots && batchForm.timeslotMode === 'CUSTOM') {
+    if (batchForm.timeslots.length === 0) {
+      ElMessage.warning('请至少添加一个自定义时段')
+      return
+    }
+    const invalid = batchForm.timeslots.some((row) => !row.startTime || !row.endTime || row.startTime >= row.endTime)
+    if (invalid) {
+      ElMessage.warning('自定义时段需填写开始与结束时间，且开始早于结束')
+      return
+    }
+  }
   batchSubmitting.value = true
   try {
-    const result = await http.post<{ created: number; skipped: number }>(
+    const result = await http.post<{ created: number; skipped: number; timeslotsCreated: number }>(
       '/housings/batch-generate',
       {
         communityId: community.id,
@@ -456,10 +496,19 @@ async function handleBatchSubmit(): Promise<void> {
         rentType: batchForm.rentType,
         buildingIds: batchScopeMode.value === 'buildings' ? batchForm.buildingIds : undefined,
         unitIds: batchScopeMode.value === 'units' ? batchForm.unitIds : undefined,
-        titleSuffix: batchForm.titleSuffix.trim() === '' ? undefined : batchForm.titleSuffix.trim()
+        titleSuffix: batchForm.titleSuffix.trim() === '' ? undefined : batchForm.titleSuffix.trim(),
+        createTimeslots: batchForm.createTimeslots,
+        timeslotMode: batchForm.createTimeslots ? batchForm.timeslotMode : undefined,
+        timeslots:
+          batchForm.createTimeslots && batchForm.timeslotMode === 'CUSTOM'
+            ? batchForm.timeslots
+            : undefined
       }
     )
-    ElMessage.success(`批量挂牌完成：新建 ${result.created} 套，跳过 ${result.skipped} 套（已有房源）`)
+    const timeslotText = result.timeslotsCreated > 0 ? `，含看房时段 ${result.timeslotsCreated} 条` : ''
+    ElMessage.success(
+      `批量挂牌完成：新建 ${result.created} 套${timeslotText}，跳过 ${result.skipped} 套（已有房源）`
+    )
     batchVisible.value = false
     await loadItems()
   } catch (error) {
@@ -736,6 +785,57 @@ async function handleBatchSubmit(): Promise<void> {
           <p class="form-hint">
             生成标题形如「1 号楼1 单元101·精装房源{{ batchForm.titleSuffix.trim() ? '·' + batchForm.titleSuffix.trim() : '' }}」
           </p>
+        </el-form-item>
+
+        <!-- 可预约看房时段：默认勾选，默认口径周一~周五 09:00-12:00 / 14:00-18:00 -->
+        <el-form-item label="看房时段">
+          <div class="timeslot-block">
+            <el-checkbox v-model="batchForm.createTimeslots">
+              同时建立可预约看房时段（仅对本次新建房源）
+            </el-checkbox>
+            <template v-if="batchForm.createTimeslots">
+              <el-radio-group v-model="batchForm.timeslotMode" size="small" class="timeslot-mode">
+                <el-radio-button value="DEFAULT">默认（工作日两段）</el-radio-button>
+                <el-radio-button value="CUSTOM">自定义</el-radio-button>
+              </el-radio-group>
+              <p v-if="batchForm.timeslotMode === 'DEFAULT'" class="form-hint">
+                周一~周五 09:00-12:00、14:00-18:00（每套房源 10 个时段）
+              </p>
+              <template v-else>
+                <div v-for="(row, index) in batchForm.timeslots" :key="index" class="timeslot-row">
+                  <el-select v-model="row.dayOfWeek" size="small" class="timeslot-day">
+                    <el-option
+                      v-for="weekday in WEEKDAY_OPTIONS"
+                      :key="weekday.value"
+                      :label="weekday.label"
+                      :value="weekday.value"
+                    />
+                  </el-select>
+                  <el-time-select
+                    v-model="row.startTime"
+                    size="small"
+                    class="timeslot-time"
+                    start="06:00"
+                    step="00:30"
+                    end="23:00"
+                    placeholder="开始"
+                  />
+                  <span class="timeslot-sep">-</span>
+                  <el-time-select
+                    v-model="row.endTime"
+                    size="small"
+                    class="timeslot-time"
+                    start="06:00"
+                    step="00:30"
+                    end="23:30"
+                    placeholder="结束"
+                  />
+                  <el-button link type="danger" size="small" @click="removeTimeslotRow(index)">删除</el-button>
+                </div>
+                <el-button link type="primary" size="small" @click="addTimeslotRow">＋ 添加时段</el-button>
+              </template>
+            </template>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -1068,6 +1168,36 @@ async function handleBatchSubmit(): Promise<void> {
   margin-right: auto;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+}
+
+/* 可预约看房时段配置（批量挂牌弹窗） */
+.timeslot-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.timeslot-mode {
+  margin-top: 2px;
+}
+
+.timeslot-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.timeslot-day {
+  width: 96px;
+}
+
+.timeslot-time {
+  width: 112px;
+}
+
+.timeslot-sep {
+  color: var(--color-text-disabled);
 }
 
 /* 响应式：窄屏筛选条纵向堆叠、卡片单列 */
