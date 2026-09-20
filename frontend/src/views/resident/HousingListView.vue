@@ -33,11 +33,11 @@ const statusOptions: Array<{ label: string; value: HousingStatus | '' }> = [
   { label: housingStatusLabels.RENTED, value: 'RENTED' }
 ]
 
-/** 租售类型选项：后端 RENT/SALE 白名单（V9，R53） */
+/** 租售类型选项：本期仅出租（R62 收敛——出售模式无售价字段与买卖流程支撑；
+ *  历史 SALE 数据读侧标签仍兼容，但不再作为可筛选类型） */
 const rentTypeOptions: Array<{ label: string; value: HousingRentType | '' }> = [
   { label: '全部类型', value: '' },
   { label: '出租', value: 'RENT' },
-  { label: '出售', value: 'SALE' }
 ]
 
 /** 户型选项：后端无枚举约束（house.layout 自由文本、精确匹配），选项取种子数据实际值；

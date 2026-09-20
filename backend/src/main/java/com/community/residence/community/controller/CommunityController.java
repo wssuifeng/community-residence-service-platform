@@ -8,6 +8,7 @@ import com.community.residence.community.service.CommunityService;
 import com.community.residence.community.vo.CommunityVO;
 import com.community.residence.housing.service.HousingService;
 import com.community.residence.housing.vo.BuildingHousingTreeVO;
+import com.community.residence.housing.vo.HouseManageItemVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,6 +44,24 @@ public class CommunityController {
     @GetMapping("/{id}/houses-with-housing")
     public ApiResponse<List<BuildingHousingTreeVO>> housesWithHousing(@PathVariable Long id) {
         return ApiResponse.success(housingService.housesWithHousing(id));
+    }
+
+    @Operation(summary = "房屋管理分页列表（带图卡片，R62）",
+            description = "房屋为主线的分页列表（房屋可未挂牌，挂牌信息为可选子对象 housing）；"
+                    + "支持社区/楼栋/单元/房号关键字与挂牌三态（all/listed/unlisted）筛选，"
+                    + "communityId 为空时覆盖全部管辖社区；ADMIN 限绑定社区（数据级拦截器过滤）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/houses-manage")
+    public ApiResponse<PageVO<HouseManageItemVO>> housesManage(
+            @RequestParam(defaultValue = "1") long page,
+            @RequestParam(defaultValue = "20") long size,
+            @RequestParam(required = false) Long communityId,
+            @RequestParam(required = false) Long buildingId,
+            @RequestParam(required = false) Long unitId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String listing) {
+        return ApiResponse.success(housingService.pageHouseManage(communityId, buildingId, unitId,
+                keyword, listing, page, size));
     }
 
     @Operation(summary = "创建社区", description = "仅超级管理员可创建社区")
