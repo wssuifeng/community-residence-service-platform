@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E12：房源展示与看房预约流程",
+    "locale": "zh-CN",
+    "output": "E12_房源展示与看房预约流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [860, 1550]
+  },
+  "participants": [
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "上架/登记" },
+    { "id": "guest", "type": "external", "label": "游客/居民", "sublabel": "浏览/预约" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "浏览计数" },
+    { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "站内推送" }
+  ],
+  "messages": [
+    { "id": "create-housing", "from": "admin", "to": "backend", "y": 190, "label": "POST /api/v1/housings", "note": "上架房源（关联房屋+地图标注+户型/面积/租金/图片）", "variant": "emphasis" },
+    { "id": "check-authenticity", "from": "backend", "to": "db", "y": 234, "label": "校验：真实性自查清单（R52）", "note": "地址/面积/租金真实准确完整（《住房租赁条例》口径）" },
+    { "id": "insert-housing", "from": "backend", "to": "db", "y": 278, "label": "INSERT tb_housing (status=AVAILABLE)" },
+    { "id": "create-timeslot", "from": "admin", "to": "backend", "y": 336, "label": "POST /api/v1/housings/{id}/timeslots", "note": "配置可预约时段" },
+    { "id": "insert-timeslot", "from": "backend", "to": "db", "y": 380, "label": "INSERT tb_housing_timeslot" },
+    { "id": "browse", "from": "guest", "to": "backend", "y": 438, "label": "GET /api/v1/housings", "note": "游客浏览房源（R53）：筛选（社区/户型/价格区间/租售类型）" },
+    { "id": "select-housing", "from": "backend", "to": "db", "y": 482, "label": "SELECT tb_housing WHERE 筛选条件" },
+    { "id": "return-list", "from": "backend", "to": "guest", "y": 526, "label": "返回房源列表", "variant": "return" },
+    { "id": "detail", "from": "guest", "to": "backend", "y": 584, "label": "GET /api/v1/housings/{id}", "note": "查看详情（含地图位置）" },
+    { "id": "incr-view", "from": "backend", "to": "redis", "y": 628, "label": "INCR housing:{id}:view_count", "note": "记录浏览量（R57）" },
+    { "id": "return-detail", "from": "backend", "to": "guest", "y": 672, "label": "返回房源详情", "variant": "return" },
+    { "id": "query-slots", "from": "guest", "to": "backend", "y": 730, "label": "GET /api/v1/housings/{id}/available-slots", "note": "看房预约（R55）：查询可预约时段" },
+    { "id": "select-slots", "from": "backend", "to": "db", "y": 774, "label": "SELECT tb_housing_timeslot WHERE housing_id={id}" },
+    { "id": "return-slots", "from": "backend", "to": "guest", "y": 818, "label": "返回可预约时段列表", "variant": "return" },
+    { "id": "book", "from": "guest", "to": "backend", "y": 876, "label": "POST /api/v1/viewing-appointments", "note": "申请看房（选择时段）" },
+    { "id": "check-timeslot", "from": "backend", "to": "db", "y": 920, "label": "时段校验：须落在可预约时段内（R54）" },
+    { "id": "check-conflict", "from": "backend", "to": "db", "y": 964, "label": "冲突校验：同一房源同一时段重叠100%拦截", "note": "复用 R33 机制" },
+    { "id": "insert-appointment", "from": "backend", "to": "db", "y": 1008, "label": "INSERT tb_viewing_appointment (status=PENDING)" },
+    { "id": "notify-new", "from": "backend", "to": "notify", "y": 1052, "label": "生成通知：新看房预约" },
+    { "id": "push-admin", "from": "notify", "to": "admin", "y": 1096, "label": "推送通知", "variant": "dashed" },
+    { "id": "confirm", "from": "admin", "to": "backend", "y": 1154, "label": "PATCH /api/v1/viewing-appointments/{id}/confirm", "note": "确认预约 → CONFIRMED" },
+    { "id": "update-confirmed", "from": "backend", "to": "db", "y": 1198, "label": "UPDATE status=CONFIRMED" },
+    { "id": "notify-confirmed", "from": "backend", "to": "notify", "y": 1242, "label": "生成通知：预约已确认" },
+    { "id": "push-guest", "from": "notify", "to": "guest", "y": 1286, "label": "推送通知", "variant": "dashed" },
+    { "id": "complete", "from": "admin", "to": "backend", "y": 1344, "label": "PATCH /api/v1/viewing-appointments/{id}/complete", "note": "带看完成与违约处置（R56）：登记已完成 → COMPLETED" },
+    { "id": "update-completed", "from": "backend", "to": "db", "y": 1388, "label": "UPDATE status=COMPLETED" },
+    { "id": "incr-viewing", "from": "backend", "to": "redis", "y": 1432, "label": "INCR housing:{id}:viewing_count", "note": "记录带看量（R57）" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "房源主线",
+      "items": [
+        "上架房源（真实性自查 R52）→ 配置时段 → 游客筛选浏览（R53）",
+        "看房预约：查询时段 → 提交 → 确认 → 带看完成（R55）"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "双重校验（复用 C7 机制）",
+      "items": [
+        "时段校验：须落在可预约时段内（R54）",
+        "冲突校验：同一房源同一时段重叠 100% 拦截（R33 机制）"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "统计与违约处置",
+      "items": [
+        "浏览量与带看量计入运营统计（R57，Redis 计数）",
+        "违约登记后处置：冻结账号/限制预约，留痕（R56）"
+      ]
+    }
+  ]
+}

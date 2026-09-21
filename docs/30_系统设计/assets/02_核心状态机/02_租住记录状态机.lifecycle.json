@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "租住记录状态机（C3）",
+    "locale": "zh-CN",
+    "output": "02_租住记录状态机图.html",
+    "quality_profile": "showcase",
+    "viewBox": [980, 720]
+  },
+  "lanes": [
+    { "id": "main", "label": "主流程" },
+    { "id": "terminal", "label": "终态" }
+  ],
+  "states": [
+    { "id": "PENDING", "type": "start", "label": "待审核", "sublabel": "租住登记申请", "lane": "main", "col": 0, "step": "01" },
+    { "id": "ACTIVE", "type": "active", "label": "已生效", "sublabel": "租期进行中", "lane": "main", "col": 1, "step": "02", "tag": "自动标注" },
+    { "id": "MOVED_OUT", "type": "waiting", "label": "已搬出", "sublabel": "搬出登记", "lane": "main", "col": 2, "step": "03" },
+    { "id": "ARCHIVED", "type": "success", "label": "已归档", "sublabel": "归档后不可修改（R16）", "lane": "main", "col": 3, "step": "04", "tag": "终态" },
+    { "id": "REJECTED", "type": "failure", "label": "已驳回", "sublabel": "审核驳回（附理由）", "lane": "terminal", "col": 0, "tag": "终态" }
+  ],
+  "transitions": [
+    { "id": "approve", "from": "PENDING", "to": "ACTIVE", "label": "审核通过", "labelAt": [171, 202] },
+    { "id": "reject", "from": "PENDING", "to": "REJECTED", "label": "审核驳回（理由）", "variant": "security", "fromSide": "bottom", "toSide": "left" },
+    { "id": "move-out", "from": "ACTIVE", "to": "MOVED_OUT", "label": "搬出登记", "labelAt": [325, 202] },
+    { "id": "archive", "from": "MOVED_OUT", "to": "ARCHIVED", "label": "归档" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "主流程",
+      "items": [
+        "待审核 → 已生效 → 已搬出 → 已归档，线性主线",
+        "归档后记录不可修改（R16）"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "日期自动标注（非状态流转）",
+      "items": [
+        "已生效期间的「即将到期 / 已到期」由定时任务按日期自动判定标注（§5）",
+        "标注不产生状态机流转记录（术语表口径）"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "终态",
+      "items": [
+        "已驳回为审核终态，附驳回理由",
+        "已归档为生命周期终点，历史可查不可改"
+      ]
+    }
+  ]
+}

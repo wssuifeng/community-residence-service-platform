@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E10b：权限初始化流程（超管搭建组织）",
+    "locale": "zh-CN",
+    "output": "E10b_权限初始化流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [760, 1160]
+  },
+  "participants": [
+    { "id": "superadmin", "type": "external", "label": "超级管理员", "sublabel": "全局级操作" },
+    { "id": "communityadmin", "type": "external", "label": "社区管理员", "sublabel": "社区级操作" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" }
+  ],
+  "messages": [
+    { "id": "create-community", "from": "superadmin", "to": "backend", "y": 190, "label": "POST /api/v1/communities", "note": "超管新建社区（全局级操作）", "variant": "emphasis" },
+    { "id": "insert-community", "from": "backend", "to": "db", "y": 234, "label": "INSERT tb_community" },
+    { "id": "return-community", "from": "backend", "to": "superadmin", "y": 278, "label": "返回 community_id", "variant": "return" },
+    { "id": "create-admin", "from": "superadmin", "to": "backend", "y": 336, "label": "POST /api/v1/sys-users", "note": "创建社区管理员账号（role=ADMIN）" },
+    { "id": "insert-admin", "from": "backend", "to": "db", "y": 380, "label": "INSERT tb_sys_user (role=ADMIN)" },
+    { "id": "return-user", "from": "backend", "to": "superadmin", "y": 424, "label": "返回 user_id", "variant": "return" },
+    { "id": "bind-community", "from": "superadmin", "to": "backend", "y": 482, "label": "POST /api/v1/sys-users/{userId}/communities", "note": "绑定管辖社区" },
+    { "id": "insert-binding", "from": "backend", "to": "db", "y": 526, "label": "INSERT tb_sys_admin_community", "note": "建立管理员-社区绑定关系" },
+    { "id": "bind-ok", "from": "backend", "to": "superadmin", "y": 570, "label": "绑定成功", "variant": "return" },
+    { "id": "admin-login", "from": "communityadmin", "to": "backend", "y": 628, "label": "POST /api/v1/auth/admin/login", "note": "社区管理员登录，在本社区范围内工作" },
+    { "id": "select-binding", "from": "backend", "to": "db", "y": 672, "label": "SELECT tb_sys_admin_community", "note": "查询绑定社区列表" },
+    { "id": "issue-jwt", "from": "backend", "to": "communityadmin", "y": 716, "label": "签发 JWT（含绑定社区列表）", "variant": "return" },
+    { "id": "create-resident", "from": "communityadmin", "to": "backend", "y": 774, "label": "POST /api/v1/residents", "note": "代建居民账号（限本社区）" },
+    { "id": "insert-resident", "from": "backend", "to": "db", "y": 818, "label": "INSERT tb_resident (community_id=绑定社区)" },
+    { "id": "create-staff", "from": "communityadmin", "to": "backend", "y": 876, "label": "POST /api/v1/sys-users", "note": "创建服务人员账号（限本社区）" },
+    { "id": "insert-staff", "from": "backend", "to": "db", "y": 920, "label": "INSERT tb_sys_user (role=STAFF, community_id)" },
+    { "id": "publish-notice", "from": "communityadmin", "to": "backend", "y": 978, "label": "POST /api/v1/notices", "note": "发布公告（限本社区范围）" },
+    { "id": "check-scope", "from": "backend", "to": "db", "y": 1022, "label": "校验：target_communities IN (绑定列表)" },
+    { "id": "insert-notice", "from": "backend", "to": "db", "y": 1066, "label": "INSERT tb_notice (target_communities)" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "超管搭建组织",
+      "items": [
+        "超管新建社区 → 创建社区管理员账号 → 绑定管辖社区",
+        "触发：超级管理员搭建组织架构"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "社区管理员的工作边界",
+      "items": [
+        "登录后 JWT 附带绑定社区列表，工作范围限本社区",
+        "账号管理限本社区居民/服务人员，广播限绑定社区范围"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "两层权限",
+      "items": [
+        "全局级（创建社区/建管理员）仅超管可操作",
+        "社区级操作由绑定关系 + 数据级过滤兜底"
+      ]
+    }
+  ]
+}

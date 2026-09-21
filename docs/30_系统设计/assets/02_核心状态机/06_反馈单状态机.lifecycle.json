@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "反馈单状态机（C6）",
+    "locale": "zh-CN",
+    "output": "06_反馈单状态机图.html",
+    "quality_profile": "showcase",
+    "viewBox": [760, 620]
+  },
+  "lanes": [
+    { "id": "main", "label": "主流程" }
+  ],
+  "states": [
+    { "id": "OPEN", "type": "start", "label": "待受理", "sublabel": "居民提交反馈", "lane": "main", "col": 0, "step": "01" },
+    { "id": "IN_PROGRESS", "type": "active", "label": "会话中", "sublabel": "长连接双向实时沟通（R30）", "lane": "main", "col": 1, "step": "02" },
+    { "id": "CLOSED", "type": "success", "label": "已办结", "sublabel": "会话归档只读（R31）", "lane": "main", "col": 2, "step": "03", "tag": "终态" }
+  ],
+  "transitions": [
+    { "id": "accept", "from": "OPEN", "to": "IN_PROGRESS", "label": "受理" },
+    { "id": "close", "from": "IN_PROGRESS", "to": "CLOSED", "label": "办结（结论）", "labelAt": [325, 202] }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "主流程",
+      "items": [
+        "待受理 → 会话中 → 已办结，单线三态",
+        "会话为长连接双向实时沟通，响应 ≤3 秒（R30）",
+        "会话归属限定本反馈单，新话题须另提反馈"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "终态",
+      "items": [
+        "已办结须填写处理结论（R28~R31）",
+        "办结后会话归档只读，不可再发言"
+      ]
+    }
+  ]
+}

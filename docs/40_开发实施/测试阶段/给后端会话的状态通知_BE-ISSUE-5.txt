@@ -1,0 +1,49 @@
+# 给后端会话的状态通知（BE-ISSUE-5 转办）
+
+复制以下内容发送给后端会话：
+
+---
+
+你好，前端复测已完成。BE-ISSUE-1~4 修复全部验证有效，另有
+1 个新发现的后端缺口（BE-ISSUE-5）需要转办。
+
+## 复测结果（2026-09-08）
+
+- **自动化 32/32 通过**；64 页路由扫描 0 运行时错误；
+  vue-tsc 0 错误；vite build 成功
+- BE-ISSUE-1：三端通知页接口全 200，居民端「全部已读」
+  PATCH read-all 200 ✅
+- BE-ISSUE-2：`GET /feedbacks/{id}/attachments` 200（空数组正常）✅
+- BE-ISSUE-3：按你们 §7 的澄清结论，前端已移除游客端回执调用
+  （guest/NoticeDetailView），居民端保留；游客详情页验证零回执调用 ✅
+- BE-ISSUE-4：admin1/staff1/resident1 真实登录复测通过，多角色
+  权限验证已由「真实令牌+客户端角色变异」升级为真实账号登录 ✅
+
+## 转办：BE-ISSUE-5（P1）看房可约时段接口缺失
+
+- **接口**：`GET /api/v1/housings/{housingId}/available-slots`
+  （接口设计.md §9.12.2.8，权限 ALL 公开）
+- **现状**：后端 404（superadmin 亦 404）。HousingTimeslotController
+  仅有 §9.12.3.4 的原始配置接口 `GET /housings/{housingId}/timeslots`
+  （分页），两者语义不同：available-slots 需按 startDate/endDate
+  展开周循环模板并返回 `currentBookings/maxBookings/status` 的
+  可约状态（仅 AVAILABLE 且未满），居民端看房预约的时段选择
+  依赖此计算。
+- **前端表现**：resident/HousingDetailView 时段区优雅降级为空态，
+  不阻塞详情展示；前端保持与接口文档一致，后端补齐后直接生效。
+- **注意**：C7 资源预约已有同模式的
+  `GET /api/v1/resources/{resourceId}/available-slots`（§9.7.x），
+  可参照其容量计算逻辑。
+
+## 残留 4xx 归类（非缺陷，供知悉）
+
+复测中 12 条 API 4xx 已逐项归类：11 条为预期行为（未发布公告对
+普通用户 404、数据级权限对跨用户固定 ID 的 403 拦截——superadmin
+访问均 200 佐证），仅上述 1 条为真实缺口。
+
+## Git 状态
+
+前端分支已合并到 main 并推送（cd60345，含冲突解决：_中控.md
+模块状态整合为前后端双 ✅，决策日志双会话条目全保留）。
+复测报告见主仓库 `docs/40_开发实施/测试阶段/测试报告_前端复测.md`
+（注：报告文件名以实际为准，位于 40_开发实施/ 下）。

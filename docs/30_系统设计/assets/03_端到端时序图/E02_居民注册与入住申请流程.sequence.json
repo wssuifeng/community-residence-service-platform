@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E2：居民注册与入住申请流程",
+    "locale": "zh-CN",
+    "output": "E02_居民注册与入住申请流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [860, 1210]
+  },
+  "participants": [
+    { "id": "resident", "type": "external", "label": "潜在居民", "sublabel": "自助注册" },
+    { "id": "admin", "type": "external", "label": "社区管理员", "sublabel": "审核人" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "站内推送" }
+  ],
+  "messages": [
+    { "id": "register", "from": "resident", "to": "backend", "y": 190, "label": "POST /api/v1/auth/resident/register", "note": "自助注册（姓名/手机/密码）", "variant": "emphasis" },
+    { "id": "insert-resident", "from": "backend", "to": "db", "y": 234, "label": "INSERT tb_resident (status=PENDING)" },
+    { "id": "register-ok", "from": "backend", "to": "resident", "y": 278, "label": "注册成功，返回 JWT", "variant": "return" },
+    { "id": "apply", "from": "resident", "to": "backend", "y": 336, "label": "POST /api/v1/residence-applications", "note": "提交入住申请（社区/房屋/关系类型/起止时间）" },
+    { "id": "insert-application", "from": "backend", "to": "db", "y": 380, "label": "INSERT tb_residence_application (status=PENDING)" },
+    { "id": "notify-new", "from": "backend", "to": "notify", "y": 424, "label": "生成通知：新入住申请" },
+    { "id": "push-admin", "from": "notify", "to": "admin", "y": 468, "label": "推送通知", "variant": "dashed" },
+    { "id": "approve", "from": "admin", "to": "backend", "y": 526, "label": "PATCH /api/v1/residence-applications/{id}/approve", "note": "审核通过" },
+    { "id": "update-approved", "from": "backend", "to": "db", "y": 570, "label": "UPDATE status=APPROVED" },
+    { "id": "insert-relation", "from": "backend", "to": "db", "y": 614, "label": "INSERT tb_residence_relation", "note": "建立居住关系" },
+    { "id": "notify-approved", "from": "backend", "to": "notify", "y": 658, "label": "生成通知：申请已通过" },
+    { "id": "push-resident", "from": "notify", "to": "resident", "y": 702, "label": "推送通知（R48）", "variant": "dashed" },
+    { "id": "access", "from": "resident", "to": "backend", "y": 760, "label": "登录后访问居民端功能", "note": "居民端功能开放" },
+    { "id": "move-out", "from": "resident", "to": "backend", "y": 818, "label": "PATCH /api/v1/residence-relations/{id}/move-out", "note": "期末搬出：申请搬出" },
+    { "id": "notify-moveout", "from": "backend", "to": "notify", "y": 862, "label": "生成通知：搬出申请" },
+    { "id": "push-admin-2", "from": "notify", "to": "admin", "y": 906, "label": "推送通知", "variant": "dashed" },
+    { "id": "review", "from": "admin", "to": "backend", "y": 964, "label": "审核搬出申请" },
+    { "id": "update-endtime", "from": "backend", "to": "db", "y": 1008, "label": "UPDATE relation.end_time", "note": "关系终止归档" },
+    { "id": "notify-done", "from": "backend", "to": "notify", "y": 1052, "label": "生成通知：搬出已完成" },
+    { "id": "push-resident-2", "from": "notify", "to": "resident", "y": 1096, "label": "推送通知", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "入住主线",
+      "items": [
+        "潜在居民自助注册 → 提交入住申请 → 管理员审核通过",
+        "通过后建立居住关系（tb_residence_relation），居民端功能开放（R9）"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "通知联动",
+      "items": [
+        "新申请通知管理员，审核结果通知居民（R48）",
+        "全程站内通知推送"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "期末搬出",
+      "items": [
+        "居民申请搬出 → 管理员审核 → 居住关系终止归档",
+        "搬出后历史关系保留可查"
+      ]
+    }
+  ]
+}

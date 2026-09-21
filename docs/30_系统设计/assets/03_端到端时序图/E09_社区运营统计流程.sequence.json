@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E9：社区运营统计流程",
+    "locale": "zh-CN",
+    "output": "E09_社区运营统计流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [760, 960]
+  },
+  "participants": [
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "看板使用者" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "聚合统计" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "缓存/计数" }
+  ],
+  "messages": [
+    { "id": "dashboard", "from": "admin", "to": "backend", "y": 190, "label": "GET /api/v1/statistics/dashboard", "note": "打开运营看板（选择社区/时间范围）", "variant": "emphasis" },
+    { "id": "cache-read", "from": "backend", "to": "redis", "y": 234, "label": "查询 Redis 缓存" },
+    { "id": "agg-house", "from": "backend", "to": "db", "y": 292, "label": "聚合查询：房屋状态分布" },
+    { "id": "agg-resident", "from": "backend", "to": "db", "y": 336, "label": "聚合查询：居民与入住/搬出量" },
+    { "id": "agg-workorder", "from": "backend", "to": "db", "y": 380, "label": "聚合查询：工单量/完成率/处理时长" },
+    { "id": "agg-staff", "from": "backend", "to": "db", "y": 424, "label": "聚合查询：服务人员工作量" },
+    { "id": "agg-evaluation", "from": "backend", "to": "db", "y": 468, "label": "聚合查询：满意度统计" },
+    { "id": "agg-reservation", "from": "backend", "to": "db", "y": 512, "label": "聚合查询：公共资源预约量" },
+    { "id": "read-views", "from": "backend", "to": "redis", "y": 556, "label": "查询浏览统计", "note": "房源浏览量与带看量（R57）" },
+    { "id": "cache-write", "from": "backend", "to": "redis", "y": 600, "label": "写入缓存（TTL）", "variant": "dashed" },
+    { "id": "return-stats", "from": "backend", "to": "admin", "y": 644, "label": "返回统计数据（JSON）", "note": "前端 ECharts 渲染图表（R42）", "variant": "return" },
+    { "id": "sample", "from": "admin", "to": "backend", "y": 702, "label": "抽样查询明细数据", "note": "答辩演示：与明细核对一致性（R41）" },
+    { "id": "select-detail", "from": "backend", "to": "db", "y": 746, "label": "SELECT 明细记录" },
+    { "id": "return-detail", "from": "backend", "to": "admin", "y": 790, "label": "返回明细数据", "variant": "return" },
+    { "id": "verify", "from": "backend", "to": "admin", "y": 848, "label": "核对：统计值与明细100%相符", "note": "管理员核对（答辩演示口径，R41）", "variant": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "看板主线",
+      "items": [
+        "打开看板 → Redis 缓存优先 → 未命中则聚合查询各模块数据",
+        "触发：管理员打开运营看板"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "聚合与缓存",
+      "items": [
+        "房屋/居住/工单/工作量/满意度/预约量多维度聚合",
+        "支持按社区与时间范围筛选（R40），结果写缓存（TTL）",
+        "图表以 ECharts 渲染，支持导出图片（R42）"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "一致性核对（R41）",
+      "items": [
+        "抽样明细与统计值核对，须 100% 相符",
+        "答辩演示口径"
+      ]
+    }
+  ]
+}

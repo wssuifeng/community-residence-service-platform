@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E8：服务评价流程",
+    "locale": "zh-CN",
+    "output": "E08_服务评价流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [860, 970]
+  },
+  "participants": [
+    { "id": "resident", "type": "external", "label": "居民", "sublabel": "评价人" },
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "跟进人" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "站内推送" }
+  ],
+  "messages": [
+    { "id": "evaluate", "from": "resident", "to": "backend", "y": 190, "label": "POST /api/v1/work-orders/{id}/evaluation", "note": "工单完成后提交评价（1~5星+文字评语）", "variant": "emphasis" },
+    { "id": "check-unique", "from": "backend", "to": "db", "y": 234, "label": "校验：每工单仅一次评价（R37）" },
+    { "id": "insert-evaluation", "from": "backend", "to": "db", "y": 278, "label": "INSERT tb_work_order_evaluation" },
+    { "id": "eval-ok", "from": "backend", "to": "resident", "y": 322, "label": "评价成功", "variant": "return" },
+    { "id": "check-rating", "from": "backend", "to": "db", "y": 380, "label": "判断：rating ≤ 2 星？", "note": "不满意评价跟进（R38）" },
+    { "id": "notify-followup", "from": "backend", "to": "notify", "y": 424, "label": "生成通知：不满意评价需跟进" },
+    { "id": "push-admin", "from": "notify", "to": "admin", "y": 468, "label": "推送通知", "variant": "dashed" },
+    { "id": "list-unsatisfied", "from": "admin", "to": "backend", "y": 526, "label": "查看不满意评价列表", "note": "GET /api/v1/evaluations/unsatisfied" },
+    { "id": "select-unsatisfied", "from": "backend", "to": "db", "y": 570, "label": "SELECT tb_work_order_evaluation WHERE rating ≤ 2" },
+    { "id": "followup", "from": "admin", "to": "backend", "y": 628, "label": "POST /api/v1/evaluations/{id}/followup", "note": "添加跟进记录（处理结果）" },
+    { "id": "insert-followup", "from": "backend", "to": "db", "y": 672, "label": "INSERT tb_evaluation_followup" },
+    { "id": "followup-ok", "from": "backend", "to": "admin", "y": 716, "label": "跟进记录成功", "variant": "return" },
+    { "id": "stats", "from": "admin", "to": "backend", "y": 774, "label": "GET /api/v1/statistics/evaluations", "note": "评价统计：按服务人员/服务类别聚合满意度（R39/R40）" },
+    { "id": "aggregate", "from": "backend", "to": "db", "y": 818, "label": "聚合查询 tb_work_order_evaluation" },
+    { "id": "return-stats", "from": "backend", "to": "admin", "y": 862, "label": "返回统计数据（与明细一致）", "variant": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "评价主线",
+      "items": [
+        "工单完成后居民评价，每工单仅一次（R37）",
+        "触发：工单完成后居民评价"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "不满意跟进（R38）",
+      "items": [
+        "≤2 星评价触发通知，管理员跟进处理",
+        "跟进记录（处理结果）落库可查"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "评价统计（R39/R40）",
+      "items": [
+        "按服务人员/服务类别聚合满意度",
+        "统计数值与明细一致（R39）"
+      ]
+    }
+  ]
+}

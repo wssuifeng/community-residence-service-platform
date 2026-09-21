@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "看房预约状态机（C12）",
+    "locale": "zh-CN",
+    "output": "04_看房预约状态机图.html",
+    "quality_profile": "showcase",
+    "viewBox": [980, 720]
+  },
+  "lanes": [
+    { "id": "main", "label": "主流程" },
+    { "id": "terminal", "label": "终态" }
+  ],
+  "states": [
+    { "id": "PENDING", "type": "start", "label": "待确认", "sublabel": "游客/居民提交预约", "lane": "main", "col": 0, "step": "01" },
+    { "id": "CONFIRMED", "type": "active", "label": "已预约", "sublabel": "管理员确认", "lane": "main", "col": 1, "step": "02" },
+    { "id": "COMPLETED", "type": "success", "label": "已完成", "sublabel": "带看完成登记", "lane": "main", "col": 2, "step": "03", "tag": "终态" },
+    { "id": "CANCELED", "type": "failure", "label": "已取消", "sublabel": "用户取消", "lane": "terminal", "col": 0, "tag": "终态" },
+    { "id": "VIOLATED", "type": "failure", "label": "已违约", "sublabel": "处置：冻结/限制（R56）", "lane": "terminal", "col": 1, "tag": "终态" }
+  ],
+  "transitions": [
+    { "id": "confirm", "from": "PENDING", "to": "CONFIRMED", "label": "确认" },
+    { "id": "complete", "from": "CONFIRMED", "to": "COMPLETED", "label": "完成登记", "labelAt": [325, 202] },
+    { "id": "cancel", "from": "CONFIRMED", "to": "CANCELED", "label": "用户取消", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "id": "violate", "from": "CONFIRMED", "to": "VIOLATED", "label": "违约登记", "variant": "security", "fromSide": "bottom", "toSide": "top" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "主流程",
+      "items": [
+        "待确认 → 已预约 → 已完成，提交到带看完整闭环",
+        "完成登记同步计入带看量统计（R57）"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "终态与违约处置",
+      "items": [
+        "已取消 / 已违约 / 已完成均为终态",
+        "违约登记后处置：冻结账号 / 限制预约，处置留痕（R56）"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "与 C7 资源预约的差异",
+      "items": [
+        "无「已拒绝」审核态：管理员不审核，由可预约时段配置约束",
+        "时段外 / 不可预约时段提交：提交即拒绝（同 C7 口径，R54）",
+        "冲突校验机制复用 C7（同一房源同一时段重叠 100% 拦截）"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E11：实时通信与通知流程",
+    "locale": "zh-CN",
+    "output": "E11_实时通信与通知流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [860, 1250]
+  },
+  "participants": [
+    { "id": "user", "type": "external", "label": "用户", "sublabel": "在线/离线" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "业务事件" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "通知库" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "序号/在线状态" },
+    { "id": "ws", "type": "messagebus", "label": "WebSocket", "sublabel": "长连接推送" }
+  ],
+  "messages": [
+    { "id": "event", "from": "backend", "to": "ws", "y": 190, "label": "业务事件：工单状态变更", "note": "触发：工单流转/审核结果/租期到期/公告广播/反馈消息/违约处置（R48）", "variant": "emphasis" },
+    { "id": "incr-seq", "from": "backend", "to": "redis", "y": 248, "label": "INCR notification:seq", "note": "生成全局递增序号（保证连续）" },
+    { "id": "insert-notification", "from": "backend", "to": "db", "y": 292, "label": "INSERT tb_notification", "note": "seq, user_id, title, content, source_type, source_id" },
+    { "id": "check-online", "from": "backend", "to": "ws", "y": 336, "label": "判断用户在线状态" },
+    { "id": "push-online", "from": "ws", "to": "user", "y": 394, "label": "WebSocket 推送通知（≤3秒）", "note": "分支 A 用户在线：订阅 /user/queue/notifications（R49）", "variant": "dashed" },
+    { "id": "offline-note", "from": "backend", "to": "db", "y": 452, "label": "通知入库（已生成）", "note": "分支 B 用户离线：入库待补拉（R50）" },
+    { "id": "connect", "from": "user", "to": "ws", "y": 510, "label": "WebSocket 连接 /ws/notifications", "note": "用户上线补拉（R50）" },
+    { "id": "pull", "from": "user", "to": "backend", "y": 554, "label": "GET /api/v1/notifications/pull?lastSeq={seq}", "note": "增量补拉离线期间通知" },
+    { "id": "select-seq", "from": "backend", "to": "db", "y": 598, "label": "SELECT WHERE seq > {lastSeq}" },
+    { "id": "return-increment", "from": "backend", "to": "user", "y": 642, "label": "返回增量通知列表", "note": "按 seq 有序，不丢失", "variant": "return" },
+    { "id": "channel-decide", "from": "backend", "to": "db", "y": 700, "label": "判断通知等级与渠道勾选", "note": "渠道分级触发（R51）：站内必达" },
+    { "id": "channel-in", "from": "backend", "to": "db", "y": 758, "label": "站内通知：必达（已入库）" },
+    { "id": "channel-log", "from": "backend", "to": "db", "y": 802, "label": "记录渠道触发留痕", "note": "短信/微信为可插拔模拟通道" },
+    { "id": "mark-read", "from": "user", "to": "backend", "y": 860, "label": "PATCH /api/v1/notifications/{id}/read", "note": "已读管理（R51）：标记已读" },
+    { "id": "update-read", "from": "backend", "to": "db", "y": 904, "label": "UPDATE tb_notification SET is_read=1" },
+    { "id": "query-unread", "from": "user", "to": "backend", "y": 962, "label": "GET /api/v1/notifications/unread", "note": "查询未读通知" },
+    { "id": "select-unread", "from": "backend", "to": "db", "y": 1006, "label": "SELECT WHERE is_read=0" },
+    { "id": "return-unread", "from": "backend", "to": "user", "y": 1050, "label": "返回未读通知列表", "variant": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "通知生成",
+      "items": [
+        "业务事件 → 全局递增序号 → 通知入库",
+        "触发：工单流转/审核结果/租期到期/公告广播/反馈消息/违约处置（R48）"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "在线推送与离线补拉",
+      "items": [
+        "在线：WebSocket 推送 ≤3 秒送达（R49）",
+        "离线：上线后按 seq 增量补拉，有序不丢失（R50）"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "渠道分级与已读管理（R51）",
+      "items": [
+        "站内渠道必达；短信/微信为可插拔模拟通道，触发留痕",
+        "支持标记已读与未读列表查询"
+      ]
+    }
+  ]
+}

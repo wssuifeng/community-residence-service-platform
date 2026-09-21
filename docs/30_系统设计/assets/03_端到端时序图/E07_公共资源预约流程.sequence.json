@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E7：公共资源预约流程",
+    "locale": "zh-CN",
+    "output": "E07_公共资源预约流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [860, 1230]
+  },
+  "participants": [
+    { "id": "resident", "type": "external", "label": "居民", "sublabel": "预约人" },
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "审核/登记" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "站内推送" }
+  ],
+  "messages": [
+    { "id": "query-slots", "from": "resident", "to": "backend", "y": 190, "label": "GET /api/v1/resources/{id}/available-slots", "note": "查询可预约时段" },
+    { "id": "select-slots", "from": "backend", "to": "db", "y": 234, "label": "SELECT tb_resource_timeslot" },
+    { "id": "return-slots", "from": "backend", "to": "resident", "y": 278, "label": "返回可预约时段列表", "variant": "return" },
+    { "id": "submit", "from": "resident", "to": "backend", "y": 336, "label": "POST /api/v1/resource-reservations", "note": "提交预约（资源/日期/时段）", "variant": "emphasis" },
+    { "id": "check-timeslot", "from": "backend", "to": "db", "y": 380, "label": "时段校验：须落在可预约时段内（R32）" },
+    { "id": "check-conflict", "from": "backend", "to": "db", "y": 424, "label": "冲突校验：同一资源同一时段重叠100%拦截（R33）", "note": "含并发提交场景" },
+    { "id": "insert-reservation", "from": "backend", "to": "db", "y": 468, "label": "INSERT tb_resource_reservation (status=PENDING)" },
+    { "id": "notify-new", "from": "backend", "to": "notify", "y": 512, "label": "生成通知：新预约申请" },
+    { "id": "push-admin", "from": "notify", "to": "admin", "y": 556, "label": "推送通知", "variant": "dashed" },
+    { "id": "confirm", "from": "admin", "to": "backend", "y": 614, "label": "PATCH /api/v1/resource-reservations/{id}/confirm", "note": "审核通过 → CONFIRMED" },
+    { "id": "update-confirmed", "from": "backend", "to": "db", "y": 658, "label": "UPDATE status=CONFIRMED" },
+    { "id": "notify-confirmed", "from": "backend", "to": "notify", "y": 702, "label": "生成通知：预约已通过" },
+    { "id": "push-resident", "from": "notify", "to": "resident", "y": 746, "label": "推送通知", "variant": "dashed" },
+    { "id": "complete", "from": "admin", "to": "backend", "y": 804, "label": "PATCH /api/v1/resource-reservations/{id}/complete", "note": "使用与完成：登记已完成 → COMPLETED" },
+    { "id": "update-completed", "from": "backend", "to": "db", "y": 848, "label": "UPDATE status=COMPLETED" },
+    { "id": "violate", "from": "admin", "to": "backend", "y": 906, "label": "PATCH /api/v1/resource-reservations/{id}/violate", "note": "违约处置（R35）：登记违约 → VIOLATED" },
+    { "id": "update-violated", "from": "backend", "to": "db", "y": 950, "label": "UPDATE status=VIOLATED" },
+    { "id": "insert-record", "from": "backend", "to": "db", "y": 994, "label": "写入违约处置留痕", "note": "冻结账号/限制预约（R35）" },
+    { "id": "update-resident", "from": "backend", "to": "db", "y": 1038, "label": "UPDATE resident status", "note": "执行处置：冻结账号或限制预约" },
+    { "id": "notify-violation", "from": "backend", "to": "notify", "y": 1082, "label": "生成通知：违约处置" },
+    { "id": "push-resident-2", "from": "notify", "to": "resident", "y": 1126, "label": "推送通知", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "预约主线",
+      "items": [
+        "查询时段 → 提交预约 → 审核通过 → 使用完成登记",
+        "触发：居民预约活动室等公共资源"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "双重校验",
+      "items": [
+        "时段校验：须落在可预约时段内，时段外提交即拒绝（R32）",
+        "冲突校验：同一资源同一时段重叠 100% 拦截，含并发提交（R33）"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "违约处置（R35）",
+      "items": [
+        "违约登记后处置：冻结账号 / 限制预约",
+        "处置动作留痕并通知居民"
+      ]
+    }
+  ]
+}
