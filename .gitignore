@@ -14,6 +14,10 @@ backend/uploads/
 .idea/
 *.iml
 
+# 编辑器/代理工具本地配置（.zcodeignore 为 .gitignore 的镜像副本，
+# 由工具同步生成，事实来源是 .gitignore 本身）
+.zcodeignore
+
 # 系统文件
 .DS_Store
 Thumbs.db
