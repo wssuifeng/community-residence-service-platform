@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E4：工单全流程（提交→派单→处理→确认→评价）",
+    "locale": "zh-CN",
+    "output": "E04_工单全流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [980, 1680]
+  },
+  "participants": [
+    { "id": "resident", "type": "external", "label": "居民", "sublabel": "工单发起人" },
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "受理/派单" },
+    { "id": "staff", "type": "external", "label": "服务人员", "sublabel": "执行人" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "站内推送" }
+  ],
+  "messages": [
+    { "id": "submit", "from": "resident", "to": "backend", "y": 190, "label": "POST /api/v1/work-orders", "note": "提交工单（类别/标题/描述/图片）", "variant": "emphasis" },
+    { "id": "insert-order", "from": "backend", "to": "db", "y": 234, "label": "INSERT tb_work_order (status=PENDING)" },
+    { "id": "insert-log-1", "from": "backend", "to": "db", "y": 278, "label": "INSERT tb_work_order_log", "note": "记录处理记录（R23）" },
+    { "id": "notify-new", "from": "backend", "to": "notify", "y": 322, "label": "生成通知：新工单" },
+    { "id": "push-admin", "from": "notify", "to": "admin", "y": 366, "label": "推送通知（R48）", "variant": "dashed" },
+    { "id": "assign", "from": "admin", "to": "backend", "y": 424, "label": "PATCH /api/v1/work-orders/{id}/assign", "note": "受理 → 派单（指定服务人员）" },
+    { "id": "update-assigned", "from": "backend", "to": "db", "y": 468, "label": "UPDATE status=ASSIGNED, assignee_id" },
+    { "id": "insert-log-2", "from": "backend", "to": "db", "y": 512, "label": "INSERT tb_work_order_log" },
+    { "id": "notify-assigned", "from": "backend", "to": "notify", "y": 556, "label": "生成通知：工单已派单" },
+    { "id": "push-staff", "from": "notify", "to": "staff", "y": 600, "label": "推送通知", "variant": "dashed" },
+    { "id": "push-resident", "from": "notify", "to": "resident", "y": 644, "label": "推送通知", "variant": "dashed" },
+    { "id": "accept", "from": "staff", "to": "backend", "y": 702, "label": "PATCH /api/v1/work-orders/{id}/accept", "note": "接单 → ACCEPTED" },
+    { "id": "update-accepted", "from": "backend", "to": "db", "y": 746, "label": "UPDATE status=ACCEPTED" },
+    { "id": "insert-log-3", "from": "backend", "to": "db", "y": 790, "label": "INSERT tb_work_order_log" },
+    { "id": "process", "from": "staff", "to": "backend", "y": 848, "label": "PATCH /api/v1/work-orders/{id}/process", "note": "开始处理 → IN_PROGRESS" },
+    { "id": "update-progress", "from": "backend", "to": "db", "y": 892, "label": "UPDATE status=IN_PROGRESS" },
+    { "id": "complete", "from": "staff", "to": "backend", "y": 950, "label": "PATCH /api/v1/work-orders/{id}/complete", "note": "提交结果（文字+图片）→ TO_CONFIRM" },
+    { "id": "update-confirm", "from": "backend", "to": "db", "y": 994, "label": "UPDATE status=TO_CONFIRM" },
+    { "id": "insert-log-4", "from": "backend", "to": "db", "y": 1038, "label": "INSERT tb_work_order_log" },
+    { "id": "notify-confirm", "from": "backend", "to": "notify", "y": 1082, "label": "生成通知：工单待确认" },
+    { "id": "push-resident-2", "from": "notify", "to": "resident", "y": 1126, "label": "推送通知", "variant": "dashed" },
+    { "id": "confirm", "from": "resident", "to": "backend", "y": 1184, "label": "PATCH /api/v1/work-orders/{id}/confirm", "note": "居民确认 → COMPLETED" },
+    { "id": "update-completed", "from": "backend", "to": "db", "y": 1228, "label": "UPDATE status=COMPLETED" },
+    { "id": "insert-log-5", "from": "backend", "to": "db", "y": 1272, "label": "INSERT tb_work_order_log" },
+    { "id": "notify-completed", "from": "backend", "to": "notify", "y": 1316, "label": "生成通知：工单已完成" },
+    { "id": "push-staff-2", "from": "notify", "to": "staff", "y": 1360, "label": "推送通知", "variant": "dashed" },
+    { "id": "evaluate", "from": "resident", "to": "backend", "y": 1418, "label": "POST /api/v1/work-orders/{id}/evaluation", "note": "服务评价：提交评价（满意度/评分/内容，R37）" },
+    { "id": "insert-evaluation", "from": "backend", "to": "db", "y": 1462, "label": "INSERT tb_work_order_evaluation" },
+    { "id": "close", "from": "admin", "to": "backend", "y": 1520, "label": "PATCH /api/v1/work-orders/{id}/close", "note": "关闭工单 → CLOSED" },
+    { "id": "update-closed", "from": "backend", "to": "db", "y": 1564, "label": "UPDATE status=CLOSED" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "工单主线",
+      "items": [
+        "提交 → 受理派单 → 接单 → 处理 → 提交结果 → 居民确认 → 已完成",
+        "完成后居民评价（R37），管理员关闭工单"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "全程通知与留痕",
+      "items": [
+        "每次状态流转通知双方相关人（R48）",
+        "每次流转写处理记录（操作人/时间/备注），时间线展示（R23）"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "状态机约束",
+      "items": [
+        "状态流转由工单状态机约束，非法流转明确报错（R19）",
+        "待确认阶段居民不满意可退回处理中（附原因）"
+      ]
+    }
+  ]
+}

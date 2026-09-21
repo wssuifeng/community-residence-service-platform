@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "入住申请状态机（C2）",
+    "locale": "zh-CN",
+    "output": "05_入住申请状态机图.html",
+    "quality_profile": "showcase",
+    "viewBox": [760, 720]
+  },
+  "lanes": [
+    { "id": "main", "label": "主流程" },
+    { "id": "terminal", "label": "终态" }
+  ],
+  "states": [
+    { "id": "PENDING", "type": "start", "label": "待审核", "sublabel": "居民提交入住申请", "lane": "main", "col": 0, "step": "01" },
+    { "id": "APPROVED", "type": "success", "label": "已通过", "sublabel": "建立居住关系（R9）", "lane": "main", "col": 1, "step": "02", "tag": "终态" },
+    { "id": "REJECTED", "type": "failure", "label": "已驳回", "sublabel": "附驳回理由", "lane": "terminal", "col": 0, "tag": "终态" }
+  ],
+  "transitions": [
+    { "id": "approve", "from": "PENDING", "to": "APPROVED", "label": "通过" },
+    { "id": "reject", "from": "PENDING", "to": "REJECTED", "label": "驳回（理由）", "variant": "security", "fromSide": "bottom", "toSide": "left" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "审核主线",
+      "items": [
+        "待审核 → 已通过 / 已驳回，一进两出",
+        "通过后建立居住关系，账号获得居民端入口（R9）"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "终态",
+      "items": [
+        "已通过与已驳回均为终态",
+        "驳回须附理由，居民可见"
+      ]
+    }
+  ]
+}

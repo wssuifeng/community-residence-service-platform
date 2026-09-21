@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E10：用户认证与权限校验流程",
+    "locale": "zh-CN",
+    "output": "E10_用户认证与权限校验流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [980, 1340]
+  },
+  "participants": [
+    { "id": "user", "type": "external", "label": "用户", "sublabel": "五类角色" },
+    { "id": "frontend", "type": "frontend", "label": "前端", "sublabel": "Vue 3 SPA" },
+    { "id": "gateway", "type": "security", "label": "Security", "sublabel": "JWT 过滤链" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "业务处理" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "redis", "type": "database", "label": "Redis", "sublabel": "黑名单/缓存" }
+  ],
+  "messages": [
+    { "id": "login", "from": "user", "to": "frontend", "y": 190, "label": "POST /api/v1/auth/login", "note": "登录（账号/密码）", "variant": "emphasis" },
+    { "id": "login-request", "from": "frontend", "to": "gateway", "y": 234, "label": "登录请求" },
+    { "id": "query-user", "from": "gateway", "to": "db", "y": 278, "label": "查询用户（tb_sys_user / tb_resident）" },
+    { "id": "bcrypt-check", "from": "gateway", "to": "db", "y": 322, "label": "BCrypt 密码校验（N4）" },
+    { "id": "query-binding", "from": "gateway", "to": "redis", "y": 366, "label": "查询社区绑定关系", "note": "社区管理员缓存绑定列表" },
+    { "id": "issue-jwt", "from": "gateway", "to": "frontend", "y": 410, "label": "签发 JWT（含角色+有效期）", "note": "Claims: userId, role, communityIds（仅管理员）", "variant": "return" },
+    { "id": "biz-request", "from": "user", "to": "frontend", "y": 468, "label": "访问业务接口（携带 JWT）", "note": "业务请求：角色+数据级两层校验（R44/R45）" },
+    { "id": "biz-api", "from": "frontend", "to": "gateway", "y": 512, "label": "GET /api/v1/work-orders" },
+    { "id": "check-blacklist", "from": "gateway", "to": "redis", "y": 556, "label": "校验 JWT 黑名单", "note": "登出令牌失效（N4）" },
+    { "id": "parse-jwt", "from": "gateway", "to": "backend", "y": 614, "label": "解析 JWT → 角色权限校验", "note": "@PreAuthorize 功能级权限（网关内完成）" },
+    { "id": "forward", "from": "gateway", "to": "backend", "y": 658, "label": "通过 → 转发请求" },
+    { "id": "inject-filter", "from": "backend", "to": "db", "y": 702, "label": "MyBatis-Plus 拦截器注入过滤", "note": "社区管理员：WHERE community_id IN (绑定列表)" },
+    { "id": "return-data", "from": "backend", "to": "frontend", "y": 746, "label": "返回数据（已过滤）", "variant": "return" },
+    { "id": "over-access", "from": "user", "to": "frontend", "y": 804, "label": "社区管理员访问全局级接口", "note": "越权访问（R44/R45）：如创建社区（仅超管）" },
+    { "id": "over-api", "from": "frontend", "to": "gateway", "y": 848, "label": "POST /api/v1/communities" },
+    { "id": "role-fail", "from": "gateway", "to": "db", "y": 906, "label": "角色校验失败：ADMIN 越全局级", "note": "@PreAuthorize('hasRole(SUPER_ADMIN)')，拒绝并准备记录" },
+    { "id": "log-deny", "from": "gateway", "to": "db", "y": 950, "label": "INSERT tb_operation_log", "note": "记录越权访问（R47）" },
+    { "id": "forbidden", "from": "gateway", "to": "frontend", "y": 994, "label": "返回 403 Forbidden", "variant": "return" },
+    { "id": "logout", "from": "user", "to": "frontend", "y": 1052, "label": "POST /api/v1/auth/logout", "note": "登出与令牌失效（N4）" },
+    { "id": "logout-request", "from": "frontend", "to": "gateway", "y": 1096, "label": "登出请求（JWT）" },
+    { "id": "blacklist-set", "from": "gateway", "to": "redis", "y": 1140, "label": "SET token:blacklist:{jti} EX {ttl}", "note": "JWT 加入黑名单（Redis+DB 双写）" },
+    { "id": "blacklist-insert", "from": "gateway", "to": "db", "y": 1184, "label": "INSERT auth_token_blacklist" },
+    { "id": "logout-ok", "from": "gateway", "to": "frontend", "y": 1228, "label": "登出成功", "variant": "return" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "登录签发",
+      "items": [
+        "账号密码 + BCrypt 校验（N4），签发含角色与有效期的 JWT",
+        "社区管理员 JWT 附带绑定社区列表"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "两层权限校验（R44/R45）",
+      "items": [
+        "功能级：@PreAuthorize 角色校验",
+        "数据级：MyBatis-Plus 拦截器按绑定社区注入过滤条件"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "越权拒绝与登出失效",
+      "items": [
+        "越权访问 100% 拒绝并记录操作日志（R47）",
+        "登出后令牌加入黑名单（Redis+DB 双写），即时失效（N4）"
+      ]
+    }
+  ]
+}

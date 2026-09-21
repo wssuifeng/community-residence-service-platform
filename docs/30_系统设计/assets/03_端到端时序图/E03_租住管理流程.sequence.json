@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E3：租住管理流程",
+    "locale": "zh-CN",
+    "output": "E03_租住管理流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [980, 1060]
+  },
+  "participants": [
+    { "id": "tenant", "type": "external", "label": "租客（居民）", "sublabel": "租住申请人" },
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "审核人" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "scheduler", "type": "backend", "label": "定时任务", "sublabel": "每日判定" },
+    { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "站内推送" }
+  ],
+  "messages": [
+    { "id": "apply", "from": "tenant", "to": "backend", "y": 190, "label": "POST /api/v1/leases", "note": "租住登记申请（房屋/租期起止/租金备注）", "variant": "emphasis" },
+    { "id": "insert-lease", "from": "backend", "to": "db", "y": 234, "label": "INSERT tb_lease_record (status=PENDING)" },
+    { "id": "notify-new", "from": "backend", "to": "notify", "y": 278, "label": "生成通知：新租住申请" },
+    { "id": "push-admin", "from": "notify", "to": "admin", "y": 322, "label": "推送通知", "variant": "dashed" },
+    { "id": "approve", "from": "admin", "to": "backend", "y": 380, "label": "PATCH /api/v1/leases/{id}/status", "note": "审核通过 → ACTIVE" },
+    { "id": "update-active", "from": "backend", "to": "db", "y": 424, "label": "UPDATE status=ACTIVE" },
+    { "id": "notify-active", "from": "backend", "to": "notify", "y": 468, "label": "生成通知：租住已生效" },
+    { "id": "push-tenant", "from": "notify", "to": "tenant", "y": 512, "label": "推送通知", "variant": "dashed" },
+    { "id": "scan", "from": "scheduler", "to": "db", "y": 570, "label": "扫描 tb_lease_record", "note": "定时任务：每日判定「即将到期」（止期前 N 天）" },
+    { "id": "check-dedup", "from": "scheduler", "to": "db", "y": 614, "label": "查询到期提醒配置 + 去重表" },
+    { "id": "gen-remind", "from": "scheduler", "to": "notify", "y": 658, "label": "生成到期提醒通知（R15）", "note": "同一状态仅提醒一次" },
+    { "id": "push-tenant-2", "from": "notify", "to": "tenant", "y": 702, "label": "推送通知：租期即将到期", "variant": "dashed" },
+    { "id": "push-admin-2", "from": "notify", "to": "admin", "y": 746, "label": "推送通知：租期即将到期", "variant": "dashed" },
+    { "id": "moveout", "from": "admin", "to": "backend", "y": 804, "label": "PATCH /api/v1/leases/{id}/status", "note": "搬出登记 → MOVED_OUT" },
+    { "id": "update-moveout", "from": "backend", "to": "db", "y": 848, "label": "UPDATE status=MOVED_OUT, move_out_time" },
+    { "id": "archive", "from": "admin", "to": "backend", "y": 906, "label": "归档操作 → ARCHIVED" },
+    { "id": "update-archive", "from": "backend", "to": "db", "y": 950, "label": "UPDATE status=ARCHIVED", "note": "归档后不可修改（R16）" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "租住主线",
+      "items": [
+        "租客申请租住登记 → 管理员审核 → 生效 → 搬出 → 归档",
+        "归档后记录不可修改（R16）"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "到期自动判定（非人工流转）",
+      "items": [
+        "「即将到期 / 已到期」由定时任务按日期自动判定标注（R15）",
+        "同一状态仅提醒一次（去重表），可手动重发"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "通知联动",
+      "items": [
+        "新申请通知管理员，审核结果与到期提醒通知租客",
+        "到期提醒同时推送租客与管理员"
+      ]
+    }
+  ]
+}

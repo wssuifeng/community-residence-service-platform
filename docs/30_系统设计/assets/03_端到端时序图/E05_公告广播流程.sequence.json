@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E5：公告广播流程",
+    "locale": "zh-CN",
+    "output": "E05_公告广播流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [980, 900]
+  },
+  "participants": [
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "发布公告" },
+    { "id": "user", "type": "external", "label": "目标用户", "sublabel": "居民/服务人员" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "scheduler", "type": "backend", "label": "定时任务", "sublabel": "过期下线" },
+    { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "渠道触发" }
+  ],
+  "messages": [
+    { "id": "create", "from": "admin", "to": "backend", "y": 190, "label": "POST /api/v1/notices", "note": "发布公告（标题/正文/分类/范围/有效期/渠道勾选）", "variant": "emphasis" },
+    { "id": "check-scope", "from": "backend", "to": "db", "y": 234, "label": "权限校验：社区管理员限绑定社区范围（R24）" },
+    { "id": "insert-notice", "from": "backend", "to": "db", "y": 278, "label": "INSERT tb_notice (status=DRAFT)" },
+    { "id": "publish", "from": "admin", "to": "backend", "y": 336, "label": "PATCH /api/v1/notices/{id}/publish", "note": "发布 → PUBLISHED" },
+    { "id": "update-published", "from": "backend", "to": "db", "y": 380, "label": "UPDATE status=PUBLISHED" },
+    { "id": "notify-send", "from": "backend", "to": "notify", "y": 424, "label": "生成站内通知（R48）", "note": "触达目标范围用户" },
+    { "id": "push-user", "from": "notify", "to": "user", "y": 468, "label": "推送通知：新公告", "variant": "dashed" },
+    { "id": "channel", "from": "backend", "to": "notify", "y": 526, "label": "触发勾选渠道（R51）", "note": "站内必达；短信/微信为可插拔模拟通道" },
+    { "id": "view", "from": "user", "to": "backend", "y": 584, "label": "POST /api/v1/notices/{id}/view", "note": "用户查看公告" },
+    { "id": "insert-view", "from": "backend", "to": "db", "y": 628, "label": "INSERT tb_notice_view_log", "note": "记录查看回执（R27）" },
+    { "id": "return-notice", "from": "backend", "to": "user", "y": 672, "label": "返回公告内容", "variant": "return" },
+    { "id": "scan", "from": "scheduler", "to": "db", "y": 730, "label": "扫描 tb_notice", "note": "定时任务：检查 valid_until < NOW()" },
+    { "id": "archive", "from": "scheduler", "to": "db", "y": 774, "label": "UPDATE status=ARCHIVED", "note": "过期公告自动下线（R26）" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "广播主线",
+      "items": [
+        "草稿 → 发布 → 站内通知触达目标范围用户",
+        "触发：管理员发布公告"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "范围与渠道",
+      "items": [
+        "社区管理员发布范围限其绑定社区（R24）",
+        "站内渠道必达；短信/微信为可插拔模拟通道（R51）"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "回执与下线",
+      "items": [
+        "用户查看公告记录回执（R27）",
+        "有效期到期由定时任务自动下线（R26）"
+      ]
+    }
+  ]
+}
