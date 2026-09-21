@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "E6：反馈提交与会话流程",
+    "locale": "zh-CN",
+    "output": "E06_反馈提交与会话流程时序图.html",
+    "quality_profile": "showcase",
+    "viewBox": [860, 1260]
+  },
+  "participants": [
+    { "id": "resident", "type": "external", "label": "居民", "sublabel": "反馈发起人" },
+    { "id": "admin", "type": "external", "label": "管理员", "sublabel": "受理人" },
+    { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
+    { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
+    { "id": "ws", "type": "messagebus", "label": "WebSocket", "sublabel": "双向会话" }
+  ],
+  "messages": [
+    { "id": "submit", "from": "resident", "to": "backend", "y": 190, "label": "POST /api/v1/feedbacks", "note": "提交反馈（分类/内容/附图）", "variant": "emphasis" },
+    { "id": "insert-feedback", "from": "backend", "to": "db", "y": 234, "label": "INSERT tb_feedback (status=OPEN)" },
+    { "id": "notify-new", "from": "backend", "to": "ws", "y": 278, "label": "生成通知：新反馈" },
+    { "id": "push-admin", "from": "ws", "to": "admin", "y": 322, "label": "推送通知", "variant": "dashed" },
+    { "id": "accept", "from": "admin", "to": "backend", "y": 380, "label": "受理反馈 → IN_PROGRESS" },
+    { "id": "update-progress", "from": "backend", "to": "db", "y": 424, "label": "UPDATE status=IN_PROGRESS" },
+    { "id": "notify-accepted", "from": "backend", "to": "ws", "y": 468, "label": "生成通知：反馈已受理" },
+    { "id": "push-resident", "from": "ws", "to": "resident", "y": 512, "label": "推送通知", "variant": "dashed" },
+    { "id": "connect-resident", "from": "resident", "to": "ws", "y": 570, "label": "WebSocket 连接 /ws/feedback/{id}", "note": "长连接会话式沟通（R30）" },
+    { "id": "connect-admin", "from": "admin", "to": "ws", "y": 614, "label": "WebSocket 连接 /ws/feedback/{id}" },
+    { "id": "msg-resident", "from": "resident", "to": "ws", "y": 672, "label": "发送消息（文本）" },
+    { "id": "save-msg-1", "from": "ws", "to": "db", "y": 716, "label": "INSERT tb_feedback_message" },
+    { "id": "push-msg-admin", "from": "ws", "to": "admin", "y": 760, "label": "实时推送消息（≤3秒）", "variant": "dashed" },
+    { "id": "msg-admin", "from": "admin", "to": "ws", "y": 818, "label": "发送回复（文本）" },
+    { "id": "save-msg-2", "from": "ws", "to": "db", "y": 862, "label": "INSERT tb_feedback_message" },
+    { "id": "push-msg-resident", "from": "ws", "to": "resident", "y": 906, "label": "实时推送消息（≤3秒）", "variant": "dashed" },
+    { "id": "close", "from": "admin", "to": "backend", "y": 964, "label": "PATCH /api/v1/feedbacks/{id}/close", "note": "办结（填写处理结论）→ CLOSED" },
+    { "id": "update-closed", "from": "backend", "to": "db", "y": 1008, "label": "UPDATE status=CLOSED, conclusion" },
+    { "id": "notify-closed", "from": "backend", "to": "ws", "y": 1052, "label": "生成通知：反馈已办结" },
+    { "id": "push-closed", "from": "ws", "to": "resident", "y": 1096, "label": "推送通知", "variant": "dashed" },
+    { "id": "ws-close", "from": "ws", "to": "resident", "y": 1154, "label": "关闭 WebSocket 连接", "note": "会话归档只读（R31）" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "反馈主线",
+      "items": [
+        "提交反馈 → 受理 → 长连接会话沟通 → 办结归档",
+        "触发：居民提交投诉/意见/建议"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "会话式沟通（R30）",
+      "items": [
+        "长连接双向实时沟通，响应 ≤3 秒",
+        "会话归属限定本反馈单，新话题须另提反馈",
+        "消息持久化到 tb_feedback_message"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "办结归档（R31）",
+      "items": [
+        "办结须填写处理结论",
+        "办结后推送通知并关闭连接，会话归档只读"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "社区居住服务管理系统 · 总体架构",
+    "locale": "zh-CN",
+    "output": "总体架构图.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "request-path",
+        "label": "主请求链路",
+        "focus": [
+          "users",
+          "frontend",
+          "gateway",
+          "modules",
+          "mysql"
+        ],
+        "note": "一次业务请求从前端到 MySQL 的完整路径。"
+      },
+      {
+        "id": "realtime-push",
+        "label": "实时通知链路",
+        "focus": [
+          "users",
+          "frontend",
+          "push",
+          "authcache",
+          "mysql"
+        ],
+        "note": "业务事件到长连接推送的异步通知链路。"
+      },
+      {
+        "id": "security-scope",
+        "label": "安全与权限",
+        "focus": [
+          "gateway",
+          "authcache",
+          "aop",
+          "oplog"
+        ],
+        "note": "JWT 无状态认证、两层权限校验与操作留痕的落点。"
+      }
+    ],
+    "viewBox": [
+      1350,
+      620
+    ]
+  },
+  "components": [
+    {
+      "id": "users",
+      "type": "external",
+      "label": "五类角色用户",
+      "sublabel": "游客/居民/服务人员/管理员/超管",
+      "pos": [
+        40,
+        320
+      ],
+      "size": [
+        200,
+        64
+      ]
+    },
+    {
+      "id": "frontend",
+      "type": "frontend",
+      "label": "frontend · Vue 3 SPA",
+      "sublabel": "Vite 8 · Pinia 3 · 自写组件层",
+      "pos": [
+        300,
+        320
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "tag": "ECharts 统计看板"
+    },
+    {
+      "id": "gateway",
+      "type": "security",
+      "label": "统一接入与安全层",
+      "sublabel": "Spring Security 7 过滤链 + JWT",
+      "pos": [
+        570,
+        320
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "tag": "两层权限：全局级 / 社区级"
+    },
+    {
+      "id": "modules",
+      "type": "backend",
+      "label": "业务模块层",
+      "sublabel": "Controller / Service / Mapper",
+      "pos": [
+        840,
+        320
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "tag": "12 业务域 · 对齐 C1~C12"
+    },
+    {
+      "id": "authcache",
+      "type": "database",
+      "label": "Redis 7",
+      "sublabel": "JWT 登出黑名单 · 会话",
+      "pos": [
+        840,
+        160
+      ],
+      "size": [
+        170,
+        60
+      ]
+    },
+    {
+      "id": "mysql",
+      "type": "database",
+      "label": "MySQL",
+      "sublabel": "业务库 · Flyway 迁移",
+      "pos": [
+        1120,
+        320
+      ],
+      "size": [
+        160,
+        64
+      ],
+      "tag": "community_id 数据隔离"
+    },
+    {
+      "id": "push",
+      "type": "messagebus",
+      "label": "消息通知服务",
+      "sublabel": "Spring WebSocket (STOMP)",
+      "pos": [
+        570,
+        480
+      ],
+      "size": [
+        180,
+        60
+      ],
+      "tag": "≤3s 在线送达"
+    },
+    {
+      "id": "aop",
+      "type": "backend",
+      "label": "横切支撑",
+      "sublabel": "定时任务（租期/公告）· AOP 切面",
+      "pos": [
+        840,
+        480
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "oplog",
+      "type": "database",
+      "label": "操作日志留痕",
+      "sublabel": "仅追加 · 关键变更全覆盖",
+      "pos": [
+        1120,
+        480
+      ],
+      "size": [
+        160,
+        60
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "单部署实例（单机可部署 · N9）",
+      "wraps": [
+        "gateway",
+        "modules",
+        "authcache",
+        "mysql",
+        "push",
+        "aop",
+        "oplog"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "users-to-frontend",
+      "from": "users",
+      "to": "frontend",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "fe-to-gateway",
+      "from": "frontend",
+      "to": "gateway",
+      "label": "REST /api · Axios"
+    },
+    {
+      "id": "fe-to-push",
+      "from": "frontend",
+      "to": "push",
+      "label": "WS 订阅",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "gateway-to-modules",
+      "from": "gateway",
+      "to": "modules",
+      "label": "已鉴权请求"
+    },
+    {
+      "id": "gateway-redis",
+      "from": "gateway",
+      "to": "authcache",
+      "label": "令牌校验",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "modules-mysql",
+      "from": "modules",
+      "to": "mysql",
+      "label": "MyBatis-Plus"
+    },
+    {
+      "id": "modules-push",
+      "from": "modules",
+      "to": "push",
+      "label": "业务事件",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "right"
+    },
+    {
+      "id": "aop-scan",
+      "from": "aop",
+      "to": "mysql",
+      "label": "自动判定",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "aop-oplog",
+      "from": "aop",
+      "to": "oplog",
+      "label": "切面留痕",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "modules-aop",
+      "from": "modules",
+      "to": "aop",
+      "label": "切面拦截",
+      "variant": "dashed",
+      "labelDx": 34
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "主链路",
+      "items": [
+        "前后端分离单体，RESTful API 单一入口",
+        "业务模块按 C1~C12 划分，单进程内调用"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "实时与异步",
+      "items": [
+        "WebSocket 长连接推送，离线通知补拉不丢",
+        "定时任务承载租期自动判定与公告下线"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "安全边界",
+      "items": [
+        "JWT 无状态认证 + Redis 登出黑名单（N4）",
+        "两层权限模型：全局级仅超管，社区级按绑定社区过滤（N5）",
+        "操作日志仅追加，保留至归档期（N6）"
+      ]
+    }
+  ]
+}

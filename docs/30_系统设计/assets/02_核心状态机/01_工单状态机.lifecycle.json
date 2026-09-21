@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "工单状态机（C4）",
+    "locale": "zh-CN",
+    "output": "01_工单状态机图.html",
+    "quality_profile": "showcase",
+    "viewBox": [980, 720]
+  },
+  "lanes": [
+    { "id": "main", "label": "主流程" },
+    { "id": "confirm", "label": "居民确认" },
+    { "id": "terminal", "label": "终态" }
+  ],
+  "states": [
+    { "id": "PENDING", "type": "start", "label": "待受理", "sublabel": "居民提交工单", "lane": "main", "col": 0, "step": "01" },
+    { "id": "TO_ASSIGN", "type": "active", "label": "待派单", "sublabel": "管理员受理", "lane": "main", "col": 1, "step": "02" },
+    { "id": "ASSIGNED", "type": "active", "label": "已派单", "sublabel": "指定服务人员", "lane": "main", "col": 2, "step": "03" },
+    { "id": "ACCEPTED", "type": "active", "label": "已接单", "sublabel": "服务人员接单", "lane": "main", "col": 3, "step": "04" },
+    { "id": "IN_PROGRESS", "type": "active", "label": "处理中", "sublabel": "现场处理", "lane": "main", "col": 4, "step": "05" },
+    { "id": "TO_CONFIRM", "type": "waiting", "label": "待确认", "sublabel": "服务人员提交结果", "lane": "confirm", "col": 2, "tag": "等待居民", "width": 100 },
+    { "id": "COMPLETED", "type": "success", "label": "已完成", "sublabel": "可评价（R37 联动）", "lane": "confirm", "col": 1, "tag": "成果", "width": 100 },
+    { "id": "REJECTED", "type": "failure", "label": "已驳回", "sublabel": "受理驳回（附理由）", "lane": "terminal", "col": 0, "tag": "终态" },
+    { "id": "CANCELED", "type": "failure", "label": "已取消", "sublabel": "居民取消", "lane": "terminal", "col": 1, "tag": "终态" },
+    { "id": "CLOSED", "type": "neutral", "label": "已关闭", "sublabel": "管理员关闭", "lane": "terminal", "col": 2, "tag": "终态" }
+  ],
+  "transitions": [
+    { "id": "accept", "from": "PENDING", "to": "TO_ASSIGN", "label": "受理" },
+    { "id": "assign", "from": "TO_ASSIGN", "to": "ASSIGNED", "label": "派单" },
+    { "id": "staff-accept", "from": "ASSIGNED", "to": "ACCEPTED", "label": "接单" },
+    { "id": "start-work", "from": "ACCEPTED", "to": "IN_PROGRESS", "label": "开始处理", "labelAt": [633, 202] },
+    { "id": "submit-result", "from": "IN_PROGRESS", "to": "TO_CONFIRM", "label": "提交结果", "labelAt": [717, 202] },
+    { "id": "confirm-ok", "from": "TO_CONFIRM", "to": "COMPLETED", "label": "居民确认", "labelAt": [633, 244] },
+    { "id": "confirm-return", "from": "TO_CONFIRM", "to": "IN_PROGRESS", "label": "居民不满意退回（原因）", "variant": "emphasis", "fromSide": "right", "toSide": "right", "via": [[880, 307], [880, 157]], "labelAt": [850, 230] },
+    { "id": "reject", "from": "PENDING", "to": "REJECTED", "label": "驳回（理由）", "variant": "security", "fromSide": "bottom", "toSide": "left" },
+    { "id": "cancel-pending", "from": "PENDING", "to": "CANCELED", "label": "居民取消", "variant": "security", "fromSide": "left", "toSide": "bottom", "via": [[12, 157], [12, 560], [556, 560]] },
+    { "id": "cancel-assign", "from": "TO_ASSIGN", "to": "CANCELED", "label": "居民取消", "variant": "security", "fromSide": "bottom", "toSide": "top", "via": [[248, 400], [556, 400]] },
+    { "id": "close", "from": "COMPLETED", "to": "CLOSED", "label": "管理员关闭" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "主流程",
+      "items": [
+        "待受理 → 待派单 → 已派单 → 已接单 → 处理中 → 待确认 → 已完成，一条主线走到底",
+        "已完成后居民可评价（R37 联动），管理员可关闭归档"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "退回重做",
+      "items": [
+        "待确认阶段居民不满意可退回处理中，须附原因",
+        "退回后服务人员重新处理并再次提交结果"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "终态与流转纪律",
+      "items": [
+        "已驳回 / 已取消 / 已关闭均为终态，不再流转",
+        "每次流转写处理记录（操作人/时间/备注），时间线展示（R23）",
+        "非法流转（如已驳回再次受理）明确报错且不产生处理记录（R19）"
+      ]
+    }
+  ]
+}
