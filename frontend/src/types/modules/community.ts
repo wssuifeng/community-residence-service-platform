@@ -297,6 +297,30 @@ export interface IBatchOperationResult {
   failures: IBatchFailure[]
 }
 
+/* ==================== 结构逐层批量创建（POST /buildings|units|houses /batch） ==================== */
+
+/**
+ * 逐层批量创建结果（后端 BatchCreateResultVO）。
+ * 语义与社区批量操作不同：**逐行独立、不整体回滚**，按行号给出成功 ID 或失败原因；
+ * rowNo 为 1 起的提交顺序，与前端生成的名称/房号清单一一对应。
+ */
+export interface IBatchCreateRow {
+  /** 行号（1 起） */
+  rowNo: number
+  success: boolean
+  /** 成功时的新建 ID */
+  id?: number
+  /** 失败原因 */
+  reason?: string
+}
+
+export interface IBatchCreateResult {
+  total: number
+  success: number
+  fail: number
+  rows: IBatchCreateRow[]
+}
+
 /* ==================== 结构链一次性批量生成（V19 批次） ==================== */
 
 /**

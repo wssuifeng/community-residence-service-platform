@@ -53,11 +53,17 @@ import { useUserStore } from '@/store/user'
  * 信息架构（两栏：社区栏 + 详情单列）：
  *   ① 社区栏：关键字/状态筛选 + 分页 + 每社区概览计数 + 选中态；超管可多选批量管理；
  *   ② 详情栏（单列，占满剩余宽度）：
- *      · 社区头部：状态、联系方式、关键数字 + 动作区（**批量建房** / 快捷**编辑楼栋**、
- *        **编辑单元** / 「结构维护」菜单（新增楼栋 · 新增单元 · 批量建单元 · 删除楼栋/单元）/
- *        编辑社区 · 停用启用 · 删除 · 社区设置）；
+ *      · 社区头部：社区名/状态/联系方式 + 社区级操作（编辑社区 · 停用启用 · 删除 · 社区设置）；
+ *      · **建房带**：一个总入口「一键生成结构链」（楼栋→单元→房屋，先预览后落库）
+ *        ＋ 三个按层级递进的分步入口「①建楼栋 / ②建单元与房屋 / ③建房屋」
+ *        ＋ 右端低频「结构维护 ▾」（编辑楼栋/编辑单元/新增单个单元/删除楼栋/删除单元）；
  *      · 房屋面板：**唯一筛选区**（范围：楼栋/单元/房号 ＋ 条件：楼层/状态）＋ 缩放控件
  *        ＋ **单元平行列**（一单元一列，列多时横向滚动，缩放即可一屏多看几列）。
+ *
+ * 为什么建房要分区成带：新建（楼栋/单元与房屋/房屋/整链）是高频且成组的结构动作，
+ * 混在社区级操作里会让头部堆成一片按钮；单独一条浅底带 + 主次分明的按钮层级
+ * （实心总入口 → 序号分步按钮 → 右端低频维护菜单），既讲清"从哪一级开始建"，
+ * 也不再和「编辑社区 / 停用 / 删除」抢视觉重量。
  *
  * 结构目录为什么取消：批量建房已一次性建成 楼栋→单元→房屋，常驻结构树的选择功能被筛选区
  * 完全替代，且它固定占掉半屏、把房屋列表挤到下面。维护动作并不常用，改为「先选目标、
@@ -71,7 +77,7 @@ import { useUserStore } from '@/store/user'
  * 操作区不入卡片内容区，也不再遮挡房号。
  *
  * 三级结构的增删改与房屋状态变更/历史、批量建房等能力全部保留；创建链路由
- * StructureGenerateDialog（一次请求建成 楼栋→单元→房屋）承担主入口，
+ * StructureGenerateDialog（一次请求建成 楼栋→单元→房屋）承担总入口，
  * 单轴弹窗退为「已有楼栋/单元内补建」的专项入口。
  */
 
@@ -1052,12 +1058,23 @@ function refreshStructure(): void {
 /* ---------------- 单元批量建 / 房屋批量建 ---------------- */
 
 const unitBatchVisible = ref(false)
-const unitBatchTarget = ref<IBuilding | null>(null)
+/** 建单元与房屋的目标楼栋预选（打开前取当前筛选范围，弹窗内仍可改选） */
+const unitBatchSubjectId = ref<number | null>(null)
 
-function openUnitBatchCreate(building: IBuilding): void {
-  unitBatchTarget.value = building
+function openUnitBatchCreate(buildingId?: number | null): void {
+  unitBatchSubjectId.value = buildingId ?? activeBuildingId.value
   unitBatchVisible.value = true
 }
+
+/** 建房带可选楼栋（带单元/房屋规模，选错楼栋一眼可辨） */
+const buildingOptions = computed(() =>
+  buildings.value.map((node) => ({
+    id: node.building.id,
+    name: node.building.name,
+    units: node.units.length,
+    houses: node.units.reduce((sum, unitNode) => sum + unitNode.houses.length, 0)
+  }))
+)
 
 function handleUnitBatchSaved(buildingId: number): void {
   /* 批量建单元后定位到该楼栋，新单元以平行列直接可见 */
@@ -1096,17 +1113,14 @@ function handleViewStructure(communityId: number): void {
   focusCommunity(communityId)
 }
 
-/* ---------------- 结构维护（左侧常驻目录已取消，改为按需取目标） ----------------
-   为什么：批量建房一次性建成 楼栋→单元→房屋 后，常驻结构树的选择功能已被右侧筛选区
-   完全替代，保留它只会占掉半个屏并把房屋列表挤到下面。维护动作（新增/编辑/删除 楼栋与
-   单元）并不常用，改为「先选目标、再进各自弹窗」的一次性入口：楼栋编辑与单元编辑在
-   社区头部有独立快捷按钮，其余动作收在「结构维护」菜单里，能力零删减。 */
+/* ---------------- 结构维护（既有楼栋/单元的改与删；建房入口在「建房带」） ----------------
+   为什么这样分工：新建类动作（楼栋 / 单元与房屋 / 房屋 / 整链）已成组出现在建房带，
+   这里只保留**低频的既有结构维护**（编辑、单个新增、删除），避免头部与建房带功能重叠。 */
 
 type StructureAction =
   | 'building-edit'
   | 'building-delete'
   | 'unit-create'
-  | 'unit-batch'
   | 'unit-edit'
   | 'unit-delete'
 
@@ -1115,9 +1129,9 @@ const STRUCTURE_ACTIONS: Record<
   { title: string; needsUnit: boolean; hint: string; confirmText: string }
 > = {
   'building-edit': {
-    title: '快捷编辑楼栋',
+    title: '编辑楼栋',
     needsUnit: false,
-    hint: '选择要编辑的楼栋，继续后打开楼栋编辑表单。',
+    hint: '选择要编辑的楼栋，继续后打开楼栋编辑表单（名称 / 总层数 / 描述）。',
     confirmText: '继续编辑'
   },
   'building-delete': {
@@ -1127,19 +1141,13 @@ const STRUCTURE_ACTIONS: Record<
     confirmText: '继续删除'
   },
   'unit-create': {
-    title: '新增单元',
+    title: '新增单个单元',
     needsUnit: false,
-    hint: '选择所属楼栋，继续后填写单元名称。',
+    hint: '选择所属楼栋，继续后自由填写单元名称（批量按序号生成请用「建房 → 建单元与房屋」）。',
     confirmText: '继续新增'
   },
-  'unit-batch': {
-    title: '批量建单元',
-    needsUnit: false,
-    hint: '选择所属楼栋，按序号区间一次生成多个单元（已有单元自动跳过）。',
-    confirmText: '继续'
-  },
   'unit-edit': {
-    title: '快捷编辑单元',
+    title: '编辑单元',
     needsUnit: true,
     hint: '选择楼栋与单元，继续后打开单元编辑表单。',
     confirmText: '继续编辑'
@@ -1185,12 +1193,8 @@ function openStructureAction(action: StructureAction): void {
   structureDialogVisible.value = true
 }
 
-/** 「结构维护」菜单：新增楼栋不需要目标，直接开弹窗；其余动作先选目标 */
+/** 「结构维护」菜单：命令与动作同名，直接转目标选择弹窗（新增楼栋在建房带第 1 步） */
 function handleStructureMenu(command: unknown): void {
-  if (command === 'building-create') {
-    openBuildingCreate()
-    return
-  }
   openStructureAction(command as StructureAction)
 }
 
@@ -1220,9 +1224,6 @@ function runStructureAction(): void {
       break
     case 'unit-create':
       openUnitCreate(node.building.id)
-      break
-    case 'unit-batch':
-      openUnitBatchCreate(node.building)
       break
     case 'unit-edit':
       if (unitNode) openUnitEdit(unitNode.unit, node.building.id)
@@ -1882,51 +1883,6 @@ onMounted(async () => {
             <div class="head-actions">
               <el-button
                 v-permission="['ADMIN', 'SUPER_ADMIN']"
-                type="primary"
-                size="small"
-                @click="openStructureGenerate"
-              >
-                批量建房
-              </el-button>
-              <!-- 快捷编辑：楼栋 / 单元各一枚，目标由弹窗选择（预选当前筛选范围） -->
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                @click="openStructureAction('building-edit')"
-              >
-                编辑楼栋
-              </el-button>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                @click="openStructureAction('unit-edit')"
-              >
-                编辑单元
-              </el-button>
-              <!-- 其余结构维护动作（新增/批量/删除）收在一个菜单里，避免头部按钮堆叠 -->
-              <el-dropdown
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                trigger="click"
-                @command="handleStructureMenu"
-              >
-                <el-button size="small" class="structure-menu-trigger">
-                  结构维护
-                  <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="building-create">新增楼栋</el-dropdown-item>
-                    <el-dropdown-item command="unit-create" divided>新增单元</el-dropdown-item>
-                    <el-dropdown-item command="unit-batch">批量建单元</el-dropdown-item>
-                    <el-dropdown-item command="building-delete" divided>删除楼栋（级联）</el-dropdown-item>
-                    <el-dropdown-item command="unit-delete">删除单元</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
                 size="small"
                 @click="openCommunityEdit(selectedCommunity)"
               >
@@ -1955,6 +1911,99 @@ onMounted(async () => {
               </el-button>
             </div>
           </header>
+
+          <!-- 建房带：一个总入口（一次建成整条结构链）+ 三个按层级递进的入口，
+               社区级操作留在上方头部，两类动作分区呈现而不是混排成一片按钮 -->
+          <section class="build-bar" aria-label="建房入口">
+            <span class="build-bar-title">
+              <span class="panel-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
+                </svg>
+              </span>
+              建房
+            </span>
+
+            <el-tooltip
+              content="按楼栋序号区间一次建成 楼栋 → 单元 → 房屋 整条结构链（先预览后落库）"
+              placement="bottom"
+            >
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                type="primary"
+                class="build-main"
+                @click="openStructureGenerate"
+              >
+                一键生成结构链
+                <span class="build-main-sub">楼栋 → 单元 → 房屋</span>
+              </el-button>
+            </el-tooltip>
+
+            <span class="build-sep" aria-hidden="true">或按层级分步建</span>
+
+            <div class="build-steps" role="group" aria-label="按层级分步建房">
+              <el-tooltip content="在指定社区新建楼栋（单栋，含总层数与描述）" placement="bottom">
+                <el-button
+                  v-permission="['ADMIN', 'SUPER_ADMIN']"
+                  size="small"
+                  class="build-step"
+                  @click="openBuildingCreate"
+                >
+                  <span class="step-no">1</span>建楼栋
+                </el-button>
+              </el-tooltip>
+              <el-tooltip
+                content="在指定楼栋按序号批量建单元，并可同时生成各单元的 楼层 × 每层户数 房屋"
+                placement="bottom"
+              >
+                <el-button
+                  v-permission="['ADMIN', 'SUPER_ADMIN']"
+                  size="small"
+                  class="build-step"
+                  @click="openUnitBatchCreate()"
+                >
+                  <span class="step-no">2</span>建单元与房屋
+                </el-button>
+              </el-tooltip>
+              <el-tooltip
+                content="在指定单元按楼层区间与每层户数批量建房屋（可只建某几层）"
+                placement="bottom"
+              >
+                <el-button
+                  v-permission="['ADMIN', 'SUPER_ADMIN']"
+                  size="small"
+                  class="build-step"
+                  @click="openHouseBatchCreate()"
+                >
+                  <span class="step-no">3</span>建房屋
+                </el-button>
+              </el-tooltip>
+            </div>
+
+            <!-- 既有结构的改/删属低频动作，收在一个菜单里，不占建房带的视觉重量 -->
+            <el-dropdown
+              v-permission="['ADMIN', 'SUPER_ADMIN']"
+              class="build-maintenance"
+              trigger="click"
+              @command="handleStructureMenu"
+            >
+              <el-button size="small" text class="structure-menu-trigger">
+                结构维护
+                <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="building-edit">编辑楼栋</el-dropdown-item>
+                  <el-dropdown-item command="unit-edit">编辑单元</el-dropdown-item>
+                  <el-dropdown-item command="unit-create" divided>新增单个单元</el-dropdown-item>
+                  <el-dropdown-item command="building-delete" divided>删除楼栋（级联）</el-dropdown-item>
+                  <el-dropdown-item command="unit-delete">删除单元</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </section>
 
           <div v-if="structureLoading && !structureLoaded" class="metric-strip">
             <el-skeleton :rows="1" animated />
@@ -2372,8 +2421,15 @@ onMounted(async () => {
       @saved="handleUnitSaved"
     />
 
-    <!-- 批量建单元：只对已有楼栋按序号区间补单元（结构生成弹窗不覆盖此场景） -->
-    <UnitBatchDialog v-model="unitBatchVisible" :building="unitBatchTarget" @saved="handleUnitBatchSaved" />
+    <!-- 建单元与房屋（建房带第 ② 级）：既有楼栋下批量补单元，并可同批生成楼层房屋 -->
+    <UnitBatchDialog
+      v-model="unitBatchVisible"
+      :community-name="selectedCommunity?.name"
+      :building-options="buildingOptions"
+      :initial-building-id="unitBatchSubjectId ?? ''"
+      @saved="handleUnitBatchSaved"
+      @result="showBatchResult"
+    />
 
     <!-- 结构生成（批量建房主入口）：一次请求建成 楼栋 → 单元 → 房屋 -->
     <StructureGenerateDialog
@@ -3053,6 +3109,91 @@ onMounted(async () => {
   align-items: center;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
+}
+
+/* ---------- 建房带（总入口 + 分步入口 + 结构维护） ---------- */
+
+/* 浅底横带：与「社区级操作」在视觉上分开——建房是本页最高频的结构动作，
+   给它一条独立的带，而不是继续往头部右侧堆按钮 */
+.build-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+}
+
+.build-bar-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding-right: var(--spacing-md);
+  border-right: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* 总入口：比子按钮高一档（实心主色 + 副标题说明作用范围） */
+.build-main {
+  height: 36px;
+  font-weight: var(--font-weight-medium);
+}
+
+.build-main-sub {
+  margin-left: var(--spacing-sm);
+  padding-left: var(--spacing-sm);
+  border-left: 1px solid rgba(255, 255, 255, 0.45);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  opacity: 0.9;
+}
+
+.build-sep {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.build-steps {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+/* 分步入口：序号徽标把「社区 → 楼栋 → 单元」的层级顺序写在按钮上 */
+.build-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+}
+
+.step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: var(--radius-circle);
+  background-color: var(--color-primary-bg);
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  color: var(--color-primary);
+}
+
+.build-step:hover .step-no {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+/* 低频维护动作推到带的右端，与建房入口拉开距离 */
+.build-maintenance {
+  margin-left: auto;
 }
 
 /* 关键数字：大字等宽，单位退为小字，环显示入住率 */
