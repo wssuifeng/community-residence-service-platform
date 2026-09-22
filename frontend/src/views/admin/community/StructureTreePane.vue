@@ -48,20 +48,25 @@ import { useGridSelection } from '@/composables/useGridSelection'
 import { useUserStore } from '@/store/user'
 
 /**
- * 社区管理主面板（2026-09-21 布局重做；2026-09-22 批次 j 交互与布局再修）。
+ * 社区管理主面板（2026-09-21 布局重做；2026-09-22 批次 j/k 交互与布局再修）。
  *
- * 信息架构（三栏：社区 → 结构 → 房屋，逐级收窄；窄屏上下堆叠）：
+ * 信息架构（两栏：社区栏 + 详情单列）：
  *   ① 社区栏：关键字/状态筛选 + 分页 + 每社区概览计数 + 选中态；超管可多选批量管理；
- *   ② 结构栏：当前社区的楼栋/单元树（两级带 套数/空置/单元数 计数），
- *      **独立滚动 + 限高 + 可折叠**，行尾统一收敛为一个「⋯」菜单；
- *   ③ 房屋栏：社区头部（状态、联系方式、关键数字）→ **唯一筛选区**（范围：楼栋/单元/房号
- *      ＋ 条件：楼层/状态）→ 房屋网格与批量操作。
+ *   ② 详情栏（单列，占满剩余宽度）：
+ *      · 社区头部：状态、联系方式、关键数字 + 动作区（**批量建房** / 快捷**编辑楼栋**、
+ *        **编辑单元** / 「结构维护」菜单（新增楼栋 · 新增单元 · 批量建单元 · 删除楼栋/单元）/
+ *        编辑社区 · 停用启用 · 删除 · 社区设置）；
+ *      · 房屋面板：**唯一筛选区**（范围：楼栋/单元/房号 ＋ 条件：楼层/状态）＋ 缩放控件
+ *        ＋ **单元平行列**（一单元一列，列多时横向滚动，缩放即可一屏多看几列）。
  *
- * 筛选区为什么只有一处：结构栏与筛选区读写同一组 activeBuildingId/activeUnitId，
- * 结构栏点选只是「选择范围的快捷方式」，筛选控件集中在房屋栏顶部一张卡内，
- * 层级固定为「范围 → 条件 → 结果」，不再出现上下两处同类筛选按钮。
+ * 结构目录为什么取消：批量建房已一次性建成 楼栋→单元→房屋，常驻结构树的选择功能被筛选区
+ * 完全替代，且它固定占掉半屏、把房屋列表挤到下面。维护动作并不常用，改为「先选目标、
+ * 再进各自弹窗」的一次性入口（`structureDialogVisible`），能力零删减。
  *
- * 房屋小卡片为什么不再盖悬浮按钮：66×34 的卡片被三个操作钮盖满后无法点开详情。
+ * 筛选区为什么只有一处：只有房屋栏顶部这一张筛选卡，层级固定为「范围 → 条件 → 结果」，
+ * 不存在上下两处同类筛选按钮。
+ *
+ * 房屋小卡片为什么不盖悬浮按钮：66×34 的卡片被三个操作钮盖满后无法点开详情。
  * 现在卡片主体整块可点（进详情），卡片右上角一个「⋯」菜单承载 详情/编辑/状态/删除，
  * 操作区不入卡片内容区，也不再遮挡房号。
  *
@@ -72,14 +77,7 @@ import { useUserStore } from '@/store/user'
 
 const ICONS = {
   home: ['M3 11l9-8 9 8', 'M5 9.7V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.7', 'M10 21v-6h4v6'],
-  search: ['M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14z', 'M20 20l-4.2-4.2'],
-  sitemap: [
-    'M9 3h6v5H9z',
-    'M3 16h6v5H3z',
-    'M15 16h6v5h-6z',
-    'M12 8v3',
-    'M6 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2'
-  ]
+  search: ['M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14z', 'M20 20l-4.2-4.2']
 }
 
 const ACTION_ICONS = {
@@ -94,8 +92,7 @@ const ACTION_ICONS = {
   ],
   swap: ['M4 8h13', 'M14 5l3 3-3 3', 'M20 16H7', 'M10 13l-3 3 3 3'],
   layers: ['M12 3l8 4.5-8 4.5-8-4.5L12 3', 'M4 12.5L12 17l8-4.5', 'M4 16.5L12 21l8-4.5'],
-  chevron: ['M9 6l6 6-6 6'],
-  /** 行尾「更多」：三个圆点（round linecap 把零长度线段画成点） */
+  /** 卡片角标「更多」：三个圆点（round linecap 把零长度线段画成点） */
   more: ['M6 12h.01', 'M12 12h.01', 'M18 12h.01'],
   eye: [
     'M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z',
@@ -249,7 +246,6 @@ function selectCommunity(community: ICommunity, force = false): void {
   resetHouseFilters()
   activeBuildingId.value = null
   activeUnitId.value = null
-  expandedBuildings.value = {}
   loadStructure(community.id)
 }
 
@@ -401,75 +397,24 @@ const houseEntries = computed<HouseEntry[]>(() =>
   )
 )
 
-/** 楼栋计数：单元数 / 房屋数 / 空置数（结构目录每行右侧的筛选依据） */
-interface StructureCount {
-  units: number
-  houses: number
-  vacant: number
-}
+/* ---------------- 筛选状态（唯一筛选区读写；楼栋/单元用选择器切换） ---------------- */
 
-const buildingCounts = computed<Map<number, StructureCount>>(() => {
-  const map = new Map<number, StructureCount>()
-  for (const building of buildings.value) {
-    let houses = 0
-    let vacant = 0
-    for (const unitNode of building.units) {
-      houses += unitNode.houses.length
-      vacant += unitNode.houses.filter((house) => house.status === 'VACANT').length
-    }
-    map.set(building.building.id, { units: building.units.length, houses, vacant })
-  }
-  return map
-})
-
-const unitCounts = computed<Map<number, StructureCount>>(() => {
-  const map = new Map<number, StructureCount>()
-  for (const building of buildings.value) {
-    for (const unitNode of building.units) {
-      map.set(unitNode.unit.id, {
-        units: 0,
-        houses: unitNode.houses.length,
-        vacant: unitNode.houses.filter((house) => house.status === 'VACANT').length
-      })
-    }
-  }
-  return map
-})
-
-/* ---------------- 筛选状态（同一层级用选择器切换，绝不平铺全部单元） ---------------- */
-
-const expandedBuildings = ref<Record<number, boolean>>({})
 const activeBuildingId = ref<number | null>(null)
 const activeUnitId = ref<number | null>(null)
 const houseKeyword = ref('')
 const activeFloor = ref<number | null>(null)
 const activeStatus = ref<HouseStatus | null>(null)
 
-function toggleBuilding(buildingId: number): void {
-  expandedBuildings.value[buildingId] = !expandedBuildings.value[buildingId]
-}
-
 function selectBuilding(buildingId: number | null): void {
   activeBuildingId.value = buildingId
   activeUnitId.value = null
-  if (buildingId !== null) expandedBuildings.value[buildingId] = true
 }
 
 function selectUnit(unitId: number | null): void {
   activeUnitId.value = unitId
 }
 
-/* ---------------- 筛选区（唯一入口：范围选择器与结构栏读写同一组状态） ---------------- */
-
-/* 结构栏折叠：楼栋多时不再持续占高（折叠后仅留标题与一行口径摘要）。
-   窄屏（<1600px 为上下堆叠布局）默认先折叠，把纵向空间留给房屋列表。 */
-const outlineCollapsed = ref(
-  typeof window !== 'undefined' && window.matchMedia('(max-width: 1599px)').matches
-)
-
-function toggleOutline(): void {
-  outlineCollapsed.value = !outlineCollapsed.value
-}
+/* ---------------- 筛选区（唯一入口：范围选择器） ---------------- */
 
 /** el-select 清空会给出 ''/undefined，统一折算为「全部」 */
 function normalizeScopeId(value: unknown): number | null {
@@ -652,7 +597,11 @@ interface GridGroup {
   title: string
   /** 分组所属单元（「＋」快速添加房屋的目标单元） */
   unit: IUnit
+  /** 单元所属楼栋（列头「批量建房」预选用，避免改动筛选态） */
+  buildingId: number
   entries: HouseEntry[]
+  /** 当前筛选下的空置套数（列头计数，与 entries.length 同口径） */
+  vacant: number
 }
 
 const gridGroups = computed<GridGroup[]>(() => {
@@ -672,19 +621,43 @@ const gridGroups = computed<GridGroup[]>(() => {
       /* 全部楼栋视图下带上楼栋名，避免同名单元在多栋间混淆 */
       title: activeBuildingId.value === null ? `${entry.buildingName} · ${entry.unitName}` : entry.unitName,
       unit: unitNode.unit,
-      entries: [entry]
+      buildingId: entry.buildingId,
+      entries: [entry],
+      vacant: 0
     })
   }
-  /* 分组内按楼层与房号排序（与结构总览楼层行阅读顺序一致） */
-  return [...groups.values()].map((group) => ({
-    ...group,
-    entries: [...group.entries].sort(
+  /* 分组内按楼层与房号排序（与结构总览楼层行阅读顺序一致）；
+     列头计数在此一次性算好，避免模板里反复 filter */
+  return [...groups.values()].map((group) => {
+    const entries = [...group.entries].sort(
       (a, b) =>
         b.house.floor - a.house.floor ||
         a.house.houseNumber.localeCompare(b.house.houseNumber, undefined, { numeric: true })
     )
-  }))
+    return {
+      ...group,
+      entries,
+      vacant: entries.filter((entry) => entry.house.status === 'VACANT').length
+    }
+  })
 })
+
+/* ---------------- 缩放（单元平行列的人眼适配：卡片小一点就能多排几列） ---------------- */
+
+const MIN_ZOOM = 0.7
+const MAX_ZOOM = 1.4
+const ZOOM_STEP = 0.1
+
+const gridZoom = ref(1)
+
+function stepZoom(delta: number): void {
+  const next = Math.round((gridZoom.value + delta) * 10) / 10
+  gridZoom.value = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next))
+}
+
+function resetZoom(): void {
+  gridZoom.value = 1
+}
 
 const HOUSE_BLOCK_CLASS: Record<HouseStatus, string> = {
   OCCUPIED: 'is-occupied',
@@ -1043,7 +1016,6 @@ function openBuildingEdit(building: IBuilding): void {
 }
 
 function handleBuildingSaved(entity: IBuilding): void {
-  expandedBuildings.value[entity.id] = true
   selectBuilding(entity.id)
   refreshStructure()
 }
@@ -1065,7 +1037,9 @@ function openUnitEdit(unit: IUnit, buildingId: number): void {
 }
 
 function handleUnitSaved(entity: IUnit): void {
-  expandedBuildings.value[entity.buildingId] = true
+  /* 保存后直接把筛选定位到该单元：新建/改名的结果当屏可见 */
+  selectBuilding(entity.buildingId)
+  selectUnit(entity.id)
   refreshStructure()
 }
 
@@ -1086,14 +1060,20 @@ function openUnitBatchCreate(building: IBuilding): void {
 }
 
 function handleUnitBatchSaved(buildingId: number): void {
-  expandedBuildings.value[buildingId] = true
+  /* 批量建单元后定位到该楼栋，新单元以平行列直接可见 */
+  selectBuilding(buildingId)
   refreshStructure()
 }
 
 const houseBatchVisible = ref(false)
+/** 批量建房弹窗的预选目标（列头点入时指向该单元，不牵动整页筛选态） */
+const houseBatchBuildingId = ref<number | null>(null)
+const houseBatchUnitId = ref<number | null>(null)
 
-/** 单元内补建房屋：预选当前筛选到的楼栋/单元（无筛选时留空由用户选择） */
-function openHouseBatchCreate(): void {
+/** 单元内补建房屋：默认预选当前筛选到的楼栋/单元；从单元列头点入时显式传该单元 */
+function openHouseBatchCreate(scope?: { buildingId: number; unitId: number }): void {
+  houseBatchBuildingId.value = scope?.buildingId ?? activeBuildingId.value
+  houseBatchUnitId.value = scope?.unitId ?? activeUnitId.value
   houseBatchVisible.value = true
 }
 
@@ -1116,44 +1096,139 @@ function handleViewStructure(communityId: number): void {
   focusCommunity(communityId)
 }
 
-/* ---------------- 结构栏行尾菜单：楼栋 / 单元的增删改收进一个「⋯」 ----------------
-   为什么收敛：每行 4 个图标按钮平铺后，20 栋就是 80 个按钮，行内文字被挤压、
-   计数被截断、结构也看不清楚。现在默认零按钮，需要时展开一个带文字标签的菜单，
-   动作语义反而更明确（且不再有图标猜谜）。 */
+/* ---------------- 结构维护（左侧常驻目录已取消，改为按需取目标） ----------------
+   为什么：批量建房一次性建成 楼栋→单元→房屋 后，常驻结构树的选择功能已被右侧筛选区
+   完全替代，保留它只会占掉半个屏并把房屋列表挤到下面。维护动作（新增/编辑/删除 楼栋与
+   单元）并不常用，改为「先选目标、再进各自弹窗」的一次性入口：楼栋编辑与单元编辑在
+   社区头部有独立快捷按钮，其余动作收在「结构维护」菜单里，能力零删减。 */
 
-function handleBuildingCommand(command: unknown, node: BuildingNode): void {
-  switch (command) {
+type StructureAction =
+  | 'building-edit'
+  | 'building-delete'
+  | 'unit-create'
+  | 'unit-batch'
+  | 'unit-edit'
+  | 'unit-delete'
+
+const STRUCTURE_ACTIONS: Record<
+  StructureAction,
+  { title: string; needsUnit: boolean; hint: string; confirmText: string }
+> = {
+  'building-edit': {
+    title: '快捷编辑楼栋',
+    needsUnit: false,
+    hint: '选择要编辑的楼栋，继续后打开楼栋编辑表单。',
+    confirmText: '继续编辑'
+  },
+  'building-delete': {
+    title: '删除楼栋',
+    needsUnit: false,
+    hint: '楼栋下有单元时会级联删除其全部单元与房屋（前端自底向上编排，中途失败不回滚）。',
+    confirmText: '继续删除'
+  },
+  'unit-create': {
+    title: '新增单元',
+    needsUnit: false,
+    hint: '选择所属楼栋，继续后填写单元名称。',
+    confirmText: '继续新增'
+  },
+  'unit-batch': {
+    title: '批量建单元',
+    needsUnit: false,
+    hint: '选择所属楼栋，按序号区间一次生成多个单元（已有单元自动跳过）。',
+    confirmText: '继续'
+  },
+  'unit-edit': {
+    title: '快捷编辑单元',
+    needsUnit: true,
+    hint: '选择楼栋与单元，继续后打开单元编辑表单。',
+    confirmText: '继续编辑'
+  },
+  'unit-delete': {
+    title: '删除单元',
+    needsUnit: true,
+    hint: '单元下存在房屋时删除会被后端拒绝（需先清空该单元房屋）。',
+    confirmText: '继续删除'
+  }
+}
+
+const structureDialogVisible = ref(false)
+const structureAction = ref<StructureAction>('building-edit')
+const structureBuildingId = ref<number | null>(null)
+const structureUnitId = ref<number | null>(null)
+
+const structureActionMeta = computed(() => STRUCTURE_ACTIONS[structureAction.value])
+
+/** 弹窗内单元选项：跟随所选楼栋联动 */
+const structureUnitOptions = computed(() => {
+  const node = buildings.value.find((item) => item.building.id === structureBuildingId.value)
+  return (node?.units ?? []).map((unitNode) => ({ value: unitNode.unit.id, label: unitNode.unit.name }))
+})
+
+const structureTargetReady = computed(() => {
+  if (structureBuildingId.value === null) return false
+  if (!structureActionMeta.value.needsUnit) return true
+  return structureUnitId.value !== null
+})
+
+/** 打开结构维护弹窗：默认预选当前筛选范围（用户正在看的楼栋/单元），
+    未筛选时退化为「第一栋 + 其第一个单元」，少一次手工选择 */
+function openStructureAction(action: StructureAction): void {
+  structureAction.value = action
+  const buildingId = activeBuildingId.value ?? buildings.value[0]?.building.id ?? null
+  structureBuildingId.value = buildingId
+  const presetUnit =
+    activeUnitId.value ??
+    buildings.value.find((item) => item.building.id === buildingId)?.units[0]?.unit.id ??
+    null
+  structureUnitId.value = presetUnit
+  structureDialogVisible.value = true
+}
+
+/** 「结构维护」菜单：新增楼栋不需要目标，直接开弹窗；其余动作先选目标 */
+function handleStructureMenu(command: unknown): void {
+  if (command === 'building-create') {
+    openBuildingCreate()
+    return
+  }
+  openStructureAction(command as StructureAction)
+}
+
+function handleStructureBuildingChange(): void {
+  structureUnitId.value = null
+}
+
+function runStructureAction(): void {
+  const meta = structureActionMeta.value
+  const node = buildings.value.find((item) => item.building.id === structureBuildingId.value) ?? null
+  if (!node) {
+    ElMessage.warning('请选择楼栋')
+    return
+  }
+  const unitNode = node.units.find((item) => item.unit.id === structureUnitId.value) ?? null
+  if (meta.needsUnit && !unitNode) {
+    ElMessage.warning('请选择单元')
+    return
+  }
+  structureDialogVisible.value = false
+  switch (structureAction.value) {
+    case 'building-edit':
+      openBuildingEdit(node.building)
+      break
+    case 'building-delete':
+      void handleBuildingDelete(node)
+      break
     case 'unit-create':
       openUnitCreate(node.building.id)
       break
     case 'unit-batch':
       openUnitBatchCreate(node.building)
       break
-    case 'edit':
-      openBuildingEdit(node.building)
+    case 'unit-edit':
+      if (unitNode) openUnitEdit(unitNode.unit, node.building.id)
       break
-    case 'delete':
-      void handleBuildingDelete(node)
-      break
-    default:
-      break
-  }
-}
-
-function handleUnitCommand(command: unknown, node: BuildingNode, unitNode: UnitNode): void {
-  switch (command) {
-    case 'house-create':
-      openHouseCreate(unitNode.unit, node.building.name)
-      break
-    case 'house-batch':
-      selectUnit(unitNode.unit.id)
-      openHouseBatchCreate()
-      break
-    case 'edit':
-      openUnitEdit(unitNode.unit, node.building.id)
-      break
-    case 'delete':
-      void handleUnitDelete(unitNode.unit)
+    case 'unit-delete':
+      if (unitNode) void handleUnitDelete(unitNode.unit)
       break
     default:
       break
@@ -1813,12 +1888,49 @@ onMounted(async () => {
               >
                 批量建房
               </el-button>
+              <!-- 快捷编辑：楼栋 / 单元各一枚，目标由弹窗选择（预选当前筛选范围） -->
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                size="small"
+                @click="openStructureAction('building-edit')"
+              >
+                编辑楼栋
+              </el-button>
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                size="small"
+                @click="openStructureAction('unit-edit')"
+              >
+                编辑单元
+              </el-button>
+              <!-- 其余结构维护动作（新增/批量/删除）收在一个菜单里，避免头部按钮堆叠 -->
+              <el-dropdown
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                trigger="click"
+                @command="handleStructureMenu"
+              >
+                <el-button size="small" class="structure-menu-trigger">
+                  结构维护
+                  <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="building-create">新增楼栋</el-dropdown-item>
+                    <el-dropdown-item command="unit-create" divided>新增单元</el-dropdown-item>
+                    <el-dropdown-item command="unit-batch">批量建单元</el-dropdown-item>
+                    <el-dropdown-item command="building-delete" divided>删除楼栋（级联）</el-dropdown-item>
+                    <el-dropdown-item command="unit-delete">删除单元</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
               <el-button
                 v-permission="['ADMIN', 'SUPER_ADMIN']"
                 size="small"
                 @click="openCommunityEdit(selectedCommunity)"
               >
-                编辑
+                编辑社区
               </el-button>
               <el-button
                 v-permission="['ADMIN', 'SUPER_ADMIN']"
@@ -1877,242 +1989,7 @@ onMounted(async () => {
           </div>
         </article>
 
-        <!-- 结构目录：楼栋 → 单元树（结构与维护入口；筛选统一在右侧房屋栏的筛选区） -->
-        <article class="panel outline-panel" :class="{ 'is-collapsed': outlineCollapsed }">
-          <header class="panel-head">
-            <h3 class="panel-title">
-              <span class="panel-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path v-for="(d, i) in ICONS.sitemap" :key="i" :d="d" />
-                </svg>
-              </span>
-              结构目录
-              <span v-if="structureLoaded" class="panel-count">{{ buildings.length }} 栋</span>
-            </h3>
-            <div class="panel-actions">
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                size="small"
-                @click="openBuildingCreate"
-              >
-                新增楼栋
-              </el-button>
-              <button
-                type="button"
-                class="collapse-btn"
-                :aria-expanded="!outlineCollapsed"
-                @click="toggleOutline"
-              >
-                {{ outlineCollapsed ? '展开' : '收起' }}
-              </button>
-            </div>
-          </header>
-
-          <template v-if="!outlineCollapsed">
-            <p class="outline-tip">
-              点楼栋 / 单元即筛选右侧房屋；行尾「⋯」做新增、批量与增删改。
-            </p>
-
-            <div v-if="structureLoading && !structureLoaded" class="outline-skeleton">
-              <el-skeleton :rows="4" animated />
-            </div>
-
-            <div v-else-if="structureError" class="outline-state">
-              <p class="state-title">结构加载失败</p>
-              <p class="state-text">{{ structureError }}</p>
-              <el-button size="small" @click="retryStructure">重试</el-button>
-            </div>
-
-            <div v-else-if="!structureLoading && buildings.length === 0" class="outline-state">
-              <p class="state-title">该社区还没有楼栋</p>
-              <p class="state-text">
-                用右上角「批量建房」一次生成 楼栋 → 单元 → 房屋；也可以点「新增楼栋」单独建一栋。
-              </p>
-            </div>
-
-            <!-- 独立滚动区：限高由 CSS 控制，楼栋再多也不会把右侧房屋列表顶下去 -->
-            <div v-else class="outline-scroll">
-              <ul class="outline">
-                <li v-for="node in buildings" :key="node.building.id">
-                  <div
-                    class="outline-row is-building"
-                    :class="{
-                      'is-active': activeBuildingId === node.building.id,
-                      'is-open': expandedBuildings[node.building.id]
-                    }"
-                  >
-                    <button
-                      type="button"
-                      class="row-toggle"
-                      :aria-label="expandedBuildings[node.building.id] ? '收起单元' : '展开单元'"
-                      :aria-expanded="!!expandedBuildings[node.building.id]"
-                      @click="toggleBuilding(node.building.id)"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        :class="{ 'is-open': expandedBuildings[node.building.id] }"
-                      >
-                        <path v-for="(d, i) in ACTION_ICONS.chevron" :key="i" :d="d" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      class="row-label"
-                      :title="node.building.name"
-                      @click="selectBuilding(node.building.id)"
-                    >
-                      {{ node.building.name }}
-                    </button>
-                    <span
-                      class="row-counts"
-                      :title="`${node.building.floors} 层 · ${buildingCounts.get(node.building.id)?.units ?? 0} 个单元 · ${buildingCounts.get(node.building.id)?.houses ?? 0} 套房屋 · 空置 ${buildingCounts.get(node.building.id)?.vacant ?? 0} 套`"
-                    >
-                      <b>{{ buildingCounts.get(node.building.id)?.houses ?? 0 }}</b> 套 · 空
-                      <b>{{ buildingCounts.get(node.building.id)?.vacant ?? 0 }}</b> ·
-                      <b>{{ buildingCounts.get(node.building.id)?.units ?? 0 }}</b> 单元
-                    </span>
-                    <el-dropdown
-                      v-permission="['ADMIN', 'SUPER_ADMIN']"
-                      class="row-menu"
-                      trigger="click"
-                      placement="bottom-end"
-                      @command="handleBuildingCommand($event, node)"
-                    >
-                      <button
-                        type="button"
-                        class="row-menu-btn"
-                        :aria-label="`${node.building.name} 更多操作`"
-                        @click.stop
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                          <path v-for="(d, i) in ACTION_ICONS.more" :key="i" :d="d" />
-                        </svg>
-                      </button>
-                      <template #dropdown>
-                        <el-dropdown-menu>
-                          <el-dropdown-item command="unit-create">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in ACTION_ICONS.plus" :key="i" :d="d" />
-                            </svg>
-                            新增单元
-                          </el-dropdown-item>
-                          <el-dropdown-item command="unit-batch">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
-                            </svg>
-                            批量建单元
-                          </el-dropdown-item>
-                          <el-dropdown-item command="edit" divided>
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
-                            </svg>
-                            编辑楼栋
-                          </el-dropdown-item>
-                          <el-dropdown-item command="delete">
-                            <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
-                            </svg>
-                            删除楼栋（级联）
-                          </el-dropdown-item>
-                        </el-dropdown-menu>
-                      </template>
-                    </el-dropdown>
-                  </div>
-
-                  <ul v-if="expandedBuildings[node.building.id]" class="outline-children">
-                    <li v-if="node.units.length === 0" class="outline-hint">
-                      该楼栋暂无单元，用行尾「⋯ → 批量建单元」按序号区间生成，或「新增单元」单独建一个。
-                    </li>
-                    <template v-else>
-                      <li v-for="unitNode in node.units" :key="unitNode.unit.id">
-                        <div
-                          class="outline-row is-unit"
-                          :class="{ 'is-active': activeUnitId === unitNode.unit.id }"
-                        >
-                          <span class="row-toggle is-leaf" aria-hidden="true" />
-                          <button
-                            type="button"
-                            class="row-label"
-                            :title="unitNode.unit.name"
-                            @click="selectUnit(unitNode.unit.id)"
-                          >
-                            {{ unitNode.unit.name }}
-                          </button>
-                          <span
-                            class="row-counts"
-                            :title="`${unitCounts.get(unitNode.unit.id)?.houses ?? 0} 套房屋 · 空置 ${unitCounts.get(unitNode.unit.id)?.vacant ?? 0} 套`"
-                          >
-                            <b>{{ unitCounts.get(unitNode.unit.id)?.houses ?? 0 }}</b> 套 · 空
-                            <b>{{ unitCounts.get(unitNode.unit.id)?.vacant ?? 0 }}</b>
-                          </span>
-                          <el-dropdown
-                            v-permission="['ADMIN', 'SUPER_ADMIN']"
-                            class="row-menu"
-                            trigger="click"
-                            placement="bottom-end"
-                            @command="handleUnitCommand($event, node, unitNode)"
-                          >
-                            <button
-                              type="button"
-                              class="row-menu-btn"
-                              :aria-label="`${unitNode.unit.name} 更多操作`"
-                              @click.stop
-                            >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path v-for="(d, i) in ACTION_ICONS.more" :key="i" :d="d" />
-                              </svg>
-                            </button>
-                            <template #dropdown>
-                              <el-dropdown-menu>
-                                <el-dropdown-item command="house-create">
-                                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path v-for="(d, i) in ICONS.home" :key="i" :d="d" />
-                                  </svg>
-                                  新增房屋
-                                </el-dropdown-item>
-                                <el-dropdown-item command="house-batch">
-                                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
-                                  </svg>
-                                  批量建房
-                                </el-dropdown-item>
-                                <el-dropdown-item command="edit" divided>
-                                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
-                                  </svg>
-                                  编辑单元
-                                </el-dropdown-item>
-                                <el-dropdown-item command="delete">
-                                  <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
-                                  </svg>
-                                  删除单元
-                                </el-dropdown-item>
-                              </el-dropdown-menu>
-                            </template>
-                          </el-dropdown>
-                        </div>
-                      </li>
-                    </template>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-          </template>
-
-          <!-- 折叠态：只留一行口径摘要，不占纵向空间 -->
-          <p v-else class="outline-summary">
-            {{ communityMetrics.buildings }} 栋 · {{ communityMetrics.units }} 单元 ·
-            {{ communityMetrics.houses }} 套房屋 · 空置 {{ communityMetrics.vacant }}
-          </p>
-        </article>
-
-        <!-- 房屋结果区：全页唯一筛选区（范围 → 条件 → 结果） -->
+        <!-- 房屋结果区：全页唯一筛选区（范围 → 条件 → 结果），单元平行成列 -->
         <article class="panel houses-panel">
           <header class="panel-head">
             <h3 class="panel-title">
@@ -2124,10 +2001,40 @@ onMounted(async () => {
               房屋
               <span v-if="!structureLoading" class="panel-count">{{ houseEntries.length }} 套</span>
             </h3>
+            <!-- 缩放：单元以平行列排布，缩小一点即可多排几列（1.0 为原始尺寸） -->
+            <div class="panel-actions">
+              <div class="zoom-control" role="group" aria-label="房屋卡片缩放">
+                <button
+                  type="button"
+                  class="zoom-btn"
+                  aria-label="缩小"
+                  :disabled="gridZoom <= MIN_ZOOM"
+                  @click="stepZoom(-ZOOM_STEP)"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  class="zoom-value"
+                  :title="`点击恢复 100%（当前 ${Math.round(gridZoom * 100)}%）`"
+                  @click="resetZoom"
+                >
+                  {{ Math.round(gridZoom * 100) }}%
+                </button>
+                <button
+                  type="button"
+                  class="zoom-btn"
+                  aria-label="放大"
+                  :disabled="gridZoom >= MAX_ZOOM"
+                  @click="stepZoom(ZOOM_STEP)"
+                >
+                  ＋
+                </button>
+              </div>
+            </div>
           </header>
 
-          <!-- 筛选区：范围（楼栋/单元/房号）＋ 条件（楼层/状态）集中一处；
-               楼栋/单元与结构目录读写同一组状态，结构目录点选只是这里的快捷方式 -->
+          <!-- 筛选区：范围（楼栋/单元/房号）＋ 条件（楼层/状态）集中一处 -->
           <section class="filter-panel" aria-label="房屋筛选">
             <div class="filter-head">
               <span class="filter-title">筛选</span>
@@ -2257,11 +2164,18 @@ onMounted(async () => {
               <el-skeleton :rows="4" animated />
             </div>
 
-            <div v-else-if="!structureLoading && gridGroups.length === 0" class="grid-state">
+            <!-- 结构加载失败：不落在「还没有房屋」的空态里（否则误导为"没数据"） -->
+            <div v-else-if="structureError" class="grid-state">
+              <p class="state-title">结构与房屋加载失败</p>
+              <p class="state-text">{{ structureError }}</p>
+              <el-button size="small" @click="retryStructure">重试</el-button>
+            </div>
+
+            <div v-else-if="gridGroups.length === 0" class="grid-state">
               <template v-if="houseEntries.length === 0">
                 <p class="state-title">该社区还没有房屋</p>
                 <p class="state-text">
-                  用「批量建房」按楼层与户数一次生成，或在结构目录单元行「⋯ → 新增房屋」单独添加。
+                  用上方「批量建房」一次生成 楼栋 → 单元 → 房屋；也可在单元列头点「＋」单独添加。
                 </p>
               </template>
               <template v-else>
@@ -2271,102 +2185,120 @@ onMounted(async () => {
               </template>
             </div>
 
-            <div v-for="group in gridGroups" :key="group.key" class="grid-group">
-              <h4 class="grid-group-title">
-                {{ group.title }}
-                <span class="grid-group-count">{{ group.entries.length }} 套</span>
-                <button
-                  v-permission="['ADMIN', 'SUPER_ADMIN']"
-                  type="button"
-                  class="icon-btn"
-                  title="添加房屋"
-                  :aria-label="`在${group.title}添加房屋`"
-                  @click="openHouseCreate(group.unit, activeBuildingName || selectedCommunity?.name || '')"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path v-for="(d, i) in ACTION_ICONS.plus" :key="i" :d="d" />
-                  </svg>
-                </button>
-              </h4>
-              <div class="grid-rows">
-                <div
-                  v-for="floor in [...new Set(group.entries.map((entry) => entry.house.floor))].sort((a, b) => b - a)"
-                  :key="floor"
-                  class="grid-row"
-                >
-                  <span class="grid-floor">{{ floor }}层</span>
-                  <div class="grid-cells">
-                    <div
-                      v-for="entry in group.entries.filter((item) => item.house.floor === floor)"
-                      :key="entry.house.id"
-                      class="grid-block"
-                      :class="[
-                        HOUSE_BLOCK_CLASS[entry.house.status],
-                        { 'is-selected': isHouseGridSelected(entry.house.id) }
-                      ]"
-                      role="button"
-                      tabindex="0"
-                      :data-house-id="entry.house.id"
-                      :title="`${entry.house.houseNumber} · ${houseStatusLabels[entry.house.status]}`"
-                      @click="onHouseBlockClick($event, entry)"
-                      @keydown.enter.prevent="openHouseInfo(entry)"
-                      @keydown.space.prevent="openHouseInfo(entry)"
+            <!-- 单元平行列：一个单元一列，列多时横向滚动；缩放作用在此层，
+                 框选矩形仍定位在未缩放的 .grid-body 上，选中坐标不受影响 -->
+            <div v-else class="grid-groups" :style="{ zoom: gridZoom }">
+              <div v-for="group in gridGroups" :key="group.key" class="grid-group">
+                <h4 class="grid-group-title">
+                  <span class="grid-group-name" :title="group.title">{{ group.title }}</span>
+                  <span class="grid-group-count">{{ group.entries.length }} 套 · 空 {{ group.vacant }}</span>
+                  <span class="grid-group-actions">
+                    <button
+                      v-permission="['ADMIN', 'SUPER_ADMIN']"
+                      type="button"
+                      class="icon-btn"
+                      title="添加房屋"
+                      :aria-label="`在${group.title}添加房屋`"
+                      @click="openHouseCreate(group.unit, activeBuildingName || selectedCommunity?.name || '')"
                     >
-                      <span class="block-number">{{ entry.house.houseNumber }}</span>
-                      <span v-if="isHouseGridSelected(entry.house.id)" class="block-check" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M5 12.5l4.5 4.5L19 7.5" />
-                        </svg>
-                      </span>
-                      <!-- 操作区不入卡片内容区：角标「⋯」展开菜单，卡片主体永远可点 -->
-                      <el-dropdown
-                        v-permission="['ADMIN', 'SUPER_ADMIN']"
-                        class="block-menu"
-                        trigger="click"
-                        placement="bottom-end"
-                        @command="handleHouseCommand($event, entry)"
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path v-for="(d, i) in ACTION_ICONS.plus" :key="i" :d="d" />
+                      </svg>
+                    </button>
+                    <button
+                      v-permission="['ADMIN', 'SUPER_ADMIN']"
+                      type="button"
+                      class="icon-btn"
+                      title="该单元批量建房"
+                      :aria-label="`在${group.title}批量建房`"
+                      @click="openHouseBatchCreate({ buildingId: group.buildingId, unitId: group.unit.id })"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path v-for="(d, i) in ACTION_ICONS.layers" :key="i" :d="d" />
+                      </svg>
+                    </button>
+                  </span>
+                </h4>
+                <div class="grid-rows">
+                  <div
+                    v-for="floor in [...new Set(group.entries.map((entry) => entry.house.floor))].sort((a, b) => b - a)"
+                    :key="floor"
+                    class="grid-row"
+                  >
+                    <span class="grid-floor">{{ floor }}层</span>
+                    <div class="grid-cells">
+                      <div
+                        v-for="entry in group.entries.filter((item) => item.house.floor === floor)"
+                        :key="entry.house.id"
+                        class="grid-block"
+                        :class="[
+                          HOUSE_BLOCK_CLASS[entry.house.status],
+                          { 'is-selected': isHouseGridSelected(entry.house.id) }
+                        ]"
+                        role="button"
+                        tabindex="0"
+                        :data-house-id="entry.house.id"
+                        :title="`${entry.house.houseNumber} · ${houseStatusLabels[entry.house.status]}`"
+                        @click="onHouseBlockClick($event, entry)"
+                        @keydown.enter.prevent="openHouseInfo(entry)"
+                        @keydown.space.prevent="openHouseInfo(entry)"
                       >
-                        <button
-                          type="button"
-                          class="block-menu-btn"
-                          :aria-label="`${entry.house.houseNumber} 更多操作`"
-                          @click.stop
-                          @keydown.enter.stop
-                          @keydown.space.stop.prevent
-                        >
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path v-for="(d, i) in ACTION_ICONS.more" :key="i" :d="d" />
+                        <span class="block-number">{{ entry.house.houseNumber }}</span>
+                        <span v-if="isHouseGridSelected(entry.house.id)" class="block-check" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12.5l4.5 4.5L19 7.5" />
                           </svg>
-                        </button>
-                        <template #dropdown>
-                          <el-dropdown-menu>
-                            <el-dropdown-item command="info">
-                              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path v-for="(d, i) in ACTION_ICONS.eye" :key="i" :d="d" />
-                              </svg>
-                              查看详情 / 在住人员
-                            </el-dropdown-item>
-                            <el-dropdown-item command="edit" divided>
-                              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
-                              </svg>
-                              编辑房屋
-                            </el-dropdown-item>
-                            <el-dropdown-item command="status">
-                              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path v-for="(d, i) in ACTION_ICONS.swap" :key="i" :d="d" />
-                              </svg>
-                              状态变更
-                            </el-dropdown-item>
-                            <el-dropdown-item command="delete">
-                              <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
-                              </svg>
-                              删除房屋
-                            </el-dropdown-item>
-                          </el-dropdown-menu>
-                        </template>
-                      </el-dropdown>
+                        </span>
+                        <!-- 操作区不入卡片内容区：角标「⋯」展开菜单，卡片主体永远可点 -->
+                        <el-dropdown
+                          v-permission="['ADMIN', 'SUPER_ADMIN']"
+                          class="block-menu"
+                          trigger="click"
+                          placement="bottom-end"
+                          @command="handleHouseCommand($event, entry)"
+                        >
+                          <button
+                            type="button"
+                            class="block-menu-btn"
+                            :aria-label="`${entry.house.houseNumber} 更多操作`"
+                            @click.stop
+                            @keydown.enter.stop
+                            @keydown.space.stop.prevent
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <path v-for="(d, i) in ACTION_ICONS.more" :key="i" :d="d" />
+                            </svg>
+                          </button>
+                          <template #dropdown>
+                            <el-dropdown-menu>
+                              <el-dropdown-item command="info">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path v-for="(d, i) in ACTION_ICONS.eye" :key="i" :d="d" />
+                                </svg>
+                                查看详情 / 在住人员
+                              </el-dropdown-item>
+                              <el-dropdown-item command="edit" divided>
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path v-for="(d, i) in ACTION_ICONS.pen" :key="i" :d="d" />
+                                </svg>
+                                编辑房屋
+                              </el-dropdown-item>
+                              <el-dropdown-item command="status">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path v-for="(d, i) in ACTION_ICONS.swap" :key="i" :d="d" />
+                                </svg>
+                                状态变更
+                              </el-dropdown-item>
+                              <el-dropdown-item command="delete">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path v-for="(d, i) in ACTION_ICONS.trash" :key="i" :d="d" />
+                                </svg>
+                                删除房屋
+                              </el-dropdown-item>
+                            </el-dropdown-menu>
+                          </template>
+                        </el-dropdown>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2462,8 +2394,8 @@ onMounted(async () => {
       v-model="houseBatchVisible"
       :communities="selectedCommunity ? [selectedCommunity] : []"
       :initial-community-id="selectedCommunityId ?? ''"
-      :initial-building-id="activeBuildingId ?? ''"
-      :initial-unit-id="activeUnitId ?? ''"
+      :initial-building-id="houseBatchBuildingId ?? ''"
+      :initial-unit-id="houseBatchUnitId ?? ''"
       @saved="handleHouseBatchSaved"
     />
 
@@ -2674,6 +2606,52 @@ onMounted(async () => {
           删除
         </el-button>
         <el-button @click="houseInfoVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 结构维护：先选目标楼栋/单元，再进各自弹窗（替代原常驻结构目录的行内操作） -->
+    <el-dialog
+      v-model="structureDialogVisible"
+      :title="structureActionMeta.title"
+      width="460px"
+      destroy-on-close
+    >
+      <el-form label-width="72px">
+        <el-form-item label="楼栋">
+          <el-select
+            v-model="structureBuildingId"
+            style="width: 100%"
+            placeholder="请选择楼栋"
+            @change="handleStructureBuildingChange"
+          >
+            <el-option
+              v-for="node in buildings"
+              :key="node.building.id"
+              :label="`${node.building.name}（${node.units.length} 个单元 · ${node.units.reduce((sum, item) => sum + item.houses.length, 0)} 套）`"
+              :value="node.building.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="structureActionMeta.needsUnit" label="单元">
+          <el-select v-model="structureUnitId" style="width: 100%" placeholder="请选择单元">
+            <el-option
+              v-for="item in structureUnitOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <p class="structure-hint">{{ structureActionMeta.hint }}</p>
+      <p v-if="buildings.length === 0" class="structure-hint is-warning">
+        该社区还没有楼栋，请先用「批量建房」生成结构。
+      </p>
+      <template #footer>
+        <el-button @click="structureDialogVisible = false">取消</el-button>
+        <el-button type="primary" :disabled="!structureTargetReady" @click="runStructureAction">
+          {{ structureActionMeta.confirmText }}
+        </el-button>
       </template>
     </el-dialog>
 
@@ -3000,7 +2978,6 @@ onMounted(async () => {
 }
 
 .rail-state,
-.outline-state,
 .grid-state {
   padding: var(--spacing-lg) 0;
   text-align: center;
@@ -3022,32 +2999,17 @@ onMounted(async () => {
 
 /* ---------- 右栏 ---------- */
 
-/* 详情区自身两列：结构栏（定宽，独立滚动）+ 房屋栏；社区头部横跨两列 */
+/* 详情区单列：社区头部 → 房屋（唯一筛选区 + 单元平行列）。
+   原左侧结构目录已取消（批量建房一次性建成结构后，选择功能由筛选区完全替代），
+   腾出的整列宽度全部交给房屋列表。 */
 .detail {
-  display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-lg);
-  align-items: start;
   min-width: 0;
 }
 
-.head-card {
-  grid-column: 1 / -1;
-}
-
-/* 结构栏常驻左侧并吸顶：楼栋很多时只在本栏内滚动，不挤压右侧房屋列表 */
-.outline-panel {
-  grid-column: 1;
-  position: sticky;
-  top: 76px;
-}
-
-.houses-panel {
-  grid-column: 2;
-}
-
 .empty-panel {
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3134,186 +3096,11 @@ onMounted(async () => {
   mask: radial-gradient(closest-side, transparent 60%, currentColor 61%);
 }
 
-/* ---------- 结构目录（两级结构与维护入口） ---------- */
-
-.outline,
-.outline-children {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* 结构栏独立滚动：楼栋再多也只在本栏内滚动，不再把右侧房屋列表顶下去 */
-.outline-scroll {
-  max-height: calc(100vh - 300px);
-  min-height: 160px;
-  padding-right: 2px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
 .panel-count {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-normal);
   color: var(--color-text-secondary);
-}
-
-.collapse-btn {
-  flex-shrink: 0;
-  padding: 0;
-  border: none;
-  background: none;
-  font-family: inherit;
-  font-size: var(--font-size-xs);
-  color: var(--color-primary);
-  cursor: pointer;
-}
-
-.collapse-btn:hover {
-  text-decoration: underline;
-}
-
-.outline-tip {
-  margin: 0 0 var(--spacing-sm);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-relaxed);
-  color: var(--color-text-secondary);
-}
-
-/* 折叠态：只保留一行结构口径，纵向几乎不占位 */
-.outline-summary {
-  margin: 0;
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.outline-children {
-  margin-left: var(--spacing-md);
-  padding-left: var(--spacing-md);
-  border-left: 1px solid var(--color-border);
-}
-
-.outline-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  min-height: 36px;
-  padding: 0 var(--spacing-xs) 0 var(--spacing-xs);
-  border-radius: var(--radius-md);
-}
-
-.outline-row:hover {
-  background-color: var(--color-bg-hover);
-}
-
-.outline-row.is-active {
-  background-color: var(--color-primary-bg);
-}
-
-.outline-row.is-active .row-label {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-medium);
-}
-
-.row-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.row-toggle.is-leaf {
-  pointer-events: none;
-}
-
-.row-toggle svg {
-  width: 12px;
-  height: 12px;
-  transition: transform 0.15s ease;
-}
-
-.row-toggle svg.is-open {
-  transform: rotate(90deg);
-}
-
-.row-label {
-  flex-shrink: 0;
-  max-width: 40%;
-  padding: 0;
-  border: none;
-  background: none;
-  font-family: inherit;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-  text-align: left;
-  cursor: pointer;
-}
-
-.row-counts {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.row-counts b {
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-}
-
-.outline-row.is-unit {
-  padding-left: var(--spacing-lg);
-}
-
-/* 行尾菜单：默认隐形（hover / 选中 / 键盘聚焦出现），把「按钮到处是」降为零视觉噪声 */
-.row-menu {
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.outline-row:hover .row-menu,
-.outline-row.is-active .row-menu,
-.outline-row:focus-within .row-menu {
-  opacity: 1;
-}
-
-.row-menu-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.row-menu-btn:hover,
-.row-menu-btn:focus-visible {
-  background-color: var(--color-primary-bg);
-  color: var(--color-primary);
-}
-
-.row-menu-btn svg {
-  width: 14px;
-  height: 14px;
 }
 
 /* 菜单项图标（下拉菜单内联 svg，随父组件 scope 生效） */
@@ -3347,13 +3134,6 @@ onMounted(async () => {
 .icon-btn svg {
   width: 13px;
   height: 13px;
-}
-
-.outline-hint {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-relaxed);
-  color: var(--color-text-secondary);
 }
 
 /* ---------- 房屋结果区 · 唯一筛选区 ---------- */
@@ -3405,6 +3185,80 @@ onMounted(async () => {
   color: var(--color-primary);
 }
 
+/* ---------- 缩放控件（房屋面板标题右侧） ---------- */
+
+.zoom-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-subtle);
+}
+
+.zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-circle);
+  background: none;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.zoom-btn:hover:not(:disabled) {
+  background-color: var(--admin-card-bg);
+  color: var(--color-primary);
+}
+
+.zoom-btn:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.zoom-value {
+  min-width: 46px;
+  padding: 0 var(--spacing-xs);
+  border: none;
+  background: none;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.zoom-value:hover {
+  color: var(--color-primary);
+}
+
+/* 结构维护弹窗的说明文字 */
+.structure-hint {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.structure-hint.is-warning {
+  color: var(--color-warning);
+}
+
+/* 「结构维护」下拉触发钮：文字 + 小三角 */
+.structure-menu-trigger .caret {
+  width: 10px;
+  height: 10px;
+  margin-left: 4px;
+  vertical-align: -1px;
+}
+
 .filter-line {
   display: flex;
   align-items: center;
@@ -3442,8 +3296,24 @@ onMounted(async () => {
   margin-top: var(--spacing-md);
 }
 
-.grid-group + .grid-group {
-  margin-top: var(--spacing-lg);
+/* 单元平行列：一个单元一列，列多时横向滚动（不自动切换的"轮播"式浏览）。
+   缩放（zoom）作用在此层，便于一屏多看几列；框选矩形仍定位在未缩放的 .grid-body 上。 */
+.grid-groups {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.grid-group {
+  flex: 0 0 auto;
+  min-width: 160px;
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-subtle);
 }
 
 .grid-group-title {
@@ -3456,11 +3326,33 @@ onMounted(async () => {
   color: var(--color-text-primary);
 }
 
+.grid-group-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .grid-group-count {
+  flex-shrink: 0;
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-normal);
   color: var(--color-text-secondary);
+}
+
+/* 列头操作默认隐形：列一多也不至于整屏按钮 */
+.grid-group-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 2px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.grid-group:hover .grid-group-actions,
+.grid-group:focus-within .grid-group-actions {
+  opacity: 1;
 }
 
 .grid-rows {
@@ -3972,36 +3864,15 @@ onMounted(async () => {
   color: var(--color-text-secondary);
 }
 
-/* 触屏无悬浮态：行尾菜单与卡片角标常驻显示（否则楼栋/单元/房屋操作在移动端不可达） */
+/* 触屏无悬浮态：列头操作与卡片角标常驻显示（否则房屋操作在移动端不可达） */
 @media (hover: none) {
-  .row-menu,
+  .grid-group-actions,
   .block-menu {
     opacity: 1;
   }
 }
 
 /* ---------- 响应式 ---------- */
-
-/* < 1600px：详情区退化为单列，结构目录折叠为限高面板（独立滚动，仍不顶飞房屋列表） */
-@media (max-width: 1599px) {
-  .detail {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .head-card,
-  .outline-panel,
-  .houses-panel {
-    grid-column: 1;
-  }
-
-  .outline-panel {
-    position: static;
-  }
-
-  .outline-scroll {
-    max-height: 240px;
-  }
-}
 
 /* < 1200px：社区栏与详情上下堆叠 */
 @media (max-width: 1199px) {
@@ -4029,8 +3900,9 @@ onMounted(async () => {
     gap: var(--spacing-md);
   }
 
-  .outline-scroll {
-    max-height: 200px;
+  /* 窄屏优先保住列宽：单元列改为按屏宽铺开，横向滚动浏览 */
+  .grid-group {
+    min-width: 140px;
   }
 }
 
@@ -4039,8 +3911,7 @@ onMounted(async () => {
   .community-item,
   .chip-btn,
   .grid-block,
-  .row-toggle svg,
-  .row-menu,
+  .grid-group-actions,
   .block-menu,
   .sel-bar-enter-active,
   .sel-bar-leave-active {
