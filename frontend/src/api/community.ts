@@ -2,6 +2,7 @@
 import { http } from '@/utils/request'
 import type { PageResult } from '@/types/api'
 import type {
+  IBatchCreateResult,
   IBatchOperationResult,
   IBuilding,
   IBuildingDTO,
@@ -88,6 +89,14 @@ export function createBuilding(data: IBuildingDTO) {
   return http.post<IBuilding>('/buildings', data)
 }
 
+/**
+ * 楼栋批量创建（POST /buildings/batch）：部分成功语义，逐行独立不整体回滚，
+ * 返回逐行结果（后端逐行校验，单行失败不回整批 400）
+ */
+export function createBuildingsBatch(data: { communityId: number; buildings: IBuildingDTO[] }) {
+  return http.post<IBatchCreateResult>('/buildings/batch', data)
+}
+
 /** 更新楼栋（接口设计.md 9.1.2.2） */
 export function updateBuilding(id: number, data: IBuildingDTO) {
   return http.put<IBuilding>(`/buildings/${id}`, data)
@@ -115,6 +124,14 @@ export function createUnit(data: IUnitDTO) {
   return http.post<IUnit>('/units', data)
 }
 
+/**
+ * 单元批量创建（POST /units/batch）：按名称列表逐项插入，空名/超长项逐行反馈，
+ * 返回成功行的新建单元 ID（供「同批接着建房屋」使用）
+ */
+export function createUnitsBatch(data: { buildingId: number; names: string[] }) {
+  return http.post<IBatchCreateResult>('/units/batch', data)
+}
+
 /** 更新单元（接口设计.md 9.1.3.2） */
 export function updateUnit(id: number, data: IUnitDTO) {
   return http.put<IUnit>(`/units/${id}`, data)
@@ -140,6 +157,14 @@ export function getUnitList(buildingId: number, params?: { page?: number; size?:
 /** 创建房屋（接口设计.md 9.1.4.1） */
 export function createHouse(data: IHouseDTO) {
   return http.post<IHouse>('/houses', data)
+}
+
+/**
+ * 房屋批量创建（POST /houses/batch）：单次上限 200 套，逐行独立不整体回滚，
+ * 返回逐行结果（成功行含新建房屋 ID）
+ */
+export function createHousesBatch(data: { unitId: number; houses: IHouseDTO[] }) {
+  return http.post<IBatchCreateResult>('/houses/batch', data)
 }
 
 /** 更新房屋（接口设计.md 9.1.4.2） */
