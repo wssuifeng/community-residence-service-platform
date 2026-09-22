@@ -1026,6 +1026,18 @@ function handleBuildingSaved(entity: IBuilding): void {
   refreshStructure()
 }
 
+/** 已存在楼栋名：批量建楼栋的重名提示用（后端无唯一约束，重名只会静默产出同名楼栋） */
+const existingBuildingNames = computed(() => buildings.value.map((node) => node.building.name))
+
+/**
+ * 批量建楼栋完成：单栋新建定位到该楼栋（结果当屏可见），
+ * 多栋新建回到「全部楼栋」——只聚焦一栋会让其余新楼栋藏在筛选之外，与批量语义相悖。
+ */
+function handleBuildingsCreated(buildingIds: number[]): void {
+  selectBuilding(buildingIds.length === 1 ? buildingIds[0] : null)
+  refreshStructure()
+}
+
 const unitDialogVisible = ref(false)
 const unitEditing = ref<IUnit | null>(null)
 const unitDefaultBuildingId = ref<number | null>(null)
@@ -1942,7 +1954,10 @@ onMounted(async () => {
             <span class="build-sep" aria-hidden="true">或按层级分步建</span>
 
             <div class="build-steps" role="group" aria-label="按层级分步建房">
-              <el-tooltip content="在指定社区新建楼栋（单栋，含总层数与描述）" placement="bottom">
+              <el-tooltip
+                content="在指定社区批量建楼栋：按名称前缀与序号区间一次建多栋，并可同批建立每栋的单元与楼层房屋"
+                placement="bottom"
+              >
                 <el-button
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
                   size="small"
@@ -2409,7 +2424,10 @@ onMounted(async () => {
       :communities="selectedCommunity ? [selectedCommunity] : []"
       :building="buildingEditing"
       :default-community-id="selectedCommunityId"
+      :existing-names="existingBuildingNames"
       @saved="handleBuildingSaved"
+      @created="handleBuildingsCreated"
+      @result="showBatchResult"
     />
 
     <UnitEditDialog
