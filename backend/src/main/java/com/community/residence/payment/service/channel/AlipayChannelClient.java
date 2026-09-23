@@ -6,10 +6,13 @@ import com.alipay.api.AlipayConfig;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradePagePayModel;
 import com.alipay.api.domain.AlipayTradeQueryModel;
+import com.alipay.api.domain.AlipayTradeRefundModel;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.community.residence.common.constant.PaymentChannel;
 import com.community.residence.payment.config.PaymentProperties;
 import com.community.residence.payment.entity.LeasePayment;
@@ -25,6 +28,8 @@ import java.util.Date;
  * product_code=FAST_INSTANT_TRADE_PAY，pageExecute 生成跳转表单）。
  * 查单 alipay.trade.query，TRADE_SUCCESS/TRADE_FINISHED 均视为支付成功
  * （TRADE_FINISHED 为交易完结后不可退款态，属成功终态）。
+ * 退款 alipay.trade.refund（R72 押金原路退还）：以原 out_trade_no 定位交易，
+ * out_request_no 为商户退款请求号（渠道幂等键）。
  */
 @Slf4j
 public class AlipayChannelClient implements PaymentChannelClient {
@@ -130,5 +135,39 @@ public class AlipayChannelClient implements PaymentChannelClient {
         return date != null
                 ? LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
                 : LocalDateTime.now();
+    }
+
+    /**
+     * 支付宝退款（alipay.trade.refund，R72 押金原路退还）：out_trade_no 定位原交易，
+     * out_request_no 为商户退款请求号（渠道侧幂等键）。SDK 退款响应无独立「退款单号」，
+     * 以交易号（trade_no）回写 channel_refund_no 供对账定位。
+     */
+    @Override
+    public ChannelRefundResult refund(LeasePayment payment, String outRequestNo,
+                                      java.math.BigDecimal amount, String reason) {
+        AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+        model.setOutTradeNo(payment.getPaymentNo());
+        model.setRefundAmount(amount.toPlainString());
+        model.setOutRequestNo(outRequestNo);
+        if (reason != null && !reason.isBlank()) {
+            model.setRefundReason(reason);
+        }
+        AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+        request.setBizModel(model);
+        try {
+            AlipayTradeRefundResponse response = alipayClient.execute(request);
+            if (!response.isSuccess()) {
+                /* 渠道业务拒绝（如交易不存在 / 已全额退款）：返回失败结果由调用方落 FAILED 留痕 */
+                log.warn("支付宝退款被拒：paymentNo={}, outRequestNo={}, subCode={}, msg={}",
+                        payment.getPaymentNo(), outRequestNo, response.getSubCode(), response.getMsg());
+                return ChannelRefundResult.failure("支付宝退款失败：" + response.getSubMsg()
+                        + "（" + response.getSubCode() + "）");
+            }
+            return ChannelRefundResult.success(response.getTradeNo());
+        } catch (AlipayApiException e) {
+            /* 网络/签名异常：上抛由调用方落 FAILED（押金状态回落 PAID 可重试） */
+            log.error("支付宝退款异常：paymentNo={}, outRequestNo={}", payment.getPaymentNo(), outRequestNo, e);
+            throw new ChannelCallException("支付宝退款异常：" + e.getErrMsg(), e);
+        }
     }
 }

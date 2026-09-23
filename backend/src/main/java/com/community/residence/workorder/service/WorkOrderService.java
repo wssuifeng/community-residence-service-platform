@@ -1,8 +1,11 @@
 package com.community.residence.workorder.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.entity.SysUser;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.CommonStatus;
 import com.community.residence.common.constant.DispatchFlag;
@@ -16,6 +19,8 @@ import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.common.service.FileUploadService;
+import com.community.residence.conversation.entity.Conversation;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.messaging.service.NotificationService;
@@ -49,6 +54,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -112,11 +118,15 @@ public class WorkOrderService {
     private final ServiceCategoryMapper categoryMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
+    private final SysAdminCommunityMapper sysAdminCommunityMapper;
     private final NotificationService notificationService;
     private final FileUploadService fileUploadService;
     private final com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
     private final StaffCapabilityService staffCapabilityService;
     private final StaffScheduleService staffScheduleService;
+
+    /** 工单临时群聊（R74）：建群 / 派单入群 / 终审回收，复用既有会话三级模型 */
+    private final ConversationService conversationService;
 
     /* 提交工单：初始 PENDING 待受理；工单号 WO+日期+随机序号。
        R9「申请通过后获得居民端功能入口」+ R12 居住私有数据口径（DEF-001）：
@@ -153,6 +163,45 @@ public class WorkOrderService {
         workOrderMapper.insert(order);
 
         appendProcess(order.getId(), "SUBMIT", null, WorkOrderStatus.PENDING, dto.getContent());
+        /* R48/R74 事件 1「提交」：**必须**通知该社区绑定管理员与超管（DEF-072 修复口径）——
+           居民提交后管理端必须"被知道"，否则受理入口对管理端不可见；居民不重复收本事件 */
+        notifySubmit(order);
+        return toVO(order);
+    }
+
+    /* 受理（R74 / DEF-071 裁决＝补实现，接口设计 §9.21.1）：PENDING → TO_ASSIGN；
+       ADMIN/SUPER_ADMIN（数据级按社区在控制器与服务层双重收口）。
+       同一事务内建立工单临时群聊（type=WORK_ORDER_GROUP、related_id=工单ID，
+       成员＝居民提交人+受理管理员）并回写 work_order.conversation_id；
+       重复受理/非法状态 → 5302（非成功幂等，与撤回同口径，不重复建群）。 */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'管理端受理工单'")
+    public WorkOrderVO intake(Long id, String remark) {
+        WorkOrder order = requireOrder(id);
+        SecurityUtils.checkCommunityAccess(order.getCommunityId());
+        /* 并发受理：另一赢家已完成 PENDING→TO_ASSIGN 时幂等返回，不重复建群/留痕/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.TO_ASSIGN)) {
+            return toVO(order);
+        }
+        appendProcess(id, "INTAKE", WorkOrderStatus.PENDING, WorkOrderStatus.TO_ASSIGN, remark);
+
+        /* 建群与流转同一事务：受理失败不建群；命中既有群直接复用（同一工单建群唯一） */
+        Conversation group = conversationService.createWorkOrderGroup(id, order.getCommunityId(),
+                order.getResidentId(), SecurityUtils.getUserId(), order.getOrderNo());
+        if (group != null) {
+            order.setConversationId(group.getId());
+            workOrderMapper.updateById(order);
+            conversationService.sendSystemMessage(group.getId(),
+                    "工单已受理，本群用于工单沟通（工单号 " + order.getOrderNo() + "）");
+        }
+        /* R48/R74 事件 2「受理」：通知居民提交人 + 该社区绑定管理员 */
+        notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已受理",
+                "您的工单 " + order.getOrderNo() + " 已被受理，正在安排服务人员",
+                "WORK_ORDER", "WORK_ORDER", id);
+        notifyCommunityAdmins(order, "工单已受理",
+                "工单 " + order.getOrderNo() + " 已受理，待派单");
+        log.info("工单已受理：orderId={}, conversationId={}, operator={}", id,
+                group == null ? null : group.getId(), SecurityUtils.getUserId());
         return toVO(order);
     }
 
@@ -320,11 +369,13 @@ public class WorkOrderService {
 
         appendProcess(id, "ASSIGN", oldStatus, WorkOrderStatus.ASSIGNED,
                 "派单给 " + assignee.getRealName() + (dto.getRemark() != null ? "：" + dto.getRemark() : ""));
-        /* 通知双向触达：服务人员接单提醒 + 居民派单进度 */
-        notificationService.create(dto.getAssigneeId(), order.getCommunityId(), "新工单派发",
+        /* R74：被派服务人员自动入群（幂等；未经受理未建群时静默跳过） */
+        conversationService.joinWorkOrderGroup(id, dto.getAssigneeId(), assignee.getRealName());
+        /* 通知双向触达：服务人员接单提醒（sys_user 身份空间）+ 居民派单进度（resident 身份空间） */
+        notificationService.createForUser(dto.getAssigneeId(), order.getCommunityId(), "新工单派发",
                 "工单 " + order.getOrderNo() + " 已派单给您，请及时接单",
                 "WORK_ORDER", "WORK_ORDER", id);
-        notificationService.create(order.getResidentId(), order.getCommunityId(), "工单已派单",
+        notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已派单",
                 "您的工单 " + order.getOrderNo() + " 已派单给 " + assignee.getRealName(),
                 "WORK_ORDER", "WORK_ORDER", id);
         log.info("工单已派单：orderId={}, assigneeId={}, operator={}",
@@ -337,9 +388,21 @@ public class WorkOrderService {
     public void accept(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         checkAssignee(order);
-        transition(order, WorkOrderStatus.ACCEPTED);
+        /* 并发接单幂等跳过：赢家已流转，不重复留痕/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.ACCEPTED)) {
+            return;
+        }
         fillAcceptTime(id);
         appendProcess(id, "ACCEPT", WorkOrderStatus.ASSIGNED, WorkOrderStatus.ACCEPTED, remark);
+        /* R48/R74 事件 4「接单」：通知服务人员（留痕提醒）+ 该社区绑定管理员；
+           §9.4.2.6 既有正文另写的「通知居民」作额外提醒保留 */
+        notifyCurrentAssignee(order, "工单已接单",
+                "工单 " + order.getOrderNo() + " 已接单，请按约上门", id);
+        notifyCommunityAdmins(order, "工单已接单",
+                "工单 " + order.getOrderNo() + " 已被服务人员接单");
+        notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "服务人员已接单",
+                "您的工单 " + order.getOrderNo() + " 已被服务人员接单",
+                "WORK_ORDER", "WORK_ORDER", id);
     }
 
     /* 开始处理：ACCEPTED → IN_PROGRESS */
@@ -348,8 +411,16 @@ public class WorkOrderService {
     public void process(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         checkAssignee(order);
-        transition(order, WorkOrderStatus.IN_PROGRESS);
+        /* 并发开始处理幂等跳过：赢家已流转，不重复留痕/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.IN_PROGRESS)) {
+            return;
+        }
         appendProcess(id, "PROCESS", WorkOrderStatus.ACCEPTED, WorkOrderStatus.IN_PROGRESS, remark);
+        /* R48/R74 事件 5「开始处理」：事件集本身无必须收件对象；
+           §9.4.2.7 既有正文的「通知居民」作额外提醒保留 */
+        notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单处理中",
+                "您的工单 " + order.getOrderNo() + " 服务人员已开始处理",
+                "WORK_ORDER", "WORK_ORDER", id);
     }
 
     /* 完成处理：IN_PROGRESS → TO_CONFIRM（待居民确认） */
@@ -358,10 +429,16 @@ public class WorkOrderService {
     public void complete(Long id, String solution) {
         WorkOrder order = requireOrder(id);
         checkAssignee(order);
-        transition(order, WorkOrderStatus.TO_CONFIRM);
+        /* 并发提交结果幂等跳过：赢家已流转，不重复留痕/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.TO_CONFIRM)) {
+            return;
+        }
         appendProcess(id, "COMPLETE", WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM, solution);
-        notificationService.create(order.getResidentId(), order.getCommunityId(), "工单已处理完成",
+        notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已处理完成",
                 "您的工单 " + order.getOrderNo() + " 已处理完成，请确认", "WORK_ORDER", "WORK_ORDER", id);
+        /* R48/R74 事件 6「提交结果」：另通知该社区绑定管理员 */
+        notifyCommunityAdmins(order, "工单待居民确认",
+                "工单 " + order.getOrderNo() + " 已提交处理结果，等待居民确认");
     }
 
     /* 居民确认：TO_CONFIRM → COMPLETED */
@@ -370,10 +447,16 @@ public class WorkOrderService {
     public void confirm(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         checkResidentOwner(order);
-        transition(order, WorkOrderStatus.COMPLETED);
+        /* 并发居民确认幂等跳过：赢家已流转，不重复留痕/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.COMPLETED)) {
+            return;
+        }
         appendProcess(id, "CONFIRM", WorkOrderStatus.TO_CONFIRM, WorkOrderStatus.COMPLETED, remark);
         notifyCurrentAssignee(order, "居民已确认工单",
                 "工单 " + order.getOrderNo() + " 已被居民确认完成", id);
+        /* R48/R74 事件 7「居民确认」：另通知该社区绑定管理员（等待终审关闭） */
+        notifyCommunityAdmins(order, "工单待终审关闭",
+                "工单 " + order.getOrderNo() + " 居民已确认完成，等待管理端终审关闭");
     }
 
     /* 居民不满意退回：TO_CONFIRM → IN_PROGRESS（R22「注明原因」——DTO @NotBlank 保证；
@@ -383,21 +466,49 @@ public class WorkOrderService {
     public void returnBack(Long id, String reason) {
         WorkOrder order = requireOrder(id);
         checkResidentOwner(order);
-        transition(order, WorkOrderStatus.IN_PROGRESS);
+        /* 并发退回幂等跳过：赢家已流转，不重复留痕/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.IN_PROGRESS)) {
+            return;
+        }
         appendProcess(id, "RETURN", WorkOrderStatus.TO_CONFIRM, WorkOrderStatus.IN_PROGRESS,
                 "居民不满意退回：" + reason);
         notifyCurrentAssignee(order, "工单被退回处理中",
                 "工单 " + order.getOrderNo() + " 被居民退回：" + reason, id);
     }
 
-    /* 关闭工单：COMPLETED → CLOSED（终态） */
+    /* 终审关闭（R74 / 接口设计 §9.21.3 复用 §9.4.2.10）：仅 COMPLETED → CLOSED
+       （状态机 ALLOWED_TRANSITIONS 已收窄，其余状态一律 5302），
+       同一事务触发工单临时群聊**资源回收**（会话 CLOSED + closed_at，只读留痕不物理删除） */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'管理员关闭工单'")
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "WORK_ORDER", targetId = "#id", content = "'管理员终审关闭工单'")
     public void close(Long id, String remark) {
         WorkOrder order = requireOrder(id);
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
-        transition(order, WorkOrderStatus.CLOSED);
+        /* 重复关闭幂等（需求口径「重复关闭不报错」）：已是 CLOSED 终态直接返回成功，
+           不重复写处理记录、不重复发通知、不重复关群；其余非法流转（如 PENDING → CLOSED）
+           仍由 transition 依状态机拒绝并返回 5302 */
+        if (WorkOrderStatus.CLOSED.equals(order.getStatus())) {
+            log.info("工单已处于已关闭终态，重复关闭按幂等处理（不重复留痕/通知）：orderId={}", id);
+            return;
+        }
+        /* 并发终审关闭幂等跳过：赢家已流转，不重复留痕/关群/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.CLOSED)) {
+            return;
+        }
         appendProcess(id, "CLOSE", WorkOrderStatus.COMPLETED, WorkOrderStatus.CLOSED, remark);
+        /* 回收前留一条系统留痕（关闭后会话只读，该消息仍在历史可查） */
+        Conversation group = conversationService.findWorkOrderGroup(id);
+        if (group != null) {
+            conversationService.sendSystemMessage(group.getId(), "工单已终审结束（已关闭），本群停止接收新消息，历史记录保留可查");
+            conversationService.closeWorkOrderGroup(id);
+        }
+        /* R48/R74 事件 8「终审关闭」：通知居民提交人 + 该社区绑定管理员 */
+        notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已结束",
+                "您的工单 " + order.getOrderNo() + " 已终审结束（已关闭）", "WORK_ORDER", "WORK_ORDER", id);
+        notifyCommunityAdmins(order, "工单已关闭",
+                "工单 " + order.getOrderNo() + " 已终审关闭");
+        log.info("工单终审关闭：orderId={}, conversationId={}, closed={}", id,
+                order.getConversationId(), group != null);
     }
 
     /* 驳回：PENDING/TO_ASSIGN → REJECTED（终态） */
@@ -406,10 +517,13 @@ public class WorkOrderService {
     public void reject(Long id, String reason) {
         WorkOrder order = requireOrder(id);
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
-        transition(order, WorkOrderStatus.REJECTED);
+        /* 并发驳回幂等跳过：赢家已流转，不重复留痕/通知（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.REJECTED)) {
+            return;
+        }
         appendProcess(id, "REJECT", order.getStatus(), WorkOrderStatus.REJECTED, reason);
         /* R48 工单流转事件全覆盖（DEF-020）：驳回通知提交居民 */
-        notificationService.create(order.getResidentId(), order.getCommunityId(), "工单已驳回",
+        notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已驳回",
                 "您的工单 " + order.getOrderNo() + " 被驳回：" + reason,
                 "WORK_ORDER", "WORK_ORDER", id);
     }
@@ -420,7 +534,10 @@ public class WorkOrderService {
     public void cancel(Long id, String reason) {
         WorkOrder order = requireOrder(id);
         checkResidentOwner(order);
-        transition(order, WorkOrderStatus.CANCELLED);
+        /* 并发取消幂等跳过：赢家已流转，不重复留痕（OCR DEF-116） */
+        if (!transition(order, WorkOrderStatus.CANCELLED)) {
+            return;
+        }
         appendProcess(id, "CANCEL", order.getStatus(), WorkOrderStatus.CANCELLED, reason);
     }
 
@@ -504,18 +621,34 @@ public class WorkOrderService {
         return order;
     }
 
-    /* 状态机校验 + 主表更新（order.status 已被改写前保存原值） */
-    private void transition(WorkOrder order, String target) {
+    /* 状态机校验 + 主表条件更新（OCR DEF-116）：UPDATE ... WHERE id=? AND status=<流转前状态>，
+       并发同流转只成功一路；0 行时重读——已是目标状态按幂等返回 false（调用方据此跳过
+       留痕/建群/通知，对齐「重复关闭幂等」DEF-097 口径），状态漂移抛 5302。
+       同态重复动作与非法流转仍由流转表先行拒绝（DEF-011：已接单不可被再接、已完成不可再确认，
+       不产生处理记录）。返回 true=本次完成流转，false=并发赢家已完成同目标流转（幂等跳过）。 */
+    private boolean transition(WorkOrder order, String target) {
         String current = order.getStatus();
-        /* DEF-011：同态重复动作与非法流转同口径拒绝（R19/R20/R22：
-           已接单不可被再接、已完成不可再确认），且不产生处理记录 */
         Set<String> allowed = ALLOWED_TRANSITIONS.getOrDefault(current, Set.of());
         if (!allowed.contains(target)) {
             throw new BusinessException(ErrorCode.WORK_ORDER_INVALID_TRANSITION,
                     String.format("工单状态不允许从 %s 流转到 %s", current, target));
         }
         order.setStatus(target);
-        workOrderMapper.updateById(order);
+        int rows = workOrderMapper.update(order, new LambdaUpdateWrapper<WorkOrder>()
+                .eq(WorkOrder::getId, order.getId())
+                .eq(WorkOrder::getStatus, current));
+        if (rows == 0) {
+            WorkOrder fresh = workOrderMapper.selectById(order.getId());
+            if (fresh != null && order.getStatus().equals(fresh.getStatus())) {
+                log.info("工单状态已被并发流转到目标状态，按幂等处理（不重复留痕/建群/通知）：orderId={}, {} -> {}",
+                        order.getId(), current, target);
+                return false;
+            }
+            throw new BusinessException(ErrorCode.WORK_ORDER_INVALID_TRANSITION,
+                    String.format("工单状态不允许从 %s 流转到 %s（并发变更，当前 %s）",
+                            current, target, fresh == null ? "未知" : fresh.getStatus()));
+        }
+        return true;
     }
 
     private void appendProcess(Long orderId, String action, String oldStatus,
@@ -531,6 +664,59 @@ public class WorkOrderService {
         processMapper.insert(process);
     }
 
+    /* R48/R74 事件 1「提交」（DEF-072 修复口径）：收件人 = **该工单所属社区的绑定启用管理员**
+       + **全部启用超管**，身份空间一律 USER（sys_user.id）；**不跨社区投递**，
+       也不发居民口径（提交人即居民本人）。同一账号去重，避免绑定+超管双投递。 */
+    private void notifySubmit(WorkOrder order) {
+        String title = "新工单待受理";
+        String content = "工单 " + order.getOrderNo() + "「" + order.getTitle() + "」已提交，请及时受理";
+        Set<Long> targets = new HashSet<>(communityAdminIds(order.getCommunityId()));
+        targets.addAll(superAdminIds());
+        for (Long adminId : targets) {
+            notificationService.createForUser(adminId, order.getCommunityId(), title, content,
+                    "WORK_ORDER", "WORK_ORDER", order.getId());
+        }
+        if (targets.isEmpty()) {
+            log.warn("工单提交无管理端收件人（社区无绑定管理员且无启用超管）：orderId={}", order.getId());
+        }
+    }
+
+    /* 事件 2/4/6/7/8 的「相关管理员」收件：该工单所属社区在 sys_admin_community 绑定的启用管理员，
+       不跨社区投递（§9.21.4 行内口径） */
+    private void notifyCommunityAdmins(WorkOrder order, String title, String content) {
+        for (Long adminId : communityAdminIds(order.getCommunityId())) {
+            notificationService.createForUser(adminId, order.getCommunityId(), title, content,
+                    "WORK_ORDER", "WORK_ORDER", order.getId());
+        }
+    }
+
+    /* 社区绑定启用管理员（sys_admin_community → sys_user 角色 ADMIN + 启用态） */
+    private List<Long> communityAdminIds(Long communityId) {
+        if (communityId == null) {
+            return List.of();
+        }
+        List<Long> boundIds = sysAdminCommunityMapper.selectList(
+                        new LambdaQueryWrapper<SysAdminCommunity>()
+                                .eq(SysAdminCommunity::getCommunityId, communityId))
+                .stream().map(SysAdminCommunity::getAdminId).distinct().toList();
+        if (boundIds.isEmpty()) {
+            return List.of();
+        }
+        return sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>()
+                        .in(SysUser::getId, boundIds)
+                        .eq(SysUser::getRole, RoleConstants.ADMIN)
+                        .eq(SysUser::getStatus, CommonStatus.ACTIVE))
+                .stream().map(SysUser::getId).toList();
+    }
+
+    /* 启用超管清单（角色 SUPER_ADMIN + 启用态；工单「提交」事件的全局收件人） */
+    private List<Long> superAdminIds() {
+        return sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>()
+                        .eq(SysUser::getRole, RoleConstants.SUPER_ADMIN)
+                        .eq(SysUser::getStatus, CommonStatus.ACTIVE))
+                .stream().map(SysUser::getId).toList();
+    }
+
     /** 通知当前派单处理人（接单/确认等 STAFF 触达场景；无派单记录时静默跳过） */
     private void notifyCurrentAssignee(WorkOrder order, String title, String content, Long orderId) {
         WorkOrderAssignment latest = assignmentMapper.selectOne(
@@ -539,7 +725,7 @@ public class WorkOrderService {
                         .orderByDesc(WorkOrderAssignment::getId)
                         .last("LIMIT 1"));
         if (latest != null) {
-            notificationService.create(latest.getAssigneeId(), order.getCommunityId(),
+            notificationService.createForUser(latest.getAssigneeId(), order.getCommunityId(),
                     title, content, "WORK_ORDER", "WORK_ORDER", orderId);
         }
     }

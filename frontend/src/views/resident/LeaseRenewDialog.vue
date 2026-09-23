@@ -19,7 +19,7 @@ import type {
 /**
  * 续租支付弹窗（R61，v1.4）：三步流——①选月数与渠道（金额仅预览：月租×月数，
  * 实际金额由服务端计算，客户端不传金额，防篡改口径）→ ②渠道支付（支付宝整页表单
- * 写入新窗口提交 / 微信 Native code_url 渲染二维码）→ ③轮询确认（3s 一次、
+ * 经 Blob URL 在新窗口加载提交 / 微信 Native code_url 渲染二维码）→ ③轮询确认（3s 一次、
  * 上限 5 分钟；本地环境无公网回调，以主动查单替代）。
  * 后端幂等：同租约已有进行中支付单时 createRenewPayment 返回既有单，
  * 月数/渠道/金额展示一律以返回单据为准。
@@ -180,22 +180,23 @@ async function submitPayment(): Promise<void> {
   }
 }
 
-/** 支付宝整页表单提交：写入新窗口并自动 submit；被拦截时置标记供手动重开 */
+/**
+ * 支付宝整页表单提交（DEF-129）：后端生成的已签名表单 HTML 装入 Blob URL 交给新窗口加载
+ * （表单尾部自带 submit 脚本会自动发起跳转），替代 document.write 向新窗口文档流注入
+ * 未转义标记；被拦截时置标记供手动重开。
+ */
 function openAlipay(formHtml: string): void {
-  const win = window.open('', '_blank')
+  const url = URL.createObjectURL(new Blob([formHtml], { type: 'text/html' }))
+  const win = window.open(url, '_blank')
   if (!win) {
+    /* 拦截场景同步释放，避免 Blob URL 泄漏 */
+    URL.revokeObjectURL(url)
     alipayBlocked.value = true
     return
   }
   alipayBlocked.value = false
-  win.document.open()
-  win.document.write(formHtml)
-  win.document.close()
-  try {
-    win.document.forms[0]?.submit()
-  } catch {
-    /* 表单自带提交按钮，新窗口内可手动点击兜底 */
-  }
+  /* 加载完成后即释放（表单提交跳转支付宝后该 URL 不再被引用） */
+  win.addEventListener('load', () => URL.revokeObjectURL(url))
 }
 
 function reopenAlipay(): void {

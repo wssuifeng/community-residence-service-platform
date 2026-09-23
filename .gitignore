@@ -7,6 +7,14 @@ target/
 *.log
 *.tmp
 
+# 本地运行临时目录：服务启停日志 + 数据库备份快照
+# （仅本机排障/恢复用，属运行时产物，不入库）
+Temp/
+
+# 本地凭据文件（DB/JWT/支付密钥；由 .env.example 复制而来，禁止入库）
+.env
+.env.local
+
 # 上传文件运行时目录（FileUploadService 本地存储，不入库）
 backend/uploads/
 

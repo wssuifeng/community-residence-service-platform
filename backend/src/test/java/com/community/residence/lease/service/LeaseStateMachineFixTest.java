@@ -26,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -51,6 +53,10 @@ class LeaseStateMachineFixTest {
     private BuildingMapper buildingMapper;
     @Mock
     private LeaseChangeLogService changeLogService;
+    @Mock
+    private com.community.residence.messaging.service.NotificationService notificationService;
+    @Mock
+    private com.community.residence.auth.mapper.SysAdminCommunityMapper sysAdminCommunityMapper;
 
     @InjectMocks
     private LeaseService leaseService;
@@ -93,7 +99,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(1L)).thenReturn(activeLease);
-            when(leaseMapper.updateById(any(LeaseRecord.class))).thenReturn(1);
+            when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
             dto.setStatus("MOVED_OUT");
@@ -103,6 +109,65 @@ class LeaseStateMachineFixTest {
             dto.setStatus("ARCHIVED");
             leaseService.updateStatus(1L, dto);
             assertThat(activeLease.getStatus()).isEqualTo("ARCHIVED");
+        }
+    }
+
+    /* ---- R66 v1.8：审核通过 → 待签约 → 生效（房态在生效时才翻转） ---- */
+
+    @Test
+    @DisplayName("待签约流转：PENDING → TO_SIGN（房态不动）→ ACTIVE（同步置房屋已入住）")
+    void updateStatus_pendingToSignThenActive_flipsHouseOnActiveOnly() {
+        LeaseRecord pendingLease = new LeaseRecord();
+        pendingLease.setId(2L);
+        pendingLease.setTenantId(1L);
+        pendingLease.setCommunityId(1L);
+        pendingLease.setHouseId(5L);
+        pendingLease.setStatus("PENDING");
+        pendingLease.setStartDate(LocalDate.now());
+        pendingLease.setEndDate(LocalDate.now().plusMonths(12));
+
+        com.community.residence.community.entity.House house =
+                new com.community.residence.community.entity.House();
+        house.setId(5L);
+        house.setCommunityId(1L);
+        house.setStatus("VACANT");
+
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(leaseMapper.selectById(2L)).thenReturn(pendingLease);
+            when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
+            when(houseMapper.selectById(5L)).thenReturn(house);
+            when(houseMapper.updateById(any(com.community.residence.community.entity.House.class)))
+                    .thenReturn(1);
+
+            UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
+            dto.setStatus("TO_SIGN");
+            leaseService.updateStatus(2L, dto);
+            assertThat(pendingLease.getStatus()).isEqualTo("TO_SIGN");
+            /* 到待签约为止房态保持空置（R66 v1.8：审核通过不置已入住） */
+            assertThat(house.getStatus()).isEqualTo("VACANT");
+
+            dto.setStatus("ACTIVE");
+            leaseService.updateStatus(2L, dto);
+            assertThat(pendingLease.getStatus()).isEqualTo("ACTIVE");
+            assertThat(house.getStatus()).isEqualTo("OCCUPIED");
+            verify(houseMapper).updateById(any(com.community.residence.community.entity.House.class));
+        }
+    }
+
+    @Test
+    @DisplayName("待签约驳回：TO_SIGN → REJECTED 合法")
+    void updateStatus_toSignRejected_ok() {
+        activeLease.setStatus("TO_SIGN");
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
+
+            UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
+            dto.setStatus("REJECTED");
+            leaseService.updateStatus(1L, dto);
+            assertThat(activeLease.getStatus()).isEqualTo("REJECTED");
         }
     }
 
@@ -135,6 +200,81 @@ class LeaseStateMachineFixTest {
 
             assertThatCode(() -> leaseService.update(1L, dto())).doesNotThrowAnyException();
         }
+    }
+
+    /* ---- DEF-108/DEF-115：TO_SIGN 放行 + 直达生效拦截 + 并发幂等 ---- */
+
+    @Test
+    @DisplayName("OCR DEF-115：PENDING → ACTIVE 直达被拒（v1.8 无此边，须先经 TO_SIGN）")
+    void updateStatus_pendingDirectActive_throws() {
+        LeaseRecord pendingLease = new LeaseRecord();
+        pendingLease.setId(3L);
+        pendingLease.setTenantId(1L);
+        pendingLease.setCommunityId(1L);
+        pendingLease.setHouseId(5L);
+        pendingLease.setStatus("PENDING");
+
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(leaseMapper.selectById(3L)).thenReturn(pendingLease);
+
+            UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
+            dto.setStatus("ACTIVE");
+            assertThatThrownBy(() -> leaseService.updateStatus(3L, dto))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                            .isEqualTo(ErrorCode.STATE_TRANSITION_INVALID));
+            assertThat(pendingLease.getStatus()).isEqualTo("PENDING");
+        }
+    }
+
+    @Test
+    @DisplayName("OCR DEF-115：并发同目标流转条件更新 0 行 + 已为目标状态 → 幂等返回不重复留痕")
+    void applyTransition_concurrentSameTarget_idempotentNoRepeatLog() {
+        LeaseRecord toSignLease = new LeaseRecord();
+        toSignLease.setId(4L);
+        toSignLease.setTenantId(1L);
+        toSignLease.setCommunityId(1L);
+        toSignLease.setHouseId(5L);
+        toSignLease.setStatus("TO_SIGN");
+
+        /* 条件更新返回 0 行（并发赢家已完成流转），重读已是 ACTIVE → 幂等返回 */
+        LeaseRecord winner = new LeaseRecord();
+        winner.setId(4L);
+        winner.setStatus("ACTIVE");
+        when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(0);
+        when(leaseMapper.selectById(4L)).thenReturn(winner);
+
+        leaseService.applyTransition(toSignLease, "ACTIVE", "测试");
+
+        verify(changeLogService, never())
+                .logStatus(anyLong(), anyString(), anyString(), anyString());
+        verify(houseMapper, never()).updateById(any(com.community.residence.community.entity.House.class));
+    }
+
+    @Test
+    @DisplayName("OCR DEF-115：条件更新 0 行且状态漂移（非目标状态）→ STATE_TRANSITION_INVALID")
+    void applyTransition_concurrentDrift_rejected() {
+        LeaseRecord toSignLease = new LeaseRecord();
+        toSignLease.setId(4L);
+        toSignLease.setTenantId(1L);
+        toSignLease.setCommunityId(1L);
+        toSignLease.setHouseId(5L);
+        toSignLease.setStatus("TO_SIGN");
+
+        /* 0 行且重读为 REJECTED（并发被驳回）→ 按并发状态冲突拒绝 */
+        LeaseRecord drifted = new LeaseRecord();
+        drifted.setId(4L);
+        drifted.setStatus("REJECTED");
+        when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(0);
+        when(leaseMapper.selectById(4L)).thenReturn(drifted);
+
+        assertThatThrownBy(() -> leaseService.applyTransition(toSignLease, "ACTIVE", "测试"))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.STATE_TRANSITION_INVALID));
+        verify(changeLogService, never())
+                .logStatus(anyLong(), anyString(), anyString(), anyString());
     }
 
     private CreateLeaseDTO dto() {

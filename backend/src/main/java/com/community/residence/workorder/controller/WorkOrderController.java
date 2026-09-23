@@ -5,6 +5,7 @@ import com.community.residence.common.result.PageVO;
 import com.community.residence.workorder.dto.AssignWorkOrderDTO;
 import com.community.residence.workorder.dto.CreateWorkOrderDTO;
 import com.community.residence.workorder.dto.WorkOrderActionDTO;
+import com.community.residence.workorder.dto.WorkOrderRemarkDTO;
 import com.community.residence.workorder.service.WorkOrderService;
 import com.community.residence.workorder.vo.AttachmentVO;
 import com.community.residence.workorder.vo.ProcessRecordVO;
@@ -31,7 +32,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-/** 工单管理控制器：提交/派单/接单/处理/确认/关闭全链路（接口设计.md 9.4.2） */
+/** 工单管理控制器：提交/派单/接单/处理/确认/关闭全链路（接口设计.md 9.4.2）。
+ * 处置动作的请求体分两类：**可选**（接单/开始处理/确认完成/关闭，{@link WorkOrderRemarkDTO}）
+ * 与**必填理由**（完成处理/不满意退回/驳回/取消，{@link WorkOrderActionDTO} 的 remark @NotBlank）。 */
 @Tag(name = "工单管理", description = "服务申请与工单流转接口")
 @RestController
 @RequestMapping("/api/v1/work-orders")
@@ -105,7 +108,16 @@ public class WorkOrderController {
         return ApiResponse.success(workOrderService.assignableStaff(communityId, categoryId));
     }
 
-    @Operation(summary = "派单", description = "待受理/待派单 → 已派单；支持改派")
+    @Operation(summary = "管理端受理", description = "待受理 → 待派单（R74/DEF-071 新增端点）；同一事务自动建立工单临时群聊"
+            + "（居民提交人 + 受理管理员入群），响应回带 conversationId；仅待受理可受理，重复受理返回 5302；请求体可选")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PatchMapping("/{id}/intake")
+    public ApiResponse<WorkOrderVO> intake(@PathVariable Long id,
+                                           @RequestBody(required = false) @Valid WorkOrderRemarkDTO dto) {
+        return ApiResponse.success(workOrderService.intake(id, remarkOf(dto)));
+    }
+
+    @Operation(summary = "派单", description = "待受理/待派单 → 已派单；支持改派；被派服务人员自动加入工单临时群聊（R74）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/assign")
     public ApiResponse<Void> assign(@PathVariable Long id, @RequestBody @Valid AssignWorkOrderDTO dto) {
@@ -113,19 +125,19 @@ public class WorkOrderController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "接单", description = "已派单 → 已接单；仅被派单的服务人员")
+    @Operation(summary = "接单", description = "已派单 → 已接单；仅被派单的服务人员；请求体可选")
     @PreAuthorize("hasRole('STAFF')")
     @PatchMapping("/{id}/accept")
-    public ApiResponse<Void> accept(@PathVariable Long id, @RequestBody @Valid WorkOrderActionDTO dto) {
-        workOrderService.accept(id, dto.getRemark());
+    public ApiResponse<Void> accept(@PathVariable Long id, @RequestBody(required = false) @Valid WorkOrderRemarkDTO dto) {
+        workOrderService.accept(id, remarkOf(dto));
         return ApiResponse.success();
     }
 
-    @Operation(summary = "开始处理", description = "已接单 → 处理中")
+    @Operation(summary = "开始处理", description = "已接单 → 处理中；请求体可选")
     @PreAuthorize("hasRole('STAFF')")
     @PatchMapping("/{id}/process")
-    public ApiResponse<Void> process(@PathVariable Long id, @RequestBody @Valid WorkOrderActionDTO dto) {
-        workOrderService.process(id, dto.getRemark());
+    public ApiResponse<Void> process(@PathVariable Long id, @RequestBody(required = false) @Valid WorkOrderRemarkDTO dto) {
+        workOrderService.process(id, remarkOf(dto));
         return ApiResponse.success();
     }
 
@@ -137,11 +149,11 @@ public class WorkOrderController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "确认完成", description = "待确认 → 已完成；仅工单提交人")
+    @Operation(summary = "确认完成", description = "待确认 → 已完成；仅工单提交人；**请求体可选**（DEF-A：前端不传 body）")
     @PreAuthorize("hasRole('RESIDENT')")
     @PatchMapping("/{id}/confirm")
-    public ApiResponse<Void> confirm(@PathVariable Long id, @RequestBody @Valid WorkOrderActionDTO dto) {
-        workOrderService.confirm(id, dto.getRemark());
+    public ApiResponse<Void> confirm(@PathVariable Long id, @RequestBody(required = false) @Valid WorkOrderRemarkDTO dto) {
+        workOrderService.confirm(id, remarkOf(dto));
         return ApiResponse.success();
     }
 
@@ -153,11 +165,11 @@ public class WorkOrderController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "关闭工单", description = "已完成 → 已关闭（终态）")
+    @Operation(summary = "关闭工单", description = "已完成 → 已关闭（终态）；**请求体可选**（DEF-A：前端不传 body）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/close")
-    public ApiResponse<Void> close(@PathVariable Long id, @RequestBody @Valid WorkOrderActionDTO dto) {
-        workOrderService.close(id, dto.getRemark());
+    public ApiResponse<Void> close(@PathVariable Long id, @RequestBody(required = false) @Valid WorkOrderRemarkDTO dto) {
+        workOrderService.close(id, remarkOf(dto));
         return ApiResponse.success();
     }
 
@@ -182,5 +194,11 @@ public class WorkOrderController {
     @GetMapping("/{id}/timeline")
     public ApiResponse<List<ProcessRecordVO>> timeline(@PathVariable Long id) {
         return ApiResponse.success(workOrderService.timeline(id));
+    }
+
+    /* DEF-A：可选请求体端点（accept/process/confirm/close）统一取值——body 缺省即无备注，
+       不能让「不传请求体」落到 HttpMessageNotReadableException 变成 400 */
+    private String remarkOf(WorkOrderRemarkDTO dto) {
+        return dto == null ? null : dto.getRemark();
     }
 }

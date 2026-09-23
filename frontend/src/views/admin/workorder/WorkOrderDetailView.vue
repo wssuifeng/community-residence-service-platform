@@ -3,8 +3,11 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
+import ConversationChat from '@/components/business/ConversationChat.vue'
 import StaffPickerDrawer from '@/views/admin/workorder/StaffPickerDrawer.vue'
-import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, listWorkOrderAttachments, rejectWorkOrder } from '@/api/workorder'
+import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, intakeWorkOrder, listWorkOrderAttachments, rejectWorkOrder } from '@/api/workorder'
+import { getConversation } from '@/api/conversation'
+import type { IConversation } from '@/types/modules/conversation'
 import type {
   DispatchFlag,
   IWorkOrder,
@@ -14,7 +17,7 @@ import type {
   WorkOrderStatus
 } from '@/types/modules/workorder'
 import { dispatchFlagColors, dispatchFlagLabels, workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
-import { canAssignOrder, formatWaited, isReassignOrder } from './dispatch'
+import { canAssignOrder, canFinalizeOrder, canIntakeOrder, formatWaited, isReassignOrder } from './dispatch'
 import { formatDateTime } from '@/utils/date'
 
 /**
@@ -60,12 +63,38 @@ const waitedText = computed(() => formatWaited(order.value?.waitedMinutes))
 /** 处理人当日班次：后端空值=未排班，需明示而非留白 */
 const assigneeShift = computed(() => order.value?.assigneeShiftLabel || '未排班')
 
-/* 状态机：待受理/待派单可派单与驳回；已派单可改派（后端 assign 同一端点）；已完成可关闭 */
+/* 状态机：待受理可受理（R74）；待受理/待派单可派单与驳回；已派单可改派（后端 assign 同一端点）；
+   已完成可终审结束（R74：复用 close 端点，前置收窄为仅 COMPLETED） */
+const canIntake = computed(() => !!order.value && canIntakeOrder(order.value))
 const canAssign = computed(() => !!order.value && canAssignOrder(order.value))
 const canReassign = computed(() => !!order.value && isReassignOrder(order.value))
 const canReject = computed(() => order.value?.status === 'PENDING' || order.value?.status === 'TO_ASSIGN')
-const canClose = computed(() => order.value?.status === 'COMPLETED')
-const hasAction = computed(() => canAssign.value || canReject.value || canClose.value)
+const canClose = computed(() => !!order.value && canFinalizeOrder(order.value))
+const hasAction = computed(
+  () => canIntake.value || canAssign.value || canReject.value || canClose.value
+)
+
+/* R74 工单临时群聊：受理后由后端同事务建群并回带 conversationId；未受理则无群（不渲染面板） */
+const workOrderConversation = ref<IConversation | null>(null)
+/** 关闭态提示（UI设计 v1.4 §R74：与接口 5604 口径一致；组件内为追加文案，不改既有默认文案） */
+const CONVERSATION_CLOSED_HINT = '工单已结束，会话资源已回收（历史可查、不可再发言）'
+
+/**
+ * 取工单临时群聊：仅参与者可见（§9.21.2）——非参与者 403 或会话不存在时
+ * 一律不渲染面板，不把「无权查看」包装成空群聊。
+ */
+async function loadConversation(): Promise<void> {
+  const conversationId = order.value?.conversationId
+  if (!conversationId) {
+    workOrderConversation.value = null
+    return
+  }
+  try {
+    workOrderConversation.value = await getConversation(conversationId)
+  } catch {
+    workOrderConversation.value = null
+  }
+}
 
 /* 紧急程度 → 状态条配色档，与 staff 端工单详情同一口径 */
 function toneOf(priority: WorkOrderPriority): 'urgent' | 'normal' | 'low' {
@@ -84,10 +113,25 @@ async function fetchDetail(): Promise<void> {
     order.value = detail
     timeline.value = processes
     attachments.value = files
+    await loadConversation()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '工单详情加载失败')
   } finally {
     loading.value = false
+  }
+}
+
+/** R74 受理：仅待受理可受理（否则后端 5302）；成功即同事务建群并回带 conversationId */
+async function handleIntake(): Promise<void> {
+  actionLoading.value = true
+  try {
+    const updated = await intakeWorkOrder(orderId)
+    ElMessage.success(updated?.conversationId ? '工单已受理，工单沟通群已建立' : '工单已受理')
+    await fetchDetail()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '受理失败')
+  } finally {
+    actionLoading.value = false
   }
 }
 
@@ -112,22 +156,23 @@ async function handleReject(): Promise<void> {
   }
 }
 
-/* 关闭：仅居民确认完成（已完成）后可关闭（状态机 9.4.2.10） */
+/* 终审结束（R74：复用关闭端点，前置仅已完成，§9.21.3）：关闭同时回收工单临时群聊为只读 */
 async function handleClose(): Promise<void> {
   try {
     await ElMessageBox.confirm(
-      '关闭后工单将归档不可再流转；若居民尚未评价，关闭后仍可补交评价。确认关闭该工单吗？',
-      '关闭工单',
+      '关闭后工单将归档不可再流转；若居民尚未评价，关闭后仍可补交评价。确认关闭该工单吗？' +
+        '终审结束后工单沟通群将回收为只读（历史可查、不可再发言）。',
+      '终审结束',
       {
-        confirmButtonText: '确认关闭',
+        confirmButtonText: '确认终审结束',
         cancelButtonText: '取消',
         type: 'warning'
       }
     )
     actionLoading.value = true
     await closeWorkOrder(orderId)
-    ElMessage.success('工单已关闭')
-    fetchDetail()
+    ElMessage.success('工单已终审结束，沟通群已回收为只读')
+    await fetchDetail()
   } catch (error) {
     if (error === 'cancel' || error === 'close') return
     ElMessage.error(error instanceof Error ? error.message : '关闭失败')
@@ -294,21 +339,42 @@ onMounted(fetchDetail)
             管理操作
           </h2>
 
+          <el-button v-if="canIntake" v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" size="large" class="action-btn" :loading="actionLoading" @click="handleIntake">
+            受理
+          </el-button>
           <el-button v-if="canAssign" type="primary" size="large" class="action-btn" @click="pickerVisible = true">
             {{ canReassign ? '改派工单' : '派单' }}
           </el-button>
           <el-button v-if="canReject" type="danger" plain size="large" class="action-btn" :loading="actionLoading" @click="handleReject">
             驳回工单
           </el-button>
-          <el-button v-if="canClose" type="warning" plain size="large" class="action-btn" :loading="actionLoading" @click="handleClose">
-            关闭工单
+          <el-button v-if="canClose" v-permission="['ADMIN', 'SUPER_ADMIN']" type="warning" plain size="large" class="action-btn" :loading="actionLoading" @click="handleClose">
+            终审结束
           </el-button>
 
           <p v-if="!hasAction" class="action-hint">
             当前状态「{{ workOrderStatusLabels[order.status] }}」无需管理操作，工单由居民或服务人员侧继续流转。
           </p>
 
-          <p class="action-note">动作说明：派单/改派须选择服务人员；驳回须填写理由；关闭为归档终态操作。</p>
+          <p class="action-note">动作说明：受理即自动建立工单沟通群；派单/改派须选择服务人员；驳回须填写理由；终审结束为归档终态操作，并回收工单沟通群为只读。</p>
+        </article>
+
+        <!-- R74 工单临时群聊：受理后自动建群（居民提交人 + 受理管理员，派单后服务人员入群）；
+             未受理时 conversationId 为空，整块不渲染；终审结束后只读留档 -->
+        <article v-if="workOrderConversation" class="panel chat-panel">
+          <h2 class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 6.5h16v9H9l-5 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            </svg>
+            工单临时群聊
+          </h2>
+          <ConversationChat
+            :conversation-id="workOrderConversation.id"
+            :closed="workOrderConversation.status === 'CLOSED'"
+            :closed-hint="CONVERSATION_CLOSED_HINT"
+            :participants="workOrderConversation.participants ?? []"
+            :title="workOrderConversation.title"
+          />
         </article>
       </div>
     </template>
@@ -474,6 +540,11 @@ onMounted(fetchDetail)
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 0.8fr);
   align-items: stretch;
   gap: var(--spacing-lg);
+}
+
+/* R74 工单临时群聊面板：独占整行，位于三栏之下（未受理时不渲染，不影响既有三栏布局） */
+.chat-panel {
+  grid-column: 1 / -1;
 }
 
 .panel {

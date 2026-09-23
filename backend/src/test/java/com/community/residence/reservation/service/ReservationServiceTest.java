@@ -187,6 +187,14 @@ class ReservationServiceTest {
 
             assertThat(pendingReservation.getStatus()).isEqualTo("VIOLATED");
             org.mockito.Mockito.verify(violationRecordMapper).insert(any(ViolationRecord.class));
+            /* 身份空间断言（DEF-067）：预约人为 resident 主体，标注 createForResident */
+            org.mockito.Mockito.verify(notificationService).createForResident(
+                    org.mockito.ArgumentMatchers.eq(1L), org.mockito.ArgumentMatchers.eq(1L),
+                    org.mockito.ArgumentMatchers.eq("预约违约处置"),
+                    org.mockito.ArgumentMatchers.anyString(),
+                    org.mockito.ArgumentMatchers.eq("RESERVATION"),
+                    org.mockito.ArgumentMatchers.eq("RESOURCE_RESERVATION"),
+                    org.mockito.ArgumentMatchers.eq(1L));
         }
     }
 

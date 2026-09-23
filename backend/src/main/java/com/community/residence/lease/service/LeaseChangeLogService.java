@@ -69,6 +69,12 @@ public class LeaseChangeLogService {
         record(leaseId, "AGREEMENT", "agreementStatus", "协议签约", null, action, detail);
     }
 
+    /* 押金退还动作（发起/成功/失败）留痕（R72）：changeType=DEPOSIT_REFUND——
+       本表记动作、lease_deposit_refund 记退款指令与渠道结果，两者互为对照 */
+    public void logDepositRefund(Long leaseId, String action, String detail) {
+        record(leaseId, "DEPOSIT_REFUND", "depositStatus", "押金状态", null, action, detail);
+    }
+
     public List<LeaseChangeVO> list(Long leaseId) {
         return changeLogMapper.selectList(new LambdaQueryWrapper<LeaseChangeLog>()
                         .eq(LeaseChangeLog::getLeaseId, leaseId)

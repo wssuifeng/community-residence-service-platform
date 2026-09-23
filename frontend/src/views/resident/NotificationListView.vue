@@ -27,8 +27,16 @@ const conversations = ref<IConversation[]>([])
 const conversationsLoading = ref(false)
 
 const conversationTypeLabels: Record<IConversation['type'], string> = {
-  VIEWING_GROUP: '群聊',
-  DIRECT: '直通'
+  LEASE_GROUP: '租约群聊',
+  VIEWING_GROUP: '看房群聊',
+  DIRECT: '直通',
+  /* R74：工单临时群聊（管理端受理后自动建群） */
+  WORK_ORDER_GROUP: '工单群聊'
+}
+
+/** 已关闭会话（R68 生命周期终止）：列表置灰标记，历史只读 */
+function isClosed(item: IConversation): boolean {
+  return item.status === 'CLOSED'
 }
 
 async function loadConversations(): Promise<void> {
@@ -153,12 +161,14 @@ onMounted(() => {
           v-for="item in conversations"
           :key="item.id"
           class="conversation-item"
+          :class="{ 'is-closed': isClosed(item) }"
           @click="openConversation(item.id)"
         >
           <span class="conv-type" :data-type="item.type">{{ conversationTypeLabels[item.type] }}</span>
           <div class="conv-main">
             <p class="conv-title">
               {{ item.title }}
+              <span v-if="isClosed(item)" class="conv-status">已关闭</span>
               <span v-if="item.unreadCount > 0" class="conv-unread">
                 {{ item.unreadCount > 99 ? '99+' : item.unreadCount }}
               </span>
@@ -170,7 +180,7 @@ onMounted(() => {
         <li v-if="!conversationsLoading && conversations.length === 0" class="conv-empty">
           <img src="/images/empty-state.png" alt="" />
           <p>暂无沟通会话</p>
-          <p class="conv-empty-sub">点击右上角「联系社区管理员」发起直通会话；看房预约将自动建群</p>
+          <p class="conv-empty-sub">点击右上角「联系社区管理员」发起直通会话；入住申请审核通过后会自动建租约群聊</p>
         </li>
       </ul>
     </section>
@@ -281,12 +291,17 @@ onMounted(() => {
   background-color: var(--color-bg-hover);
 }
 
-/* 会话类型徽标：看房群聊 / 居民-社区管理员直通 */
+/* 会话类型徽标：租约群聊 / 看房群聊 / 居民-社区管理员直通 */
 .conv-type {
   flex-shrink: 0;
   padding: 2px var(--spacing-sm);
   border-radius: var(--radius-pill);
   font-size: var(--font-size-xs);
+}
+
+.conv-type[data-type='LEASE_GROUP'] {
+  background: #e6f6f8;
+  color: #0891b2;
 }
 
 .conv-type[data-type='VIEWING_GROUP'] {
@@ -297,6 +312,21 @@ onMounted(() => {
 .conv-type[data-type='DIRECT'] {
   background: #f1ebfd;
   color: #8b5cf6;
+}
+
+/* 已关闭会话（R68）：整行降透明度提示只读，不隐藏历史 */
+.conversation-item.is-closed {
+  opacity: 0.68;
+}
+
+.conv-status {
+  flex-shrink: 0;
+  padding: 1px var(--spacing-xs);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: var(--font-weight-normal);
 }
 
 .conv-main {

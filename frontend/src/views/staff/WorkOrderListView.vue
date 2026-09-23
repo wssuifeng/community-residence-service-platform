@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import { listWorkOrders } from '@/api/workorder'
+import { listWorkOrders, acceptWorkOrder, processWorkOrder } from '@/api/workorder'
 import type { IWorkOrder, WorkOrderPriority, WorkOrderStatus } from '@/types/modules/workorder'
 import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatDateTime } from '@/utils/date'
@@ -146,6 +146,46 @@ function goDetail(order: IWorkOrder): void {
   router.push(`/staff/work-orders/${order.id}`)
 }
 
+/* ---------- R74 派单链路的列表内操作（与详情页同状态机口径） ---------- */
+
+/** 正在提交的动作所属工单（同一时刻只允许一个动作在飞行，避免重复点击造成二次流转） */
+const actionLoadingId = ref<number | null>(null)
+
+/** 接单（接口设计 §9.4.2.6：仅已派单 → 已接单，本人） */
+async function handleAccept(order: IWorkOrder): Promise<void> {
+  if (actionLoadingId.value !== null) return
+  actionLoadingId.value = order.id
+  try {
+    await acceptWorkOrder(order.id)
+    ElMessage.success('已接单，可开始处理')
+    await refresh()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '接单失败')
+  } finally {
+    actionLoadingId.value = null
+  }
+}
+
+/** 开始处理（接口设计 §9.4.2.7：仅已接单 → 处理中，本人） */
+async function handleProcess(order: IWorkOrder): Promise<void> {
+  if (actionLoadingId.value !== null) return
+  actionLoadingId.value = order.id
+  try {
+    await processWorkOrder(order.id)
+    ElMessage.success('已开始处理，处理完成后请提交处理结果')
+    await refresh()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '开始处理失败')
+  } finally {
+    actionLoadingId.value = null
+  }
+}
+
+/** 提交处理结果需要填写说明与可选的现场照片，落详情页的表单（不在列表做半套表单） */
+function goComplete(order: IWorkOrder): void {
+  router.push({ path: `/staff/work-orders/${order.id}`, query: { action: 'complete' } })
+}
+
 onMounted(refresh)
 onUnmounted(() => window.clearTimeout(searchTimer))
 </script>
@@ -217,9 +257,35 @@ onUnmounted(() => window.clearTimeout(searchTimer))
           </div>
 
           <div class="order-side">
-            <button type="button" class="order-action" @click.stop="goDetail(order)">
-              {{ order.status === 'ASSIGNED' ? '接单' : '查看' }}
+            <!-- 派单链路的真操作入口（原实现只有「接单」文案却仅做跳转：接单/开始处理在列表上点不动）。
+                 状态机同 detail 页：ASSIGNED→接单、ACCEPTED→开始处理、IN_PROGRESS→提交处理结果（表单在详情页） -->
+            <button
+              v-if="order.status === 'ASSIGNED'"
+              type="button"
+              class="order-action"
+              :disabled="actionLoadingId === order.id"
+              @click.stop="handleAccept(order)"
+            >
+              接单
             </button>
+            <button
+              v-else-if="order.status === 'ACCEPTED'"
+              type="button"
+              class="order-action"
+              :disabled="actionLoadingId === order.id"
+              @click.stop="handleProcess(order)"
+            >
+              开始处理
+            </button>
+            <button
+              v-else-if="order.status === 'IN_PROGRESS'"
+              type="button"
+              class="order-action"
+              @click.stop="goComplete(order)"
+            >
+              提交处理结果
+            </button>
+            <button type="button" class="order-action is-ghost" @click.stop="goDetail(order)">详情</button>
           </div>
         </li>
       </ul>
@@ -521,6 +587,7 @@ onUnmounted(() => window.clearTimeout(searchTimer))
 .order-side {
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
   flex-shrink: 0;
 }
 
@@ -539,6 +606,26 @@ onUnmounted(() => window.clearTimeout(searchTimer))
 
 .order-action:hover {
   background-color: var(--color-primary-dark);
+}
+
+.order-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 次要入口（详情）：描边样式，不与主动作抢视觉 */
+.order-action.is-ghost {
+  padding: 11px 18px;
+  border: 1px solid var(--color-border);
+  background-color: #fff;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.order-action.is-ghost:hover {
+  border-color: var(--color-primary);
+  background-color: #fff;
+  color: var(--color-primary);
 }
 
 @media (max-width: 991px) {

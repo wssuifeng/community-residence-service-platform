@@ -286,7 +286,7 @@ public class ReservationService {
                 reservation.getEndTime(), id);
         reservation.setStatus(ReservationStatus.RESERVED);
         reservationMapper.updateById(reservation);
-        notificationService.create(reservation.getUserId(), reservation.getCommunityId(),
+        notificationService.createForResident(reservation.getUserId(), reservation.getCommunityId(),
                 "预约已确认", "您 " + reservation.getReserveDate() + " 的预约已确认",
                 "RESERVATION", "RESOURCE_RESERVATION", id);
         log.info("预约已确认：reservationId={}, operator={}", id, SecurityUtils.getUserId());
@@ -313,7 +313,7 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.REJECTED);
         reservation.setRemark(reason);
         reservationMapper.updateById(reservation);
-        notificationService.create(reservation.getUserId(), reservation.getCommunityId(),
+        notificationService.createForResident(reservation.getUserId(), reservation.getCommunityId(),
                 "预约未通过", "您 " + reservation.getReserveDate() + " 的预约未通过：" + reason,
                 "RESERVATION", "RESOURCE_RESERVATION", id);
     }
@@ -351,7 +351,7 @@ public class ReservationService {
         violationRecordMapper.insert(record);
 
         freezeIfExceeded(reservation.getUserId(), reason);
-        notificationService.create(reservation.getUserId(), reservation.getCommunityId(),
+        notificationService.createForResident(reservation.getUserId(), reservation.getCommunityId(),
                 "预约违约处置", "您 " + reservation.getReserveDate() + " 的预约被标记违约：" + reason,
                 "RESERVATION", "RESOURCE_RESERVATION", id);
     }

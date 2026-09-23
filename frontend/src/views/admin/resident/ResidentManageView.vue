@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import AdminStatCard from '@/components/admin/AdminStatCard.vue'
 import ResidentListView from './ResidentListView.vue'
-import ResidenceApplicationListView from './ResidenceApplicationListView.vue'
 import ResidenceRelationListView from './ResidenceRelationListView.vue'
 import ResidentAdminCreateDialog from './ResidentAdminCreateDialog.vue'
 import ResidentImportDialog from './ResidentImportDialog.vue'
 import { getResidenceApplicationList, getResidentList } from '@/api/resident'
 
 /**
- * 居民管理容器：Tab 深链 ?tab=list|applications|relations（任务 1 契约，取值不得变更）。
- * 对照设计稿 04-居民管理：页头 + 3 统计卡 + 白卡 Tab 条（入住申请带待审核角标）+
- * 三列表 Tab。审批动作后经 reviewed 事件刷新统计卡与角标。
+ * 居民管理容器：Tab 深链 ?tab=list|relations（批次 g：入住申请审核已迁至
+ * 「租住与房源 → 入住申请」，本页只保留自身台账——居民列表 / 居住关系）。
+ * 对照设计稿 04-居民管理：页头 + 3 统计卡 + 白卡 Tab 条 + 列表 Tab。
  * 页头操作区：代建居民 / 批量导入（DEF-038，R8 v1.2；权限口径与后端
  * @PreAuthorize 对齐，列表 Tab 的冻结按钮同为 ADMIN/SUPER_ADMIN）。
  */
@@ -21,7 +20,7 @@ import { getResidenceApplicationList, getResidentList } from '@/api/resident'
 const createDialogVisible = ref(false)
 const importDialogVisible = ref(false)
 
-const TABS = ['list', 'applications', 'relations'] as const
+const TABS = ['list', 'relations'] as const
 type TabName = (typeof TABS)[number]
 
 const route = useRoute()
@@ -33,6 +32,17 @@ const activeTab = computed<TabName>(() => {
     ? (tab as TabName)
     : TABS[0]
 })
+
+/* 老链接兼容：?tab=applications 是入住申请审核迁出前的深链，改落 Hub 对应 Tab，避免停成空页 */
+watch(
+  () => route.query.tab,
+  (tab) => {
+    if (tab === 'applications') {
+      router.replace({ name: 'AdminHousingLease', query: { tab: 'applications' } })
+    }
+  },
+  { immediate: true }
+)
 
 /* Tab 切换走 query 替换：?tab= 深链可直达、可刷新、不产生历史记录；
    切换时顺带刷新统计卡（冻结/审批等动作可能已改变口径） */
@@ -145,6 +155,15 @@ function refreshAfterMutation(): void {
       />
     </div>
 
+    <!-- 入住申请审核已迁至 Hub：本页只保留待办口径统计，给出直达入口（批次 g） -->
+    <p class="stat-hint">
+      「待审核申请」为入住申请待办数，审核动作在
+      <router-link :to="{ name: 'AdminHousingLease', query: { tab: 'applications' } }">
+        租住与房源 → 入住申请
+      </router-link>
+      中完成
+    </p>
+
     <!-- 白卡 Tab 条：观感与运营看板/社区结构一致（激活蓝字 + 底部 2px 下划线） -->
     <nav class="tab-bar" role="tablist" aria-label="居民管理视图切换">
       <button
@@ -161,17 +180,6 @@ function refreshAfterMutation(): void {
         type="button"
         role="tab"
         class="tab-item"
-        :class="{ active: activeTab === 'applications' }"
-        :aria-selected="activeTab === 'applications'"
-        @click="switchTab('applications')"
-      >
-        入住申请
-        <span v-if="pendingTotal > 0" class="tab-badge">{{ pendingTotal }}</span>
-      </button>
-      <button
-        type="button"
-        role="tab"
-        class="tab-item"
         :class="{ active: activeTab === 'relations' }"
         :aria-selected="activeTab === 'relations'"
         @click="switchTab('relations')"
@@ -181,7 +189,6 @@ function refreshAfterMutation(): void {
     </nav>
 
     <ResidentListView v-if="activeTab === 'list'" :key="listRefreshKey" @go-relations="goRelations" />
-    <ResidenceApplicationListView v-else-if="activeTab === 'applications'" @reviewed="loadStats" />
     <ResidenceRelationListView v-else :preset-resident-id="presetResidentId" />
 
     <ResidentAdminCreateDialog v-model="createDialogVisible" @created="refreshAfterMutation" />
@@ -194,7 +201,19 @@ function refreshAfterMutation(): void {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+/* 迁出提示：低饱和辅助行，不与统计卡抢视线 */
+.stat-hint {
+  margin: 0 0 var(--spacing-lg);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.stat-hint a {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
 }
 
 .tab-bar {
@@ -234,22 +253,6 @@ function refreshAfterMutation(): void {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
   font-weight: var(--font-weight-medium);
-}
-
-/* 待审核数角标：语义 soft 色对，随统计自动消隐 */
-.tab-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-warning-soft);
-  color: var(--color-warning);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  line-height: 1;
 }
 
 @media (max-width: 767px) {

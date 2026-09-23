@@ -38,6 +38,15 @@ const props = defineProps<{
   role: 'ADMIN' | 'RESIDENT'
   /** 社区 ID（可选；缺省由组件内部查租约补全，仅影响可用模板清单） */
   communityId?: number
+  /** 是否自带白卡容器（默认 true，页面直挂用）；嵌在弹窗等已有容器内时传 false */
+  selfManaged?: boolean
+  /**
+   * 承租是否已确认（R67/V20，仅管理方相关）：`false` 表示居民尚未确认承租，
+   * 此时**禁用**「发起协议」并说明原因（后端同样拒绝 LEASE_TENANCY_NOT_CONFIRMED 5601）。
+   * `undefined` 表示调用方未知该状态（如后端尚未返回 tenantConfirmAt）——此时放行，
+   * 由后端把关，避免前端字段缺失把合法操作挡住。
+   */
+  tenancyConfirmed?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -191,32 +200,15 @@ async function handleAdminConfirm(item: ILeaseAgreement): Promise<void> {
   await doConfirm(item)
 }
 
-/** 居民方确认：必须二次确认，弹窗明示「确认后视为已同意协议内容」；可选填确认人姓名（留空由后端取账号姓名） */
-async function handleResidentConfirm(item: ILeaseAgreement): Promise<void> {
-  let confirmName: string
-  try {
-    const result = await ElMessageBox.prompt(
-      `确认后视为您已同意协议「${item.title}」的全部内容，系统将记录确认人姓名与确认时间，确认后不可自行撤销。`,
-      '确认协议内容',
-      {
-        type: 'warning',
-        confirmButtonText: '我已阅读并同意',
-        cancelButtonText: '取消',
-        inputPlaceholder: '确认人姓名（选填，留空默认使用账号姓名）',
-        inputValue: ''
-      }
-    )
-    confirmName = result.value.trim()
-  } catch {
-    return
-  }
-  await doConfirm(item, confirmName)
-}
-
-async function doConfirm(item: ILeaseAgreement, confirmName?: string): Promise<void> {
+/**
+ * 确认动作（**仅管理方入口**）：DEF-078 去重后，居民「同意承租」只在承约
+ * （`POST /leases/{id}/tenancy-confirm`）采集一次，管理方确认协议时由后端引用该留痕，
+ * 因此居民侧不再需要（也不提供）二次确认入口——确认人姓名由后端按当前账号解析。
+ */
+async function doConfirm(item: ILeaseAgreement): Promise<void> {
   submitting.value = true
   try {
-    await confirmLeaseAgreement(item.id, confirmName ? { confirmName } : {})
+    await confirmLeaseAgreement(item.id, {})
     ElMessage.success('协议已确认')
     await load()
     emit('changed')
@@ -266,6 +258,14 @@ const isAdmin = computed(() => props.role === 'ADMIN')
 const adminConfirmed = computed(() => !!current.value?.adminConfirmTime)
 const tenantConfirmed = computed(() => !!current.value?.tenantConfirmTime)
 
+/* ---------- 承租确认前置（R67：未确认承租时管理端不可发起协议） ---------- */
+
+/** 居民尚未确认承租（仅 tenancyConfirmed 显式为 false 时判定为受阻，undefined=未知则放行） */
+const tenancyBlocked = computed(() => props.tenancyConfirmed === false)
+const createDisabledReason = computed(() =>
+  tenancyBlocked.value ? '居民尚未确认承租，确认后方可发起租赁协议' : ''
+)
+
 onMounted(async () => {
   await Promise.all([load(), resolveCommunity()])
 })
@@ -282,7 +282,12 @@ defineExpose({ reload: load })
 </script>
 
 <template>
-  <article v-loading="loading" class="agreement-panel">
+  <!-- 自带白卡容器（selfManaged=false 时不加，供弹窗内嵌） -->
+  <article
+    v-loading="loading"
+    class="agreement-panel"
+    :class="{ 'is-flat': selfManaged === false }"
+  >
     <header class="panel-head">
       <h2 class="panel-title">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -350,15 +355,11 @@ defineExpose({ reload: load })
             撤回协议
           </el-button>
         </template>
-        <el-button
-          v-else-if="!tenantConfirmed"
-          size="small"
-          type="primary"
-          :loading="submitting"
-          @click="handleResidentConfirm(current)"
-        >
-          确认协议
-        </el-button>
+        <!-- 居民侧（DEF-078 去重）：承租确认（承约）即签署意愿留痕，
+             管理方确认时引用该留痕 → **不再提供居民二次确认入口** -->
+        <p v-else class="action-hint resident-tenancy-note">
+          承租确认（承约）即您的签署意愿留痕；管理方确认协议时引用该留痕并直接推进，您无需再次确认。
+        </p>
       </div>
 
       <!-- 提示按协议状态而非「本人是否已确认」判定：双方都已确认时不能再提示等待对方 -->
@@ -366,10 +367,10 @@ defineExpose({ reload: load })
         双方已确认，协议已生效并同步租约签约状态，可随时查看协议正文。
       </p>
       <p v-else-if="isAdmin && adminConfirmed" class="action-hint">
-        您已确认本协议，待居民方确认后协议生效并同步租约签约状态。
+        您已确认本协议，协议已引用居民承约留痕并即时生效。
       </p>
       <p v-else-if="!isAdmin && tenantConfirmed" class="action-hint">
-        您已确认本协议，等待管理方确认。
+        您的承约留痕已计入本协议，等待社区管理方确认后生效。
       </p>
     </template>
 
@@ -381,8 +382,29 @@ defineExpose({ reload: load })
         </p>
         <p v-else class="empty-text">管理方尚未发起协议。</p>
       </div>
+
+      <!-- 承租确认前置说明（R67）：未确认时把入口置灰并给出原因，而不是让用户点了才被后端拒绝 -->
+      <el-alert
+        v-if="isAdmin && tenancyBlocked"
+        type="warning"
+        :closable="false"
+        show-icon
+        class="tenancy-alert"
+        title="居民尚未确认承租"
+        description="承租确认是发起租赁协议的前置条件：居民在「我的租约 → 待签约」或租约群聊内确认后，管理方方可发起协议。"
+      />
+
       <div v-if="isAdmin" class="panel-actions">
-        <el-button type="primary" size="small" @click="openCreate">发起协议</el-button>
+        <el-button
+          type="primary"
+          size="small"
+          :disabled="tenancyBlocked"
+          :title="createDisabledReason"
+          @click="openCreate"
+        >
+          发起协议
+        </el-button>
+        <span v-if="tenancyBlocked" class="action-block-hint">{{ createDisabledReason }}</span>
       </div>
     </template>
 
@@ -496,6 +518,14 @@ defineExpose({ reload: load })
   background-color: var(--admin-card-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
+}
+
+/* 嵌在弹窗等已有容器内（selfManaged=false）：去掉白卡与阴影，只保留内容排版 */
+.agreement-panel.is-flat {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .panel-head {
@@ -646,6 +676,17 @@ defineExpose({ reload: load })
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: var(--line-height-relaxed);
+}
+
+/* 承租确认前置提示与置灰原因（R67） */
+.tenancy-alert {
+  margin-top: var(--spacing-md);
+}
+
+.action-block-hint {
+  align-self: center;
+  font-size: var(--font-size-xs);
+  color: var(--color-warning);
 }
 
 .history-collapse {

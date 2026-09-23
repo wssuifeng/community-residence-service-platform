@@ -107,10 +107,14 @@ public class GlobalExceptionHandler {
         return badRequest(message);
     }
 
+    /* ---- 400：请求体不可读（DEF-A：原文案「请求体格式不合法」对调用方不可行动——
+       既说不清是缺 body 还是 JSON 写错，也看不出该怎么改；改为说明「缺什么/怎么办」。
+       请求体是否必填由各端点 @RequestBody(required) 决定，本处理器只兜"读不出来"） ---- */
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnreadable(HttpMessageNotReadableException e) {
         log.warn("请求体不可读：{}", e.getMessage());
-        return badRequest("请求体格式不合法");
+        return badRequest("请求体缺失或格式不正确，请提交合法的 JSON 请求体");
     }
 
     /* ---- 404：无对应路由（落到静态资源处理器） ---- */

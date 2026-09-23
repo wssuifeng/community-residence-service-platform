@@ -38,6 +38,9 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -65,14 +68,28 @@ class ResidenceApplicationServiceTest {
     @Mock
     private HousingMapper housingMapper;
     @Mock
+    private com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
+    @Mock
     private LeaseChangeLogService changeLogService;
     @Mock
     private CommunityService communityService;
+    @Mock
+    private com.community.residence.conversation.service.ConversationService conversationService;
     @Mock
     private NotificationService notificationService;
 
     @InjectMocks
     private ResidenceApplicationService applicationService;
+
+    @org.junit.jupiter.api.BeforeAll
+    static void initTableInfo() {
+        /* 终态条件更新的 LambdaUpdateWrapper.set 构造期急解析列名，需实体元数据注册
+           （OCR DEF-117 适配，口径同 ConversationLeaseGroupEnsureTest） */
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(
+                new org.apache.ibatis.builder.MapperBuilderAssistant(
+                        new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""),
+                ResidenceApplication.class);
+    }
 
     private House vacantHouse;
     private ResidenceApplication pendingApplication;
@@ -96,7 +113,7 @@ class ResidenceApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("提交申请：社区开启自动通过时提交即审批通过并生成租约")
+    @DisplayName("提交申请：社区开启自动通过时提交即生成「待签约」租约并建租约群聊")
     void create_autoApproveCommunity_createsLeaseImmediately() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
@@ -110,6 +127,8 @@ class ResidenceApplicationServiceTest {
             listing.setMonthlyRent(new BigDecimal("2500.00"));
             listing.setDeposit(new BigDecimal("5000.00"));
             when(housingMapper.selectOne(any())).thenReturn(listing);
+            when(conversationService.createLeaseGroup(any(), any(), any(), any()))
+                    .thenReturn(leaseGroupConversation());
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(1L);
@@ -117,24 +136,39 @@ class ResidenceApplicationServiceTest {
 
             applicationService.create(dto);
 
-            /* 租约按社区默认租期（3 个月）生成，租金/押金取房源挂牌值 */
+            /* 租约按社区默认租期（3 个月）生成，租金/押金取房源挂牌值；
+               R66 v1.8：审核通过只到待签约（ACTIVE 由协议双方确认联动） */
             ArgumentCaptor<LeaseRecord> leaseCaptor = ArgumentCaptor.forClass(LeaseRecord.class);
             verify(leaseRecordMapper).insert(leaseCaptor.capture());
             LeaseRecord lease = leaseCaptor.getValue();
-            assertThat(lease.getStatus()).isEqualTo("ACTIVE");
+            assertThat(lease.getStatus()).isEqualTo("TO_SIGN");
             assertThat(lease.getMonthlyRent()).isEqualByComparingTo("2500.00");
             assertThat(lease.getDeposit()).isEqualByComparingTo("5000.00");
             assertThat(lease.getStartDate()).isEqualTo(LocalDate.now());
             assertThat(lease.getEndDate()).isEqualTo(LocalDate.now().plusMonths(3));
 
-            /* 居住关系建立、房屋翻转为已入住、申请落 APPROVED */
+            /* 居住关系建立、房屋**保持空置**（不再翻转 OCCUPIED）、申请落 APPROVED */
             verify(relationMapper).insert(any(ResidenceRelation.class));
-            assertThat(vacantHouse.getStatus()).isEqualTo(HouseStatusConstant.OCCUPIED);
+            assertThat(vacantHouse.getStatus()).isEqualTo(HouseStatusConstant.VACANT);
             ArgumentCaptor<ResidenceApplication> appCaptor = ArgumentCaptor.forClass(ResidenceApplication.class);
             verify(applicationMapper).updateById(appCaptor.capture());
             assertThat(appCaptor.getValue().getStatus()).isEqualTo("APPROVED");
             assertThat(appCaptor.getValue().getReviewerId()).isNull();
+
+            /* R68 租约群聊：审核通过即建群并回写 conversation_id */
+            verify(conversationService).createLeaseGroup(eq(lease.getId()), eq(1L), eq(1L), anyString());
+            verify(leaseRecordMapper).updateById(leaseCaptor.capture());
+            assertThat(leaseCaptor.getValue().getConversationId()).isEqualTo(77L);
         }
+    }
+
+    private com.community.residence.conversation.entity.Conversation leaseGroupConversation() {
+        com.community.residence.conversation.entity.Conversation conversation =
+                new com.community.residence.conversation.entity.Conversation();
+        conversation.setId(77L);
+        conversation.setType("LEASE_GROUP");
+        conversation.setStatus("ACTIVE");
+        return conversation;
     }
 
     @Test
@@ -219,17 +253,19 @@ class ResidenceApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("审批通过：状态 APPROVED + 房屋翻转 OCCUPIED（TENANT 建租约）")
+    @DisplayName("审批通过：状态 APPROVED + 租约落待签约 + 房屋保持 VACANT（R66 v1.8 新口径）")
     void approve_tenant_flipsHouseAndCreatesLease() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
             when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
             when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
-            when(houseMapper.updateById(any(House.class))).thenReturn(1);
+            when(applicationMapper.update(isNull(), any())).thenReturn(1);
             when(applicationMapper.updateById(any(ResidenceApplication.class))).thenReturn(1);
             when(relationMapper.insert(any(com.community.residence.resident.entity.ResidenceRelation.class))).thenReturn(1);
             when(leaseRecordMapper.insert(any(com.community.residence.lease.entity.LeaseRecord.class))).thenReturn(1);
+            when(conversationService.createLeaseGroup(any(), any(), any(), any()))
+                    .thenReturn(leaseGroupConversation());
 
             ApproveApplicationDTO dto = new ApproveApplicationDTO();
             dto.setLeaseStartDate(LocalDate.of(2026, 9, 10));
@@ -239,7 +275,70 @@ class ResidenceApplicationServiceTest {
             var vo = applicationService.approve(1L, dto);
 
             assertThat(vo.getStatus()).isEqualTo("APPROVED");
-            assertThat(vacantHouse.getStatus()).isEqualTo("OCCUPIED");
+            /* 审核通过不翻房态：房屋在签约生效前仍为空置 */
+            assertThat(vacantHouse.getStatus()).isEqualTo(HouseStatusConstant.VACANT);
+            ArgumentCaptor<LeaseRecord> leaseCaptor = ArgumentCaptor.forClass(LeaseRecord.class);
+            verify(leaseRecordMapper).insert(leaseCaptor.capture());
+            assertThat(leaseCaptor.getValue().getStatus()).isEqualTo("TO_SIGN");
+            verify(conversationService).createLeaseGroup(any(), eq(1L), eq(1L), anyString());
+            /* 身份空间断言（DEF-067）：审批结果触达申请人居民，标注 createForResident */
+            verify(notificationService).createForResident(eq(1L), eq(1L), eq("入住申请已通过"),
+                    anyString(), eq("LEASE"), eq("LEASE"), any());
+        }
+    }
+
+    @Test
+    @DisplayName("撤回申请：本人待审核申请 → WITHDRAWN")
+    void withdraw_pendingApplication_ok() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT)).thenReturn(true);
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
+            when(applicationMapper.update(isNull(), any())).thenReturn(1);
+            when(leaseRecordMapper.selectOne(any())).thenReturn(null);
+
+            var vo = applicationService.withdraw(1L);
+
+            assertThat(vo.getStatus()).isEqualTo("WITHDRAWN");
+            ArgumentCaptor<ResidenceApplication> captor =
+                    ArgumentCaptor.forClass(ResidenceApplication.class);
+            verify(applicationMapper).updateById(captor.capture());
+            assertThat(captor.getValue().getStatus()).isEqualTo("WITHDRAWN");
+        }
+    }
+
+    @Test
+    @DisplayName("撤回申请：非待审核状态拒绝（APPLICATION_NOT_WITHDRAWABLE 5605）")
+    void withdraw_reviewedApplication_rejected() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT)).thenReturn(true);
+            pendingApplication.setStatus("APPROVED");
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
+
+            assertThatThrownBy(() -> applicationService.withdraw(1L))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                            .isEqualTo(ErrorCode.APPLICATION_NOT_WITHDRAWABLE));
+        }
+    }
+
+    @Test
+    @DisplayName("撤回申请：非本人拒绝（ForbiddenException）")
+    void withdraw_othersApplication_forbidden() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(999L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT)).thenReturn(true);
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
+
+            assertThatThrownBy(() -> applicationService.withdraw(1L))
+                    .isInstanceOf(com.community.residence.common.exception.ForbiddenException.class);
         }
     }
 
@@ -261,5 +360,124 @@ class ResidenceApplicationServiceTest {
                     .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
                             .isEqualTo(ErrorCode.APPLICATION_ALREADY_REVIEWED));
         }
+    }
+
+    @Test
+    @DisplayName("撤回并发竞态（OCR DEF-117）：条件更新 0 行 + 已 WITHDRAWN → 幂等返回，不再二次落库/关群")
+    void withdraw_concurrentWinnerAlreadyWithdrawn_idempotent() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT)).thenReturn(true);
+            ResidenceApplication withdrawn = approvedApplication();
+            withdrawn.setStatus("WITHDRAWN");
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication, withdrawn);
+            when(applicationMapper.update(isNull(), any())).thenReturn(0);
+
+            var vo = applicationService.withdraw(1L);
+
+            assertThat(vo.getStatus()).isEqualTo("WITHDRAWN");
+            verify(applicationMapper, never()).updateById(any(ResidenceApplication.class));
+            verify(conversationService, never()).closeLeaseGroup(any());
+        }
+    }
+
+    @Test
+    @DisplayName("撤回并发竞态（OCR DEF-117）：条件更新 0 行 + 已 APPROVED → 5605 拒绝")
+    void withdraw_concurrentReviewed_throwsNotWithdrawable() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT)).thenReturn(true);
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication, approvedApplication());
+            when(applicationMapper.update(isNull(), any())).thenReturn(0);
+
+            assertThatThrownBy(() -> applicationService.withdraw(1L))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                            .isEqualTo(ErrorCode.APPLICATION_NOT_WITHDRAWABLE));
+            verify(conversationService, never()).closeLeaseGroup(any());
+        }
+    }
+
+    @Test
+    @DisplayName("撤回弱回退收窄（OCR DEF-117）：弱命中 TO_SIGN 活跃租约 → 跳过关群（活跃租约的群是现行沟通渠道）")
+    void withdraw_weakFallbackActiveLease_skipsGroupClose() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT)).thenReturn(true);
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
+            when(applicationMapper.update(isNull(), any())).thenReturn(1);
+            LeaseRecord liveLease = new LeaseRecord();
+            liveLease.setId(7L);
+            liveLease.setStatus("TO_SIGN");
+            when(leaseRecordMapper.selectOne(any())).thenReturn(liveLease);
+
+            var vo = applicationService.withdraw(1L);
+
+            assertThat(vo.getStatus()).isEqualTo("WITHDRAWN");
+            verify(conversationService, never()).closeLeaseGroup(any());
+        }
+    }
+
+    @Test
+    @DisplayName("撤回强关联（OCR DEF-117 对照）：lease_id 直挂本申请的租约即便 TO_SIGN 也照常关群")
+    void withdraw_strongLinkLease_closesGroupRegardlessOfActive() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT)).thenReturn(true);
+            pendingApplication.setLeaseId(3L);
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
+            when(applicationMapper.update(isNull(), any())).thenReturn(1);
+            LeaseRecord linkedLease = new LeaseRecord();
+            linkedLease.setId(3L);
+            linkedLease.setStatus("TO_SIGN");
+            when(leaseRecordMapper.selectById(3L)).thenReturn(linkedLease);
+
+            applicationService.withdraw(1L);
+
+            verify(conversationService).closeLeaseGroup(3L);
+        }
+    }
+
+    @Test
+    @DisplayName("审批并发竞态（OCR DEF-117）：条件更新 0 行 + 已 APPROVED → 幂等返回，不重建关系/租约/群")
+    void approve_concurrentWinnerAlreadyApproved_idempotent() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
+            ResidenceApplication approved = approvedApplication();
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication, approved);
+            when(applicationMapper.update(isNull(), any())).thenReturn(0);
+
+            ApproveApplicationDTO dto = new ApproveApplicationDTO();
+            dto.setLeaseStartDate(LocalDate.now());
+            dto.setLeaseEndDate(LocalDate.now().plusDays(30));
+            dto.setMonthlyRent(BigDecimal.ONE);
+
+            var vo = applicationService.approve(1L, dto);
+
+            assertThat(vo.getStatus()).isEqualTo("APPROVED");
+            verify(relationMapper, never()).insert(any(ResidenceRelation.class));
+            verify(leaseRecordMapper, never()).insert(any(LeaseRecord.class));
+            verify(conversationService, never()).createLeaseGroup(any(), any(), any(), any());
+        }
+    }
+
+    private ResidenceApplication approvedApplication() {
+        ResidenceApplication approved = new ResidenceApplication();
+        approved.setId(1L);
+        approved.setResidentId(1L);
+        approved.setCommunityId(1L);
+        approved.setHouseId(1L);
+        approved.setRelationType("TENANT");
+        approved.setStatus("APPROVED");
+        return approved;
     }
 }

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import ConversationChat from '@/components/business/ConversationChat.vue'
+import { getConversation } from '@/api/conversation'
 import { getViewingAppointmentDetail, cancelViewingAppointment } from '@/api/housing'
 import type { IViewingAppointment, ViewingAppointmentStatus } from '@/types/modules/housing'
 import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
@@ -34,6 +35,20 @@ const invalidEntry = !Number.isInteger(appointmentId) || appointmentId <= 0
 const detail = ref<ResidentViewingRow | null>(null)
 const loading = ref(true)
 const cancelling = ref(false)
+/* 看房群聊关闭态（OCR DEF-122 契约补传）：取会话详情 status 传入组件 */
+const chatClosed = ref(false)
+
+async function loadConversationStatus(): Promise<void> {
+  const conversationId = detail.value?.conversationId
+  if (conversationId == null) return
+  try {
+    const conversation = await getConversation(conversationId)
+    chatClosed.value = conversation.status === 'CLOSED'
+  } catch (error) {
+    /* 状态取不到时保持未关闭：组件自身 403 降级只读兜底 */
+    console.error('加载会话状态失败', error)
+  }
+}
 
 const tagTypeMap: Record<ViewingAppointmentStatus, 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled'> = {
   TO_CONFIRM: 'pending',
@@ -52,6 +67,7 @@ async function loadDetail(): Promise<void> {
   loading.value = true
   try {
     detail.value = await getViewingAppointmentDetail(appointmentId)
+    await loadConversationStatus()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载看房预约详情失败')
   } finally {
@@ -152,7 +168,11 @@ onMounted(() => {
 
         <!-- 右：看房群聊（R63 多方会话；conversationId 缺失时只读占位） -->
         <div class="chat-wrap">
-          <ConversationChat v-if="detail.conversationId" :conversation-id="detail.conversationId" />
+          <ConversationChat
+            v-if="detail.conversationId"
+            :conversation-id="detail.conversationId"
+            :closed="chatClosed"
+          />
           <div v-else class="chat-placeholder">该预约暂未开通沟通群</div>
         </div>
       </div>

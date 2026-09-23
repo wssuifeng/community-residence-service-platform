@@ -77,7 +77,7 @@ class FeedbackPushTest {
             inv.getArgument(0, FeedbackMessage.class).setId(77L);
             return 1;
         });
-        when(webSocketSessionService.isOnline(10L)).thenReturn(true);
+        when(webSocketSessionService.isResidentOnline(10L)).thenReturn(true);
 
         try (MockedStatic<SecurityUtils> ignored = mockAdmin(5L)) {
             var vo = feedbackService.sendMessage(1L, dto());
@@ -101,7 +101,8 @@ class FeedbackPushTest {
     void sendMessage_bothOffline_noPush() {
         when(feedbackMapper.selectById(1L)).thenReturn(inSessionFeedback);
         when(messageMapper.insert(any(FeedbackMessage.class))).thenReturn(1);
-        when(webSocketSessionService.isOnline(anyLong())).thenReturn(false);
+        when(webSocketSessionService.isResidentOnline(anyLong())).thenReturn(false);
+        when(webSocketSessionService.isUserOnline(anyLong())).thenReturn(false);
 
         try (MockedStatic<SecurityUtils> ignored = mockAdmin(5L)) {
             feedbackService.sendMessage(1L, dto());
@@ -114,7 +115,7 @@ class FeedbackPushTest {
     void sendMessage_pushFailure_notPropagated() {
         when(feedbackMapper.selectById(1L)).thenReturn(inSessionFeedback);
         when(messageMapper.insert(any(FeedbackMessage.class))).thenReturn(1);
-        when(webSocketSessionService.isOnline(10L)).thenReturn(true);
+        when(webSocketSessionService.isResidentOnline(10L)).thenReturn(true);
         org.mockito.Mockito.doThrow(new RuntimeException("broker down"))
                 .when(messagingTemplate).convertAndSend(anyString(), any(Object.class));
 
@@ -130,8 +131,9 @@ class FeedbackPushTest {
         when(feedbackMapper.selectById(1L)).thenReturn(inSessionFeedback);
         when(messageMapper.insert(any(FeedbackMessage.class))).thenReturn(1);
         /* WebSocketSessionService.isOnline 在 Redis 不可用时内部捕获并返回 false，
-           推送侧只需验证 false 时不推送 */
-        when(webSocketSessionService.isOnline(anyLong())).thenReturn(false);
+           推送侧只需验证 false 时不推送（居民/员工两个身份空间各判定一次） */
+        when(webSocketSessionService.isResidentOnline(anyLong())).thenReturn(false);
+        when(webSocketSessionService.isUserOnline(anyLong())).thenReturn(false);
 
         try (MockedStatic<SecurityUtils> ignored = mockAdmin(5L)) {
             var vo = feedbackService.sendMessage(1L, dto());

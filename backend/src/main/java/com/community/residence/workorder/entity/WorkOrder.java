@@ -48,6 +48,9 @@ public class WorkOrder {
     @Schema(description = "优先级：LOW-低, NORMAL-普通, HIGH-高, URGENT-紧急")
     private String priority;
 
+    @Schema(description = "工单临时群聊ID（R74，conversation.id，弱关联不设外键；未受理为空）")
+    private Long conversationId;
+
     @Schema(description = "提交时间")
     private LocalDateTime createdAt;
 

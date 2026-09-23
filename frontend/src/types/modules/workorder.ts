@@ -109,6 +109,11 @@ export interface IWorkOrder {
   assigneeShiftLabel?: string | null
   /** 当前处理人在手工单数（未完结工单数） */
   assigneeActiveOrders?: number
+  /**
+   * 工单临时群聊会话 ID（R74/V23，弱关联不设外键）：
+   * 管理端受理成功后同事务建群并回带；**受理前为 null/缺省**（此时详情页不渲染群聊面板）
+   */
+  conversationId?: number | null
   createdAt: string
   updatedAt: string
 }
@@ -199,9 +204,13 @@ export interface IWorkOrderAssignRequest {
   remark?: string
 }
 
-/** 完成工单请求（接口设计.md 9.4.2.8） */
+/** 完成工单请求（后端 WorkOrderActionDTO：处理结果说明写在 remark，@NotBlank + max 500） */
 export interface IWorkOrderCompleteRequest {
-  solution: string
+  remark: string
+}
+
+/** 管理端受理请求（接口设计 §9.21.1：请求体可空，remark ≤200 记入处理记录与时间线） */
+export interface IWorkOrderIntakeRequest {
   remark?: string
 }
 

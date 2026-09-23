@@ -5,7 +5,11 @@ import { useUserStore } from '@/store/user'
 
 /**
  * 管理端左侧边栏（frontend-beautify 重构，样式对齐 design-mockups/admin/01、02）：
- * 深蓝底单组 12 项 + 线性图标；「系统」为超管独占，按角色过滤（UI设计.md §10.1）
+ * 深蓝底单组 + 线性图标；「系统」为超管独占，按角色过滤（UI设计.md §10.1）。
+ *
+ * 批次 g 导航合并：原「租住」「房源」「退租申请」「协议模板」四个一级项收敛为单一
+ * 「租住与房源」项（/admin/housing-lease 五 Tab Hub，入住申请审核也迁入其中），
+ * 同一模块不再拆到多个页面；旧一级路径仍由路由重定向落到 Hub，靠 activeMatch 点亮本项。
  */
 const route = useRoute()
 const userStore = useUserStore()
@@ -15,6 +19,8 @@ interface MenuItem {
   title: string
   icon: string
   roles?: string[]
+  /** 额外点亮前缀：菜单项合并后，未挂在 Hub 路径下的旧路径/下钻详情仍归入本项 */
+  activeMatch?: string[]
 }
 
 const menuItems: MenuItem[] = [
@@ -25,13 +31,23 @@ const menuItems: MenuItem[] = [
   { path: '/admin/staff-schedules', title: '人员排班', icon: 'schedule' },
   { path: '/admin/staff-capabilities', title: '服务人员', icon: 'staff' },
   { path: '/admin/residents', title: '居民', icon: 'residents' },
-  { path: '/admin/leases', title: '租住', icon: 'lease' },
-  // V18/R64 协议模板：全局模板仅超管可维护
-  { path: '/admin/agreement-templates', title: '协议模板', icon: 'agreement', roles: ['SUPER_ADMIN', 'ADMIN'] },
+  // 批次 g：租住/房源/退租申请/协议模板/入住申请审核的唯一入口
+  {
+    path: '/admin/housing-lease',
+    title: '租住与房源',
+    icon: 'lease',
+    activeMatch: [
+      '/admin/leases',
+      '/admin/housings',
+      '/admin/move-out-applications',
+      '/admin/agreement-templates',
+      '/admin/residence-applications',
+      '/admin/viewing-appointments'
+    ]
+  },
   { path: '/admin/notices', title: '公告', icon: 'notice' },
   { path: '/admin/feedbacks', title: '反馈', icon: 'feedback' },
   { path: '/admin/reservations', title: '预约', icon: 'reservation' },
-  { path: '/admin/housings', title: '房源', icon: 'housing' },
   { path: '/admin/evaluations', title: '评价', icon: 'evaluation' },
   // 消息中心：ADMIN/SUPER_ADMIN 均可见（复用隐藏路由 /admin/notifications，验收第三轮 C2）
   { path: '/admin/notifications', title: '消息中心', icon: 'notification' },
@@ -46,11 +62,15 @@ const visibleItems = computed(() =>
 )
 
 function isActive(path: string): boolean {
-  // 前缀匹配，覆盖详情下钻（/admin/work-orders/:id、/admin/residents/:id、/admin/housings/:id）
+  // 前缀匹配，覆盖详情下钻（/admin/work-orders/:id、/admin/residents/:id、/admin/leases/:id）
   if (route.path === path || route.path.startsWith(`${path}/`)) return true
   // 社区详情挂在 /admin/communities/:id（复数段），与菜单路径 /admin/community 不同段，单独归入点亮
   if (path === '/admin/community') return route.path.startsWith('/admin/communities/')
-  // 租约详情挂在 /admin/leases/:id，与菜单路径同段，前缀匹配已覆盖
+  // 合并项：旧一级路径与未挂在 Hub 路径下的下钻详情（租约/房源/看房预约/协议模板）一并点亮
+  const item = menuItems.find((menu) => menu.path === path)
+  if (item?.activeMatch?.some((prefix) => route.path === prefix || route.path.startsWith(`${prefix}/`))) {
+    return true
+  }
   return false
 }
 </script>
@@ -93,10 +113,6 @@ function isActive(path: string): boolean {
             <path d="M3.4 19.6a6 6 0 0 1 12 0" />
             <path d="M16.4 5.6a3.2 3.2 0 0 1 0 6.2M18.2 19.6a5.6 5.6 0 0 0-1.8-4.1" />
           </svg>
-          <svg v-else-if="item.icon === 'agreement'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 3.4h7.6L18.6 8v12a1.6 1.6 0 0 1-1.6 1.6H6A1.6 1.6 0 0 1 4.4 20V5A1.6 1.6 0 0 1 6 3.4Z" />
-            <path d="M13.2 3.6V8.4h4.8M8 14.4h4M8 17.4h2.6M14.4 16.6l1.4 1.4 2.6-3" />
-          </svg>
           <svg v-else-if="item.icon === 'residents'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="8" r="3.6" />
             <path d="M5.4 20a6.6 6.6 0 0 1 13.2 0" />
@@ -116,10 +132,6 @@ function isActive(path: string): boolean {
           <svg v-else-if="item.icon === 'reservation'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <rect x="4" y="5.5" width="16" height="15" rx="2" />
             <path d="M4 10.2h16M8.5 3.2v4M15.5 3.2v4" />
-          </svg>
-          <svg v-else-if="item.icon === 'housing'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5.5" y="3.5" width="13" height="17" rx="1.6" />
-            <path d="M9 7.4h2M13 7.4h2M9 11h2M13 11h2M9 14.6h2M13 14.6h2M10.5 20.5v-3.2h3v3.2" />
           </svg>
           <svg v-else-if="item.icon === 'evaluation'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="m12 3.8 2.5 5 5.6.8-4 4 .9 5.6-5-2.7-5 2.7.9-5.6-4-4 5.6-.8Z" />

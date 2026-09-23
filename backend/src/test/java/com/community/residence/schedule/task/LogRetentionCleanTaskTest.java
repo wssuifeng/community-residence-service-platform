@@ -106,7 +106,7 @@ class LogRetentionCleanTaskTest {
         task.execute();
 
         verify(operationLogMapper).delete(any(Wrapper.class));
-        verify(notificationService, org.mockito.Mockito.times(2)).create(
+        verify(notificationService, org.mockito.Mockito.times(2)).createForUser(
                 anyLong(), isNull(), contains("操作日志留存清理"), contains("3 条"), eq("SYSTEM"), eq("TASK"), isNull());
         verify(taskLogService).record(eq(LogRetentionCleanTask.TASK_NAME), any(LocalDateTime.class),
                 anyLong(), eq(3), eq(3), eq(0), isNull());
@@ -127,7 +127,7 @@ class LogRetentionCleanTaskTest {
         task.execute();
 
         verify(operationLogMapper).delete(any(Wrapper.class));
-        verify(notificationService).create(eq(1L), isNull(), contains("清理"),
+        verify(notificationService).createForUser(eq(1L), isNull(), contains("清理"),
                 contains("1 条"), eq("SYSTEM"), eq("TASK"), isNull());
     }
 
@@ -141,7 +141,9 @@ class LogRetentionCleanTaskTest {
         task.execute();
 
         /* 回退 730 天窗口下无到期日志 → 跳过且不通知 */
-        verify(notificationService, never()).create(anyLong(), any(), anyString(), anyString(),
+        verify(notificationService, never()).createForResident(anyLong(), any(), anyString(), anyString(),
+                anyString(), anyString(), any());
+        verify(notificationService, never()).createForUser(anyLong(), any(), anyString(), anyString(),
                 anyString(), anyString(), any());
         verify(taskLogService).record(eq(LogRetentionCleanTask.TASK_NAME), any(LocalDateTime.class),
                 anyLong(), eq(0), eq(0), eq(0), isNull());
@@ -157,7 +159,9 @@ class LogRetentionCleanTaskTest {
         task.execute();
 
         verify(operationLogMapper, never()).delete(any(Wrapper.class));
-        verify(notificationService, never()).create(anyLong(), any(), anyString(), anyString(),
+        verify(notificationService, never()).createForResident(anyLong(), any(), anyString(), anyString(),
+                anyString(), anyString(), any());
+        verify(notificationService, never()).createForUser(anyLong(), any(), anyString(), anyString(),
                 anyString(), anyString(), any());
         verify(taskLogService).record(eq(LogRetentionCleanTask.TASK_NAME), any(LocalDateTime.class),
                 anyLong(), eq(0), eq(0), eq(0), isNull());
@@ -177,7 +181,7 @@ class LogRetentionCleanTaskTest {
         task.execute();
 
         ArgumentCaptor<String> contentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(notificationService).create(eq(1L), isNull(), eq("操作日志留存清理完成"),
+        verify(notificationService).createForUser(eq(1L), isNull(), eq("操作日志留存清理完成"),
                 contentCaptor.capture(), eq("SYSTEM"), eq("TASK"), isNull());
         assertThat(contentCaptor.getValue())
                 .contains("2 条")
@@ -197,7 +201,9 @@ class LogRetentionCleanTaskTest {
 
         verify(operationLogMapper, never()).selectCount(any());
         verify(operationLogMapper, never()).delete(any(Wrapper.class));
-        verify(notificationService, never()).create(anyLong(), any(), anyString(), anyString(),
+        verify(notificationService, never()).createForResident(anyLong(), any(), anyString(), anyString(),
+                anyString(), anyString(), any());
+        verify(notificationService, never()).createForUser(anyLong(), any(), anyString(), anyString(),
                 anyString(), anyString(), any());
         verify(taskLogService).record(eq(LogRetentionCleanTask.TASK_NAME), any(LocalDateTime.class),
                 anyLong(), eq(0), eq(0), eq(0), isNull());

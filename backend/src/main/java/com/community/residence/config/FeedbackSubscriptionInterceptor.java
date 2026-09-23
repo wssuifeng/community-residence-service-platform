@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.common.constant.RoleConstants;
+import com.community.residence.common.context.IdentityPrincipal;
 import com.community.residence.feedback.entity.Feedback;
 import com.community.residence.feedback.mapper.FeedbackMapper;
 import lombok.RequiredArgsConstructor;
@@ -59,9 +60,10 @@ public class FeedbackSubscriptionInterceptor implements ChannelInterceptor {
         if (!(accessor.getUser() instanceof UsernamePasswordAuthenticationToken auth)) {
             throw new MessageDeliveryException("Forbidden: 订阅反馈会话需先完成认证");
         }
-        if (!(auth.getPrincipal() instanceof Long userId)) {
+        if (!(auth.getPrincipal() instanceof IdentityPrincipal principal)) {
             throw new MessageDeliveryException("Forbidden: 订阅主体无效");
         }
+        Long userId = principal.getUserId();
         String role = resolveRole(auth);
         if (!hasSubscriptionAccess(feedbackId, userId, role)) {
             log.warn("反馈会话订阅被拒：feedbackId={}, userId={}, role={}", feedbackId, userId, role);

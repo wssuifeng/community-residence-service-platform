@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import ImageUploader from '@/components/common/ImageUploader.vue'
+import ConversationChat from '@/components/business/ConversationChat.vue'
+import { getConversation } from '@/api/conversation'
+import type { IConversation } from '@/types/modules/conversation'
 import {
   acceptWorkOrder,
   completeWorkOrder,
@@ -57,7 +60,8 @@ const attachments = ref<IWorkOrderAttachment[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 
-/* 操作面板输入：solution 为处理结果说明（处理中状态必填），remark 为备注，images 为处理后照片 */
+/* 操作面板输入：solution 为页面「处理结果说明」输入（处理中状态必填），remark 为可选备注，
+   images 为处理后照片；二者提交时合并为请求体的 remark 字段 */
 const resultForm = ref({
   solution: '',
   remark: '',
@@ -81,21 +85,81 @@ function toneOf(priority: WorkOrderPriority): 'urgent' | 'normal' | 'low' {
   return priority === 'LOW' ? 'low' : 'normal'
 }
 
+/**
+ * 取数口径（⑤ 修复）：**只有主数据**（GET /work-orders/{id}）失败才算"详情打不开"；
+ * 时间线与附件是辅助信息，任一失败都不再连带把操作面板打成空白——
+ * 修复前三者同处一个 `Promise.all`，辅助接口一失败服务人员就看不到接单/处理入口。
+ */
+const loadError = ref('')
+
 async function fetchDetail(): Promise<void> {
   loading.value = true
+  loadError.value = ''
   try {
-    const [detail, processes, files] = await Promise.all([
-      getWorkOrder(orderId),
-      getWorkOrderTimeline(orderId),
-      listWorkOrderAttachments(orderId)
-    ])
-    order.value = detail
-    timeline.value = processes
-    attachments.value = files
+    order.value = await getWorkOrder(orderId)
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '工单详情加载失败')
+    order.value = null
+    timeline.value = []
+    attachments.value = []
+    loadError.value = error instanceof Error ? error.message : '工单详情加载失败'
   } finally {
     loading.value = false
+  }
+  if (!order.value) return
+  void fetchTimeline()
+  void fetchAttachments()
+  await loadConversation()
+  focusRequestedAction()
+}
+
+/** 处理时间线：独立取数并静默降级（不阻断操作面板） */
+async function fetchTimeline(): Promise<void> {
+  try {
+    timeline.value = await getWorkOrderTimeline(orderId)
+  } catch {
+    timeline.value = []
+  }
+}
+
+/** 工单附件：独立取数并静默降级（不阻断操作面板） */
+async function fetchAttachments(): Promise<void> {
+  try {
+    attachments.value = await listWorkOrderAttachments(orderId)
+  } catch {
+    attachments.value = []
+  }
+}
+
+/** 从列表页「提交处理结果」跳进来时（?action=complete）把焦点落到处理结果说明，少一次点击 */
+function focusRequestedAction(): void {
+  if (route.query.action !== 'complete') return
+  void nextTick(() => {
+    const target = document.getElementById('result-solution')
+    target?.focus()
+    target?.scrollIntoView({ block: 'center' })
+  })
+}
+
+/* R74 工单临时群聊：受理即建群（居民 + 受理管理员），派单后本服务人员自动入群；
+   未受理无群、未入群（非参与者 403）均不渲染面板 */
+const workOrderConversation = ref<IConversation | null>(null)
+/** 关闭态提示（UI设计 v1.4 §R74：工单终审结束后会话资源回收） */
+const CONVERSATION_CLOSED_HINT = '工单已结束，会话资源已回收（历史可查、不可再发言）'
+
+/**
+ * 取工单临时群聊：仅参与者可见（§9.21.2）——未受理（无 conversationId）、
+ * 未入群（403）或会话不存在时一律不渲染面板。
+ */
+async function loadConversation(): Promise<void> {
+  const conversationId = order.value?.conversationId
+  if (!conversationId) {
+    workOrderConversation.value = null
+    return
+  }
+  try {
+    workOrderConversation.value = await getConversation(conversationId)
+  } catch {
+    workOrderConversation.value = null
   }
 }
 
@@ -155,11 +219,9 @@ async function attachImages(urls: string[]): Promise<number> {
   return failed
 }
 
-/* 组装完成请求：后端 complete 读取的是 WorkOrderActionDTO.remark（@NotBlank + max 500），
-   接口文档里的 solution 字段并未被后端读取——只传 solution 会被丢弃、
-   只传 solution 且不带 remark 还会触发 @NotBlank 校验失败。
-   故把处理结果说明写成 remark 提交，备注追加其后，两个字段同时携带保证不丢信息。 */
-function buildCompletePayload(): { solution: string; remark: string } | null {
+/* 组装完成请求：后端 complete 读取 WorkOrderActionDTO.remark（@NotBlank + max 500），
+   故把处理结果说明与备注合并写入 remark 提交。 */
+function buildCompletePayload(): { remark: string } | null {
   const solution = resultForm.value.solution.trim()
   const note = resultForm.value.remark.trim()
   if (!solution) {
@@ -171,7 +233,7 @@ function buildCompletePayload(): { solution: string; remark: string } | null {
     ElMessage.warning(`处理结果说明与备注合计不能超过 ${REMARK_MAX} 字`)
     return null
   }
-  return { solution, remark }
+  return { remark }
 }
 
 /* 提交处理结果：填写解决方案后流转至待确认（状态机 9.4.2.8） */
@@ -447,8 +509,41 @@ onMounted(fetchDetail)
 
           <button type="button" class="btn-ghost" @click="notifyReassignPending">申请改派</button>
         </article>
+
+        <!-- R74 工单临时群聊：受理即建群，派单后本服务人员自动入群（未入群时不渲染）；
+             终审结束后只读留档 -->
+        <article v-if="workOrderConversation" class="panel chat-panel">
+          <h2 class="panel-title">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 6.5h16v9H9l-5 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            </svg>
+            工单临时群聊
+          </h2>
+          <ConversationChat
+            :conversation-id="workOrderConversation.id"
+            :closed="workOrderConversation.status === 'CLOSED'"
+            :closed-hint="CONVERSATION_CLOSED_HINT"
+            :participants="workOrderConversation.participants ?? []"
+            :title="workOrderConversation.title"
+          />
+        </article>
       </div>
     </template>
+
+    <!-- 主数据取不到时的显式兜底：给出原因与重试，避免"打不开"表现为空白（操作入口随之消失） -->
+    <article v-else-if="!loading" class="panel load-failed">
+      <el-empty :description="loadError || '工单详情暂无数据'">
+        <div class="load-failed-actions">
+          <el-button type="primary" @click="fetchDetail">重新加载</el-button>
+          <el-button @click="router.push({ path: '/staff/work-orders', query: { tab: 'todo' } })">
+            返回我的工单
+          </el-button>
+        </div>
+      </el-empty>
+      <p class="load-failed-hint">
+        仅派给本人的工单可查看；若提示无权查看，请确认该工单已派给当前账号（可联系管理员改派）。
+      </p>
+    </article>
   </section>
 </template>
 
@@ -552,6 +647,11 @@ onMounted(fetchDetail)
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) minmax(0, 1fr);
   align-items: stretch;
   gap: var(--spacing-lg);
+}
+
+/* R74 工单临时群聊面板：独占整行，位于三栏之下（未入群/未受理时不渲染） */
+.chat-panel {
+  grid-column: 1 / -1;
 }
 
 .panel {
@@ -971,5 +1071,23 @@ onMounted(fetchDetail)
   .status-flag {
     margin-left: 0;
   }
+}
+
+/* 主数据取数失败的显式兜底（避免"打不开"表现为空白页、操作入口消失） */
+.load-failed {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+}
+
+.load-failed-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.load-failed-hint {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 </style>

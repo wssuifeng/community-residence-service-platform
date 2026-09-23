@@ -13,8 +13,13 @@ import AppLogo from '@/components/common/AppLogo.vue'
  * 顶部导航栏（三端通用，UI设计.md §2）：Logo + 导航菜单 + 通知铃铛 + 用户下拉
  */
 defineProps<{
-  /** 顶部导航菜单项 */
-  items?: { label: string; to: string }[]
+  /**
+   * 顶部导航菜单项。
+   * `to` 为跳转目标；`activeMatch` 为可选的点亮前缀集合——缺省时用 `to` 前缀匹配，
+   * 提供后按集合逐一前缀匹配（用于一个菜单项覆盖多个不共享前缀的子路径，
+   * 如「租住与房源」需覆盖 /resident/housings/:id 等 Hub 之外的子页）。
+   */
+  items?: { label: string; to: string; activeMatch?: string[] }[]
   /** 未登录态是否追加「注册」按钮（游客端对齐设计稿；默认不展示，其他端不受影响） */
   showRegister?: boolean
 }>()
@@ -58,8 +63,13 @@ function handleCommand(command: string): void {
   }
 }
 
-function isActive(to: string): boolean {
-  return route.path.startsWith(to)
+/**
+ * 导航项点亮判定：优先用 activeMatch 前缀集合，缺省回落到 `to` 前缀匹配。
+ * 集合内任一项命中即点亮（向后兼容：既有调用方不传 activeMatch，行为与原先一致）。
+ */
+function isItemActive(item: { to: string; activeMatch?: string[] }): boolean {
+  const prefixes = item.activeMatch?.length ? item.activeMatch : [item.to]
+  return prefixes.some((prefix) => route.path === prefix || route.path.startsWith(`${prefix}/`))
 }
 
 /** 铃铛下拉面板实例（点击面板项后收起面板） */
@@ -100,7 +110,7 @@ async function handleBellItemClick(item: {
           :key="item.to"
           :to="item.to"
           class="app-header-nav-item"
-          :class="{ active: isActive(item.to) }"
+          :class="{ active: isItemActive(item) }"
         >
           {{ item.label }}
         </router-link>

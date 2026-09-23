@@ -1,11 +1,15 @@
 package com.community.residence.conversation.service;
 
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.entity.SysUser;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
+import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.context.UserContext;
+import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.conversation.dto.SendMessageDTO;
@@ -17,11 +21,14 @@ import com.community.residence.conversation.mapper.ConversationMessageMapper;
 import com.community.residence.conversation.mapper.ConversationParticipantMapper;
 import com.community.residence.conversation.vo.ConversationMessageVO;
 import com.community.residence.conversation.vo.ConversationVO;
+import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
 import com.community.residence.messaging.service.WebSocketSessionService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.resident.mapper.ResidenceRelationMapper;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +40,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
@@ -44,6 +52,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -52,7 +61,9 @@ import static org.mockito.Mockito.when;
 
 /**
  * R63 多方会话回归：建群入群（居民+社区管理员+带看人幂等）、非参与者 403、
- * 未读游标与 markRead 只前移、直通幂等与社区归属校验、发送后 WS 推送。
+ * 未读游标与 markRead 只前移、直通幂等与社区归属校验、发送后 WS 推送；
+ * OCR 静态评审（DEF-106/DEF-119，2026-09-23）：并发建群撞唯一键重查回退、
+ * 租约会话回链条件更新、入群撞键幂等忽略、关闭态 join/系统留痕拒绝 5604。
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -62,6 +73,16 @@ class ConversationServiceTest {
     private static final Long CONV_ID = 10L;
     private static final Long RESIDENT_USER_ID = 1L;
     private static final Long ADMIN_ID = 9L;
+
+    @BeforeAll
+    static void initTableInfo() {
+        /* LambdaUpdateWrapper.eq 为惰性解析、set 是构造期即时解析（断言列名须查
+           TableInfo 缓存），DEF-119 条件更新回链路径先初始化 LeaseRecord 元数据
+           （口径同 ConversationLeaseGroupEnsureTest / NoticeAutoOfflineTaskTest） */
+        TableInfoHelper.initTableInfo(
+                new MapperBuilderAssistant(new MybatisConfiguration(), ""),
+                LeaseRecord.class);
+    }
 
     @Mock
     private ConversationMapper conversationMapper;
@@ -105,7 +126,9 @@ class ConversationServiceTest {
         residentParticipant.setUserId(RESIDENT_USER_ID);
         residentParticipant.setLastReadMessageId(0L);
 
-        lenient().when(webSocketSessionService.isOnline(anyLong())).thenReturn(false);
+        /* DEF-067：会话参与者的在线判定按两个身份空间各查一次（参与者表无角色列） */
+        lenient().when(webSocketSessionService.isResidentOnline(anyLong())).thenReturn(false);
+        lenient().when(webSocketSessionService.isUserOnline(anyLong())).thenReturn(false);
     }
 
     private void asResident() {
@@ -217,8 +240,8 @@ class ConversationServiceTest {
             Resident resident = new Resident();
             resident.setRealName("演示居民");
             lenient().when(residentMapper.selectById(RESIDENT_USER_ID)).thenReturn(resident);
-            /* 有参与者在线 → 推送 */
-            lenient().when(webSocketSessionService.isOnline(ADMIN_ID)).thenReturn(true);
+            /* 有参与者在线 → 推送（ADMIN_ID 属 sys_user 身份空间） */
+            lenient().when(webSocketSessionService.isUserOnline(ADMIN_ID)).thenReturn(true);
 
             ConversationMessageVO vo = service.sendMessage(CONV_ID, dto("明天几点看房？"));
 
@@ -312,6 +335,233 @@ class ConversationServiceTest {
             verify(participantMapper, org.mockito.Mockito.times(2))
                     .insert(any(ConversationParticipant.class));
         }
+    }
+
+    /* ---------- R68 租约群聊生命周期 ---------- */
+
+    @Test
+    @DisplayName("租约建群：参与者=居民+社区启用管理员，类型 LEASE_GROUP、related_id=租约ID")
+    void createLeaseGroup_participants() {
+        lenient().when(conversationMapper.selectOne(any())).thenReturn(null);
+        lenient().when(sysAdminCommunityMapper.selectList(any()))
+                .thenReturn(List.of(binding(ADMIN_ID, 1L)));
+        SysUser admin = new SysUser();
+        admin.setId(ADMIN_ID);
+        admin.setRole("ADMIN");
+        admin.setStatus("ACTIVE");
+        admin.setRealName("王管理");
+        lenient().when(sysUserMapper.selectList(any())).thenReturn(List.of(admin));
+        lenient().when(participantMapper.exists(any())).thenReturn(false);
+
+        Conversation created = service.createLeaseGroup(88L, 1L, RESIDENT_USER_ID, "租约沟通·演示社区1栋101");
+
+        assertThat(created.getType()).isEqualTo("LEASE_GROUP");
+        assertThat(created.getStatus()).isEqualTo("ACTIVE");
+        assertThat(created.getRelatedId()).isEqualTo(88L);
+        ArgumentCaptor<ConversationParticipant> captor = ArgumentCaptor.forClass(ConversationParticipant.class);
+        verify(participantMapper, org.mockito.Mockito.times(2)).insert(captor.capture());
+        assertThat(captor.getAllValues())
+                .extracting(ConversationParticipant::getUserId)
+                .containsExactlyInAnyOrder(RESIDENT_USER_ID, ADMIN_ID);
+    }
+
+    @Test
+    @DisplayName("租约建群幂等：同租约已有群直接返回，不重复建群")
+    void createLeaseGroup_idempotent() {
+        Conversation existing = new Conversation();
+        existing.setId(CONV_ID);
+        existing.setType("LEASE_GROUP");
+        existing.setRelatedId(88L);
+        existing.setStatus("ACTIVE");
+        lenient().when(conversationMapper.selectOne(any())).thenReturn(existing);
+
+        Conversation result = service.createLeaseGroup(88L, 1L, RESIDENT_USER_ID, "租约沟通");
+
+        assertThat(result.getId()).isEqualTo(CONV_ID);
+        verify(conversationMapper, never()).insert(any(Conversation.class));
+    }
+
+    @Test
+    @DisplayName("关闭会话：置 CLOSED + closed_at，且关闭后发消息拒绝 5604")
+    void closeConversation_blocksSend() {
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_USER_ID);
+            mocked.when(SecurityUtils::getUser)
+                    .thenReturn(new UserContext(RESIDENT_USER_ID, "resident1", "RESIDENT", Set.of(1L)));
+            conversation.setStatus("ACTIVE");
+            lenient().when(conversationMapper.selectById(CONV_ID)).thenReturn(conversation);
+            lenient().when(participantMapper.exists(any())).thenReturn(true);
+
+            /* 关闭：状态与时间落库 */
+            service.closeConversation(CONV_ID, "入住申请撤回");
+            ArgumentCaptor<Conversation> captor = ArgumentCaptor.forClass(Conversation.class);
+            verify(conversationMapper).updateById(captor.capture());
+            assertThat(captor.getValue().getStatus()).isEqualTo("CLOSED");
+            assertThat(captor.getValue().getClosedAt()).isNotNull();
+
+            /* 关闭后发消息：拒绝 5604，历史消息仍可读 */
+            assertThatThrownBy(() -> service.sendMessage(CONV_ID, dto("还能发吗")))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                            .isEqualTo(ErrorCode.CONVERSATION_CLOSED));
+            verify(messageMapper, never()).insert(any(ConversationMessage.class));
+        }
+    }
+
+    @Test
+    @DisplayName("关闭会话幂等：已 CLOSED 或会话不存在直接返回")
+    void closeConversation_idempotent() {
+        conversation.setStatus("CLOSED");
+        lenient().when(conversationMapper.selectById(CONV_ID)).thenReturn(conversation);
+
+        service.closeConversation(CONV_ID, "重复关闭");
+        verify(conversationMapper, never()).updateById(any(Conversation.class));
+
+        /* 未建群的租约（selectOne 空）关闭为无操作 */
+        lenient().when(conversationMapper.selectById(999L)).thenReturn(null);
+        service.closeConversation(999L, "无会话");
+        verify(conversationMapper, never()).updateById(any(Conversation.class));
+    }
+
+    @Test
+    @DisplayName("会话详情：参与者可见（含 status/type/relatedId 与参与者概要），非参与者 403")
+    void getById_participantOnly() {
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_USER_ID);
+            conversation.setStatus("CLOSED");
+            lenient().when(conversationMapper.selectById(CONV_ID)).thenReturn(conversation);
+            lenient().when(participantMapper.exists(any())).thenReturn(true);
+            lenient().when(participantMapper.selectList(any()))
+                    .thenReturn(List.of(residentParticipant, participant(ADMIN_ID)));
+            Resident resident = new Resident();
+            resident.setRealName("演示居民");
+            lenient().when(residentMapper.selectById(RESIDENT_USER_ID)).thenReturn(resident);
+            SysUser admin = new SysUser();
+            admin.setId(ADMIN_ID);
+            admin.setRole("ADMIN");
+            admin.setRealName("王管理");
+            lenient().when(sysUserMapper.selectBatchIds(any())).thenReturn(List.of(admin));
+            lenient().when(residentMapper.selectBatchIds(any())).thenReturn(List.of());
+
+            ConversationVO vo = service.getById(CONV_ID);
+
+            assertThat(vo.getStatus()).isEqualTo("CLOSED");
+            assertThat(vo.getType()).isEqualTo("VIEWING_GROUP");
+            assertThat(vo.getRelatedId()).isEqualTo(23L);
+            assertThat(vo.getParticipantCount()).isEqualTo(2);
+
+            /* 非参与者：403 */
+            lenient().when(participantMapper.exists(any())).thenReturn(false);
+            assertThatThrownBy(() -> service.getById(CONV_ID))
+                    .isInstanceOf(ForbiddenException.class);
+        }
+    }
+
+    /* ---------- OCR 静态评审 DEF-106 / DEF-119（2026-09-23）---------- */
+
+    @Test
+    @DisplayName("DEF-106 并发建群：insert 撞 uk_conversation_type_related 后重查返回既有会话")
+    void createLeaseGroup_duplicateKeyFallsBackToWinner() {
+        Conversation winner = new Conversation();
+        winner.setId(77L);
+        winner.setType("LEASE_GROUP");
+        winner.setRelatedId(88L);
+        winner.setStatus("ACTIVE");
+        /* 先查为空（并发窗口）→ insert 撞唯一键 → 重查命中既有会话 */
+        lenient().when(conversationMapper.selectOne(any())).thenReturn(null).thenReturn(winner);
+        lenient().doAnswer(inv -> {
+            throw new DuplicateKeyException("uk_conversation_type_related");
+        }).when(conversationMapper).insert(any(Conversation.class));
+
+        Conversation result = service.createLeaseGroup(88L, 1L, RESIDENT_USER_ID, "租约沟通");
+
+        assertThat(result.getId()).isEqualTo(77L);
+        /* 输家路径即刻返回，不再向新群插参与者（既有群成员已就位） */
+        verify(participantMapper, never()).insert(any(ConversationParticipant.class));
+    }
+
+    @Test
+    @DisplayName("DEF-119 回链条件更新：ensureLeaseGroup 仅更新 conversation_id，非全字段 updateById")
+    void ensureLeaseGroup_backfillsConversationIdViaConditionalUpdate() {
+        LeaseRecord lease = new LeaseRecord();
+        lease.setId(88L);
+        lease.setCommunityId(1L);
+        lease.setTenantId(RESIDENT_USER_ID);
+        lease.setStatus("TO_SIGN");
+        lease.setConversationId(null);
+        lenient().when(leaseRecordMapper.selectById(88L)).thenReturn(lease);
+        lenient().when(conversationMapper.selectOne(any())).thenReturn(null);
+        lenient().when(conversationMapper.insert(any(Conversation.class))).thenAnswer(inv -> {
+            Conversation created = inv.getArgument(0);
+            created.setId(77L);
+            return 1;
+        });
+        lenient().when(participantMapper.exists(any())).thenReturn(false);
+        lenient().when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of());
+        lenient().when(sysUserMapper.selectList(any())).thenReturn(List.of());
+        lenient().when(participantMapper.selectOne(any())).thenReturn(null);
+        lenient().when(messageMapper.selectCount(any())).thenReturn(0L);
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(ADMIN_ID);
+            mocked.when(SecurityUtils::getUser)
+                    .thenReturn(new UserContext(ADMIN_ID, "admin1", "ADMIN", Set.of(1L)));
+
+            service.ensureLeaseGroup(88L);
+
+            /* 条件更新：SET 仅 conversation_id / WHERE 仅 id——不把读取时刻的
+               整租约快照写回（并发的 TO_SIGN→ACTIVE 流转不得被覆盖） */
+            verify(leaseRecordMapper).update(isNull(), any());
+            verify(leaseRecordMapper, never()).updateById(any(LeaseRecord.class));
+            /* 内存对象同步仅为本地一致性，回链字段已可见 */
+            assertThat(lease.getConversationId()).isEqualTo(77L);
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-119 关闭态工单群：joinWorkOrderGroup 拒绝入群（5604）")
+    void joinWorkOrderGroup_closedConversationRejected() {
+        Conversation closed = new Conversation();
+        closed.setId(66L);
+        closed.setType("WORK_ORDER_GROUP");
+        closed.setRelatedId(9L);
+        closed.setStatus("CLOSED");
+        lenient().when(conversationMapper.selectOne(any())).thenReturn(closed);
+
+        assertThatThrownBy(() -> service.joinWorkOrderGroup(9L, 11L, "李师傅"))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.CONVERSATION_CLOSED));
+        /* 关闭态不落参与者行、不留入群系统消息 */
+        verify(participantMapper, never()).insert(any(ConversationParticipant.class));
+        verify(messageMapper, never()).insert(any(ConversationMessage.class));
+    }
+
+    @Test
+    @DisplayName("DEF-119 关闭态会话：sendSystemMessage 拒绝留痕（5604，与 sendMessage 同口径）")
+    void sendSystemMessage_closedConversationRejected() {
+        conversation.setStatus("CLOSED");
+
+        assertThatThrownBy(() -> service.sendSystemMessage(CONV_ID, "租赁协议双方已确认，租约已正式生效。"))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.CONVERSATION_CLOSED));
+        verify(messageMapper, never()).insert(any(ConversationMessage.class));
+        verify(conversationMapper, never()).updateById(any(Conversation.class));
+    }
+
+    @Test
+    @DisplayName("DEF-119 入群撞 uk_cp_identity：DuplicateKeyException 静默忽略（幂等）")
+    void addParticipant_duplicateKeySilentlyIgnored() {
+        lenient().when(participantMapper.exists(any())).thenReturn(false);
+        lenient().doAnswer(inv -> {
+            throw new DuplicateKeyException("uk_cp_identity");
+        }).when(participantMapper).insert(any(ConversationParticipant.class));
+
+        /* 撞键不抛即通过——对齐 addParticipant Javadoc「撞号静默忽略」声明 */
+        service.addParticipant(CONV_ID, "USER", ADMIN_ID);
+
+        verify(participantMapper).insert(any(ConversationParticipant.class));
     }
 
     private static SendMessageDTO dto(String content) {

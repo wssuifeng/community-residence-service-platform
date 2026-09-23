@@ -10,6 +10,7 @@ import type {
   IWorkOrderAttachment,
   IWorkOrderCompleteRequest,
   IWorkOrderCreateRequest,
+  IWorkOrderIntakeRequest,
   IWorkOrderProcess,
   IWorkOrderQuery,
   IWorkOrderReasonRequest,
@@ -84,6 +85,21 @@ export function completeWorkOrder(id: number, data: IWorkOrderCompleteRequest) {
 /** 居民确认完成（接口设计.md 9.4.2.9，仅工单提交人可确认） */
 export function confirmWorkOrder(id: number, data?: { remark?: string }) {
   return http.patch<null>(`/work-orders/${id}/confirm`, data)
+}
+
+/**
+ * 管理端受理（接口设计 §9.21.1，R74）：
+ * 仅 `PENDING` 可受理（否则 5302），`PENDING → TO_ASSIGN`，同一事务自动建立
+ * 工单临时群聊（`WORK_ORDER_GROUP`）并回带 `conversationId`。
+ * 权限：ADMIN（限绑定社区）/ SUPER_ADMIN；请求体可空（`remark` ≤200 记入时间线）。
+ */
+export function intakeWorkOrder(id: number, data?: IWorkOrderIntakeRequest) {
+  return http.patch<IWorkOrder>(`/work-orders/${id}/intake`, data)
+}
+
+/** 居民不满意退回（R22，后端 PATCH /work-orders/{id}/return：待确认 → 处理中，须填原因） */
+export function returnWorkOrder(id: number, data: IWorkOrderReasonRequest) {
+  return http.patch<null>(`/work-orders/${id}/return`, data)
 }
 
 /** 关闭工单（接口设计.md 9.4.2.10，仅居民确认后可关闭） */

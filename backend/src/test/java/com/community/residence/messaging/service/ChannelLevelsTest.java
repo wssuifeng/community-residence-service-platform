@@ -58,7 +58,7 @@ class ChannelLevelsTest {
             inv.getArgument(0, Notification.class).setId(77L);
             return 1;
         });
-        lenient().when(webSocketSessionService.isOnline(anyLong())).thenReturn(false);
+        lenient().when(webSocketSessionService.isOnline(anyString(), anyLong())).thenReturn(false);
         /* seq 生成走 Redis INCR */
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         lenient().when(valueOperations.increment(anyString())).thenReturn(1001L);
@@ -135,7 +135,7 @@ class ChannelLevelsTest {
                 .thenReturn("{\"NOTICE\":[\"SMS\"]}");
         mockNotificationInsert();
 
-        notificationService.create(10L, null, "公告", "内容", "NOTICE", "NOTICE", 1L);
+        notificationService.createForResident(10L, null, "公告", "内容", "NOTICE", "NOTICE", 1L);
 
         ArgumentCaptor<NotificationChannelLog> captor =
                 ArgumentCaptor.forClass(NotificationChannelLog.class);
@@ -155,7 +155,7 @@ class ChannelLevelsTest {
                 .thenReturn("{\"IMPORTANT\":[\"SMS\"],\"NORMAL\":[]}");
         mockNotificationInsert();
 
-        notificationService.create(10L, null, "标题", "内容", "NORMAL", "NOTICE", 1L);
+        notificationService.createForResident(10L, null, "标题", "内容", "NORMAL", "NOTICE", 1L);
 
         ArgumentCaptor<NotificationChannelLog> captor =
                 ArgumentCaptor.forClass(NotificationChannelLog.class);
@@ -169,7 +169,7 @@ class ChannelLevelsTest {
         when(sysConfigService.getValue("notify.channel.levels")).thenReturn("not-json{");
         mockNotificationInsert();
 
-        notificationService.create(10L, null, "标题", "内容", "NOTICE", "NOTICE", 1L);
+        notificationService.createForResident(10L, null, "标题", "内容", "NOTICE", "NOTICE", 1L);
 
         verify(channelLogMapper, times(1)).insert(any(NotificationChannelLog.class));
     }

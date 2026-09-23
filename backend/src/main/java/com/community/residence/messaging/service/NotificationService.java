@@ -3,7 +3,10 @@ package com.community.residence.messaging.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.community.residence.common.constant.NotificationOwnerType;
+import com.community.residence.common.context.IdentityPrincipal;
 import com.community.residence.common.context.SecurityUtils;
+import com.community.residence.common.context.UserContext;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.messaging.entity.Notification;
@@ -25,12 +28,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 通知业务逻辑：站内通知统一生成（P2 升级 WebSocket 实时推送）。
  * 生成时若接收人 WebSocket 在线则即时推送，离线由前端登录后 pull 补拉；
  * seq 由 Redis INCR 生成，Redis 不可用时以毫秒时间戳兜底（保持递增性）。
- * 通知为用户私有数据，全部查询按当前登录用户约束。
+ * <p>
+ * 收件人身份为 **(ownerType, userId) 二元组**（DEF-067）：resident 表与 sys_user
+ * 表是两套独立身份空间且主键可撞号（resident 1 与 sys_user 1），单靠 user_id
+ * 会双向串收，故生成、查询、已读、增量拉取、WebSocket 目的地全部按该二元组收口。
  */
 @Slf4j
 @Service
@@ -45,9 +52,9 @@ public class NotificationService {
     /** 合法站外模拟渠道（站内 WEBSOCKET 必达，不在配置范围） */
     private static final List<String> VALID_CHANNELS = List.of("EMAIL", "SMS");
 
-    /** 合法通知等级键（DEF-042 白名单）：与 create() 全部调用点的 type 实参集一致
-     *  （WORK_ORDER/NOTICE/FEEDBACK/RESERVATION/RESIDENCE/LEASE/SYSTEM——RESOURCE_RESERVATION
-     *  等为 sourceType 来源标识，不参与等级匹配），未知键 400 防配置漂移 */
+    /** 合法通知等级键（DEF-042 白名单）：与 createForUser/createForResident 全部调用点的
+     *  type 实参集一致（WORK_ORDER/NOTICE/FEEDBACK/RESERVATION/RESIDENCE/LEASE/SYSTEM——
+     *  RESOURCE_RESERVATION 等为 sourceType 来源标识，不参与等级匹配），未知键 400 防配置漂移 */
     private static final List<String> VALID_LEVELS = List.of(
             "WORK_ORDER", "NOTICE", "FEEDBACK", "RESERVATION", "RESIDENCE", "LEASE", "SYSTEM");
 
@@ -58,12 +65,36 @@ public class NotificationService {
     private final WebSocketSessionService webSocketSessionService;
     private final SysConfigService sysConfigService;
 
-    /** 生成通知（业务模块调用）：seq 全局递增；接收人在线时实时推送 */
+    /**
+     * 生成员工/管理员通知（收件人取自 sys_user 身份空间）：
+     * boundAdminIds(communityId)、assigneeId/handlerId 等 sys_user.id，以及超管账号。
+     * seq 全局递增；接收人在线时实时推送（目的地主体名 U:{sysUserId}）。
+     */
     @Transactional(rollbackFor = Exception.class)
-    public void create(Long userId, Long communityId, String title, String content,
-                       String type, String sourceType, Long sourceId) {
+    public void createForUser(Long userId, Long communityId, String title, String content,
+                              String type, String sourceType, Long sourceId) {
+        create(NotificationOwnerType.USER, userId, communityId, title, content, type, sourceType, sourceId);
+    }
+
+    /**
+     * 生成居民通知（收件人取自 resident 身份空间）：lease.tenantId、
+     * application.residentId、payment.residentId、appointment/reservation.userId、
+     * 公告群发 residentId 等 resident.id。
+     * seq 全局递增；接收人在线时实时推送（目的地主体名 R:{residentId}）。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void createForResident(Long userId, Long communityId, String title, String content,
+                                  String type, String sourceType, Long sourceId) {
+        create(NotificationOwnerType.RESIDENT, userId, communityId, title, content, type, sourceType, sourceId);
+    }
+
+    /* 通知生成内核：ownerType 为收件人身份空间，与 userId 一起落库并决定推送目的地。
+       仅由上面两个显式入口调用——不提供带默认 USER 的重载，避免新调用点漏标身份。 */
+    private void create(String ownerType, Long userId, Long communityId, String title, String content,
+                        String type, String sourceType, Long sourceId) {
         Notification notification = new Notification();
         notification.setSeq(nextSeq());
+        notification.setOwnerType(ownerType);
         notification.setUserId(userId);
         notification.setCommunityId(communityId);
         notification.setTitle(title);
@@ -75,16 +106,20 @@ public class NotificationService {
         notification.setIsRead(0);
         notificationMapper.insert(notification);
 
-        /* 渠道留痕（R51）：站内必达记 WEBSOCKET；按等级配置勾选的模拟渠道各记一条 */
+        /* 渠道留痕（R51）：站内必达记 WEBSOCKET；按等级配置勾选的模拟渠道各记一条。
+           留痕表经 notification_id 关联本体，身份空间由 notification.owner_type 承载，
+           不需要冗余列（无任何按收件人过滤留痕的查询） */
         recordChannels(notification);
 
-        /* 推送失败不影响通知落库（事务内异常回滚会连带丢通知），由轮询兜底 */
-        if (webSocketSessionService.isOnline(userId)) {
+        /* 推送失败不影响通知落库（事务内异常回滚会连带丢通知），由轮询兜底；
+           在线判定与目的地一律带身份前缀，居民与员工不共用同一 destination（DEF-067） */
+        if (webSocketSessionService.isOnline(ownerType, userId)) {
             try {
-                messagingTemplate.convertAndSendToUser(userId.toString(),
+                messagingTemplate.convertAndSendToUser(
+                        IdentityPrincipal.subjectName(ownerType, userId),
                         "/queue/notifications", NotificationVO.from(notification));
             } catch (Exception e) {
-                log.warn("WebSocket 推送失败，由轮询兜底：userId={}", userId, e);
+                log.warn("WebSocket 推送失败，由轮询兜底：ownerType={}, userId={}", ownerType, userId, e);
             }
         }
     }
@@ -93,6 +128,7 @@ public class NotificationService {
         Page<Notification> result = notificationMapper.selectPage(
                 new Page<>(page, Math.min(size, 100)),
                 new LambdaQueryWrapper<Notification>()
+                        .eq(Notification::getOwnerType, currentOwnerType())
                         .eq(Notification::getUserId, SecurityUtils.getUserId())
                         .eq(isRead != null, Notification::getIsRead, Boolean.TRUE.equals(isRead) ? 1 : 0)
                         .orderByDesc(Notification::getSeq));
@@ -102,6 +138,7 @@ public class NotificationService {
     /** 未读通知列表（P1 轮询端点） */
     public List<NotificationVO> unread() {
         return notificationMapper.selectList(new LambdaQueryWrapper<Notification>()
+                        .eq(Notification::getOwnerType, currentOwnerType())
                         .eq(Notification::getUserId, SecurityUtils.getUserId())
                         .eq(Notification::getIsRead, 0)
                         .orderByDesc(Notification::getSeq))
@@ -112,20 +149,23 @@ public class NotificationService {
     public List<NotificationVO> pull(Long sinceSeq) {
         long cursor = sinceSeq != null ? sinceSeq : 0;
         return notificationMapper.selectList(new LambdaQueryWrapper<Notification>()
+                        .eq(Notification::getOwnerType, currentOwnerType())
                         .eq(Notification::getUserId, SecurityUtils.getUserId())
                         .gt(Notification::getSeq, cursor)
                         .orderByAsc(Notification::getSeq))
                 .stream().map(NotificationVO::from).toList();
     }
 
-    /* 标记已读：仅本人通知 */
+    /* 标记已读：仅本人通知——id 相同但身份空间不同（resident 1 / sys_user 1 撞号）
+       同样视为他人通知，拒绝越权置读 */
     @Transactional(rollbackFor = Exception.class)
     public void markRead(Long id) {
         Notification notification = notificationMapper.selectById(id);
         if (notification == null) {
             throw new ResourceNotFoundException("通知不存在");
         }
-        if (!notification.getUserId().equals(SecurityUtils.getUserId())) {
+        if (!Objects.equals(notification.getOwnerType(), currentOwnerType())
+                || !notification.getUserId().equals(SecurityUtils.getUserId())) {
             throw new com.community.residence.common.exception.ForbiddenException("无权操作他人通知");
         }
         notificationMapper.update(null, new LambdaUpdateWrapper<Notification>()
@@ -136,9 +176,17 @@ public class NotificationService {
     @Transactional(rollbackFor = Exception.class)
     public void markAllRead() {
         notificationMapper.update(null, new LambdaUpdateWrapper<Notification>()
+                .eq(Notification::getOwnerType, currentOwnerType())
                 .eq(Notification::getUserId, SecurityUtils.getUserId())
                 .eq(Notification::getIsRead, 0)
                 .set(Notification::getIsRead, 1));
+    }
+
+    /* 当前登录主体所属身份空间：RESIDENT 角色取 resident 身份空间，其余取 sys_user；
+       与 JwtAuthenticationFilter 的令牌吊销分支同判据，保证读写两侧口径一致 */
+    private String currentOwnerType() {
+        UserContext user = SecurityUtils.getUser();
+        return NotificationOwnerType.ofRole(user == null ? null : user.getRole());
     }
 
     /** seq 生成：Redis INCR；不可用时毫秒时间戳兜底（仍全局递增） */

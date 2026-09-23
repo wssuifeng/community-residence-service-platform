@@ -1,6 +1,7 @@
 package com.community.residence.workorder.service;
 
 import com.community.residence.auth.entity.SysUser;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.WorkOrderStatus;
@@ -8,6 +9,7 @@ import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.context.UserContext;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.service.FileUploadService;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.resident.mapper.ResidenceRelationMapper;
@@ -75,6 +77,11 @@ class WorkOrderBatch2FixTest {
     @Mock
     private StaffScheduleService staffScheduleService;
 
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
+    private ConversationService conversationService;
+
     @InjectMocks
     private WorkOrderService service;
 
@@ -140,7 +147,7 @@ class WorkOrderBatch2FixTest {
     @DisplayName("退回：TO_CONFIRM → IN_PROGRESS + 时间线 RETURN + 通知服务人员（R22）")
     void returnBack_fromToConfirm_ok() {
         try (MockedStatic<SecurityUtils> mocked = mockResident()) {
-            lenient().when(workOrderMapper.updateById(any(WorkOrder.class))).thenReturn(1);
+            lenient().when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
             lenient().when(processMapper.insert(any(WorkOrderProcess.class))).thenReturn(1);
             /* notifyCurrentAssignee 走 assignmentMapper.selectOne */
             com.community.residence.workorder.entity.WorkOrderAssignment assignment =
@@ -151,7 +158,7 @@ class WorkOrderBatch2FixTest {
             service.returnBack(10L, "未修好");
 
             assertThat(order.getStatus()).isEqualTo(WorkOrderStatus.IN_PROGRESS);
-            verify(notificationService).create(eq(7L), eq(1L), anyString(), anyString(),
+            verify(notificationService).createForUser(eq(7L), eq(1L), anyString(), anyString(),
                     anyString(), anyString(), eq(10L));
         }
     }
@@ -190,12 +197,12 @@ class WorkOrderBatch2FixTest {
     void reject_notifiesResident() {
         order.setStatus(WorkOrderStatus.PENDING);
         try (MockedStatic<SecurityUtils> mocked = mockAdmin()) {
-            lenient().when(workOrderMapper.updateById(any(WorkOrder.class))).thenReturn(1);
+            lenient().when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
             lenient().when(processMapper.insert(any(WorkOrderProcess.class))).thenReturn(1);
 
             service.reject(10L, "不符合受理范围");
 
-            verify(notificationService).create(eq(5L), eq(1L), eq("工单已驳回"),
+            verify(notificationService).createForResident(eq(5L), eq(1L), eq("工单已驳回"),
                     anyString(), anyString(), anyString(), eq(10L));
         }
     }

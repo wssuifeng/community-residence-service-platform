@@ -1,21 +1,44 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
-import { getLease, getLeaseChanges, renewLease, updateLease, updateLeaseStatus } from '@/api/lease'
+import ConversationChat from '@/components/business/ConversationChat.vue'
+import DepositRefundDialog from './DepositRefundDialog.vue'
+import { getConversation, ensureLeaseGroupConversation, openDirectConversation } from '@/api/conversation'
+import type { IConversation } from '@/types/modules/conversation'
+import {
+  getLease,
+  getLeaseChanges,
+  listDepositRefunds,
+  listLeasePayments,
+  listLeaseViewings,
+  renewLease,
+  updateLease,
+  updateLeaseStatus
+} from '@/api/lease'
 import type {
+  DepositStatus,
+  IDepositRefund,
   ILeaseChange,
+  ILeasePayment,
   ILeaseRecord,
   LeaseChangeOperatorType,
   LeaseChangeType,
   LeaseStatus
 } from '@/types/modules/lease'
-import { leaseChangeTypeLabels, leaseStatusLabels } from '@/types/modules/lease'
+import {
+  depositRefundStatusLabels,
+  depositStatusLabels,
+  leaseChangeTypeLabels,
+  leaseStatusLabels
+} from '@/types/modules/lease'
 import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
 import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
+import type { IViewingAppointment } from '@/types/modules/housing'
+import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
 import { formatDate, formatDateTime } from '@/utils/date'
 
 /**
@@ -30,37 +53,214 @@ import { formatDate, formatDateTime } from '@/utils/date'
  */
 
 const route = useRoute()
+const router = useRouter()
 
 const leaseId = Number(route.params.id)
 
 const lease = ref<ILeaseRecord | null>(null)
 const changes = ref<ILeaseChange[]>([])
+/** 关联看房预约（R69 双向关联）：会话内发起的看房带上本租约，房源页发起的为空 */
+const viewings = ref<IViewingAppointment[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 
 /* ---------- 取数 ---------- */
 
+/**
+ * 加载失败原因（详情为空态时展示，避免"打不开＝空白页"无法自证）。
+ * 主数据（GET /leases/{id}）失败才阻断页面；变更历史是**辅助信息**，
+ * 取不到只记提示，不再把整个详情页打成空白（与 viewings / deposit 同口径）。
+ */
+const loadError = ref('')
+const changesError = ref('')
+
 async function fetchDetail(): Promise<void> {
   loading.value = true
+  loadError.value = ''
   try {
-    const [detail, history] = await Promise.all([getLease(leaseId), getLeaseChanges(leaseId)])
-    lease.value = detail
-    /* 后端按时间倒序返回；此处再排一次防止同秒记录顺序不稳（最新在最上） */
-    changes.value = [...history].sort((a, b) =>
-      (b.createdAt ?? '').localeCompare(a.createdAt ?? '')
-    )
+    /* 主数据必须先到：租约不存在 / 无权查看（403/404）时由后端文案说明原因 */
+    lease.value = await getLease(leaseId)
   } catch (error) {
     lease.value = null
     changes.value = []
-    ElMessage.error(error instanceof Error ? error.message : '租约详情加载失败')
+    loadError.value = error instanceof Error ? error.message : '租约详情加载失败'
   } finally {
     loading.value = false
   }
+  if (!lease.value) {
+    void fetchViewings()
+    void fetchDeposit()
+    return
+  }
+  await fetchChanges()
+  void fetchViewings()
+  void fetchDeposit()
+  void fetchChat()
+}
+
+/** 变更历史：独立取数并静默降级（仅提示「变更历史暂不可用」，不阻断详情渲染） */
+async function fetchChanges(): Promise<void> {
+  changesError.value = ''
+  try {
+    const history = await getLeaseChanges(leaseId)
+    /* 后端按时间倒序返回；此处再排一次防止同秒记录顺序不稳（最新在最上） */
+    changes.value = [...history].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+  } catch (error) {
+    changes.value = []
+    changesError.value = error instanceof Error ? error.message : '变更历史加载失败'
+  }
+}
+
+/** 关联看房记录：独立取数并静默失败——看房是租约的辅助信息，取不到不应影响主详情 */
+async function fetchViewings(): Promise<void> {
+  try {
+    viewings.value = await listLeaseViewings(leaseId)
+  } catch {
+    viewings.value = []
+  }
+}
+
+/* --------------------- 押金状态与退还（R72） --------------------- */
+
+/** 押金退还流水（§9.20.2）：管理端限绑定社区；失败原因需在详情可见 */
+const depositRefunds = ref<IDepositRefund[]>([])
+/** 该租约支付单：用于推导实缴押金与原支付渠道，供押金退还弹窗只读展示 */
+const payments = ref<ILeasePayment[]>([])
+const refundDialogVisible = ref(false)
+
+async function fetchDeposit(): Promise<void> {
+  const [refunds, paymentList] = await Promise.all([
+    listDepositRefunds(leaseId).catch(() => [] as IDepositRefund[]),
+    listLeasePayments(leaseId).catch(() => [] as ILeasePayment[])
+  ])
+  depositRefunds.value = refunds
+  payments.value = paymentList
+}
+
+/** 押金状态：后端未返回时按「未缴」兜底（不猜「已缴」，避免给出错误的可退错觉） */
+const depositStatus = computed<DepositStatus>(
+  () => lease.value?.depositStatus ?? 'UNPAID'
+)
+
+const depositLabel = computed(() => depositStatusLabels[depositStatus.value])
+
+/** 累计已成功退还金额（只计 SUCCESS：失败单的钱并未退回） */
+const refundedAmount = computed(() =>
+  depositRefunds.value
+    .filter((item) => item.status === 'SUCCESS')
+    .reduce((sum, item) => sum + (item.amount ?? 0), 0)
+)
+
+/**
+ * 是否可发起押金退还（§9.20.1 前置）：租约已搬出 且 押金状态为 `PAID`。
+ * 仅做前端可见性收敛，最终仍由后端判定（5701/5702/5703）。
+ */
+const canRefundDeposit = computed(
+  () => lease.value?.status === 'MOVED_OUT' && depositStatus.value === 'PAID'
+)
+
+/** 不可发起时的原因说明（按钮禁用需给理由，而不是静默置灰） */
+const refundDisabledReason = computed(() => {
+  if (!lease.value) return ''
+  if (lease.value.status !== 'MOVED_OUT') {
+    return '退租审核通过后（租约已搬出）方可发起押金退还'
+  }
+  if (depositStatus.value !== 'PAID') {
+    return `当前押金状态为「${depositLabel.value}」，仅「已缴」状态可发起退还`
+  }
+  return ''
+})
+
+/** 押金退还状态 → StatusTag 语义色档（StatusTag 无 failed 档，失败用 rejected 红） */
+function depositRefundTone(status: IDepositRefund['status']): 'completed' | 'pending' | 'rejected' {
+  if (status === 'SUCCESS') return 'completed'
+  if (status === 'PENDING') return 'pending'
+  return 'rejected'
+}
+
+/** 押金退还成功后刷新详情（OCR DEF-123）：fetchDetail 内部已含 fetchDeposit（流水+支付单），
+ *  不再并发补一发 fetchDeposit——双请求各取数两遍且完成时序不定，旧响应可能后写回覆盖新状态 */
+async function handleRefundSuccess(): Promise<void> {
+  await fetchDetail()
 }
 
 /** 属性保存/状态流转后的统一刷新：属性卡与变更历史同时刷新，用户即时看到新记录 */
 async function refreshAll(): Promise<void> {
   await fetchDetail()
+}
+
+/* ---------- ③ 租约群聊（R68；会话 id 来自 lease_record.conversation_id） ---------- */
+
+/** 关闭态提示（沿用租约群聊既有口径，仅作组件文案覆盖位） */
+const LEASE_CHAT_CLOSED_HINT = '租约流程已结束，历史消息只读留档，不可再发送'
+
+/**
+ * 会话详情（群成员与只读态）：仅参与者可见——超管不自动入群，
+ * 取不到（403/不存在）时仍渲染面板外壳与「前往会话中心」入口，组件自身降级只读。
+ */
+const chatConversation = ref<IConversation | null>(null)
+const chatClosed = computed(
+  () => chatConversation.value?.status === 'CLOSED' || lease.value?.status === 'ARCHIVED'
+)
+const chatParticipants = computed(() => chatConversation.value?.participants ?? [])
+const chatTitle = computed(() => chatConversation.value?.title ?? '租约沟通群')
+
+async function fetchChat(): Promise<void> {
+  const conversationId = lease.value?.conversationId
+  if (!conversationId) {
+    chatConversation.value = null
+    return
+  }
+  try {
+    chatConversation.value = await getConversation(conversationId)
+  } catch {
+    chatConversation.value = null
+  }
+}
+
+/* ---------- DEF-076 补建租约沟通会话 / 代居民发起直通会话 ---------- */
+
+const chatBuilding = ref(false)
+const directOpening = ref(false)
+
+/**
+ * 补建/直取租约沟通会话（`POST /conversations/lease-groups`，ADMIN/SUPER_ADMIN，幂等）：
+ * 存量或旁路数据（审批内核未建群）下管理端自救建群；后端同事务回写
+ * `lease_record.conversation_id`，故成功后重拉详情 + 会话即可渲染面板，
+ * 同时解除居民「确认承租」的 5608 前置。
+ */
+async function handleEnsureLeaseGroup(): Promise<void> {
+  if (!lease.value) return
+  chatBuilding.value = true
+  try {
+    const conversation = await ensureLeaseGroupConversation(lease.value.id)
+    ElMessage.success('租约沟通群已就绪')
+    await fetchDetail()
+    chatConversation.value = conversation
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '建立租约沟通群失败')
+  } finally {
+    chatBuilding.value = false
+  }
+}
+
+/** 代本租约居民发起直通会话（DEF-076，幂等）并在会话中心打开该会话 */
+async function handleOpenDirectWithTenant(): Promise<void> {
+  const row = lease.value
+  if (!row) return
+  directOpening.value = true
+  try {
+    const conversation = await openDirectConversation({
+      communityId: row.communityId,
+      residentId: row.tenantId
+    })
+    ElMessage.success('已开通与租户的直通会话')
+    router.push(`/admin/conversations?id=${conversation.id}`)
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '发起会话失败')
+  } finally {
+    directOpening.value = false
+  }
 }
 
 /* ---------- 状态与标注 ---------- */
@@ -75,12 +275,32 @@ function statusTagView(row: ILeaseRecord): { label: string; type: TagType } {
   }
   const map: Record<Exclude<LeaseStatus, 'ACTIVE'>, { label: string; type: TagType }> = {
     PENDING: { label: '待审核', type: 'pending' },
+    TO_SIGN: { label: '待签约', type: 'pending' },
     MOVED_OUT: { label: '已搬出', type: 'canceled' },
     ARCHIVED: { label: '已归档', type: 'canceled' },
     REJECTED: { label: '已驳回', type: 'rejected' }
   }
   return map[row.status]
 }
+
+/* ---------- 承租确认（R67/V20：发起租赁协议的前置条件） ---------- */
+
+/**
+ * 承租是否已确认。返回三态：true/false 为该租约已明确的状态，
+ * `undefined` 表示后端未返回 `tenantConfirmAt` 字段（字段缺失 ≠ 未确认）——
+ * 此时不阻断协议发起，交由后端 5601 把关，避免前端误挡合法操作。
+ */
+const tenancyConfirmed = computed<boolean | undefined>(() => {
+  const row = lease.value
+  if (!row) return undefined
+  if (row.status === 'PENDING') return undefined
+  return !!row.tenantConfirmAt
+})
+
+/** 待签约/已生效阶段才涉及承租确认展示（待审核还没有这一环节） */
+const showTenancyState = computed(
+  () => lease.value?.status === 'TO_SIGN' || lease.value?.status === 'ACTIVE'
+)
 
 const AGREEMENT_TAG_TYPE: Record<LeaseAgreementSignStatus, TagType> = {
   NONE: 'canceled',
@@ -132,13 +352,14 @@ function moneyText(value?: number | null): string {
 
 /* ---------- 变更历史展示 ---------- */
 
-/** 变更类型 → 标签配色：属性变更中性、续租蓝、状态流转紫、协议签约绿、登记蓝灰 */
+/** 变更类型 → 标签配色：属性变更中性、续租蓝、状态流转紫、协议签约绿、押金退还青、登记蓝灰 */
 const CHANGE_TONE: Record<LeaseChangeType, string> = {
   CREATE: 'is-neutral',
   ATTRIBUTE: 'is-neutral',
   RENEW: 'is-blue',
   STATUS: 'is-purple',
-  AGREEMENT: 'is-green'
+  AGREEMENT: 'is-green',
+  DEPOSIT_REFUND: 'is-teal'
 }
 
 const OPERATOR_LABELS: Record<LeaseChangeOperatorType, string> = {
@@ -270,7 +491,13 @@ async function handleEditSubmit(): Promise<void> {
 
 /* ---------- 状态流转（与列表页同一状态机口径） ---------- */
 
-const canApprove = computed(() => lease.value?.status === 'PENDING')
+/**
+ * 审核入口（OCR DEF-123，与列表页 handleApprove 对齐）：PENDING 走「审核通过」→ TO_SIGN；
+ * TO_SIGN 走「置为生效」→ ACTIVE（常规流程由协议双方确认自动生效，此处为管理方直通通道）。
+ */
+const canApprove = computed(
+  () => lease.value?.status === 'PENDING' || lease.value?.status === 'TO_SIGN'
+)
 const canReject = computed(() => lease.value?.status === 'PENDING')
 const canRenew = computed(() => lease.value?.status === 'ACTIVE')
 const canMoveOut = computed(() => lease.value?.status === 'ACTIVE')
@@ -286,16 +513,21 @@ const hasStatusAction = computed(
 
 async function handleApprove(): Promise<void> {
   if (!lease.value) return
+  const isToSign = lease.value.status === 'TO_SIGN'
   try {
     await ElMessageBox.confirm(
-      `确定通过该租约（${lease.value.tenantName} · ${lease.value.houseLocation}）？通过后租约生效并开始计租。`,
-      '租约审批通过',
-      { type: 'info', confirmButtonText: '通过', cancelButtonText: '取消' }
+      isToSign
+        ? `确定将租约（${lease.value.tenantName} · ${lease.value.houseLocation}）置为已生效？\n` +
+            '常规流程由租赁协议双方确认后自动生效，此处为管理方直接生效通道；生效后房屋置已入住。' +
+            (tenancyConfirmed.value ? '' : '\n注意：该租约居民尚未确认承租。')
+        : `确定通过该租约（${lease.value.tenantName} · ${lease.value.houseLocation}）？通过后租约进入「待签约」，待居民确认承租并由双方确认协议后才正式生效。`,
+      isToSign ? '租约置为已生效' : '租约审批通过',
+      { type: 'info', confirmButtonText: '确认', cancelButtonText: '取消' }
     )
   } catch {
     return
   }
-  await doTransition('ACTIVE', '租约已生效')
+  await doTransition('ACTIVE', isToSign ? '租约已生效' : '已审核通过，租约进入待签约')
 }
 
 async function handleReject(): Promise<void> {
@@ -480,6 +712,14 @@ onMounted(fetchDetail)
             :label="leaseAgreementSignStatusLabels[agreementStatus]"
             :type="AGREEMENT_TAG_TYPE[agreementStatus]"
           />
+          <!-- 承租确认（R67）：发起协议的前置条件，状态条上与协议/租约状态并列可见 -->
+          <StatusTag
+            v-if="showTenancyState"
+            :label="tenancyConfirmed ? '承租已确认' : '承租待确认'"
+            :type="tenancyConfirmed ? 'completed' : 'pending'"
+          />
+          <!-- 押金状态（R72）：五态徽标，与租约状态并列 -->
+          <span class="deposit-pill" :data-deposit="depositStatus">押金{{ depositLabel }}</span>
           <StatusTag :label="statusTagView(lease).label" :type="statusTagView(lease).type" />
           <span v-if="remainText" class="remain-chip" :class="remainTone">{{ remainText }}</span>
         </div>
@@ -531,6 +771,16 @@ onMounted(fetchDetail)
                 <dt>登记时间</dt>
                 <dd>{{ formatDateTime(lease.createdAt) }}</dd>
               </div>
+              <!-- 承租确认（R67）：未确认时管理方的协议发起会被后端拒绝，故在详情显著位置说明 -->
+              <div v-if="showTenancyState" class="info-row">
+                <dt>承租确认</dt>
+                <dd v-if="tenancyConfirmed" class="tenancy-done">
+                  已确认 · {{ lease.tenantConfirmAt ? formatDateTime(lease.tenantConfirmAt) : '时间未记录' }}
+                </dd>
+                <dd v-else class="tenancy-pending">
+                  居民尚未确认承租——确认后方可发起租赁协议
+                </dd>
+              </div>
             </dl>
 
             <span class="block-label">
@@ -553,6 +803,17 @@ onMounted(fetchDetail)
                 <dt>押金</dt>
                 <dd class="money-text">{{ moneyText(lease.deposit) }}</dd>
               </div>
+              <!-- 押金状态与退还（R72）：状态 + 累计已退 + 抵扣说明 + 发起入口 -->
+              <div class="info-row">
+                <dt>押金状态</dt>
+                <dd class="deposit-cell">
+                  <span class="deposit-pill" :data-deposit="depositStatus">{{ depositLabel }}</span>
+                  <span class="deposit-meta">累计已退还 {{ moneyText(refundedAmount) }}</span>
+                  <template v-if="lease.depositOffsetRemark">
+                    <span class="deposit-meta">抵扣说明：{{ lease.depositOffsetRemark }}</span>
+                  </template>
+                </dd>
+              </div>
               <div class="info-row">
                 <dt>合同附件</dt>
                 <dd>
@@ -573,6 +834,82 @@ onMounted(fetchDetail)
                 <dd>{{ lease.remark || '—' }}</dd>
               </div>
             </dl>
+          </article>
+
+          <article class="panel">
+            <h2 class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3.2 20 7v6c0 4.2-3.2 7-8 7.8-4.8-.8-8-3.6-8-7.8V7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                <path d="M12 8.4v4.2M12 15.4h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+              押金与退还（R72）
+              <span class="title-note">共 {{ depositRefunds.length }} 条退还流水</span>
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                class="title-action"
+                type="primary"
+                plain
+                size="small"
+                :disabled="!canRefundDeposit"
+                :title="refundDisabledReason || '按实缴渠道原路退还'"
+                @click="refundDialogVisible = true"
+              >
+                发起押金退还
+              </el-button>
+            </h2>
+
+            <!-- 不可发起时把原因写出来（禁用按钮本身不解释原因） -->
+            <p v-if="refundDisabledReason" class="refund-disabled-note">{{ refundDisabledReason }}</p>
+
+            <ul v-if="depositRefunds.length > 0" class="refund-list">
+              <li v-for="item in depositRefunds" :key="item.id" class="refund-item">
+                <span class="refund-amount">{{ moneyText(item.amount) }}</span>
+                <span class="refund-channel">{{ item.channel === 'ALIPAY' ? '支付宝' : '微信支付' }}</span>
+                <StatusTag
+                  :label="depositRefundStatusLabels[item.status]"
+                  :type="depositRefundTone(item.status)"
+                />
+                <span class="refund-meta">
+                  发起 {{ formatDateTime(item.createdAt) }} ·
+                  完成 {{ item.refundedAt ? formatDateTime(item.refundedAt) : '—' }}
+                </span>
+                <p class="refund-meta mono">请求号 {{ item.outRequestNo }}</p>
+                <p v-if="item.failReason" class="refund-fail">失败原因：{{ item.failReason }}</p>
+              </li>
+            </ul>
+            <el-empty v-else description="尚无押金退还流水" :image-size="70" />
+          </article>
+
+          <article class="panel">
+            <h2 class="panel-title">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="4" y="5.5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.8" />
+                <path d="M4 10.2h16M8.5 3.2v4M15.5 3.2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+              关联看房（R69）
+              <span class="title-note">共 {{ viewings.length }} 条 · 会话内发起的看房记录</span>
+            </h2>
+
+            <ul v-if="viewings.length > 0" class="viewing-list">
+              <li v-for="item in viewings" :key="item.id" class="viewing-item">
+                <div class="viewing-main">
+                  <span class="viewing-title">{{ item.housingTitle || `房源 #${item.housingId}` }}</span>
+                  <span class="viewing-time mono">
+                    {{ formatDate(item.appointmentDate) }} {{ item.startTime.slice(0, 5) }} ~ {{ item.endTime.slice(0, 5) }}
+                  </span>
+                </div>
+                <div class="viewing-side">
+                  <span class="viewing-assignee">
+                    带看人 {{ item.assigneeName || '未分配' }}
+                  </span>
+                  <StatusTag
+                    :label="viewingAppointmentStatusLabels[item.status]"
+                    :type="item.status === 'COMPLETED' ? 'completed' : item.status === 'CANCELLED' || item.status === 'VIOLATED' ? 'canceled' : 'pending'"
+                  />
+                </div>
+              </li>
+            </ul>
+            <el-empty v-else description="该租约暂无关联看房记录" :image-size="70" />
           </article>
 
           <article class="panel">
@@ -615,6 +952,11 @@ onMounted(fetchDetail)
               </li>
             </ol>
             <el-empty v-else description="尚无变更记录" :image-size="70" />
+            <!-- 变更历史为辅助信息：取不到只提示，不影响详情主体（原来会连带整页空白） -->
+            <p v-if="changesError" class="changes-error">
+              变更历史暂不可用：{{ changesError }}
+              <el-button text type="primary" size="small" @click="fetchChanges">重试</el-button>
+            </p>
           </article>
         </div>
 
@@ -639,7 +981,7 @@ onMounted(fetchDetail)
                 :loading="actionLoading"
                 @click="handleApprove"
               >
-                审核通过
+                {{ lease.status === 'TO_SIGN' ? '置为生效' : '审核通过' }}
               </el-button>
               <el-button
                 v-if="canReject"
@@ -702,11 +1044,83 @@ onMounted(fetchDetail)
             :lease-id="lease.id"
             role="ADMIN"
             :community-id="lease.communityId"
+            :tenancy-confirmed="tenancyConfirmed"
             @changed="refreshAll"
           />
+
+          <!-- ③ 会话相关操作界面：租约群聊（R68，会话由「入住申请审核通过」自动建立）。
+               有群时内嵌复用 ConversationChat（含只读/关闭态），并给会话中心入口；
+               无群（存量租约）时说明来源与去往会话中心，不在前端自造会话 -->
+          <article class="panel lease-chat-panel">
+            <h2 class="panel-title">租约群聊</h2>
+            <template v-if="lease.conversationId">
+              <p class="chat-panel-note">
+                本租约的沟通群（居民 + 社区管理方，派单后含服务人员）；租约终态后会话回收为只读。
+              </p>
+              <ConversationChat
+                :conversation-id="lease.conversationId"
+                :closed="chatClosed"
+                :closed-hint="LEASE_CHAT_CLOSED_HINT"
+                :participants="chatParticipants"
+                :title="chatTitle"
+              />
+            </template>
+            <template v-else>
+              <p class="action-hint">
+                该租约尚未建立沟通群：入住申请审核通过后由系统自动建群；存量或旁路数据可由下方按钮补建。
+              </p>
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                type="primary"
+                size="small"
+                :loading="chatBuilding"
+                @click="handleEnsureLeaseGroup"
+              >
+                建立/进入租约沟通群
+              </el-button>
+            </template>
+            <div class="chat-panel-actions">
+              <el-button
+                v-permission="['ADMIN', 'SUPER_ADMIN']"
+                text
+                type="primary"
+                size="small"
+                :loading="directOpening"
+                @click="handleOpenDirectWithTenant"
+              >
+                与租户直通会话
+              </el-button>
+              <el-button text type="primary" size="small" @click="router.push('/admin/conversations')">
+                前往会话中心
+              </el-button>
+            </div>
+          </article>
         </div>
       </div>
     </template>
+
+    <!-- 详情取不到时的显式兜底（原来只有面包屑：表现为"页面打不开"却看不到原因） -->
+    <article v-else-if="!loading" class="panel load-failed">
+      <el-empty :description="loadError || '租约详情暂无数据'">
+        <div class="load-failed-actions">
+          <el-button type="primary" @click="fetchDetail">重新加载</el-button>
+          <el-button @click="router.push('/admin/housing-lease?tab=leases')">返回租约列表</el-button>
+        </div>
+      </el-empty>
+      <p class="load-failed-hint">
+        若持续失败：请确认该租约属于当前账号绑定的社区（社区管理员）或改用超管账号查看；
+        接口返回 404 表示租约不存在，403 表示无数据权限。
+      </p>
+    </article>
+
+    <!-- 押金退还弹窗（R72）：金额默认全额可改、渠道只读原渠道、失败原因可见可重试 -->
+    <DepositRefundDialog
+      v-model="refundDialogVisible"
+      :lease="lease"
+      :first-payments="payments"
+      :refunded-amount="refundedAmount"
+      @success="handleRefundSuccess"
+    />
 
     <!-- 属性编辑抽屉：仅列可变更字段 -->
     <el-drawer v-model="editVisible" title="编辑租约属性" size="480px">
@@ -1056,6 +1470,168 @@ onMounted(fetchDetail)
   color: var(--color-text-disabled);
 }
 
+/* 承租确认两态：已确认绿、待确认橙（并作为协议入口受阻的原因说明） */
+.tenancy-done {
+  color: var(--color-success);
+}
+
+.tenancy-pending {
+  color: var(--color-warning);
+}
+
+/* 关联看房（R69）：紧凑列表，一行一预约 */
+.viewing-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.viewing-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.viewing-item:last-child {
+  border-bottom: none;
+}
+
+.viewing-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.viewing-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.viewing-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.viewing-side {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.viewing-assignee {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 押金状态与退还（R72） ---------- */
+
+/* 押金徽标五态：未缴红 / 已缴绿 / 退还中橙 / 已退还主色 / 已抵扣紫 */
+.deposit-pill {
+  flex-shrink: 0;
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-tight);
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+}
+
+.deposit-pill[data-deposit='UNPAID'] {
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.deposit-pill[data-deposit='PAID'] {
+  background-color: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.deposit-pill[data-deposit='REFUNDING'] {
+  background-color: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.deposit-pill[data-deposit='REFUNDED'] {
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.deposit-pill[data-deposit='OFFSET'] {
+  background-color: #f1ebfd;
+  color: #8b5cf6;
+}
+
+.deposit-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+}
+
+.deposit-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.refund-disabled-note {
+  margin: 0 0 var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-warning-soft);
+  font-size: var(--font-size-xs);
+  color: var(--color-warning);
+  line-height: var(--line-height-normal);
+}
+
+.refund-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.refund-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.refund-item:last-child {
+  border-bottom: none;
+}
+
+.refund-amount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.refund-channel,
+.refund-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.refund-fail {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  line-height: var(--line-height-normal);
+}
+
+.mono {
+  font-family: var(--font-family-mono);
+}
+
 /* 变更历史时间线：自绘节点（圆点按变更类型着色） */
 .timeline {
   margin: 0;
@@ -1120,6 +1696,11 @@ onMounted(fetchDetail)
   background-color: var(--color-success);
 }
 
+/* 押金退还（R72 留痕）：青色，与状态流转紫 / 协议绿区分 */
+.tl-dot.is-teal {
+  background-color: #0891b2;
+}
+
 .tl-body {
   min-width: 0;
   flex: 1;
@@ -1156,6 +1737,11 @@ onMounted(fetchDetail)
 .change-tag.is-green {
   color: var(--color-success);
   background-color: var(--color-success-soft);
+}
+
+.change-tag.is-teal {
+  color: #0891b2;
+  background-color: #e6f6f8;
 }
 
 .tl-field {
@@ -1258,5 +1844,46 @@ onMounted(fetchDetail)
   .tl-time {
     margin-left: 0;
   }
+}
+
+/* 详情取数失败的显式兜底（避免"打不开"表现为空白页） */
+.load-failed {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+}
+
+.load-failed-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.load-failed-hint {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.changes-error {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--status-pending);
+}
+
+/* ③ 租约群聊面板：与右侧栏其它面板同宽，内嵌复用会话组件 */
+.lease-chat-panel {
+  margin-top: var(--spacing-md);
+}
+
+.chat-panel-note {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.chat-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-sm);
 }
 </style>

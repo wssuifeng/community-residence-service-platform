@@ -49,7 +49,10 @@ img {
   outline-offset: 2px;
 }
 
-:focus {
+/* 仅抹掉"非键盘聚焦"的默认环：写成 :focus 会与上一条同特异性、靠后胜出，
+   把键盘焦点环一并抹掉（自写交互元素将完全不可见）。规范文本的修正走 docs，
+   代码此处按正确写法收口。 */
+:focus:not(:focus-visible) {
   outline: none;
 }
 

@@ -29,4 +29,18 @@ public interface PaymentChannelClient {
      * @return 支付成功时的渠道信息（流水号 + 完成时间）；未支付/已关闭返回 null
      */
     ChannelTradeResult queryTrade(String paymentNo);
+
+    /**
+     * 发起退款（R72 押金原路退还）：按原支付单向渠道提交退款指令。
+     * 渠道侧同 outRequestNo 重复提交返回同一结果（幂等由渠道保证）；
+     * 渠道业务拒绝返回 success=false + failReason（不抛异常），
+     * 网络/凭据异常抛 ChannelCallException 由调用方落 FAILED 留痕。
+     *
+     * @param payment      原支付单（渠道以 paymentNo 定位原交易）
+     * @param outRequestNo 商户退款请求号（幂等键）
+     * @param amount       本次退款金额
+     * @param reason       退款说明（渠道账单可见）
+     */
+    ChannelRefundResult refund(LeasePayment payment, String outRequestNo,
+                               java.math.BigDecimal amount, String reason);
 }

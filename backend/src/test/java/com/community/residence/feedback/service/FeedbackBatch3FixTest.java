@@ -76,8 +76,8 @@ class FeedbackBatch3FixTest {
             when(feedbackMapper.selectById(1L)).thenReturn(feedback);
             when(feedbackMapper.updateById(any(Feedback.class))).thenReturn(1);
             when(messageMapper.insert(any(FeedbackMessage.class))).thenReturn(1);
-            when(webSocketSessionService.isOnline(10L)).thenReturn(false);
-            when(webSocketSessionService.isOnline(5L)).thenReturn(false);
+            when(webSocketSessionService.isResidentOnline(10L)).thenReturn(false);
+            when(webSocketSessionService.isUserOnline(5L)).thenReturn(false);
 
             var dto = new CloseFeedbackDTO();
             dto.setRemark("已解决");
@@ -93,7 +93,7 @@ class FeedbackBatch3FixTest {
         when(feedbackMapper.selectById(1L)).thenReturn(feedback);
         when(feedbackMapper.updateById(any(Feedback.class))).thenReturn(1);
         when(messageMapper.insert(any(FeedbackMessage.class))).thenReturn(1);
-        when(webSocketSessionService.isOnline(10L)).thenReturn(true);
+        when(webSocketSessionService.isResidentOnline(10L)).thenReturn(true);
 
         var dto = new CloseFeedbackDTO();
         dto.setRemark("已解决");

@@ -351,7 +351,7 @@ public class NoticeService {
         noticeMapper.updateById(notice);
 
         for (Long residentId : noticeTargetResidentIds(notice.getId())) {
-            notificationService.create(residentId, null, "社区公告",
+            notificationService.createForResident(residentId, null, "社区公告",
                     "新公告「" + notice.getTitle() + "」已发布，请查看",
                     "NOTICE", "NOTICE", notice.getId());
         }

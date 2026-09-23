@@ -37,6 +37,9 @@ public class ViewingAppointmentVO {
     @Schema(description = "关联会话ID（R63 看房群聊；游客预约/未建群为空）")
     private Long conversationId;
 
+    @Schema(description = "所属租约ID（R69 会话内发起时写入；房源页发起为空）")
+    private Long leaseId;
+
     @Schema(description = "所属社区ID")
     private Long communityId;
 
@@ -69,6 +72,7 @@ public class ViewingAppointmentVO {
         vo.setHousingId(entity.getHousingId());
         vo.setAssigneeId(entity.getAssignedStaffId());
         vo.setConversationId(entity.getConversationId());
+        vo.setLeaseId(entity.getLeaseId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setAppointmentDate(entity.getAppointmentDate());
         vo.setStartTime(entity.getStartTime());

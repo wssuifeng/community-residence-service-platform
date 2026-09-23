@@ -28,10 +28,13 @@ public class ResidenceApplication {
     @Schema(description = "申请房屋ID")
     private Long houseId;
 
+    @Schema(description = "审批通过生成的租约ID（V26 强关联，审批通过内核同一事务回写；NULL=无关联租约或存量无法判定）")
+    private Long leaseId;
+
     @Schema(description = "关系类型：OWNER-业主, TENANT-租客, FAMILY-家属")
     private String relationType;
 
-    @Schema(description = "状态：PENDING-待审核, APPROVED-已通过, REJECTED-已拒绝")
+    @Schema(description = "状态：PENDING-待审核, APPROVED-已通过, REJECTED-已拒绝, WITHDRAWN-已撤回")
     private String status;
 
     @Schema(description = "申请说明")

@@ -1,8 +1,13 @@
 package com.community.residence.lease.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.community.residence.auth.entity.SysAdminCommunity;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.common.constant.ErrorCode;
+import com.community.residence.common.constant.HouseStatusConstant;
+import com.community.residence.common.constant.LeaseStatus;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
@@ -21,6 +26,7 @@ import com.community.residence.lease.dto.UpdateLeaseStatusDTO;
 import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
 import com.community.residence.lease.vo.LeaseVO;
+import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +36,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * 租住业务逻辑：待审核→已生效→已搬出→已归档 + 已驳回 状态机（架构设计 §6）。
+ * 租住业务逻辑：待审核→待签约→已生效→已搬出→已归档 + 已驳回 状态机（架构设计 §6.2 六态）。
  * 「即将到期/已到期」为日期自动判定标注（expiryFlag），不是状态流转。
  * RESIDENT 数据权限在查询层显式按 tenant_id 约束。
  */
@@ -44,10 +52,13 @@ import java.util.Set;
 public class LeaseService {
 
     /** 状态机合法流转表 */
-    /* 状态机（架构 §6.2 线性流转，R16）：待审核→已生效→已搬出→已归档；
-       DEF-013 删除 ACTIVE→ARCHIVED 跳级边（未搬出不可归档） */
+    /* 状态机（架构 §6.2 六态，R66 v1.8 增「待签约」）：待审核→待签约→已生效→已搬出→已归档；
+       待签约亦可被驳回；DEF-013 删除 ACTIVE→ARCHIVED 跳级边（未搬出不可归档）；
+       OCR DEF-115 删除 PENDING→ACTIVE 边——冻结状态机 v1.8 无此边（审核通过 ≠ 租约生效，
+       生效仅经「承租确认 + 协议双方确认」闭环），审核通过只落到 TO_SIGN */
     private static final Map<String, Set<String>> ALLOWED_TRANSITIONS = Map.of(
-            "PENDING", Set.of("ACTIVE", "REJECTED"),
+            "PENDING", Set.of("TO_SIGN", "REJECTED"),
+            "TO_SIGN", Set.of("ACTIVE", "REJECTED"),
             "ACTIVE", Set.of("MOVED_OUT"),
             "MOVED_OUT", Set.of("ARCHIVED"),
             "ARCHIVED", Set.of(),
@@ -63,6 +74,8 @@ public class LeaseService {
     private final BuildingMapper buildingMapper;
     private final com.community.residence.community.mapper.CommunityMapper communityMapper;
     private final LeaseChangeLogService changeLogService;
+    private final NotificationService notificationService;
+    private final SysAdminCommunityMapper sysAdminCommunityMapper;
 
     /* 登记租约：房屋与租客须存在；初始 PENDING 待审核 */
     @Transactional(rollbackFor = Exception.class)
@@ -174,7 +187,8 @@ public class LeaseService {
         return PageVO.of(result.convert(this::toVO));
     }
 
-    /* 状态流转：查表校验合法性；非法流转拒绝 */
+    /* 状态流转：查表校验合法性；非法流转拒绝。TO_SIGN→ACTIVE 视为签约/管理方直接生效，
+       须同步把房屋置为已入住（R66 v1.8：审核通过不再翻房态，生效动作才翻） */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "LEASE_RECORD", targetId = "#id", content = "'租住状态变更为 ' + #dto.status")
     public void updateStatus(Long id, UpdateLeaseStatusDTO dto) {
@@ -185,19 +199,109 @@ public class LeaseService {
         if (current.equals(target)) {
             return;
         }
+        applyTransition(lease, target, dto.getRemark());
+        log.info("租住状态流转：leaseId={}, {} -> {}, operator={}",
+                id, current, target, SecurityUtils.getUserId());
+    }
+
+    /**
+     * 生效流转内核（状态机校验 + 持久化 + 变更留痕 + 房态联动）：状态流转端点与
+     * 协议双方确认（AgreementService）共用，避免两处各写一份状态机判定导致口径漂移。
+     * 同状态重复调用直接返回（幂等）；目标为 ACTIVE 时把房屋置为已入住。
+     * 持久化为条件更新（OCR DEF-115）：WHERE 携带流转前状态——两路并发确认只成功一路；
+     * 0 行时重读，已为目标状态按幂等处理直接返回（不重复留痕/房态联动），否则拒绝。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void applyTransition(LeaseRecord lease, String target, String reason) {
+        String current = lease.getStatus();
+        if (current.equals(target)) {
+            return;
+        }
         Set<String> allowed = ALLOWED_TRANSITIONS.getOrDefault(current, Set.of());
         if (!allowed.contains(target)) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
                     String.format("租住状态不允许从 %s 流转到 %s", current, target));
         }
         lease.setStatus(target);
-        if (StringUtils.hasText(dto.getRemark())) {
-            lease.setRemark(dto.getRemark());
+        if (StringUtils.hasText(reason)) {
+            lease.setRemark(reason);
         }
-        leaseMapper.updateById(lease);
-        changeLogService.logStatus(id, current, target, dto.getRemark());
-        log.info("租住状态流转：leaseId={}, {} -> {}, operator={}",
-                id, current, target, SecurityUtils.getUserId());
+        int rows = leaseMapper.update(lease, new LambdaUpdateWrapper<LeaseRecord>()
+                .eq(LeaseRecord::getId, lease.getId())
+                .eq(LeaseRecord::getStatus, current));
+        if (rows == 0) {
+            LeaseRecord fresh = leaseMapper.selectById(lease.getId());
+            if (fresh != null && target.equals(fresh.getStatus())) {
+                return;
+            }
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
+                    String.format("租住状态不允许从 %s 流转到 %s（并发变更，当前 %s）",
+                            current, target, fresh == null ? "未知" : fresh.getStatus()));
+        }
+        changeLogService.logStatus(lease.getId(), current, target, reason);
+
+        if (LeaseStatus.ACTIVE.equals(target)) {
+            markHouseOccupied(lease.getHouseId());
+        }
+    }
+
+    /* 租约生效同步房态（R66 v1.8）：房屋必须存在，缺失时 WARN 不阻断生效（历史数据可能已删房屋） */
+    private void markHouseOccupied(Long houseId) {
+        House house = houseMapper.selectById(houseId);
+        if (house == null) {
+            log.warn("租约生效但房屋不存在，跳过房态联动：houseId={}", houseId);
+            return;
+        }
+        house.setStatus(HouseStatusConstant.OCCUPIED);
+        houseMapper.updateById(house);
+    }
+
+    /**
+     * 承租确认（R67）：**承约前置 = 本人 + 待签约状态**（用户 2026-09-22 裁决）——
+     * 看房预约与租约群聊是**沟通手段**，不是承约门槛："管理端确认（审核通过→待签约）
+     * + 居民端确认（承约）"即可直接推进协议确认。
+     * **幂等且不覆盖首次留痕**（tenant_confirm_at/by 只写一次，首次确认时间才具证明意义）。
+     * 确认后管理方方可发起租赁协议（AgreementService 前置校验），并通知本社区管理方。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "LEASE_RECORD", targetId = "#id", content = "'居民确认承租'")
+    public LeaseVO tenancyConfirm(Long id) {
+        LeaseRecord lease = requireLease(id);
+        Long residentId = SecurityUtils.getUserId();
+        if (!lease.getTenantId().equals(residentId)) {
+            throw new ForbiddenException("无权对他人租约确认承租");
+        }
+        if (!LeaseStatus.TO_SIGN.equals(lease.getStatus())) {
+            throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,
+                    "仅待签约租约可确认承租，当前状态：" + lease.getStatus());
+        }
+        if (lease.getTenantConfirmAt() == null) {
+            lease.setTenantConfirmAt(LocalDateTime.now());
+            lease.setTenantConfirmBy(residentId);
+            leaseMapper.updateById(lease);
+            changeLogService.logAgreement(lease.getId(), "居民确认承租",
+                    "承租确认时间 " + lease.getTenantConfirmAt());
+            notifyAdminsTenancyConfirmed(lease);
+            log.info("居民确认承租：leaseId={}, residentId={}", id, residentId);
+        }
+        return toVO(lease);
+    }
+
+    /* 承租确认通知本社区管理方（口径同到期提醒：sys_admin_community 绑定的管理员账号） */
+    private void notifyAdminsTenancyConfirmed(LeaseRecord lease) {
+        for (Long adminId : boundAdminIds(lease.getCommunityId())) {
+            notificationService.createForUser(adminId, lease.getCommunityId(),
+                    "居民已确认承租",
+                    "租约 #" + lease.getId() + "（房屋 " + lease.getHouseId() + "）居民已确认承租，可发起租赁协议",
+                    "LEASE", "LEASE_TENANCY", lease.getId());
+        }
+    }
+
+    /* 社区绑定管理员 ID 集合（通知口径同到期提醒任务） */
+    private List<Long> boundAdminIds(Long communityId) {
+        return sysAdminCommunityMapper.selectList(new LambdaQueryWrapper<SysAdminCommunity>()
+                        .eq(SysAdminCommunity::getCommunityId, communityId))
+                .stream().map(SysAdminCommunity::getAdminId).toList();
     }
 
     /** 租约变更历史（字段级前后值）：RESIDENT 限本人，ADMIN 限绑定社区 */

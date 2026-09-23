@@ -145,6 +145,8 @@ export interface IViewingAppointment {
   /** 带看人（R59，v1.3 新增；未分配为 null，后端 VO 补齐后点亮） */
   assigneeId?: number | null
   assigneeName?: string | null
+  /** 所属租约（R69/V20）：租约群聊内发起的看房预约带此标识，房源页发起的为空 */
+  leaseId?: number | null
 }
 
 /** 带看会话消息（R59，v1.3；后端 ViewingMessageVO，会话参与者可读写） */
@@ -187,12 +189,14 @@ export interface ViewingAppointmentReasonDTO {
   reason: string
 }
 
-/** 看房预约列表查询参数（接口设计.md 9.12.2.3） */
+/** 看房预约列表查询参数（接口设计.md 9.12.2.3；leaseId 为 R69 新增按租约过滤） */
 export interface ViewingAppointmentListQuery extends PageQuery {
   status?: ViewingAppointmentStatus
   housingId?: number
   startDate?: string
   endDate?: string
+  /** 所属租约（R69/V20：租约详情查其关联看房记录） */
+  leaseId?: number
 }
 
 /** 房源可预约看房时段（接口设计.md 9.12.2.8 响应 data 元素） */

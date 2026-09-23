@@ -123,14 +123,14 @@ public class FeedbackService {
         message.setSenderType("ADMIN");
         message.setContent("[办结] " + dto.getRemark());
         messageMapper.insert(message);
-        notificationService.create(feedback.getResidentId(), feedback.getCommunityId(),
+        notificationService.createForResident(feedback.getResidentId(), feedback.getCommunityId(),
                 "反馈已办结", "您的反馈「" + feedback.getTitle() + "」已办结",
                 "FEEDBACK", "FEEDBACK", id);
 
         /* 与 sendMessage 同口径：任一端在线即广播状态变更，失败由轮询兜底 */
-        if (webSocketSessionService.isOnline(feedback.getResidentId())
+        if (webSocketSessionService.isResidentOnline(feedback.getResidentId())
                 || (feedback.getHandlerId() != null
-                        && webSocketSessionService.isOnline(feedback.getHandlerId()))) {
+                        && webSocketSessionService.isUserOnline(feedback.getHandlerId()))) {
             try {
                 messagingTemplate.convertAndSend("/topic/feedback/" + id,
                         FeedbackPushVO.status(id, "CLOSED"));
@@ -176,20 +176,20 @@ public class FeedbackService {
 
         /* 会话消息触达对端：管理员回复通知居民；居民追问通知处理人（未受理时无处理人则跳过） */
         if (isAdminSide) {
-            notificationService.create(feedback.getResidentId(), feedback.getCommunityId(),
+            notificationService.createForResident(feedback.getResidentId(), feedback.getCommunityId(),
                     "反馈有新回复", "您的反馈「" + feedback.getTitle() + "」有新回复",
                     "FEEDBACK", "FEEDBACK", feedbackId);
         } else if (feedback.getHandlerId() != null) {
-            notificationService.create(feedback.getHandlerId(), feedback.getCommunityId(),
+            notificationService.createForUser(feedback.getHandlerId(), feedback.getCommunityId(),
                     "反馈有新消息", "反馈「" + feedback.getTitle() + "」有居民新消息",
                     "FEEDBACK", "FEEDBACK", feedbackId);
         }
 
         /* R30 会话实时推送：广播到 /topic/feedback/{id}（订阅鉴权保证仅参与者收到）；
            双方均离线不推送，推送失败不回滚——前端轮询兜底即离线补拉语义 */
-        if (webSocketSessionService.isOnline(feedback.getResidentId())
+        if (webSocketSessionService.isResidentOnline(feedback.getResidentId())
                 || (feedback.getHandlerId() != null
-                        && webSocketSessionService.isOnline(feedback.getHandlerId()))) {
+                        && webSocketSessionService.isUserOnline(feedback.getHandlerId()))) {
             try {
                 messagingTemplate.convertAndSend("/topic/feedback/" + feedbackId,
                         FeedbackPushVO.message(toVO(message, feedback.getResidentId())));

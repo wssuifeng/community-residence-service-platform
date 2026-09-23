@@ -12,14 +12,15 @@ export const residentStatusLabels: Record<ResidentStatus, string> = {
   FROZEN: '已冻结'
 }
 
-/** 入住申请状态（接口设计.md 9.2.2.3） */
-export type ResidenceApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
+/** 入住申请状态（接口设计.md 9.2.2.3；WITHDRAWN 为批次 f/R66 扩态：待审核阶段申请人可撤回） */
+export type ResidenceApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN'
 
 /** 入住申请状态中文标签 */
 export const residenceApplicationStatusLabels: Record<ResidenceApplicationStatus, string> = {
   PENDING: '待审核',
   APPROVED: '已通过',
-  REJECTED: '已驳回'
+  REJECTED: '已驳回',
+  WITHDRAWN: '已撤回'
 }
 
 /** 居住关系状态（接口设计.md 9.2.3.1 / 9.2.3.2） */
@@ -160,6 +161,17 @@ export interface IResidenceApplication {
   remark?: string
   reviewRemark?: string
   reviewTime?: string
+  /*
+   * 申请 → 租约 → 会话一跳可达（**V26 强关联**，取代 DEF-079 弱关联猜测）：
+   * 后端新增 `residence_application.lease_id`，在**审批通过（含社区自动审批）时写死**，
+   * VO 的 `leaseId` **直接取该列**——只有 `APPROVED` 且真实关联时才有值；
+   * **为空即"无关联"，后端不回退按（居民/社区/房屋）猜最新租约**（避免同屋多租约指错）。
+   * 故 UI 只在 `APPROVED && leaseId` 时给深链，为空一律中性兜底、不出死链。
+   */
+  /** 审批通过时生成的租约 ID（V26 强关联；为空表示无关联） */
+  leaseId?: number | null
+  /** 上述租约的沟通会话 ID（为空表示该租约未建群） */
+  conversationId?: number | null
   createdAt: string
 }
 

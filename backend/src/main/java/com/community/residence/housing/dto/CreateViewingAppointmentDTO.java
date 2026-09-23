@@ -18,8 +18,7 @@ import java.time.LocalTime;
 @Schema(description = "创建看房预约请求")
 public class CreateViewingAppointmentDTO {
 
-    @Schema(description = "房源ID")
-    @NotNull(message = "房源不能为空")
+    @Schema(description = "房源ID（会话内发起 R69 可省略，服务端按租约房屋推导）")
     private Long housingId;
 
     @Schema(description = "预约日期")

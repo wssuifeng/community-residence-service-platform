@@ -2,6 +2,7 @@ package com.community.residence.config;
 
 import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
+import com.community.residence.common.context.IdentityPrincipal;
 import com.community.residence.feedback.entity.Feedback;
 import com.community.residence.feedback.mapper.FeedbackMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,8 +58,10 @@ class FeedbackSubscriptionInterceptorTest {
         StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
         accessor.setDestination(destination);
         accessor.setLeaveMutable(true);
+        /* 主体名带身份空间前缀（R:{id} / U:{id}）——与 WebSocketAuthInterceptor 注入口径一致（DEF-067） */
         accessor.setUser(new UsernamePasswordAuthenticationToken(
-                userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))));
+                IdentityPrincipal.ofRole(role, userId), null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + role))));
         return MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
     }
 

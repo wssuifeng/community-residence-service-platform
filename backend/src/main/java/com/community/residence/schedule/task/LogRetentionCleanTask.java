@@ -110,7 +110,7 @@ public class LogRetentionCleanTask {
                         .eq(SysUser::getRole, "SUPER_ADMIN")
                         .eq(SysUser::getStatus, "ACTIVE"));
         for (SysUser admin : superAdmins) {
-            notificationService.create(admin.getId(), null,
+            notificationService.createForUser(admin.getId(), null,
                     "操作日志留存清理完成",
                     "系统已自动清理 " + cleaned + " 条到期操作日志（保留阈值 "
                             + retentionDays + " 天，配置项 log.retention_days）。",

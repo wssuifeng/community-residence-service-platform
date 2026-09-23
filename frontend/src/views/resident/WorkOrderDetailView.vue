@@ -3,12 +3,16 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
+import ConversationChat from '@/components/business/ConversationChat.vue'
+import { getConversation } from '@/api/conversation'
+import type { IConversation } from '@/types/modules/conversation'
 import {
   cancelWorkOrder,
   confirmWorkOrder,
   getWorkOrder,
   getWorkOrderTimeline,
-  listWorkOrderAttachments
+  listWorkOrderAttachments,
+  returnWorkOrder
 } from '@/api/workorder'
 import { getEvaluation, submitEvaluation } from '@/api/evaluation'
 import type {
@@ -138,10 +142,33 @@ async function fetchDetail(): Promise<void> {
     order.value = detail
     timeline.value = processes
     attachments.value = files
+    await loadConversation()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '工单详情加载失败')
   } finally {
     loading.value = false
+  }
+}
+
+/* R74 工单临时群聊：受理后由后端同事务建群并回带 conversationId；未受理则无群（不渲染面板） */
+const workOrderConversation = ref<IConversation | null>(null)
+/** 关闭态提示（UI设计 v1.4 §R74：工单终审结束后会话资源回收） */
+const CONVERSATION_CLOSED_HINT = '工单已结束，会话资源已回收（历史可查、不可再发言）'
+
+/**
+ * 取工单临时群聊：仅参与者可见（§9.21.2）——非参与者 403 或会话不存在时
+ * 一律不渲染面板。
+ */
+async function loadConversation(): Promise<void> {
+  const conversationId = order.value?.conversationId
+  if (!conversationId) {
+    workOrderConversation.value = null
+    return
+  }
+  try {
+    workOrderConversation.value = await getConversation(conversationId)
+  } catch {
+    workOrderConversation.value = null
   }
 }
 
@@ -196,7 +223,9 @@ async function handleConfirm(): Promise<void> {
   }
 }
 
-/* 不满意：仍需确认工单完结，原因随确认备注留痕，评价低于 4 星将自动触发跟进 */
+/* 不满意退回：调专用退回端点（R22：待确认 → 处理中，须填原因，服务端会通知服务人员），
+   不再走"确认完成"——否则工单会被推进到已完成，居民失去返工机会；
+   提示文案不得指向评价表单（OCR DEF-124）：退回后工单为处理中，评价入口仅已完成可用 */
 async function handleUnsatisfied(): Promise<void> {
   try {
     const { value } = await ElMessageBox.prompt('请描述不满意的原因，我们将督促服务人员跟进', '不满意反馈', {
@@ -206,8 +235,8 @@ async function handleUnsatisfied(): Promise<void> {
       inputValidator: (input: string) => (input.trim() ? true : '请填写不满意原因')
     })
     actionLoading.value = true
-    await confirmWorkOrder(orderId, { remark: `居民反馈不满意：${value.trim()}` })
-    ElMessage.success('反馈已记录，请在下方评价中打分，低分评价将自动进入跟进')
+    await returnWorkOrder(orderId, { remark: `居民反馈不满意：${value.trim()}` })
+    ElMessage.success('反馈已记录，已退回服务人员重新处理，完成后可再次确认并评价')
     fetchDetail()
   } catch (error) {
     if (error === 'cancel' || error === 'close') return
@@ -486,6 +515,19 @@ onMounted(() => {
         </div>
       </article>
 
+      <!-- R74 工单临时群聊：受理后自动建群（居民提交人 + 受理管理员，派单后服务人员入群）；
+           未受理时 conversationId 为空，整块不渲染；终审结束后只读留档 -->
+      <article v-if="workOrderConversation" class="chat-card">
+        <h2 class="card-title">工单临时群聊</h2>
+        <ConversationChat
+          :conversation-id="workOrderConversation.id"
+          :closed="workOrderConversation.status === 'CLOSED'"
+          :closed-hint="CONVERSATION_CLOSED_HINT"
+          :participants="workOrderConversation.participants ?? []"
+          :title="workOrderConversation.title"
+        />
+      </article>
+
       <!-- 底部操作条：可用性按状态机置灰，逻辑不变 -->
       <article class="action-bar">
         <div class="action-bar-buttons">
@@ -597,12 +639,21 @@ onMounted(() => {
 .timeline-card,
 .assignee-card,
 .evaluation-card,
-.steps-card {
+.steps-card,
+/* R74 工单临时群聊面板：与既有卡片同款容器（未受理时不渲染） */
+.chat-card {
   background-color: #fff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
+}
+
+.chat-card .card-title {
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
 }
 
 .terminal-banner {

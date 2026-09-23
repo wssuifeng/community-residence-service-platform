@@ -1,11 +1,13 @@
 package com.community.residence.workorder.service;
 
 import com.community.residence.auth.entity.SysUser;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.constant.WorkOrderStatus;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.service.FileUploadService;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.workorder.entity.WorkOrder;
@@ -63,6 +65,11 @@ class WorkOrderBatch3FixTest {
     private StaffCapabilityService staffCapabilityService;
     @Mock
     private StaffScheduleService staffScheduleService;
+
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
+    private ConversationService conversationService;
 
     @InjectMocks
     private WorkOrderService workOrderService;

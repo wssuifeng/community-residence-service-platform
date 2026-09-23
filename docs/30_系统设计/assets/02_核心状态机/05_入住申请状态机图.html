@@ -5004,7 +5004,7 @@
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / 图版 04">
-      <svg viewBox="0 0 760 720" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+      <svg viewBox="0 0 980 720" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
         <title id="archify-diagram-title">入住申请状态机（C2）</title>
         <desc id="archify-diagram-description">由 Archify 生成的生命周期图。</desc>
         <!-- Definitions -->
@@ -5030,19 +5030,20 @@
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Lifecycle bands -->
-        <path d="M 72 112 L 688 112" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
+        <path d="M 72 112 L 908 112" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
         <text x="72" y="100" class="t-dim" font-size="10" font-weight="600">01 / 主流程</text>
-        <path d="M 72 264 L 688 264" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
+        <path d="M 72 264 L 908 264" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
         <text x="72" y="252" class="t-dim" font-size="10" font-weight="600">02 / Interruptions + recovery</text>
-        <path d="M 72 436 L 688 436" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
+        <path d="M 72 436 L 908 436" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
         <text x="72" y="424" class="t-dim" font-size="10" font-weight="600">03 / 终态</text>
 
         <!-- Primary lifecycle rail -->
         <path d="M 154 157 L 286 157" class="a-emphasis" stroke-width="2.2" marker-end="url(#arrowhead-emphasis)"/>
 
         <!-- Transition paths -->
-        <path data-edge-from="PENDING" data-edge-to="APPROVED" data-edge-label="通过" data-edge-key="0" data-edge-id="approve" data-composition-points="153,157;189,157" d="M 153 157 L 189 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="驳回（理由）" data-edge-key="1" data-edge-id="reject" data-composition-points="94,188;94,479;343,479" d="M 94 188 L 94 469 Q 94 479 104 479 L 343 479" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="PENDING" data-edge-to="APPROVED" data-edge-label="通过" data-edge-key="0" data-edge-id="approve" data-composition-points="94,188;94,400;402,400;402,450" d="M 94 188 L 94 390 Q 94 400 104 400 L 392 400 Q 402 400 402 410 L 402 450" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="PENDING" data-edge-to="WITHDRAWN" data-edge-label="居民主动撤回（R66）" data-edge-key="1" data-edge-id="withdraw" data-composition-points="35,157;60,157;60,360;556,360;556,450" d="M 35 157 L 50 157 Q 60 157 60 167 L 60 350 Q 60 360 70 360 L 546 360 Q 556 360 556 370 L 556 450" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="驳回（理由）" data-edge-key="2" data-edge-id="reject" data-composition-points="153,157;790,157;790,479;769,479" d="M 153 157 L 780 157 Q 790 157 790 167 L 790 469 Q 790 479 780 479 L 769 479" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
 
         <!-- States -->
         <g id="node-PENDING" data-node-id="PENDING" data-node-label="待审核" tabindex="0" role="button" aria-label="聚焦待审核，居民提交入住申请, 主流程" aria-pressed="false" data-node-kind="start" data-node-sublabel="居民提交入住申请" data-node-context="主流程">
@@ -5058,41 +5059,58 @@
           <text data-detail="context" x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">居民提交入住申请</text>
         </g>
 
-        <g id="node-APPROVED" data-node-id="APPROVED" data-node-label="已通过" tabindex="0" role="button" aria-label="聚焦已通过，建立居住关系（R9）, 主流程" aria-pressed="false" data-node-kind="success" data-node-sublabel="建立居住关系（R9）" data-node-tag="终态" data-node-context="主流程">
-          <title>已通过 · 建立居住关系（R9） · 主流程 · 终态</title>
-          <rect x="189" y="126" width="118" height="62" rx="7" class="c-mask"/>
-          <rect x="189" y="126" width="118" height="62" rx="7" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-database" transform="translate(290 132) scale(0.6875)">
+        <g id="node-APPROVED" data-node-id="APPROVED" data-node-label="已通过" tabindex="0" role="button" aria-label="聚焦已通过，建立居住关系（R9）, 终态" aria-pressed="false" data-node-kind="success" data-node-sublabel="建立居住关系（R9）" data-node-tag="终态" data-node-context="终态">
+          <title>已通过 · 建立居住关系（R9） · 终态 · 终态</title>
+          <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
+          <rect x="343" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-database" transform="translate(444 456) scale(0.6875)">
             <circle cx="8" cy="8" r="5.3"/>
             <path d="m5.2 8 1.8 1.8 3.8-4"/>
           </g>
-        <text data-detail="fine" x="199" y="140" class="t-database" font-size="7" font-weight="700">02</text>
-          <text data-node-label="" data-detail-anchor="" x="248" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已通过</text>
-          <text data-detail="context" x="248" y="163" class="t-muted" font-size="7" text-anchor="middle">建立居住关系（R9）</text>
-        <text data-detail="fine" x="248" y="177" class="t-database" font-size="7" text-anchor="middle">终态</text>
+          <text data-node-label="" data-detail-anchor="" x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已通过</text>
+          <text data-detail="context" x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">建立居住关系（R9）</text>
+        <text data-detail="fine" x="402" y="497" class="t-database" font-size="7" text-anchor="middle">终态</text>
+        </g>
+
+        <g id="node-WITHDRAWN" data-node-id="WITHDRAWN" data-node-label="已撤回" tabindex="0" role="button" aria-label="聚焦已撤回，居民主动撤回（R66）, 终态" aria-pressed="false" data-node-kind="failure" data-node-sublabel="居民主动撤回（R66）" data-node-tag="终态" data-node-context="终态">
+          <title>已撤回 · 居民主动撤回（R66） · 终态 · 终态</title>
+          <rect x="497" y="450" width="118" height="58" rx="7" class="c-mask"/>
+          <rect x="497" y="450" width="118" height="58" rx="7" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="failure" class="semantic-sigil s-security" transform="translate(598 456) scale(0.6875)">
+            <circle cx="8" cy="8" r="5.3"/>
+            <path d="m5.7 5.7 4.6 4.6m0-4.6-4.6 4.6"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="556" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已撤回</text>
+          <text data-detail="context" x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">居民主动撤回（R66）</text>
+        <text data-detail="fine" x="556" y="497" class="t-security" font-size="7" text-anchor="middle">终态</text>
         </g>
 
         <g id="node-REJECTED" data-node-id="REJECTED" data-node-label="已驳回" tabindex="0" role="button" aria-label="聚焦已驳回，附驳回理由, 终态" aria-pressed="false" data-node-kind="failure" data-node-sublabel="附驳回理由" data-node-tag="终态" data-node-context="终态">
           <title>已驳回 · 附驳回理由 · 终态 · 终态</title>
-          <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
-          <rect x="343" y="450" width="118" height="58" rx="7" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="failure" class="semantic-sigil s-security" transform="translate(444 456) scale(0.6875)">
+          <rect x="651" y="450" width="118" height="58" rx="7" class="c-mask"/>
+          <rect x="651" y="450" width="118" height="58" rx="7" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="failure" class="semantic-sigil s-security" transform="translate(752 456) scale(0.6875)">
             <circle cx="8" cy="8" r="5.3"/>
             <path d="m5.7 5.7 4.6 4.6m0-4.6-4.6 4.6"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已驳回</text>
-          <text data-detail="context" x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">附驳回理由</text>
-        <text data-detail="fine" x="402" y="497" class="t-security" font-size="7" text-anchor="middle">终态</text>
+          <text data-node-label="" data-detail-anchor="" x="710" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已驳回</text>
+          <text data-detail="context" x="710" y="487" class="t-muted" font-size="7" text-anchor="middle">附驳回理由</text>
+        <text data-detail="fine" x="710" y="497" class="t-security" font-size="7" text-anchor="middle">终态</text>
         </g>
 
         <!-- Transition labels -->
         <g data-detail="context" data-edge-from="PENDING" data-edge-to="APPROVED" data-edge-label="通过" data-edge-key="0" data-edge-id="approve">
-          <rect x="155" y="136" width="32" height="16" rx="4" class="c-mask"/>
-          <text x="171" y="147" class="t-muted" font-size="8" text-anchor="middle">通过</text>
+          <rect x="207.7" y="229" width="80.60000000000001" height="27" rx="4" class="c-mask"/>
+          <text x="248" y="240" class="t-muted" font-size="8" text-anchor="middle">通过</text>
+        <text data-detail="fine" x="248" y="251" class="t-dim" font-size="7" text-anchor="middle">含社区自动通过</text>
         </g>
-        <g data-detail="context" data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="驳回（理由）" data-edge-key="1" data-edge-id="reject">
-          <rect x="183.1" y="458" width="70.80000000000001" height="16" rx="4" class="c-mask"/>
-          <text x="218.5" y="469" class="t-security" font-size="8" text-anchor="middle">驳回（理由）</text>
+        <g data-detail="context" data-edge-from="PENDING" data-edge-to="WITHDRAWN" data-edge-label="居民主动撤回（R66）" data-edge-key="1" data-edge-id="withdraw">
+          <rect x="247.45" y="319" width="105.10000000000001" height="16" rx="4" class="c-mask"/>
+          <text x="300" y="330" class="t-security" font-size="8" text-anchor="middle">居民主动撤回（R66）</text>
+        </g>
+        <g data-detail="context" data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="驳回（理由）" data-edge-key="2" data-edge-id="reject">
+          <rect x="794.6" y="319" width="70.80000000000001" height="16" rx="4" class="c-mask"/>
+          <text x="830" y="330" class="t-security" font-size="8" text-anchor="middle">驳回（理由）</text>
         </g>
 
         <!-- Legend -->
@@ -5303,8 +5321,20 @@
           <h3>审核主线</h3>
         </div>
         <ul>
-          <li>&bull; 待审核 → 已通过 / 已驳回，一进两出</li>
+          <li>&bull; 待审核 → 已通过 / 已驳回 / 已撤回，一进三出</li>
           <li>&bull; 通过后建立居住关系，账号获得居民端入口（R9）</li>
+          <li>&bull; 社区开启自动通过时提交即通过，不经过人工审核（R62 补）</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot amber"></div>
+          <h3>两机口径差异</h3>
+        </div>
+        <ul>
+          <li>&bull; 本状态机与租住记录状态机（§6.2）相互独立：申请「已通过」只建立居住关系，不等于租约生效</li>
+          <li>&bull; 租约生效以 §6.2「协议双方在线确认」为准（R66）</li>
         </ul>
       </div>
 
@@ -5314,8 +5344,8 @@
           <h3>终态</h3>
         </div>
         <ul>
-          <li>&bull; 已通过与已驳回均为终态</li>
-          <li>&bull; 驳回须附理由，居民可见</li>
+          <li>&bull; 已通过 / 已驳回 / 已撤回三者皆终态，不再流转</li>
+          <li>&bull; 驳回须附理由；撤回仅限待审核阶段由居民主动发起（R66 新增）</li>
         </ul>
       </div>
     </div>

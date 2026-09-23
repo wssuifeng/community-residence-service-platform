@@ -1,18 +1,32 @@
 <script setup lang="ts">
 import AppHeader from '@/components/layout/AppHeader.vue'
 
-/** 居民端布局：顶部导航 + 单栏内容区（UI设计.md §2.1）
-    导航按居民高频使用排序：浏览资源与管理预约邻位成组（公共资源 → 我的预约），
-    我的租约紧随其后（居住事务），工单/反馈为日常服务链，公告/房源为信息浏览，消息收尾 */
+/**
+ * 居民端布局：顶部导航 + 单栏内容区（UI设计.md §2.1）
+ * 导航 8 项，按居民高频使用排序：浏览资源与管理预约邻位成组（公共资源 → 我的预约），
+ * 租住与房源紧随其后（居住事务双 Tab Hub，R66 导航合并：原「我的租约」「房源」两项合一），
+ * 工单/反馈为日常服务链，公告为信息浏览，消息收尾。
+ *
+ * activeMatch：Hub 之外的租房子页（房源详情、预约看房、申请租住、看房预约详情）
+ * 路径不在 Hub 前缀下，靠 activeMatch 一并点亮，避免进入子页后导航失去高亮。
+ */
 const navItems = [
   { label: '首页', to: '/resident/home' },
   { label: '公共资源', to: '/resident/resources' },
   { label: '我的预约', to: '/resident/reservations' },
-  { label: '我的租约', to: '/resident/leases' },
+  {
+    label: '租住与房源',
+    to: '/resident/housing-lease',
+    activeMatch: [
+      '/resident/housing-lease',
+      '/resident/leases',
+      '/resident/housings',
+      '/resident/viewing-appointments'
+    ]
+  },
   { label: '我的工单', to: '/resident/work-orders' },
   { label: '我的反馈', to: '/resident/feedbacks' },
   { label: '公告', to: '/resident/notices' },
-  { label: '房源', to: '/resident/housings' },
   { label: '消息', to: '/resident/notifications' }
 ]
 </script>

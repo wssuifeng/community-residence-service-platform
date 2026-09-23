@@ -85,6 +85,8 @@ class ViewingAssignTest {
     private NotificationService notificationService;
     @Mock
     private com.community.residence.conversation.service.ConversationService conversationService;
+    @Mock
+    private com.community.residence.lease.mapper.LeaseRecordMapper leaseMapper;
 
     @InjectMocks
     private ViewingAppointmentService service;
@@ -135,9 +137,9 @@ class ViewingAssignTest {
 
         assertThat(appointment.getAssignedStaffId()).isEqualTo(2L);
         verify(appointmentMapper).updateById(appointment);
-        verify(notificationService).create(eq(2L), eq(1L), eq(TITLE_ASSIGNEE),
+        verify(notificationService).createForUser(eq(2L), eq(1L), eq(TITLE_ASSIGNEE),
                 anyString(), anyString(), anyString(), eq(1L));
-        verify(notificationService).create(eq(5L), eq(1L), eq(TITLE_RESIDENT),
+        verify(notificationService).createForResident(eq(5L), eq(1L), eq(TITLE_RESIDENT),
                 anyString(), anyString(), anyString(), eq(1L));
         assertThat(vo.getAssigneeId()).isEqualTo(2L);
         assertThat(vo.getAssigneeName()).isEqualTo("李带看");
@@ -197,9 +199,9 @@ class ViewingAssignTest {
 
         assignAsAdmin(1L, 2L);
 
-        verify(notificationService).create(eq(2L), eq(1L), eq(TITLE_ASSIGNEE),
+        verify(notificationService).createForUser(eq(2L), eq(1L), eq(TITLE_ASSIGNEE),
                 anyString(), anyString(), anyString(), eq(1L));
-        verify(notificationService, never()).create(anyLong(), anyLong(),
+        verify(notificationService, never()).createForResident(anyLong(), anyLong(),
                 eq(TITLE_RESIDENT), anyString(), anyString(), anyString(), anyLong());
     }
 
@@ -252,7 +254,7 @@ class ViewingAssignTest {
         ViewingAppointmentVO vo = assignAsAdmin(1L, 9L);
 
         assertThat(appointment.getAssignedStaffId()).isEqualTo(9L);
-        verify(notificationService).create(eq(9L), eq(1L), eq(TITLE_ASSIGNEE),
+        verify(notificationService).createForUser(eq(9L), eq(1L), eq(TITLE_ASSIGNEE),
                 anyString(), anyString(), anyString(), eq(1L));
         assertThat(vo.getAssigneeName()).isEqualTo("王管理");
     }
