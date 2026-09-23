@@ -50,6 +50,9 @@ public class WorkOrderVO {
     @Schema(description = "优先级：LOW/NORMAL/HIGH/URGENT")
     private String priority;
 
+    @Schema(description = "工单临时群聊会话ID（R74；受理后建立，群聊复用 GET /conversations/{id}；未受理为空）")
+    private Long conversationId;
+
     @Schema(description = "当前处理人ID（未派单为空）")
     private Long assigneeId;
 
@@ -87,6 +90,7 @@ public class WorkOrderVO {
         vo.setAddress(entity.getAddress());
         vo.setStatus(entity.getStatus());
         vo.setPriority(entity.getPriority());
+        vo.setConversationId(entity.getConversationId());
         vo.setCreatedAt(entity.getCreatedAt());
         vo.setUpdatedAt(entity.getUpdatedAt());
         return vo;

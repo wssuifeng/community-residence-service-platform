@@ -2,6 +2,7 @@ package com.community.residence.config;
 
 import com.community.residence.auth.service.TokenBlacklistService;
 import com.community.residence.auth.util.JwtUtil;
+import com.community.residence.common.context.IdentityPrincipal;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,9 @@ import java.util.List;
 /**
  * WebSocket CONNECT 帧认证拦截器。
  * 从 STOMP 头取 Authorization Bearer 令牌，复用 JwtUtil + 登出黑名单校验；
- * 通过后以 userId 为主键构造 Principal 供 convertAndSendToUser 定向推送。
+ * 通过后以带身份空间前缀的主体名构造 Principal（R:{residentId} / U:{sysUserId}，
+ * DEF-067）供 convertAndSendToUser 定向推送——resident.id 与 sys_user.id 撞号时
+ * 二者主体名仍不同，点对点通知不会串到另一身份空间的会话。
  * 令牌无效时抛 MessageDeliveryException，由框架回 ERROR 帧并关闭连接。
  */
 @Slf4j
@@ -55,11 +58,12 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         }
         Long userId = jwtUtil.extractUserId(claims);
         String role = jwtUtil.extractRole(claims);
+        IdentityPrincipal principal = IdentityPrincipal.ofRole(role, userId);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                principal, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         accessor.setUser(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        log.debug("WebSocket 认证通过：userId={}, role={}", userId, role);
+        log.debug("WebSocket 认证通过：subject={}, role={}", principal.getName(), role);
         return message;
     }
 

@@ -122,7 +122,9 @@ class ViewingMessageAccessTest {
         staff.setRealName("李带看");
         lenient().when(sysUserMapper.selectById(STAFF_ID)).thenReturn(staff);
 
-        lenient().when(webSocketSessionService.isOnline(anyLong())).thenReturn(false);
+        /* DEF-067：预约居民与带看人分属两个身份空间，各判定一次（默认均离线） */
+        lenient().when(webSocketSessionService.isResidentOnline(anyLong())).thenReturn(false);
+        lenient().when(webSocketSessionService.isUserOnline(anyLong())).thenReturn(false);
     }
 
     /* ---- 可读口径 ---- */
@@ -221,7 +223,7 @@ class ViewingMessageAccessTest {
     @Test
     @DisplayName("预约居民发送成功：落库 + WS 推送 /topic/appointment/1（type=APPOINTMENT_MESSAGE）")
     void send_ownerResident_pushesWebSocket() {
-        when(webSocketSessionService.isOnline(RESIDENT_ID)).thenReturn(true);
+        when(webSocketSessionService.isResidentOnline(RESIDENT_ID)).thenReturn(true);
         try (MockedStatic<SecurityUtils> mocked = mockUser(RESIDENT_ID, "RESIDENT", null)) {
             ViewingMessageVO vo = service.sendMessage(APPOINTMENT_ID, dto("明天上午方便"));
 
@@ -239,7 +241,7 @@ class ViewingMessageAccessTest {
     @Test
     @DisplayName("带看人发送成功（ADMIN 账号被分配为带看人时同口径可发）")
     void send_assignedStaff_ok() {
-        when(webSocketSessionService.isOnline(STAFF_ID)).thenReturn(true);
+        when(webSocketSessionService.isUserOnline(STAFF_ID)).thenReturn(true);
         try (MockedStatic<SecurityUtils> mocked = mockUser(STAFF_ID, "ADMIN", Set.of(1L))) {
             ViewingMessageVO vo = service.sendMessage(APPOINTMENT_ID, dto("下午三点可以"));
 

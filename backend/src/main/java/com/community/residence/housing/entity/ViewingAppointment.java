@@ -35,6 +35,9 @@ public class ViewingAppointment {
     @Schema(description = "关联会话ID（R63 看房群聊；游客预约为空）")
     private Long conversationId;
 
+    @Schema(description = "所属租约ID（R69 会话内发起时写入；房源页发起为空）")
+    private Long leaseId;
+
     @Schema(description = "房源ID")
     private Long housingId;
 

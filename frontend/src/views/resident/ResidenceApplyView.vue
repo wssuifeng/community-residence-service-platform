@@ -5,6 +5,8 @@ import { ElMessage } from 'element-plus'
 import { getHousingDetail } from '@/api/housing'
 import { getCommunity } from '@/api/community'
 import { createResidenceApplication } from '@/api/resident'
+import { APPLICATION_PENDING_EXISTS } from '@/constants/apiCodes'
+import { ApiError } from '@/utils/request'
 import type { IHousing } from '@/types/modules/housing'
 import { housingRentTypeLabels } from '@/types/modules/housing'
 import type { RelationType } from '@/types/modules/resident'
@@ -16,6 +18,10 @@ import { relationTypeLabels } from '@/types/modules/resident'
  * 生成居住关系与租约（租期从审核通过起算）。
  * 社区开启「入住申请自动通过」后提交即时生效，本页据社区配置切换文案与结果态，
  * 结果态以提交响应的 status 为准（不靠前端猜测社区开关）。
+ *
+ * 批次 g：已有待审核申请被拒（后端 ErrorCode.APPLICATION_PENDING_EXISTS）时，
+ * 提示语必须指引到「租住与房源 → 入住申请」（本人申请的进度与撤回入口），
+ * 而不是让居民只看到一句「已有待审核」却无处可去。
  */
 
 const route = useRoute()
@@ -26,6 +32,8 @@ const housing = ref<IHousing | null>(null)
 const loading = ref(true)
 const submitting = ref(false)
 const submitted = ref(false)
+/** 提交被拒：已有待审核申请（同社区），页面给出查看/撤回的直达入口 */
+const pendingExists = ref(false)
 /** 提交后是否即时通过（社区自动审批路径）：决定结果态文案与后续引导 */
 const autoApproved = ref(false)
 /** 社区是否开启自动通过（提交前提示文案用；取不到时按人工审核口径展示） */
@@ -72,6 +80,7 @@ async function loadCommunityPolicy(communityId: number | undefined): Promise<voi
 async function handleSubmit(): Promise<void> {
   if (!housing.value || submitting.value) return
   submitting.value = true
+  pendingExists.value = false
   try {
     const application = await createResidenceApplication({
       houseId: housing.value.houseId,
@@ -82,11 +91,22 @@ async function handleSubmit(): Promise<void> {
     submitted.value = true
     ElMessage.success(autoApproved.value ? '申请已通过，租约已生成' : '申请已提交，等待管理方审核')
   } catch (error) {
-    /* 后端业务错误（已在住/存在在审申请/房屋不可租）直接展示其 message */
-    ElMessage.error(error instanceof Error ? error.message : '申请提交失败')
+    if (error instanceof ApiError && error.code === APPLICATION_PENDING_EXISTS) {
+      /* 已有待审核申请：给出进度与撤回入口，避免居民只看到一句拒绝却无处可去 */
+      pendingExists.value = true
+      ElMessage.warning('您已有待审核的入住申请，可在「租住与房源 → 入住申请」查看或撤回')
+    } else {
+      /* 其余业务错误（已在住/房屋不可租）直接展示后端 message */
+      ElMessage.error(error instanceof Error ? error.message : '申请提交失败')
+    }
   } finally {
     submitting.value = false
   }
+}
+
+/* Hub 内跳转：租约在「租住契约」Tab，本人申请在「入住申请」Tab */
+function goHub(tab: 'lease' | 'application'): void {
+  router.push({ path: '/resident/housing-lease', query: { tab } })
 }
 
 onMounted(() => {
@@ -117,18 +137,33 @@ onMounted(() => {
       </p>
     </header>
 
+    <!-- 提交被拒态：已有待审核申请时给出「查看/撤回」直达入口（批次 g） -->
+    <div v-if="pendingExists" class="result-card card">
+      <h2>您已有待审核的入住申请</h2>
+      <p>
+        同一房屋（或同一社区在住/在审）无法重复提交。请在「租住与房源 → 入住申请」查看审核进度，
+        若不再需要该申请，可在该页撤回后重新提交。
+      </p>
+      <div class="result-actions">
+        <el-button type="primary" @click="goHub('application')">查看我的入住申请</el-button>
+        <el-button @click="router.back()">返回</el-button>
+      </div>
+    </div>
+
     <!-- 提交成功态：区分自动通过与待审核两条路径，明确后续去哪看结果 -->
-    <div v-if="submitted" class="result-card card">
+    <div v-else-if="submitted" class="result-card card">
       <h2>{{ autoApproved ? '申请已通过，租约已生成' : '申请已提交' }}</h2>
       <p v-if="autoApproved">
-        本社区已开启入住申请自动通过，租约已生效。可在「我的租约」查看租期、租金与押金，
+        本社区已开启入住申请自动通过，租约已生成。可在「租住与房源 → 租住契约」查看租期、租金与押金，
         并留意管理方发起的租赁协议确认。
       </p>
       <p v-else>
-        管理方审核通过后，您将收到通知，并可在「我的租约」中查看租期与租金。
+        管理方审核通过后，您将收到通知；审核进度可在「租住与房源 → 入住申请」查看（待审核可撤回），
+        通过后可在「租住契约」查看租期与租金。
       </p>
       <div class="result-actions">
-        <el-button type="primary" @click="router.push('/resident/leases')">查看我的租约</el-button>
+        <el-button type="primary" @click="goHub('lease')">查看我的租约</el-button>
+        <el-button @click="goHub('application')">查看我的申请</el-button>
         <el-button @click="router.push('/resident/housings')">继续看房源</el-button>
       </div>
     </div>
@@ -193,12 +228,12 @@ onMounted(() => {
           <template v-if="communityAutoApprove">
             <p>· 本社区已开启入住申请自动通过，提交后立即生成居住关系与租约；</p>
             <p>· 租期按社区默认租期起算，租金与押金取房源当前挂牌值；</p>
-            <p>· 租约生效后可在「我的租约」查看，并在管理方发起协议后在线确认租赁协议。</p>
+            <p>· 租约生成后可在「租住契约」查看，并在管理方发起协议后在线确认租赁协议。</p>
           </template>
           <template v-else>
             <p>· 申请提交后进入「待审核」，管理方审核通过才会生成租约；</p>
-            <p>· 审核期间可在「我的消息」中查看进度，同一房屋重复申请会被拒绝；</p>
-            <p>· 租期与租金以审核通过后生成的租约为准，可在「我的租约」中查看与续租。</p>
+            <p>· 审核期间可在「租住与房源 → 入住申请」查看进度或撤回申请，同一房屋重复申请会被拒绝；</p>
+            <p>· 租期与租金以审核通过后生成的租约为准，可在「租住契约」中查看与续租。</p>
           </template>
         </div>
 

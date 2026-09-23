@@ -53,12 +53,20 @@ public class ResidenceApplicationController {
         return ApiResponse.success(applicationService.page(page, size, status));
     }
 
-    @Operation(summary = "审批通过", description = "自动建立居住关系/租住记录并翻转房屋状态")
+    @Operation(summary = "审批通过",
+            description = "建立居住关系与待签约租约并创建租约群聊；房屋保持空置，待协议双方确认后生效")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/approve")
     public ApiResponse<ApplicationVO> approve(@PathVariable Long id,
                                               @RequestBody @Valid ApproveApplicationDTO dto) {
         return ApiResponse.success(applicationService.approve(id, dto));
+    }
+
+    @Operation(summary = "撤回入住申请", description = "仅申请人本人、仅待审核可撤回；落已撤回终态并关闭租约群聊")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @PatchMapping("/{id}/withdraw")
+    public ApiResponse<ApplicationVO> withdraw(@PathVariable Long id) {
+        return ApiResponse.success(applicationService.withdraw(id));
     }
 
     @Operation(summary = "审批拒绝")

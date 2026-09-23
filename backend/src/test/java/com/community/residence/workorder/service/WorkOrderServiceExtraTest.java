@@ -3,9 +3,11 @@ package com.community.residence.workorder.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.community.residence.auth.entity.SysUser;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.constant.WorkOrderStatus;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
@@ -62,6 +64,11 @@ class WorkOrderServiceExtraTest {
     private StaffCapabilityService staffCapabilityService;
     @Mock
     private StaffScheduleService staffScheduleService;
+
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
+    private ConversationService conversationService;
 
     @InjectMocks
     private WorkOrderService workOrderService;
@@ -189,7 +196,7 @@ class WorkOrderServiceExtraTest {
                     .hasRole(RoleConstants.RESIDENT)).thenReturn(true);
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
             when(workOrderMapper.selectById(1L)).thenReturn(order);
-            when(workOrderMapper.updateById(any(WorkOrder.class))).thenReturn(1);
+            when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
             when(processMapper.insert(any(WorkOrderProcess.class))).thenReturn(1);
 
             workOrderService.cancel(1L, "self solved");

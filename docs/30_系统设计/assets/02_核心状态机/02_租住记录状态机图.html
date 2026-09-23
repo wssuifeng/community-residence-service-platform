@@ -5038,13 +5038,14 @@
         <text x="72" y="424" class="t-dim" font-size="10" font-weight="600">03 / 终态</text>
 
         <!-- Primary lifecycle rail -->
-        <path d="M 154 157 L 594 157" class="a-emphasis" stroke-width="2.2" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 154 157 L 748 157" class="a-emphasis" stroke-width="2.2" marker-end="url(#arrowhead-emphasis)"/>
 
         <!-- Transition paths -->
-        <path data-edge-from="PENDING" data-edge-to="ACTIVE" data-edge-label="审核通过" data-edge-key="0" data-edge-id="approve" data-composition-points="153,157;189,157" d="M 153 157 L 189 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="审核驳回（理由）" data-edge-key="1" data-edge-id="reject" data-composition-points="94,188;94,479;343,479" d="M 94 188 L 94 469 Q 94 479 104 479 L 343 479" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
-        <path data-edge-from="ACTIVE" data-edge-to="MOVED_OUT" data-edge-label="搬出登记" data-edge-key="2" data-edge-id="move-out" data-composition-points="307,157;343,157" d="M 307 157 L 343 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="MOVED_OUT" data-edge-to="ARCHIVED" data-edge-label="归档" data-edge-key="3" data-edge-id="archive" data-composition-points="461,157;497,157" d="M 461 157 L 497 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="PENDING" data-edge-to="TO_SIGN" data-edge-label="审核通过" data-edge-key="0" data-edge-id="approve" data-composition-points="153,157;189,157" d="M 153 157 L 189 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="TO_SIGN" data-edge-to="ACTIVE" data-edge-label="双方在线确认" data-edge-key="1" data-edge-id="sign" data-composition-points="307,157;343,157" d="M 307 157 L 343 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="ACTIVE" data-edge-to="MOVED_OUT" data-edge-label="搬出登记（R70）" data-edge-key="2" data-edge-id="move-out" data-composition-points="461,157;497,157" d="M 461 157 L 497 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="MOVED_OUT" data-edge-to="ARCHIVED" data-edge-label="归档" data-edge-key="3" data-edge-id="archive" data-composition-points="615,157;651,157" d="M 615 157 L 651 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="审核驳回" data-edge-key="4" data-edge-id="reject" data-composition-points="94,188;94,330;402,330;402,450" d="M 94 188 L 94 320 Q 94 330 104 330 L 392 330 Q 402 330 402 340 L 402 450" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
 
         <!-- States -->
         <g id="node-PENDING" data-node-id="PENDING" data-node-label="待审核" tabindex="0" role="button" aria-label="聚焦待审核，租住登记申请, 主流程" aria-pressed="false" data-node-kind="start" data-node-sublabel="租住登记申请" data-node-context="主流程">
@@ -5060,47 +5061,60 @@
           <text data-detail="context" x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">租住登记申请</text>
         </g>
 
-        <g id="node-ACTIVE" data-node-id="ACTIVE" data-node-label="已生效" tabindex="0" role="button" aria-label="聚焦已生效，租期进行中, 主流程" aria-pressed="false" data-node-kind="active" data-node-sublabel="租期进行中" data-node-tag="自动标注" data-node-context="主流程">
-          <title>已生效 · 租期进行中 · 主流程 · 自动标注</title>
+        <g id="node-TO_SIGN" data-node-id="TO_SIGN" data-node-label="待签约" tabindex="0" role="button" aria-label="聚焦待签约，协议确认后生效, 主流程" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="协议确认后生效" data-node-tag="新增（R66）" data-node-context="主流程">
+          <title>待签约 · 协议确认后生效 · 主流程 · 新增（R66）</title>
           <rect x="189" y="126" width="118" height="62" rx="7" class="c-mask"/>
-          <rect x="189" y="126" width="118" height="62" rx="7" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="active" class="semantic-sigil s-backend" transform="translate(290 132) scale(0.6875)">
-            <path d="M2 8h3l1.5-3.5L9 12l1.6-4H14"/>
-          </g>
-        <text data-detail="fine" x="199" y="140" class="t-backend" font-size="7" font-weight="700">02</text>
-          <text data-node-label="" data-detail-anchor="" x="248" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已生效</text>
-          <text data-detail="context" x="248" y="163" class="t-muted" font-size="7" text-anchor="middle">租期进行中</text>
-        <text data-detail="fine" x="248" y="177" class="t-backend" font-size="7" text-anchor="middle">自动标注</text>
-        </g>
-
-        <g id="node-MOVED_OUT" data-node-id="MOVED_OUT" data-node-label="已搬出" tabindex="0" role="button" aria-label="聚焦已搬出，搬出登记, 主流程" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="搬出登记" data-node-context="主流程">
-          <title>已搬出 · 搬出登记 · 主流程</title>
-          <rect x="343" y="126" width="118" height="62" rx="7" class="c-mask"/>
-          <rect x="343" y="126" width="118" height="62" rx="7" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(444 132) scale(0.6875)">
+          <rect x="189" y="126" width="118" height="62" rx="7" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(290 132) scale(0.6875)">
             <path d="M4 2.5h8M4 13.5h8M5 3c0 2.8 2 3.2 3 5-1 1.8-3 2.2-3 5M11 3c0 2.8-2 3.2-3 5 1 1.8 3 2.2 3 5"/>
           </g>
-        <text data-detail="fine" x="353" y="140" class="t-cloud" font-size="7" font-weight="700">03</text>
-          <text data-node-label="" data-detail-anchor="" x="402" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已搬出</text>
-          <text data-detail="context" x="402" y="163" class="t-muted" font-size="7" text-anchor="middle">搬出登记</text>
+        <text data-detail="fine" x="199" y="140" class="t-cloud" font-size="7" font-weight="700">02</text>
+          <text data-node-label="" data-detail-anchor="" x="248" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">待签约</text>
+          <text data-detail="context" x="248" y="163" class="t-muted" font-size="7" text-anchor="middle">协议确认后生效</text>
+        <text data-detail="fine" x="248" y="177" class="t-cloud" font-size="7" text-anchor="middle">新增（R66）</text>
+        </g>
+
+        <g id="node-ACTIVE" data-node-id="ACTIVE" data-node-label="已生效" tabindex="0" role="button" aria-label="聚焦已生效，租期进行中, 主流程" aria-pressed="false" data-node-kind="active" data-node-sublabel="租期进行中" data-node-tag="自动标注" data-node-context="主流程">
+          <title>已生效 · 租期进行中 · 主流程 · 自动标注</title>
+          <rect x="343" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="343" y="126" width="118" height="62" rx="7" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="active" class="semantic-sigil s-backend" transform="translate(444 132) scale(0.6875)">
+            <path d="M2 8h3l1.5-3.5L9 12l1.6-4H14"/>
+          </g>
+        <text data-detail="fine" x="353" y="140" class="t-backend" font-size="7" font-weight="700">03</text>
+          <text data-node-label="" data-detail-anchor="" x="402" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已生效</text>
+          <text data-detail="context" x="402" y="163" class="t-muted" font-size="7" text-anchor="middle">租期进行中</text>
+        <text data-detail="fine" x="402" y="177" class="t-backend" font-size="7" text-anchor="middle">自动标注</text>
+        </g>
+
+        <g id="node-MOVED_OUT" data-node-id="MOVED_OUT" data-node-label="已搬出" tabindex="0" role="button" aria-label="聚焦已搬出，搬出登记（R70）, 主流程" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="搬出登记（R70）" data-node-context="主流程">
+          <title>已搬出 · 搬出登记（R70） · 主流程</title>
+          <rect x="497" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="497" y="126" width="118" height="62" rx="7" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(598 132) scale(0.6875)">
+            <path d="M4 2.5h8M4 13.5h8M5 3c0 2.8 2 3.2 3 5-1 1.8-3 2.2-3 5M11 3c0 2.8-2 3.2-3 5 1 1.8 3 2.2 3 5"/>
+          </g>
+        <text data-detail="fine" x="507" y="140" class="t-cloud" font-size="7" font-weight="700">04</text>
+          <text data-node-label="" data-detail-anchor="" x="556" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已搬出</text>
+          <text data-detail="context" x="556" y="163" class="t-muted" font-size="7" text-anchor="middle">搬出登记（R70）</text>
         </g>
 
         <g id="node-ARCHIVED" data-node-id="ARCHIVED" data-node-label="已归档" tabindex="0" role="button" aria-label="聚焦已归档，归档后不可修改（R16）, 主流程" aria-pressed="false" data-node-kind="success" data-node-sublabel="归档后不可修改（R16）" data-node-tag="终态" data-node-context="主流程">
           <title>已归档 · 归档后不可修改（R16） · 主流程 · 终态</title>
-          <rect x="497" y="126" width="118" height="62" rx="7" class="c-mask"/>
-          <rect x="497" y="126" width="118" height="62" rx="7" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-database" transform="translate(598 132) scale(0.6875)">
+          <rect x="651" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="651" y="126" width="118" height="62" rx="7" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-database" transform="translate(752 132) scale(0.6875)">
             <circle cx="8" cy="8" r="5.3"/>
             <path d="m5.2 8 1.8 1.8 3.8-4"/>
           </g>
-        <text data-detail="fine" x="507" y="140" class="t-database" font-size="7" font-weight="700">04</text>
-          <text data-node-label="" data-detail-anchor="" x="556" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已归档</text>
-          <text data-detail="context" x="556" y="163" class="t-muted" font-size="7" text-anchor="middle">归档后不可修改（R16）</text>
-        <text data-detail="fine" x="556" y="177" class="t-database" font-size="7" text-anchor="middle">终态</text>
+        <text data-detail="fine" x="661" y="140" class="t-database" font-size="7" font-weight="700">05</text>
+          <text data-node-label="" data-detail-anchor="" x="710" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已归档</text>
+          <text data-detail="context" x="710" y="163" class="t-muted" font-size="7" text-anchor="middle">归档后不可修改（R16）</text>
+        <text data-detail="fine" x="710" y="177" class="t-database" font-size="7" text-anchor="middle">终态</text>
         </g>
 
-        <g id="node-REJECTED" data-node-id="REJECTED" data-node-label="已驳回" tabindex="0" role="button" aria-label="聚焦已驳回，审核驳回（附理由）, 终态" aria-pressed="false" data-node-kind="failure" data-node-sublabel="审核驳回（附理由）" data-node-tag="终态" data-node-context="终态">
-          <title>已驳回 · 审核驳回（附理由） · 终态 · 终态</title>
+        <g id="node-REJECTED" data-node-id="REJECTED" data-node-label="已驳回" tabindex="0" role="button" aria-label="聚焦已驳回，附理由，租约群聊终止, 终态" aria-pressed="false" data-node-kind="failure" data-node-sublabel="附理由，租约群聊终止" data-node-tag="终态" data-node-context="终态">
+          <title>已驳回 · 附理由，租约群聊终止 · 终态 · 终态</title>
           <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
           <rect x="343" y="450" width="118" height="58" rx="7" class="c-security" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="failure" class="semantic-sigil s-security" transform="translate(444 456) scale(0.6875)">
@@ -5108,26 +5122,31 @@
             <path d="m5.7 5.7 4.6 4.6m0-4.6-4.6 4.6"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已驳回</text>
-          <text data-detail="context" x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">审核驳回（附理由）</text>
+          <text data-detail="context" x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">附理由，租约群聊终止</text>
         <text data-detail="fine" x="402" y="497" class="t-security" font-size="7" text-anchor="middle">终态</text>
         </g>
 
         <!-- Transition labels -->
-        <g data-detail="context" data-edge-from="PENDING" data-edge-to="ACTIVE" data-edge-label="审核通过" data-edge-key="0" data-edge-id="approve">
+        <g data-detail="context" data-edge-from="PENDING" data-edge-to="TO_SIGN" data-edge-label="审核通过" data-edge-key="0" data-edge-id="approve">
           <rect x="145.4" y="191" width="51.2" height="16" rx="4" class="c-mask"/>
           <text x="171" y="202" class="t-muted" font-size="8" text-anchor="middle">审核通过</text>
         </g>
-        <g data-detail="context" data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="审核驳回（理由）" data-edge-key="1" data-edge-id="reject">
-          <rect x="173.3" y="458" width="90.4" height="16" rx="4" class="c-mask"/>
-          <text x="218.5" y="469" class="t-security" font-size="8" text-anchor="middle">审核驳回（理由）</text>
+        <g data-detail="context" data-edge-from="TO_SIGN" data-edge-to="ACTIVE" data-edge-label="双方在线确认" data-edge-key="1" data-edge-id="sign">
+          <rect x="279.8" y="191" width="90.4" height="27" rx="4" class="c-mask"/>
+          <text x="325" y="202" class="t-muted" font-size="8" text-anchor="middle">双方在线确认</text>
+        <text data-detail="fine" x="325" y="213" class="t-dim" font-size="7" text-anchor="middle">承租确认（前置）</text>
         </g>
-        <g data-detail="context" data-edge-from="ACTIVE" data-edge-to="MOVED_OUT" data-edge-label="搬出登记" data-edge-key="2" data-edge-id="move-out">
-          <rect x="299.4" y="191" width="51.2" height="16" rx="4" class="c-mask"/>
-          <text x="325" y="202" class="t-muted" font-size="8" text-anchor="middle">搬出登记</text>
+        <g data-detail="context" data-edge-from="ACTIVE" data-edge-to="MOVED_OUT" data-edge-label="搬出登记（R70）" data-edge-key="2" data-edge-id="move-out">
+          <rect x="436.25" y="191" width="85.5" height="16" rx="4" class="c-mask"/>
+          <text x="479" y="202" class="t-muted" font-size="8" text-anchor="middle">搬出登记（R70）</text>
         </g>
         <g data-detail="context" data-edge-from="MOVED_OUT" data-edge-to="ARCHIVED" data-edge-label="归档" data-edge-key="3" data-edge-id="archive">
-          <rect x="463" y="136" width="32" height="16" rx="4" class="c-mask"/>
-          <text x="479" y="147" class="t-muted" font-size="8" text-anchor="middle">归档</text>
+          <rect x="617" y="191" width="32" height="16" rx="4" class="c-mask"/>
+          <text x="633" y="202" class="t-muted" font-size="8" text-anchor="middle">归档</text>
+        </g>
+        <g data-detail="context" data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="审核驳回" data-edge-key="4" data-edge-id="reject">
+          <rect x="134.4" y="239" width="51.2" height="16" rx="4" class="c-mask"/>
+          <text x="160" y="250" class="t-security" font-size="8" text-anchor="middle">审核驳回</text>
         </g>
 
         <!-- Legend -->
@@ -5346,8 +5365,9 @@
           <h3>主流程</h3>
         </div>
         <ul>
-          <li>&bull; 待审核 → 已生效 → 已搬出 → 已归档，线性主线</li>
-          <li>&bull; 归档后记录不可修改（R16）</li>
+          <li>&bull; 待审核 → 待签约 → 已生效 → 已搬出 → 已归档，主流程逐个阶段推进</li>
+          <li>&bull; 审核通过只到「待签约」：房屋不置已入住，居住关系按 R9 建立（R66）</li>
+          <li>&bull; 承租确认是发起协议的前置条件，本身不改变租约状态；协议双方在线确认才置「已生效」</li>
         </ul>
       </div>
 
@@ -5357,8 +5377,8 @@
           <h3>日期自动标注（非状态流转）</h3>
         </div>
         <ul>
-          <li>&bull; 已生效期间的「即将到期 / 已到期」由定时任务按日期自动判定标注（§5）</li>
-          <li>&bull; 标注不产生状态机流转记录（术语表口径）</li>
+          <li>&bull; 「即将到期 / 已到期」由定时任务按日期自动判定标注（§5），不是状态机流转</li>
+          <li>&bull; 标注不产生流转记录，也不改变租住状态（术语表口径）</li>
         </ul>
       </div>
 
@@ -5368,8 +5388,8 @@
           <h3>终态</h3>
         </div>
         <ul>
-          <li>&bull; 已驳回为审核终态，附驳回理由</li>
-          <li>&bull; 已归档为生命周期终点，历史可查不可改</li>
+          <li>&bull; 已驳回为终态：待审核驳回附理由（申请撤回不改租约状态，租约维持待签约），租约群聊同时终止</li>
+          <li>&bull; 已归档为生命周期终点：归档后记录不可修改（R16），历史可查</li>
         </ul>
       </div>
     </div>

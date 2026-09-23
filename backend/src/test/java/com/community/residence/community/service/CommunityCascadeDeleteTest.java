@@ -196,6 +196,12 @@ class CommunityCascadeDeleteTest {
     private LeaseAgreementMapper leaseAgreementMapper;
     @Mock
     private LeaseChangeLogMapper leaseChangeLogMapper;
+    /* V20 新增表：同时带 lease_id / community_id / house_id 三个外键，级联必须最先覆盖 */
+    @Mock
+    private com.community.residence.lease.mapper.LeaseMoveOutApplicationMapper leaseMoveOutApplicationMapper;
+    /* V22 新增表：带 lease_id 外键（无 community_id），须随租约按 leaseIds 批删且早于租约物理删除 */
+    @Mock
+    private com.community.residence.lease.mapper.LeaseDepositRefundMapper leaseDepositRefundMapper;
 
     @InjectMocks
     private CommunityService communityService;
@@ -225,6 +231,10 @@ class CommunityCascadeDeleteTest {
         TableInfoHelper.initTableInfo(assistant, HousingTimeslot.class);
         TableInfoHelper.initTableInfo(assistant, ViewingAppointment.class);
         TableInfoHelper.initTableInfo(assistant, LeaseRecord.class);
+        TableInfoHelper.initTableInfo(assistant,
+                com.community.residence.lease.entity.LeaseMoveOutApplication.class);
+        TableInfoHelper.initTableInfo(assistant,
+                com.community.residence.lease.entity.LeaseDepositRefund.class);
         TableInfoHelper.initTableInfo(assistant, LeaseReminder.class);
         TableInfoHelper.initTableInfo(assistant, ResidenceApplication.class);
         TableInfoHelper.initTableInfo(assistant, ResidenceRelation.class);
@@ -281,6 +291,8 @@ class CommunityCascadeDeleteTest {
         verify(serviceCategoryMapper).delete(any());
         verify(residenceApplicationMapper).delete(any());
         verify(residenceRelationMapper).delete(any());
+        /* V20 退租申请表：按 community_id 直删，空数据社区亦须执行（零残留） */
+        verify(leaseMoveOutApplicationMapper).delete(any());
         verify(houseStatusHistoryMapper).delete(any());
         verify(resourceTimeslotMapper).delete(any());
         verify(houseMapper).physicalDeleteByCommunityId(9L);
@@ -434,5 +446,61 @@ class CommunityCascadeDeleteTest {
         verify(staffCommunityMapper).delete(any());
         verify(staffScheduleMapper).delete(any());
         verify(agreementTemplateMapper).delete(any());
+    }
+
+    @Test
+    @DisplayName("V20 退租申请表纳入级联：先于租约与房屋删除（DEF-066 同类硬缺陷回归）")
+    void delete_cascadesV20MoveOutApplication() {
+        LeaseRecord lease = new LeaseRecord();
+        lease.setId(88L);
+        lease.setCommunityId(9L);
+        when(leaseRecordMapper.selectList(any())).thenReturn(List.of(lease));
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+
+            communityService.delete(9L);
+        }
+
+        /* 零残留：按 community_id 清理一次（三个外键中 community_id 为数据权限锚点） */
+        verify(leaseMoveOutApplicationMapper).delete(any());
+
+        /* 顺序：退租申请（FK 指向 lease_record / house / community）必须先于
+           租约、房屋结构链与社区本体删除，否则 FK 违约 */
+        InOrder moveOutOrder = inOrder(leaseMoveOutApplicationMapper, leaseRecordMapper,
+                houseMapper, buildingMapper, communityMapper);
+        moveOutOrder.verify(leaseMoveOutApplicationMapper).delete(any());
+        moveOutOrder.verify(leaseRecordMapper).deleteBatchIds(List.of(88L));
+        moveOutOrder.verify(houseMapper).physicalDeleteByCommunityId(9L);
+        moveOutOrder.verify(buildingMapper).physicalDeleteByCommunityId(9L);
+        moveOutOrder.verify(communityMapper).deleteById(9L);
+    }
+
+    @Test
+    @DisplayName("V22 押金退还记录纳入级联：按 leaseIds 批删且先于租约物理删除（DEF-066 纪律回归）")
+    void delete_cascadesV22DepositRefund() {
+        LeaseRecord lease = new LeaseRecord();
+        lease.setId(99L);
+        lease.setCommunityId(9L);
+        when(leaseRecordMapper.selectList(any())).thenReturn(List.of(lease));
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+
+            communityService.delete(9L);
+        }
+
+        /* 零残留：押金退还记录无 community_id，须按所属租约集合整体清理一次
+           （租约 99 之下含「已批准 + 处理中/失败」多态记录，全部随租约清除） */
+        verify(leaseDepositRefundMapper).delete(any());
+
+        /* 顺序：lease_deposit_refund 外键指向 lease_record，必须排在租约物理删除之前，
+           否则含押金退还记录的社区删除将 FK 违约 */
+        InOrder refundOrder = inOrder(leaseAgreementMapper, leaseChangeLogMapper,
+                leaseDepositRefundMapper, leaseRecordMapper);
+        refundOrder.verify(leaseAgreementMapper).delete(any());
+        refundOrder.verify(leaseChangeLogMapper).delete(any());
+        refundOrder.verify(leaseDepositRefundMapper).delete(any());
+        refundOrder.verify(leaseRecordMapper).deleteBatchIds(List.of(99L));
     }
 }

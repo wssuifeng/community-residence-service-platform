@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -64,6 +65,24 @@ class LeaseServiceTest {
     }
 
     @Test
+    @DisplayName("OCR DEF-108：状态端点参数校验放行 TO_SIGN（Bean Validation 直测）")
+    void updateLeaseStatusDto_patternAcceptsToSign() {
+        jakarta.validation.Validator validator =
+                jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
+
+        UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
+        dto.setStatus("TO_SIGN");
+        dto.setRemark("测试");
+        Set<jakarta.validation.ConstraintViolation<UpdateLeaseStatusDTO>> violations =
+                validator.validate(dto);
+        assertThat(violations).isEmpty();
+
+        /* 非法值仍被拒：放行 TO_SIGN 不等于放开枚举白名单 */
+        dto.setStatus("INVALID");
+        assertThat(validator.validate(dto)).isNotEmpty();
+    }
+
+    @Test
     @DisplayName("状态机：PENDING 不可直达 ARCHIVED（STATE_TRANSITION_INVALID 5004）")
     void updateStatus_illegalTransition_throws() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
@@ -83,7 +102,7 @@ class LeaseServiceTest {
     }
 
     @Test
-    @DisplayName("状态机：PENDING → ACTIVE → MOVED_OUT 合法流转")
+    @DisplayName("状态机：PENDING → TO_SIGN → ACTIVE → MOVED_OUT 线性合法流转（DEF-115：PENDING 不可直达 ACTIVE）")
     void updateStatus_legalTransitions_pass() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
@@ -92,9 +111,13 @@ class LeaseServiceTest {
             pending.setCommunityId(1L);
             pending.setStatus("PENDING");
             when(leaseMapper.selectById(1L)).thenReturn(pending);
-            when(leaseMapper.updateById(any(LeaseRecord.class))).thenReturn(1);
+            when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
+            dto.setStatus("TO_SIGN");
+            leaseService.updateStatus(1L, dto);
+            assertThat(pending.getStatus()).isEqualTo("TO_SIGN");
+
             dto.setStatus("ACTIVE");
             leaseService.updateStatus(1L, dto);
             assertThat(pending.getStatus()).isEqualTo("ACTIVE");

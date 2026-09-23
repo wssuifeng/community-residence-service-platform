@@ -34,6 +34,12 @@ public class DisabledChannelClient implements PaymentChannelClient {
         throw new BusinessException(ErrorCode.PAYMENT_CHANNEL_DISABLED);
     }
 
+    @Override
+    public ChannelRefundResult refund(LeasePayment payment, String outRequestNo,
+                                      java.math.BigDecimal amount, String reason) {
+        throw new BusinessException(ErrorCode.PAYMENT_CHANNEL_DISABLED);
+    }
+
     /** 便捷工厂（PaymentConfig 装配用） */
     public static DisabledChannelClient alipay() {
         return new DisabledChannelClient(PaymentChannel.ALIPAY);

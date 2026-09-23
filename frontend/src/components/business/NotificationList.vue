@@ -28,13 +28,30 @@ const props = withDefaults(
   { role: 'RESIDENT' }
 )
 
-/** 通知分类：key → 匹配的 sourceType 集合（SYSTEM 兜底未识别类型） */
+/**
+ * 通知分类：key → 匹配的 sourceType 集合（SYSTEM 兜底未识别类型）。
+ *
+ * `lease` 为批次 f 从「系统」拆出的独立分类（R66~R71 租约通知量大且用户明确抱怨
+ * 混在系统里找不到）；仅 `SYSTEM` / `TASK` 仍留系统兜底。
+ * 前缀型来源（LEASE_*）在此逐值列举，避免把 WORK_ORDER 之类的其它前缀误吞进来。
+ * `LEASE_MOVE_OUT` 为退租申请三通知（OCR DEF-121 补，sourceType 与导航映射三处对齐）；
+ * `LEASE_SIGN` 后端从不写入（签约完成走 LEASE_AGREEMENT），已从清单删除。
+ */
 const CATEGORY_TYPES: Record<string, string[]> = {
   workorder: ['WORK_ORDER'],
   feedback: ['FEEDBACK'],
   reservation: ['RESERVATION', 'RESOURCE_RESERVATION'],
   notice: ['NOTICE'],
-  system: ['SYSTEM', 'LEASE', 'LEASE_RECORD', 'TASK']
+  lease: [
+    'LEASE',
+    'LEASE_RECORD',
+    'LEASE_AGREEMENT',
+    'LEASE_PAYMENT',
+    'LEASE_TENANCY',
+    'LEASE_MOVE_OUT',
+    'RESIDENCE_APPLICATION'
+  ],
+  system: ['SYSTEM', 'TASK']
 }
 
 const categories = [
@@ -43,6 +60,7 @@ const categories = [
   { key: 'feedback', label: '反馈', icon: 'chat' },
   { key: 'reservation', label: '预约', icon: 'calendar' },
   { key: 'notice', label: '公告', icon: 'megaphone' },
+  { key: 'lease', label: '租约', icon: 'lease' },
   { key: 'system', label: '系统', icon: 'gear' }
 ]
 
@@ -218,6 +236,10 @@ async function handleMarkAll(): Promise<void> {
               <path d="M3 11l14-6v14L3 13v-2z" />
               <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
             </template>
+            <template v-else-if="item.icon === 'lease'">
+              <path d="M4 10.4 12 4l8 6.4V19a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 19Z" />
+              <path d="M9.6 20.4v-5.6h4.8v5.6" />
+            </template>
             <template v-else>
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -253,6 +275,10 @@ async function handleMarkAll(): Promise<void> {
                 <template v-else-if="categoryOf(item) === 'notice'">
                   <path d="M3 11l14-6v14L3 13v-2z" />
                   <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+                </template>
+                <template v-else-if="categoryOf(item) === 'lease'">
+                  <path d="M4 10.4 12 4l8 6.4V19a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 19Z" />
+                  <path d="M9.6 20.4v-5.6h4.8v5.6" />
                 </template>
                 <template v-else>
                   <circle cx="12" cy="12" r="3" />
@@ -425,7 +451,7 @@ async function handleMarkAll(): Promise<void> {
   font-weight: var(--font-weight-bold);
 }
 
-/* 类型彩色圆形图标：工单蓝 / 反馈橙 / 预约绿 / 公告紫 / 系统灰 */
+/* 类型彩色圆形图标：工单蓝 / 反馈橙 / 预约绿 / 公告紫 / 租约青 / 系统灰 */
 .type-icon {
   flex-shrink: 0;
   width: 40px;
@@ -445,6 +471,7 @@ async function handleMarkAll(): Promise<void> {
 .type-icon[data-type='feedback'] { background: #fef3e2; color: var(--color-warning); }
 .type-icon[data-type='reservation'] { background: #e7f8f1; color: var(--color-success); }
 .type-icon[data-type='notice'] { background: #f1ebfd; color: #8b5cf6; }
+.type-icon[data-type='lease'] { background: #e6f6f8; color: #0891b2; }
 .type-icon[data-type='system'] { background: var(--color-bg-hover); color: var(--color-text-secondary); }
 
 .unread-dot {

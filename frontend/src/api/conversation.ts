@@ -19,6 +19,14 @@ export function listConversations(params?: IConversationQuery) {
   return http.get<PageResult<IConversation>>('/conversations', params)
 }
 
+/**
+ * 会话详情（V20 新增端点 R68）：返回含 status/closedAt 的会话本身，
+ * 供会话详情页判定「已关闭」只读态与租约群聊业务入口（relatedId=租约 ID）。
+ */
+export function getConversation(id: number) {
+  return http.get<IConversation>(`/conversations/${id}`)
+}
+
 /** 会话消息列表（参与者可读，时间正序非分页） */
 export function listConversationMessages(conversationId: number) {
   return http.get<IConversationMessage[]>(`/conversations/${conversationId}/messages`)
@@ -29,7 +37,21 @@ export function sendConversationMessage(conversationId: number, data: IConversat
   return http.post<IConversationMessage>(`/conversations/${conversationId}/messages`, data)
 }
 
-/** 创建/获取居民与所在社区管理员的直通会话（幂等：已有会话直接返回） */
+/**
+ * 创建/获取居民与所在社区管理员的直通会话（幂等：同（DIRECT，社区，居民）已有则返回同一条）。
+ * 居民端为本人；**管理端/超管传 `residentId` 代居民发起**（DEF-076，缺省 → 400、
+ * 未绑定该社区 → 403）。
+ */
 export function openDirectConversation(data: IDirectConversationDTO) {
   return http.post<IConversation>('/conversations/direct', data)
+}
+
+/**
+ * 建/取**租约沟通会话**（DEF-076 管理端补建入口，接口设计 §9.14 扩展）：
+ * `POST /conversations/lease-groups`，ADMIN/SUPER_ADMIN；幂等返回既有或新建的
+ * `LEASE_GROUP`，并由后端回写 `lease_record.conversation_id`。
+ * 用于存量/旁路数据（审批内核未建群）下管理端自救建群。
+ */
+export function ensureLeaseGroupConversation(leaseId: number) {
+  return http.post<IConversation>('/conversations/lease-groups', { leaseId })
 }

@@ -8,7 +8,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/** 多方会话（conversation 表；VIEWING_GROUP 看房群聊 / DIRECT 居民-管理员直通，R63） */
+/** 多方会话（conversation 表；VIEWING_GROUP 看房群聊 / LEASE_GROUP 租约群聊 / DIRECT 直通，R63+R68） */
 @Data
 @TableName("conversation")
 @Schema(description = "多方会话")
@@ -18,7 +18,7 @@ public class Conversation {
     @Schema(description = "会话ID")
     private Long id;
 
-    @Schema(description = "会话类型：VIEWING_GROUP-看房预约群聊, DIRECT-居民与管理员直通")
+    @Schema(description = "会话类型：VIEWING_GROUP-看房预约群聊, LEASE_GROUP-租约群聊, DIRECT-居民与管理员直通")
     private String type;
 
     @Schema(description = "会话标题")
@@ -27,8 +27,14 @@ public class Conversation {
     @Schema(description = "所属社区ID")
     private Long communityId;
 
-    @Schema(description = "关联业务对象ID（VIEWING_GROUP=看房预约ID；DIRECT 为空）")
+    @Schema(description = "关联业务对象ID（VIEWING_GROUP=看房预约ID；LEASE_GROUP=租约ID；DIRECT 为空）")
     private Long relatedId;
+
+    @Schema(description = "会话状态（R68）：ACTIVE-进行中, CLOSED-已关闭（只读留档，停收停发）")
+    private String status;
+
+    @Schema(description = "会话关闭时间（R68）")
+    private LocalDateTime closedAt;
 
     @Schema(description = "最后一条消息摘要（冗余，发消息时维护）")
     private String lastMessage;

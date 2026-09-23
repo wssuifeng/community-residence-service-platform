@@ -47,12 +47,19 @@ public class ApplicationVO {
     @Schema(description = "申请时间")
     private LocalDateTime createdAt;
 
+    @Schema(description = "关联租约ID（V26 强关联：审批通过内核写死本次生成的租约；NULL=无关联租约或存量无法判定）")
+    private Long leaseId;
+
+    @Schema(description = "关联租约沟通会话ID（取该租约的 conversation_id；无租约或无会话时为空）")
+    private Long conversationId;
+
     public static ApplicationVO from(ResidenceApplication entity) {
         ApplicationVO vo = new ApplicationVO();
         vo.setId(entity.getId());
         vo.setResidentId(entity.getResidentId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setHouseId(entity.getHouseId());
+        vo.setLeaseId(entity.getLeaseId());
         vo.setRelationType(entity.getRelationType());
         vo.setStatus(entity.getStatus());
         vo.setRemark(entity.getRemark());

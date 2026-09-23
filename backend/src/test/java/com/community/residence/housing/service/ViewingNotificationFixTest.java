@@ -89,7 +89,7 @@ class ViewingNotificationFixTest {
     void confirm_notifiesApplicant() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked = mockAdmin()) {
             service.confirm(1L, "ok");
-            verify(notificationService).create(eq(5L), eq(1L), eq("看房预约已确认"),
+            verify(notificationService).createForResident(eq(5L), eq(1L), eq("看房预约已确认"),
                     anyString(), anyString(), anyString(), eq(1L));
         }
     }
@@ -100,7 +100,7 @@ class ViewingNotificationFixTest {
         appointment.setStatus("RESERVED");
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked = mockAdmin()) {
             service.complete(1L, "done");
-            verify(notificationService).create(eq(5L), eq(1L), eq("看房预约已完成"),
+            verify(notificationService).createForResident(eq(5L), eq(1L), eq("看房预约已完成"),
                     anyString(), anyString(), anyString(), eq(1L));
         }
     }
@@ -110,7 +110,7 @@ class ViewingNotificationFixTest {
     void cancel_notifiesApplicant() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked = mockAdmin()) {
             service.cancel(1L, "时间冲突");
-            verify(notificationService).create(eq(5L), eq(1L), eq("看房预约已取消"),
+            verify(notificationService).createForResident(eq(5L), eq(1L), eq("看房预约已取消"),
                     anyString(), anyString(), anyString(), eq(1L));
         }
     }
@@ -123,7 +123,7 @@ class ViewingNotificationFixTest {
             lenient().when(violationRecordMapper.insert(
                     any(com.community.residence.reservation.entity.ViolationRecord.class))).thenReturn(1);
             service.violate(1L, "未到场");
-            verify(notificationService).create(eq(5L), eq(1L), eq("看房预约违约处置"),
+            verify(notificationService).createForResident(eq(5L), eq(1L), eq("看房预约违约处置"),
                     anyString(), anyString(), anyString(), eq(1L));
             verify(violationRecordMapper).insert(
                     any(com.community.residence.reservation.entity.ViolationRecord.class));
@@ -136,7 +136,7 @@ class ViewingNotificationFixTest {
         appointment.setUserId(null);
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked = mockAdmin()) {
             service.confirm(1L, "ok");
-            verify(notificationService, never()).create(anyLong(), anyLong(), anyString(),
+            verify(notificationService, never()).createForResident(anyLong(), anyLong(), anyString(),
                     anyString(), anyString(), anyString(), anyLong());
         }
     }

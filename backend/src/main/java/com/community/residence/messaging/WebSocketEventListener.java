@@ -1,5 +1,6 @@
 package com.community.residence.messaging;
 
+import com.community.residence.common.context.IdentityPrincipal;
 import com.community.residence.messaging.service.WebSocketSessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 /**
  * WebSocket 连接生命周期监听：上线/下线同步 Redis 会话注册表
- * （ws:session:{userId}），供通知推送前判断在线。
+ * （ws:session:{主体名}，主体名带身份空间前缀 R:/U:，DEF-067），供通知推送前判断在线。
  */
 @Slf4j
 @Component
@@ -23,35 +24,28 @@ public class WebSocketEventListener {
 
     @EventListener
     public void onConnected(SessionConnectedEvent event) {
-        Long userId = resolveUserId(event.getMessage().getHeaders());
-        if (userId != null) {
-            webSocketSessionService.register(userId);
-            log.debug("WebSocket 上线：userId={}", userId);
+        IdentityPrincipal principal = resolvePrincipal(event.getMessage().getHeaders());
+        if (principal != null) {
+            webSocketSessionService.register(principal.getOwnerType(), principal.getUserId());
+            log.debug("WebSocket 上线：subject={}", principal.getName());
         }
     }
 
     @EventListener
     public void onDisconnected(SessionDisconnectEvent event) {
-        Long userId = resolveUserId(event.getMessage().getHeaders());
-        if (userId != null) {
-            webSocketSessionService.deregister(userId);
-            log.debug("WebSocket 下线：userId={}", userId);
+        IdentityPrincipal principal = resolvePrincipal(event.getMessage().getHeaders());
+        if (principal != null) {
+            webSocketSessionService.deregister(principal.getOwnerType(), principal.getUserId());
+            log.debug("WebSocket 下线：subject={}", principal.getName());
         }
     }
 
-    /** Principal 由 CONNECT 认证拦截器注入（name = userId） */
-    private Long resolveUserId(org.springframework.messaging.MessageHeaders headers) {
+    /** Principal 由 WebSocketAuthInterceptor 在 CONNECT 帧注入（name = R:{id}/U:{id}） */
+    private IdentityPrincipal resolvePrincipal(org.springframework.messaging.MessageHeaders headers) {
         Object raw = headers.get(SimpMessageHeaderAccessor.USER_HEADER);
         if (raw instanceof UsernamePasswordAuthenticationToken auth
-                && auth.getPrincipal() instanceof Long userId) {
-            return userId;
-        }
-        if (raw instanceof java.security.Principal principal) {
-            try {
-                return Long.valueOf(principal.getName());
-            } catch (NumberFormatException ignored) {
-                // 非 userId 主键的 Principal（不应出现），忽略
-            }
+                && auth.getPrincipal() instanceof IdentityPrincipal principal) {
+            return principal;
         }
         return null;
     }

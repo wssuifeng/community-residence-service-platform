@@ -8,7 +8,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/** 会话参与者（conversation_participant 表；user_id 多态引用不设外键，R63） */
+/** 会话参与者（conversation_participant 表；user_id 多态引用不设外键，R63。
+ * DEF-075：user_id 必须与 owner_type 成对使用——居民 1 与 sys_user 1 会撞号，
+ * 仅按 user_id 判定会让另一身份空间主体越权进入会话。 */
 @Data
 @TableName("conversation_participant")
 @Schema(description = "会话参与者")
@@ -21,7 +23,10 @@ public class ConversationParticipant {
     @Schema(description = "会话ID")
     private Long conversationId;
 
-    @Schema(description = "参与者ID（居民=resident.id，其余角色=sys_user.id）")
+    @Schema(description = "参与者身份空间：USER=sys_user 主体（STAFF/ADMIN/SUPER_ADMIN）/ RESIDENT=resident 主体")
+    private String ownerType;
+
+    @Schema(description = "参与者ID（owner_type=RESIDENT 时为 resident.id，USER 时为 sys_user.id）")
     private Long userId;
 
     @Schema(description = "已读游标（最后已读消息ID，0=全部未读）")

@@ -106,6 +106,14 @@ export function rejectResidenceApplication(id: number, data: IApplicationRejectD
   return http.patch<null>(`/residence-applications/${id}/reject`, data)
 }
 
+/**
+ * 撤回入住申请（R66 批次 f 端点；仅申请人本人、仅「待审核」可撤回，
+ * 撤回后落「已撤回」终态并关闭租约群聊）
+ */
+export function withdrawResidenceApplication(id: number) {
+  return http.patch<IResidenceApplication>(`/residence-applications/${id}/withdraw`)
+}
+
 /* ---------------------------------- 9.2.3 居住关系管理 ---------------------------------- */
 
 /** 居民居住关系分页列表（接口设计.md 9.2.3.1） */

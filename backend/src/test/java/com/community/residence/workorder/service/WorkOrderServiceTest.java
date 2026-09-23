@@ -1,9 +1,11 @@
 package com.community.residence.workorder.service;
 
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.WorkOrderStatus;
 import com.community.residence.common.exception.BusinessException;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.workorder.dto.AssignWorkOrderDTO;
@@ -52,6 +54,11 @@ class WorkOrderServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
+    private ConversationService conversationService;
+
     @InjectMocks
     private WorkOrderService workOrderService;
 
@@ -87,7 +94,9 @@ class WorkOrderServiceTest {
                     .hasRole(anyString())).thenReturn(false);
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
             when(workOrderMapper.selectById(1L)).thenReturn(order);
+            /* assign 持久化走 updateById；其余流转走条件更新（OCR DEF-116）——两路各留一桩 */
             when(workOrderMapper.updateById(any(WorkOrder.class))).thenReturn(1);
+            when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
             when(processMapper.insert(any(com.community.residence.workorder.entity.WorkOrderProcess.class))).thenReturn(1);
 
             // 派单（含 STAFF 校验）：PENDING → ASSIGNED
@@ -188,6 +197,65 @@ class WorkOrderServiceTest {
             assertThatThrownBy(() -> workOrderService.accept(1L, "hi"))
                     .isInstanceOf(com.community.residence.common.exception.ForbiddenException.class)
                     .hasMessageContaining("被派单");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-A：确认完成/关闭工单缺省备注（null）不抛异常，状态流转仍正确")
+    void confirmAndClose_withNullRemark_succeeds() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole("RESIDENT")).thenReturn(true);
+            /* 居民本人确认：工单提交人 = 1 号（DEF-A 前端不传 body，备注为 null） */
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            order.setStatus(WorkOrderStatus.TO_CONFIRM);
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+            /* 流转走条件更新（OCR DEF-116）：放行 1 行，走正常路径而非并发幂等分支 */
+            when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
+
+            workOrderService.confirm(1L, null);
+            assertThat(order.getStatus()).isEqualTo("COMPLETED");
+
+            /* 管理员关闭：已完成 → 已关闭，同样缺省备注 */
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole("RESIDENT")).thenReturn(false);
+            workOrderService.close(1L, null);
+            assertThat(order.getStatus()).isEqualTo("CLOSED");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-A 权限不变：非工单提交人的居民确认完成被拒（403 ForbiddenException）")
+    void confirm_notOwner_throws() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils
+                    .hasRole("RESIDENT")).thenReturn(true);
+            /* 当前居民 = 2 号，工单提交人 = 1 号 */
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
+            order.setStatus(WorkOrderStatus.TO_CONFIRM);
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+
+            assertThatThrownBy(() -> workOrderService.confirm(1L, null))
+                    .isInstanceOf(com.community.residence.common.exception.ForbiddenException.class)
+                    .hasMessageContaining("仅工单提交人");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-A 权限不变：关闭工单仍先做社区数据权限校验（跨界管理员被拒）")
+    void close_otherCommunityAdmin_throws() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            order.setStatus(WorkOrderStatus.COMPLETED);
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils.checkCommunityAccess(1L))
+                    .thenThrow(new com.community.residence.common.exception.ForbiddenException("无权操作其他社区数据"));
+
+            assertThatThrownBy(() -> workOrderService.close(1L, null))
+                    .isInstanceOf(com.community.residence.common.exception.ForbiddenException.class)
+                    .hasMessageContaining("无权操作其他社区数据");
         }
     }
 

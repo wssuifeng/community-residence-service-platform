@@ -1,26 +1,65 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import LeaseRenewDialog from './LeaseRenewDialog.vue'
+import LeaseFirstPaymentDialog from './LeaseFirstPaymentDialog.vue'
+import LeaseMoveOutDialog from './LeaseMoveOutDialog.vue'
 import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
-import { getLeaseList } from '@/api/lease'
-import { listMyPayments } from '@/api/payment'
+import LeaseTimeline from '@/components/business/LeaseTimeline.vue'
+import {
+  confirmTenancy,
+  getLeaseChanges,
+  getLeaseList,
+  listDepositRefunds,
+  listLeasePayments
+} from '@/api/lease'
 import { formatDateTime } from '@/utils/date'
-import { leaseStatusLabels } from '@/types/modules/lease'
+import { ApiError } from '@/utils/request'
+
+/* 承约前置错误码（后端 ErrorCode.java：5607 看房未完成 / 5608 会话未建立，DEF-077） */
+const TENANCY_VIEWING_REQUIRED = 5607
+const TENANCY_CONVERSATION_REQUIRED = 5608
+import {
+  depositRefundStatusLabels,
+  depositStatusLabels,
+  leasePaymentTypeLabels,
+  leaseStatusLabels
+} from '@/types/modules/lease'
 import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
-import type { ILeasePayment, ILeaseRecord, PaymentChannel, PaymentStatus } from '@/types/modules/lease'
+import type {
+  DepositStatus,
+  IDepositRefund,
+  ILeaseChange,
+  ILeasePayment,
+  ILeaseRecord,
+  LeasePaymentType,
+  PaymentChannel,
+  PaymentStatus
+} from '@/types/modules/lease'
 import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
 
 /**
- * 我的租约（R61，v1.4；2026-09-20 按 mockup-to-page 重设计）：
- * 「租约｜支付记录」双 tab。租约 tab 按「社区 + 房屋」分组为卡片：
- * 组内取当前租约（ACTIVE 优先，其次起始日期最新）作主卡，
- * 其余折叠为「历史租约 N 条」（同一房屋多次租住不再重复铺开）；
- * ACTIVE 主卡可发起在线续租（三步支付弹窗见 LeaseRenewDialog）。
- * 到期标注按今天前端计算（仅 ACTIVE：止期 30 天内「即将到期」/已过止期
- * 「已到期」），与后端 expiryFlag 同口径独立判定。tab 状态写入 URL query。
+ * 我的租约（R61 v1.4 / R66~R71 批次 f / R72~R73 批次 h）：租住签约闭环的居民侧主入口。
+ * 「租约｜租约明细」双 tab。租约 tab 按「社区 + 房屋」分组为卡片：
+ * 组内取当前租约（在租优先、其次待签约、再次起始日期最新）作主卡，
+ * 其余折叠为「历史租约 N 条」（同一房屋多次租住不再重复铺开）。
+ *
+ * 主卡动作按状态分流（一一对应后端端点，前端不做状态猜测）：
+ * - 待签约 TO_SIGN：确认承租（POST /leases/{id}/tenancy-confirm），是管理方发起协议的前置条件；
+ * - 已生效 ACTIVE：支付首期费用（/first-payments）、续租（三步支付弹窗）、申请退租（/move-out-applications）；
+ * - 已搬出 MOVED_OUT：只读 + 押金状态与押金退还记录（R72，居民侧只读不可发起）。
+ *
+ * 押金与明细（R72/R73）：
+ * - 卡片与展开区展示 `deposit_status` 五态徽标（未缴/已缴/退还中/已退还/已抵扣，OFFSET 附抵扣说明）；
+ * - 展开区列出本人租约的押金退还流水（金额/渠道/状态/失败原因/发起与完成时间）；
+ * - 「租约明细」tab 按租约合并三源（状态流转 + 支付流水 + 押金退还）渲染时间线，见 LeaseTimeline。
+ *
+ * 深链：`?leaseId=` 由消息中心「租约」类通知跳转落地，本页负责翻页定位该租约、
+ * 自动展开并高亮该卡片（完整列表页跳转，定位失败时提示而非静默停首屏）。
+ * 到期标注按今天前端计算（仅 ACTIVE：止期 30 天内「即将到期」/已过止期「已到期」），
+ * 与后端 expiryFlag 同口径独立判定。tab 状态写入 URL query。
  */
 
 const route = useRoute()
@@ -34,13 +73,12 @@ const tab = ref<ListTab>(route.query.tab === 'payments' ? 'payments' : 'lease')
 
 function handleTabChange(value: string | number | boolean | undefined): void {
   tab.value = value === 'payments' ? 'payments' : 'lease'
-  /* replace 免得来回切换污染历史栈；query 仅支付记录 tab 携带 */
+  /* replace 免得来回切换污染历史栈；query 仅租约明细 tab 携带 */
   router.replace({
     query: tab.value === 'payments' ? { tab: 'payments' } : undefined
   })
   if (tab.value === 'payments') {
-    payQuery.page = 1
-    loadPayments()
+    ensureDetailLoaded()
   } else {
     loadLeases()
   }
@@ -48,8 +86,8 @@ function handleTabChange(value: string | number | boolean | undefined): void {
 
 const headSub = computed(() =>
   tab.value === 'payments'
-    ? '续租支付流水，支付结果以查单确认后为准'
-    : '本人租约的租期与租金，在租租约可在线发起续租'
+    ? '首期与续期支付流水，以及押金退还记录与状态流转合并的租约明细时间线'
+    : '本人租约的租期与租金：待签约可确认承租，已生效可付首期、续租或申请退租'
 )
 
 /* ------------------------------ 租约 tab ------------------------------ */
@@ -63,6 +101,9 @@ const expandedId = ref<number | null>(null)
 /** 展开历史折叠的分组 key（单开模式） */
 const expandedHistory = ref<string | null>(null)
 
+/** 深链定位目标（`?leaseId=`）：命中后高亮该租约卡片并自动展开 */
+const focusLeaseId = ref<number | null>(null)
+
 async function loadLeases(): Promise<void> {
   loading.value = true
   try {
@@ -73,6 +114,7 @@ async function loadLeases(): Promise<void> {
     if (expandedId.value !== null && !data.records.some((row) => row.id === expandedId.value)) {
       expandedId.value = null
     }
+    await loadLeasePayments(data.records)
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载租约列表失败')
   } finally {
@@ -80,9 +122,171 @@ async function loadLeases(): Promise<void> {
   }
 }
 
-function toggleExpand(row: ILeaseRecord): void {
-  expandedId.value = expandedId.value === row.id ? null : row.id
+/* ------------------------------ 各租约支付记录（R71） ------------------------------
+ * 首期支付不改租约状态、不顺延租期，支付结果只存在于支付单上；
+ * 故卡片级「首期已支付 / 待支付首期费用」与展开区支付记录都取自本表。
+ */
+
+/** leaseId → 该租约支付单（键存在即表示已取回，用于区分「无成功首期单」与「未取到」） */
+const leasePayments = ref<Record<number, ILeasePayment[]>>({})
+
+/** 当前页每份租约取一次支付单（页大小 10，展开历史租约也要能看到其续期流水） */
+async function loadLeasePayments(rows: ILeaseRecord[]): Promise<void> {
+  await Promise.all(
+    rows.map(async (row) => {
+      try {
+        leasePayments.value[row.id] = await listLeasePayments(row.id)
+      } catch {
+        /* 取不到支付单时不落键：卡片退化为原有「支付首期」入口，不误报待支付 */
+      }
+    })
+  )
 }
+
+function paymentsOf(row: ILeaseRecord): ILeasePayment[] {
+  return leasePayments.value[row.id] ?? []
+}
+
+function paymentsUnknown(row: ILeaseRecord): boolean {
+  return leasePayments.value[row.id] === undefined
+}
+
+/** 已支付的首期单（成功态）：卡片徽标与「首期已支付」文案的唯一依据 */
+function firstPaymentOf(row: ILeaseRecord): ILeasePayment | null {
+  return (
+    paymentsOf(row).find(
+      (item) => paymentTypeOf(item) === 'FIRST' && item.status === 'SUCCESS'
+    ) ?? null
+  )
+}
+
+function firstPaymentText(row: ILeaseRecord): string | null {
+  const paid = firstPaymentOf(row)
+  return paid
+    ? `首期已支付 ${money(paid.amount)}${paid.paidAt ? ` · ${formatDateTime(paid.paidAt)}` : ''}`
+    : null
+}
+
+/**
+ * 待支付首期：已生效、支付单已取回、无成功首期单，且**止期未过**（DEF-069）。
+ * 止期已过的租约业务上不再收首期费用（首期只对起租有效），故不再提供入口，
+ * 由 firstPayBlockedText 说明原因；未取到支付单时不判定，避免误报。
+ */
+function firstPaymentDue(row: ILeaseRecord): boolean {
+  return (
+    row.status === 'ACTIVE' &&
+    !paymentsUnknown(row) &&
+    firstPaymentOf(row) === null &&
+    expiryOf(row) !== 'EXPIRED'
+  )
+}
+
+/**
+ * 已到期租约的首期支付拦截说明（DEF-069）：止期已过时卡片不再出现「待支付首期费用」
+ * （点了必然与业务口径冲突），改为在动作区说明原因与可行动作；续租/申请退租入口不受影响。
+ * 已支付（成功首期单）的历史事实照常由绿色徽标展示，不走本说明。
+ */
+function firstPayBlockedText(row: ILeaseRecord): string | null {
+  if (row.status !== 'ACTIVE' || expiryOf(row) !== 'EXPIRED' || firstPaymentOf(row)) return null
+  return '首期费用不可再支付：租约止期已过；如需继续租住请续租，或办理退租。'
+}
+
+/** 到期徽标 tooltip：两种日期标注都提示「按止期派生、非状态流转」（DEF-069） */
+function expiryBadgeTitle(row: ILeaseRecord): string {
+  const flag = expiryOf(row)
+  if (flag === null) return ''
+  return `${flag === 'EXPIRED' ? '已到期' : '即将到期'}（${expiryText(row)}）：日期标注，按止期与当天计算，非状态流转`
+}
+
+/**
+ * 「已到期」与租约状态的关系说明（DEF-069）：到期是**按止期与当天派生的日期标注**，
+ * 不是状态流转值，租约状态仍为「在租」——两者并列并非自相矛盾，故在卡片上写清楚。
+ * 仅在止期已过（用户反馈的并列场景）时展示，避免每张卡都挂一行说明。
+ */
+function expiryAnnotationText(row: ILeaseRecord): string | null {
+  if (expiryOf(row) !== 'EXPIRED') return null
+  const base = '「已到期」为日期标注（止期已过），非状态流转，租约状态仍为「在租」'
+  return firstPaymentOf(row) ? `${base}；首期费用已支付，不受止期影响。` : `${base}。`
+}
+
+/* ------------------------------ 深链定位（?leaseId=） ------------------------------ */
+
+/**
+ * 深链定位：通知跳转只带租约 ID，无法保证目标在当前分页，故按页查找
+ * （服务端分页上限内翻页，护栏 20 页防死循环）。
+ * 命中：切到租约 tab、展开该卡并置高亮；未命中：提示后停在列表首屏（不静默失败）。
+ */
+let locating = false
+
+async function locateLease(leaseId: number): Promise<void> {
+  if (locating) return
+  locating = true
+  focusLeaseId.value = leaseId
+  try {
+    if (tab.value !== 'lease') {
+      tab.value = 'lease'
+      router.replace({ query: { tab: 'lease', leaseId: String(leaseId) } })
+    }
+    /* 命中当前已加载数据则免请求 */
+    if (records.value.some((row) => row.id === leaseId)) {
+      revealLease(leaseId)
+      return
+    }
+    const targetPage = await findLeasePage(leaseId)
+    if (targetPage === null) {
+      ElMessage.warning('未找到该通知对应的租约，可能已归档或不属于当前账号')
+      return
+    }
+    query.page = targetPage
+    await loadLeases()
+    revealLease(leaseId)
+  } finally {
+    locating = false
+  }
+}
+
+/** 逐页查找租约所在页（返回 null 表示未找到）；不复用 loadLeases，避免定位过程反复改写列表状态 */
+async function findLeasePage(leaseId: number): Promise<number | null> {
+  const size = query.size
+  for (let page = 1; page <= 20; page += 1) {
+    try {
+      const data = await getLeaseList({ page, size })
+      if (data.records.some((row) => row.id === leaseId)) return page
+      if (data.records.length === 0 || page * size >= data.total) return null
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+function revealLease(leaseId: number): void {
+  expandedId.value = leaseId
+  /* 等卡片渲染后滚动到可视区，长列表下用户不必自己找 */
+  void nextTick(() => {
+    document.getElementById(`lease-card-${leaseId}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  })
+}
+
+function clearFocus(): void {
+  focusLeaseId.value = null
+  const query = { ...route.query }
+  delete query.leaseId
+  router.replace({ query })
+}
+
+/** 路由 query 变化即重新定位（Hub 内 Tab 往返不重新挂载本组件，只能靠 watch） */
+watch(
+  () => route.query.leaseId,
+  (value) => {
+    const leaseId = Number(value)
+    if (Number.isInteger(leaseId) && leaseId > 0) {
+      void locateLease(leaseId)
+    } else {
+      focusLeaseId.value = null
+    }
+  }
+)
 
 function toggleHistory(key: string): void {
   expandedHistory.value = expandedHistory.value === key ? null : key
@@ -132,10 +336,14 @@ function money(value: number | null | undefined): string {
   return value == null ? '—' : `¥ ${value.toLocaleString('zh-CN')}`
 }
 
-/** 组内当前租约排序：ACTIVE 优先，其次起始日期新（同屋多次租住的展示主卡） */
+/**
+ * 组内主卡排序：在租 0 < 待签约 1 < 其余 2（在租最需日常操作，待签约次之需确认承租），
+ * 同级按起始日期新在前——同屋多次租住时主卡始终是当前这一份。
+ */
 function leaseRank(row: ILeaseRecord): number {
   if (row.status === 'ACTIVE') return 0
-  return 1
+  if (row.status === 'TO_SIGN') return 1
+  return 2
 }
 
 interface LeaseGroup {
@@ -174,7 +382,12 @@ const leaseGroups = computed<LeaseGroup[]>(() => {
 
 const isEmpty = computed(() => !loading.value && records.value.length === 0)
 
-/* ------------------------------ 续租入口（三步支付弹窗） ------------------------------ */
+/** 深链高亮：仅在目标租约确实是当前主卡时点亮（避免历史折叠里的同号误亮） */
+function isFocused(row: ILeaseRecord): boolean {
+  return focusLeaseId.value !== null && focusLeaseId.value === row.id
+}
+
+/* ------------------------------ 续租 / 首期支付 / 退租入口 ------------------------------ */
 
 const renewVisible = ref(false)
 const renewTarget = ref<ILeaseRecord | null>(null)
@@ -184,12 +397,230 @@ function openRenew(row: ILeaseRecord): void {
   renewVisible.value = true
 }
 
-/** 支付成功后租期已延展，刷新列表拿到新止期 */
-function handleRenewSuccess(): void {
+/** 续租支付成功后止期延展，时间线新增一条续期条目，故明细缓存一并失效 */
+function handleRenewSuccessDetail(): void {
+  loadLeases()
+  void refreshLeasePayments(renewTarget.value?.id)
+  refreshDetail(renewTarget.value?.id)
+}
+
+const firstPayVisible = ref(false)
+const firstPayTarget = ref<ILeaseRecord | null>(null)
+
+function openFirstPayment(row: ILeaseRecord): void {
+  firstPayTarget.value = row
+  firstPayVisible.value = true
+}
+
+/* ---------- ① 租约群聊入口（R68/R74） ---------- */
+
+/** 进入本租约的沟通群（会话详情路由既有，页面计数不变） */
+function openLeaseChat(row: ILeaseRecord): void {
+  if (!row.conversationId) return
+  router.push(`/resident/conversations/${row.conversationId}`)
+}
+
+/* ---------- ② 费用与支付入口（任何状态都可见，不整条消失） ---------- */
+
+interface PaymentEntry {
+  /** 按钮文案（保持与既有入口命名一致：待支付首期费用 / 重试加载 / 支付首期费用） */
+  label: string
+  /** FIRST=首期付费（首月租金+押金一次收）；RETRY=支付单取数失败重试回查；NONE=无可支付项（入口保留为禁用态 + 原因） */
+  action: 'FIRST' | 'RETRY' | 'NONE'
+  /** 入口旁的说明（可支付时讲口径，不可支付时讲原因） */
+  note: string
+}
+
+/**
+ * 支付入口解析（R71 首期 / R61 续租 + 用户口径「押金/租金就放首期付费里，不做独立支付」）：
+ * 首期费用 = 首月租金 + 押金，一次收取；续租按所选月数支付租金，二者都不改租约状态。
+ *
+ * 结清口径只认 FIRST（OCR DEF-111）：押金只随首期单收取，续租 RENEWAL 成功不代表首期已收；
+ * 原「任一 SUCCESS 即结清」会把只付过续租的在租约误判已结清、隐藏首期入口，连带堵死押金链路。
+ *
+ * 入口**任何状态都不整条消失**，但可点的 FIRST 动作收敛为「已生效且未结清且止期未过」——
+ * 后端 createFirstPayment 仅放行 ACTIVE，TO_SIGN 点了必然 400（OCR DEF-111）：
+ * - ACTIVE 未结清未过止期 → 可点「待支付首期费用」；
+ * - 支付单取不回（unknown）→ 不给可点支付动作，改「支付记录加载失败」+ 重试入口
+ *   （结清与否无法判定时盲发起只会把错误甩给后端）；
+ * - 已结清 / 止期已过 / 未生效 / 终态 → 入口仍在，**置禁用并给出原因**；
+ *   续租动作用卡片上既有的「续租」按钮承载（note 指引）。
+ */
+function paymentEntryOf(row: ILeaseRecord): PaymentEntry {
+  const unknown = paymentsUnknown(row)
+  const expired = expiryOf(row) === 'EXPIRED'
+  /* 结清只认 FIRST 成功单（DEF-111）：与 firstPaymentDue / 首期徽标同一口径 */
+  const settled = !unknown && firstPaymentOf(row) !== null
+
+  if (unknown) {
+    return {
+      label: '重试加载',
+      action: 'RETRY',
+      note: '支付记录加载失败，暂无法判定首期是否结清；请重试。'
+    }
+  }
+  if (settled) {
+    return {
+      label: '支付首期费用',
+      action: 'NONE',
+      note:
+        row.status === 'ACTIVE'
+          ? '首期已结清；需要延长租期时点「续租」并在此支付租金。'
+          : '首期费用已结清，无可支付项；历史支付记录仍在下方可查。'
+    }
+  }
+  if (row.status === 'ACTIVE') {
+    if (!expired) {
+      return {
+        label: '待支付首期费用',
+        action: 'FIRST',
+        note: '首期费用 = 首月租金 + 押金（一次收取，不做拆分支付），支付不改租约状态。'
+      }
+    }
+    return {
+      label: '支付首期费用',
+      action: 'NONE',
+      note: '止期已过：首期费用不可再支付；如需继续租住请用「续租」，或办理退租。'
+    }
+  }
+  if (row.status === 'TO_SIGN') {
+    return {
+      label: '支付首期费用',
+      action: 'NONE',
+      note: '租约尚未生效：承租确认与协议双方确认后生效，届时可在此支付首期费用。'
+    }
+  }
+  if (row.status === 'PENDING') {
+    return {
+      label: '支付首期费用',
+      action: 'NONE',
+      note: '待审核租约暂不可支付：审核通过后可在此支付首期费用。'
+    }
+  }
+  return {
+    label: '支付首期费用',
+    action: 'NONE',
+    note: '租约已结束，无可支付项；历史支付记录仍在下方可查。'
+  }
+}
+
+/** 支付入口点击：FIRST 打开首期支付弹窗；RETRY 重取支付单恢复结清判定；禁用态不做事 */
+function handlePaymentEntry(row: ILeaseRecord): void {
+  const entry = paymentEntryOf(row)
+  if (entry.action === 'FIRST') {
+    openFirstPayment(row)
+  } else if (entry.action === 'RETRY') {
+    void retryLoadPayments(row)
+  }
+}
+
+/** unknown 兜底重试：单独重取该租约支付单；失败如实提示，成功后入口按真实结清态重渲 */
+async function retryLoadPayments(row: ILeaseRecord): Promise<void> {
+  try {
+    leasePayments.value[row.id] = await listLeasePayments(row.id)
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '支付记录加载失败，请稍后重试')
+  }
+}
+
+/** 租金支付状态文案：已存在任一成功支付单即视为已支付（首期或续租） */
+function rentPaidState(row: ILeaseRecord): string {
+  if (paymentsUnknown(row)) return '状态待刷新'
+  return paymentsOf(row).some((item) => item.status === 'SUCCESS') ? '已支付' : '待支付'
+}
+
+/** 首期支付成功不改租约状态（R71 解耦），仅刷新支付记录与列表金额展示 */
+function handleFirstPaySuccess(): void {
+  loadLeases()
+  void refreshLeasePayments(firstPayTarget.value?.id)
+  refreshDetail(firstPayTarget.value?.id)
+}
+
+/**
+ * 弹窗打开回查即判定「首期已支付」（DEF-068）：刷新支付记录并展开该租约卡片，
+ * 把用户直接落到卡片内的支付记录区块（弹窗已就自身结论给出说明）。
+ */
+function handleViewFirstPayments(): void {
+  const target = firstPayTarget.value
+  if (!target) return
+  loadLeases()
+  revealLease(target.id)
+}
+
+const moveOutVisible = ref(false)
+const moveOutTarget = ref<ILeaseRecord | null>(null)
+
+function openMoveOut(row: ILeaseRecord): void {
+  moveOutTarget.value = row
+  moveOutVisible.value = true
+}
+
+/** 退租申请提交成功后租约状态未变（待管理方审核），刷新列表即可 */
+function handleMoveOutSuccess(): void {
   loadLeases()
 }
 
-/* ------------------------------ 支付记录 tab ------------------------------ */
+/* ------------------------------ 确认承租（R67） ------------------------------ */
+
+/** 待签约且尚未确认承租 */
+function needsTenancyConfirm(row: ILeaseRecord): boolean {
+  return row.status === 'TO_SIGN' && !row.tenantConfirmAt
+}
+
+/** 待签约且已确认承租（等待管理方发起协议） */
+function tenancyConfirmed(row: ILeaseRecord): boolean {
+  return row.status === 'TO_SIGN' && !!row.tenantConfirmAt
+}
+
+const tenancyConfirming = ref<number | null>(null)
+
+/**
+ * 承约不再设前置（用户裁决 2026-09-22）：看房与租约沟通群都只是**自愿的交通手段**，
+ * 后端已撤掉 DEF-077 硬前置（5607/5608 仅保留错误码定义）。
+ * 这里只对**旧构建/旁路数据**仍可能返回的这两个码做**非阻断兜底**：
+ * 如实提示一句、不弹阻断式弹窗、不强制跳转，居民可稍后重试或直接联系管理员。
+ * 返回 true 表示已就地消化该错误（不再按普通失败提示）。
+ */
+function notifyTenancySoftBlocked(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return false
+  if (error.code !== TENANCY_VIEWING_REQUIRED && error.code !== TENANCY_CONVERSATION_REQUIRED) {
+    return false
+  }
+  ElMessage.warning(
+    `${error.message}（看房与沟通群都只是自愿手段，不影响承约；可稍后重试或联系社区管理员）`
+  )
+  return true
+}
+
+/** 确认承租：居民专属动作（管理端不可代确认），二次确认后调用端点，管理方即可直接推进协议确认 */
+async function handleTenancyConfirm(row: ILeaseRecord): Promise<void> {
+  try {
+    await ElMessageBox.confirm(
+      `确认承租「${row.houseLocation}」（租期 ${row.startDate} ~ ${row.endDate}，月租 ${money(row.monthlyRent)}）？\n` +
+        '确认后社区管理方即可直接发起并确认租赁协议（管理方确认时引用本次承约留痕），租约随之生效。\n' +
+        '（提示：承租确认是居民侧的签署意愿留痕，居民无需再次确认协议；看房与沟通群不构成承约前置。）',
+      '确认承租',
+      { type: 'info', confirmButtonText: '确认承租', cancelButtonText: '再想想' }
+    )
+  } catch {
+    return
+  }
+  tenancyConfirming.value = row.id
+  try {
+    await confirmTenancy(row.id)
+    ElMessage.success('已确认承租，社区管理方可直接推进协议确认')
+    await loadLeases()
+  } catch (error) {
+    /* 5607/5608 只作非阻断提示（后端已撤硬前置）；其余错误沿用既有如实提示 */
+    if (!notifyTenancySoftBlocked(error)) {
+      ElMessage.error(error instanceof Error ? error.message : '确认承租失败')
+    }
+  } finally {
+    tenancyConfirming.value = null
+  }
+}
+
+/* ------------------------------ 租约明细 tab（押金 + 三源时间线，R72/R73） ------------------------------ */
 
 const paymentChannelLabels: Record<PaymentChannel, string> = {
   ALIPAY: '支付宝',
@@ -201,31 +632,160 @@ const paymentStatusLabels: Record<PaymentStatus, string> = {
   CLOSED: '已关闭'
 }
 
-const payQuery = reactive({ page: 1, size: 10 })
-const payTotal = ref(0)
-const payRecords = ref<ILeasePayment[]>([])
-const payLoading = ref(false)
+/**
+ * 支付单类型标签：后端 V20 起返回 paymentType；
+ * 存量数据缺省按「续期」展示（V20 之前仅有续租支付单，该兜底口径与历史一致）。
+ */
+function paymentTypeOf(row: ILeasePayment): LeasePaymentType {
+  return row.paymentType ?? 'RENEWAL'
+}
 
-async function loadPayments(): Promise<void> {
-  payLoading.value = true
-  try {
-    const data = await listMyPayments({ page: payQuery.page, size: payQuery.size })
-    payRecords.value = data.records
-    payTotal.value = data.total
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '加载支付记录失败')
-  } finally {
-    payLoading.value = false
+/**
+ * 单租约明细缓存（按租约 ID 归档）：押金退还流水 + 变更历史。
+ * 支付流水**不在此处**——卡片徽标与展开区支付记录已由 `leasePayments` 统一持有
+ * （见「各租约支付记录」一节），时间线直接复用该表，避免同一端点两条缓存漂移。
+ */
+interface LeaseDetailState {
+  refunds: IDepositRefund[]
+  changes: ILeaseChange[]
+  loading: boolean
+  /** 押金退还流水取数失败：区分「无记录」与「取不到」，避免误报「未退还」 */
+  refundsFailed: boolean
+}
+
+const detailCache = reactive<Record<number, LeaseDetailState>>({})
+/** 明细 tab 当前查看的租约（缺省取首个租约，深链 leaseId 优先） */
+const detailLeaseId = ref<number | null>(null)
+
+const detailLease = computed<ILeaseRecord | null>(
+  () => records.value.find((row) => row.id === detailLeaseId.value) ?? records.value[0] ?? null
+)
+
+const detailState = computed<LeaseDetailState | null>(() => {
+  const id = detailLease.value?.id
+  return id == null ? null : (detailCache[id] ?? null)
+})
+
+async function loadLeaseDetail(leaseId: number): Promise<void> {
+  /* 已有缓存不重复拉取（切换频繁，明细为只读快照；支付/退还动作后由 refreshDetail 强制刷新） */
+  if (detailCache[leaseId] && !detailCache[leaseId].loading) return
+  detailCache[leaseId] = { refunds: [], changes: [], loading: true, refundsFailed: false }
+  const [refunds, changes] = await Promise.all([
+    listDepositRefunds(leaseId).catch(() => 'FAILED' as const),
+    getLeaseChanges(leaseId).catch(() => [] as ILeaseChange[])
+  ])
+  detailCache[leaseId] = {
+    refunds: refunds === 'FAILED' ? [] : refunds,
+    changes,
+    loading: false,
+    refundsFailed: refunds === 'FAILED'
   }
 }
 
-const payEmpty = computed(() => !payLoading.value && payRecords.value.length === 0)
+/** 明细 tab 进入/切换租约时确保已取数 */
+function ensureDetailLoaded(): void {
+  const id = detailLease.value?.id
+  if (id == null) return
+  void loadLeaseDetail(id)
+}
+
+function selectDetailLease(id: number): void {
+  detailLeaseId.value = id
+  void loadLeaseDetail(id)
+}
+
+/** 押金支付或退还后强制刷新该租约明细（退还流水与变更历史缓存失效） */
+function refreshDetail(leaseId?: number): void {
+  const id = leaseId ?? detailLease.value?.id
+  if (id == null) return
+  delete detailCache[id]
+  void loadLeaseDetail(id)
+}
+
+/** 时间线三源之一（支付流水）复用卡片级缓存：这里按租约单独补取一次 */
+async function refreshLeasePayments(leaseId?: number): Promise<void> {
+  const target = leaseId ?? detailLease.value?.id
+  if (target == null) return
+  try {
+    leasePayments.value[target] = await listLeasePayments(target)
+  } catch {
+    /* 取不到时保留旧值（时间线降级为两源），不落空键以免误报「无支付记录」 */
+  }
+}
+
+/* --------------------- 押金状态展示（R72 §3.1.1） --------------------- */
+
+/**
+ * 押金状态：后端未返回时按「未缴」兜底——不猜「已缴」，
+ * 否则会在未真正收到押金时给出「可退还」的错觉。
+ */
+function depositStatusOf(row: ILeaseRecord): DepositStatus {
+  return row.depositStatus ?? 'UNPAID'
+}
+
+function depositLabel(row: ILeaseRecord): string {
+  return depositStatusLabels[depositStatusOf(row)]
+}
+
+function depositTone(row: ILeaseRecord): string {
+  return depositStatusOf(row)
+}
+
+/** 抵扣说明（仅 OFFSET 有值）：横幅展示，避免徽标「已抵扣」无从解释 */
+function depositOffsetRemark(row: ILeaseRecord): string {
+  return row.depositOffsetRemark?.trim() ?? ''
+}
+
+/** 押金退还流水（明细 tab 与展开区共用）：按发起时间降序，接口层已保证，这里再兜一次 */
+function refundsOf(leaseId: number): IDepositRefund[] {
+  const list = detailCache[leaseId]?.refunds ?? []
+  return [...list].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+}
+
+/**
+ * 累计已成功退还金额（R72 §3.1.1 要求可见）：
+ * 只累加 `SUCCESS` 的退还单——`FAILED` 表示渠道退款未成功，金额并未退回，
+ * 计入会让居民误以为钱已到账。
+ */
+function refundedAmountOf(leaseId: number): number {
+  return refundsOf(leaseId)
+    .filter((item) => item.status === 'SUCCESS')
+    .reduce((sum, item) => sum + (item.amount ?? 0), 0)
+}
+
+function depositRefundTone(status: IDepositRefund['status']): 'completed' | 'pending' | 'failed' {
+  if (status === 'SUCCESS') return 'completed'
+  if (status === 'PENDING') return 'pending'
+  return 'failed'
+}
+
+/** 押金退还流水取数失败（区分「无记录」与「取不到」） */
+function refundsFailedOf(row: ILeaseRecord): boolean {
+  return detailCache[row.id]?.refundsFailed ?? false
+}
+
+/** 展开卡片时按需取该租约明细（押金流水与时间线同源，取一次共用） */
+function handleExpand(row: ILeaseRecord): void {
+  const next = expandedId.value === row.id ? null : row.id
+  expandedId.value = next
+  if (next !== null) void loadLeaseDetail(row.id)
+}
 
 onMounted(() => {
-  if (tab.value === 'payments') {
-    loadPayments()
-  } else {
-    loadLeases()
+  const deepLinkId = Number(route.query.leaseId)
+  const hasDeepLink = Number.isInteger(deepLinkId) && deepLinkId > 0
+  /* 深链优先级最高：明细 tab 的缺省租约与定位目标都取它 */
+  if (hasDeepLink) {
+    detailLeaseId.value = deepLinkId
+    focusLeaseId.value = deepLinkId
+  }
+  /* 带 leaseId 深链时先渲染租约 tab（定位目标在租约列表），明细数据随后按需拉取 */
+  const wantDetail = tab.value === 'payments' && !hasDeepLink
+  void loadLeases().then(() => {
+    if (wantDetail) ensureDetailLoaded()
+  })
+  if (hasDeepLink) {
+    void locateLease(deepLinkId)
   }
 })
 </script>
@@ -243,8 +803,13 @@ onMounted(() => {
     <div class="tab-bar">
       <el-radio-group :model-value="tab" @update:model-value="handleTabChange">
         <el-radio-button value="lease">租约</el-radio-button>
-        <el-radio-button value="payments">支付记录</el-radio-button>
+        <el-radio-button value="payments">租约明细</el-radio-button>
       </el-radio-group>
+      <!-- 深链定位提示条：仅从通知跳转落地时出现，可一键回到全量列表 -->
+      <div v-if="focusLeaseId !== null" class="focus-bar" role="status">
+        <span>已定位通知对应的租约（ID {{ focusLeaseId }}）</span>
+        <el-button text type="primary" size="small" @click="clearFocus">查看全部租约</el-button>
+      </div>
     </div>
 
     <!-- 租约 tab：社区+房屋分组卡片，同屋历史折叠 -->
@@ -254,7 +819,14 @@ onMounted(() => {
           <p>还没有租约记录，入住申请通过后即可在这里查看</p>
         </div>
 
-        <article v-for="group in leaseGroups" v-else :key="group.key" class="lease-card">
+        <article
+          v-for="group in leaseGroups"
+          v-else
+          :id="`lease-card-${group.current.id}`"
+          :key="group.key"
+          class="lease-card"
+          :class="{ 'is-focused': isFocused(group.current) }"
+        >
           <!-- 社区徽章行 -->
           <div class="card-community">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -270,8 +842,8 @@ onMounted(() => {
             class="lease-row"
             role="button"
             tabindex="0"
-            @click="toggleExpand(group.current)"
-            @keydown.enter="toggleExpand(group.current)"
+            @click="handleExpand(group.current)"
+            @keydown.enter="handleExpand(group.current)"
           >
             <div class="lease-main">
               <h2 class="lease-title">{{ group.current.houseLocation }}</h2>
@@ -291,7 +863,13 @@ onMounted(() => {
               </div>
             </div>
             <div class="lease-side">
-              <span v-if="expiryOf(group.current)" class="expiry-badge" :data-flag="expiryOf(group.current)">
+              <!-- 到期标注带 tooltip：说明它按止期与当天派生，不是状态流转值（DEF-069） -->
+              <span
+                v-if="expiryOf(group.current)"
+                class="expiry-badge"
+                :data-flag="expiryOf(group.current)"
+                :title="expiryBadgeTitle(group.current)"
+              >
                 {{ expiryOf(group.current) === 'EXPIRING' ? '即将到期' : '已到期' }}
               </span>
               <span
@@ -304,16 +882,86 @@ onMounted(() => {
               <span class="status-pill" :data-status="group.current.status">
                 {{ leaseStatusLabels[group.current.status] }}
               </span>
+
+              <!-- 押金状态徽标（R72）：未缴/已缴/退还中/已退还/已抵扣，居民侧只读 -->
+              <span
+                class="deposit-pill"
+                :data-deposit="depositTone(group.current)"
+                :title="depositOffsetRemark(group.current) || undefined"
+              >
+                押金{{ depositLabel(group.current) }}
+              </span>
+
+              <!-- 首期费用状态（R71）：首期支付不改租约状态、不顺延租期，
+                   故支付结果必须单独在卡片上呈现，否则居民付完款看不到任何反馈 -->
+              <span v-if="firstPaymentText(group.current)" class="first-pay-pill">
+                {{ firstPaymentText(group.current) }}
+              </span>
+              <span v-else-if="firstPaymentDue(group.current)" class="first-pay-pill is-due">
+                待支付首期费用
+              </span>
+              <span v-else-if="firstPayBlockedText(group.current)" class="action-blocked-note">
+                {{ firstPayBlockedText(group.current) }}
+              </span>
+
+              <!-- 「已到期」与「在租」并列的说明（DEF-069）：日期标注 ≠ 状态流转 -->
+              <p v-if="expiryAnnotationText(group.current)" class="expiry-note">
+                {{ expiryAnnotationText(group.current) }}
+              </p>
+
+              <!-- 待签约（R67）：确认承租是管理方发起协议的前置条件，仅在未确认时露出 -->
               <el-button
-                v-if="group.current.status === 'ACTIVE'"
+                v-if="needsTenancyConfirm(group.current)"
                 class="lease-action"
                 type="primary"
                 round
                 size="small"
-                @click.stop="openRenew(group.current)"
+                :loading="tenancyConfirming === group.current.id"
+                @click.stop="handleTenancyConfirm(group.current)"
               >
-                续租
+                确认承租
               </el-button>
+              <span v-else-if="tenancyConfirmed(group.current)" class="action-hint-pill">
+                已确认承租
+              </span>
+
+              <!-- 支付入口区（R71/R61 + DEF-111）：**任何状态都可见**，不再整条消失；
+                   可支付时点开首期付费弹窗，取数失败时给重试入口，无可支付项时保留禁用入口 + 原因说明 -->
+              <el-button
+                class="lease-action payment-entry"
+                :type="paymentEntryOf(group.current).action === 'FIRST' ? 'warning' : 'primary'"
+                :plain="paymentEntryOf(group.current).action !== 'FIRST'"
+                :disabled="paymentEntryOf(group.current).action === 'NONE'"
+                round
+                size="small"
+                @click.stop="handlePaymentEntry(group.current)"
+              >
+                {{ paymentEntryOf(group.current).label }}
+              </el-button>
+              <span class="payment-entry-note">{{ paymentEntryOf(group.current).note }}</span>
+
+              <!-- 已生效（R71/R70）：续租、申请退租；首期支付入口已移到上方（所有状态可见） -->
+              <template v-if="group.current.status === 'ACTIVE'">
+                <el-button
+                  class="lease-action"
+                  round
+                  size="small"
+                  @click.stop="openRenew(group.current)"
+                >
+                  续租
+                </el-button>
+                <el-button
+                  class="lease-action"
+                  type="warning"
+                  plain
+                  round
+                  size="small"
+                  @click.stop="openMoveOut(group.current)"
+                >
+                  申请退租
+                </el-button>
+              </template>
+
               <svg
                 class="lease-arrow"
                 :class="{ 'is-open': expandedId === group.current.id }"
@@ -372,13 +1020,181 @@ onMounted(() => {
                 <dt>到期说明</dt>
                 <dd>{{ expiryText(group.current) }}</dd>
               </div>
+              <!-- 承租确认留痕（R67）：待签约租约的关键状态，已确认时展示时间供居民核对 -->
+              <div v-if="group.current.status === 'TO_SIGN'" class="expand-item">
+                <dt>承租确认</dt>
+                <dd>
+                  {{ group.current.tenantConfirmAt ? formatDateTime(group.current.tenantConfirmAt) : '尚未确认（确认后由社区管理方发起租赁协议）' }}
+                </dd>
+              </div>
               <div class="expand-item expand-remark">
                 <dt>备注</dt>
                 <dd>{{ group.current.remark?.trim() || '无' }}</dd>
               </div>
             </dl>
 
-            <!-- 租赁协议（R64 轻量版）：居民侧查看协议正文与在线确认，确认动作在面板内自处理 -->
+            <!-- 待签约且未确认承租时，展开区给一处同款引导（列表行按钮在窄屏可能被挤到换行） -->
+            <div v-if="needsTenancyConfirm(group.current)" class="expand-cta">
+              <p class="expand-cta-text">
+                确认承租后社区管理方即可直接发起并确认租赁协议（管理方确认时引用本次承约留痕），租约随之生效。
+                （承租确认即居民侧签署意愿留痕，居民无需再次确认协议。）
+              </p>
+              <el-button
+                type="primary"
+                round
+                size="small"
+                :loading="tenancyConfirming === group.current.id"
+                @click.stop="handleTenancyConfirm(group.current)"
+              >
+                确认承租
+              </el-button>
+              <!-- 自愿的交通手段（用户裁决）：看房与沟通群都不是承约前置，只作可选提示 -->
+              <p class="expand-optional-hint">
+                想去看看房？可在「房源信息」页对目标房源预约看房；看房与沟通群都是自愿手段，不构成承约前置。
+              </p>
+            </div>
+
+            <!-- 首期费用（R71）：支付不改租约状态，故在此给出可操作入口与支付结果 -->
+            <div v-if="firstPaymentDue(group.current)" class="expand-cta">
+              <p class="expand-cta-text">
+                首期费用（首月租金 + 押金）尚未支付。支付成功后租约状态不变（首期与租期解耦），
+                支付结果记入下方支付记录。
+              </p>
+              <el-button
+                type="warning"
+                round
+                size="small"
+                @click.stop="openFirstPayment(group.current)"
+              >
+                去支付首期费用
+              </el-button>
+            </div>
+
+            <!-- 止期已过（DEF-069）：不提供首期支付入口，在此说明原因；续租/退租入口保持可达 -->
+            <p v-else-if="firstPayBlockedText(group.current)" class="expand-blocked">
+              {{ firstPayBlockedText(group.current) }}
+            </p>
+
+            <!-- 押金状态与退还记录（R72）：居民侧只读——发起退还属管理端动作 -->
+            <div class="lease-deposit">
+              <h3 class="payments-title">
+                押金
+                <span class="deposit-pill" :data-deposit="depositTone(group.current)">
+                  {{ depositLabel(group.current) }}
+                </span>
+                <span v-if="refundedAmountOf(group.current.id) > 0" class="deposit-refunded">
+                  累计已退还 {{ money(refundedAmountOf(group.current.id)) }}
+                </span>
+              </h3>
+
+              <!-- 抵扣说明（仅已抵扣）：徽标含义必须可解释 -->
+              <p v-if="depositOffsetRemark(group.current)" class="deposit-offset">
+                抵扣说明：{{ depositOffsetRemark(group.current) }}
+              </p>
+
+              <p v-if="refundsFailedOf(group.current)" class="payments-empty">
+                押金退还记录暂不可用，请稍后刷新
+              </p>
+              <p v-else-if="refundsOf(group.current.id).length === 0" class="payments-empty">
+                暂无押金退还记录：退租审核通过后由社区管理方发起原路退还
+              </p>
+              <ul v-else class="refund-list">
+                <li v-for="item in refundsOf(group.current.id)" :key="item.id" class="refund-item">
+                  <span class="refund-amount mono">{{ money(item.amount) }}</span>
+                  <span class="refund-channel">{{ paymentChannelLabels[item.channel] }}</span>
+                  <span class="status-pill" :data-status="depositRefundTone(item.status)">
+                    {{ depositRefundStatusLabels[item.status] }}
+                  </span>
+                  <span class="refund-meta">
+                    发起 {{ formatDateTime(item.createdAt) }} ·
+                    完成 {{ item.refundedAt ? formatDateTime(item.refundedAt) : '—' }}
+                  </span>
+                  <!-- 失败原因必须可见（渠道失败 / 凭据未配置时管理方与居民都要能对上账） -->
+                  <p v-if="item.failReason" class="refund-fail">失败原因：{{ item.failReason }}</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 该租约支付记录（GET /leases/{id}/payments）：首期/续期、金额、状态、支付时间 -->
+            <div class="lease-payments">
+              <h3 class="payments-title">支付记录</h3>
+              <p v-if="paymentsUnknown(group.current)" class="payments-empty">
+                支付记录暂不可用，请稍后刷新
+              </p>
+              <p v-else-if="paymentsOf(group.current).length === 0" class="payments-empty">
+                暂无支付记录：首期费用与续租支付都会在此留痕
+              </p>
+              <ul v-else class="payments-list">
+                <li v-for="item in paymentsOf(group.current)" :key="item.paymentNo" class="payment-item">
+                  <span class="pay-type-badge" :data-type="paymentTypeOf(item)">
+                    {{ leasePaymentTypeLabels[paymentTypeOf(item)] }}
+                  </span>
+                  <span class="payment-amount mono">{{ money(item.amount) }}</span>
+                  <span class="status-pill" :data-status="item.status">
+                    {{ paymentStatusLabels[item.status] }}
+                  </span>
+                  <span class="payment-meta">
+                    {{ paymentChannelLabels[item.channel] }} · 创建 {{ formatDateTime(item.createdAt) }} ·
+                    支付时间 {{ item.paidAt ? formatDateTime(item.paidAt) : '—' }}
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- ① 租约群聊入口（R68/R74）：**仅当本租约已建群**（lease_record.conversation_id）时渲染；
+                 无群不渲染（与工单「受理前不渲染」同口径），复用既有会话详情路由不新增页面 -->
+            <div v-if="group.current.conversationId" class="lease-chat-entry">
+              <h3 class="payments-title">租约群聊</h3>
+              <p class="chat-entry-note">
+                与社区管理方（派单后含服务人员）在本租约的沟通群内留言，消息实时同步。
+              </p>
+              <el-button type="primary" round size="small" @click.stop="openLeaseChat(group.current)">
+                进入租约群聊
+              </el-button>
+            </div>
+
+            <!-- ② 费用构成与支付入口：把「首期费用」拆成租金/押金两行明示，
+                 并给出可点击的支付入口（押金与首月租金由首期支付单一次性收取——
+                 后端 lease_payment.payment_type 仅 FIRST/RENEWAL，无单独押金端点） -->
+            <div class="lease-charges">
+              <h3 class="payments-title">费用与支付</h3>
+              <ul class="charge-list">
+                <li class="charge-item">
+                  <span class="charge-name">月租金</span>
+                  <span class="charge-amount mono">{{ money(group.current.monthlyRent) }}</span>
+                  <span class="charge-state" :data-paid="rentPaidState(group.current) === '已支付'">
+                    {{ rentPaidState(group.current) }}
+                  </span>
+                </li>
+                <li class="charge-item">
+                  <span class="charge-name">押金</span>
+                  <span class="charge-amount mono">{{ money(group.current.deposit) }}</span>
+                  <span class="charge-state" :data-paid="depositTone(group.current) === 'PAID'">
+                    {{ depositLabel(group.current) }}
+                  </span>
+                </li>
+              </ul>
+              <p class="charge-note">
+                {{ paymentEntryOf(group.current).note }}
+              </p>
+              <div class="charge-actions">
+                <!-- 与卡片行同一入口（同一解析口径）：可支付时点开首期付费弹窗，
+                     取数失败时重试回查，无独立押金支付——押金只随首期费用一并收取 -->
+                <el-button
+                  :type="paymentEntryOf(group.current).action === 'FIRST' ? 'warning' : 'primary'"
+                  :plain="paymentEntryOf(group.current).action !== 'FIRST'"
+                  :disabled="paymentEntryOf(group.current).action === 'NONE'"
+                  round
+                  size="small"
+                  @click.stop="handlePaymentEntry(group.current)"
+                >
+                  {{ paymentEntryOf(group.current).label }}
+                </el-button>
+              </div>
+            </div>
+
+            <!-- 租赁协议（R64 轻量版 + DEF-078）：居民侧查看协议正文；居民只在承约确认一次，
+                 管理方确认时引用承约留痕，故居民侧不再有二次确认入口（面板内自处理） -->
             <AgreementSignPanel
               :lease-id="group.current.id"
               role="RESIDENT"
@@ -399,44 +1215,116 @@ onMounted(() => {
       </div>
     </template>
 
-    <!-- 支付记录 tab：续租支付流水 -->
+    <!-- 租约明细 tab（R72/R73）：押金状态 + 按租约合并三源的时间线 -->
     <template v-else>
-      <div class="card list-card">
-        <div v-loading="payLoading" class="list-scroll">
-          <div v-if="payEmpty" class="empty-state">
-            <p>还没有支付记录，续租支付后会在这里留痕</p>
-          </div>
-
-          <article v-for="row in payRecords" v-else :key="row.paymentNo" class="pay-row">
-            <div class="pay-main">
-              <h2 class="pay-title">{{ paymentChannelLabels[row.channel] }} · 续租 {{ row.months }} 个月</h2>
-              <p class="pay-meta">
-                <span class="mono">单号 {{ row.paymentNo }}</span>
-                <span>创建 {{ formatDateTime(row.createdAt) }}</span>
-                <span>支付时间 {{ row.paidAt ? formatDateTime(row.paidAt) : '—' }}</span>
-              </p>
-            </div>
-            <div class="pay-side">
-              <span class="pay-amount">{{ money(row.amount) }}</span>
-              <span class="status-pill" :data-status="row.status">
-                {{ paymentStatusLabels[row.status] }}
-              </span>
-            </div>
-          </article>
+      <div class="detail-tab">
+        <!-- 租约选择：明细以单份租约为单位（退还流水与时间线均按租约收敛） -->
+        <div v-if="records.length > 0" class="detail-switch" role="tablist" aria-label="选择租约">
+          <button
+            v-for="row in records"
+            :key="row.id"
+            type="button"
+            class="detail-switch-item"
+            :class="{ active: detailLease?.id === row.id }"
+            @click="selectDetailLease(row.id)"
+          >
+            <span class="switch-house">{{ row.houseLocation }}</span>
+            <span class="switch-meta">
+              {{ leaseStatusLabels[row.status] }} · 押金{{ depositLabel(row) }}
+            </span>
+          </button>
         </div>
 
-        <Pagination
-          v-model:page="payQuery.page"
-          v-model:size="payQuery.size"
-          :total="payTotal"
-          @update:page="loadPayments"
-          @update:size="loadPayments"
-        />
+        <div v-if="!detailLease" class="card empty-state-block">
+          <p>还没有租约记录，入住申请通过后即可在这里查看押金与明细流水</p>
+        </div>
+
+        <template v-else>
+          <!-- 押金概览：状态徽标 + 实缴押金 + 累计已退 + 抵扣说明 -->
+          <div class="card deposit-card">
+            <div class="deposit-head">
+              <h3 class="deposit-title">
+                押金
+                <span class="deposit-pill" :data-deposit="depositTone(detailLease)">
+                  {{ depositLabel(detailLease) }}
+                </span>
+              </h3>
+              <span class="deposit-house">{{ detailLease.houseLocation }}</span>
+            </div>
+            <dl class="deposit-grid">
+              <div>
+                <dt>押金登记金额</dt>
+                <dd class="mono">{{ money(detailLease.deposit) }}</dd>
+              </div>
+              <div>
+                <dt>累计已退还</dt>
+                <dd class="mono">{{ money(refundedAmountOf(detailLease.id)) }}</dd>
+              </div>
+            </dl>
+            <p v-if="depositOffsetRemark(detailLease)" class="deposit-offset">
+              抵扣说明：{{ depositOffsetRemark(detailLease) }}
+            </p>
+            <p class="deposit-note">
+              押金退还由社区管理方发起原路退回；平台不托管押金资金、不计息、不垫付。
+            </p>
+          </div>
+
+          <!-- 押金退还记录（R72 §9.20.2）：金额 / 渠道 / 状态 / 失败原因 / 发起与完成时间 -->
+          <div class="card refund-card">
+            <h3 class="payments-title">押金退还记录</h3>
+            <p v-if="detailState?.loading" class="payments-empty">押金退还记录加载中…</p>
+            <p v-else-if="detailState?.refundsFailed" class="payments-empty">
+              押金退还记录暂不可用，请稍后刷新
+            </p>
+            <p v-else-if="refundsOf(detailLease.id).length === 0" class="payments-empty">
+              暂无押金退还记录：退租审核通过后由社区管理方发起原路退还
+            </p>
+            <ul v-else class="refund-list">
+              <li v-for="item in refundsOf(detailLease.id)" :key="item.id" class="refund-item">
+                <span class="refund-amount mono">{{ money(item.amount) }}</span>
+                <span class="refund-channel">{{ paymentChannelLabels[item.channel] }}</span>
+                <span class="status-pill" :data-status="depositRefundTone(item.status)">
+                  {{ depositRefundStatusLabels[item.status] }}
+                </span>
+                <span class="refund-meta">
+                  发起 {{ formatDateTime(item.createdAt) }} ·
+                  完成 {{ item.refundedAt ? formatDateTime(item.refundedAt) : '—' }}
+                </span>
+                <p class="refund-meta mono">请求号 {{ item.outRequestNo }}</p>
+                <p v-if="item.failReason" class="refund-fail">失败原因：{{ item.failReason }}</p>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 租约明细时间线（R73）：状态流转 + 支付流水 + 押金退还三源合并、时间倒序 -->
+          <div class="card timeline-card">
+            <h3 class="payments-title">租约明细时间线</h3>
+            <p class="timeline-sub">状态流转 / 支付 / 押金退还三源合并，按发生时间倒序</p>
+            <LeaseTimeline
+              v-loading="detailState?.loading"
+              :changes="detailState?.changes ?? []"
+              :payments="paymentsOf(detailLease)"
+              :refunds="detailState?.refunds ?? []"
+            />
+          </div>
+        </template>
       </div>
     </template>
 
     <!-- 续租支付弹窗（三步：选月数渠道 → 支付 → 确认结果） -->
-    <LeaseRenewDialog v-model="renewVisible" :lease="renewTarget" @success="handleRenewSuccess" />
+    <LeaseRenewDialog v-model="renewVisible" :lease="renewTarget" @success="handleRenewSuccessDetail" />
+
+    <!-- 首期费用支付弹窗（R71：金额=首月租金+押金，服务端计算，与续租同款双渠道；
+         重开时由弹窗回查既有首期单续接或明示已支付，DEF-068） -->
+    <LeaseFirstPaymentDialog
+      v-model="firstPayVisible"
+      :lease="firstPayTarget"
+      @success="handleFirstPaySuccess"
+      @view-payments="handleViewFirstPayments"
+    />
+
+    <!-- 申请退租弹窗（R70：搬出日期 + 原因，提交后进管理端审核） -->
+    <LeaseMoveOutDialog v-model="moveOutVisible" :lease="moveOutTarget" @success="handleMoveOutSuccess" />
   </section>
 </template>
 
@@ -460,6 +1348,22 @@ onMounted(() => {
 
 .tab-bar {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+/* 深链定位提示条（仅从通知跳转落地时出现） */
+.focus-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
 }
 
 .card {
@@ -508,6 +1412,12 @@ onMounted(() => {
 .lease-card:hover {
   border-color: var(--color-primary-light);
   box-shadow: var(--shadow-sm);
+}
+
+/* 深链定位目标卡：主色描边 + 浅底，与其它卡片一眼可分 */
+.lease-card.is-focused {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-bg);
 }
 
 /* 社区徽章行：小图标 + 社区名（解决租约不显示社区信息） */
@@ -619,7 +1529,7 @@ onMounted(() => {
   color: #1d4ed8;
 }
 
-/* 状态胶囊：在租/支付成功绿，待审核/待支付黄，搬出/归档/已关闭灰，驳回红 */
+/* 状态胶囊：待签约/待审核/待支付黄，在租/支付成功绿，搬出/归档/已关闭灰，驳回红 */
 .status-pill {
   flex-shrink: 0;
   padding: 1px var(--spacing-sm);
@@ -634,7 +1544,8 @@ onMounted(() => {
   color: var(--color-success);
 }
 
-.status-pill[data-status='PENDING'] {
+.status-pill[data-status='PENDING'],
+.status-pill[data-status='TO_SIGN'] {
   background: rgba(245, 158, 11, 0.12);
   color: var(--color-warning);
 }
@@ -653,6 +1564,16 @@ onMounted(() => {
 
 .lease-action {
   flex-shrink: 0;
+}
+
+/* 待签约已确认承租的非交互状态提示（避免用禁用按钮造成「可点但点不动」的误解） */
+.action-hint-pill {
+  flex-shrink: 0;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
 }
 
 .lease-arrow {
@@ -751,6 +1672,26 @@ onMounted(() => {
   grid-column: 1 / -1;
 }
 
+/* 展开区内的待签约引导：文案 + 主色按钮横向排布 */
+.expand-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.expand-cta-text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
 .expand-remark dd {
   line-height: var(--line-height-relaxed);
   white-space: pre-wrap;
@@ -781,9 +1722,259 @@ onMounted(() => {
 
 .pay-title {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+}
+
+/* 支付单类型徽标（R71）：首期主色、续期中性，与「续租 N 个月」文案互为印证 */
+.pay-type-badge {
+  flex-shrink: 0;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.pay-type-badge[data-type='FIRST'] {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.pay-type-badge[data-type='RENEWAL'] {
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 押金状态与退还记录（R72） ---------- */
+
+/* 押金徽标五态：未缴红 / 已缴绿 / 退还中橙 / 已退还主色 / 已抵扣紫 */
+.deposit-pill {
+  flex-shrink: 0;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+}
+
+.deposit-pill[data-deposit='UNPAID'] {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.deposit-pill[data-deposit='PAID'] {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.deposit-pill[data-deposit='REFUNDING'] {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.deposit-pill[data-deposit='REFUNDED'] {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.deposit-pill[data-deposit='OFFSET'] {
+  background: #f1ebfd;
+  color: #8b5cf6;
+}
+
+.lease-deposit {
+  margin-top: var(--spacing-md);
+}
+
+.deposit-refunded {
+  margin-left: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-success);
+}
+
+.deposit-offset {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.refund-list {
+  margin: var(--spacing-xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.refund-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.refund-item:last-child {
+  border-bottom: none;
+}
+
+.refund-amount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.refund-channel,
+.refund-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.refund-fail {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  line-height: var(--line-height-normal);
+}
+
+/* 状态胶囊补充两档：押金退还失败红、退还中橙（与支付单状态共用一套 data-status 语义） */
+.status-pill[data-status='failed'] {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+/* ---------- 租约明细 tab（R72/R73） ---------- */
+
+.detail-tab {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* 租约切换条：明细按单份租约收敛，横向可滚 */
+.detail-switch {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-xs);
+}
+
+.detail-switch-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  min-width: 190px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.detail-switch-item:hover {
+  border-color: var(--color-primary-light);
+}
+
+.detail-switch-item.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+}
+
+.switch-house {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.switch-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.empty-state-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.deposit-card,
+.refund-card,
+.timeline-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.deposit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.deposit-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.deposit-house {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.deposit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin: var(--spacing-md) 0 0;
+}
+
+.deposit-grid dt {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+  margin-bottom: 2px;
+}
+
+.deposit-grid dd {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.deposit-note {
+  margin: var(--spacing-md) 0 0;
+  padding-top: var(--spacing-sm);
+  border-top: 1px dashed var(--color-border);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+  line-height: var(--line-height-normal);
+}
+
+.timeline-sub {
+  margin: calc(-1 * var(--spacing-xs)) 0 var(--spacing-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 .pay-meta {
@@ -808,6 +1999,191 @@ onMounted(() => {
   font-weight: var(--font-weight-bold);
   color: var(--color-primary);
   font-family: var(--font-family-mono);
+}
+
+/* 首期费用徽标（R71）：已支付=成功绿软底 / 待支付=警示黄软底，与租约状态徽标同排 */
+.first-pay-pill {
+  flex-shrink: 0;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.first-pay-pill.is-due {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+/* 止期已过时的首期支付拦截说明（DEF-069）：占动作位的一小段文字，不用可点控件避免误点 */
+.action-blocked-note {
+  max-width: 220px;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  text-align: left;
+}
+
+/* 「已到期」与「在租」并列的说明：日期标注 ≠ 状态流转 */
+.expiry-note {
+  max-width: 220px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  text-align: left;
+}
+
+/* 展开区同款说明（替换原本会出现「去支付首期费用」的位置） */
+.expand-blocked {
+  margin: 0 0 var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-hover);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+/* 展开区内该租约支付记录：沿用「支付记录」Tab 的类型徽标与状态色，仅改为紧凑纵排 */
+.lease-payments {
+  margin-bottom: var(--spacing-md);
+}
+
+/* ① 租约群聊入口（仅已建群时渲染） */
+.lease-chat-entry {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+}
+
+.chat-entry-note {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ② 费用构成：租金/押金两行 + 支付入口 */
+.lease-charges {
+  margin-bottom: var(--spacing-md);
+}
+
+.charge-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0 0 var(--spacing-xs);
+  padding: 0;
+  list-style: none;
+}
+
+.charge-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.charge-name {
+  min-width: 56px;
+  color: var(--color-text-secondary);
+}
+
+.charge-amount {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.charge-state {
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background-color: rgba(245, 158, 11, 0.12);
+  color: var(--status-pending);
+  font-size: var(--font-size-xs);
+}
+
+.charge-state[data-paid='true'] {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: var(--status-completed, #10b981);
+}
+
+.charge-note {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.charge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+/* 支付入口旁的说明（可支付时讲口径，不可支付时讲原因——入口不整条消失） */
+.payment-entry-note {
+  margin-left: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* 自愿的交通手段提示（看房/沟通群不是承约前置） */
+.expand-optional-hint {
+  margin: var(--spacing-sm) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.payments-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.payments-empty {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.payment-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
+
+.payment-amount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.payment-meta {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
 }
 
 /* 响应式：窄屏允许行内元素换行 */

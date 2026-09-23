@@ -115,14 +115,14 @@ public class LeaseExpiryReminderTask {
 
         boolean expired = LeaseStatus.FLAG_EXPIRED.equals(flag);
         String dateText = lease.getEndDate().toString();
-        notificationService.create(lease.getTenantId(), lease.getCommunityId(),
+        notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
                 expired ? "租住已到期" : "租住即将到期",
                 expired
                         ? "您的租住合同已于 " + dateText + " 到期，请尽快办理续签或退住手续。"
                         : "您的租住合同将于 " + dateText + " 到期，请及时续签或办理退住手续。",
                 "LEASE", "LEASE_RECORD", lease.getId());
         for (Long adminId : boundAdminIds(lease.getCommunityId())) {
-            notificationService.create(adminId, lease.getCommunityId(),
+            notificationService.createForUser(adminId, lease.getCommunityId(),
                     expired ? "社区租住已到期" : "社区租住即将到期",
                     "租住记录 #" + lease.getId() + " 的合同"
                             + (expired ? "已于 " : "将于 ") + dateText

@@ -1,10 +1,28 @@
 import type { PageQuery } from '@/types/api'
 
 /**
- * 通知来源类型（接口设计.md 9.11.1 / §6.3，文档仅示例 WORK_ORDER，
- * 后端枚举其余取值落地时在此扩展）
+ * 通知来源类型（接口设计.md 9.11.1 / §6.3：文档仅示例 WORK_ORDER，以下为后端
+ * NotificationService 实际写入值的实测集合，含批次 f 租约类）。
+ * 注意 `sourceId` 语义随来源而异：LEASE/LEASE_RECORD/LEASE_TENANCY/LEASE_MOVE_OUT
+ * 为租约 ID（退租三通知后端已按 OCR DEF-105 改传租约 ID）；LEASE_AGREEMENT 为协议 ID；
+ * LEASE_PAYMENT 为支付单 ID——跳转映射见 `utils/notificationNav.ts`，
+ * 勿一律当租约 ID 拼 /leases/{id}。
  */
-export type NotificationSourceType = 'WORK_ORDER'
+export type NotificationSourceType =
+  | 'WORK_ORDER'
+  | 'FEEDBACK'
+  | 'NOTICE'
+  | 'RESERVATION'
+  | 'RESOURCE_RESERVATION'
+  | 'RESIDENCE_APPLICATION'
+  | 'LEASE'
+  | 'LEASE_RECORD'
+  | 'LEASE_AGREEMENT'
+  | 'LEASE_PAYMENT'
+  | 'LEASE_TENANCY'
+  | 'LEASE_MOVE_OUT'
+  | 'SYSTEM'
+  | 'TASK'
 
 /** 通知已读状态中文标签（isRead 布尔映射，供 StatusTag 使用） */
 export const notificationReadLabels = {

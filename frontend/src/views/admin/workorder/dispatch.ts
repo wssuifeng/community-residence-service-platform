@@ -66,6 +66,24 @@ export function canAssignOrder(order: IWorkOrder): boolean {
   return ASSIGNABLE_STATUSES.includes(order.status)
 }
 
+/**
+ * R74 受理动作可用状态：**仅 `PENDING`（待受理）**。
+ * 接口设计 §9.21.1 前置硬口径——已受理（`TO_ASSIGN` 及更后）再次受理返回 5302，
+ * 故入口只在待受理行给出，避免点击必失败。
+ */
+export function canIntakeOrder(order: IWorkOrder): boolean {
+  return order.status === 'PENDING'
+}
+
+/**
+ * R74 终审结束动作可用状态：**仅 `COMPLETED`（已完成）**。
+ * 接口设计 §9.21.3：复用 `close` 端点，前置由 `CONFIRMED` 收窄为 `COMPLETED`；
+ * 关闭同时回收工单临时群聊（只读留痕）。
+ */
+export function canFinalizeOrder(order: IWorkOrder): boolean {
+  return order.status === 'COMPLETED'
+}
+
 /** 是否为改派（已派单状态下再派一次） */
 export function isReassignOrder(order: IWorkOrder): boolean {
   return order.status === 'ASSIGNED'

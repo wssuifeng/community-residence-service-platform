@@ -273,12 +273,12 @@ async function loadRelatedViewings(): Promise<void> {
 }
 
 function goBack(): void {
-  /* 默认 Tab 为看房预约（R62 后房源挂牌归社区结构），返回落「全局房源」Tab */
-  router.push({ path: '/admin/housings', query: { tab: 'list' } })
+  /* 返回「租住与房源 → 房源管理」的全局房源分区（批次 g：原 /admin/housings 已并入 Hub） */
+  router.push({ path: '/admin/housing-lease', query: { tab: 'housings', view: 'list' } })
 }
 
 function goAllViewings(): void {
-  router.push({ path: '/admin/housings', query: { tab: 'viewings' } })
+  router.push({ path: '/admin/housing-lease', query: { tab: 'housings', view: 'viewings' } })
 }
 
 onMounted(async () => {

@@ -1,10 +1,13 @@
 package com.community.residence.resident.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.community.residence.common.constant.ApplicationStatus;
 import com.community.residence.common.constant.CommonStatus;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.HouseStatusConstant;
+import com.community.residence.common.constant.LeaseStatus;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
@@ -19,6 +22,8 @@ import com.community.residence.community.mapper.BuildingMapper;
 import com.community.residence.community.mapper.HouseMapper;
 import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.community.service.CommunityService;
+import com.community.residence.conversation.entity.Conversation;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.housing.entity.Housing;
 import com.community.residence.housing.mapper.HousingMapper;
 import com.community.residence.lease.entity.LeaseRecord;
@@ -47,8 +52,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 入住申请业务逻辑：PENDING → APPROVED / REJECTED 状态机（终态不可变更）。
- * 审批通过自动建立居住关系、租住记录并翻转房屋状态为已入住（同一事务）。
+ * 入住申请业务逻辑：PENDING → APPROVED / REJECTED / WITHDRAWN 状态机（终态不可变更，R66 增撤回）。
+ * 审批通过（人工或社区自动）建立居住关系 + 租住记录 + 租约群聊（同一事务）；
+ * **审核通过 ≠ 租约生效**（R66 v1.8 口径）：租约落 TO_SIGN 待签约、房屋保持空置，
+ * 待租赁协议双方确认（AgreementService）才置 ACTIVE 并翻转房屋为已入住。
  */
 @Slf4j
 @Service
@@ -66,7 +73,9 @@ public class ResidenceApplicationService {
     private final BuildingMapper buildingMapper;
     private final LeaseRecordMapper leaseRecordMapper;
     private final HousingMapper housingMapper;
+    private final com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
     private final CommunityService communityService;
+    private final ConversationService conversationService;
     private final LeaseChangeLogService changeLogService;
     private final NotificationService notificationService;
 
@@ -128,11 +137,6 @@ public class ResidenceApplicationService {
         }
         applyApproval(application, house, startDate, startDate.plusMonths(months), monthlyRent, deposit,
                 null, "社区已开启入住申请自动通过，系统自动审批");
-        notificationService.create(application.getResidentId(), application.getCommunityId(),
-                "入住申请已自动通过",
-                "房屋 " + house.getHouseNumber() + " 的入住申请已由社区自动审批通过"
-                        + ("TENANT".equals(application.getRelationType()) ? "，租约已生成" : ""),
-                "RESIDENCE", "RESIDENCE_APPLICATION", application.getId());
         log.info("入住申请自动通过：applicationId={}, houseId={}, leaseMonths={}, rent={}",
                 application.getId(), house.getId(), months, monthlyRent);
     }
@@ -165,6 +169,23 @@ public class ResidenceApplicationService {
         if (!"PENDING".equals(application.getStatus())) {
             throw new BusinessException(ErrorCode.APPLICATION_ALREADY_REVIEWED);
         }
+        /* 抢占式终态条件更新（OCR DEF-117）：并发「管理员审批 × 居民撤回」都读到 PENDING 时，
+           仅一方能落 APPROVED（WHERE status='PENDING' 抢占）；0 行即并发赢家已处理——
+           重读后已 APPROVED 视为重复审批幂等返回既有结果，其余终态按已审核拒绝。
+           抢占成功后本事务内继续跑审批内核，失败整体回滚（含抢占行） */
+        int claimed = applicationMapper.update(null, new LambdaUpdateWrapper<ResidenceApplication>()
+                .eq(ResidenceApplication::getId, id)
+                .eq(ResidenceApplication::getStatus, ApplicationStatus.PENDING)
+                .set(ResidenceApplication::getStatus, ApplicationStatus.APPROVED));
+        if (claimed == 0) {
+            ResidenceApplication fresh = applicationMapper.selectById(id);
+            if (fresh != null && ApplicationStatus.APPROVED.equals(fresh.getStatus())) {
+                log.info("重复审批按幂等处理，直接返回既有结果：applicationId={}", id);
+                return toVO(fresh);
+            }
+            throw new BusinessException(ErrorCode.APPLICATION_ALREADY_REVIEWED,
+                    "申请已被处理（当前状态：" + (fresh == null ? "未知" : fresh.getStatus()) + "）");
+        }
         if (dto.getLeaseEndDate().isBefore(dto.getLeaseStartDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期不能早于开始日期");
         }
@@ -175,16 +196,15 @@ public class ResidenceApplicationService {
 
         applyApproval(application, house, dto.getLeaseStartDate(), dto.getLeaseEndDate(),
                 dto.getMonthlyRent(), dto.getDeposit(), SecurityUtils.getUserId(), dto.getRemark());
-        notificationService.create(application.getResidentId(), application.getCommunityId(),
-                "入住申请已通过", "您的入住申请（房屋 " + house.getHouseNumber() + "）已审批通过",
-                "RESIDENCE", "RESIDENCE_APPLICATION", id);
         log.info("入住申请已通过：applicationId={}, operator={}", id, SecurityUtils.getUserId());
         return toVO(application);
     }
 
     /**
-     * 审批通过内核：建立居住关系 + 租住记录（仅 TENANT）+ 房屋状态翻转 + 申请落终态。
+     * 审批通过内核：建立居住关系 + 租住记录（仅 TENANT，落 TO_SIGN 待签约）+ 租约群聊 + 申请落终态。
      * 人工审批与社区自动审批共用，差异仅在租期/租金来源与审核人是否留痕（自动审批无人工审核者）。
+     * R66 v1.8：**不**翻转房屋状态（签约生效时才置 OCCUPIED）；群聊生命周期开始于审核通过，
+     * 参与者 = 申请居民 + 该社区全部启用 ADMIN，会话 ID 回写 lease_record.conversation_id。
      */
     private void applyApproval(ResidenceApplication application, House house, LocalDate startDate,
                                LocalDate endDate, BigDecimal monthlyRent, BigDecimal deposit,
@@ -200,6 +220,7 @@ public class ResidenceApplicationService {
         relationMapper.insert(relation);
 
         if ("TENANT".equals(application.getRelationType())) {
+            String houseLocation = buildHouseLocation(house);
             LeaseRecord lease = new LeaseRecord();
             lease.setTenantId(application.getResidentId());
             lease.setCommunityId(application.getCommunityId());
@@ -208,23 +229,114 @@ public class ResidenceApplicationService {
             lease.setEndDate(endDate);
             lease.setMonthlyRent(monthlyRent);
             lease.setDeposit(deposit);
-            lease.setStatus("ACTIVE");
+            lease.setStatus(LeaseStatus.TO_SIGN);
             lease.setAgreementStatus("NONE");
             lease.setRemark("入住申请审批通过自动建立");
             leaseRecordMapper.insert(lease);
-            changeLogService.logCreate(lease, "入住申请审批通过自动建立");
+            changeLogService.logCreate(lease, "入住申请审批通过自动建立（待签约）");
+
+            /* R68 租约群聊：审核通过即建群（幂等），居民确认承租与看房预约均在该会话内进行 */
+            Conversation conversation = conversationService.createLeaseGroup(lease.getId(),
+                    application.getCommunityId(), application.getResidentId(),
+                    "租约沟通·" + houseLocation);
+            if (conversation != null) {
+                lease.setConversationId(conversation.getId());
+                leaseRecordMapper.updateById(lease);
+            }
+            /* V26 强关联（DEF-080）：把"本申请生成的那份租约"写死到申请上（同一事务，
+               人工审批与社区自动审批共用本内核，故两条链路都覆盖）——
+               杜绝前端按"同一居民/社区/房屋 取最新"反查在同屋多租约时指错 */
+            application.setLeaseId(lease.getId());
+
+            /* 看房 → 租约 指向修正（DEF-081）：把该居民该房屋下 lease_id 仍为空的看房预约
+               补写成本次生成的租约。只补指向、不动看房状态——看房仍是沟通手段、不是承约门槛；
+               `lease_id IS NULL` 保证幂等（重复审批不重写、不覆盖既有非空指向）。 */
+            int linked = viewingAppointmentMapper.linkToLease(lease.getId(),
+                    application.getResidentId(), application.getHouseId());
+            if (linked > 0) {
+                log.info("看房预约已指向本次生成的租约：applicationId={}, leaseId={}, 补写行数={}",
+                        application.getId(), lease.getId(), linked);
+            }
+            notificationService.createForResident(application.getResidentId(), application.getCommunityId(),
+                    "入住申请已通过",
+                    "您的入住申请（" + houseLocation + "）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+                    "LEASE", "LEASE", lease.getId());
+        } else {
+            notificationService.createForResident(application.getResidentId(), application.getCommunityId(),
+                    "入住申请已通过",
+                    "您的入住申请（" + buildHouseLocation(house) + "）已审批通过",
+                    "RESIDENCE", "RESIDENCE_APPLICATION", application.getId());
         }
 
-        house.setStatus(HouseStatusConstant.OCCUPIED);
-        houseMapper.updateById(house);
-
-        application.setStatus("APPROVED");
+        application.setStatus(ApplicationStatus.APPROVED);
         application.setReviewerId(reviewerId);
         application.setReviewTime(LocalDateTime.now());
         application.setReviewRemark(reviewRemark);
         applicationMapper.updateById(application);
         log.info("入住申请审批内核完成：applicationId={}, relationId={}, reviewer={}",
                 application.getId(), relation.getId(), reviewerId);
+    }
+
+    /**
+     * 撤回申请（R66 v1.8）：仅申请人本人、仅 PENDING 可撤回，落 WITHDRAWN 终态；
+     * 若该申请已产生租约群聊则一并关闭（群聊生命周期止于申请撤回）。
+     * `lease_id` **保留不清空**：撤回只允许发生在 PENDING（正常为 NULL），
+     * 若旁路数据已有关联，保留它是"这份租约曾由此申请产生"的审计线索，清空反而丢证据。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "RESIDENCE_APPLICATION", targetId = "#id", content = "'撤回入住申请'")
+    public ApplicationVO withdraw(Long id) {
+        ResidenceApplication application = requireApplication(id);
+        if (!SecurityUtils.hasRole(RoleConstants.RESIDENT)
+                || !application.getResidentId().equals(SecurityUtils.getUserId())) {
+            throw new ForbiddenException("仅申请人本人可撤回申请");
+        }
+        if (!ApplicationStatus.PENDING.equals(application.getStatus())) {
+            throw new BusinessException(ErrorCode.APPLICATION_NOT_WITHDRAWABLE);
+        }
+        /* 抢占式终态条件更新（OCR DEF-117）：并发「居民撤回 × 管理员审批」都读到 PENDING 时，
+           仅一方能落 WITHDRAWN（WHERE status='PENDING' 抢占）；0 行即并发赢家已处理——
+           重读后已 WITHDRAWN 视为重复撤回幂等成功，其余终态按不可撤回拒绝 */
+        int claimed = applicationMapper.update(null, new LambdaUpdateWrapper<ResidenceApplication>()
+                .eq(ResidenceApplication::getId, id)
+                .eq(ResidenceApplication::getStatus, ApplicationStatus.PENDING)
+                .set(ResidenceApplication::getStatus, ApplicationStatus.WITHDRAWN));
+        if (claimed == 0) {
+            ResidenceApplication fresh = applicationMapper.selectById(id);
+            if (fresh != null && ApplicationStatus.WITHDRAWN.equals(fresh.getStatus())) {
+                log.info("重复撤回按幂等处理，直接返回既有终态：applicationId={}", id);
+                return toVO(fresh);
+            }
+            throw new BusinessException(ErrorCode.APPLICATION_NOT_WITHDRAWABLE,
+                    "申请已被处理（当前状态：" + (fresh == null ? "未知" : fresh.getStatus()) + "），无法撤回");
+        }
+        application.setStatus(ApplicationStatus.WITHDRAWN);
+        application.setReviewTime(LocalDateTime.now());
+        application.setReviewRemark("申请人主动撤回");
+        applicationMapper.updateById(application);
+
+        /* 待审核申请正常无租约（lease_id 为空）；存量数据经「先通过后退回待审」等旁路可能已有
+           租约群聊，此时允许回退弱关联定位（**仅本副作用路径**，见 leaseOf 注释） */
+        LeaseRecord lease = leaseOf(application, true);
+        if (lease == null) {
+            log.warn("撤回申请未匹配到租约，无需关闭群聊：applicationId={}", id);
+            return toVO(application);
+        }
+        /* 弱回退关群收窄（OCR DEF-117）：弱命中（同居民/社区/房屋最新租约）若仍处活跃态
+           （TO_SIGN/ACTIVE），该群是**另一份已批申请**的现行沟通渠道——本次撤回的是别的申请，
+           不得误关；强关联租约（lease_id 直挂本申请）不受此限，其群生命周期本就止于本申请撤回 */
+        boolean strongLink = application.getLeaseId() != null
+                && application.getLeaseId().equals(lease.getId());
+        if (!strongLink && (LeaseStatus.TO_SIGN.equals(lease.getStatus())
+                || LeaseStatus.ACTIVE.equals(lease.getStatus()))) {
+            log.info("撤回申请弱命中租约仍处活跃态，跳过关闭其群聊：applicationId={}, leaseId={}, leaseStatus={}",
+                    id, lease.getId(), lease.getStatus());
+            return toVO(application);
+        }
+        conversationService.closeLeaseGroup(lease.getId());
+        log.info("入住申请已撤回：applicationId={}, leaseId={}, operator={}",
+                id, lease.getId(), SecurityUtils.getUserId());
+        return toVO(application);
     }
 
     /* 审批拒绝：终态不可变更 */
@@ -236,12 +348,27 @@ public class ResidenceApplicationService {
         if (!"PENDING".equals(application.getStatus())) {
             throw new BusinessException(ErrorCode.APPLICATION_ALREADY_REVIEWED);
         }
-        application.setStatus("REJECTED");
+        /* 抢占式终态条件更新（OCR DEF-117）：与 approve/withdraw 同口径，防止并发驳回
+           覆盖撤回/审批的终态（updateById 全字段写回会静默改掉已落终态） */
+        int claimed = applicationMapper.update(null, new LambdaUpdateWrapper<ResidenceApplication>()
+                .eq(ResidenceApplication::getId, id)
+                .eq(ResidenceApplication::getStatus, ApplicationStatus.PENDING)
+                .set(ResidenceApplication::getStatus, ApplicationStatus.REJECTED));
+        if (claimed == 0) {
+            ResidenceApplication fresh = applicationMapper.selectById(id);
+            if (fresh != null && ApplicationStatus.REJECTED.equals(fresh.getStatus())) {
+                log.info("重复驳回按幂等处理，直接返回：applicationId={}", id);
+                return;
+            }
+            throw new BusinessException(ErrorCode.APPLICATION_ALREADY_REVIEWED,
+                    "申请已被处理（当前状态：" + (fresh == null ? "未知" : fresh.getStatus()) + "）");
+        }
+        application.setStatus(ApplicationStatus.REJECTED);
         application.setReviewerId(SecurityUtils.getUserId());
         application.setReviewTime(LocalDateTime.now());
         application.setReviewRemark(dto.getReason());
         applicationMapper.updateById(application);
-        notificationService.create(application.getResidentId(), application.getCommunityId(),
+        notificationService.createForResident(application.getResidentId(), application.getCommunityId(),
                 "入住申请未通过", "您的入住申请未通过：" + dto.getReason(),
                 "RESIDENCE", "RESIDENCE_APPLICATION", id);
         log.info("入住申请已拒绝：applicationId={}, reason={}, operator={}",
@@ -283,7 +410,56 @@ public class ResidenceApplicationService {
         if (house != null) {
             vo.setHouseLocation(buildHouseLocation(house));
         }
+        /* V26 强关联（DEF-080）：leaseId 直接取申请上的记录列，**不回退弱关联猜测**——
+           同屋多租约时"取最新"会指错，正是本次裁决要修的问题；存量 NULL 行返回空，
+           由前端按 status 收口（"无关联租约/请从租约列表进入"）。
+           conversationId 取该租约自己的 conversation_id。 */
+        if (application.getLeaseId() != null) {
+            LeaseRecord lease = leaseRecordMapper.selectById(application.getLeaseId());
+            if (lease != null) {
+                vo.setConversationId(lease.getConversationId());
+            } else {
+                log.warn("入住申请关联租约不存在（悬空关联，疑似人工改库）：applicationId={}, leaseId={}",
+                        application.getId(), application.getLeaseId());
+            }
+        }
         return vo;
+    }
+
+    /**
+     * 申请对应租约（**单一口径实现**）：
+     * ①强关联优先——V26 起由审批通过内核写死的 `application.lease_id`；
+     * ②`allowWeakFallback=true` 时，仅当强关联为空，才回退到弱关联
+     *   （同一 居民/社区/房屋 的最新租约，与 V26 存量回填口径一致）并 WARN 留痕。
+     * 该回退**只允许用于撤回关闭群聊这一副作用路径**；VO 取值一律 `false`，避免两套口径
+     * 并存、也避免把"靠猜"重新引入读路径。
+     */
+    private LeaseRecord leaseOf(ResidenceApplication application, boolean allowWeakFallback) {
+        if (application.getLeaseId() != null) {
+            LeaseRecord linked = leaseRecordMapper.selectById(application.getLeaseId());
+            if (linked != null) {
+                return linked;
+            }
+            log.warn("申请强关联租约不存在，按{}处理：applicationId={}, leaseId={}",
+                    allowWeakFallback ? "弱关联兜底" : "空关联",
+                    application.getId(), application.getLeaseId());
+            if (!allowWeakFallback) {
+                return null;
+            }
+        } else if (!allowWeakFallback) {
+            return null;
+        }
+        LeaseRecord weak = leaseRecordMapper.selectOne(new LambdaQueryWrapper<LeaseRecord>()
+                .eq(LeaseRecord::getTenantId, application.getResidentId())
+                .eq(LeaseRecord::getCommunityId, application.getCommunityId())
+                .eq(LeaseRecord::getHouseId, application.getHouseId())
+                .orderByDesc(LeaseRecord::getId)
+                .last("LIMIT 1"));
+        if (weak != null) {
+            log.warn("申请无强关联租约，回退弱关联（同居民/社区/房屋最新租约，可能不精确）：applicationId={}, leaseId={}",
+                    application.getId(), weak.getId());
+        }
+        return weak;
     }
 
     /** 拼装「楼栋-单元-房号」位置描述 */

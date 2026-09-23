@@ -10,9 +10,11 @@ import com.community.residence.workorder.mapper.WorkOrderProcessMapper;
 import com.community.residence.workorder.mapper.ServiceCategoryMapper;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.context.UserContext;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.auth.entity.SysUser;
 import com.community.residence.common.service.FileUploadService;
+import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.mapper.ResidentMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * DEF-011/012 修复回归：工单状态机完整性。
@@ -64,6 +67,17 @@ class WorkOrderStateMachineFixTest {
     private NotificationService notificationService;
     @Mock
     private FileUploadService fileUploadService;
+
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
+    private ConversationService conversationService;
+    @Mock
+    private com.community.residence.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
+    @Mock
+    private StaffCapabilityService staffCapabilityService;
+    @Mock
+    private StaffScheduleService staffScheduleService;
 
     @InjectMocks
     private WorkOrderService service;
@@ -143,12 +157,14 @@ class WorkOrderStateMachineFixTest {
     }
 
     @Test
-    @DisplayName("终态重复：CLOSED→close 5302（原 200）")
-    void close_onClosed_throws() {
+    @DisplayName("终态重复：CLOSED→close 幂等成功（需求口径「重复关闭不报错」，原断言 5302 已按新口径更新）")
+    void close_onClosed_isIdempotent() {
         order.setStatus("CLOSED");
         try (MockedStatic<SecurityUtils> mocked = mockAdmin()) {
-            assertThatThrownBy(() -> service.close(1L, "再关闭"))
-                    .isInstanceOf(BusinessException.class);
+            /* R74/接口设计 §9.21.3 复核裁决：重复关闭同一终态属幂等动作（返回成功），
+               与 DEF-011「同态重复动作 5302」的其余动作（reject/cancel/accept/confirm）区分；
+               非法流转（如 PENDING → CLOSED）仍为 5302，见 WorkOrderCloseIdempotencyTest */
+            assertThatCode(() -> service.close(1L, "再关闭")).doesNotThrowAnyException();
             verify(processMapper, never()).insert(any(com.community.residence.workorder.entity.WorkOrderProcess.class));
         }
     }
@@ -186,7 +202,7 @@ class WorkOrderStateMachineFixTest {
     void cancel_pendingOrToAssign_ok() {
         for (String status : Set.of("PENDING", "TO_ASSIGN")) {
             order.setStatus(status);
-            lenient().when(workOrderMapper.updateById(any(WorkOrder.class))).thenReturn(1);
+            lenient().when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
             lenient().when(processMapper.insert(any(com.community.residence.workorder.entity.WorkOrderProcess.class))).thenReturn(1);
             try (MockedStatic<SecurityUtils> mocked = mockResident()) {
                 assertThatCode(() -> service.cancel(1L, "计划有变")).doesNotThrowAnyException();
@@ -233,6 +249,57 @@ class WorkOrderStateMachineFixTest {
                                 .isEqualTo(ErrorCode.WORK_ORDER_INVALID_TRANSITION));
             }
         }
+    }
+
+    /* ---- OCR DEF-116：transition 条件更新并发防护（受理竞态两分支） ---- */
+
+    @Test
+    @DisplayName("OCR DEF-116：并发受理条件更新 0 行 + 重读已到目标状态 → 幂等返回，不重复建群/留痕/通知")
+    void intake_concurrentWinner_idempotentNoSideEffects() {
+        order.setStatus("PENDING");
+        /* 并发赢家已完成 PENDING→TO_ASSIGN：本请求条件更新 0 行，重读为已受理 */
+        WorkOrder winner = new WorkOrder();
+        winner.setId(1L);
+        winner.setOrderNo("WO202609110001");
+        winner.setResidentId(5L);
+        winner.setCommunityId(1L);
+        winner.setStatus("TO_ASSIGN");
+        when(workOrderMapper.selectById(1L)).thenReturn(order, winner);
+        when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(0);
+
+        try (MockedStatic<SecurityUtils> mocked = mockAdmin()) {
+            assertThatCode(() -> service.intake(1L, "并发受理")).doesNotThrowAnyException();
+        }
+        verify(conversationService, never())
+                .createWorkOrderGroup(anyLong(), anyLong(), anyLong(), anyLong(), anyString());
+        verify(processMapper, never())
+                .insert(any(com.community.residence.workorder.entity.WorkOrderProcess.class));
+        verify(notificationService, never())
+                .createForResident(anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong());
+    }
+
+    @Test
+    @DisplayName("OCR DEF-116：并发受理条件更新 0 行且重读状态漂移（被并发驳回）→ 5302 并发冲突")
+    void intake_concurrentDrift_throwsConflict() {
+        order.setStatus("PENDING");
+        /* 重读为 REJECTED（非目标状态）：漂移按并发冲突拒绝，而非幂等吞掉 */
+        WorkOrder drifted = new WorkOrder();
+        drifted.setId(1L);
+        drifted.setStatus("REJECTED");
+        when(workOrderMapper.selectById(1L)).thenReturn(order, drifted);
+        when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(0);
+
+        try (MockedStatic<SecurityUtils> mocked = mockAdmin()) {
+            assertThatThrownBy(() -> service.intake(1L, "并发受理"))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                            .isEqualTo(ErrorCode.WORK_ORDER_INVALID_TRANSITION))
+                    .hasMessageContaining("并发");
+        }
+        verify(conversationService, never())
+                .createWorkOrderGroup(anyLong(), anyLong(), anyLong(), anyLong(), anyString());
+        verify(processMapper, never())
+                .insert(any(com.community.residence.workorder.entity.WorkOrderProcess.class));
     }
 
     /* ---- 通用脚手架（静态工具按角色 mock） ---- */

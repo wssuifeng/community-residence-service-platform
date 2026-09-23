@@ -49,6 +49,8 @@ import com.community.residence.housing.mapper.HousingMapper;
 import com.community.residence.housing.mapper.HousingTimeslotMapper;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.lease.entity.LeaseChangeLog;
+import com.community.residence.lease.entity.LeaseDepositRefund;
+import com.community.residence.lease.entity.LeaseMoveOutApplication;
 import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.lease.entity.LeaseReminder;
 import com.community.residence.lease.mapper.LeaseChangeLogMapper;
@@ -149,6 +151,11 @@ public class CommunityService {
     private final AgreementTemplateMapper agreementTemplateMapper;
     private final LeaseAgreementMapper leaseAgreementMapper;
     private final LeaseChangeLogMapper leaseChangeLogMapper;
+    /* V20 新增表的级联清理依赖（外键同时指向 lease_record / community / house，R70 退租申请） */
+    private final com.community.residence.lease.mapper.LeaseMoveOutApplicationMapper leaseMoveOutApplicationMapper;
+    /* V22 新增表的级联清理依赖（外键指向 lease_record，R72 押金退还记录；
+       无 community_id，按 leaseIds 批删且须早于租约物理删除） */
+    private final com.community.residence.lease.mapper.LeaseDepositRefundMapper leaseDepositRefundMapper;
 
     /** 创建社区（仅超管，功能级权限在 Controller 声明） */
     @Transactional(rollbackFor = Exception.class)
@@ -215,6 +222,11 @@ public class CommunityService {
     public void delete(Long id) {
         Community community = requireCommunity(id);
         Long operatorId = SecurityUtils.getUserId();
+
+        /* ---- 退租申请（V20 lease_move_out_application，R70）：同时带 lease_id / community_id /
+                house_id 三个外键，必须早于租约与房屋物理删除（DEF-066 同类硬缺陷，2026-09-21 批次 f 纳入） ---- */
+        leaseMoveOutApplicationMapper.delete(new LambdaQueryWrapper<LeaseMoveOutApplication>()
+                .eq(LeaseMoveOutApplication::getCommunityId, id));
 
         /* ---- 工单链（V1 #15~18 + #27/28）：附件/处理记录/派单 → 评价/跟进 → 工单 → 服务类别 ---- */
         List<Long> orderIds = workOrderMapper.selectList(
@@ -309,8 +321,8 @@ public class CommunityService {
             viewingAppointmentMapper.deleteBatchIds(viewingIds);
         }
 
-        /* ---- C2/C3 居住与租住（V1 #9/10/12/13 + V18 协议/变更历史）：提醒 → 协议与变更历史 → 租约
-                → 入住申请/居住关系
+        /* ---- C2/C3 居住与租住（V1 #9/10/12/13 + V18 协议/变更历史 + V22 押金退还）：提醒 →
+                协议/变更历史/押金退还记录 → 租约 → 入住申请/居住关系
                 （resident 账号不删：跨社区共享账号体系，归属经 residence_relation 表达） ---- */
         List<Long> leaseIds = leaseRecordMapper.selectList(
                 new LambdaQueryWrapper<LeaseRecord>().eq(LeaseRecord::getCommunityId, id))
@@ -318,11 +330,13 @@ public class CommunityService {
         if (!leaseIds.isEmpty()) {
             leaseReminderMapper.delete(new LambdaQueryWrapper<LeaseReminder>()
                     .in(LeaseReminder::getLeaseId, leaseIds));
-            /* V18 两表外键指向租约，必须早于租约物理删除 */
+            /* V18 两表 + V22 押金退还记录外键指向租约，必须早于租约物理删除 */
             leaseAgreementMapper.delete(new LambdaQueryWrapper<LeaseAgreement>()
                     .in(LeaseAgreement::getLeaseId, leaseIds));
             leaseChangeLogMapper.delete(new LambdaQueryWrapper<LeaseChangeLog>()
                     .in(LeaseChangeLog::getLeaseId, leaseIds));
+            leaseDepositRefundMapper.delete(new LambdaQueryWrapper<LeaseDepositRefund>()
+                    .in(LeaseDepositRefund::getLeaseId, leaseIds));
             leaseRecordMapper.deleteBatchIds(leaseIds);
         }
         /* V19 人员绑定/排班 + V18 协议模板：直接以 community_id 归属 */

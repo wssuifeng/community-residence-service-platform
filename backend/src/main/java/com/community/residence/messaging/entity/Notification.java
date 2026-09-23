@@ -21,8 +21,12 @@ public class Notification {
     @Schema(description = "全局递增序号（Redis INCR 生成）")
     private Long seq;
 
-    @Schema(description = "接收人ID")
+    @Schema(description = "接收人ID（口径由 ownerType 决定：USER=sys_user.id / RESIDENT=resident.id）")
     private Long userId;
+
+    @Schema(description = "通知归属主体类型：USER-sys_user主体（员工/管理员），RESIDENT-居民主体；"
+            + "与 userId 组成唯一收件人身份（DEF-067 身份空间分离）")
+    private String ownerType;
 
     @Schema(description = "所属社区ID（可选）")
     private Long communityId;

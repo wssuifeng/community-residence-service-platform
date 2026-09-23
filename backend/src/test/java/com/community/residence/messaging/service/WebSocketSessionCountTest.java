@@ -1,5 +1,6 @@
 package com.community.residence.messaging.service;
 
+import com.community.residence.common.constant.NotificationOwnerType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,12 +22,16 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/** 第四批修复回归：DEF-036（WebSocket 多连接计数——任一连接断开不再注销整个在线状态） */
+/**
+ * WebSocket 会话注册表回归：DEF-036（多连接计数——任一连接断开不再注销整个在线状态）
+ * + DEF-067（在线键带身份空间前缀，resident 1 与 sys_user 1 撞号时互不代表在线）。
+ */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("WebSocket 会话计数回归（DEF-036）")
+@DisplayName("WebSocket 会话计数回归（DEF-036 / DEF-067）")
 class WebSocketSessionCountTest {
 
-    private static final String KEY = "ws:session:1";
+    private static final String KEY = "ws:session:R:1";
+    private static final String USER_KEY = "ws:session:U:1";
 
     @Mock
     private StringRedisTemplate redisTemplate;
@@ -48,10 +53,10 @@ class WebSocketSessionCountTest {
         when(valueOps.decrement(KEY)).thenAnswer(inv -> counter.decrementAndGet());
         when(valueOps.get(KEY)).thenAnswer(inv -> String.valueOf(counter.get()));
 
-        service.deregister(1L);
+        service.deregister(NotificationOwnerType.RESIDENT, 1L);
 
         verify(redisTemplate, never()).delete(anyString());
-        assertThat(service.isOnline(1L)).isTrue();
+        assertThat(service.isOnline(NotificationOwnerType.RESIDENT, 1L)).isTrue();
     }
 
     @Test
@@ -60,7 +65,7 @@ class WebSocketSessionCountTest {
         AtomicLong counter = new AtomicLong(1);
         when(valueOps.decrement(KEY)).thenAnswer(inv -> counter.decrementAndGet());
 
-        service.deregister(1L);
+        service.deregister(NotificationOwnerType.RESIDENT, 1L);
 
         verify(redisTemplate).delete(KEY);
     }
@@ -70,7 +75,7 @@ class WebSocketSessionCountTest {
     void register_incrementsAndRenewsTtl() {
         when(valueOps.increment(KEY)).thenReturn(2L);
 
-        service.register(1L);
+        service.register(NotificationOwnerType.RESIDENT, 1L);
 
         verify(valueOps).increment(KEY);
         verify(redisTemplate).expire(eq(KEY), any(java.time.Duration.class));
@@ -88,7 +93,7 @@ class WebSocketSessionCountTest {
         for (int i = 0; i < 2; i++) {
             new Thread(() -> {
                 try {
-                    service.register(1L);
+                    service.register(NotificationOwnerType.RESIDENT, 1L);
                 } finally {
                     latch.countDown();
                 }
@@ -97,17 +102,32 @@ class WebSocketSessionCountTest {
         await(latch);
         assertThat(counter.get()).isEqualTo(2);
         when(valueOps.get(KEY)).thenAnswer(inv -> String.valueOf(counter.get()));
-        assertThat(service.isOnline(1L)).isTrue();
+        assertThat(service.isOnline(NotificationOwnerType.RESIDENT, 1L)).isTrue();
 
         /* 第一路断开：在线保持 */
-        service.deregister(1L);
+        service.deregister(NotificationOwnerType.RESIDENT, 1L);
         assertThat(counter.get()).isEqualTo(1);
-        assertThat(service.isOnline(1L)).isTrue();
+        assertThat(service.isOnline(NotificationOwnerType.RESIDENT, 1L)).isTrue();
         verify(redisTemplate, never()).delete(anyString());
 
         /* 第二路（最后一路）断开：注销 */
-        service.deregister(1L);
+        service.deregister(NotificationOwnerType.RESIDENT, 1L);
         verify(redisTemplate).delete(KEY);
+    }
+
+    @Test
+    @DisplayName("DEF-067 撞号分离：resident 1 上线不等价于 sys_user 1 在线（在线键互不相同）")
+    void collidingIds_useDistinctSessionKeys() {
+        when(valueOps.increment(KEY)).thenReturn(1L);
+        when(valueOps.get(KEY)).thenReturn("1");
+        when(valueOps.get(USER_KEY)).thenReturn(null);
+
+        /* 仅居民 1 上线 */
+        service.register(NotificationOwnerType.RESIDENT, 1L);
+
+        assertThat(service.isResidentOnline(1L)).isTrue();
+        assertThat(service.isUserOnline(1L)).isFalse();
+        assertThat(KEY).isNotEqualTo(USER_KEY);
     }
 
     @Test
@@ -116,7 +136,7 @@ class WebSocketSessionCountTest {
         when(valueOps.get(KEY)).thenReturn("legacy-single-value");
 
         /* 非计数格式残留值（Long.parseLong 抛 NumberFormatException）按在线处理 */
-        assertThat(service.isOnline(1L)).isTrue();
+        assertThat(service.isOnline(NotificationOwnerType.RESIDENT, 1L)).isTrue();
     }
 
     @Test
@@ -124,7 +144,7 @@ class WebSocketSessionCountTest {
     void redisDown_degradesOffline() {
         when(valueOps.get(anyString())).thenThrow(new RedisConnectionFailureException("down"));
 
-        assertThat(service.isOnline(1L)).isFalse();
+        assertThat(service.isOnline(NotificationOwnerType.RESIDENT, 1L)).isFalse();
     }
 
     private void await(java.util.concurrent.CountDownLatch latch) {

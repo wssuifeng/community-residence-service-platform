@@ -2,6 +2,7 @@ package com.community.residence.config;
 
 import com.community.residence.auth.service.TokenBlacklistService;
 import com.community.residence.auth.util.JwtUtil;
+import com.community.residence.common.context.IdentityPrincipal;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +57,7 @@ class WebSocketAuthInterceptorTest {
     }
 
     @Test
-    @DisplayName("有效令牌：Principal 注入 userId，消息放行")
+    @DisplayName("有效令牌：Principal 注入带身份空间前缀的主体名（居民 R:7），消息放行")
     void preSend_validToken_setsPrincipal() {
         when(jwtUtil.parseToken("token-1")).thenReturn(claims);
         when(jwtUtil.extractUserId(claims)).thenReturn(7L);
@@ -67,7 +68,9 @@ class WebSocketAuthInterceptorTest {
 
         StompHeaderAccessor result = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         assertThat(result.getUser()).isInstanceOf(UsernamePasswordAuthenticationToken.class);
-        assertThat(result.getUser().getName()).isEqualTo("7");
+        assertThat(((UsernamePasswordAuthenticationToken) result.getUser()).getPrincipal())
+                .isInstanceOf(IdentityPrincipal.class);
+        assertThat(result.getUser().getName()).isEqualTo("R:7");
     }
 
     @Test

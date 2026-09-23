@@ -62,9 +62,34 @@ public enum ErrorCode {
     EVALUATION_NOT_ALLOWED(5501, "工单未完成，不可评价"),
     EVALUATION_DUPLICATE(5502, "已评价，不可重复评价"),
 
-    /* ---- 权限管理 5701~5799 ---- */
+    /* ---- 租住签约闭环 5601~5699（R66~R71 v1.8） ---- */
+    LEASE_TENANCY_NOT_CONFIRMED(5601, "承租尚未确认，不可发起协议"),
+    LEASE_STATUS_INVALID(5602, "当前租约状态不允许该操作"),
+    MOVE_OUT_APPLICATION_PENDING(5603, "已有待审核的退租申请"),
+    CONVERSATION_CLOSED(5604, "会话已关闭，不可再发送消息"),
+    APPLICATION_NOT_WITHDRAWABLE(5605, "当前申请状态不可撤回"),
+    /* DEF-069：已到期（止期严格早于当天）租约不得再支付首期费用；续期支付不受限（到期正是续期场景） */
+    LEASE_EXPIRED(5606, "租约已到期，请续租或办理退租"),
+    /* 保留号段（2026-09-22 用户裁决）：本批曾用 5607/5608 作承约前置拒绝理由，裁决
+       「看房预约与租约群聊是沟通手段、不是承约门槛」后**不再作为任何拒绝理由**；
+       号段定义保留以免制造编号空洞，文案改为中性描述，语义留给后续真正需要该前置的场景复用 */
+    LEASE_TENANCY_VIEWING_REQUIRED(5607, "尚未完成本房源看房预约"),
+    LEASE_TENANCY_CONVERSATION_REQUIRED(5608, "租约沟通会话未建立"),
+
+    /* ---- 权限管理 5701~5702（C10，既有契约不得改号） ---- */
     SELF_FREEZE_FORBIDDEN(5701, "不可冻结自己的账号"),
     BIND_ROLE_INVALID(5702, "仅社区管理员可绑定社区"),
+
+    /* ---- 押金退还 5703~5706（R72） ----
+       段位裁决（2026-09-22，用户口径）：接口设计 v1.5 §3.2 原把 5701~5799 整段划给押金退还，
+       但 5701/5702 是 C10 已生效的既有契约（SELF_FREEZE_FORBIDDEN / BIND_ROLE_INVALID），
+       **新旧冲突时新功能取空号、老码不搬家**——押金退还四码因此落在本段首个连续空块
+       5703~5706（5700~5799 其余号段未被占用，见同名守卫），语义顺序与 §9.20.1 一致：
+       状态不允许 / 超实缴 / 渠道不一致 / 请求号冲突。 */
+    DEPOSIT_STATUS_NOT_REFUNDABLE(5703, "押金状态不允许退还"),
+    DEPOSIT_AMOUNT_EXCEEDED(5704, "退款金额超过实缴押金"),
+    DEPOSIT_CHANNEL_MISMATCH(5705, "退款渠道与实缴渠道不一致"),
+    DEPOSIT_OUT_REQUEST_CONFLICT(5706, "退款请求号冲突（同号内容不一致）"),
 
     /* ---- 看房预约 5801~5899 ---- */
     PAST_SLOT(5804, "不能预约已过去的时段"),
@@ -76,7 +101,11 @@ public enum ErrorCode {
     /* ---- 支付管理 5901~5999（R61 租约续约支付） ---- */
     PAYMENT_CHANNEL_DISABLED(5901, "该支付渠道未配置"),
     PAYMENT_CREATE_FAILED(5902, "发起支付失败，请稍后重试"),
-    PAYMENT_AMOUNT_MISMATCH(5903, "渠道支付金额与应付金额不一致");
+    PAYMENT_AMOUNT_MISMATCH(5903, "渠道支付金额与应付金额不一致"),
+    /* R71 首期支付（DEF-068 口径）：同租约同类型首期单**已完成 SUCCESS** 时触发；
+       进行中 PENDING 走幂等续接（原样返回该单并重取凭据）、已关闭 CLOSED 允许重新发起，
+       均不再触发本码（文案沿用接口设计.md §9.19.15 表，未单方面收窄） */
+    PAYMENT_ALREADY_EXISTS(5904, "该类型支付单已完成或进行中");
 
     private final int code;
     private final String message;

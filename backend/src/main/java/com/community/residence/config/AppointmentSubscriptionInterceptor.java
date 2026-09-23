@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.common.constant.RoleConstants;
+import com.community.residence.common.context.IdentityPrincipal;
 import com.community.residence.housing.entity.ViewingAppointment;
 import com.community.residence.housing.mapper.ViewingAppointmentMapper;
 import lombok.RequiredArgsConstructor;
@@ -60,9 +61,10 @@ public class AppointmentSubscriptionInterceptor implements ChannelInterceptor {
         if (!(accessor.getUser() instanceof UsernamePasswordAuthenticationToken auth)) {
             throw new MessageDeliveryException("Forbidden: 订阅看房会话需先完成认证");
         }
-        if (!(auth.getPrincipal() instanceof Long userId)) {
+        if (!(auth.getPrincipal() instanceof IdentityPrincipal principal)) {
             throw new MessageDeliveryException("Forbidden: 订阅主体无效");
         }
+        Long userId = principal.getUserId();
         String role = resolveRole(auth);
         if (!hasSubscriptionAccess(appointmentId, userId, role)) {
             log.warn("看房会话订阅被拒：appointmentId={}, userId={}, role={}", appointmentId, userId, role);

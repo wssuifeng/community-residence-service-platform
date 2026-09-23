@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
@@ -10,7 +10,7 @@ import FilterPanel from '@/components/common/FilterPanel.vue'
 import ServiceCategoryDrawer from '@/views/admin/workorder/ServiceCategoryDrawer.vue'
 import WorkOrderDispatchCard from '@/views/admin/workorder/WorkOrderDispatchCard.vue'
 import StaffPickerDrawer from '@/views/admin/workorder/StaffPickerDrawer.vue'
-import { getServiceCategoryTree, listAssignableStaff, listWorkOrders } from '@/api/workorder'
+import { closeWorkOrder, getServiceCategoryTree, intakeWorkOrder, listAssignableStaff, listWorkOrders } from '@/api/workorder'
 import { getCommunityList } from '@/api/community'
 import { getWorkOrderStats } from '@/api/statistics'
 import type {
@@ -33,6 +33,8 @@ import {
   DISPATCH_STAGES,
   compareWorkOrders,
   canAssignOrder,
+  canFinalizeOrder,
+  canIntakeOrder,
   formatWaited,
   isReassignOrder,
   stageKeyOfStatus
@@ -346,6 +348,55 @@ function goDetail(order: IWorkOrder): void {
   router.push(`/admin/work-orders/${order.id}`)
 }
 
+/* ---------------- R74 受理 / 终审结束 ---------------- */
+
+const intakingId = ref<number | null>(null)
+const finalizingId = ref<number | null>(null)
+
+/**
+ * 受理（接口设计 §9.21.1）：仅待受理行有此入口；成功即 `TO_ASSIGN` 且同事务建立
+ * 工单临时群聊（响应回带 conversationId），故提示里明示「沟通群已建立」。
+ */
+async function handleIntake(order: IWorkOrder): Promise<void> {
+  if (intakingId.value !== null) return
+  intakingId.value = order.id
+  try {
+    const updated = await intakeWorkOrder(order.id)
+    ElMessage.success(updated?.conversationId ? '工单已受理，工单沟通群已建立' : '工单已受理')
+    refresh()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '受理失败')
+  } finally {
+    intakingId.value = null
+  }
+}
+
+/** 终审结束（接口设计 §9.21.3）：复用关闭端点，仅已完成行可点；关闭同时回收群聊只读 */
+async function handleFinalize(order: IWorkOrder): Promise<void> {
+  if (finalizingId.value !== null) return
+  /* 防重入标记先于确认框置位（OCR DEF-124）：确认框等待期间标记须已生效，
+     否则再次点击（本行或他行）会再弹一个确认框、确认后并发两次关闭请求 */
+  finalizingId.value = order.id
+  try {
+    try {
+      await ElMessageBox.confirm(
+        `终审结束后工单进入「已关闭」终态，工单沟通群将回收为只读（历史可查、不可再发言）。确认结束工单 ${order.orderNo} 吗？`,
+        '终审结束',
+        { confirmButtonText: '确认终审结束', cancelButtonText: '取消', type: 'warning' }
+      )
+    } catch {
+      return
+    }
+    await closeWorkOrder(order.id)
+    ElMessage.success('工单已终审结束，沟通群已回收为只读')
+    refresh()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '终审结束失败')
+  } finally {
+    finalizingId.value = null
+  }
+}
+
 /* ---------------- 服务类别抽屉（原独立页收编） ---------------- */
 
 const categoryDrawerVisible = ref(false)
@@ -534,6 +585,8 @@ onMounted(() => {
         <el-table-column prop="orderNo" label="工单号" width="170">
           <template #default="{ row }">
             <el-link type="primary" @click.stop="goDetail(row)">{{ row.orderNo }}</el-link>
+            <!-- R74：受理成功即自动建群，工单带着 conversationId 回来 → 列表可见「已建群」标记 -->
+            <span v-if="row.conversationId" class="group-flag" title="已建立工单临时群聊">已建群</span>
           </template>
         </el-table-column>
         <el-table-column prop="title" label="标题" min-width="170" show-overflow-tooltip />
@@ -568,10 +621,34 @@ onMounted(() => {
         <el-table-column label="提交时间" width="146">
           <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="124" fixed="right">
+        <el-table-column label="操作" width="188" fixed="right">
           <template #default="{ row }">
+            <!-- R74 受理：仅待受理行可见（§9.21.1 前置硬口径）；受理成功即自动建工单临时群聊 -->
+            <el-button
+              v-if="canIntakeOrder(row)"
+              v-permission="['ADMIN', 'SUPER_ADMIN']"
+              text
+              type="primary"
+              size="small"
+              :loading="intakingId === row.id"
+              @click.stop="handleIntake(row)"
+            >
+              受理
+            </el-button>
             <el-button v-if="canAssignOrder(row)" text type="primary" size="small" @click.stop="openPicker(row)">
               {{ isReassignOrder(row) ? '改派' : '派单' }}
+            </el-button>
+            <!-- R74 终审结束：仅已完成行可见（§9.21.3 前置收窄），复用关闭端点并回收群聊 -->
+            <el-button
+              v-if="canFinalizeOrder(row)"
+              v-permission="['ADMIN', 'SUPER_ADMIN']"
+              text
+              type="warning"
+              size="small"
+              :loading="finalizingId === row.id"
+              @click.stop="handleFinalize(row)"
+            >
+              终审结束
             </el-button>
             <el-button text type="primary" size="small" @click.stop="goDetail(row)">详情</el-button>
           </template>
@@ -924,6 +1001,17 @@ onMounted(() => {
 
 .cell-empty {
   color: var(--color-text-disabled);
+}
+
+/* R74 已建群标记：受理成功后工单带 conversationId 回来，列表一眼可见 */
+.group-flag {
+  margin-left: var(--spacing-xs);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-light, #e8f1ff);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
 }
 
 :deep(.el-table__row) {

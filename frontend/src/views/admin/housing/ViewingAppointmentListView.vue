@@ -5,6 +5,7 @@ import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import ConversationChat from '@/components/business/ConversationChat.vue'
+import { getConversation } from '@/api/conversation'
 import {
   listViewingAppointments,
   confirmViewingAppointment,
@@ -254,17 +255,27 @@ async function handleAssignConfirm(): Promise<void> {
 
 const chatVisible = ref(false)
 const chatRow = ref<AdminViewingRow | null>(null)
+/* 看房群聊关闭态（OCR DEF-122 契约补传）：取会话详情 status，父层传入组件 */
+const chatClosed = ref(false)
 
 const chatConversationId = computed(() => chatRow.value?.conversationId ?? null)
 const chatTitle = computed(() => (chatRow.value ? `看房群聊 · ${chatRow.value.housingTitle}` : '看房群聊'))
 
-function openChatDialog(row: AdminViewingRow): void {
+async function openChatDialog(row: AdminViewingRow): Promise<void> {
   if (row.conversationId == null) {
     ElMessage.warning('该预约暂无会话')
     return
   }
   chatRow.value = row
+  chatClosed.value = false
   chatVisible.value = true
+  try {
+    const conversation = await getConversation(row.conversationId)
+    chatClosed.value = conversation.status === 'CLOSED'
+  } catch (error) {
+    /* 状态取不到时保持未关闭：组件自身 403 降级只读兜底 */
+    console.error('加载会话状态失败', error)
+  }
 }
 
 onMounted(loadList)
@@ -388,7 +399,11 @@ onMounted(loadList)
     </el-dialog>
     <!-- 看房群聊（R63 v1.5）：内嵌通用会话组件；destroy-on-close 保证关闭即退订 WS 并停止轮询 -->
     <el-dialog v-model="chatVisible" :title="chatTitle" width="640px" destroy-on-close>
-      <ConversationChat v-if="chatConversationId !== null" :conversation-id="chatConversationId" />
+      <ConversationChat
+        v-if="chatConversationId !== null"
+        :conversation-id="chatConversationId"
+        :closed="chatClosed"
+      />
     </el-dialog>
   </section>
 </template>

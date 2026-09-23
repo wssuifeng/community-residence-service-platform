@@ -58,6 +58,11 @@
 70 部署运行 ← 依赖 40/50/60 产出
 ```
 
+**阶段职责边界**（2026-09-21 用户裁决）：`50_系统测试` 只验证「**编码是否符合 30 系统设计**」；
+「**功能是否满足 20 需求**」由 `60_评估验收` 判定，**不得在 50 阶段作为通过/不通过判据**
+（用户原话："测试是测试是否按设计完成了编码，并不应该包含这个功能是否满足需求"）；
+50 阶段若观察到需求满足性/体验类现象，**只记录、不判通过与否**。
+
 **依赖向上填补规则**：任何阶段文档的修改（如 20 包新增一条需求），必须能追溯
 到上游文档的支撑；若上游没有对应定义，必须先补足上游定义，再在本层完整描述，
 不允许只在当前层添加（杜绝悬空需求）。
@@ -68,10 +73,15 @@
   系统设计与实现」的配套系统——面向具有明确服务管理方的居住社区的管理者的
   社区居住服务管理系统，统一管理社区房屋、居住关系、日常服务事项
   （工单/公告/反馈）、公共资源预约及运营统计。
-- **业务范围边界**（2026-09-21 用户裁决，系统定义 v1.5；权威表述见
+- **业务范围边界**（2026-09-21 用户裁决，系统定义 **v1.6**；权威表述见
   `docs/10_系统定义/系统定义.md` §3 非目标）：
   - **出租 = 系统内完整闭环**：房源挂牌 → 展示筛选 → 看房预约 → 入住申请
-    与审核 → 租赁协议在线确认 → 租约生效 → 续约支付 → 退租归档；
+    与审核 → 租赁协议在线确认 → 租约生效 → 续约支付 → 退租申请与审核 →
+    **押金原路退还** → 归档；
+  - **押金边界（v1.6 再收窄）**：**押金在线退还已纳入范围**——平台通过支付渠道
+    **原路退款**（发起反向指令并记录渠道结果与失败原因，幂等键防重）；
+    仍排除 **押金资金池 / 托管** 与 **线下垫付**：平台**不托管押金资金、不计息、
+    不垫付**，库内**不得出现任何押金资金账户 / 余额 / 计息字段**（架构核查项）；
   - **出售 = 仅房源信息展示 + 线下看房预约入口**：房屋买卖交易环节
     （网签备案 / 资金监管 / 过户登记 / 税费代扣 / 中介佣金撮合）须对接
     不动产登记与银行资金监管系统，超出纯软件系统边界，不介入；
@@ -203,13 +213,13 @@
     │   │                     # P1 前端实施全部完成，约 190 个接口函数；
     │   │                     # P2 增 upload.ts 通用上传）
     │   └── auth.ts          # 认证（居民/管理员登录注册登出）
-    ├── views/               # 页面组件（按三端分目录；**功能视图 65**）
-    │   │                     # 口径（2026-09-21 重述，可复现）：views/ 下 91 个
+    ├── views/               # 页面组件（按三端分目录；**功能视图 69**）
+    │   │                     # 口径（2026-09-22 重述，可复现）：views/ 下 98 个
     │   │                     # .vue 扣除 布局壳 4（各端 *Layout.vue）+ 全局错误页 2
     │   │                     # （ForbiddenView/NotFoundView）+ 登录注册 2（auth/）+
-    │   │                     # 弹窗/抽屉/面板等子组件 18（*Dialog/*Drawer/*Pane/
-    │   │                     # *Panel/*Tab/*Card/*Header/*Step）→ 65
-    │   │                     # 分布：管理端 33 / 居民端 22 / 游客端 5 / 服务人员端 5。
+    │   │                     # 弹窗/抽屉/面板等子组件 21（*Dialog/*Drawer/*Pane/
+    │   │                     # *Panel/*Tab/*Card/*Header/*Step）→ 69
+    │   │                     # 分布：管理端 35 / 居民端 24 / 游客端 5 / 服务人员端 5。
     │   │                     # 演进：原 58（2026-09-07 P1 全部实现，时点 64、
     │   │                     # 2026-09-09 冗余清理删 6 页；联调复测 12/12 通过）
     │   │                     # + 2026-09-19/20 批次新增 7 页
@@ -217,13 +227,27 @@
     │   │                     # ViewingAppointmentDetailView /
     │   │                     # HousingReservationView / ConversationDetailView，
     │   │                     # 管理端 ConversationListView /
-    │   │                     # HousesWithHousingView）+ 2026-09-21 批次新增 4 页
+    │   │                     # HousesWithHousingView）+ 2026-09-21 批次 e 新增 4 页
     │   │                     # （管理端 lease/LeaseDetailView 租约详情、
     │   │                     # lease/AgreementTemplateView 协议模板、
     │   │                     # workorder/StaffScheduleView 人员排班、
-    │   │                     # workorder/StaffCapabilityView 服务人员绑定）；
+    │   │                     # workorder/StaffCapabilityView 服务人员绑定）
+    │   │                     # + 2026-09-21 批次 f 新增 2 页 + 2 子组件
+    │   │                     # （居民端 HousingLeaseHubView「租住与房源」Hub、
+    │   │                     # 管理端 lease/MoveOutApplicationView 退租申请审核；
+    │   │                     # 子组件 LeaseFirstPaymentDialog 首期费用支付、
+    │   │                     # LeaseMoveOutDialog 居民退租申请）
+    │   │                     # + 2026-09-21 批次 g 新增 2 页
+    │   │                     # （管理端 lease/HousingLeaseHubView 五 Tab「租住与房源」Hub、
+    │   │                     # 居民端 ResidenceApplicationListView 我的入住申请）；
     │   │                     # 服务人员端同期另增
     │   │                     # ViewingsWorkbenchView「我的带看」工作台；
+    │   │                     # + 2026-09-22 批次 h·i 新增 1 个子组件
+    │   │                     # （管理端 lease/DepositRefundDialog 发起押金退还
+    │   │                     # ——`*Dialog` 子组件，**计入 `.vue` 不计功能视图**；
+    │   │                     # 工单批次 `.vue` 新增 0：受理/终审入口写在既有页面内、
+    │   │                     # 群聊面板复用 `ConversationChat`）⇒ 98 个 `.vue`、
+    │   │                     # 子组件 21，**功能视图仍 69**；
     │   │                     # 原「69+」为旧口径（把部分子组件计入视图）已更正）
     │   ├── resident/        # 居民端
     │   ├── guest/           # 游客端
@@ -236,10 +260,14 @@
     │   │                     # workorder/StaffCapabilityView 服务人员（绑定）、
     │   │                     # community/StructureGenerateDialog 结构链一次性
     │   │                     # 批量生成；auth/ 子目录为 C10 系统用户/操作日志）；
-    │   │                     # 管理端侧栏菜单名（AppSidebar）：看板 / 社区管理 /
-    │   │                     # 工单调度 / 人员排班 / 服务人员 / 居民 / 租住 /
-    │   │                     # 协议模板 / 公告 / 反馈 / 预约 / 房源 / 评价 /
-    │   │                     # 消息中心 / 消息会话 / 系统（「系统」为超管独占，按角色过滤）
+    │   │                     # 管理端侧栏菜单（AppSidebar，2026-09-21 批次 g 合并后 **14 项**：
+    │   │                     # 看板 / 社区管理 / 工单调度 / 人员排班 / 服务人员 / 居民 /
+    │   │                     # **租住与房源**（一级 Hub `/admin/housing-lease`，内含
+    │   │                     # 入住申请 · 租约管理 · 房源管理 · 退租申请 · 协议模板 五个 Tab；
+    │   │                     # 原「租住」「房源」「退租申请」「协议模板」四个一级项已合并，
+    │   │                     # 协议模板 Tab 仅 SUPER_ADMIN/ADMIN 可见）/
+    │   │                     # 公告 / 反馈 / 预约 / 评价 / 消息中心 / 消息会话 /
+    │   │                     # 系统（「系统」为超管独占，按角色过滤））
     │   ├── auth/            # 登录注册（LoginView/RegisterView 2 页）
     │   ├── ForbiddenView/NotFoundView  # 全局 403/404
     ├── components/          # 组件（通用组件层与业务组件 P1 已实现）
@@ -263,7 +291,7 @@
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
   | 环境变量配置 | `export DB_PASSWORD="your_password"` + `export JWT_SECRET="your_secret_key"`（≥32 字符）(Linux/Mac)；Windows 用 `set` | 数据库密码必需；JWT 密钥 dev 未设置时用仅限本机的默认值（生产 profile 拒绝默认密钥，见架构设计 §7）；Redis 可选 `REDIS_HOST/REDIS_PORT/REDIS_PASSWORD`（默认 localhost:6379 无密码） |
-  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 **V1~V19 共 19 个迁移、51 张表**，无需手动跑脚本：V1（40 张表 DDL）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V4/V5（house 户型朝向字段、看房游客支持）+ V6（五角色演示种子：admin1/Admin123456 绑社区、staff1/Staff123456、resident1/Resident123456 已入住 + 游客可见的公告/房源/看房时段 + 健身房资源与时段）+ V7（种子社区默认服务类别目录 7 类，需求 R17）+ V8（日志留存配置 log.retention_days=730）+ V9（公告置顶/多目标定向列 + 房源租售类型与户型列）+ V10~V11（预约并发唯一约束 + C2 时段栅格 slot_unit）+ V12（公告表单字段 priority/type）+ V13（公告 GUEST 游客可见目标，R12/DEF-046）+ V14（带看人列与看房沟通消息表，R59）+ V15（租约续约支付单表 lease_payment，R61）+ V16（多方会话三表与看房群聊回填，R63）+ V17（房号同单元唯一 uk_unit_house_number，R62 补）+ V18（社区自动审批两列 + 租约签约状态列 + 租约变更历史/协议模板/租约协议三表，R64/R62 补）+ V19（人员常驻社区/擅长类别/排班三表 + 存量派单回填，R65）；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量） |
+  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 **V1~V28 共 28 个迁移、53 张业务表（库内计数 54 = 含 Flyway 历史表）**，无需手动跑脚本：V1（40 张表 DDL）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V4/V5（house 户型朝向字段、看房游客支持）+ V6（五角色演示种子）+ V7（种子社区默认服务类别目录 7 类，R17）+ V8（日志留存配置 log.retention_days=730）+ V9（公告置顶/多目标定向列 + 房源租售类型与户型列）+ V10~V11（预约并发唯一约束 + C2 时段栅格 slot_unit）+ V12（公告表单字段 priority/type）+ V13（公告 GUEST 游客可见目标，R12/DEF-046）+ V14（带看人列与看房沟通消息表，R59）+ V15（租约续约支付单表 lease_payment，R61）+ V16（多方会话三表与看房群聊回填，R63）+ V17（房号同单元唯一 uk_unit_house_number，R62 补）+ V18（社区自动审批两列 + 租约签约状态列 + 租约变更历史/协议模板/租约协议三表，R64/R62 补）+ V19（人员常驻社区/擅长类别/排班三表 + 存量派单回填，R65）+ V20（租住签约闭环 R66~R71，新表 lease_move_out_application——表数 51→52）+ V21（通知归属身份空间分离 DEF-067，表数不变）+ V22（押金状态列 deposit_status + 押金退还单表 lease_deposit_refund，R72——表数 52→53）+ V23（工单群聊 conversation 增 WORK_ORDER_GROUP 类型，R74）+ V24（会话参与者身份空间列 + 复合唯一键 + 存量回填，DEF-098）+ V25（押金状态存量回填）+ V26（入住申请-租约强关联 lease_id + 回填，DEF-080）+ V27（会话 (type, related_id) 唯一键 uk_conversation_type_related，OCR DEF-106，表数不变）+ V28（V21/V26 存量回填修正，仅改数据不改结构，OCR DEF-109/DEF-120）；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量，可由仓库根 `.env` 提供） |
   | 支付渠道环境变量（可选） | 支付宝：`PAYMENT_ALIPAY_APP_ID` / `PAYMENT_ALIPAY_GATEWAY_URL` / `PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY` / `PAYMENT_ALIPAY_PUBLIC_KEY`（另可选 `PAYMENT_ALIPAY_RETURN_URL`）；微信：`PAYMENT_WECHAT_MCH_ID` / `PAYMENT_WECHAT_APP_ID` / `PAYMENT_WECHAT_API_V3_KEY` / `PAYMENT_WECHAT_MERCHANT_SERIAL_NO` / `PAYMENT_WECHAT_PRIVATE_KEY`（或 `PAYMENT_WECHAT_PRIVATE_KEY_PATH`） | 租约续约在线支付（R61）的可选凭据，不配置则两渠道禁用（渠道卡片置灰明示）；支付宝沙箱个人可自助开通、微信需商户资质；**变量名以 `backend/src/main/resources/application.yml` 的 `payment.*` 占位符为准**，配置步骤与沙箱网关见 `README.md`「支付渠道配置」节 |
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
@@ -277,7 +305,7 @@
 |------|----------|------|
 | C1 社区基础信息 | `community`、`building`、`unit`、`house`、`public_resource` | 社区→楼栋→单元→房屋四级结构 + 公共资源 |
 | C2 居民管理 | `resident`、`residence_application`、`residence_relation` | 居民账号 + 入住申请 + 居住关系 |
-| C3 租住管理 | `lease_record`、`lease_reminder`、`lease_payment`、`lease_change_log`、`agreement_template`、`lease_agreement` | 租住记录 + 到期提醒去重 + 续约支付单 + 租约属性变更历史（字段级留痕）+ 协议模板 + 租约协议（R64 轻量在线确认） |
+| C3 租住管理 | `lease_record`、`lease_reminder`、`lease_payment`、`lease_change_log`、`agreement_template`、`lease_agreement`、`lease_move_out_application` | 租住记录 + 到期提醒去重 + 续约/首期支付单（`payment_type` 区分 FIRST/RENEWAL）+ 租约属性变更历史（字段级留痕）+ 协议模板 + 租约协议（R64 轻量在线确认）+ 居民自助退租申请（R70 批次 f 新表） |
 | C4 工单管理 | `service_category`、`work_order`、`work_order_process`、`work_order_attachment`、`work_order_assignment`、`staff_community`、`staff_service_category`、`staff_schedule` | 服务类别树 + 工单 + 处理记录 + 附件 + 派单关系 + 人员常驻社区/擅长类别绑定 + 排班（R65 调度） |
 | C5 公告管理 | `notice`、`notice_target`、`notice_view_record` | 公告 + 目标范围 + 查看记录 |
 | C6 反馈管理 | `feedback`、`feedback_message`、`feedback_attachment` | 反馈单 + 会话消息 + 附件 |
@@ -292,8 +320,8 @@
 **六大状态机**（权威定义见 30_系统设计/架构设计.md §6，状态图见
 30_系统设计/assets/02_核心状态机/）：
 1. 工单状态（10状态）：待受理→待派单→已派单→已接单→处理中→待确认→已完成 + 已关闭/已驳回/已取消
-2. 租住状态（5状态）：待审核→已生效→已搬出→已归档 + 已驳回（「即将到期/已到期」为定时任务日期自动判定标注，非状态流转）
-3. 入住申请（3状态）：待审核→已通过 / 已驳回
+2. 租住状态（**6 状态**，2026-09-21 批次 f 依 R66 扩态）：待审核→**待签约**→已生效→已搬出→已归档 + 已驳回（**审核通过只到「待签约」且房屋不置已入住，承租确认 + 协议双方确认才置已生效**；「即将到期/已到期」为定时任务日期自动判定标注，非状态流转）
+3. 入住申请（**4 状态**，2026-09-21 批次 f 依 R66 扩态）：待审核→已通过 / 已驳回 / **已撤回**（待审核阶段居民可主动撤回）
 4. 资源预约（6状态）：待审核→已预约→已完成 + 已拒绝/已取消/已违约
 5. 看房预约（5状态）：待确认→已预约→已完成 + 已取消/已违约
 6. 反馈状态（3状态）：待受理→会话中→已办结

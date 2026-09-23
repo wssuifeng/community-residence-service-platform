@@ -1,6 +1,7 @@
 package com.community.residence.config;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.community.residence.common.context.IdentityPrincipal;
 import com.community.residence.conversation.entity.ConversationParticipant;
 import com.community.residence.conversation.mapper.ConversationParticipantMapper;
 import lombok.RequiredArgsConstructor;
@@ -55,12 +56,13 @@ public class ConversationSubscriptionInterceptor implements ChannelInterceptor {
         if (!(accessor.getUser() instanceof UsernamePasswordAuthenticationToken auth)) {
             throw new MessageDeliveryException("Forbidden: 订阅会话需先完成认证");
         }
-        if (!(auth.getPrincipal() instanceof Long userId)) {
+        if (!(auth.getPrincipal() instanceof IdentityPrincipal principal)) {
             throw new MessageDeliveryException("Forbidden: 订阅主体无效");
         }
-        if (!isParticipant(conversationId, userId)) {
-            log.warn("会话订阅被拒：conversationId={}, userId={}, role={}",
-                    conversationId, userId, resolveRole(auth));
+        Long userId = principal.getUserId();
+        if (!isParticipant(conversationId, principal.getOwnerType(), userId)) {
+            log.warn("会话订阅被拒：conversationId={}, ownerType={}, userId={}, role={}",
+                    conversationId, principal.getOwnerType(), userId, resolveRole(auth));
             throw new MessageDeliveryException("Forbidden: 非会话参与者，拒绝订阅");
         }
         return message;
@@ -73,10 +75,13 @@ public class ConversationSubscriptionInterceptor implements ChannelInterceptor {
                 .findFirst().orElse("");
     }
 
-    /* 参与者实时校验：与 HTTP 读写路径同口径（conversation_participant 存在性） */
-    private boolean isParticipant(Long conversationId, Long userId) {
+    /* 参与者实时校验：与 HTTP 读写路径同口径（conversation_participant 存在性）。
+       DEF-075：按 (owner_type, user_id) 二元组——resident 1 与 sys_user 1 撞号时，
+       另一身份空间主体不再被误判为参与者（旧实现仅按 user_id 放行） */
+    private boolean isParticipant(Long conversationId, String ownerType, Long userId) {
         return participantMapper.exists(new LambdaQueryWrapper<ConversationParticipant>()
                 .eq(ConversationParticipant::getConversationId, conversationId)
+                .eq(ConversationParticipant::getOwnerType, ownerType)
                 .eq(ConversationParticipant::getUserId, userId));
     }
 }

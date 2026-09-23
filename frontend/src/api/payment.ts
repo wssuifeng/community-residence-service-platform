@@ -1,6 +1,7 @@
 import { http } from '@/utils/request'
 import type { PageResult } from '@/types/api'
 import type {
+  IFirstPaymentCreateDTO,
   ILeasePayment,
   IPaymentChannelOption,
   IRenewPaymentCreateDTO,
@@ -21,6 +22,14 @@ export function listPaymentChannels() {
 /** 发起续约支付：按月数与渠道创建支付单（金额服务端计算，响应含支付凭据） */
 export function createRenewPayment(leaseId: number, data: IRenewPaymentCreateDTO) {
   return http.post<ILeasePayment>(`/leases/${leaseId}/renew-payments`, data)
+}
+
+/**
+ * 发起首期费用支付（R71/V20）：金额=首月租金+押金，月数固定 1，均由服务端计算，
+ * 客户端传金额无效。仅「已生效」租约可发起（否则后端 LEASE_STATUS_INVALID）。
+ */
+export function createFirstPayment(leaseId: number, data: IFirstPaymentCreateDTO) {
+  return http.post<ILeasePayment>(`/leases/${leaseId}/first-payments`, data)
 }
 
 /** 查询支付单状态（前端轮询；后端在查询时向渠道侧主动查单回写状态） */

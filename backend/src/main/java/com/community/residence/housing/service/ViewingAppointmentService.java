@@ -7,6 +7,7 @@ import com.community.residence.auth.entity.SysUser;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.CommonStatus;
+import com.community.residence.common.constant.ConversationStatus;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.ReservationStatus;
 import com.community.residence.common.constant.RoleConstants;
@@ -31,6 +32,7 @@ import com.community.residence.housing.vo.AssigneeOptionVO;
 import com.community.residence.housing.vo.ViewingAppointmentVO;
 import com.community.residence.housing.vo.ViewingMessageVO;
 import com.community.residence.housing.vo.ViewingPushVO;
+import com.community.residence.lease.entity.LeaseRecord;
 import com.community.residence.messaging.service.WebSocketSessionService;
 import com.community.residence.reservation.entity.ResourceReservation;
 import com.community.residence.reservation.mapper.ResourceReservationMapper;
@@ -92,6 +94,7 @@ public class ViewingAppointmentService {
     private final HousingTimeslotMapper timeslotMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
+    private final com.community.residence.lease.mapper.LeaseRecordMapper leaseMapper;
     private final SysAdminCommunityMapper sysAdminCommunityMapper;
     private final SysConfigService sysConfigService;
     private final ViolationRecordMapper violationRecordMapper;
@@ -114,6 +117,96 @@ public class ViewingAppointmentService {
      * 游客预约无账号不参与）。
      */
     public ViewingAppointmentVO create(CreateViewingAppointmentDTO dto) {
+        ViewingAppointment appointment = insertAppointment(dto);
+        /* R63 预约创建即建群：居民 + 该社区启用管理员入群（游客预约
+           userId=null 跳过不建群，conversation_id 保持空）；建群与
+           conversation_id 回写发生在锁外——insertAppointment 返回时锁已
+           释放，预约行已落库可承载回写（OCR DEF-118 注释时序修正：
+           原「建群在锁内落库之后」与实现不符） */
+        Conversation conversation = conversationService.createViewingGroup(
+                appointment.getId(), appointment.getCommunityId(),
+                appointment.getUserId(), housingTitle(appointment.getHousingId()));
+        if (conversation != null) {
+            appointment.setConversationId(conversation.getId());
+            appointmentMapper.updateById(appointment);
+        }
+        return toVO(appointment);
+    }
+
+    /**
+     * 会话内发起看房预约（R69）：调用者须为该租约群聊参与者；复用既有创建逻辑
+     * （同表/同状态机/同冲突校验/同锁），仅两处差异——`lease_id` 取自会话 `related_id`
+     * （双向关联），且**不再新建 VIEWING_GROUP**（直接以该租约群作为会话载体）。
+     * 会话已关闭（CLOSED，退租通过/租约归档后停收停发）拒绝 5604（DEF-110，
+     * 接口设计 §9.19.7 错误码消费点）。
+     */
+    public ViewingAppointmentVO createInConversation(Long conversationId, CreateViewingAppointmentDTO dto) {
+        Conversation conversation = conversationService.requireLeaseGroup(conversationId);
+        /* 会话关闭即拒绝（DEF-110）：requireLeaseGroup 只校验参与者与群类型，
+           关闭态停收停发口径须在此消费——不得再以已关闭租约群为入口发起新预约 */
+        if (ConversationStatus.CLOSED.equals(conversation.getStatus())) {
+            throw new BusinessException(ErrorCode.CONVERSATION_CLOSED);
+        }
+        resolveHousingFromLease(conversation.getRelatedId(), dto);
+        ViewingAppointment appointment = insertAppointment(dto);
+        appointment.setLeaseId(conversation.getRelatedId());
+        /* 会话载体沿用租约群聊：只做归属回写，不新建群聊 */
+        appointment.setConversationId(conversation.getId());
+        appointmentMapper.updateById(appointment);
+        return toVO(appointment);
+    }
+
+    /* 会话内发起未传房源时按租约推导：优先该房屋在架挂牌（房源页语义），
+       无在架挂牌则回落到最近一条挂牌记录；均无则拒绝（无房源无法做时段校验）。
+       无论传入还是推导，房源归属租约房屋一律显式校验（DEF-118）——传他房屋的
+       housingId（或挂牌被改绑他房屋）拒绝，防租约会话沦为任意房源预约入口。 */
+    private void resolveHousingFromLease(Long leaseId, CreateViewingAppointmentDTO dto) {
+        LeaseRecord lease = leaseMapper.selectById(leaseId);
+        if (lease == null) {
+            throw new ResourceNotFoundException("租住记录不存在");
+        }
+        if (dto.getHousingId() != null) {
+            /* DEF-118（传入路径）：按 id 取出挂牌过归属校验；housing 不存在
+               交由 insertAppointment 统一 404（其本身重查校验状态） */
+            requireHousingOfLease(lease, housingMapper.selectById(dto.getHousingId()));
+            return;
+        }
+        List<Housing> listings = housingMapper.selectList(new LambdaQueryWrapper<Housing>()
+                .eq(Housing::getHouseId, lease.getHouseId())
+                .orderByDesc(Housing::getId));
+        Housing resolved = listings.stream()
+                .filter(h -> "AVAILABLE".equals(h.getStatus()))
+                .findFirst()
+                .orElse(listings.isEmpty() ? null : listings.get(0));
+        if (resolved == null) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "该租约房屋尚未挂牌房源，请先联系管理方挂牌后再预约看房");
+        }
+        /* 解析路径按 lease.house_id 筛选，归属由查询口径保证；仍显式过同一校验
+           （DEF-118 纵深防御）——解析口径未来放宽时不依赖隐式前提 */
+        requireHousingOfLease(lease, resolved);
+        dto.setHousingId(resolved.getId());
+    }
+
+    /* DEF-118 归属校验：housing.house_id 必须与 lease.house_id 一致（挂牌被
+       改绑他房屋时同一守卫同样拦截）；housing 为 null 时放行——存在性/可约
+       状态由 insertAppointment 统一把关 */
+    private void requireHousingOfLease(LeaseRecord lease, Housing housing) {
+        if (housing != null && !housing.getHouseId().equals(lease.getHouseId())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM,
+                    "预约房源与租约房屋不一致，无法在租约会话内预约该房源");
+        }
+    }
+
+    /**
+     * 预约创建内核（R55/R60/DEF-045/DEF-062）：身份解析、可约校验、日程冲突检查
+     * 与落库一律在此完成；`@Transactional` 刻意不加（理由同 C7 冲突检测：
+     * 锁内单条 INSERT 自动提交，完全同槽竞态由 V10 唯一约束兜底）。
+     * 会话内发起与房源页发起共用，保证两条入口的状态机与冲突口径完全一致。
+     */
+    private ViewingAppointment insertAppointment(CreateViewingAppointmentDTO dto) {
+        if (dto.getHousingId() == null) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "房源不能为空");
+        }
         Housing housing = housingMapper.selectById(dto.getHousingId());
         if (housing == null || !"AVAILABLE".equals(housing.getStatus())) {
             throw new ResourceNotFoundException("房源不存在或不可预约");
@@ -226,17 +319,7 @@ public class ViewingAppointmentService {
                 /* 完全同槽并发竞态被 V10 唯一约束拦截（锁失效时的最后防线） */
                 throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段已被预约");
             }
-            /* R63 预约创建即建群：居民 + 该社区启用管理员入群（游客预约
-               userId=null 跳过不建群，conversation_id 保持空）；
-               建群在锁内落库之后，预约 insert 已完成 conversation_id 可回写 */
-            Conversation conversation = conversationService.createViewingGroup(
-                    appointment.getId(), appointment.getCommunityId(),
-                    appointment.getUserId(), housing.getTitle());
-            if (conversation != null) {
-                appointment.setConversationId(conversation.getId());
-                appointmentMapper.updateById(appointment);
-            }
-            return toVO(appointment);
+            return appointment;
         } finally {
             if (locked) {
                 unlockQuietly(lock);
@@ -244,7 +327,9 @@ public class ViewingAppointmentService {
         }
     }
 
-    /** 预约详情：居民限本人；游客经公开路径查看（手机号核对由前端交互完成） */
+    /**
+     * 预约详情：居民限本人；游客经公开路径查看（手机号核对由前端交互完成）
+     */
     public ViewingAppointmentVO getById(Long id) {
         ViewingAppointment appointment = requireAppointment(id);
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
@@ -252,6 +337,31 @@ public class ViewingAppointmentService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "无权查看他人预约");
         }
         return toVO(appointment);
+    }
+
+    /**
+     * 某租约关联的看房预约列表（R69 双向关联，按预约日期降序 + id 降序稳定排序，
+     * 接口设计 §9.19.8 契约；原仅按 id 排序，同日多条时日期乱序——DEF-118）：
+     * 读权限沿用租约口径——RESIDENT 限本人租约，ADMIN 限绑定社区，SUPER_ADMIN 放行。
+     * 供居民端「我的租约」与租约详情页展示会话内发起的看房安排。
+     */
+    public List<ViewingAppointmentVO> listByLease(Long leaseId) {
+        LeaseRecord lease = leaseMapper.selectById(leaseId);
+        if (lease == null) {
+            throw new ResourceNotFoundException("租住记录不存在");
+        }
+        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
+                && !lease.getTenantId().equals(SecurityUtils.getUserId())) {
+            throw new ForbiddenException("无权查看他人租约的看房预约");
+        }
+        if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+            SecurityUtils.checkCommunityAccess(lease.getCommunityId());
+        }
+        return appointmentMapper.selectList(new LambdaQueryWrapper<ViewingAppointment>()
+                        .eq(ViewingAppointment::getLeaseId, leaseId)
+                        .orderByDesc(ViewingAppointment::getAppointmentDate)
+                        .orderByDesc(ViewingAppointment::getId))
+                .stream().map(this::toVO).toList();
     }
 
     /**
@@ -347,11 +457,12 @@ public class ViewingAppointmentService {
                 "您 " + appointment.getAppointmentDate() + " 的看房预约被标记违约：" + reason);
     }
 
-    /* R55「确认/取消均通知对方」（DEF-023）：预约人有账号时经通知中心触达；
-       游客预约无账号，通知语义不适用（违约处置等动作的游客触达无通道，为 R55 口径内边界） */
+    /* R55「确认/取消均通知对方」（DEF-023）：预约人有账号时经通知中心触达（resident.id
+       身份空间）；游客预约无账号，通知语义不适用（违约处置等动作的游客触达无通道，
+       为 R55 口径内边界） */
     private void notifyApplicant(ViewingAppointment appointment, String title, String content) {
         if (appointment.getUserId() != null) {
-            notificationService.create(appointment.getUserId(), appointment.getCommunityId(),
+            notificationService.createForResident(appointment.getUserId(), appointment.getCommunityId(),
                     title, content, "RESERVATION", "VIEWING_APPOINTMENT", appointment.getId());
         }
     }
@@ -397,7 +508,7 @@ public class ViewingAppointmentService {
             conversationService.addParticipant(appointment.getConversationId(), assigneeId);
         }
 
-        notificationService.create(assigneeId, appointment.getCommunityId(),
+        notificationService.createForUser(assigneeId, appointment.getCommunityId(),
                 "您已被分配为看房带看人",
                 "您已被分配为 " + appointment.getAppointmentDate() + " 看房预约的带看人，可与预约人沟通看房事宜",
                 "RESERVATION", "VIEWING_APPOINTMENT", appointment.getId());
@@ -514,9 +625,9 @@ public class ViewingAppointmentService {
        （订阅鉴权保证仅参与者收到）；双方均离线不推送，推送失败不回滚——前端轮询兜底 */
     private void pushMessage(ViewingAppointment appointment, ViewingMessageVO vo) {
         boolean residentOnline = appointment.getUserId() != null
-                && webSocketSessionService.isOnline(appointment.getUserId());
+                && webSocketSessionService.isResidentOnline(appointment.getUserId());
         boolean assigneeOnline = appointment.getAssignedStaffId() != null
-                && webSocketSessionService.isOnline(appointment.getAssignedStaffId());
+                && webSocketSessionService.isUserOnline(appointment.getAssignedStaffId());
         if (residentOnline || assigneeOnline) {
             try {
                 messagingTemplate.convertAndSend("/topic/appointment/" + appointment.getId(),
@@ -548,6 +659,12 @@ public class ViewingAppointmentService {
             throw new ResourceNotFoundException("看房预约不存在");
         }
         return appointment;
+    }
+
+    /* 建群标题用的房源名（房源可能已被下架但记录仍在，缺失时回落到空串） */
+    private String housingTitle(Long housingId) {
+        Housing housing = housingMapper.selectById(housingId);
+        return housing != null ? housing.getTitle() : "";
     }
 
     private void validateTransition(ViewingAppointment appointment, String target) {

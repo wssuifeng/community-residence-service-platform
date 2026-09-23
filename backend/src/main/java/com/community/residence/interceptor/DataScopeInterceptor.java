@@ -53,7 +53,13 @@ public class DataScopeInterceptor implements InnerInterceptor {
             /* V18/V19：协议模板需同时可见全局模板（community_id 为空），
                租约变更历史与服务人员类别绑定表无 community_id 列，
                三者均由业务层显式约束可见性 */
-            "agreement_template", "lease_change_log", "staff_service_category");
+            "agreement_template", "lease_change_log", "staff_service_category",
+            /* V22 押金退还记录（R72）：无 community_id 列（数据权限经 lease_id 归属校验），
+               漏登记时 ADMIN 查询会被注入 community_id → BadSqlGrammar 500（社区管理员必炸） */
+            "lease_deposit_refund",
+            /* C10 拉黑审计日志：同样无 community_id 列（超管专属，ADMIN 当前不查询），
+               同型潜在缺陷一并收口——该表本无社区归属列，登记 SKIP 不削弱数据权限 */
+            "sys_blacklist_log");
 
     @Override
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter,

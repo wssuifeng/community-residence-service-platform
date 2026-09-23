@@ -126,6 +126,14 @@ class FeedbackServiceTest {
 
             assertThat(pendingFeedback.getStatus()).isEqualTo("IN_SESSION");
             assertThat(pendingFeedback.getHandlerId()).isEqualTo(5L);
+            /* 身份空间断言（DEF-067）：管理员回复触达居民，标注 createForResident */
+            org.mockito.Mockito.verify(notificationService).createForResident(
+                    org.mockito.ArgumentMatchers.eq(1L), org.mockito.ArgumentMatchers.eq(1L),
+                    org.mockito.ArgumentMatchers.eq("反馈有新回复"),
+                    org.mockito.ArgumentMatchers.anyString(),
+                    org.mockito.ArgumentMatchers.eq("FEEDBACK"),
+                    org.mockito.ArgumentMatchers.eq("FEEDBACK"),
+                    org.mockito.ArgumentMatchers.eq(1L));
         }
     }
 

@@ -105,9 +105,9 @@ class LeaseExpiryReminderTaskTest {
         verify(leaseReminderMapper).insert(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo("EXPIRING");
         assertThat(captor.getValue().getLeaseId()).isEqualTo(1L);
-        verify(notificationService).create(eq(100L), eq(1L), eq("租住即将到期"),
+        verify(notificationService).createForResident(eq(100L), eq(1L), eq("租住即将到期"),
                 anyString(), eq("LEASE"), eq("LEASE_RECORD"), eq(1L));
-        verify(notificationService).create(eq(9L), eq(1L), eq("社区租住即将到期"),
+        verify(notificationService).createForUser(eq(9L), eq(1L), eq("社区租住即将到期"),
                 anyString(), eq("LEASE"), eq("LEASE_RECORD"), eq(1L));
         verify(taskLogService).record(anyString(), any(), anyLong(), eq(1), eq(1), eq(0), isNull());
     }
@@ -127,7 +127,7 @@ class LeaseExpiryReminderTaskTest {
         ArgumentCaptor<LeaseReminder> captor = ArgumentCaptor.forClass(LeaseReminder.class);
         verify(leaseReminderMapper).insert(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo("EXPIRED");
-        verify(notificationService).create(eq(100L), eq(1L), eq("租住已到期"),
+        verify(notificationService).createForResident(eq(100L), eq(1L), eq("租住已到期"),
                 anyString(), eq("LEASE"), eq("LEASE_RECORD"), eq(2L));
     }
 
@@ -143,7 +143,9 @@ class LeaseExpiryReminderTaskTest {
 
         task.execute();
 
-        verify(notificationService, never()).create(anyLong(), any(), anyString(),
+        verify(notificationService, never()).createForResident(anyLong(), any(), anyString(),
+                anyString(), anyString(), anyString(), any());
+        verify(notificationService, never()).createForUser(anyLong(), any(), anyString(),
                 anyString(), anyString(), anyString(), any());
         verify(taskLogService).record(anyString(), any(), anyLong(), eq(1), eq(0), eq(0), isNull());
     }

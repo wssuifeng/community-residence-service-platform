@@ -348,7 +348,7 @@ class NoticeGuestVisibilityTest {
             noticeService.publish(5L, LocalDateTime.now());
         }
         verify(residentMapper, never()).selectList(any());
-        verify(notificationService, never()).create(any(), any(), any(), any(), any(), any(), any());
+        verify(notificationService, never()).createForResident(any(), any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -377,6 +377,6 @@ class NoticeGuestVisibilityTest {
 
             noticeService.publish(6L, LocalDateTime.now());
         }
-        verify(notificationService, times(2)).create(anyLong(), any(), any(), any(), any(), any(), any());
+        verify(notificationService, times(2)).createForResident(anyLong(), any(), any(), any(), any(), any(), any());
     }
 }

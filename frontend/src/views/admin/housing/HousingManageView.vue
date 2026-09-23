@@ -3,39 +3,43 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import AdminStatCard from '@/components/admin/AdminStatCard.vue'
+import HousesWithHousingView from '@/views/admin/community/HousesWithHousingView.vue'
 import HousingListView from './HousingListView.vue'
 import ViewingAppointmentListView from './ViewingAppointmentListView.vue'
 import { listHousings, listViewingAppointments } from '@/api/housing'
 
 /**
- * 房源与看房容器：Tab 深链 ?tab=viewings|list（任务 1 契约，取值不得变更）。
- * R62 房源挂牌管理并入社区结构后：本页不再以独立房源模块形态呈现——
- * 默认 Tab 为看房预约处置；「全局房源」Tab 降级为跨社区总览视图（顶部说明 +
- * 社区筛选），挂牌维护入口指向 社区结构 → 房屋与房源。
+ * 房源管理（「租住与房源」Hub 的房源管理子视图，批次 g）：页内三分区
+ * ?view=houses|viewings|list（缺省 houses）。
+ * 主体为 R62 的「房屋与房源」一体化视图（挂牌/编辑/上下架 + 批量挂牌）；
+ * 看房预约处置与跨社区「全局房源」总览为同模块的另两个分区，避免同模块再拆页面。
  * 对照设计稿 09-房源管理：页头 + 4 统计卡 + 白卡 Tab 条（看房预约 Tab 带待确认角标）。
  * 稿例「在租/待租/已租/本月看房」为 AI 即兴，统计卡按真实状态枚举
  * （可租/已预订/已出租）取计数，第四卡按简报取看房预约累计（接口无时间参数不造假）；
- * 已下架不占卡位，可经列表状态筛选查看。子 Tab 动作后经 changed 事件刷新统计与角标。
+ * 已下架不占卡位，可经列表状态筛选查看。子视图动作后经 changed 事件刷新统计与角标。
  */
 
-const TABS = ['viewings', 'list'] as const
+const TABS = ['houses', 'viewings', 'list'] as const
 type TabName = (typeof TABS)[number]
 
 const route = useRoute()
 const router = useRouter()
 
+/* ?view= 深链契约（houses|viewings|list）：缺省与非法取值回退 houses（一体化挂牌为房源管理主体）。
+   参数名用 view 而非 tab，是为让出 Hub（/admin/housing-lease）的 `tab` 命名空间——
+   子视图切换时展开 route.query，Hub 的 tab 不被冲掉 */
 const activeTab = computed<TabName>(() => {
-  const tab = route.query.tab
-  return typeof tab === 'string' && (TABS as readonly string[]).includes(tab)
-    ? (tab as TabName)
+  const view = route.query.view
+  return typeof view === 'string' && (TABS as readonly string[]).includes(view)
+    ? (view as TabName)
     : TABS[0]
 })
 
-/* Tab 切换走 query 替换：?tab= 深链可直达、可刷新、不产生历史记录；
+/* Tab 切换走 query 替换：?view= 深链可直达、可刷新、不产生历史记录；
    切换时顺带刷新统计卡（动作可能已改变口径） */
-function switchTab(tab: TabName): void {
-  if (tab === activeTab.value) return
-  router.replace({ query: { ...route.query, tab } })
+function switchTab(view: TabName): void {
+  if (view === activeTab.value) return
+  router.replace({ query: { ...route.query, view } })
   loadStats()
 }
 
@@ -94,8 +98,8 @@ onMounted(loadStats)
 <template>
   <div class="admin-page">
     <AdminPageHeader
-      title="房源与看房"
-      subtitle="看房预约处置 · 全局房源总览（房源挂牌管理已并入社区结构）"
+      title="房源管理"
+      subtitle="房屋与房源一体化挂牌 · 看房预约处置 · 全局房源总览"
     />
 
     <!-- 统计卡：真实口径（见 script 决策注释） -->
@@ -110,10 +114,10 @@ onMounted(loadStats)
       />
     </div>
 
-    <!-- 并入说明（R62）：仅「全局房源」Tab 展示，指向社区结构内的一体化挂牌管理 -->
+    <!-- 并入说明（R62）：仅「全局房源」分区展示，指向社区结构内同一体化挂牌管理 -->
     <div v-if="activeTab === 'list'" class="merged-notice">
       <span class="merged-notice-text">
-        房源挂牌管理已并入「社区结构 → 房屋与房源」：按 社区→楼栋→单元→房屋 树形完成挂牌/编辑/上下架与批量挂牌。本页为跨社区「全局房源」总览视图（支持社区筛选），仍可进行详情、时段与删除操作。
+        房源挂牌管理由「房屋与房源」分区与「社区结构 → 房屋与房源」共同承载：按 社区→楼栋→单元→房屋 树形完成挂牌/编辑/上下架与批量挂牌。本分区为跨社区「全局房源」总览视图（支持社区筛选），仍可进行详情、时段与删除操作。
       </span>
       <el-button type="primary" link class="merged-notice-link" @click="goCommunityHousing">
         前往社区结构 →
@@ -121,7 +125,17 @@ onMounted(loadStats)
     </div>
 
     <!-- 白卡 Tab 条：观感与居民管理/运营看板一致（激活蓝字 + 底部 2px 下划线） -->
-    <nav class="tab-bar" role="tablist" aria-label="房源与看房视图切换">
+    <nav class="tab-bar" role="tablist" aria-label="房源管理视图切换">
+      <button
+        type="button"
+        role="tab"
+        class="tab-item"
+        :class="{ active: activeTab === 'houses' }"
+        :aria-selected="activeTab === 'houses'"
+        @click="switchTab('houses')"
+      >
+        房屋与房源
+      </button>
       <button
         type="button"
         role="tab"
@@ -145,7 +159,8 @@ onMounted(loadStats)
       </button>
     </nav>
 
-    <ViewingAppointmentListView v-if="activeTab === 'viewings'" @changed="loadStats" />
+    <HousesWithHousingView v-if="activeTab === 'houses'" />
+    <ViewingAppointmentListView v-else-if="activeTab === 'viewings'" @changed="loadStats" />
     <HousingListView v-else @changed="loadStats" />
   </div>
 </template>

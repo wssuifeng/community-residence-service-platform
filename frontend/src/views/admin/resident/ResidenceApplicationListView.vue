@@ -1,8 +1,10 @@
 <script setup lang="ts">
-/** 入住申请 Tab：状态筛选 + 通过（生成居住关系与租住记录）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
+/** 入住申请（「租住与房源」Hub 的入住申请 Tab，批次 g 由「居民」页迁入）：
+ *  状态筛选 + 通过（生成居住关系与待签约租住记录）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import {
   approveResidenceApplication,
   getResidenceApplicationList,
@@ -27,12 +29,13 @@ const size = ref(10)
 const total = ref(0)
 const statusFilter = ref<ResidenceApplicationStatus | ''>('')
 
-/** 申请状态 → StatusTag 语义色 */
+/** 申请状态 → StatusTag 语义色（已撤回为终态灰，不得落到驳回红） */
 function statusTagType(
   status: ResidenceApplicationStatus
-): 'pending' | 'completed' | 'rejected' {
+): 'pending' | 'completed' | 'rejected' | 'canceled' {
   if (status === 'PENDING') return 'pending'
   if (status === 'APPROVED') return 'completed'
+  if (status === 'WITHDRAWN') return 'canceled'
   return 'rejected'
 }
 
@@ -165,6 +168,12 @@ onMounted(load)
 
 <template>
   <section class="application-list">
+    <!-- 页标题由子视图承担（Hub 只提供 Tab 条，不再出现两层大标题） -->
+    <AdminPageHeader
+      title="入住申请"
+      subtitle="居民入住申请审核 · 通过后落「待签约」租约并自动创建租约群聊"
+    />
+
     <FilterPanel resettable @reset="handleReset">
       <el-select
         v-model="statusFilter"
