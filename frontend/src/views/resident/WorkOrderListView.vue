@@ -97,6 +97,7 @@ watch([page, size], () => {
 })
 
 /* 仅提交人可取消，且限待受理/待派单阶段（状态机） */
+/* 终审关闭后仍允许补交评价，避免管理端先归档导致居民失去评价入口 */
 async function handleCancel(order: IWorkOrder): Promise<void> {
   try {
     const { value } = await ElMessageBox.prompt('取消后无法恢复，请填写取消原因', `取消工单 ${order.orderNo}`, {
@@ -187,7 +188,7 @@ onMounted(() => {
         </div>
 
         <div class="order-side" @click.stop>
-          <el-button v-if="order.status === 'COMPLETED'" @click="goDetail(order)">去评价</el-button>
+          <el-button v-if="order.status === 'COMPLETED' || order.status === 'CLOSED'" @click="goDetail(order)">去评价</el-button>
           <el-button text type="primary" @click="goDetail(order)">查看详情 →</el-button>
           <el-button
             v-if="order.status === 'PENDING' || order.status === 'TO_ASSIGN'"

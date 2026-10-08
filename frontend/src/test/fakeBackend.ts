@@ -2131,7 +2131,7 @@ export class FakeBackend {
     submitEvaluation: async (orderId: number, data: { score: number; content: string }) => {
       const order = this.state.workOrders.find((item) => item.id === orderId)
       if (!order) fail(CODES.WORK_ORDER_NOT_FOUND, '工单不存在')
-      if (order.status !== 'COMPLETED') {
+      if (order.status !== 'COMPLETED' && order.status !== 'CLOSED') {
         fail(CODES.EVALUATION_NOT_ALLOWED, '工单未完成，不可评价')
       }
       const exists = this.state.evaluations.find((item) => item.orderId === orderId)

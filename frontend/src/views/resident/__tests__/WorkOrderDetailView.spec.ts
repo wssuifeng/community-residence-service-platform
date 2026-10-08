@@ -49,6 +49,33 @@ function seedToConfirmOrder(): void {
   })
 }
 
+function seedClosedOrder(): void {
+  backend().state.workOrders.push({
+    id: 1,
+    orderNo: 'WO20260922002',
+    residentId: 1,
+    communityId: 1,
+    categoryId: 1,
+    title: '厨房水管漏水',
+    description: '水槽下方渗水',
+    status: 'CLOSED',
+    assigneeId: 1,
+    assigneeName: '服务人员一号',
+    conversationId: 1,
+    createdAt: '2026-09-22T09:00:00'
+  })
+  backend().state.conversations.push({
+    id: 1,
+    type: 'WORK_ORDER_GROUP',
+    relatedId: 1,
+    title: '工单沟通 WO20260922002',
+    status: 'CLOSED',
+    participantIds: [1],
+    createdAt: '2026-09-22T09:00:00',
+    closedAt: '2026-09-22T10:00:00'
+  })
+}
+
 beforeEach(() => {
   installFakeBackend({ role: 'RESIDENT', id: 1 })
 })
@@ -108,6 +135,16 @@ describe('居民工单详情 · 不满意退回（R22）', () => {
 
     expect(backend().state.workOrders[0].status).toBe('TO_CONFIRM')
     expect(backend().state.workOrderProcesses).toHaveLength(0)
+  })
+
+  it('终审关闭后仍保留居民补交评价入口', async () => {
+    seedClosedOrder()
+
+    const wrapper = await mountPage()
+
+    expect(wrapper.text()).toContain('服务评价')
+    expect(wrapper.find('.evaluation-card').exists()).toBe(true)
+    expect(wrapper.find('.evaluation-form').exists()).toBe(true)
   })
 
   it('退回成功提示指向「重新处理后再确认」，不再指向退回后不可用的评价表单', async () => {
