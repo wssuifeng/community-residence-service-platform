@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
@@ -31,11 +31,6 @@ import { formatDateTime } from '@/utils/date'
  * 处置动作后 emit changed 供容器刷新统计卡与角标。
  */
 
-/* 本地界面行类型：ViewingAppointmentVO 将新增 conversationId（R63 v1.5，types 目录禁改故本地扩展） */
-interface AdminViewingRow extends IViewingAppointment {
-  conversationId?: number
-}
-
 const emit = defineEmits<{
   changed: []
 }>()
@@ -60,7 +55,7 @@ const query = reactive({
 })
 
 const total = ref(0)
-const records = ref<AdminViewingRow[]>([])
+const records = ref<IViewingAppointment[]>([])
 const loading = ref(false)
 
 async function loadList(): Promise<void> {
@@ -92,7 +87,7 @@ function handleReset(): void {
 /* ------------------------------ 确认与处置 ------------------------------ */
 
 /** 确认（TO_CONFIRM → RESERVED）；后端 ReservationActionDTO 要求 reason 必填，确认备注作 reason 传递 */
-async function handleConfirm(row: AdminViewingRow): Promise<void> {
+async function handleConfirm(row: IViewingAppointment): Promise<void> {
   try {
     const { value } = await ElMessageBox.prompt(
       `${row.housingTitle} · ${row.appointmentDate} ${row.startTime} ~ ${row.endTime}，看房人 ${row.visitorName}`,
@@ -116,7 +111,7 @@ async function handleConfirm(row: AdminViewingRow): Promise<void> {
 }
 
 /** 拒绝（走 cancel 接口携带理由，TO_CONFIRM → CANCELLED） */
-async function handleReject(row: AdminViewingRow): Promise<void> {
+async function handleReject(row: IViewingAppointment): Promise<void> {
   try {
     const { value } = await ElMessageBox.prompt('请填写拒绝理由', `拒绝看房 · ${row.housingTitle}`, {
       confirmButtonText: '确认拒绝',
@@ -136,7 +131,7 @@ async function handleReject(row: AdminViewingRow): Promise<void> {
 }
 
 /** 完成（RESERVED → COMPLETED）；后端 ReservationActionDTO 要求 reason 必填 */
-async function handleComplete(row: AdminViewingRow): Promise<void> {
+async function handleComplete(row: IViewingAppointment): Promise<void> {
   try {
     const { value } = await ElMessageBox.prompt(
       `确认「${row.housingTitle}」${row.appointmentDate} 的看房已完成？`,
@@ -160,7 +155,7 @@ async function handleComplete(row: AdminViewingRow): Promise<void> {
 }
 
 /** 违约（RESERVED → VIOLATED），理由必填，计入居民违约记录 */
-async function handleViolate(row: AdminViewingRow): Promise<void> {
+async function handleViolate(row: IViewingAppointment): Promise<void> {
   try {
     const { value } = await ElMessageBox.prompt(
       '违约将计入访客的违约记录，请谨慎操作',
@@ -197,7 +192,7 @@ const candidatesLoading = ref(false)
 const candidates = ref<AssigneeOption[]>([])
 const assigneeId = ref<number | null>(null)
 const assigning = ref(false)
-const assigningRow = ref<AdminViewingRow | null>(null)
+const assigningRow = ref<IViewingAppointment | null>(null)
 
 const assigningRowLabel = computed(() => {
   const row = assigningRow.value
@@ -221,7 +216,7 @@ async function loadCandidates(): Promise<void> {
 }
 
 /** 打开分配弹窗：已有带看人时预选当前人（可更换） */
-function openAssignDialog(row: AdminViewingRow): void {
+function openAssignDialog(row: IViewingAppointment): void {
   assigningRow.value = row
   assigneeId.value = row.assigneeId ?? null
   assignDialogVisible.value = true
@@ -254,14 +249,14 @@ async function handleAssignConfirm(): Promise<void> {
    待主会话补充 markConversationRead 后在此接入（当前跳过，不影响会话读写）。 */
 
 const chatVisible = ref(false)
-const chatRow = ref<AdminViewingRow | null>(null)
+const chatRow = ref<IViewingAppointment | null>(null)
 /* 看房群聊关闭态（OCR DEF-122 契约补传）：取会话详情 status，父层传入组件 */
 const chatClosed = ref(false)
 
 const chatConversationId = computed(() => chatRow.value?.conversationId ?? null)
 const chatTitle = computed(() => (chatRow.value ? `看房群聊 · ${chatRow.value.housingTitle}` : '看房群聊'))
 
-async function openChatDialog(row: AdminViewingRow): Promise<void> {
+async function openChatDialog(row: IViewingAppointment): Promise<void> {
   if (row.conversationId == null) {
     ElMessage.warning('该预约暂无会话')
     return

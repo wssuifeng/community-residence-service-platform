@@ -17,14 +17,6 @@ import { formatDateTime } from '@/utils/date'
  * conversationId 为空（游客预约/存量未建群数据）时展示只读占位提示。
  */
 
-/**
- * 详情行本地扩展：后端 ViewingAppointmentVO 将补 conversationId（V16），
- * types 禁改，故在视图内扩展；空值走未开通沟通群的只读占位。
- */
-interface ResidentViewingRow extends IViewingAppointment {
-  conversationId?: number
-}
-
 const route = useRoute()
 const router = useRouter()
 
@@ -32,7 +24,7 @@ const appointmentId = Number(route.params.id)
 /** 非法直达（旧书签/坏链）→ 回我的预约看房 tab */
 const invalidEntry = !Number.isInteger(appointmentId) || appointmentId <= 0
 
-const detail = ref<ResidentViewingRow | null>(null)
+const detail = ref<IViewingAppointment | null>(null)
 const loading = ref(true)
 const cancelling = ref(false)
 /* 看房群聊关闭态（OCR DEF-122 契约补传）：取会话详情 status 传入组件 */

@@ -142,6 +142,8 @@ export interface IViewingAppointment {
   appointmentNumber: string
   /** 幽灵字段：后端 VO 不返回 visitorCount；居民端列表仍展示，保留原因同上 */
   visitorCount: number
+  /** R63 看房群聊关联会话（游客预约为空；居民预约创建时建立） */
+  conversationId?: number | null
   /** 带看人（R59，v1.3 新增；未分配为 null，后端 VO 补齐后点亮） */
   assigneeId?: number | null
   assigneeName?: string | null

@@ -3,7 +3,8 @@ import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import AppointmentChat from '@/components/business/AppointmentChat.vue'
+import ConversationChat from '@/components/business/ConversationChat.vue'
+import { getConversation } from '@/api/conversation'
 import {
   listViewingAppointments,
   completeViewingAppointment,
@@ -16,8 +17,8 @@ import { formatDateTime } from '@/utils/date'
 /**
  * 我的带看工作台（R59，需求规格 v1.3）：服务人员视角被分配为带看人的看房预约。
  * 列表口径（assigned to me）由后端本批实现，前端直接调用 listViewingAppointments；
- * 主从布局：点击行右侧展示预约详情 + 带看沟通会话（服务人员作为 assigned_staff
- * 是会话参与者，会话组件内部处理 WS 推送与轮询兜底）。
+ * 主从布局：点击行右侧展示预约详情 + R63 看房群聊（服务人员作为 assigned_staff
+ * 入群后复用预约 conversationId，会话组件内部处理 WS 推送与轮询兜底）。
  * 操作对齐 R55 状态机：带看人可对已预约的看房登记完成/违约；确认归属管理方，不展示。
  */
 
@@ -36,14 +37,26 @@ const loading = ref(false)
 const selectedId = ref<number | null>(null)
 
 const selected = ref<IViewingAppointment | null>(null)
+const selectedConversationClosed = ref(false)
 
 function rowClassName({ row }: { row: IViewingAppointment }): string {
   return row.id === selectedId.value ? 'is-selected' : ''
 }
 
-function selectRow(row: IViewingAppointment): void {
+async function selectRow(row: IViewingAppointment): Promise<void> {
   selectedId.value = row.id
   selected.value = row
+  selectedConversationClosed.value = false
+  if (row.conversationId == null) return
+  try {
+    const conversation = await getConversation(row.conversationId)
+    if (selected.value?.id === row.id) {
+      selectedConversationClosed.value = conversation.status === 'CLOSED'
+    }
+  } catch (error) {
+    /* 会话详情失败时仍让组件自行按参与者权限降级，避免把预约详情一并变成空白 */
+    console.error('加载看房群聊状态失败', error)
+  }
 }
 
 async function loadList(): Promise<void> {
@@ -55,7 +68,12 @@ async function loadList(): Promise<void> {
     /* 动作后重载：按 id 重新对齐选中行（行内状态已变化），不在当前页则清空选中 */
     const current = selectedId.value === null ? null : result.records.find((row) => row.id === selectedId.value)
     selected.value = current ?? null
-    if (!current) selectedId.value = null
+    if (!current) {
+      selectedId.value = null
+      selectedConversationClosed.value = false
+    } else if (current.conversationId != null) {
+      void selectRow(current)
+    }
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '带看预约列表加载失败')
   } finally {
@@ -200,8 +218,15 @@ onMounted(loadList)
             </div>
           </div>
 
-          <!-- key 强制切换预约时重建会话（组件在 onMounted 订阅当前预约的消息主题） -->
-          <AppointmentChat :key="selected.id" :appointment-id="selected.id" />
+          <!-- R63：服务人员与居民/管理员共用预约关联的多方看房群聊。 -->
+          <ConversationChat
+            v-if="selected.conversationId != null"
+            :key="selected.conversationId"
+            :conversation-id="selected.conversationId"
+            :closed="selectedConversationClosed"
+            title="看房群聊"
+          />
+          <div v-else class="chat-placeholder">该预约暂无可用沟通群</div>
         </template>
         <el-empty v-else class="detail-empty" description="点击左侧预约查看详情与带看沟通" :image-size="80" />
       </aside>
@@ -328,6 +353,19 @@ onMounted(loadList)
 .action-btn.danger {
   background-color: var(--status-rejected);
   color: #fff;
+}
+
+.chat-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: var(--spacing-lg);
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-sm);
 }
 
 .detail-empty {
