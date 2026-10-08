@@ -429,6 +429,10 @@ public class ViewingAppointmentService {
         appointment.setStatus("CANCELLED");
         appointment.setRemark(reason);
         appointmentMapper.updateById(appointment);
+        /* 预约取消即终止看房沟通：历史消息保留，但会话转只读，避免已取消预约继续出现可发送输入框。 */
+        if (appointment.getConversationId() != null) {
+            conversationService.closeConversation(appointment.getConversationId(), "看房预约已取消");
+        }
         notifyApplicant(appointment, "看房预约已取消",
                 "您 " + appointment.getAppointmentDate() + " 的看房预约已取消" + (reason != null ? "：" + reason : ""));
     }
