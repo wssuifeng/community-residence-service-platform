@@ -37,13 +37,13 @@ public class ConversationController {
     private final ViewingAppointmentService viewingAppointmentService;
 
     /**
-     * 会话内发起看房预约（R69，接口设计.md 9.19）：调用者须为该租约群聊参与者；
+     * 会话内发起看房预约（R69，接口设计.md 9.19）：仅注册并登录的居民租约群参与者可发起；
      * 复用既有创建逻辑（同表/同状态机/同冲突校验），lease_id 取自会话 related_id，
      * **不再新建 VIEWING_GROUP**（直接复用该租约群作为会话载体）。
      */
     @Operation(summary = "会话内发起看房预约",
-            description = "租约群聊参与者在会话内预约看房；lease_id 取自会话关联租约，不再新建看房群聊")
-    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
+            description = "仅居民租约群聊参与者可在会话内预约看房；lease_id 取自会话关联租约，不再新建看房群聊")
+    @PreAuthorize("hasRole('RESIDENT')")
     @PostMapping("/{id}/viewing-appointments")
     public ApiResponse<ViewingAppointmentVO> createViewingAppointment(
             @PathVariable Long id,

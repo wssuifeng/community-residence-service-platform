@@ -1,7 +1,6 @@
 package com.community.residence.housing.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -11,8 +10,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * 创建看房预约请求：居民登录预约带空 visitor 字段（取令牌身份）；
- * 游客预约必填 visitorName/visitorPhone（user_id 留空）。
+ * 创建看房预约请求：仅注册并登录的居民账号可提交，预约人身份从 JWT 取得。
+ * `visitorName` 仅为历史请求兼容字段，新接口不再消费游客身份信息。
  */
 @Data
 @Schema(description = "创建看房预约请求")
@@ -33,12 +32,11 @@ public class CreateViewingAppointmentDTO {
     @NotNull(message = "结束时间不能为空")
     private LocalTime endTime;
 
-    @Schema(description = "游客姓名（游客预约必填，居民预约忽略）")
-    @Size(max = 50, message = "游客姓名最多 50 字符")
+    @Schema(description = "历史兼容字段（新预约不使用）", hidden = true, deprecated = true)
+    @Size(max = 50, message = "姓名最多 50 字符")
     private String visitorName;
 
-    @Schema(description = "联系电话")
-    @NotBlank(message = "联系电话不能为空")
+    @Schema(description = "联系电话（可选；为空时服务端取居民档案手机号）")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String contactPhone;
 

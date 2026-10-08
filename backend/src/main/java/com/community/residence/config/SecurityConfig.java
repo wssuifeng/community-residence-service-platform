@@ -61,11 +61,10 @@ public class SecurityConfig {
                                 "/api/v1/housings", "/api/v1/housings/{id}",
                                 "/api/v1/housings/{housingId}/available-slots",
                                 "/api/v1/housings/{housingId}/timeslots",
-                                "/api/v1/configs/{key}",
-                                "/api/v1/viewing-appointments/{id}").permitAll()
-                        // 游客可写接口：房源浏览计数、看房预约创建
+                                "/api/v1/configs/{key}").permitAll()
+                        // 游客只读：房源浏览计数仍公开；看房预约创建归居民账号
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
-                                "/api/v1/housings/{id}/view", "/api/v1/viewing-appointments").permitAll()
+                                "/api/v1/housings/{id}/view").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         // 未认证：401 + 统一响应体
