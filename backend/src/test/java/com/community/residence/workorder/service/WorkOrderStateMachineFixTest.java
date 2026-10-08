@@ -96,6 +96,42 @@ class WorkOrderStateMachineFixTest {
         lenient().when(workOrderMapper.selectById(1L)).thenReturn(order);
     }
 
+    @Test
+    @DisplayName("驳回处理记录保留真实前置状态：PENDING → REJECTED")
+    void reject_processRecordUsesPreTransitionStatus() {
+        order.setStatus("PENDING");
+        lenient().when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
+        lenient().when(processMapper.insert(any(com.community.residence.workorder.entity.WorkOrderProcess.class)))
+                .thenReturn(1);
+        try (MockedStatic<SecurityUtils> mocked = mockAdmin()) {
+            service.reject(1L, "不符合受理范围");
+        }
+
+        var captor = org.mockito.ArgumentCaptor.forClass(
+                com.community.residence.workorder.entity.WorkOrderProcess.class);
+        verify(processMapper).insert(captor.capture());
+        assertThat(captor.getValue().getOldStatus()).isEqualTo("PENDING");
+        assertThat(captor.getValue().getNewStatus()).isEqualTo("REJECTED");
+    }
+
+    @Test
+    @DisplayName("取消处理记录保留真实前置状态：PENDING → CANCELLED")
+    void cancel_processRecordUsesPreTransitionStatus() {
+        order.setStatus("PENDING");
+        lenient().when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(1);
+        lenient().when(processMapper.insert(any(com.community.residence.workorder.entity.WorkOrderProcess.class)))
+                .thenReturn(1);
+        try (MockedStatic<SecurityUtils> mocked = mockResident()) {
+            service.cancel(1L, "计划有变");
+        }
+
+        var captor = org.mockito.ArgumentCaptor.forClass(
+                com.community.residence.workorder.entity.WorkOrderProcess.class);
+        verify(processMapper).insert(captor.capture());
+        assertThat(captor.getValue().getOldStatus()).isEqualTo("PENDING");
+        assertThat(captor.getValue().getNewStatus()).isEqualTo("CANCELLED");
+    }
+
     /* ---- DEF-011：同态/终态重复动作 5302 + 时间线零新增 ---- */
 
     @Test
