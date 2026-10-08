@@ -1,8 +1,8 @@
-# UI 设计 · v1.4
+# UI 设计 · v1.5
 
-> 文档版本：v1.4
+> 文档版本：v1.5
 > 创建日期：2026-09-06
-> 设计依据：需求规格说明（20 包，**v1.9 / R1~R73 + R74**）、接口设计（30 包，**v1.6**）、架构设计（30 包）
+> 设计依据：需求规格说明（20 包，**v1.12 / R1~R75**）、接口设计（30 包，**v1.7**）、架构设计（30 包）
 >
 > **v1.1 变更（2026-09-21，批次 f · 租住签约闭环）**：
 > ①**居民端新增一级「租住与房源」`/resident/housing-lease`**（R66~R71 签约闭环双 Tab Hub），
@@ -24,6 +24,8 @@
 > （`*Dialog` 类，按 §12.2 口径**计入 `.vue` 但不计入功能视图**）⇒ `views/` 下 `.vue` 由 **97 → 98**、
 > 子组件由 20 → **21**，**功能视图仍 69**；时间线为**既有页面内区块升级**、
 > **不新增页面**；§13.1 需求覆盖标题由「R1~R71」更正为 **R1~R73** 并补 R72/R73 映射行。
+>
+> **v1.5 变更（2026-10-08，方案 B：看房预约注册居民化）**：游客房源详情保留房源与可预约时段浏览，预约入口改为“登录 / 注册后预约看房”并携带回跳地址；居民预约页只提交当前居民身份与可选联系信息，不显示游客姓名/游客手机号字段；预约列表、详情与取消均为登录居民本人或管理端权限。
 >
 > **v1.4 变更（2026-09-22，工单完整业务链路 · R74，用户裁决 + DEF-071 / DEF-072）**：
 > ①**管理端工单列表（§4.3.4）与工单详情（§4.3.5）新增「受理」入口**——**`PENDING`（待受理）可见**，
@@ -293,7 +295,7 @@
 |---------|---------|------|------|
 | `/guest/home` | 首页 | GUEST | 公开公告 + 房源推荐 |
 | `/guest/housings` | 房源浏览 | GUEST | 房源列表 + 详情 |
-| `/guest/housings/:id` | 房源详情 | GUEST | 房源信息 + 看房预约（需注册） |
+| `/guest/housings/:id` | 房源详情 | GUEST | 房源信息 + 可预约时段浏览；点击预约需注册并登录居民账号 |
 | `/guest/notices` | 公开公告 | GUEST | 公告列表 + 详情 |
 | `/auth/login` | 登录 | GUEST | 居民登录 / 管理员登录切换 |
 | `/auth/register` | 注册 | GUEST | 自助注册（可全局关闭） |
@@ -660,12 +662,15 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 - **时段选择**：
   - 日期选择器
   - 可预约时段列表（单选）
-- **预约按钮**：「预约看房」
+- **预约入口**：游客显示「登录 / 注册后预约看房」；居民显示「预约看房」；其他角色显示「请使用居民账号登录」
+- **可预约时段**：公开只读展示，不直接创建预约
 
 **交互**：
 - 轮播图片切换
 - 选择日期后加载可预约时段
-- 点击预约按钮提交看房预约（居民/游客）
+- 游客点击预约入口跳转 `/auth/login?redirect=<当前房源详情>`，登录后回到原详情页；未登录不调用预约创建接口
+- 居民点击预约入口进入三步预约页（选择日期 → 选择连续时段 → 确认提交）
+- 居民预约页以当前账号实名为联系人，联系电话可从居民档案带出并允许修正；不展示游客姓名、游客人数或短信验证码输入
 
 ---
 
@@ -1486,7 +1491,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 | R41~R45 | /admin/dashboard | 运营看板（多维度统计卡片 + 图表，Tab 化） |
 | R46~R47 | /admin/system?tab=users, /admin/system?tab=logs | 系统用户管理 + 操作日志 |
 | R48~R52 | /resident/notifications, /staff/notifications, /admin/notifications | 通知中心 + WebSocket 推送 + 增量补拉 |
-| R53~R57 | /resident/housing-lease?tab=housing, /admin/housing-lease?tab=housings, /admin/housings?tab=viewings | 房源管理 + 看房预约（游客支持）（**v1.2 起管理端 canonical 为 Hub `housings` tab**） |
+| R53~R57 | /resident/housing-lease?tab=housing, /admin/housing-lease?tab=housings, /admin/housings?tab=viewings | 房源管理 + 看房预约（游客浏览、居民账号预约）（**v1.2 起管理端 canonical 为 Hub `housings` tab**） |
 | R58 | /admin/system?tab=configs | 日志留存配置（`log.retention_days` 读回显 730） |
 | R59 | /staff/viewings（我的带看）, /admin/housings?tab=viewings, /resident/viewing-appointments/:id | 带看人分配 + 带看沟通会话（「我的带看」工作台） |
 | R60 | /resident/reservations/create, /resident/housing-lease?tab=housing | 连续时段预约（多段合并提交） |
