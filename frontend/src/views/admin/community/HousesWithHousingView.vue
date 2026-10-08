@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import { getCommunityList, getBuildingList, getUnitList } from '@/api/community'
@@ -47,6 +48,8 @@ interface HouseManageItem {
 
 /** 房源占位插画（未挂牌或无图时使用，frontend/public 静态资产） */
 const HOUSING_PLACEHOLDER = '/housing-placeholder.png'
+
+const router = useRouter()
 
 /* ===================== 筛选 + 卡片列表 ===================== */
 
@@ -267,6 +270,12 @@ async function handleSave(): Promise<void> {
   } finally {
     saving.value = false
   }
+}
+
+/** 从房屋与房源一体化入口进入该房源的看房时段配置。 */
+function goTimeslots(item: HouseManageItem): void {
+  if (!item.housing) return
+  router.push({ path: `/admin/housings/${item.housing.id}`, hash: '#timeslots' })
 }
 
 /* ===================== 上架 / 下架 ===================== */
@@ -624,6 +633,15 @@ async function handleBatchSubmit(): Promise<void> {
             @click="openHousingDialog(item)"
           >
             {{ item.housing ? '编辑房源' : '挂牌' }}
+          </el-button>
+          <el-button
+            v-if="item.housing"
+            v-permission="['ADMIN', 'SUPER_ADMIN']"
+            size="small"
+            plain
+            @click="goTimeslots(item)"
+          >
+            看房时段
           </el-button>
           <el-button
             v-if="item.housing"

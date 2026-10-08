@@ -5,11 +5,16 @@ import com.community.residence.community.entity.House;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 /** 房屋数据访问（软删除） */
 @Mapper
 public interface HouseMapper extends BaseMapper<House> {
+
+    /* 写入入住申请/租约前锁定房屋行，串行化同房屋的竞争性业务操作。 */
+    @Select("SELECT * FROM house WHERE id = #{id} AND is_deleted = 0 FOR UPDATE")
+    House selectByIdForUpdate(@Param("id") Long id);
 
     @Update("UPDATE house SET is_deleted = 1, deleted_at = NOW() WHERE id = #{id} AND is_deleted = 0")
     int softDeleteById(@Param("id") Long id);

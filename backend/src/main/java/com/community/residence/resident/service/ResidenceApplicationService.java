@@ -50,6 +50,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 入住申请业务逻辑：PENDING → APPROVED / REJECTED / WITHDRAWN 状态机（终态不可变更，R66 增撤回）。
@@ -65,6 +66,10 @@ public class ResidenceApplicationService {
     /** 自动通过路径的兜底默认租期（月）：社区未配置时使用 */
     private static final int DEFAULT_LEASE_MONTHS = 12;
 
+    /** 会阻止同一房屋继续生成新入住业务链的租约状态。 */
+    private static final Set<String> BLOCKING_LEASE_STATUSES =
+            Set.of(LeaseStatus.PENDING, LeaseStatus.TO_SIGN, LeaseStatus.ACTIVE);
+
     private final ResidenceApplicationMapper applicationMapper;
     private final ResidenceRelationMapper relationMapper;
     private final ResidentMapper residentMapper;
@@ -79,10 +84,10 @@ public class ResidenceApplicationService {
     private final LeaseChangeLogService changeLogService;
     private final NotificationService notificationService;
 
-    /* 提交申请：房屋须空置；同一房屋同一居民不可重复在审 */
+    /* 提交申请：锁定房屋行后串行检查申请、租约与居住关系，避免多账号抢同一房屋或重复建租约。 */
     @Transactional(rollbackFor = Exception.class)
     public ApplicationVO create(CreateApplicationDTO dto) {
-        House house = houseMapper.selectById(dto.getHouseId());
+        House house = lockHouse(dto.getHouseId());
         if (house == null) {
             throw new ResourceNotFoundException("房屋不存在");
         }
@@ -92,13 +97,7 @@ public class ResidenceApplicationService {
         }
 
         Long residentId = SecurityUtils.getUserId();
-        Long pendingCount = applicationMapper.selectCount(new LambdaQueryWrapper<ResidenceApplication>()
-                .eq(ResidenceApplication::getResidentId, residentId)
-                .eq(ResidenceApplication::getHouseId, dto.getHouseId())
-                .eq(ResidenceApplication::getStatus, "PENDING"));
-        if (pendingCount > 0) {
-            throw new BusinessException(ErrorCode.APPLICATION_PENDING_EXISTS);
-        }
+        ensureApplicationAvailable(residentId, dto.getHouseId());
 
         ResidenceApplication application = new ResidenceApplication();
         application.setResidentId(residentId);
@@ -169,6 +168,13 @@ public class ResidenceApplicationService {
         if (!"PENDING".equals(application.getStatus())) {
             throw new BusinessException(ErrorCode.APPLICATION_ALREADY_REVIEWED);
         }
+        /* 先锁定房屋，再抢占申请终态：提交申请与管理员审批共用同一房屋锁，
+           避免审批已将申请改为 APPROVED、但租约尚未写入时被另一请求插入第二条申请。 */
+        House house = lockHouse(application.getHouseId());
+        if (house == null || HouseStatusConstant.OCCUPIED.equals(house.getStatus())) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已被入住，无法通过申请");
+        }
+        ensureApprovalAvailable(application);
         /* 抢占式终态条件更新（OCR DEF-117）：并发「管理员审批 × 居民撤回」都读到 PENDING 时，
            仅一方能落 APPROVED（WHERE status='PENDING' 抢占）；0 行即并发赢家已处理——
            重读后已 APPROVED 视为重复审批幂等返回既有结果，其余终态按已审核拒绝。
@@ -189,11 +195,6 @@ public class ResidenceApplicationService {
         if (dto.getLeaseEndDate().isBefore(dto.getLeaseStartDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期不能早于开始日期");
         }
-        House house = houseMapper.selectById(application.getHouseId());
-        if (house == null || HouseStatusConstant.OCCUPIED.equals(house.getStatus())) {
-            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已被入住，无法通过申请");
-        }
-
         applyApproval(application, house, dto.getLeaseStartDate(), dto.getLeaseEndDate(),
                 dto.getMonthlyRent(), dto.getDeposit(), SecurityUtils.getUserId(), dto.getRemark());
         log.info("入住申请已通过：applicationId={}, operator={}", id, SecurityUtils.getUserId());
@@ -275,6 +276,64 @@ public class ResidenceApplicationService {
         applicationMapper.updateById(application);
         log.info("入住申请审批内核完成：applicationId={}, relationId={}, reviewer={}",
                 application.getId(), relation.getId(), reviewerId);
+    }
+
+    /**
+     * 锁定房屋行。单元测试中旧用例只 stub 通用查询时允许回退；生产环境优先使用 FOR UPDATE。
+     */
+    private House lockHouse(Long houseId) {
+        House locked = houseMapper.selectByIdForUpdate(houseId);
+        return locked != null ? locked : houseMapper.selectById(houseId);
+    }
+
+    /* 提交前的唯一性保护：同一房屋只允许一条待处理申请，已有租约或在住关系不得重复开启租住链。 */
+    private void ensureApplicationAvailable(Long residentId, Long houseId) {
+        Long residentPending = applicationMapper.selectCount(new LambdaQueryWrapper<ResidenceApplication>()
+                .eq(ResidenceApplication::getResidentId, residentId)
+                .eq(ResidenceApplication::getHouseId, houseId)
+                .eq(ResidenceApplication::getStatus, ApplicationStatus.PENDING));
+        if (residentPending > 0) {
+            throw new BusinessException(ErrorCode.APPLICATION_PENDING_EXISTS);
+        }
+
+        Long housePending = applicationMapper.selectCount(new LambdaQueryWrapper<ResidenceApplication>()
+                .eq(ResidenceApplication::getHouseId, houseId)
+                .eq(ResidenceApplication::getStatus, ApplicationStatus.PENDING));
+        if (housePending > 0) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "该房屋已有待处理入住申请，请稍后再试");
+        }
+
+        Long leaseConflict = leaseRecordMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
+                .eq(LeaseRecord::getHouseId, houseId)
+                .in(LeaseRecord::getStatus, BLOCKING_LEASE_STATUSES));
+        if (leaseConflict > 0) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "该房屋已有进行中的租约，无法重复申请");
+        }
+
+        Long activeRelation = relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
+                .eq(ResidenceRelation::getResidentId, residentId)
+                .eq(ResidenceRelation::getHouseId, houseId)
+                .isNull(ResidenceRelation::getMoveOutDate));
+        if (activeRelation > 0) {
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE, "您与该房屋已有有效居住关系，无法重复申请");
+        }
+    }
+
+    /* 审批前再次检查写入竞争，防止历史多申请或旁路租约绕过提交端保护。 */
+    private void ensureApprovalAvailable(ResidenceApplication application) {
+        Long leaseConflict = leaseRecordMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
+                .eq(LeaseRecord::getHouseId, application.getHouseId())
+                .in(LeaseRecord::getStatus, BLOCKING_LEASE_STATUSES));
+        if (leaseConflict > 0) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已有进行中的租约，无法通过当前申请");
+        }
+
+        Long activeRelation = relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
+                .eq(ResidenceRelation::getHouseId, application.getHouseId())
+                .isNull(ResidenceRelation::getMoveOutDate));
+        if (activeRelation > 0) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已有在住居住关系，无法通过当前申请");
+        }
     }
 
     /**

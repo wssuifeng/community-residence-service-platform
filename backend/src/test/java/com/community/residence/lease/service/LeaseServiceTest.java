@@ -27,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /** 租住业务逻辑测试：状态机流转表、到期标注、租期校验 */
@@ -148,6 +150,32 @@ class LeaseServiceTest {
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             var vo = leaseService.getById(1L);
             assertThat(vo.getExpiryFlag()).isEqualTo("EXPIRED");
+        }
+    }
+
+    @Test
+    @DisplayName("创建租约：同一居民与房屋已有进行中租约时拒绝重复登记")
+    void create_existingLease_throws() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(residentMapper.selectById(1L)).thenReturn(new com.community.residence.resident.entity.Resident());
+            com.community.residence.community.entity.House house = new com.community.residence.community.entity.House();
+            house.setId(1L);
+            house.setCommunityId(1L);
+            when(houseMapper.selectById(1L)).thenReturn(house);
+            when(leaseMapper.selectCount(any())).thenReturn(1L);
+
+            CreateLeaseDTO dto = new CreateLeaseDTO();
+            dto.setResidentId(1L);
+            dto.setHouseId(1L);
+            dto.setStartDate(LocalDate.of(2026, 10, 10));
+            dto.setEndDate(LocalDate.of(2027, 10, 9));
+            dto.setMonthlyRent(BigDecimal.valueOf(3000));
+
+            assertThatThrownBy(() -> leaseService.create(dto))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("进行中的租约");
+            verify(leaseMapper, never()).insert(any(LeaseRecord.class));
         }
     }
 

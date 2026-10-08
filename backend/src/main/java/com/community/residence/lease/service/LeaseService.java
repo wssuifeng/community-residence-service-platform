@@ -67,6 +67,10 @@ public class LeaseService {
     /** 即将到期标注窗口（天） */
     private static final int EXPIRING_WINDOW_DAYS = 30;
 
+    /** 管理方直接登记租约时需要阻止的重叠状态。 */
+    private static final Set<String> BLOCKING_CREATE_STATUSES =
+            Set.of(LeaseStatus.PENDING, LeaseStatus.TO_SIGN, LeaseStatus.ACTIVE);
+
     private final LeaseRecordMapper leaseMapper;
     private final ResidentMapper residentMapper;
     private final HouseMapper houseMapper;
@@ -85,13 +89,20 @@ public class LeaseService {
         if (tenant == null) {
             throw new ResourceNotFoundException("租客不存在");
         }
-        House house = houseMapper.selectById(dto.getHouseId());
+        House house = lockHouse(dto.getHouseId());
         if (house == null) {
             throw new ResourceNotFoundException("房屋不存在");
         }
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
         if (!dto.getEndDate().isAfter(dto.getStartDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期必须晚于开始日期");
+        }
+        Long conflict = leaseMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
+                .eq(LeaseRecord::getTenantId, dto.getResidentId())
+                .eq(LeaseRecord::getHouseId, dto.getHouseId())
+                .in(LeaseRecord::getStatus, BLOCKING_CREATE_STATUSES));
+        if (conflict > 0) {
+            throw new BusinessException(ErrorCode.DUPLICATE_RESOURCE, "该居民与房屋已有进行中的租约，无法重复登记");
         }
 
         LeaseRecord lease = new LeaseRecord();
@@ -108,6 +119,14 @@ public class LeaseService {
         leaseMapper.insert(lease);
         changeLogService.logCreate(lease, "管理方登记租约");
         return toVO(lease);
+    }
+
+    /**
+     * 写入租约前锁定房屋行；旧单元测试未 stub 锁查询时回退到普通查询。
+     */
+    private House lockHouse(Long houseId) {
+        House locked = houseMapper.selectByIdForUpdate(houseId);
+        return locked != null ? locked : houseMapper.selectById(houseId);
     }
 
     @Transactional(rollbackFor = Exception.class)
