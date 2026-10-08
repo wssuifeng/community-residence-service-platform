@@ -52,7 +52,7 @@ const attachments = ref<IWorkOrderAttachment[]>([])
 const loading = ref(false)
 const actionLoading = ref(false)
 
-/* 评价区：已评价则展示结果，未评价展示表单（仅已完成状态） */
+/* 评价区：已评价则展示结果，未评价展示表单（已完成或终审关闭后仍可补评） */
 const evaluation = ref<IEvaluation | null>(null)
 const evaluationLoading = ref(false)
 const evaluationForm = ref({
@@ -76,7 +76,7 @@ const timelineNodeType: Record<string, 'primary' | 'success' | 'warning' | 'dang
 }
 const canCancel = computed(() => order.value?.status === 'PENDING' || order.value?.status === 'TO_ASSIGN')
 const canConfirm = computed(() => order.value?.status === 'TO_CONFIRM')
-const canEvaluate = computed(() => order.value?.status === 'COMPLETED')
+const canEvaluate = computed(() => order.value?.status === 'COMPLETED' || order.value?.status === 'CLOSED')
 
 /* 左侧信息卡双态：「居民提交」（默认）/「处理进展」（服务人员上传内容） */
 const infoTab = ref<'submit' | 'progress'>('submit')
@@ -172,7 +172,7 @@ async function loadConversation(): Promise<void> {
   }
 }
 
-/* 已完成工单尝试拉取既有评价（不可重复评价） */
+/* 已完成或已关闭工单尝试拉取既有评价（不可重复评价） */
 async function fetchEvaluation(): Promise<void> {
   evaluationLoading.value = true
   try {
@@ -461,7 +461,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- 评价区：已完成且未评价时展示表单 -->
+      <!-- 评价区：已完成或已关闭且未评价时展示表单 -->
       <article v-if="canEvaluate" ref="evaluationCardRef" class="evaluation-card">
         <h3 class="block-title">服务评价</h3>
 
