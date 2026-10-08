@@ -454,6 +454,7 @@ class ResidenceApplicationServiceTest {
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
             ResidenceApplication approved = approvedApplication();
             when(applicationMapper.selectById(1L)).thenReturn(pendingApplication, approved);
+            when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
             when(applicationMapper.update(isNull(), any())).thenReturn(0);
 
             ApproveApplicationDTO dto = new ApproveApplicationDTO();
@@ -464,6 +465,71 @@ class ResidenceApplicationServiceTest {
             var vo = applicationService.approve(1L, dto);
 
             assertThat(vo.getStatus()).isEqualTo("APPROVED");
+            verify(relationMapper, never()).insert(any(ResidenceRelation.class));
+            verify(leaseRecordMapper, never()).insert(any(LeaseRecord.class));
+            verify(conversationService, never()).createLeaseGroup(any(), any(), any(), any());
+        }
+    }
+
+    @Test
+    @DisplayName("提交申请：房屋已有进行中租约拒绝重复申请")
+    void create_existingLease_throws() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+            when(applicationMapper.selectCount(any())).thenReturn(0L);
+            when(leaseRecordMapper.selectCount(any())).thenReturn(1L);
+
+            CreateApplicationDTO dto = new CreateApplicationDTO();
+            dto.setHouseId(1L);
+            dto.setRelationType("TENANT");
+
+            assertThatThrownBy(() -> applicationService.create(dto))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("进行中的租约");
+            verify(applicationMapper, never()).insert(any(ResidenceApplication.class));
+        }
+    }
+
+    @Test
+    @DisplayName("提交申请：房屋已有其他待审核申请拒绝第二个申请")
+    void create_otherPendingApplication_throws() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
+            when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+            when(applicationMapper.selectCount(any())).thenReturn(0L, 1L);
+
+            CreateApplicationDTO dto = new CreateApplicationDTO();
+            dto.setHouseId(1L);
+            dto.setRelationType("TENANT");
+
+            assertThatThrownBy(() -> applicationService.create(dto))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("待处理入住申请");
+            verify(applicationMapper, never()).insert(any(ResidenceApplication.class));
+        }
+    }
+
+    @Test
+    @DisplayName("审批通过：已有进行中租约时不再创建居住关系、租约或群聊")
+    void approve_existingLease_throwsBeforeSideEffects() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
+                     mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(2L);
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
+            when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+            when(leaseRecordMapper.selectCount(any())).thenReturn(1L);
+
+            ApproveApplicationDTO dto = new ApproveApplicationDTO();
+            dto.setLeaseStartDate(LocalDate.now());
+            dto.setLeaseEndDate(LocalDate.now().plusMonths(12));
+            dto.setMonthlyRent(BigDecimal.valueOf(3000));
+
+            assertThatThrownBy(() -> applicationService.approve(1L, dto))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining("进行中的租约");
             verify(relationMapper, never()).insert(any(ResidenceRelation.class));
             verify(leaseRecordMapper, never()).insert(any(LeaseRecord.class));
             verify(conversationService, never()).createLeaseGroup(any(), any(), any(), any());

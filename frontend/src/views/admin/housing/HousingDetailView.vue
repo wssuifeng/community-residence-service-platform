@@ -23,6 +23,7 @@ import type {
 } from '@/types/modules/housing'
 import { housingStatusLabels, viewingAppointmentStatusLabels } from '@/types/modules/housing'
 import { formatDateTime } from '@/utils/date'
+import { HOUSING_WEEKDAY_OPTIONS } from './housingWeekdayOptions'
 
 /**
  * 房源详情（管理端）：面包屑 + 图集/信息摘要白卡 + 看房时段配置 + 关联看房预约。
@@ -475,7 +476,12 @@ onMounted(async () => {
       <el-form label-width="80px">
         <el-form-item label="星期" required>
           <el-select v-model="slotForm.dayOfWeek" style="width: 180px">
-            <el-option v-for="(name, dow) in ['周日','周一','周二','周三','周四','周五','周六']" :key="dow" :label="name" :value="Number(dow)" />
+            <el-option
+              v-for="option in HOUSING_WEEKDAY_OPTIONS"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="开始时间" required>
