@@ -1113,8 +1113,8 @@ describe('模拟 E2E · CF-E10 权限与越权拒绝', () => {
   })
 })
 
-describe('模拟 E2E · CF-E12 房源上架与游客看房预约', () => {
-  it('CF-E12 房源上架 → 游客预约看房（待确认）→ 管理方确认（已预约）→ 完成；违约分支留痕', async () => {
+describe('模拟 E2E · CF-E12 房源上架与注册居民看房预约', () => {
+  it('CF-E12 房源上架 → 游客浏览 → 居民预约（待确认）→ 管理方确认（已预约）→ 完成；违约分支留痕', async () => {
     const housingApi = await import('@/api/housing')
     const communityApi = await import('@/api/community')
 
@@ -1135,19 +1135,28 @@ describe('模拟 E2E · CF-E12 房源上架与游客看房预约', () => {
     } as never)) as { id: number }
     expect(backend().state.housings.some((item) => item.id === housing.id)).toBe(true)
 
-    /* 游客（无账号）预约看房 → 待确认 */
+    /* 游客只读浏览，创建预约必须被拒绝 */
     actAs('GUEST', 0)
     const slots = await housingApi.listViewingAvailableSlots(housing.id, {} as never)
     expect(Array.isArray(slots)).toBe(true)
-    const appointment = (await housingApi.createViewingAppointment({
+    await expect(housingApi.createViewingAppointment({
       housingId: housing.id,
-      visitorName: '访客甲',
-      visitorPhone: '13900000001',
       appointmentDate: localToday(),
       startTime: '10:00',
       endTime: '11:00'
-    } as never)) as { id: number; status: string }
+    })).rejects.toMatchObject({ code: 403 })
+
+    /* 注册居民预约看房 → 待确认 */
+    actAs('RESIDENT', 1)
+    const appointment = (await housingApi.createViewingAppointment({
+      housingId: housing.id,
+      contactPhone: '13900000001',
+      appointmentDate: localToday(),
+      startTime: '10:00',
+      endTime: '11:00'
+    })) as { id: number; status: string; userId?: number }
     expect(appointment.status).toBe('TO_CONFIRM')
+    expect(appointment.userId).toBe(1)
 
     /* 管理方确认（可同时指定带看人）→ 已预约 */
     actAs('ADMIN', 1)
@@ -1162,16 +1171,15 @@ describe('模拟 E2E · CF-E12 房源上架与游客看房预约', () => {
     await housingApi.completeViewingAppointment(appointment.id, {} as never)
     expect(backend().state.viewingAppointments[0].status).toBe('COMPLETED')
 
-    /* 违约分支：新增一条预约并标记违约（留痕可查） */
-    actAs('GUEST', 0)
+    /* 违约分支：注册居民新增一条预约并标记违约（留痕可查） */
+    actAs('RESIDENT', 1)
     const second = (await housingApi.createViewingAppointment({
       housingId: housing.id,
-      visitorName: '访客乙',
-      visitorPhone: '13900000002',
+      contactPhone: '13900000002',
       appointmentDate: localToday(),
       startTime: '15:00',
       endTime: '16:00'
-    } as never)) as { id: number }
+    })) as { id: number }
     actAs('ADMIN', 1)
     await housingApi.confirmViewingAppointment(second.id, { assigneeId: 1 } as never)
     await housingApi.violateViewingAppointment(second.id, { reason: '未按时到访' } as never)

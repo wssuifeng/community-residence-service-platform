@@ -96,16 +96,16 @@ export interface IConversationMessageDTO {
 
 /**
  * 会话内发起看房预约请求（R69/V20：POST /conversations/{id}/viewing-appointments）。
- * 字段与房源页预约完全同构，但**不带 leaseId**——所属租约由会话 relatedId 推导，
- * 前端自行填写会造成越权关联。
+ * 字段与房源页预约完全同构，但**不带 leaseId 或游客身份字段**——所属租约由会话 relatedId 推导，
+ * 联系人身份由当前居民 JWT 确定，前端自行填写会造成越权关联。
  */
 export interface ConversationViewingCreateDTO {
   housingId: number
   appointmentDate: string
   startTime: string
   endTime: string
-  visitorName: string
-  contactPhone: string
+  /** 可选联系信息；为空时后端取居民档案手机号 */
+  contactPhone?: string
   remark?: string
 }
 

@@ -408,6 +408,10 @@ export interface FakeResource {
   id: number
   communityId: number
   name: string
+  /** 展示图片（2026-09-29 新增：逗号分隔存储、接口按数组返回；无图为空数组 []，与房源 housing.images 同口径） */
+  images: string[]
+  /** 资源类型（真实 VO 返回；缺省时前端回退默认类型图标） */
+  type?: 'MEETING_ROOM' | 'GYM' | 'PARKING'
   status: 'AVAILABLE' | 'DISABLED'
 }
 
@@ -451,6 +455,10 @@ export interface FakeViewingAppointment {
   housingId: number
   houseId: number
   communityId: number
+  /** 新预约绑定居民身份；历史游客样本可能为空 */
+  userId?: number | null
+  /** 居民预约联系电话；历史游客数据继续保留旧字段供兼容展示 */
+  contactPhone?: string | null
   visitorName: string
   visitorPhone: string
   appointmentDate: string
@@ -471,7 +479,7 @@ export interface FakeBackendState {
   housings: FakeHousing[]
   residents: Array<{ id: number; name: string; phone: string; communityId: number; status: 'ACTIVE' | 'FROZEN' }>
   residenceApplications: FakeResidenceApplication[]
-  residenceRelations: Array<{ id: number; residentId: number; houseId: number; status: 'ACTIVE' | 'MOVED_OUT'; moveOutAt?: string | null }>
+  residenceRelations: Array<{ id: number; residentId: number; communityId: number; houseId: number; status: 'ACTIVE' | 'MOVED_OUT'; moveOutAt?: string | null }>
   leases: FakeLease[]
   leaseChanges: FakeLeaseChange[]
   /** R72 押金退还流水（按租约收敛，单租约记录量小故不分页） */
@@ -615,7 +623,7 @@ export class FakeBackend {
       notices: [],
       noticeViews: [],
       feedbacks: [],
-      resources: [{ id: 1, communityId: 1, name: '健身房', status: 'AVAILABLE' }],
+      resources: [{ id: 1, communityId: 1, name: '健身房', type: 'GYM', images: [], status: 'AVAILABLE' }],
       timeslots: [
         { id: 1, resourceId: 1, slotDate: dateOnly(new Date()), startTime: '09:00', endTime: '10:00', capacity: 1, status: 'AVAILABLE' }
       ],
@@ -1096,6 +1104,7 @@ export class FakeBackend {
         this.state.residenceRelations.push({
           id: this.nextId('residenceRelation'),
           residentId: application.residentId,
+          communityId: application.communityId,
           houseId: application.houseId,
           status: 'ACTIVE',
           moveOutAt: null
@@ -1139,7 +1148,13 @@ export class FakeBackend {
       application.reviewRemark = '申请人主动撤回'
       return application
     },
-    getMyResidenceRelations: async () => this.state.residenceRelations,
+    /* 当前居民居住关系：真实契约为 PageResult，且按 status 过滤（默认只取生效中关系） */
+    getMyResidenceRelations: async (params?: PageParams & { status?: string }) => {
+      const rows = params?.status
+        ? this.state.residenceRelations.filter((item) => item.status === params.status)
+        : this.state.residenceRelations
+      return pageOf(rows, params)
+    },
     getResidentResidenceList: async () => pageOf(this.state.residenceRelations),
     getHouseResidentList: async () => pageOf([])
   }
@@ -2385,13 +2400,18 @@ export class FakeBackend {
       )
       if (params?.status) rows = rows.filter((item) => item.status === params.status)
       return pageOf(
-        rows.map((item) => ({
-          ...item,
-          resourceName: this.state.resources.find((resource) => resource.id === item.resourceId)?.name ?? '',
-          slotDate: this.state.timeslots.find((slot) => slot.id === item.timeslotId)?.slotDate ?? '',
-          startTime: this.state.timeslots.find((slot) => slot.id === item.timeslotId)?.startTime ?? '',
-          endTime: this.state.timeslots.find((slot) => slot.id === item.timeslotId)?.endTime ?? ''
-        })),
+        rows.map((item) => {
+          const slot = this.state.timeslots.find((entry) => entry.id === item.timeslotId)
+          return {
+            ...item,
+            resourceName: this.state.resources.find((resource) => resource.id === item.resourceId)?.name ?? '',
+            /* 真实 ReservationVO 返回 reserveDate（居民端读取侧优先字段）；slotDate 为过渡兼容保留 */
+            reserveDate: slot?.slotDate ?? '',
+            slotDate: slot?.slotDate ?? '',
+            startTime: slot?.startTime ?? '',
+            endTime: slot?.endTime ?? ''
+          }
+        }),
         params
       )
     },
@@ -2567,9 +2587,10 @@ export class FakeBackend {
       appointmentDate: string
       startTime: string
       endTime: string
-      visitorName?: string
-      visitorPhone?: string
+      contactPhone?: string
     }) => {
+      const actor = currentActor()
+      if (actor.role !== 'RESIDENT') fail(CODES.FORBIDDEN, '只有注册并登录的居民账号可预约看房')
       const housing = this.state.housings.find((item) => item.id === data.housingId)
       if (!housing) fail(CODES.NOT_FOUND, '房源不存在')
       const conflict = this.state.viewingAppointments.find(
@@ -2585,8 +2606,10 @@ export class FakeBackend {
         housingId: housing.id,
         houseId: housing.houseId,
         communityId: housing.communityId,
-        visitorName: data.visitorName ?? '游客',
-        visitorPhone: data.visitorPhone ?? '13900000000',
+        userId: actor.id,
+        contactPhone: data.contactPhone ?? this.state.residents.find((item) => item.id === actor.id)?.phone ?? null,
+        visitorName: this.state.residents.find((item) => item.id === actor.id)?.name ?? '演示居民',
+        visitorPhone: data.contactPhone ?? this.state.residents.find((item) => item.id === actor.id)?.phone ?? '',
         appointmentDate: data.appointmentDate,
         startTime: data.startTime,
         endTime: data.endTime,
@@ -2661,7 +2684,8 @@ export class FakeBackend {
   }
 
   community = {
-    getCommunityList: async () => this.state.communities.map((item) => ({ ...item })),
+    /* 社区列表：真实契约为 PageResult（各端筛选下拉均读 records） */
+    getCommunityList: async (params?: PageParams) => pageOf(this.state.communities, params),
     getCommunity: async (id: number) => {
       const found = this.state.communities.find((item) => item.id === id)
       if (!found) fail(CODES.NOT_FOUND, '社区不存在')
@@ -2764,14 +2788,31 @@ export class FakeBackend {
       this.state.houses.push(house)
       return house
     },
-    createResource: async (data: { communityId: number; name?: string; capacity?: number }) => {
+    createResource: async (data: {
+      communityId: number
+      name?: string
+      capacity?: number
+      images?: string[]
+    }) => {
       const resource: FakeResource = {
         id: this.nextId('resource'),
         communityId: data.communityId,
         name: data.name ?? '公共资源',
+        images: data.images ?? [],
         status: 'AVAILABLE'
       }
       this.state.resources.push(resource)
+      return resource
+    },
+    updateResource: async (
+      id: number,
+      data: { communityId?: number; name?: string; images?: string[] }
+    ) => {
+      const resource = this.state.resources.find((item) => item.id === id)
+      if (!resource) fail(CODES.NOT_FOUND, '资源不存在')
+      if (data.communityId !== undefined) resource.communityId = data.communityId
+      if (data.name !== undefined) resource.name = data.name
+      if (data.images !== undefined) resource.images = data.images
       return resource
     },
     createTimeslot: async (

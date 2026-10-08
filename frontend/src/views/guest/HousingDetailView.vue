@@ -93,18 +93,27 @@ async function load(): Promise<void> {
   }
 }
 
-/** 预约看房：未登录跳登录（带回跳）；非居民角色引导使用居民账号；居民跳转居民端预约入口 */
+/**
+ * 看房预约入口：游客跳居民登录并回跳预约页；非居民不调用预约接口。
+ * 游客只负责浏览房源与可预约时段，创建预约由居民端完成。
+ */
 function handleBookViewing(): void {
+  const reservePath = `/resident/housings/${route.params.id}/reserve`
   if (!userStore.isLoggedIn) {
-    router.push(`/auth/login?redirect=${encodeURIComponent(route.fullPath)}`)
+    router.push(`/auth/login?redirect=${encodeURIComponent(reservePath)}`)
     return
   }
   if (userStore.role !== 'RESIDENT') {
     ElMessage.warning('看房预约需居民账号，请切换居民账号登录后再试')
     return
   }
-  router.push(`/resident/housings/${route.params.id}`)
+  router.push(reservePath)
 }
+
+const bookingActionLabel = computed(() => {
+  if (!userStore.isLoggedIn) return '登录 / 注册后预约看房'
+  return userStore.role === 'RESIDENT' ? '预约看房' : '请使用居民账号预约'
+})
 
 onMounted(load)
 </script>
@@ -220,9 +229,9 @@ onMounted(load)
 
           <div class="info-actions">
             <el-button type="primary" size="large" @click="handleBookViewing">
-              预约看房
+              {{ bookingActionLabel }}
             </el-button>
-            <p class="action-hint">注册居民账号即可选择看房时段，在线提交预约</p>
+            <p class="action-hint">游客可浏览时段；注册并登录居民账号后即可在线提交预约</p>
           </div>
 
           <!-- 可约时段：只读胶囊，最多展示 4 个，预约动作统一走上方按钮 -->

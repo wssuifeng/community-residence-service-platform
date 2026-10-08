@@ -118,13 +118,12 @@ export interface HousingStatusUpdateDTO {
 
 /**
  * 看房预约单（2026-09-12 以后端 ViewingAppointmentVO.java 核对收口）。
- * 接口设计.md 9.12.2.1 的 appointmentNumber/timeslotId/visitorPhone/visitorCount/residentId 均为漂移命名：
- * visitorPhone→contactPhone、residentId→userId 已收口；appointmentNumber/visitorCount 为
- * 幽灵字段（后端不返回），保留仅因居民端列表仍展示（本任务禁改保护端）。
+ * 接口设计.md 9.12.2.1 的 visitorPhone/residentId 为历史漂移命名：
+ * visitorPhone→contactPhone、residentId→userId 已收口；游客预约路径已退役，历史游客字段仅作兼容展示。
  */
 export interface IViewingAppointment {
   id: number
-  /** 预约人用户ID（游客预约为 null；接口文档 residentId 为漂移命名） */
+  /** 预约人用户ID（新预约必有；历史游客预约可能为 null） */
   userId: number | null
   housingId: number
   housingTitle: string
@@ -132,16 +131,13 @@ export interface IViewingAppointment {
   appointmentDate: string
   startTime: string
   endTime: string
-  visitorName: string
-  /** 联系电话（接口文档 visitorPhone 为漂移命名） */
-  contactPhone: string
+  /** 居民实名；历史游客预约可能来自存量字段 */
+  visitorName?: string | null
+  /** 联系电话；历史游客预约可能为空 */
+  contactPhone?: string | null
   status: ViewingAppointmentStatus
   remark: string | null
   createdAt: string
-  /** 幽灵字段：后端 VO 不返回 appointmentNumber；居民端列表仍展示，运行时恒为 undefined */
-  appointmentNumber: string
-  /** 幽灵字段：后端 VO 不返回 visitorCount；居民端列表仍展示，保留原因同上 */
-  visitorCount: number
   /** R63 看房群聊关联会话（游客预约为空；居民预约创建时建立） */
   conversationId?: number | null
   /** 带看人（R59，v1.3 新增；未分配为 null，后端 VO 补齐后点亮） */
@@ -173,15 +169,15 @@ export interface IViewingAssigneeOption {
   role: 'STAFF' | 'ADMIN'
 }
 
-/** 创建看房预约请求（接口设计.md 9.12.2.1 请求体，游客可提交） */
+/** 创建看房预约请求（接口设计.md 9.12.2.1，仅 RESIDENT） */
 export interface ViewingAppointmentCreateDTO {
-  /** 后端 CreateViewingAppointmentDTO：日期+起止时间直传（接口文档的 timeslotId 为漂移命名） */
+  /** 后端 CreateViewingAppointmentDTO：日期+起止时间直传 */
   housingId: number
   appointmentDate: string
   startTime: string
   endTime: string
-  visitorName: string
-  contactPhone: string
+  /** 可选；为空时服务端从居民档案取手机号 */
+  contactPhone?: string
   remark?: string
 }
 

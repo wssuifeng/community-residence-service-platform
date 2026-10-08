@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 
-/** 看房预约管理控制器：居民/游客预约 + 管理端处置（接口设计.md 9.12.2） */
+/** 看房预约管理控制器：居民预约 + 管理端处置（接口设计.md 9.12.2） */
 @Tag(name = "看房预约管理", description = "看房预约提交与处置接口")
 @RestController
 @RequestMapping("/api/v1/viewing-appointments")
@@ -37,13 +37,15 @@ public class ViewingAppointmentController {
 
     private final ViewingAppointmentService appointmentService;
 
-    @Operation(summary = "创建看房预约", description = "居民或游客（游客填姓名电话）；时段冲突检测")
+    @Operation(summary = "创建看房预约", description = "仅注册并登录的居民账号可提交；服务端从令牌绑定预约人身份")
+    @PreAuthorize("hasRole('RESIDENT')")
     @PostMapping
     public ApiResponse<ViewingAppointmentVO> create(@RequestBody @Valid CreateViewingAppointmentDTO dto) {
         return ApiResponse.success(appointmentService.create(dto));
     }
 
-    @Operation(summary = "查询预约详情")
+    @Operation(summary = "查询预约详情", description = "居民仅可查看本人；服务人员仅可查看被分配预约；管理端按社区范围查看")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}")
     public ApiResponse<ViewingAppointmentVO> getById(@PathVariable Long id) {
         return ApiResponse.success(appointmentService.getById(id));
@@ -86,7 +88,7 @@ public class ViewingAppointmentController {
     }
 
     @Operation(summary = "预约列表（分页）",
-            description = "居民只看本人预约；服务人员看被分配的预约（我的带看，R59）；游客经详情页查询")
+            description = "居民只看本人预约；服务人员看被分配的预约（我的带看，R59）；管理端按社区或全局范围查询，游客无预约列表权限")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping
     public ApiResponse<PageVO<ViewingAppointmentVO>> page(
@@ -115,7 +117,8 @@ public class ViewingAppointmentController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "取消预约", description = "待确认/已预约 → 已取消")
+    @Operation(summary = "取消预约", description = "居民本人或管理端取消；服务人员与游客无权取消")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ApiResponse<Void> cancel(@PathVariable Long id, @RequestBody @Valid ReservationActionDTO dto) {
         appointmentService.cancel(id, dto.getReason());

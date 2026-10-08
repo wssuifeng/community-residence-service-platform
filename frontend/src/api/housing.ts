@@ -55,12 +55,12 @@ export function recordHousingView(id: number) {
   return http.post<number>(`/housings/${id}/view`)
 }
 
-/** 创建看房预约（接口设计.md 9.12.2.1，居民/游客可提交） */
+/** 创建看房预约（接口设计.md 9.12.2.1，仅注册并登录的居民可提交） */
 export function createViewingAppointment(data: ViewingAppointmentCreateDTO) {
   return http.post<IViewingAppointment>('/viewing-appointments', data)
 }
 
-/** 查询看房预约详情（接口设计.md 9.12.2.2） */
+/** 查询看房预约详情（接口设计.md 9.12.2.2，需登录且按角色/数据范围校验） */
 export function getViewingAppointmentDetail(id: number) {
   return http.get<IViewingAppointment>(`/viewing-appointments/${id}`)
 }
@@ -80,7 +80,7 @@ export function completeViewingAppointment(id: number, data: ViewingAppointmentR
   return http.patch<null>(`/viewing-appointments/${id}/complete`, data)
 }
 
-/** 取消看房预约（接口设计.md 9.12.2.6，PENDING/CONFIRMED → CANCELLED） */
+/** 取消看房预约（接口设计.md 9.12.2.6，居民本人或管理端） */
 export function cancelViewingAppointment(id: number, data: ViewingAppointmentReasonDTO) {
   return http.patch<null>(`/viewing-appointments/${id}/cancel`, data)
 }

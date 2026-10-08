@@ -63,7 +63,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 看房预约业务逻辑：待确认→已预约→已完成 + 已取消/已违约（六大状态机 #5，
- * 复用 C7 冲突检测模式）。居民预约绑定 user_id；游客预约记录 visitor 信息。
+ * 复用 C7 冲突检测模式）。新建预约绑定居民 user_id；历史游客记录仅作兼容读取。
  * R59：管理端分配带看人（assigned_staff_id）+ 预约居民与带看人会话消息。
  * R63：会话模型升级多方会话——预约创建即建群（居民 + 该社区启用管理员），
  * 分配带看人时带看人入群（conversation.conversation_id 关联，
@@ -106,7 +106,7 @@ public class ViewingAppointmentService {
     private final ConversationService conversationService;
 
     /**
-     * 创建预约：居民取令牌身份；游客必填姓名电话；时段落在房源模板内 + 冲突检测。
+     * 创建预约：仅居民账号可提交，身份取自令牌；时段落在房源模板内 + 冲突检测。
      * DEF-045：今日已结束时段（endTime<=now）拒绝（5804），与可约时段接口同口径。
      * R55 冲突校验复用 C7（R33）机制——「Redisson 分布式锁 + 数据库唯一约束
      * （V10 uk_viewing_slot）」双保险：锁内做区间重叠判定（与 C7 同口径，
@@ -114,12 +114,13 @@ public class ViewingAppointmentService {
      * 完全同槽竞态漏网由唯一约束兜底。刻意不加 @Transactional（理由同 C7）。
      * DEF-062：锁内落库前增「预约人日程冲突」检查（跨房源 + 跨域）——同账号
      * 同日与任意看房预约或任意资源预约时间区间重叠即拒 5807（「影分身」拦截；
-     * 游客预约无账号不参与）。
+     * 新建预约均有账号，历史游客记录不参与新建冲突检查）。
      */
     public ViewingAppointmentVO create(CreateViewingAppointmentDTO dto) {
+        requireResidentIdentity();
         ViewingAppointment appointment = insertAppointment(dto);
-        /* R63 预约创建即建群：居民 + 该社区启用管理员入群（游客预约
-           userId=null 跳过不建群，conversation_id 保持空）；建群与
+        /* R63 预约创建即建群：居民 + 该社区启用管理员入群；历史游客预约
+           不进入新建路径；建群与
            conversation_id 回写发生在锁外——insertAppointment 返回时锁已
            释放，预约行已落库可承载回写（OCR DEF-118 注释时序修正：
            原「建群在锁内落库之后」与实现不符） */
@@ -141,6 +142,7 @@ public class ViewingAppointmentService {
      * 接口设计 §9.19.7 错误码消费点）。
      */
     public ViewingAppointmentVO createInConversation(Long conversationId, CreateViewingAppointmentDTO dto) {
+        requireResidentIdentity();
         Conversation conversation = conversationService.requireLeaseGroup(conversationId);
         /* 会话关闭即拒绝（DEF-110）：requireLeaseGroup 只校验参与者与群类型，
            关闭态停收停发口径须在此消费——不得再以已关闭租约群为入口发起新预约 */
@@ -237,10 +239,9 @@ public class ViewingAppointmentService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "所选时间不在房源可预约时段内");
         }
 
-        /* 预约人身份先行解析（DEF-062 日程冲突检查需要）：居民取令牌身份；
-           游客无账号（userId=null）不参与日程冲突检查 */
-        Long userId = SecurityUtils.getUser() != null && SecurityUtils.hasRole(RoleConstants.RESIDENT)
-                ? SecurityUtils.getUserId() : null;
+        /* 预约人身份由居民令牌确定（DEF-158 方案 B）：游客没有新建预约路径。
+           身份先行解析用于跨房源/跨资源日程冲突检查。 */
+        Long userId = requireResidentIdentity();
 
         RLock lock = redissonClient.getLock(
                 "viewing:lock:housing:" + dto.getHousingId() + ":" + dto.getAppointmentDate());
@@ -295,23 +296,16 @@ public class ViewingAppointmentService {
             }
 
             ViewingAppointment appointment = new ViewingAppointment();
-            if (userId != null) {
-                appointment.setUserId(userId);
-            } else {
-                /* 游客预约：user_id 空 + visitor 信息必填 */
-                if (!StringUtils.hasText(dto.getVisitorName())) {
-                    throw new BusinessException(ErrorCode.INVALID_PARAM, "游客预约请填写姓名");
-                }
-                appointment.setVisitorName(dto.getVisitorName());
-                appointment.setVisitorPhone(dto.getContactPhone());
-            }
+            appointment.setUserId(userId);
             appointment.setHousingId(housing.getId());
             appointment.setCommunityId(housing.getCommunityId());
             appointment.setAppointmentDate(dto.getAppointmentDate());
             appointment.setStartTime(dto.getStartTime());
             appointment.setEndTime(dto.getEndTime());
             appointment.setStatus("TO_CONFIRM");
-            appointment.setContactPhone(dto.getContactPhone());
+            Resident resident = residentMapper.selectById(userId);
+            appointment.setContactPhone(StringUtils.hasText(dto.getContactPhone())
+                    ? dto.getContactPhone() : resident != null ? resident.getPhone() : null);
             appointment.setRemark(dto.getRemark());
             try {
                 appointmentMapper.insert(appointment);
@@ -328,13 +322,23 @@ public class ViewingAppointmentService {
     }
 
     /**
-     * 预约详情：居民限本人；游客经公开路径查看（手机号核对由前端交互完成）
+     * 预约详情：居民限本人；服务人员限被分配预约；ADMIN 限绑定社区；
+     * SUPER_ADMIN 可查看全局。历史游客预约仅对管理端保留兼容读取。
      */
     public ViewingAppointmentVO getById(Long id) {
         ViewingAppointment appointment = requireAppointment(id);
-        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
-                && !appointment.getUserId().equals(SecurityUtils.getUserId())) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "无权查看他人预约");
+        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
+            if (!java.util.Objects.equals(appointment.getUserId(), SecurityUtils.getUserId())) {
+                throw new BusinessException(ErrorCode.FORBIDDEN, "无权查看他人预约");
+            }
+        } else if (SecurityUtils.hasRole(RoleConstants.STAFF)) {
+            if (!java.util.Objects.equals(appointment.getAssignedStaffId(), SecurityUtils.getUserId())) {
+                throw new BusinessException(ErrorCode.FORBIDDEN, "仅可查看分配给本人的预约");
+            }
+        } else if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
+            SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
+        } else if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+            throw new ForbiddenException("未登录或无权查看看房预约");
         }
         return toVO(appointment);
     }
@@ -419,11 +423,15 @@ public class ViewingAppointmentService {
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long id, String reason) {
         ViewingAppointment appointment = requireAppointment(id);
-        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
-                && !appointment.getUserId().equals(SecurityUtils.getUserId())) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "仅预约人本人可取消");
-        } else {
+        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
+            if (!java.util.Objects.equals(appointment.getUserId(), SecurityUtils.getUserId())) {
+                throw new BusinessException(ErrorCode.FORBIDDEN, "仅预约人本人可取消");
+            }
+        } else if (SecurityUtils.hasRole(RoleConstants.ADMIN)
+                || SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
             SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
+        } else {
+            throw new ForbiddenException("服务人员与游客无权取消看房预约");
         }
         validateTransition(appointment, "CANCELLED");
         appointment.setStatus("CANCELLED");
@@ -507,7 +515,7 @@ public class ViewingAppointmentService {
         appointmentMapper.updateById(appointment);
 
         /* R63 带看人入群（幂等，复用 addParticipant 撞号忽略语义）；
-           未建群（游客预约）无会话可入，跳过 */
+           未建群（历史游客预约）无会话可入，跳过 */
         if (appointment.getConversationId() != null) {
             conversationService.addParticipant(appointment.getConversationId(), assigneeId);
         }
@@ -655,6 +663,14 @@ public class ViewingAppointmentService {
             vo.setSenderName(user != null ? user.getRealName() : "");
         }
         return vo;
+    }
+
+    /** 方案 B 身份防线：所有新建看房预约必须绑定已认证居民账号。 */
+    private Long requireResidentIdentity() {
+        if (!SecurityUtils.hasRole(RoleConstants.RESIDENT) || SecurityUtils.getUser() == null) {
+            throw new ForbiddenException("只有注册并登录的居民账号可预约看房");
+        }
+        return SecurityUtils.getUserId();
     }
 
     public ViewingAppointment requireAppointment(Long id) {

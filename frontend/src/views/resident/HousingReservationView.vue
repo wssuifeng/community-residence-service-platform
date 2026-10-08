@@ -13,7 +13,8 @@ import type { IResident } from '@/types/modules/resident'
  * 非连续点击拒绝并提示，本地连续时长上限 MAX_CONTINUOUS_MINUTES 前置拦截，
  * 最终超限由后端按 sys_config 兜底拒绝；提交为合并区间单条预约，成功跳预约详情页。
  *
- * 注意：连续多选规则与 ReservationCreateView（资源域）为同规则双实现（R60 两域各一键），
+ * 联系人身份由登录居民账号确定，不再收集游客姓名或短信验证码信息。
+ * 连续多选规则与 ReservationCreateView（资源域）为同规则双实现（R60 两域各一键），
  * 一侧调整约束须同步另一侧。
  */
 
@@ -293,7 +294,6 @@ function goNextFromStep2(): void {
 /* ------------------------------ 第三步：确认提交 ------------------------------ */
 
 const form = reactive({
-  visitorName: '',
   contactPhone: '',
   remark: ''
 })
@@ -305,17 +305,13 @@ const weekdayText = computed(() => {
   return WEEKDAYS[(new Date(`${selectedDate.value}T00:00:00`).getDay() + 6) % 7]
 })
 
-/** 联系电话后端必填（CreateViewingAppointmentDTO @NotBlank + 手机号格式），提交前本地校验 */
-const phoneValid = computed(() => /^1[3-9]\d{9}$/.test(form.contactPhone.trim()))
+/** 联系电话可选；有填写时按后端手机号格式校验 */
+const phoneValid = computed(() => !form.contactPhone.trim() || /^1[3-9]\d{9}$/.test(form.contactPhone.trim()))
 
 async function handleSubmit(): Promise<void> {
   if (submitting.value) return
   if (!selectedDate.value || !mergedStart.value || !mergedEnd.value) {
     ElMessage.warning('请先选择看房日期与时段')
-    return
-  }
-  if (!form.visitorName.trim()) {
-    ElMessage.warning('请填写联系人姓名')
     return
   }
   if (!phoneValid.value) {
@@ -329,8 +325,7 @@ async function handleSubmit(): Promise<void> {
       appointmentDate: selectedDate.value,
       startTime: mergedStart.value,
       endTime: mergedEnd.value,
-      visitorName: form.visitorName.trim(),
-      contactPhone: form.contactPhone.trim(),
+      contactPhone: form.contactPhone.trim() || undefined,
       remark: form.remark.trim() || undefined
     })
     ElMessage.success('看房预约已提交，等待管理员确认')
@@ -360,7 +355,6 @@ onMounted(async () => {
   }
   try {
     profile.value = await getMyProfile()
-    form.visitorName = profile.value.realName
     form.contactPhone = profile.value.phone
   } catch {
     /* 资料加载失败不阻塞预约流程，联系人与电话可手填 */
@@ -533,16 +527,16 @@ onMounted(async () => {
             </div>
             <div class="summary-row">
               <dt>联系人</dt>
-              <dd>{{ profile?.realName || form.visitorName || '当前登录居民' }}</dd>
+              <dd>{{ profile?.realName || '当前登录居民' }}</dd>
             </div>
           </dl>
 
           <div class="supplement">
             <el-form label-width="76px" class="supplement-form" @submit.prevent>
-              <el-form-item label="联系电话" required>
+              <el-form-item label="联系电话">
                 <el-input
                   v-model="form.contactPhone"
-                  placeholder="用于看房确认联系（必填）"
+                  placeholder="用于管理员联系（选填）"
                   maxlength="11"
                   style="width: 240px"
                 />
