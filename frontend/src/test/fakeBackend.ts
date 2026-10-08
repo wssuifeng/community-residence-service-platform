@@ -2128,7 +2128,10 @@ export class FakeBackend {
   }
 
   evaluation = {
-    submitEvaluation: async (orderId: number, data: { score: number; content: string }) => {
+    submitEvaluation: async (
+      orderId: number,
+      data: { score?: number; rating?: number; content?: string; isSatisfied?: boolean }
+    ) => {
       const order = this.state.workOrders.find((item) => item.id === orderId)
       if (!order) fail(CODES.WORK_ORDER_NOT_FOUND, '工单不存在')
       if (order.status !== 'COMPLETED' && order.status !== 'CLOSED') {
@@ -2136,12 +2139,13 @@ export class FakeBackend {
       }
       const exists = this.state.evaluations.find((item) => item.orderId === orderId)
       if (exists) fail(CODES.EVALUATION_DUPLICATE, '已评价，不可重复评价')
+      const score = data.score ?? data.rating ?? 0
       const evaluation: FakeEvaluation = {
         id: this.nextId('evaluation'),
         orderId,
-        score: data.score,
-        content: data.content,
-        satisfied: data.score > 2,
+        score,
+        content: data.content ?? '',
+        satisfied: data.isSatisfied ?? score >= 4,
         followups: [],
         createdAt: nowIso()
       }

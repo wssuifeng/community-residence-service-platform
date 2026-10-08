@@ -145,6 +145,15 @@ describe('居民工单详情 · 不满意退回（R22）', () => {
     expect(wrapper.text()).toContain('服务评价')
     expect(wrapper.find('.evaluation-card').exists()).toBe(true)
     expect(wrapper.find('.evaluation-form').exists()).toBe(true)
+
+    await wrapper.findAll('.evaluation-form .el-rate__item')[4].trigger('click')
+    await wrapper.find('.evaluation-form textarea').setValue('维修及时，处理结果符合预期')
+    await wrapper.find('.evaluation-form button').trigger('click')
+    await flushPromises()
+
+    expect(backend().state.evaluations[0]).toMatchObject({ orderId: 1, score: 5, satisfied: true })
+    expect(wrapper.find('.evaluation-form').exists()).toBe(false)
+    expect(wrapper.find('.evaluation-summary').exists()).toBe(true)
   })
 
   it('退回成功提示指向「重新处理后再确认」，不再指向退回后不可用的评价表单', async () => {
