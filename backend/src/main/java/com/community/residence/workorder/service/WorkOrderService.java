@@ -517,11 +517,12 @@ public class WorkOrderService {
     public void reject(Long id, String reason) {
         WorkOrder order = requireOrder(id);
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
+        String oldStatus = order.getStatus();
         /* 并发驳回幂等跳过：赢家已流转，不重复留痕/通知（OCR DEF-116） */
         if (!transition(order, WorkOrderStatus.REJECTED)) {
             return;
         }
-        appendProcess(id, "REJECT", order.getStatus(), WorkOrderStatus.REJECTED, reason);
+        appendProcess(id, "REJECT", oldStatus, WorkOrderStatus.REJECTED, reason);
         /* R48 工单流转事件全覆盖（DEF-020）：驳回通知提交居民 */
         notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已驳回",
                 "您的工单 " + order.getOrderNo() + " 被驳回：" + reason,
@@ -534,11 +535,12 @@ public class WorkOrderService {
     public void cancel(Long id, String reason) {
         WorkOrder order = requireOrder(id);
         checkResidentOwner(order);
+        String oldStatus = order.getStatus();
         /* 并发取消幂等跳过：赢家已流转，不重复留痕（OCR DEF-116） */
         if (!transition(order, WorkOrderStatus.CANCELLED)) {
             return;
         }
-        appendProcess(id, "CANCEL", order.getStatus(), WorkOrderStatus.CANCELLED, reason);
+        appendProcess(id, "CANCEL", oldStatus, WorkOrderStatus.CANCELLED, reason);
     }
 
     /** 处理时间线（按时间升序） */
