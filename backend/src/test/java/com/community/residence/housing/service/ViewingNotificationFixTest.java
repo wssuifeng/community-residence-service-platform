@@ -108,10 +108,12 @@ class ViewingNotificationFixTest {
     @Test
     @DisplayName("取消：预约人收到通知（含原因）")
     void cancel_notifiesApplicant() {
+        appointment.setConversationId(55L);
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked = mockAdmin()) {
             service.cancel(1L, "时间冲突");
             verify(notificationService).createForResident(eq(5L), eq(1L), eq("看房预约已取消"),
                     anyString(), anyString(), anyString(), eq(1L));
+            verify(conversationService).closeConversation(55L, "看房预约已取消");
         }
     }
 
