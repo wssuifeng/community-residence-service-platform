@@ -57,7 +57,9 @@ import com.community.residence.lease.mapper.LeaseChangeLogMapper;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
 import com.community.residence.lease.mapper.LeaseReminderMapper;
 import com.community.residence.messaging.entity.Notification;
+import com.community.residence.messaging.entity.NotificationChannelLog;
 import com.community.residence.messaging.mapper.NotificationMapper;
+import com.community.residence.messaging.mapper.NotificationChannelLogMapper;
 import com.community.residence.notice.entity.Notice;
 import com.community.residence.notice.entity.NoticeTarget;
 import com.community.residence.notice.entity.NoticeViewRecord;
@@ -142,6 +144,7 @@ public class CommunityService {
     private final ViewingAppointmentMapper viewingAppointmentMapper;
     private final StatisticsSnapshotMapper statisticsSnapshotMapper;
     private final NotificationMapper notificationMapper;
+    private final NotificationChannelLogMapper notificationChannelLogMapper;
     private final SysAdminCommunityMapper sysAdminCommunityMapper;
     private final SysOperationLogMapper sysOperationLogMapper;
     /* V18/V19 新增表的级联清理依赖（外键指向 community / lease_record / service_category） */
@@ -362,12 +365,20 @@ public class CommunityService {
         buildingMapper.physicalDeleteByCommunityId(id);
         publicResourceMapper.physicalDeleteByCommunityId(id);
 
-        /* ---- 横切与统计（V1 #29/35）：统计快照、通知
-                （notification_channel_log 无实体无 FK，数据随通知失效） ---- */
+        /* ---- 横切与统计（V1 #29/35）：统计快照、通知及渠道留痕 ---- */
         statisticsSnapshotMapper.delete(new LambdaQueryWrapper<StatisticsSnapshot>()
                 .eq(StatisticsSnapshot::getCommunityId, id));
-        notificationMapper.delete(new LambdaQueryWrapper<Notification>()
-                .eq(Notification::getCommunityId, id));
+        LambdaQueryWrapper<Notification> notificationScope = new LambdaQueryWrapper<Notification>()
+                .eq(Notification::getCommunityId, id);
+        List<Long> notificationIds = notificationMapper.selectList(notificationScope).stream()
+                .map(Notification::getId)
+                .toList();
+        /* notification_channel_log 以 notification_id 外键依赖通知，必须先删渠道留痕 */
+        if (!notificationIds.isEmpty()) {
+            notificationChannelLogMapper.delete(new LambdaQueryWrapper<NotificationChannelLog>()
+                    .in(NotificationChannelLog::getNotificationId, notificationIds));
+        }
+        notificationMapper.delete(notificationScope);
 
         /* ---- 账号绑定解除（V1 #31）：sys_user 保留（跨社区共享体系） ---- */
         sysAdminCommunityMapper.delete(new LambdaQueryWrapper<SysAdminCommunity>()
