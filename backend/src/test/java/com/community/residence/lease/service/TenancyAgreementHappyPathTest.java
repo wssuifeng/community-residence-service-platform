@@ -111,8 +111,8 @@ class TenancyAgreementHappyPathTest {
     void setUp() {
         agreementService = new AgreementService(templateMapper, agreementMapper, leaseMapper,
                 communityMapper, houseMapper, unitMapper, buildingMapper, residentMapper,
-                sysUserMapper, notificationService, changeLogService, conversationMapper,
-                conversationService, leaseService);
+                sysAdminCommunityMapper, sysUserMapper, notificationService, changeLogService,
+                conversationMapper, conversationService, leaseService);
         /* 管理端确认（审核通过 → 待签约）：状态 TO_SIGN；无看房、无群聊 */
         lease = new LeaseRecord();
         lease.setId(LEASE_ID);

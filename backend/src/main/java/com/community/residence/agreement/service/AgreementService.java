@@ -12,7 +12,9 @@ import com.community.residence.agreement.mapper.AgreementTemplateMapper;
 import com.community.residence.agreement.mapper.LeaseAgreementMapper;
 import com.community.residence.agreement.vo.AgreementTemplateVO;
 import com.community.residence.agreement.vo.LeaseAgreementVO;
+import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.entity.SysUser;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.ConversationType;
@@ -79,6 +81,7 @@ public class AgreementService {
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final ResidentMapper residentMapper;
+    private final SysAdminCommunityMapper sysAdminCommunityMapper;
     private final SysUserMapper sysUserMapper;
     private final NotificationService notificationService;
     private final LeaseChangeLogService changeLogService;
@@ -437,20 +440,59 @@ public class AgreementService {
         return (building != null ? building.getName() : "") + unit.getName() + house.getHouseNumber();
     }
 
+    /* 协议确认通知：居民与社区绑定启用管理员均使用各自身份空间收件；
+       管理方通知不能依赖页面待办刷新，否则居民先确认后管理端无法收到状态事件。 */
     private void notifyCounterpart(LeaseAgreement agreement, LeaseRecord lease, boolean bothConfirmed) {
         String houseLocation = houseLocation(lease);
         if (bothConfirmed) {
             notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
                     "租赁协议已确认", "您的租赁协议（" + houseLocation + "）双方均已确认，可随时在「我的租约」中查看",
                     "LEASE", "LEASE_AGREEMENT", agreement.getId());
+            notifyCommunityAdmins(lease, "租赁协议已确认",
+                    "租约 #" + lease.getId() + "（" + houseLocation + "）双方已确认，租约已正式生效",
+                    agreement.getId());
             return;
         }
         if (agreement.getTenantConfirmTime() == null) {
             notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
                     "待确认租赁协议", "管理方已确认租赁协议（" + houseLocation + "），请及时查看并确认",
                     "LEASE", "LEASE_AGREEMENT", agreement.getId());
+            return;
         }
-        /* 管理方一侧由前端会话/待办清单呈现，此处仅写居民侧通知，避免向系统账号推送 */
+        notifyCommunityAdmins(lease, "居民已确认租赁协议",
+                "租约 #" + lease.getId() + "（" + houseLocation + "）居民已确认协议，请管理方确认",
+                agreement.getId());
+    }
+
+    /* 协议事件的管理方收件人：与承租确认、到期提醒共用社区绑定管理员口径，
+       只投递启用的 ADMIN，不把 SUPER_ADMIN 混入社区管理员身份集合。 */
+    private void notifyCommunityAdmins(LeaseRecord lease, String title, String content, Long agreementId) {
+        List<SysAdminCommunity> bindings = sysAdminCommunityMapper.selectList(
+                new LambdaQueryWrapper<SysAdminCommunity>()
+                        .eq(SysAdminCommunity::getCommunityId, lease.getCommunityId()));
+        if (bindings == null || bindings.isEmpty()) {
+            return;
+        }
+        List<Long> adminIds = bindings.stream()
+                .map(SysAdminCommunity::getAdminId)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .toList();
+        if (adminIds.isEmpty()) {
+            return;
+        }
+        List<SysUser> admins = sysUserMapper.selectList(
+                new LambdaQueryWrapper<SysUser>()
+                        .in(SysUser::getId, adminIds)
+                        .eq(SysUser::getRole, RoleConstants.ADMIN)
+                        .eq(SysUser::getStatus, "ACTIVE"));
+        if (admins == null) {
+            return;
+        }
+        for (SysUser admin : admins) {
+            notificationService.createForUser(admin.getId(), lease.getCommunityId(), title, content,
+                    "LEASE", "LEASE_AGREEMENT", agreementId);
+        }
     }
 
     /* 租约签约状态与协议状态同义，协议完成后回写便于租约列表直接展示 */

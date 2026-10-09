@@ -6,8 +6,12 @@ import com.community.residence.agreement.entity.AgreementTemplate;
 import com.community.residence.agreement.entity.LeaseAgreement;
 import com.community.residence.agreement.mapper.AgreementTemplateMapper;
 import com.community.residence.agreement.mapper.LeaseAgreementMapper;
+import com.community.residence.auth.entity.SysAdminCommunity;
+import com.community.residence.auth.entity.SysUser;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.ErrorCode;
+import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.community.entity.House;
@@ -38,6 +42,7 @@ import org.mockito.quality.Strictness;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -85,6 +90,8 @@ class AgreementLeaseActivationTest {
     @Mock
     private ResidentMapper residentMapper;
     @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
     private SysUserMapper sysUserMapper;
     @Mock
     private NotificationService notificationService;
@@ -110,8 +117,8 @@ class AgreementLeaseActivationTest {
     void setUp() {
         agreementService = new AgreementService(templateMapper, agreementMapper, leaseMapper,
                 communityMapper, houseMapper, unitMapper, buildingMapper, residentMapper,
-                sysUserMapper, notificationService, changeLogService, conversationMapper,
-                conversationService, leaseService);
+                sysAdminCommunityMapper, sysUserMapper, notificationService, changeLogService,
+                conversationMapper, conversationService, leaseService);
 
         toSignLease = new LeaseRecord();
         toSignLease.setId(LEASE_ID);
@@ -194,6 +201,16 @@ class AgreementLeaseActivationTest {
     @Test
     @DisplayName("双方确认达成 SIGNED：联动租约生效 + 房屋置已入住 + 状态留痕 + 群聊系统消息")
     void confirm_bothSides_activatesLease() {
+        SysAdminCommunity binding = new SysAdminCommunity();
+        binding.setAdminId(ADMIN_ID);
+        binding.setCommunityId(3L);
+        SysUser admin = new SysUser();
+        admin.setId(ADMIN_ID);
+        admin.setRole(RoleConstants.ADMIN);
+        admin.setStatus("ACTIVE");
+        when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of(binding));
+        when(sysUserMapper.selectList(any())).thenReturn(List.of(admin));
+
         Conversation conversation = new Conversation();
         conversation.setId(CONVERSATION_ID);
         conversation.setType("LEASE_GROUP");
@@ -219,6 +236,37 @@ class AgreementLeaseActivationTest {
             /* 身份空间断言（DEF-067）：双方确认达成触达居民，标注 createForResident */
             verify(notificationService).createForResident(eq(RESIDENT_ID), eq(3L),
                     eq("租赁协议已确认"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"),
+                    eq(AGREEMENT_ID));
+            verify(notificationService).createForUser(eq(ADMIN_ID), eq(3L),
+                    eq("租赁协议已确认"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"),
+                    eq(AGREEMENT_ID));
+        }
+    }
+
+    @Test
+    @DisplayName("居民先确认协议：通知社区绑定管理员")
+    void residentConfirm_notifiesBoundAdmins() {
+        pendingAgreement.setAdminConfirmTime(null);
+        pendingAgreement.setAdminConfirmName(null);
+        SysAdminCommunity binding = new SysAdminCommunity();
+        binding.setAdminId(ADMIN_ID);
+        binding.setCommunityId(3L);
+        SysUser admin = new SysUser();
+        admin.setId(ADMIN_ID);
+        admin.setRole(RoleConstants.ADMIN);
+        admin.setStatus("ACTIVE");
+        when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of(binding));
+        when(sysUserMapper.selectList(any())).thenReturn(List.of(admin));
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
+            mocked.when(() -> SecurityUtils.hasRole(RoleConstants.RESIDENT)).thenReturn(true);
+
+            var vo = agreementService.confirm(AGREEMENT_ID, new AgreementConfirmDTO());
+
+            assertThat(vo.getStatus()).isEqualTo("PARTIAL");
+            verify(notificationService).createForUser(eq(ADMIN_ID), eq(3L),
+                    eq("居民已确认租赁协议"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"),
                     eq(AGREEMENT_ID));
         }
     }

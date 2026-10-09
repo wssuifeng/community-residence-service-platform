@@ -4,6 +4,9 @@ import com.community.residence.agreement.dto.AgreementConfirmDTO;
 import com.community.residence.agreement.entity.LeaseAgreement;
 import com.community.residence.agreement.mapper.AgreementTemplateMapper;
 import com.community.residence.agreement.mapper.LeaseAgreementMapper;
+import com.community.residence.auth.entity.SysAdminCommunity;
+import com.community.residence.auth.entity.SysUser;
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
@@ -79,6 +82,8 @@ class AgreementTenancyConsentReuseTest {
     @Mock
     private ResidentMapper residentMapper;
     @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
     private SysUserMapper sysUserMapper;
     @Mock
     private NotificationService notificationService;
@@ -105,8 +110,8 @@ class AgreementTenancyConsentReuseTest {
     void setUp() {
         agreementService = new AgreementService(templateMapper, agreementMapper, leaseMapper,
                 communityMapper, houseMapper, unitMapper, buildingMapper, residentMapper,
-                sysUserMapper, notificationService, changeLogService, conversationMapper,
-                conversationService, leaseService);
+                sysAdminCommunityMapper, sysUserMapper, notificationService, changeLogService,
+                conversationMapper, conversationService, leaseService);
 
         tenancyConfirmedAt = LocalDateTime.now().minusHours(3);
         toSignLease = new LeaseRecord();
