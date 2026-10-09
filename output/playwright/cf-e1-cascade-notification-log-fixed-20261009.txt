@@ -1,0 +1,17 @@
+2026-10-09 DEF-163 社区级联删除清理通知渠道留痕真实回归
+环境：community_residence_test，后端 http://127.0.0.1:8082；不写开发库 community_residence。
+adminLogin status=200 tokenReceived=True
+createCommunity status=200 id=3
+createStructure buildingStatus=200 buildingId=3 unitStatus=200 unitId=3 houseStatus=200 houseId=6
+seedNotificationChannelLog notificationId=2
+beforeDelete notificationAndLogCounts=1	1
+deleteCommunity status=200 body={"code":200,"message":"success","data":null,"timestamp":"2026-10-09T20:37:03.6319181","traceId":null}
+afterDelete residualCounts:
+community	0
+notification	0
+channel_log	0
+building	0
+unit	0
+house	0
+expected: delete HTTP 200 and every residual count is 0
+result: deletePassed=True residualZero=True

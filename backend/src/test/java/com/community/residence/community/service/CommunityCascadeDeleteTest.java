@@ -50,6 +50,8 @@ import com.community.residence.lease.mapper.LeaseChangeLogMapper;
 import com.community.residence.lease.mapper.LeaseRecordMapper;
 import com.community.residence.lease.mapper.LeaseReminderMapper;
 import com.community.residence.messaging.entity.Notification;
+import com.community.residence.messaging.entity.NotificationChannelLog;
+import com.community.residence.messaging.mapper.NotificationChannelLogMapper;
 import com.community.residence.messaging.mapper.NotificationMapper;
 import com.community.residence.notice.entity.NoticeTarget;
 import com.community.residence.notice.mapper.NoticeMapper;
@@ -180,6 +182,8 @@ class CommunityCascadeDeleteTest {
     @Mock
     private NotificationMapper notificationMapper;
     @Mock
+    private NotificationChannelLogMapper notificationChannelLogMapper;
+    @Mock
     private SysAdminCommunityMapper sysAdminCommunityMapper;
     @Mock
     private SysOperationLogMapper sysOperationLogMapper;
@@ -246,6 +250,7 @@ class CommunityCascadeDeleteTest {
         TableInfoHelper.initTableInfo(assistant, PublicResource.class);
         TableInfoHelper.initTableInfo(assistant, StatisticsSnapshot.class);
         TableInfoHelper.initTableInfo(assistant, Notification.class);
+        TableInfoHelper.initTableInfo(assistant, NotificationChannelLog.class);
         TableInfoHelper.initTableInfo(assistant, SysAdminCommunity.class);
         TableInfoHelper.initTableInfo(assistant, com.community.residence.auth.entity.SysUser.class);
     }
@@ -272,6 +277,11 @@ class CommunityCascadeDeleteTest {
     @Test
     @DisplayName("空数据社区删除：仅删本体与绑定、写操作日志，无业务表调用")
     void delete_emptyCommunity_minimalCascade() {
+        Notification notification = new Notification();
+        notification.setId(501L);
+        notification.setCommunityId(9L);
+        when(notificationMapper.selectList(any())).thenReturn(List.of(notification));
+
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUserId).thenReturn(1L);
 
@@ -300,6 +310,8 @@ class CommunityCascadeDeleteTest {
         verify(buildingMapper).physicalDeleteByCommunityId(9L);
         verify(publicResourceMapper).physicalDeleteByCommunityId(9L);
         verify(statisticsSnapshotMapper).delete(any());
+        verify(notificationMapper).selectList(any());
+        verify(notificationChannelLogMapper).delete(any());
         verify(notificationMapper).delete(any());
         verify(sysAdminCommunityMapper).delete(any());
 
