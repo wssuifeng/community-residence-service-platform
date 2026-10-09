@@ -1,5 +1,7 @@
 package com.community.residence.housing.service;
 
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
+
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -66,6 +68,8 @@ class HousingPastSlotFixTest {
     @Mock
     private ViewingAppointmentMapper appointmentMapper;
     @Mock
+    private com.community.residence.reservation.mapper.ResourceReservationMapper resourceReservationMapper;
+    @Mock
     private ResidentMapper residentMapper;
     @Mock
     private ViolationRecordMapper violationRecordMapper;
@@ -77,6 +81,9 @@ class HousingPastSlotFixTest {
     private RLock lock;
     @Mock
     private com.community.residence.conversation.service.ConversationService conversationService;
+
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
 
     @InjectMocks
     private HousingService housingService;
@@ -95,6 +102,8 @@ class HousingPastSlotFixTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(sysAdminCommunityMapper.selectList(any())).thenReturn(java.util.List.of());
+        lenient().when(resourceReservationMapper.selectCount(any())).thenReturn(0L);
         lenient().when(redissonClient.getLock(anyString())).thenReturn(lock);
         try {
             lenient().when(lock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);
@@ -185,16 +194,25 @@ class HousingPastSlotFixTest {
         CreateViewingAppointmentDTO dto = new CreateViewingAppointmentDTO();
         dto.setHousingId(1L);
         dto.setAppointmentDate(LocalDate.now());
-        dto.setStartTime(now.minusMinutes(90));
-        dto.setEndTime(now.minusMinutes(30));
+        dto.setStartTime(now.minusMinutes(45));
+        dto.setEndTime(now.minusMinutes(15));
         dto.setContactPhone("13800001111");
         dto.setVisitorName("游客甲");
+        when(timeslotMapper.selectList(any())).thenReturn(List.of(
+                slot(dto.getAppointmentDate().getDayOfWeek().getValue(),
+                        dto.getStartTime().minusMinutes(30), dto.getEndTime().plusMinutes(30))));
 
-        assertThatThrownBy(() -> appointmentService.create(dto))
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUser).thenReturn(
+                    new com.community.residence.common.context.UserContext(1L, "resident1", "RESIDENT", java.util.Set.of()));
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> SecurityUtils.hasRole("RESIDENT")).thenReturn(true);
+            assertThatThrownBy(() -> appointmentService.create(dto))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
                         .isEqualTo(ErrorCode.PAST_SLOT))
                 .hasMessageContaining("不能预约已过去的时段");
+        }
         assertThat(ErrorCode.PAST_SLOT.getCode()).isEqualTo(5804);
     }
 
@@ -217,7 +235,10 @@ class HousingPastSlotFixTest {
         dto.setVisitorName("游客甲");
 
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUser).thenReturn(null);
+            mocked.when(SecurityUtils::getUser).thenReturn(
+                    new com.community.residence.common.context.UserContext(1L, "resident1", "RESIDENT", java.util.Set.of()));
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> SecurityUtils.hasRole("RESIDENT")).thenReturn(true);
 
             ViewingAppointmentVO vo = appointmentService.create(dto);
 

@@ -40,7 +40,7 @@ const props = withDefaults(
 const CATEGORY_TYPES: Record<string, string[]> = {
   workorder: ['WORK_ORDER'],
   feedback: ['FEEDBACK'],
-  reservation: ['RESERVATION', 'RESOURCE_RESERVATION'],
+  reservation: ['RESERVATION', 'RESOURCE_RESERVATION', 'VIEWING_APPOINTMENT'],
   notice: ['NOTICE'],
   lease: [
     'LEASE',

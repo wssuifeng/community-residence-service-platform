@@ -1,5 +1,7 @@
 package com.community.residence.housing.service;
 
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
+
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.housing.dto.CreateViewingAppointmentDTO;
@@ -52,6 +54,8 @@ class ViewingAppointmentConflictFixTest {
     @Mock
     private ViewingAppointmentMapper appointmentMapper;
     @Mock
+    private com.community.residence.reservation.mapper.ResourceReservationMapper resourceReservationMapper;
+    @Mock
     private HousingMapper housingMapper;
     @Mock
     private HousingTimeslotMapper timeslotMapper;
@@ -68,6 +72,9 @@ class ViewingAppointmentConflictFixTest {
     @Mock
     private com.community.residence.conversation.service.ConversationService conversationService;
 
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+
     @InjectMocks
     private ViewingAppointmentService service;
 
@@ -75,6 +82,8 @@ class ViewingAppointmentConflictFixTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(sysAdminCommunityMapper.selectList(any())).thenReturn(java.util.List.of());
+        lenient().when(resourceReservationMapper.selectCount(any())).thenReturn(0L);
         lenient().when(redissonClient.getLock(anyString())).thenReturn(lock);
         try {
             lenient().when(lock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);
@@ -160,7 +169,12 @@ class ViewingAppointmentConflictFixTest {
         Runnable task = () -> {
             try (var mocked = mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
                 mocked.when(com.community.residence.common.context.SecurityUtils::getUser)
-                        .thenReturn(null);
+                        .thenReturn(new com.community.residence.common.context.UserContext(
+                                1L, "resident1", "RESIDENT", java.util.Set.of()));
+                mocked.when(com.community.residence.common.context.SecurityUtils::getUserId)
+                        .thenReturn(1L);
+                mocked.when(() -> com.community.residence.common.context.SecurityUtils.hasRole("RESIDENT"))
+                        .thenReturn(true);
                 var dto = dto(A_START, A_END);
                 dto.setVisitorName("游客" + (long) Thread.currentThread().getId());
                 try {
@@ -219,10 +233,15 @@ class ViewingAppointmentConflictFixTest {
         assertThat(vo.getStatus()).isEqualTo("TO_CONFIRM");
     }
 
-    /** 游客路径创建（SecurityUtils.getUser 返回 null 走 visitor 分支） */
+    /** 居民路径创建（预约人身份由 SecurityUtils 绑定） */
     private ViewingAppointmentVO invokeCreate(LocalTime start, LocalTime end) {
         try (var mocked = mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
-            mocked.when(com.community.residence.common.context.SecurityUtils::getUser).thenReturn(null);
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUser)
+                    .thenReturn(new com.community.residence.common.context.UserContext(
+                            1L, "resident1", "RESIDENT", java.util.Set.of()));
+            mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> com.community.residence.common.context.SecurityUtils.hasRole("RESIDENT"))
+                    .thenReturn(true);
             when(housingMapper.selectById(1L)).thenReturn(housing);
             when(timeslotMapper.selectList(any())).thenReturn(List.of(template()));
             return service.create(dto(start, end));

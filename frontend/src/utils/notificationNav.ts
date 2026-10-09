@@ -12,7 +12,9 @@ import type { Role } from '@/types/api'
  *    （后端 LeaseService / LeaseMoveOutApplicationService / DepositRefundService /
  *    ResidenceApplicationService 的写入口径），故居民端可拼 `?tab=lease&leaseId={id}`
  *    深链定位、管理端拼 `/admin/leases/{id}`；
- * 4. `LEASE_AGREEMENT` / `LEASE_PAYMENT` 的 `sourceId` **分别是协议 ID 与支付单 ID，
+ * 4. `VIEWING_APPOINTMENT` 的 `sourceId` 是看房预约 ID：居民落预约详情，
+ *    管理端落房源管理的看房预约分区，服务人员落「我的带看」工作台；
+ * 5. `LEASE_AGREEMENT` / `LEASE_PAYMENT` 的 `sourceId` **分别是协议 ID 与支付单 ID，
  *    不是租约 ID**（见 AgreementService / PaymentService 的通知写入）——**严禁**拼
  *    `/leases/{id}`，否则必然落到别人的租约或 404；这两类一律只落列表页。
  *
@@ -55,6 +57,11 @@ export function notificationTarget(
   /* 服务人员端仅工单有详情页，其余来源一律不跳（与既有一致） */
   if (type.startsWith('WORK_ORDER')) {
     return sourceId === null ? null : `${prefix}/work-orders/${sourceId}`
+  }
+  if (type === 'VIEWING_APPOINTMENT') {
+    if (role === 'STAFF') return '/staff/viewings'
+    if (prefix === '/admin') return '/admin/housing-lease?tab=housings&view=viewings'
+    return sourceId === null ? '/resident/reservations?tab=viewing' : `/resident/viewing-appointments/${sourceId}`
   }
   if (role === 'STAFF') return null
 

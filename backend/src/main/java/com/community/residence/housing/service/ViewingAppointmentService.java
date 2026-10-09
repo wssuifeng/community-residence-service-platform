@@ -313,6 +313,7 @@ public class ViewingAppointmentService {
                 /* 完全同槽并发竞态被 V10 唯一约束拦截（锁失效时的最后防线） */
                 throw new BusinessException(ErrorCode.RESERVATION_CONFLICT, "该时段已被预约");
             }
+            notifyAdminsOfNewAppointment(appointment);
             return appointment;
         } finally {
             if (locked) {
@@ -441,8 +442,13 @@ public class ViewingAppointmentService {
         if (appointment.getConversationId() != null) {
             conversationService.closeConversation(appointment.getConversationId(), "看房预约已取消");
         }
-        notifyApplicant(appointment, "看房预约已取消",
-                "您 " + appointment.getAppointmentDate() + " 的看房预约已取消" + (reason != null ? "：" + reason : ""));
+        String content = "看房预约 " + appointment.getAppointmentDate() + " 已取消"
+                + (reason != null ? "：" + reason : "");
+        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
+            notifyAdmins(appointment, "看房预约已取消", "居民" + content);
+        } else {
+            notifyApplicant(appointment, "看房预约已取消", "您 " + content);
+        }
     }
 
     /* 标记违约：RESERVED → VIOLATED；居民违约写 violation_record（游客无账号不计） */
@@ -475,6 +481,26 @@ public class ViewingAppointmentService {
     private void notifyApplicant(ViewingAppointment appointment, String title, String content) {
         if (appointment.getUserId() != null) {
             notificationService.createForResident(appointment.getUserId(), appointment.getCommunityId(),
+                    title, content, "RESERVATION", "VIEWING_APPOINTMENT", appointment.getId());
+        }
+    }
+
+    /* R48/E12：新建看房预约投递给房源所属社区的绑定管理员；游客历史预约无新建入口，
+       因此此处只处理已登录居民创建的预约。 */
+    private void notifyAdminsOfNewAppointment(ViewingAppointment appointment) {
+        notifyAdmins(appointment, "新看房预约",
+                "居民提交了 " + appointment.getAppointmentDate() + " "
+                        + appointment.getStartTime() + "~" + appointment.getEndTime() + " 的看房预约，请及时确认");
+    }
+
+    /* 管理方通知统一走社区绑定关系，避免创建 / 取消事件各自复制收件人逻辑。 */
+    private void notifyAdmins(ViewingAppointment appointment, String title, String content) {
+        List<Long> adminIds = sysAdminCommunityMapper.selectList(
+                        new LambdaQueryWrapper<SysAdminCommunity>()
+                                .eq(SysAdminCommunity::getCommunityId, appointment.getCommunityId()))
+                .stream().map(SysAdminCommunity::getAdminId).toList();
+        for (Long adminId : adminIds) {
+            notificationService.createForUser(adminId, appointment.getCommunityId(),
                     title, content, "RESERVATION", "VIEWING_APPOINTMENT", appointment.getId());
         }
     }
