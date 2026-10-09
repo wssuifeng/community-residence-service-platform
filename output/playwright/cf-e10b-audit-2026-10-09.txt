@@ -1,0 +1,140 @@
+{
+  "username": "codex_e10b_175601",
+  "user_id": 6,
+  "e10b": [
+    {
+      "name": "temporary admin login after bind",
+      "result": {
+        "status": 200,
+        "user": {
+          "boundCommunities": [
+            2
+          ],
+          "id": 6,
+          "realName": "Codex临时管理员",
+          "role": "ADMIN",
+          "username": "codex_e10b_175601"
+        },
+        "token": true
+      }
+    },
+    {
+      "name": "bound admin creates in-scope notice",
+      "result": {
+        "status": 200,
+        "notice_id": 11
+      }
+    },
+    {
+      "name": "bound admin deletes own draft",
+      "result": {
+        "status": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": null,
+          "timestamp": "2026-10-09T17:59:33.1131198",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "bound admin global community create denied",
+      "result": {
+        "status": 403,
+        "body": {
+          "code": 403,
+          "message": "无权限访问",
+          "data": null,
+          "timestamp": "2026-10-09T17:59:33.1338395",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "bound admin global channel update denied",
+      "result": {
+        "status": 403,
+        "body": {
+          "code": 403,
+          "message": "无权限访问",
+          "data": null,
+          "timestamp": "2026-10-09T17:59:33.1458373",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "superadmin unbinds community",
+      "result": {
+        "status": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": null,
+          "timestamp": "2026-10-09T17:59:33.1660336",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "bound communities empty after unbind",
+      "result": {
+        "status": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": [],
+          "timestamp": "2026-10-09T17:59:33.1770042",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "superadmin freezes temporary admin",
+      "result": {
+        "status": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": null,
+          "timestamp": "2026-10-09T17:59:33.203826",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "old token revoked after freeze",
+      "result": {
+        "status": 401,
+        "body": {
+          "code": 401,
+          "message": "未登录或令牌已失效",
+          "data": null,
+          "timestamp": "2026-10-09T17:59:33.2123575",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "frozen admin cannot login",
+      "result": {
+        "status": 200,
+        "body": {
+          "code": 5201,
+          "message": "账号已冻结",
+          "data": null,
+          "timestamp": "2026-10-09T17:59:33.3005797",
+          "traceId": null
+        }
+      }
+    }
+  ],
+  "browser": {
+    "route": "/admin/system?tab=users",
+    "contains_temp_user": true,
+    "errors": [],
+    "request_failures": [],
+    "screenshot": "output/playwright/cf-e10b-system-users-2026-10-09.png"
+  }
+}
