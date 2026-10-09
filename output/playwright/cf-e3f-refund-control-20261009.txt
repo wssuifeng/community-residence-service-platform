@@ -1,0 +1,19 @@
+CF-E3-F 押金退还受控回归（2026-10-09）
+
+环境：community_residence_test；受控后端 8083（独立进程，非开发库）；浏览器前端 5175；渠道为本地支付宝协议 mock，未触发真实资金。
+
+DEF-164 修复前复现：
+- 管理端已缴押金租约发起退款，渠道异常摘要较长时，settle 的第二事务写入 lease_change_log.reason 超过 VARCHAR(500)。
+- 浏览器原始结果：API 失败 ['500 POST http://127.0.0.1:5175/api/v1/leases/1/deposit-refunds']；控制台错误 ['error:Failed to load resource: the server responded with a status of 500 (Internal Server Error)']；弹窗显示“系统内部错误”；数据库当时为 PENDING/REFUNDING。
+- 根因：fail_reason 只按退款表字段截断，和 remark 拼接后的变更历史 reason 未做整体长度约束，导致状态结算事务回滚。
+
+修复后回归：
+- DepositRefundService 对发起/成功/失败三类 DEPOSIT_REFUND 留痕统一按 500 字符上限截断。
+- 长失败原因 + 500 字符备注：页面显示渠道失败原因，不显示“系统内部错误”；console/page/API 错误均为 0（errors=[], apiFailures=[]）。
+- 数据库断言：退款单 FAILED，租约押金状态回落 PAID；lease_deposit_refund.fail_reason 与 lease_change_log.reason 均不超过 500 字符。
+- 后端 DepositRefundServiceTest 19/19 通过；新增超长失败留痕回归断言。
+
+受控边界：
+- 原渠道不一致返回 5705；同 outRequestNo 重复提交返回已有失败记录（见 API 对照：5705）。
+- 已缴押金成功退款的真实支付宝/微信签名沙箱未完成；本批不宣称 REFUNDING→REFUNDED 的真实渠道成功落账。
+- 测试结束清理：lease 1 恢复 ACTIVE/UNPAID，首期支付单恢复 CLOSED，押金退还记录与 DEPOSIT_REFUND 变更留痕为 0；mock 进程已停止。

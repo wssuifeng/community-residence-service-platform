@@ -1,0 +1,10 @@
+{
+  "beforeRequestNo": "6000",
+  "dialogAfter": "发起押金退还\n原渠道原路退回，平台不托管押金资金\n\n渠道由系统按该租约实缴支付单原路退回，不可指定；平台不托管押金资金、不计息、不垫付。\n\n租约\nZL0001 · 1 号楼1 单元101\n押金状态\n已缴\n实缴押金\n¥ 6,000\n已退还\n¥ 0\n可退金额\n¥ 6,000\n退款渠道\n\n只读：按实缴支付单原路退回至支付宝，不可跨渠道退款\n\n退还金额\n\n留空表示全额退还；手填不得超过实缴可退金额\n\n备注\n500 / 500\n幂等请求号\nDR1MV14BM9NQTRV\n\n失败重试会自动换新请求号（同一请求号重复提交返回既有记录）\n\n押金退还失败\n\n支付宝退款失败：交易不存在（ACQ.TRADE_NOT_EXIST）\n\n换新请求号重试\n关闭\n确认发起退还",
+  "showsFailure": true,
+  "hasInternalError": false,
+  "errors": [],
+  "apiFailures": [],
+  "requestFailures": [],
+  "url": "http://127.0.0.1:5175/admin/leases/1"
+}
