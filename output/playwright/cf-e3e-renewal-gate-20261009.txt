@@ -1,0 +1,85 @@
+{
+  "flow": "CF-E3-E 续期支付门禁与待支付单安全回归（不实际付款）",
+  "environment": "community_residence_test / backend 8082",
+  "leaseId": 1,
+  "channels": [
+    {
+      "channel": "ALIPAY",
+      "enabled": true
+    },
+    {
+      "channel": "WECHAT",
+      "enabled": false
+    }
+  ],
+  "beforeLease": {
+    "status": "ACTIVE",
+    "endDate": "2027-12-31",
+    "monthlyRent": 3000.0
+  },
+  "beforePaymentCount": 2,
+  "disabledWechat": {
+    "status": 200,
+    "body": {
+      "code": 5901,
+      "message": "该支付渠道未配置",
+      "data": null,
+      "timestamp": "2026-10-09T21:45:57.0109324",
+      "traceId": null
+    }
+  },
+  "paymentCountAfterDisabledWechat": 2,
+  "enabledAlipay": {
+    "status": 200,
+    "paymentNo": "RENEW20261009191675",
+    "paymentType": "RENEWAL",
+    "amount": 9000.0,
+    "months": 3,
+    "statusValue": "PENDING",
+    "channel": "ALIPAY"
+  },
+  "closePending": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": null,
+      "timestamp": "2026-10-09T21:45:57.0598314",
+      "traceId": null
+    }
+  },
+  "afterLease": {
+    "status": "ACTIVE",
+    "endDate": "2027-12-31",
+    "monthlyRent": 3000.0
+  },
+  "afterPaymentStatuses": [
+    {
+      "paymentNo": "RENEW20261009191675",
+      "paymentType": "RENEWAL",
+      "status": "CLOSED",
+      "amount": 9000.0,
+      "channel": "ALIPAY"
+    },
+    {
+      "paymentNo": "FIRST20261009976856",
+      "paymentType": "FIRST",
+      "status": "CLOSED",
+      "amount": 9000.0,
+      "channel": "ALIPAY"
+    },
+    {
+      "paymentNo": "FIRST20261009418915",
+      "paymentType": "FIRST",
+      "status": "CLOSED",
+      "amount": 9000.0,
+      "channel": "ALIPAY"
+    }
+  ],
+  "assertions": {
+    "disabledWechatRejected": false,
+    "alipayCreatedPending": true,
+    "leaseUnchanged": true,
+    "pendingClosed": true
+  }
+}
