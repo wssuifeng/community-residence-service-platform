@@ -13,6 +13,11 @@ import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.community.entity.Community;
+import com.community.residence.community.entity.House;
+import com.community.residence.community.entity.Unit;
+import com.community.residence.community.mapper.BuildingMapper;
+import com.community.residence.community.mapper.HouseMapper;
+import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.community.service.CommunityService;
 import com.community.residence.notice.dto.CreateNoticeDTO;
 import com.community.residence.notice.entity.Notice;
@@ -24,6 +29,7 @@ import com.community.residence.notice.mapper.NoticeViewRecordMapper;
 import com.community.residence.notice.vo.NoticeVO;
 import com.community.residence.notice.vo.NoticeViewRecordVO;
 import com.community.residence.messaging.service.NotificationService;
+import com.community.residence.resident.entity.ResidenceRelation;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.resident.mapper.ResidenceRelationMapper;
@@ -34,15 +40,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * 公告业务逻辑：DRAFT → PUBLISHED → WITHDRAWN 状态机；
  * notice 表无 community_id 列（拦截器跳过），ADMIN 数据范围由
- * notice_target（COMMUNITY 目标）在业务层校验；无目标记录为全系统广播（仅超管管理）。
+ * notice_target（COMMUNITY/BUILDING 目标）在业务层校验；无目标记录为全系统广播（仅超管管理）。
  */
 @Slf4j
 @Service
@@ -75,7 +84,9 @@ public class NoticeService {
     private final ResidentMapper residentMapper;
     private final NotificationService notificationService;
     private final ResidenceRelationMapper residenceRelationMapper;
-    private final com.community.residence.community.mapper.BuildingMapper buildingMapper;
+    private final BuildingMapper buildingMapper;
+    private final HouseMapper houseMapper;
+    private final UnitMapper unitMapper;
 
     /* 创建公告：初始 DRAFT；多社区/楼栋定向逐项写 notice_target（R25 v1.2），
        ADMIN 逐项目标校验绑定范围；无目标为全系统广播（仅超管） */
@@ -261,7 +272,7 @@ public class NoticeService {
         }
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
-                    || !visibleToResidentCommunities(notice, residentCommunityIds(SecurityUtils.getUserId()))) {
+                    || !visibleToResident(notice, SecurityUtils.getUserId())) {
                 throw new ResourceNotFoundException("公告不存在或已下线");
             }
         } else if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
@@ -275,7 +286,7 @@ public class NoticeService {
     /**
      * 公告分页列表：匿名/普通用户仅 PUBLISHED 且未过期，游客另限纯广播 +
      * GUEST 显式可见（DEF-046）；居民限本人社区定向 + 全系统广播（DEF-003）；
-     * 管理端角色返回全部状态（ADMIN 限绑定社区，业务层经 notice_target 过滤）。
+     * 管理端角色返回全部状态（ADMIN 限绑定社区，BUILDING 目标按楼栋归属社区过滤）。
      */
     public PageVO<NoticeVO> page(long page, long size, Long communityId, String keyword,
                                  String priority, Integer isPinned, String type) {
@@ -304,20 +315,14 @@ public class NoticeService {
         }
         /* ADMIN 限绑定社区公告（经 notice_target 过滤）；SUPER_ADMIN 不过滤 */
         if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
-            List<Long> boundNoticeIds = noticeTargetMapper.selectList(
-                            new LambdaQueryWrapper<NoticeTarget>()
-                                    .eq(NoticeTarget::getTargetType, "COMMUNITY")
-                                    .in(NoticeTarget::getTargetId, SecurityUtils.getCommunityIds()))
-                    .stream().map(NoticeTarget::getNoticeId).toList();
+            List<Long> boundNoticeIds = targetedNoticeIdsForCommunities(new ArrayList<>(SecurityUtils.getCommunityIds()));
             if (boundNoticeIds.isEmpty()) {
                 return PageVO.of(List.of(), 0, page, size);
             }
             wrapper.in(Notice::getId, boundNoticeIds);
         } else if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
-            /* 居民限本人社区定向公告 + 全系统广播（R25 范围外不可见，DEF-003；
-               游客/未登录维持公开口径不动，未被缺陷报告覆盖） */
-            List<Long> mine = residentCommunityIds(SecurityUtils.getUserId());
-            List<Long> visibleIds = targetedNoticeIdsForCommunities(mine);
+            /* 居民只看本人当前居住关系命中的社区/楼栋定向公告 + 全系统广播。 */
+            List<Long> visibleIds = targetedNoticeIdsForResident(SecurityUtils.getUserId());
             if (visibleIds.isEmpty()) {
                 wrapper.apply(BROADCAST_FILTER_SQL);
             } else {
@@ -359,15 +364,15 @@ public class NoticeService {
                 id, publishTime, SecurityUtils.getUserId(), noticeTargetResidentIds(id).size());
     }
 
-    /** 公告目标居民：COMMUNITY 目标取社区在住居民（经 residence_relation），
-     *  全系统广播取全部 ACTIVE 居民；仅 GUEST 目标的公告（DEF-046，居民不可见）
-     *  不向居民触达，其余无 COMMUNITY 目标情形维持全员口径不变 */
+    /** 公告目标居民：按当前有效居住关系匹配社区/楼栋；纯 GUEST 不触达居民；无目标才广播全体 ACTIVE 居民。 */
     private List<Long> noticeTargetResidentIds(Long noticeId) {
         List<NoticeTarget> targets = noticeTargetMapper.selectList(
                 new LambdaQueryWrapper<NoticeTarget>()
-                        .eq(NoticeTarget::getNoticeId, noticeId)
-                        .eq(NoticeTarget::getTargetType, "COMMUNITY"));
-        if (targets.isEmpty()) {
+                        .eq(NoticeTarget::getNoticeId, noticeId));
+        List<NoticeTarget> scopedTargets = targets.stream()
+                .filter(t -> "COMMUNITY".equals(t.getTargetType()) || "BUILDING".equals(t.getTargetType()))
+                .toList();
+        if (scopedTargets.isEmpty()) {
             Long guestRows = noticeTargetMapper.selectCount(new LambdaQueryWrapper<NoticeTarget>()
                     .eq(NoticeTarget::getNoticeId, noticeId)
                     .eq(NoticeTarget::getTargetType, "GUEST"));
@@ -378,11 +383,16 @@ public class NoticeService {
                             .eq(Resident::getStatus, "ACTIVE"))
                     .stream().map(Resident::getId).toList();
         }
-        List<Long> communityIds = targets.stream().map(NoticeTarget::getTargetId).toList();
-        return residenceRelationMapper.selectList(new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
-                        .in(com.community.residence.resident.entity.ResidenceRelation::getCommunityId, communityIds))
-                .stream().map(com.community.residence.resident.entity.ResidenceRelation::getResidentId)
-                .distinct().toList();
+
+        Set<Long> communityIds = scopedTargets.stream()
+                .filter(t -> "COMMUNITY".equals(t.getTargetType()))
+                .map(NoticeTarget::getTargetId)
+                .collect(Collectors.toSet());
+        Set<Long> buildingIds = scopedTargets.stream()
+                .filter(t -> "BUILDING".equals(t.getTargetType()))
+                .map(NoticeTarget::getTargetId)
+                .collect(Collectors.toSet());
+        return activeResidentIdsMatching(new ResidentScope(communityIds, buildingIds));
     }
 
     /* 撤回公告：PUBLISHED → WITHDRAWN */
@@ -483,20 +493,107 @@ public class NoticeService {
         return communityIds.stream().distinct().toList();
     }
 
-    /** 居民在住社区集合（经 residence_relation；无居住关系返回空集合） */
-    private List<Long> residentCommunityIds(Long residentId) {
-        return residenceRelationMapper.selectList(
-                        new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
-                                .eq(com.community.residence.resident.entity.ResidenceRelation::getResidentId, residentId))
-                .stream().map(com.community.residence.resident.entity.ResidenceRelation::getCommunityId)
+    /** 居民当前有效居住范围：从居住关系沿房屋 → 单元 → 楼栋解析，避免楼栋定向降级为社区定向。 */
+    private ResidentScope residentScope(Long residentId) {
+        List<ResidenceRelation> relations = residenceRelationMapper.selectList(
+                new LambdaQueryWrapper<ResidenceRelation>()
+                        .eq(ResidenceRelation::getResidentId, residentId)
+                        .isNull(ResidenceRelation::getMoveOutDate));
+        Set<Long> communityIds = relations.stream()
+                .map(ResidenceRelation::getCommunityId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toCollection(HashSet::new));
+        Set<Long> houseIds = relations.stream()
+                .map(ResidenceRelation::getHouseId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (houseIds.isEmpty()) {
+            return new ResidentScope(communityIds, Set.of());
+        }
+        Set<Long> buildingIds = resolveHouseBuildingIds(houseIds).values().stream()
+                .collect(Collectors.toCollection(HashSet::new));
+        return new ResidentScope(communityIds, buildingIds);
+    }
+
+    /** 公告对居民可见：无目标=广播；COMMUNITY 匹配社区；BUILDING 必须匹配当前楼栋；GUEST-only 不可见。 */
+    private boolean visibleToResident(Notice notice, Long residentId) {
+        List<NoticeTarget> targets = noticeTargetMapper.selectList(
+                new LambdaQueryWrapper<NoticeTarget>().eq(NoticeTarget::getNoticeId, notice.getId()));
+        if (targets.isEmpty()) {
+            return true;
+        }
+        ResidentScope scope = residentScope(residentId);
+        return targets.stream().anyMatch(target ->
+                "COMMUNITY".equals(target.getTargetType())
+                        && scope.communityIds().contains(target.getTargetId())
+                || "BUILDING".equals(target.getTargetType())
+                        && scope.buildingIds().contains(target.getTargetId()));
+    }
+
+    /** 居民公告列表可见的定向公告 ID，按本人当前社区/楼栋范围匹配。 */
+    private List<Long> targetedNoticeIdsForResident(Long residentId) {
+        ResidentScope scope = residentScope(residentId);
+        if (scope.communityIds().isEmpty() && scope.buildingIds().isEmpty()) {
+            return List.of();
+        }
+        List<NoticeTarget> targets = noticeTargetMapper.selectList(null);
+        return targets.stream()
+                .filter(t -> "COMMUNITY".equals(t.getTargetType())
+                        && scope.communityIds().contains(t.getTargetId())
+                        || "BUILDING".equals(t.getTargetType())
+                        && scope.buildingIds().contains(t.getTargetId()))
+                .map(NoticeTarget::getNoticeId)
                 .distinct().toList();
     }
 
-    /** 公告对居民社区集合可见：无目标=广播可见；任一目标（含楼栋归属）落在集合内可见 */
-    private boolean visibleToResidentCommunities(Notice notice, List<Long> communityIds) {
-        List<Long> targetCommunities = resolveNoticeCommunityIds(notice.getId());
-        return targetCommunities.isEmpty()
-                || targetCommunities.stream().anyMatch(communityIds::contains);
+    private record ResidentScope(Set<Long> communityIds, Set<Long> buildingIds) {
+    }
+
+    /** 按范围匹配当前有效居住居民，供公告发布触达复用。 */
+    private List<Long> activeResidentIdsMatching(ResidentScope scope) {
+        if (scope.communityIds().isEmpty() && scope.buildingIds().isEmpty()) {
+            return List.of();
+        }
+        List<ResidenceRelation> relations = residenceRelationMapper.selectList(
+                new LambdaQueryWrapper<ResidenceRelation>().isNull(ResidenceRelation::getMoveOutDate));
+        Set<Long> houseIds = relations.stream()
+                .map(ResidenceRelation::getHouseId)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<Long, Long> houseBuildingIds = resolveHouseBuildingIds(houseIds);
+        Set<Long> residentIds = relations.stream()
+                .filter(r -> scope.communityIds().contains(r.getCommunityId())
+                        || scope.buildingIds().contains(houseBuildingIds.get(r.getHouseId())))
+                .map(ResidenceRelation::getResidentId)
+                .collect(Collectors.toSet());
+        if (residentIds.isEmpty()) {
+            return List.of();
+        }
+        return residentMapper.selectBatchIds(residentIds).stream()
+                .filter(r -> "ACTIVE".equals(r.getStatus()))
+                .map(Resident::getId)
+                .distinct().toList();
+    }
+
+    /** 批量解析房屋所属楼栋，公告发布时避免对每条居住关系逐条查询。 */
+    private Map<Long, Long> resolveHouseBuildingIds(Set<Long> houseIds) {
+        if (houseIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, Long> houseUnits = houseMapper.selectBatchIds(houseIds).stream()
+                .filter(h -> h.getUnitId() != null)
+                .collect(Collectors.toMap(House::getId, House::getUnitId));
+        if (houseUnits.isEmpty()) {
+            return Map.of();
+        }
+        Set<Long> unitIds = new HashSet<>(houseUnits.values());
+        Map<Long, Long> unitBuildings = unitMapper.selectBatchIds(unitIds).stream()
+                .filter(u -> u.getBuildingId() != null)
+                .collect(Collectors.toMap(Unit::getId, Unit::getBuildingId));
+        return houseUnits.entrySet().stream()
+                .filter(entry -> unitBuildings.containsKey(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        entry -> unitBuildings.get(entry.getValue())));
     }
 
     /** 公告对游客可见（DEF-046）：无 COMMUNITY/BUILDING 定向行（纯广播）或存在 GUEST 目标行；
@@ -537,11 +634,7 @@ public class NoticeService {
 
     /** 按社区取公告 ID 集合；为空时经 wrapper 注入恒假条件（in 空集合会生成非法 SQL） */
     private List<Long> resolveNoticeIdsByCommunity(Long communityId, LambdaQueryWrapper<Notice> wrapper) {
-        List<Long> noticeIds = noticeTargetMapper.selectList(
-                        new LambdaQueryWrapper<NoticeTarget>()
-                                .eq(NoticeTarget::getTargetType, "COMMUNITY")
-                                .eq(NoticeTarget::getTargetId, communityId))
-                .stream().map(NoticeTarget::getNoticeId).toList();
+        List<Long> noticeIds = targetedNoticeIdsForCommunities(List.of(communityId));
         if (noticeIds.isEmpty()) {
             noticeIds = List.of(-1L);
         }

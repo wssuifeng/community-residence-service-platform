@@ -1,0 +1,4 @@
+create 200 {"code":200,"message":"success","data":{"address":"A-1��¥A-1��¥1��Ԫ1002","assigneeActiveOrders":null,"assigneeId":null,"assigneeName":null,"assigneeShiftLabel":null,"categoryId":1,"categoryName":"�Զ���ά�޷���","communityId":2,"contactPhone":"13905710101","content":"��������֤δ�ɵ�������Ա���ɶ�ȡ�����ȡ����������","conversationId":null,"createdAt":null,"dispatchFlag":"NORMAL","id":3,"orderNo":"WO202610095553","priority":"LOW","residentId":1,"residentName":"��ΰ","status":"PENDING","title":"Ȩ�޷�Χ̽�빤��","updatedAt":null,"waitedMinutes":0},"timestamp":"2026-10-09T16:11:05.3406534","traceId":null}
+staff_unassigned_get 403 {"code":403,"message":"�����ɵ��ķ�����Ա�ɲ����ù���","data":null,"timestamp":"2026-10-09T16:11:05.3506522","traceId":null}
+cancel 200 {"code":200,"message":"success","data":null,"timestamp":"2026-10-09T16:11:05.3813507","traceId":null}
+oid 3

@@ -6,6 +6,10 @@ import com.community.residence.common.context.UserContext;
 import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.exception.ResourceNotFoundException;
 import com.community.residence.community.entity.Building;
+import com.community.residence.community.entity.House;
+import com.community.residence.community.entity.Unit;
+import com.community.residence.community.mapper.HouseMapper;
+import com.community.residence.community.mapper.UnitMapper;
 import com.community.residence.community.entity.Community;
 import com.community.residence.community.mapper.BuildingMapper;
 import com.community.residence.community.service.CommunityService;
@@ -16,6 +20,7 @@ import com.community.residence.notice.entity.NoticeTarget;
 import com.community.residence.notice.mapper.NoticeMapper;
 import com.community.residence.notice.mapper.NoticeTargetMapper;
 import com.community.residence.notice.mapper.NoticeViewRecordMapper;
+import com.community.residence.resident.entity.ResidenceRelation;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.resident.mapper.ResidenceRelationMapper;
@@ -38,6 +43,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -78,6 +84,10 @@ class NoticeDataScopeFixTest {
     private ResidenceRelationMapper residenceRelationMapper;
     @Mock
     private BuildingMapper buildingMapper;
+    @Mock
+    private HouseMapper houseMapper;
+    @Mock
+    private UnitMapper unitMapper;
 
     @InjectMocks
     private NoticeService noticeService;
@@ -253,21 +263,166 @@ class NoticeDataScopeFixTest {
         }
     }
 
+    /* ---- DEF-162：BUILDING 目标必须沿当前居住关系命中具体楼栋 ---- */
+
+    @Test
+    @DisplayName("DEF-162：居民位于 A-1，BUILDING=A-2 公告详情不可见")
+    void getById_residentInOtherBuilding_notVisible() {
+        lenient().when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
+        lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target("BUILDING", 102L)));
+        stubResidentScope(5L, 1L, 501L, 101L);
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mockResident(mocked, 5L);
+            assertThatThrownBy(() -> noticeService.getById(1L))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining("公告不存在");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-162：居民位于 A-1，BUILDING=A-1 公告详情可见")
+    void getById_residentInSameBuilding_visible() {
+        lenient().when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
+        lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target("BUILDING", 101L)));
+        lenient().when(buildingMapper.selectById(101L)).thenReturn(building(101L, 1L));
+        lenient().when(sysUserMapper.selectById(anyLong())).thenReturn(null);
+        stubResidentScope(5L, 1L, 501L, 101L);
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mockResident(mocked, 5L);
+            assertThat(noticeService.getById(1L).getTitle()).isEqualTo("清源里定向公告");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-162：纯 GUEST 目标公告不对居民开放详情")
+    void getById_residentGuestOnly_notVisible() {
+        lenient().when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
+        lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target("GUEST", 0L)));
+        lenient().when(noticeTargetMapper.selectCount(any())).thenReturn(1L);
+        lenient().when(residenceRelationMapper.selectList(any())).thenReturn(List.of());
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mockResident(mocked, 5L);
+            assertThatThrownBy(() -> noticeService.getById(1L))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining("公告不存在");
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-162：管理员绑定社区可看到该社区楼栋定向公告")
+    void page_adminBoundCommunity_seesBuildingNotice() {
+        lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target("BUILDING", 101L)));
+        lenient().when(buildingMapper.selectBatchIds(any())).thenReturn(List.of(building(101L, 1L)));
+        lenient().when(noticeMapper.selectPage(any(), any())).thenAnswer(invocation -> {
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<Notice> page = invocation.getArgument(0);
+            page.setRecords(List.of());
+            page.setTotal(0);
+            return page;
+        });
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
+            mocked.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(false);
+            mocked.when(SecurityUtils::getCommunityIds).thenReturn(Set.of(1L));
+            noticeService.page(1, 10, null, null, null, null, null);
+            verify(noticeMapper).selectPage(any(), any());
+        }
+    }
+
+    @Test
+    @DisplayName("DEF-162：发布楼栋定向公告只触达目标楼栋在住居民")
+    void publish_buildingTarget_notifiesOnlyResidentsInBuilding() {
+        Notice draft = new Notice();
+        draft.setId(2L);
+        draft.setTitle("楼栋公告");
+        draft.setStatus("DRAFT");
+        draft.setPublisherId(1L);
+        when(noticeMapper.selectById(2L)).thenReturn(draft);
+        when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target(2L, "BUILDING", 101L)));
+        when(residenceRelationMapper.selectList(any())).thenReturn(List.of(
+                relation(5L, 1L, 501L), relation(6L, 1L, 502L)));
+        when(houseMapper.selectBatchIds(any())).thenReturn(List.of(
+                house(501L, 601L), house(502L, 602L)));
+        when(unitMapper.selectBatchIds(any())).thenReturn(List.of(
+                unit(601L, 101L), unit(602L, 102L)));
+        Resident targetResident = new Resident();
+        targetResident.setId(5L);
+        targetResident.setStatus("ACTIVE");
+        when(residentMapper.selectBatchIds(any())).thenReturn(List.of(targetResident));
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(true);
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+            noticeService.publish(2L, LocalDateTime.now());
+            verify(notificationService).createForResident(5L, null, "社区公告",
+                    "新公告「楼栋公告」已发布，请查看", "NOTICE", "NOTICE", 2L);
+        }
+    }
+
+    private void mockResident(MockedStatic<SecurityUtils> mocked, Long residentId) {
+        mocked.when(SecurityUtils::getUser).thenReturn(new UserContext(
+                residentId, "resident", "RESIDENT", Set.of()));
+        mocked.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(false);
+        mocked.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(false);
+        mocked.when(() -> SecurityUtils.hasRole("RESIDENT")).thenReturn(true);
+        mocked.when(SecurityUtils::getUserId).thenReturn(residentId);
+    }
+
+    private void stubResidentScope(Long residentId, Long communityId, Long houseId, Long buildingId) {
+        when(residenceRelationMapper.selectList(any())).thenReturn(List.of(
+                relation(residentId, communityId, houseId)));
+        when(houseMapper.selectBatchIds(any())).thenReturn(List.of(house(houseId, 601L)));
+        when(unitMapper.selectBatchIds(any())).thenReturn(List.of(unit(601L, buildingId)));
+    }
+
     /* ---- 通用脚手架 ---- */
 
     private NoticeTarget target(String type, Long id) {
+        return target(1L, type, id);
+    }
+
+    private NoticeTarget target(Long noticeId, String type, Long id) {
         NoticeTarget t = new NoticeTarget();
-        t.setNoticeId(1L);
+        t.setNoticeId(noticeId);
         t.setTargetType(type);
         t.setTargetId(id);
         return t;
     }
 
-    private com.community.residence.resident.entity.ResidenceRelation relation(Long residentId, Long communityId) {
-        com.community.residence.resident.entity.ResidenceRelation r =
-                new com.community.residence.resident.entity.ResidenceRelation();
+    private ResidenceRelation relation(Long residentId, Long communityId) {
+        return relation(residentId, communityId, null);
+    }
+
+    private ResidenceRelation relation(Long residentId, Long communityId, Long houseId) {
+        ResidenceRelation r = new ResidenceRelation();
         r.setResidentId(residentId);
         r.setCommunityId(communityId);
+        r.setHouseId(houseId);
+        r.setMoveOutDate(null);
         return r;
+    }
+
+    private House house(Long id, Long unitId) {
+        House h = new House();
+        h.setId(id);
+        h.setUnitId(unitId);
+        return h;
+    }
+
+    private Unit unit(Long id, Long buildingId) {
+        Unit u = new Unit();
+        u.setId(id);
+        u.setBuildingId(buildingId);
+        return u;
+    }
+
+    private Building building(Long id, Long communityId) {
+        Building b = new Building();
+        b.setId(id);
+        b.setCommunityId(communityId);
+        return b;
     }
 }

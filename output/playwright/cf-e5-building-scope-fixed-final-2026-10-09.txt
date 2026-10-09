@@ -1,0 +1,16 @@
+{
+  "marker": "DEF162-FINAL-A2-172726",
+  "notice_id": 10,
+  "create_status": 200,
+  "publish_status": 200,
+  "resident_list_contains": false,
+  "resident_detail_status": 404,
+  "resident_notification_count": 0,
+  "browser_errors": [],
+  "request_failures": [],
+  "screenshot": "output/playwright/cf-e5-building-scope-fixed-final-2026-10-09.png",
+  "cleanup": {
+    "withdraw": 200,
+    "delete": 200
+  }
+}
