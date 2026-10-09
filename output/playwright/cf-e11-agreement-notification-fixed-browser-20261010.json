@@ -1,0 +1,89 @@
+{
+  "backend": "http://127.0.0.1:8083/api/v1",
+  "frontend": "http://127.0.0.1:5175",
+  "roles": {
+    "admin": {
+      "before": "http://127.0.0.1:5175/admin/notifications",
+      "after": "http://127.0.0.1:5175/admin/housing-lease?tab=leases",
+      "rowCount": 1,
+      "rowText": "租赁协议已确认\n\n租约 #6（1 号楼1 单元102）双方已确认，租约已正式生效\n\n刚刚",
+      "expected": "/admin/housing-lease?tab=leases",
+      "deepLinkPassed": true,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "apiFailures": []
+    },
+    "resident": {
+      "before": "http://127.0.0.1:5175/resident/notifications",
+      "after": "http://127.0.0.1:5175/resident/housing-lease?tab=lease",
+      "rowCount": 1,
+      "rowText": "租赁协议已确认\n\n您的租赁协议（1 号楼1 单元102）双方均已确认，可随时在「我的租约」中查看\n\n刚刚",
+      "expected": "/resident/housing-lease?tab=lease",
+      "deepLinkPassed": true,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "apiFailures": []
+    }
+  },
+  "events": [
+    {
+      "label": "template",
+      "status": 200
+    },
+    {
+      "label": "application",
+      "status": 200,
+      "id": 8
+    },
+    {
+      "label": "approve",
+      "status": 200,
+      "leaseId": 6
+    },
+    {
+      "label": "tenancy",
+      "status": 200
+    },
+    {
+      "label": "agreement",
+      "status": 200,
+      "agreementId": 4
+    },
+    {
+      "label": "resident-confirm",
+      "status": 200
+    },
+    {
+      "label": "admin-confirm",
+      "status": 200
+    }
+  ],
+  "apiAdminGenerated": [
+    {
+      "id": 47,
+      "title": "租赁协议已确认",
+      "sourceType": "LEASE_AGREEMENT",
+      "sourceId": 4,
+      "ownerType": null
+    },
+    {
+      "id": 45,
+      "title": "居民已确认租赁协议",
+      "sourceType": "LEASE_AGREEMENT",
+      "sourceId": 4,
+      "ownerType": null
+    }
+  ],
+  "cleanup": {
+    "exitCode": 0,
+    "stdout": [
+      "leases",
+      "0",
+      "agreements",
+      "0",
+      "notifications",
+      "0"
+    ],
+    "stderr": ""
+  }
+}
