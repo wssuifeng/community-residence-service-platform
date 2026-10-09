@@ -1,0 +1,1492 @@
+{
+  "started_at": "2026-10-09T16:07:38",
+  "base": {
+    "frontend": "http://127.0.0.1:5173",
+    "backend": "http://127.0.0.1:8081"
+  },
+  "auth": {
+    "superadmin": {
+      "status": 200,
+      "token": true,
+      "user": {
+        "boundCommunities": [],
+        "id": 1,
+        "realName": "超级管理员",
+        "role": "SUPER_ADMIN",
+        "username": "superadmin"
+      }
+    },
+    "admin1": {
+      "status": 200,
+      "token": true,
+      "user": {
+        "boundCommunities": [
+          2
+        ],
+        "id": 2,
+        "realName": "陈国强",
+        "role": "ADMIN",
+        "username": "admin1"
+      }
+    },
+    "staff1": {
+      "status": 200,
+      "token": true,
+      "user": {
+        "boundCommunities": [],
+        "id": 3,
+        "realName": "刘伟民",
+        "role": "STAFF",
+        "username": "staff1"
+      }
+    },
+    "resident1": {
+      "status": 200,
+      "token": true,
+      "user": {
+        "boundCommunities": [],
+        "id": 1,
+        "realName": "张伟",
+        "role": "RESIDENT",
+        "username": "resident1"
+      }
+    }
+  },
+  "e10": [
+    {
+      "name": "unauthenticated notifications",
+      "result": {
+        "status": 401,
+        "body": {
+          "code": 401,
+          "message": "未登录或令牌已失效",
+          "data": null,
+          "timestamp": "2026-10-09T16:07:38.7637831",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "resident to sys-users",
+      "result": {
+        "status": 403,
+        "body": {
+          "code": 403,
+          "message": "无权限访问",
+          "data": null,
+          "timestamp": "2026-10-09T16:07:38.770758",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "admin global community create",
+      "result": {
+        "status": 403,
+        "body": {
+          "code": 403,
+          "message": "无权限访问",
+          "data": null,
+          "timestamp": "2026-10-09T16:07:38.7797961",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "admin global channel update",
+      "result": {
+        "status": 403,
+        "body": {
+          "code": 403,
+          "message": "无权限访问",
+          "data": null,
+          "timestamp": "2026-10-09T16:07:38.7887578",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "resident other resident record",
+      "result": {
+        "status": 403,
+        "body": {
+          "code": 403,
+          "message": "无权限访问",
+          "data": null,
+          "timestamp": "2026-10-09T16:07:38.7957585",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "staff work order probe",
+      "result": {
+        "status": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "address": "A-1号楼A-1号楼1单元1002",
+            "assigneeActiveOrders": 0,
+            "assigneeId": 3,
+            "assigneeName": "刘伟民",
+            "assigneeShiftLabel": null,
+            "categoryId": 1,
+            "categoryName": "自动化维修服务",
+            "communityId": 2,
+            "contactPhone": "13905710101",
+            "content": "卫生间水龙头漏水，需要安排维修人员上门处理。",
+            "conversationId": 11,
+            "createdAt": "2026-10-09T04:11:08",
+            "dispatchFlag": "NORMAL",
+            "id": 1,
+            "orderNo": "WO202610099822",
+            "priority": "NORMAL",
+            "residentId": 1,
+            "residentName": "张伟",
+            "status": "CLOSED",
+            "title": "自动化工单链路审核",
+            "updatedAt": "2026-10-09T04:11:08",
+            "waitedMinutes": 702
+          },
+          "timestamp": "2026-10-09T16:07:38.8147565",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "name": "superadmin operation logs",
+      "result": {
+        "status": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "records": [
+              {
+                "communityId": 2,
+                "content": "{\"action\": \"管理员终审关闭工单\"}",
+                "createdAt": "2026-10-09T13:53:45",
+                "id": 137,
+                "ip": "0:0:0:0:0:0:0:1",
+                "operationType": "STATUS",
+                "operatorId": 2,
+                "operatorType": "ADMIN",
+                "targetId": 2,
+                "targetType": "WORK_ORDER",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+              },
+              {
+                "communityId": null,
+                "content": "{\"action\": \"居民确认完成\"}",
+                "createdAt": "2026-10-09T13:53:45",
+                "id": 136,
+                "ip": "0:0:0:0:0:0:0:1",
+                "operationType": "STATUS",
+                "operatorId": 1,
+                "operatorType": "RESIDENT",
+                "targetId": 2,
+                "targetType": "WORK_ORDER",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+              },
+              {
+                "communityId": null,
+                "content": "{\"action\": \"提交处理结果\"}",
+                "createdAt": "2026-10-09T13:53:45",
+                "id": 135,
+                "ip": "0:0:0:0:0:0:0:1",
+                "operationType": "STATUS",
+                "operatorId": 3,
+                "operatorType": "STAFF",
+                "targetId": 2,
+                "targetType": "WORK_ORDER",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+              },
+              {
+                "communityId": null,
+                "content": "{\"action\": \"开始处理工单\"}",
+                "createdAt": "2026-10-09T13:53:44",
+                "id": 134,
+                "ip": "0:0:0:0:0:0:0:1",
+                "operationType": "STATUS",
+                "operatorId": 3,
+                "operatorType": "STAFF",
+                "targetId": 2,
+                "targetType": "WORK_ORDER",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+              },
+              {
+                "communityId": null,
+                "content": "{\"action\": \"服务人员接单\"}",
+                "createdAt": "2026-10-09T13:53:44",
+                "id": 133,
+                "ip": "0:0:0:0:0:0:0:1",
+                "operationType": "STATUS",
+                "operatorId": 3,
+                "operatorType": "STAFF",
+                "targetId": 2,
+                "targetType": "WORK_ORDER",
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+              }
+            ],
+            "total": 137,
+            "page": 1,
+            "size": 5,
+            "pages": 28
+          },
+          "timestamp": "2026-10-09T16:07:38.8257569",
+          "traceId": null
+        }
+      }
+    }
+  ],
+  "e11": [
+    {
+      "name": "notification snapshots",
+      "result": {
+        "resident1": {
+          "page": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": {
+                "records": [
+                  {
+                    "communityId": null,
+                    "content": "新公告「[自动化] 非目标楼栋公告 20261009132317」已发布，请查看",
+                    "createdAt": "2026-10-09T13:23:19",
+                    "id": 63,
+                    "isRead": 0,
+                    "seq": 4182,
+                    "sourceId": 4,
+                    "sourceType": "NOTICE",
+                    "title": "社区公告",
+                    "type": "NOTICE"
+                  },
+                  {
+                    "communityId": null,
+                    "content": "新公告「[自动化] 已过期公告 20261009132122」已发布，请查看",
+                    "createdAt": "2026-10-09T13:21:34",
+                    "id": 61,
+                    "isRead": 0,
+                    "seq": 4180,
+                    "sourceId": 3,
+                    "sourceType": "NOTICE",
+                    "title": "社区公告",
+                    "type": "NOTICE"
+                  },
+                  {
+                    "communityId": null,
+                    "content": "新公告「[自动化] 游客可见公告 20261009132122」已发布，请查看",
+                    "createdAt": "2026-10-09T13:21:32",
+                    "id": 59,
+                    "isRead": 0,
+                    "seq": 4178,
+                    "sourceId": 2,
+                    "sourceType": "NOTICE",
+                    "title": "社区公告",
+                    "type": "NOTICE"
+                  },
+                  {
+                    "communityId": null,
+                    "content": "新公告「[自动化] 楼栋定向公告 20261009132122」已发布，请查看",
+                    "createdAt": "2026-10-09T13:21:25",
+                    "id": 51,
+                    "isRead": 0,
+                    "seq": 4170,
+                    "sourceId": 1,
+                    "sourceType": "NOTICE",
+                    "title": "社区公告",
+                    "type": "NOTICE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的工单 WO202610099822 已终审结束（已关闭）",
+                    "createdAt": "2026-10-09T04:24:42",
+                    "id": 42,
+                    "isRead": 0,
+                    "seq": 4161,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已结束",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的工单 WO202610099822 已处理完成，请确认",
+                    "createdAt": "2026-10-09T04:18:13",
+                    "id": 38,
+                    "isRead": 0,
+                    "seq": 4157,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已处理完成",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的工单 WO202610099822 服务人员已开始处理",
+                    "createdAt": "2026-10-09T04:17:10",
+                    "id": 37,
+                    "isRead": 0,
+                    "seq": 4156,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单处理中",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的工单 WO202610099822 已被服务人员接单",
+                    "createdAt": "2026-10-09T04:15:14",
+                    "id": 36,
+                    "isRead": 0,
+                    "seq": 4155,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "服务人员已接单",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的工单 WO202610099822 已派单给 刘伟民",
+                    "createdAt": "2026-10-09T04:14:26",
+                    "id": 33,
+                    "isRead": 0,
+                    "seq": 4152,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已派单",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的工单 WO202610099822 已被受理，正在安排服务人员",
+                    "createdAt": "2026-10-09T04:12:24",
+                    "id": 30,
+                    "isRead": 0,
+                    "seq": 4149,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已受理",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的退租申请已通过，搬出日期 2026-10-10，租约状态已更新为已搬出。",
+                    "createdAt": "2026-10-09T03:45:44",
+                    "id": 27,
+                    "isRead": 0,
+                    "seq": 4146,
+                    "sourceId": 5,
+                    "sourceType": "LEASE_MOVE_OUT",
+                    "title": "退租申请已通过",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的租赁协议（A-1号楼A-1号楼1单元604）双方均已确认，可随时在「我的租约」中查看",
+                    "createdAt": "2026-10-09T03:21:18",
+                    "id": 25,
+                    "isRead": 0,
+                    "seq": 4144,
+                    "sourceId": 1,
+                    "sourceType": "LEASE_AGREEMENT",
+                    "title": "租赁协议已确认",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的租约（A-1号楼A-1号楼1单元604）已生成租赁协议，请在「我的租约」中查看并确认",
+                    "createdAt": "2026-10-09T03:20:29",
+                    "id": 24,
+                    "isRead": 0,
+                    "seq": 4143,
+                    "sourceId": 1,
+                    "sourceType": "LEASE_AGREEMENT",
+                    "title": "待确认租赁协议",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的入住申请（A-1号楼A-1号楼1单元604）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+                    "createdAt": "2026-10-09T03:01:36",
+                    "id": 22,
+                    "isRead": 0,
+                    "seq": 4141,
+                    "sourceId": 5,
+                    "sourceType": "LEASE",
+                    "title": "入住申请已通过",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-12 的看房预约已取消：核心链路审核清理测试数据",
+                    "createdAt": "2026-10-09T02:29:33",
+                    "id": 20,
+                    "isRead": 0,
+                    "seq": 4139,
+                    "sourceId": 5,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "看房预约已取消",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-12 的看房预约已安排带看人，可与其沟通看房事宜",
+                    "createdAt": "2026-10-09T02:29:33",
+                    "id": 19,
+                    "isRead": 0,
+                    "seq": 4138,
+                    "sourceId": 5,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "您的看房预约已安排带看人",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-12 的看房预约已安排带看人，可与其沟通看房事宜",
+                    "createdAt": "2026-10-09T02:29:33",
+                    "id": 17,
+                    "isRead": 0,
+                    "seq": 4136,
+                    "sourceId": 5,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "您的看房预约已安排带看人",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-12 的看房预约已确认",
+                    "createdAt": "2026-10-09T02:29:32",
+                    "id": 15,
+                    "isRead": 0,
+                    "seq": 4134,
+                    "sourceId": 5,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "看房预约已确认",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-09 的看房预约已取消：浏览器回归清理测试预约",
+                    "createdAt": "2026-10-09T01:36:04",
+                    "id": 14,
+                    "isRead": 0,
+                    "seq": 4133,
+                    "sourceId": 4,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "看房预约已取消",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-11 的看房预约已完成",
+                    "createdAt": "2026-10-08T23:36:42",
+                    "id": 13,
+                    "isRead": 0,
+                    "seq": 4132,
+                    "sourceId": 3,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "看房预约已完成",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-11 的看房预约已安排带看人，可与其沟通看房事宜",
+                    "createdAt": "2026-10-08T23:36:29",
+                    "id": 12,
+                    "isRead": 0,
+                    "seq": 4131,
+                    "sourceId": 3,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "您的看房预约已安排带看人",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-11 的看房预约已确认",
+                    "createdAt": "2026-10-08T23:36:27",
+                    "id": 10,
+                    "isRead": 0,
+                    "seq": 4129,
+                    "sourceId": 3,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "看房预约已确认",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-11 的看房预约已取消：自动化验证取消后会话只读",
+                    "createdAt": "2026-10-08T23:17:33",
+                    "id": 9,
+                    "isRead": 0,
+                    "seq": 4128,
+                    "sourceId": 2,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "看房预约已取消",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您 2026-10-11 的看房预约已取消：本轮自动化链路回归完成，取消测试预约",
+                    "createdAt": "2026-10-08T23:06:10",
+                    "id": 8,
+                    "isRead": 0,
+                    "seq": 4127,
+                    "sourceId": 1,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "看房预约已取消",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的入住申请（A-1号楼A-1号楼1单元1002）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+                    "createdAt": "2026-10-08T19:26:23",
+                    "id": 7,
+                    "isRead": 1,
+                    "seq": 4126,
+                    "sourceId": 4,
+                    "sourceType": "LEASE",
+                    "title": "入住申请已通过",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的入住申请（A-1号楼A-1号楼1单元1002）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+                    "createdAt": "2026-10-08T19:24:04",
+                    "id": 6,
+                    "isRead": 1,
+                    "seq": 4125,
+                    "sourceId": 3,
+                    "sourceType": "LEASE",
+                    "title": "入住申请已通过",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的入住申请（A-1号楼A-1号楼1单元1002）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+                    "createdAt": "2026-10-08T16:24:48",
+                    "id": 2,
+                    "isRead": 1,
+                    "seq": 4121,
+                    "sourceId": 1,
+                    "sourceType": "LEASE",
+                    "title": "入住申请已通过",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您的入住申请未通过：不要同时申请多个入住",
+                    "createdAt": "2026-10-08T16:22:50",
+                    "id": 1,
+                    "isRead": 1,
+                    "seq": 4120,
+                    "sourceId": 2,
+                    "sourceType": "RESIDENCE_APPLICATION",
+                    "title": "入住申请未通过",
+                    "type": "RESIDENCE"
+                  }
+                ],
+                "total": 28,
+                "page": 1,
+                "size": 100,
+                "pages": 1
+              },
+              "timestamp": "2026-10-09T16:07:38.8357569",
+              "traceId": null
+            }
+          },
+          "unread": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": [
+                {
+                  "communityId": null,
+                  "content": "新公告「[自动化] 非目标楼栋公告 20261009132317」已发布，请查看",
+                  "createdAt": "2026-10-09T13:23:19",
+                  "id": 63,
+                  "isRead": 0,
+                  "seq": 4182,
+                  "sourceId": 4,
+                  "sourceType": "NOTICE",
+                  "title": "社区公告",
+                  "type": "NOTICE"
+                },
+                {
+                  "communityId": null,
+                  "content": "新公告「[自动化] 已过期公告 20261009132122」已发布，请查看",
+                  "createdAt": "2026-10-09T13:21:34",
+                  "id": 61,
+                  "isRead": 0,
+                  "seq": 4180,
+                  "sourceId": 3,
+                  "sourceType": "NOTICE",
+                  "title": "社区公告",
+                  "type": "NOTICE"
+                },
+                {
+                  "communityId": null,
+                  "content": "新公告「[自动化] 游客可见公告 20261009132122」已发布，请查看",
+                  "createdAt": "2026-10-09T13:21:32",
+                  "id": 59,
+                  "isRead": 0,
+                  "seq": 4178,
+                  "sourceId": 2,
+                  "sourceType": "NOTICE",
+                  "title": "社区公告",
+                  "type": "NOTICE"
+                },
+                {
+                  "communityId": null,
+                  "content": "新公告「[自动化] 楼栋定向公告 20261009132122」已发布，请查看",
+                  "createdAt": "2026-10-09T13:21:25",
+                  "id": 51,
+                  "isRead": 0,
+                  "seq": 4170,
+                  "sourceId": 1,
+                  "sourceType": "NOTICE",
+                  "title": "社区公告",
+                  "type": "NOTICE"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的工单 WO202610099822 已终审结束（已关闭）",
+                  "createdAt": "2026-10-09T04:24:42",
+                  "id": 42,
+                  "isRead": 0,
+                  "seq": 4161,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已结束",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的工单 WO202610099822 已处理完成，请确认",
+                  "createdAt": "2026-10-09T04:18:13",
+                  "id": 38,
+                  "isRead": 0,
+                  "seq": 4157,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已处理完成",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的工单 WO202610099822 服务人员已开始处理",
+                  "createdAt": "2026-10-09T04:17:10",
+                  "id": 37,
+                  "isRead": 0,
+                  "seq": 4156,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单处理中",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的工单 WO202610099822 已被服务人员接单",
+                  "createdAt": "2026-10-09T04:15:14",
+                  "id": 36,
+                  "isRead": 0,
+                  "seq": 4155,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "服务人员已接单",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的工单 WO202610099822 已派单给 刘伟民",
+                  "createdAt": "2026-10-09T04:14:26",
+                  "id": 33,
+                  "isRead": 0,
+                  "seq": 4152,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已派单",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的工单 WO202610099822 已被受理，正在安排服务人员",
+                  "createdAt": "2026-10-09T04:12:24",
+                  "id": 30,
+                  "isRead": 0,
+                  "seq": 4149,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已受理",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的退租申请已通过，搬出日期 2026-10-10，租约状态已更新为已搬出。",
+                  "createdAt": "2026-10-09T03:45:44",
+                  "id": 27,
+                  "isRead": 0,
+                  "seq": 4146,
+                  "sourceId": 5,
+                  "sourceType": "LEASE_MOVE_OUT",
+                  "title": "退租申请已通过",
+                  "type": "LEASE"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的租赁协议（A-1号楼A-1号楼1单元604）双方均已确认，可随时在「我的租约」中查看",
+                  "createdAt": "2026-10-09T03:21:18",
+                  "id": 25,
+                  "isRead": 0,
+                  "seq": 4144,
+                  "sourceId": 1,
+                  "sourceType": "LEASE_AGREEMENT",
+                  "title": "租赁协议已确认",
+                  "type": "LEASE"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的租约（A-1号楼A-1号楼1单元604）已生成租赁协议，请在「我的租约」中查看并确认",
+                  "createdAt": "2026-10-09T03:20:29",
+                  "id": 24,
+                  "isRead": 0,
+                  "seq": 4143,
+                  "sourceId": 1,
+                  "sourceType": "LEASE_AGREEMENT",
+                  "title": "待确认租赁协议",
+                  "type": "LEASE"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您的入住申请（A-1号楼A-1号楼1单元604）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+                  "createdAt": "2026-10-09T03:01:36",
+                  "id": 22,
+                  "isRead": 0,
+                  "seq": 4141,
+                  "sourceId": 5,
+                  "sourceType": "LEASE",
+                  "title": "入住申请已通过",
+                  "type": "LEASE"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-12 的看房预约已取消：核心链路审核清理测试数据",
+                  "createdAt": "2026-10-09T02:29:33",
+                  "id": 20,
+                  "isRead": 0,
+                  "seq": 4139,
+                  "sourceId": 5,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "看房预约已取消",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-12 的看房预约已安排带看人，可与其沟通看房事宜",
+                  "createdAt": "2026-10-09T02:29:33",
+                  "id": 19,
+                  "isRead": 0,
+                  "seq": 4138,
+                  "sourceId": 5,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "您的看房预约已安排带看人",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-12 的看房预约已安排带看人，可与其沟通看房事宜",
+                  "createdAt": "2026-10-09T02:29:33",
+                  "id": 17,
+                  "isRead": 0,
+                  "seq": 4136,
+                  "sourceId": 5,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "您的看房预约已安排带看人",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-12 的看房预约已确认",
+                  "createdAt": "2026-10-09T02:29:32",
+                  "id": 15,
+                  "isRead": 0,
+                  "seq": 4134,
+                  "sourceId": 5,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "看房预约已确认",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-09 的看房预约已取消：浏览器回归清理测试预约",
+                  "createdAt": "2026-10-09T01:36:04",
+                  "id": 14,
+                  "isRead": 0,
+                  "seq": 4133,
+                  "sourceId": 4,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "看房预约已取消",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-11 的看房预约已完成",
+                  "createdAt": "2026-10-08T23:36:42",
+                  "id": 13,
+                  "isRead": 0,
+                  "seq": 4132,
+                  "sourceId": 3,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "看房预约已完成",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-11 的看房预约已安排带看人，可与其沟通看房事宜",
+                  "createdAt": "2026-10-08T23:36:29",
+                  "id": 12,
+                  "isRead": 0,
+                  "seq": 4131,
+                  "sourceId": 3,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "您的看房预约已安排带看人",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-11 的看房预约已确认",
+                  "createdAt": "2026-10-08T23:36:27",
+                  "id": 10,
+                  "isRead": 0,
+                  "seq": 4129,
+                  "sourceId": 3,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "看房预约已确认",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-11 的看房预约已取消：自动化验证取消后会话只读",
+                  "createdAt": "2026-10-08T23:17:33",
+                  "id": 9,
+                  "isRead": 0,
+                  "seq": 4128,
+                  "sourceId": 2,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "看房预约已取消",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您 2026-10-11 的看房预约已取消：本轮自动化链路回归完成，取消测试预约",
+                  "createdAt": "2026-10-08T23:06:10",
+                  "id": 8,
+                  "isRead": 0,
+                  "seq": 4127,
+                  "sourceId": 1,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "看房预约已取消",
+                  "type": "RESERVATION"
+                }
+              ],
+              "timestamp": "2026-10-09T16:07:38.8447683",
+              "traceId": null
+            }
+          }
+        },
+        "admin1": {
+          "page": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": {
+                "records": [
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 已终审关闭",
+                    "createdAt": "2026-10-09T04:24:42",
+                    "id": 43,
+                    "isRead": 0,
+                    "seq": 4162,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已关闭",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 居民已确认完成，等待管理端终审关闭",
+                    "createdAt": "2026-10-09T04:19:07",
+                    "id": 41,
+                    "isRead": 0,
+                    "seq": 4160,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单待终审关闭",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 已提交处理结果，等待居民确认",
+                    "createdAt": "2026-10-09T04:18:13",
+                    "id": 39,
+                    "isRead": 0,
+                    "seq": 4158,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单待居民确认",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 已被服务人员接单",
+                    "createdAt": "2026-10-09T04:15:14",
+                    "id": 35,
+                    "isRead": 0,
+                    "seq": 4154,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已接单",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 已受理，待派单",
+                    "createdAt": "2026-10-09T04:12:24",
+                    "id": 31,
+                    "isRead": 0,
+                    "seq": 4150,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已受理",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822「自动化工单链路审核」已提交，请及时受理",
+                    "createdAt": "2026-10-09T04:11:08",
+                    "id": 29,
+                    "isRead": 0,
+                    "seq": 4148,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "新工单待受理",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "租约 #5 的居民申请于 2026-10-10 退租，请及时审核",
+                    "createdAt": "2026-10-09T03:42:03",
+                    "id": 26,
+                    "isRead": 0,
+                    "seq": 4145,
+                    "sourceId": 5,
+                    "sourceType": "LEASE_MOVE_OUT",
+                    "title": "居民提交退租申请",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "租约 #5（房屋 24）居民已确认承租，可发起租赁协议",
+                    "createdAt": "2026-10-09T03:16:53",
+                    "id": 23,
+                    "isRead": 0,
+                    "seq": 4142,
+                    "sourceId": 5,
+                    "sourceType": "LEASE_TENANCY",
+                    "title": "居民已确认承租",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "租约 #4（房屋 38）居民已确认承租，可发起租赁协议",
+                    "createdAt": "2026-10-09T02:38:02",
+                    "id": 21,
+                    "isRead": 0,
+                    "seq": 4140,
+                    "sourceId": 4,
+                    "sourceType": "LEASE_TENANCY",
+                    "title": "居民已确认承租",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "租约 #2（房屋 37）居民已确认承租，可发起租赁协议",
+                    "createdAt": "2026-10-08T16:56:00",
+                    "id": 5,
+                    "isRead": 1,
+                    "seq": 4124,
+                    "sourceId": 2,
+                    "sourceType": "LEASE_TENANCY",
+                    "title": "居民已确认承租",
+                    "type": "LEASE"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "租约 #1（房屋 38）居民已确认承租，可发起租赁协议",
+                    "createdAt": "2026-10-08T16:31:57",
+                    "id": 3,
+                    "isRead": 1,
+                    "seq": 4122,
+                    "sourceId": 1,
+                    "sourceType": "LEASE_TENANCY",
+                    "title": "居民已确认承租",
+                    "type": "LEASE"
+                  }
+                ],
+                "total": 11,
+                "page": 1,
+                "size": 100,
+                "pages": 1
+              },
+              "timestamp": "2026-10-09T16:07:38.8557561",
+              "traceId": null
+            }
+          },
+          "unread": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": [
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 已终审关闭",
+                  "createdAt": "2026-10-09T04:24:42",
+                  "id": 43,
+                  "isRead": 0,
+                  "seq": 4162,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已关闭",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 居民已确认完成，等待管理端终审关闭",
+                  "createdAt": "2026-10-09T04:19:07",
+                  "id": 41,
+                  "isRead": 0,
+                  "seq": 4160,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单待终审关闭",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 已提交处理结果，等待居民确认",
+                  "createdAt": "2026-10-09T04:18:13",
+                  "id": 39,
+                  "isRead": 0,
+                  "seq": 4158,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单待居民确认",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 已被服务人员接单",
+                  "createdAt": "2026-10-09T04:15:14",
+                  "id": 35,
+                  "isRead": 0,
+                  "seq": 4154,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已接单",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 已受理，待派单",
+                  "createdAt": "2026-10-09T04:12:24",
+                  "id": 31,
+                  "isRead": 0,
+                  "seq": 4150,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已受理",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822「自动化工单链路审核」已提交，请及时受理",
+                  "createdAt": "2026-10-09T04:11:08",
+                  "id": 29,
+                  "isRead": 0,
+                  "seq": 4148,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "新工单待受理",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "租约 #5 的居民申请于 2026-10-10 退租，请及时审核",
+                  "createdAt": "2026-10-09T03:42:03",
+                  "id": 26,
+                  "isRead": 0,
+                  "seq": 4145,
+                  "sourceId": 5,
+                  "sourceType": "LEASE_MOVE_OUT",
+                  "title": "居民提交退租申请",
+                  "type": "LEASE"
+                },
+                {
+                  "communityId": 2,
+                  "content": "租约 #5（房屋 24）居民已确认承租，可发起租赁协议",
+                  "createdAt": "2026-10-09T03:16:53",
+                  "id": 23,
+                  "isRead": 0,
+                  "seq": 4142,
+                  "sourceId": 5,
+                  "sourceType": "LEASE_TENANCY",
+                  "title": "居民已确认承租",
+                  "type": "LEASE"
+                },
+                {
+                  "communityId": 2,
+                  "content": "租约 #4（房屋 38）居民已确认承租，可发起租赁协议",
+                  "createdAt": "2026-10-09T02:38:02",
+                  "id": 21,
+                  "isRead": 0,
+                  "seq": 4140,
+                  "sourceId": 4,
+                  "sourceType": "LEASE_TENANCY",
+                  "title": "居民已确认承租",
+                  "type": "LEASE"
+                }
+              ],
+              "timestamp": "2026-10-09T16:07:38.8657563",
+              "traceId": null
+            }
+          }
+        },
+        "superadmin": {
+          "page": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": {
+                "records": [
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822「自动化工单链路审核」已提交，请及时受理",
+                    "createdAt": "2026-10-09T04:11:08",
+                    "id": 28,
+                    "isRead": 0,
+                    "seq": 4147,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "新工单待受理",
+                    "type": "WORK_ORDER"
+                  }
+                ],
+                "total": 1,
+                "page": 1,
+                "size": 100,
+                "pages": 1
+              },
+              "timestamp": "2026-10-09T16:07:38.8757589",
+              "traceId": null
+            }
+          },
+          "unread": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": [
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822「自动化工单链路审核」已提交，请及时受理",
+                  "createdAt": "2026-10-09T04:11:08",
+                  "id": 28,
+                  "isRead": 0,
+                  "seq": 4147,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "新工单待受理",
+                  "type": "WORK_ORDER"
+                }
+              ],
+              "timestamp": "2026-10-09T16:07:38.8837572",
+              "traceId": null
+            }
+          }
+        },
+        "staff1": {
+          "page": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": {
+                "records": [
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 已被居民确认完成",
+                    "createdAt": "2026-10-09T04:19:07",
+                    "id": 40,
+                    "isRead": 0,
+                    "seq": 4159,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "居民已确认工单",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 已接单，请按约上门",
+                    "createdAt": "2026-10-09T04:15:14",
+                    "id": 34,
+                    "isRead": 0,
+                    "seq": 4153,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "工单已接单",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "工单 WO202610099822 已派单给您，请及时接单",
+                    "createdAt": "2026-10-09T04:14:26",
+                    "id": 32,
+                    "isRead": 0,
+                    "seq": 4151,
+                    "sourceId": 1,
+                    "sourceType": "WORK_ORDER",
+                    "title": "新工单派发",
+                    "type": "WORK_ORDER"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您已被分配为 2026-10-12 看房预约的带看人，可与预约人沟通看房事宜",
+                    "createdAt": "2026-10-09T02:29:33",
+                    "id": 18,
+                    "isRead": 0,
+                    "seq": 4137,
+                    "sourceId": 5,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "您已被分配为看房带看人",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您已被分配为 2026-10-12 看房预约的带看人，可与预约人沟通看房事宜",
+                    "createdAt": "2026-10-09T02:29:33",
+                    "id": 16,
+                    "isRead": 0,
+                    "seq": 4135,
+                    "sourceId": 5,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "您已被分配为看房带看人",
+                    "type": "RESERVATION"
+                  },
+                  {
+                    "communityId": 2,
+                    "content": "您已被分配为 2026-10-11 看房预约的带看人，可与预约人沟通看房事宜",
+                    "createdAt": "2026-10-08T23:36:29",
+                    "id": 11,
+                    "isRead": 0,
+                    "seq": 4130,
+                    "sourceId": 3,
+                    "sourceType": "VIEWING_APPOINTMENT",
+                    "title": "您已被分配为看房带看人",
+                    "type": "RESERVATION"
+                  }
+                ],
+                "total": 6,
+                "page": 1,
+                "size": 100,
+                "pages": 1
+              },
+              "timestamp": "2026-10-09T16:07:38.8937579",
+              "traceId": null
+            }
+          },
+          "unread": {
+            "status": 200,
+            "body": {
+              "code": 200,
+              "message": "success",
+              "data": [
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 已被居民确认完成",
+                  "createdAt": "2026-10-09T04:19:07",
+                  "id": 40,
+                  "isRead": 0,
+                  "seq": 4159,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "居民已确认工单",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 已接单，请按约上门",
+                  "createdAt": "2026-10-09T04:15:14",
+                  "id": 34,
+                  "isRead": 0,
+                  "seq": 4153,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "工单已接单",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "工单 WO202610099822 已派单给您，请及时接单",
+                  "createdAt": "2026-10-09T04:14:26",
+                  "id": 32,
+                  "isRead": 0,
+                  "seq": 4151,
+                  "sourceId": 1,
+                  "sourceType": "WORK_ORDER",
+                  "title": "新工单派发",
+                  "type": "WORK_ORDER"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您已被分配为 2026-10-12 看房预约的带看人，可与预约人沟通看房事宜",
+                  "createdAt": "2026-10-09T02:29:33",
+                  "id": 18,
+                  "isRead": 0,
+                  "seq": 4137,
+                  "sourceId": 5,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "您已被分配为看房带看人",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您已被分配为 2026-10-12 看房预约的带看人，可与预约人沟通看房事宜",
+                  "createdAt": "2026-10-09T02:29:33",
+                  "id": 16,
+                  "isRead": 0,
+                  "seq": 4135,
+                  "sourceId": 5,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "您已被分配为看房带看人",
+                  "type": "RESERVATION"
+                },
+                {
+                  "communityId": 2,
+                  "content": "您已被分配为 2026-10-11 看房预约的带看人，可与预约人沟通看房事宜",
+                  "createdAt": "2026-10-08T23:36:29",
+                  "id": 11,
+                  "isRead": 0,
+                  "seq": 4130,
+                  "sourceId": 3,
+                  "sourceType": "VIEWING_APPOINTMENT",
+                  "title": "您已被分配为看房带看人",
+                  "type": "RESERVATION"
+                }
+              ],
+              "timestamp": "2026-10-09T16:07:38.9027572",
+              "traceId": null
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "same numeric user id does not cross notification spaces",
+      "resident_id_1_notification_ids": [
+        63,
+        61,
+        59,
+        51,
+        42,
+        38,
+        37,
+        36,
+        33,
+        30,
+        27,
+        25,
+        24,
+        22,
+        20,
+        19,
+        17,
+        15,
+        14,
+        13,
+        12,
+        10,
+        9,
+        8,
+        7,
+        6,
+        2,
+        1
+      ],
+      "superadmin_id_1_notification_ids": [
+        28
+      ],
+      "resident_titles": [
+        "社区公告",
+        "社区公告",
+        "社区公告",
+        "社区公告",
+        "工单已结束",
+        "工单已处理完成",
+        "工单处理中",
+        "服务人员已接单",
+        "工单已派单",
+        "工单已受理",
+        "退租申请已通过",
+        "租赁协议已确认",
+        "待确认租赁协议",
+        "入住申请已通过",
+        "看房预约已取消",
+        "您的看房预约已安排带看人",
+        "您的看房预约已安排带看人",
+        "看房预约已确认",
+        "看房预约已取消",
+        "看房预约已完成"
+      ],
+      "superadmin_titles": [
+        "新工单待受理"
+      ],
+      "overlap_ids": [],
+      "resident_work_order_sources": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "superadmin_work_order_sources": [
+        1
+      ]
+    }
+  ],
+  "browser": {
+    "resident1": {
+      "route": "/resident/notifications",
+      "screenshot": "output/playwright/cf-e10-e11-resident1.png",
+      "body_prefix": "社区居住服务\n首页\n公共资源\n我的预约\n租住与房源\n我的工单\n我的反馈\n公告\n消息\n24\n张\n张伟（居民）\n消息中心\n通知消息\n沟通会话\n全部\n未读 24\n全部已读\n全部\n工单\n反馈\n预约\n公告\n租约\n系统\n\n社区公告\n\n新公告「[自动化] 非目标楼栋公告 20261009132317」已发布，请查看\n\n2 小时前\n\n社区公告\n\n新公告「[自动化] 已过期公告 20261009132122」已发布，请查看\n\n2 小时前\n\n社区公告\n\n新公告「[自动化] 游客可见公告 20261009132122」已发布，请查看\n\n2 小时前\n\n社区公告\n\n新公告「[自动化] 楼栋定向公告 20261009132122」已发布，请查看\n\n2 小时前\n\n工单已结束\n\n您的工单 WO202610099822 已终审结束（已关闭）\n\n11 小时前\n\n工单已处理完成\n\n您的工单 WO202610099822 已处理完成，请确认\n\n11 小时前\n\n工单处理中\n\n您的工单 WO202610099822 服务人员已开始处理\n\n11 小时前\n\n服务人员已接单\n\n您的工单 WO202610099822 已被服务人员接单\n\n11 小时前\n\n工单已派单\n\n您的工单 WO202610099822 已派单给 刘伟民\n\n11 小时前\n\n工单已受理\n\n您的工单 WO202610099822 已被受理，正在安排服务人员\n\n11 小时前\n\n退租申请已通过\n\n您的退租申请已通过，搬出日期 2026-10-10，租约状态已更新为已搬出。\n\n12 小时前\n\n租赁协议已确认\n\n您的租赁协议（A-1号楼A-1号楼1单元604）双方均已确认，可随时在「我的租约」中查看\n\n12 小时前\n\n待确认租赁协议\n\n您的租约（A-1号楼A-1号楼1单元604）已生成租赁协议，请在「我的租约」中查看并确认\n\n12 小时前\n\n入住申请已通过\n\n您的入住申请（A-1号楼A-1号楼1单元604）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议\n\n13 小时前\n\n看房预约已取消\n\n您 2026-10-12 的看房预约已取消：核心链路审核清理测试数据\n\n13 小时前\n\n您的看房预约已安排带看人\n\n您 2026-10-12 的看房预约已安排带看人，可与其沟通看房事宜\n\n13 小时前\n\n您的看房预约已安排带看人\n\n您 2026-10-12 的看房预约已安排带看人，可与其沟通看房事宜\n\n13 小时前\n\n看房预约已确认\n\n您 2026-10-12 的看房预约已确认\n\n13 小时前\n\n看房预约已取消\n\n您 2026-10-09 的看房预约已取消：浏览器回归清理测试预约\n\n14 小时前\n\n看房预约已完成\n\n您 2026-10-11 的看房预约已完成\n\n16 小时前\n加载更多",
+      "console_or_page_errors": [],
+      "request_failures": []
+    },
+    "superadmin": {
+      "route": "/admin/notifications",
+      "screenshot": "output/playwright/cf-e10-e11-superadmin.png",
+      "body_prefix": "社区居住服务\n1\n超\n超级管理员（超级管理员）\n看板\n社区管理\n工单调度\n人员排班\n服务人员\n居民\n租住与房源\n公告\n反馈\n预约\n评价\n消息中心\n消息会话\n系统\n管理后台 / 通知列表\n超级管理员\n消息中心\n全部\n未读 1\n全部已读\n全部\n工单\n反馈\n预约\n公告\n租约\n系统\n\n新工单待受理\n\n工单 WO202610099822「自动化工单链路审核」已提交，请及时受理\n\n11 小时前",
+      "console_or_page_errors": [],
+      "request_failures": []
+    }
+  },
+  "errors": []
+}

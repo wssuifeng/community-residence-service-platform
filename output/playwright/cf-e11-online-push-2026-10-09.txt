@@ -1,0 +1,55 @@
+{
+  "create": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 2,
+        "communityName": "汤臣一品",
+        "content": "E11在线推送验证",
+        "createdAt": null,
+        "endTime": "2026-11-08T16:14:53",
+        "expireTime": "2026-11-08T16:14:53",
+        "id": 5,
+        "isPinned": 0,
+        "priority": "NORMAL",
+        "publishTime": "2026-10-09T16:14:53",
+        "publisherId": 2,
+        "publisherName": "陈国强",
+        "status": "DRAFT",
+        "targets": [
+          {
+            "targetId": 2,
+            "targetName": "汤臣一品",
+            "targetType": "COMMUNITY"
+          }
+        ],
+        "title": "E11实时通知探针-161453",
+        "type": "ANNOUNCEMENT",
+        "viewCount": 0
+      },
+      "timestamp": "2026-10-09T16:14:53.2609378",
+      "traceId": null
+    }
+  },
+  "publish": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": null,
+      "timestamp": "2026-10-09T16:14:53.3119373",
+      "traceId": null
+    }
+  },
+  "online_visible": false,
+  "marker": "E11实时通知探针-161453",
+  "resident_page_has_notification": false,
+  "cleanup": {
+    "withdraw": 200,
+    "delete": 200
+  },
+  "console_or_page_errors": [],
+  "request_failures": []
+}
