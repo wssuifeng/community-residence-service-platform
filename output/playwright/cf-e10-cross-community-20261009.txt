@@ -1,0 +1,34 @@
+{
+  "flow": "CF-E10 跨社区数据级权限对照",
+  "environment": "community_residence_test / backend 8082",
+  "tempUserId": 4,
+  "createAdmin": {
+    "status": 200,
+    "id": 4
+  },
+  "bindCommunity": 200,
+  "createCommunity2Draft": {
+    "status": 200,
+    "noticeId": 2,
+    "code": 200
+  },
+  "admin2Get": {
+    "status": 200,
+    "code": 200
+  },
+  "admin1Get": {
+    "status": 404,
+    "code": null,
+    "message": null
+  },
+  "admin1Page": {
+    "status": 200,
+    "code": 200,
+    "containsProbe": false
+  },
+  "cleanup": {
+    "delete": 200,
+    "unbind": 200,
+    "freeze": 200
+  }
+}

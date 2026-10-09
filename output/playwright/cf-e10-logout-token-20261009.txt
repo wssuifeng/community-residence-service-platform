@@ -1,0 +1,16 @@
+{
+  "flow": "CF-E10 登出后旧令牌失效",
+  "tempUserId": 5,
+  "create": 200,
+  "bind": 200,
+  "logout": 200,
+  "oldTokenAfterLogout": {
+    "status": 401,
+    "code": null,
+    "message": null
+  },
+  "cleanup": {
+    "freeze": 200,
+    "unbind": 200
+  }
+}
