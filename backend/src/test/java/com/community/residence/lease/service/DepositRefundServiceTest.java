@@ -367,6 +367,31 @@ class DepositRefundServiceTest {
     }
 
     @Test
+    @DisplayName("失败原因与备注拼接超长时，退款仍落 FAILED 且变更历史 reason 不超过 500")
+    void failureDetail_isBoundedToLeaseChangeLogColumn() {
+        String longReason = "R".repeat(500);
+        when(alipayChannelClient.refund(any(), anyString(), any(), anyString()))
+                .thenReturn(ChannelRefundResult.failure(longReason));
+
+        CreateDepositRefundDTO request = dto(new BigDecimal("6000.00"), null);
+        request.setRemark("M".repeat(500));
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(OPERATOR_ID);
+
+            DepositRefundVO vo = service.request(LEASE_ID, request);
+
+            assertThat(vo.getStatus()).isEqualTo(DepositRefundStatus.FAILED);
+            ArgumentCaptor<String> detailCaptor = ArgumentCaptor.forClass(String.class);
+            verify(changeLogService, org.mockito.Mockito.atLeastOnce())
+                    .logDepositRefund(eq(LEASE_ID), anyString(), detailCaptor.capture());
+            assertThat(detailCaptor.getAllValues()).allSatisfy(detail ->
+                    assertThat(detail).hasSizeLessThanOrEqualTo(500));
+            assertThat(lease.getDepositStatus()).isEqualTo(DepositStatus.PAID);
+        }
+    }
+
+    @Test
     @DisplayName("渠道调用异常 → 不抛出、落 FAILED + 异常摘要（网络异常不打挂接口，可重试）")
     void channelException_settlesFailed() {
         when(alipayChannelClient.refund(any(), anyString(), any(), anyString()))

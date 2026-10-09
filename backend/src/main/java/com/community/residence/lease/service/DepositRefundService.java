@@ -218,7 +218,7 @@ public class DepositRefundService {
                     refundMapper.insert(refund);
                     lease.setDepositStatus(DepositStatus.REFUNDING);
                     leaseMapper.updateById(lease);
-                    changeLogService.logDepositRefund(leaseId, "发起押金退还", changeDetail);
+                    changeLogService.logDepositRefund(leaseId, "发起押金退还", boundedChangeDetail(changeDetail));
                 });
             } catch (DuplicateKeyException e) {
                 /* 撞库重查（DEF-103）：先查与 insert 之间并发落库的同号记录，胜者即既有记录 */
@@ -295,8 +295,8 @@ public class DepositRefundService {
                 lease.setDepositStatus(fullyRefunded ? DepositStatus.REFUNDED : DepositStatus.PAID);
                 leaseMapper.updateById(lease);
                 changeLogService.logDepositRefund(lease.getId(), "押金退还成功",
-                        "金额 " + refund.getAmount().toPlainString() + " 元，渠道 " + refund.getChannel()
-                                + "，渠道单号 " + result.channelRefundNo());
+                        boundedChangeDetail("金额 " + refund.getAmount().toPlainString() + " 元，渠道 " + refund.getChannel()
+                                + "，渠道单号 " + result.channelRefundNo()));
                 notifyResident(lease, "押金已退还",
                         "您的租约押金 " + refund.getAmount().toPlainString() + " 元已按原渠道（"
                                 + refund.getChannel() + "）退回，请注意查收。");
@@ -316,8 +316,8 @@ public class DepositRefundService {
                 lease.setDepositStatus(DepositStatus.PAID);
                 leaseMapper.updateById(lease);
                 changeLogService.logDepositRefund(lease.getId(), "押金退还失败",
-                        "金额 " + refund.getAmount().toPlainString() + " 元，原因：" + stored
-                                + (StringUtils.hasText(remark) ? "；备注：" + remark : ""));
+                        boundedChangeDetail("金额 " + refund.getAmount().toPlainString() + " 元，原因：" + stored
+                                + (StringUtils.hasText(remark) ? "；备注：" + remark : "")));
                 notifyResident(lease, "押金退还失败",
                         "您的租约押金 " + refund.getAmount().toPlainString() + " 元退还失败："
                                 + stored + "，可联系社区管理员重新发起。");
@@ -425,6 +425,11 @@ public class DepositRefundService {
             return null;
         }
         return StringUtils.hasText(user.getRealName()) ? user.getRealName() : user.getUsername();
+    }
+
+    /* 租约变更历史 reason 列宽 500；退款失败原因与备注拼接后仍须整体截断，避免事务二因超长回滚 */
+    private String boundedChangeDetail(String text) {
+        return truncate(text);
     }
 
     /* 渠道文案截断：fail_reason 列宽 500，超长截断避免插入异常 */
