@@ -1,0 +1,45 @@
+{
+  "flow": "CF-E3-D 首期费用支付浏览器门禁（不实际付款，清洁运行）",
+  "environment": "community_residence_test / backend 8082 / frontend 5174",
+  "leaseId": 1,
+  "channels": [
+    "",
+    "支\n支付宝\n新窗口跳转支付宝完成付款",
+    "微\n微信支付\n微信扫一扫二维码付款\n未配置",
+    "取消",
+    "去支付"
+  ],
+  "paymentResponse": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "alipayForm": "<form name=\"punchout_form\" method=\"post\" action=\"https://openapi-sandbox.dl.alipaydev.com/gateway.do?charset=UTF-8&method=alipay.trade.page.pay&sign=Aojs346b0m8xZnV%2BKtFCd7XERKEtSCmvdbNpvL1Ed9Q0K6Tjl8wFGVCnJMEz9OL9w9yaE47gy7JM3RQ0BqSS5uSVKfIpVPP8cCpDVwJuzMfWFvyvKduxtfmrdpJSfwBfurrL70s3bQBA38CJ83UmFlIVWrTrVNyukV%2BgTrYMvf%2Bc9j8gy7OW80NFPvL8M4z0mtFzgWJLjrvQ1QPVRR%2BP29XLCGOES5M13J0LNzHNhj1SQ9MPMHgL4shpZfMGZ6OASM2TGzAmP%2FIl2G9gIsQP8MhtI50l2cUR%2FXX8GTIoOkRB8GDjb5LiZ1Eopznvyy7pO4r7C5aNNf%2FEruahWQUrXA%3D%3D&version=1.0&app_id=9021000168645104&sign_type=RSA2&timestamp=2026-10-09+21%3A51%3A26&alipay_sdk=alipay-sdk-java-4.40.1006.ALL&format=json\">\n<input type=\"hidden\" name=\"biz_content\" value=\"{&quot;out_trade_no&quot;:&quot;FIRST20261009778038&quot;,&quot;product_code&quot;:&quot;FAST_INSTANT_TRADE_PAY&quot;,&quot;subject&quot;:&quot;租约首期费用（首月租金+押金）&quot;,&quot;total_amount&quot;:&quot;9000.00&quot;}\">\n<input type=\"submit\" value=\"立即支付\" style=\"display:none\" >\n</form>\n<script>document.forms[0].submit();</script>",
+        "amount": 9000.0,
+        "channel": "ALIPAY",
+        "channelTradeNo": null,
+        "createdAt": null,
+        "depositAmount": 6000.0,
+        "leaseId": 1,
+        "months": 1,
+        "paidAt": null,
+        "paymentNo": "FIRST20261009778038",
+        "paymentType": "FIRST",
+        "periodEnd": "2026-02-01",
+        "periodStart": "2026-01-01",
+        "qrCode": null,
+        "rentAmount": 3000.0,
+        "status": "PENDING"
+      },
+      "timestamp": "2026-10-09T21:51:26.80428",
+      "traceId": null
+    }
+  },
+  "paymentNo": "FIRST20261009778038",
+  "step2Reached": true,
+  "popupCount": 1,
+  "errors": [],
+  "requestFailures": [],
+  "apiFailures": []
+}

@@ -1,0 +1,12 @@
+{
+  "flow": "CF-E3-D 首期支付已有 PENDING 单重开续接浏览器回归（不实际付款）",
+  "environment": "community_residence_test / backend 8082 / frontend 5174",
+  "leaseId": 1,
+  "reopenedStep2Reached": true,
+  "reopenedShowsResume": true,
+  "dialogText": "见浏览器验证：重开后单号保持不变，并显示已续接此前未支付首期支付单；当前支付宝凭据未就绪，提供重新获取支付页入口。",
+  "cleanClose": "居民令牌关闭成功，测试库无 PENDING 残留",
+  "popupCount": 1,
+  "errors": [],
+  "requestFailures": []
+}
