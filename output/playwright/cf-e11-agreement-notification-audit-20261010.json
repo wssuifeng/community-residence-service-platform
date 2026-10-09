@@ -1,0 +1,395 @@
+{
+  "environment": "community_residence_test/8082",
+  "events": [
+    {
+      "label": "create template",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "communityId": 1,
+            "communityName": null,
+            "content": "社区：{{社区名称}}；房屋：{{房屋位置}}；租客：{{租客姓名}}；租期：{{租期开始}} 至 {{租期结束}}；月租：{{月租金}}；押金：{{押金}}",
+            "createdAt": null,
+            "fileName": null,
+            "fileSize": null,
+            "fileUrl": null,
+            "id": 1,
+            "isDefault": 1,
+            "name": "CF-E11 临时协议模板",
+            "remark": "CF-E11",
+            "status": "ACTIVE",
+            "updatedAt": null
+          },
+          "timestamp": "2026-10-10T01:05:36.5491725",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "submit application",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "communityId": 1,
+            "conversationId": null,
+            "createdAt": null,
+            "houseId": 2,
+            "houseLocation": "1 号楼1 单元102",
+            "id": 5,
+            "leaseId": null,
+            "relationType": "TENANT",
+            "remark": "CF-E11 agreement notification",
+            "residentId": 1,
+            "residentName": "演示居民",
+            "reviewRemark": null,
+            "reviewTime": null,
+            "status": "PENDING"
+          },
+          "timestamp": "2026-10-10T01:05:36.564245",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "approve application",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "communityId": 1,
+            "conversationId": 3,
+            "createdAt": "2026-10-10T01:05:36",
+            "houseId": 2,
+            "houseLocation": "1 号楼1 单元102",
+            "id": 5,
+            "leaseId": 3,
+            "relationType": "TENANT",
+            "remark": "CF-E11 agreement notification",
+            "residentId": 1,
+            "residentName": "演示居民",
+            "reviewRemark": "CF-E11 agreement",
+            "reviewTime": "2026-10-10T01:05:36.6043706",
+            "status": "APPROVED"
+          },
+          "timestamp": "2026-10-10T01:05:36.6164513",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "resident tenancy confirm",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "agreementStatus": "NONE",
+            "communityId": 1,
+            "communityName": "阳光花园社区",
+            "contractUrl": null,
+            "conversationId": 3,
+            "createdAt": "2026-10-10T01:05:36",
+            "deposit": 6000.0,
+            "depositStatus": "UNPAID",
+            "endDate": "2027-10-09",
+            "expiryFlag": null,
+            "houseId": 2,
+            "houseLocation": "1 号楼1 单元102",
+            "id": 3,
+            "monthlyRent": 3000.0,
+            "remark": "入住申请审批通过自动建立",
+            "startDate": "2026-10-10",
+            "status": "TO_SIGN",
+            "tenantConfirmAt": "2026-10-10T01:05:36.6345012",
+            "tenantConfirmBy": 1,
+            "tenantId": 1,
+            "tenantName": "演示居民"
+          },
+          "timestamp": "2026-10-10T01:05:36.6477383",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "admin create agreement",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "adminConfirmName": null,
+            "adminConfirmTime": null,
+            "cancelReason": null,
+            "communityId": 1,
+            "content": "社区：阳光花园社区；房屋：1 号楼1 单元102；租客：演示居民；租期：2026-10-10 至 2027-10-09；月租：¥3000；押金：¥6000",
+            "createdAt": null,
+            "id": 1,
+            "leaseId": 3,
+            "remark": "CF-E11 agreement notification",
+            "status": "PENDING",
+            "templateFileName": null,
+            "templateFileUrl": null,
+            "templateId": 1,
+            "templateName": "CF-E11 临时协议模板",
+            "tenantConfirmName": null,
+            "tenantConfirmTime": null,
+            "tenantId": 1,
+            "title": "CF-E11 临时协议"
+          },
+          "timestamp": "2026-10-10T01:05:36.6969101",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "resident confirm agreement",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "adminConfirmName": null,
+            "adminConfirmTime": null,
+            "cancelReason": null,
+            "communityId": 1,
+            "content": "社区：阳光花园社区；房屋：1 号楼1 单元102；租客：演示居民；租期：2026-10-10 至 2027-10-09；月租：¥3000；押金：¥6000",
+            "createdAt": "2026-10-10T01:05:36",
+            "id": 1,
+            "leaseId": 3,
+            "remark": "CF-E11 agreement notification",
+            "status": "PARTIAL",
+            "templateFileName": null,
+            "templateFileUrl": null,
+            "templateId": 1,
+            "templateName": "CF-E11 临时协议模板",
+            "tenantConfirmName": "resident1",
+            "tenantConfirmTime": "2026-10-10T01:05:36.7199294",
+            "tenantId": 1,
+            "title": "CF-E11 临时协议"
+          },
+          "timestamp": "2026-10-10T01:05:36.7289296",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "admin confirm agreement",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "adminConfirmName": "admin1",
+            "adminConfirmTime": "2026-10-10T01:05:36.7502924",
+            "cancelReason": null,
+            "communityId": 1,
+            "content": "社区：阳光花园社区；房屋：1 号楼1 单元102；租客：演示居民；租期：2026-10-10 至 2027-10-09；月租：¥3000；押金：¥6000",
+            "createdAt": "2026-10-10T01:05:36",
+            "id": 1,
+            "leaseId": 3,
+            "remark": "CF-E11 agreement notification",
+            "status": "SIGNED",
+            "templateFileName": null,
+            "templateFileUrl": null,
+            "templateId": 1,
+            "templateName": "CF-E11 临时协议模板",
+            "tenantConfirmName": "resident1",
+            "tenantConfirmTime": "2026-10-10T01:05:37",
+            "tenantId": 1,
+            "title": "CF-E11 临时协议"
+          },
+          "timestamp": "2026-10-10T01:05:36.7842906",
+          "traceId": null
+        }
+      }
+    }
+  ],
+  "afterApprove": {
+    "resident": [
+      {
+        "id": 28,
+        "title": "入住申请已通过",
+        "content": "您的入住申请（1 号楼1 单元102）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ],
+    "admin": []
+  },
+  "afterTenancyConfirm": {
+    "resident": [
+      {
+        "id": 28,
+        "title": "入住申请已通过",
+        "content": "您的入住申请（1 号楼1 单元102）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ],
+    "admin": [
+      {
+        "id": 29,
+        "title": "居民已确认承租",
+        "content": "租约 #3（房屋 2）居民已确认承租，可发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE_TENANCY",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ]
+  },
+  "afterAgreementCreate": {
+    "resident": [
+      {
+        "id": 30,
+        "title": "待确认租赁协议",
+        "content": "您的租约（1 号楼1 单元102）已生成租赁协议，请在「我的租约」中查看并确认",
+        "type": "LEASE",
+        "sourceType": "LEASE_AGREEMENT",
+        "sourceId": 1,
+        "isRead": 0
+      },
+      {
+        "id": 28,
+        "title": "入住申请已通过",
+        "content": "您的入住申请（1 号楼1 单元102）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ],
+    "admin": [
+      {
+        "id": 29,
+        "title": "居民已确认承租",
+        "content": "租约 #3（房屋 2）居民已确认承租，可发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE_TENANCY",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ]
+  },
+  "afterResidentAgreementConfirm": {
+    "resident": [
+      {
+        "id": 30,
+        "title": "待确认租赁协议",
+        "content": "您的租约（1 号楼1 单元102）已生成租赁协议，请在「我的租约」中查看并确认",
+        "type": "LEASE",
+        "sourceType": "LEASE_AGREEMENT",
+        "sourceId": 1,
+        "isRead": 0
+      },
+      {
+        "id": 28,
+        "title": "入住申请已通过",
+        "content": "您的入住申请（1 号楼1 单元102）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ],
+    "admin": [
+      {
+        "id": 29,
+        "title": "居民已确认承租",
+        "content": "租约 #3（房屋 2）居民已确认承租，可发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE_TENANCY",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ]
+  },
+  "afterAdminAgreementConfirm": {
+    "resident": [
+      {
+        "id": 31,
+        "title": "租赁协议已确认",
+        "content": "您的租赁协议（1 号楼1 单元102）双方均已确认，可随时在「我的租约」中查看",
+        "type": "LEASE",
+        "sourceType": "LEASE_AGREEMENT",
+        "sourceId": 1,
+        "isRead": 0
+      },
+      {
+        "id": 30,
+        "title": "待确认租赁协议",
+        "content": "您的租约（1 号楼1 单元102）已生成租赁协议，请在「我的租约」中查看并确认",
+        "type": "LEASE",
+        "sourceType": "LEASE_AGREEMENT",
+        "sourceId": 1,
+        "isRead": 0
+      },
+      {
+        "id": 28,
+        "title": "入住申请已通过",
+        "content": "您的入住申请（1 号楼1 单元102）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ],
+    "admin": [
+      {
+        "id": 29,
+        "title": "居民已确认承租",
+        "content": "租约 #3（房屋 2）居民已确认承租，可发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE_TENANCY",
+        "sourceId": 3,
+        "isRead": 0
+      }
+    ]
+  },
+  "beforeCleanupDb": [
+    "id\ttenant_id\thouse_id\tstatus\tagreement_status\tconversation_id",
+    "3\t1\t2\tACTIVE\tSIGNED\t3",
+    "id\tlease_id\tstatus\ttenant_confirm_time\tadmin_confirm_time",
+    "1\t3\tSIGNED\t2026-10-10 01:05:37\t2026-10-10 01:05:37",
+    "id\tuser_id\towner_type\ttitle\ttype\tsource_type\tsource_id",
+    "3\t1\tRESIDENT\tѺ���˻�ʧ��\tLEASE\tLEASE\t1",
+    "4\t1\tRESIDENT\tѺ���˻�ʧ��\tLEASE\tLEASE\t1",
+    "5\t1\tRESIDENT\tѺ���˻�ʧ��\tLEASE\tLEASE\t1",
+    "6\t1\tRESIDENT\tѺ���˻�ʧ��\tLEASE\tLEASE\t1",
+    "7\t1\tRESIDENT\tѺ���˻�ʧ��\tLEASE\tLEASE\t1",
+    "8\t1\tRESIDENT\tѺ���˻�ʧ��\tLEASE\tLEASE\t1",
+    "9\t1\tRESIDENT\tѺ���˻�ʧ��\tLEASE\tLEASE\t1",
+    "28\t1\tRESIDENT\t��ס������ͨ��\tLEASE\tLEASE\t3",
+    "29\t2\tUSER\t������ȷ�ϳ���\tLEASE\tLEASE_TENANCY\t3",
+    "30\t1\tRESIDENT\t��ȷ������Э��\tLEASE\tLEASE_AGREEMENT\t1",
+    "31\t1\tRESIDENT\t����Э����ȷ��\tLEASE\tLEASE_AGREEMENT\t1"
+  ],
+  "cleanup": {
+    "exitCode": 0,
+    "stdout": [
+      "generated_notifications",
+      "0",
+      "generated_lease",
+      "0",
+      "generated_agreement",
+      "0"
+    ],
+    "stderr": ""
+  }
+}
