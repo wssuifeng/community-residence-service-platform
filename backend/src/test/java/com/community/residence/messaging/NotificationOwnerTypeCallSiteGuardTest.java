@@ -93,7 +93,8 @@ class NotificationOwnerTypeCallSiteGuardTest {
                         "notificationService.createForUser(feedback.getHandlerId()", 1));
         expected.put("com/community/residence/housing/service/ViewingAppointmentService.java",
                 calls("notificationService.createForResident(appointment.getUserId()", 1,
-                        "notificationService.createForUser(assigneeId", 1));
+                        "notificationService.createForUser(assigneeId", 1,
+                        "notificationService.createForUser(adminId", 1));
         expected.put("com/community/residence/lease/service/LeaseService.java",
                 calls("notificationService.createForUser(adminId", 1));
         /* R72 押金退还结果通知租约居民（resident 身份空间） */

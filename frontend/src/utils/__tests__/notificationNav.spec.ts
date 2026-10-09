@@ -87,3 +87,24 @@ describe('租约族通知 → 租约深链（DEF-121）', () => {
     )
   })
 })
+
+
+describe('看房预约通知 → 三端业务入口（R48/R55/R59）', () => {
+  it('居民有预约 ID 时落看房详情，缺 ID 时落我的预约看房 tab', () => {
+    expect(notificationTarget({ sourceType: 'VIEWING_APPOINTMENT', sourceId: 12 }, 'RESIDENT')).toBe(
+      '/resident/viewing-appointments/12'
+    )
+    expect(notificationTarget({ sourceType: 'VIEWING_APPOINTMENT', sourceId: null }, 'RESIDENT')).toBe(
+      '/resident/reservations?tab=viewing'
+    )
+  })
+
+  it('管理端落统一 Hub 的看房预约分区，服务人员落我的带看工作台', () => {
+    expect(notificationTarget({ sourceType: 'VIEWING_APPOINTMENT', sourceId: 12 }, 'ADMIN')).toBe(
+      '/admin/housing-lease?tab=housings&view=viewings'
+    )
+    expect(notificationTarget({ sourceType: 'VIEWING_APPOINTMENT', sourceId: 12 }, 'STAFF')).toBe(
+      '/staff/viewings'
+    )
+  })
+})

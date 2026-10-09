@@ -1,0 +1,129 @@
+{
+  "backend": "http://127.0.0.1:8083/api/v1",
+  "frontend": "http://127.0.0.1:5175",
+  "solutionB": {
+    "housingId": 1,
+    "redirect": "/resident/housings/1/reserve",
+    "selectedDate": "10",
+    "selectedSlot": "09:00 ~ 10:00\n余 1",
+    "appointmentId": 3,
+    "noGuestFields": true,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "apiFailures": []
+  },
+  "notifications": {
+    "createdAdmin": [
+      {
+        "id": 162,
+        "title": "新看房预约",
+        "type": "RESERVATION",
+        "sourceType": "VIEWING_APPOINTMENT",
+        "sourceId": 3,
+        "ownerType": null,
+        "userId": null
+      }
+    ],
+    "residentAfterConfirm": [
+      {
+        "id": 165,
+        "title": "您的看房预约已安排带看人",
+        "type": "RESERVATION",
+        "sourceType": "VIEWING_APPOINTMENT",
+        "sourceId": 3,
+        "ownerType": null,
+        "userId": null
+      },
+      {
+        "id": 163,
+        "title": "看房预约已确认",
+        "type": "RESERVATION",
+        "sourceType": "VIEWING_APPOINTMENT",
+        "sourceId": 3,
+        "ownerType": null,
+        "userId": null
+      }
+    ],
+    "staffAfterAssign": [
+      {
+        "id": 164,
+        "title": "您已被分配为看房带看人",
+        "type": "RESERVATION",
+        "sourceType": "VIEWING_APPOINTMENT",
+        "sourceId": 3,
+        "ownerType": null,
+        "userId": null
+      }
+    ],
+    "adminAfterResidentCancel": [
+      {
+        "id": 166,
+        "title": "看房预约已取消",
+        "type": "RESERVATION",
+        "sourceType": "VIEWING_APPOINTMENT",
+        "sourceId": 3,
+        "ownerType": null,
+        "userId": null
+      },
+      {
+        "id": 162,
+        "title": "新看房预约",
+        "type": "RESERVATION",
+        "sourceType": "VIEWING_APPOINTMENT",
+        "sourceId": 3,
+        "ownerType": null,
+        "userId": null
+      }
+    ]
+  },
+  "browser": {
+    "admin-新看房预约": {
+      "before": "http://127.0.0.1:5175/admin/notifications",
+      "after": "http://127.0.0.1:5175/admin/housing-lease?tab=housings&view=viewings",
+      "expected": "/admin/housing-lease?tab=housings&view=viewings",
+      "rowCount": 1,
+      "rowText": "新看房预约\n\n居民提交了 2026-10-10 09:00~10:00 的看房预约，请及时确认\n\n刚刚",
+      "deepLinkPassed": true,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "apiFailures": []
+    },
+    "resident-看房预约已确认": {
+      "before": "http://127.0.0.1:5175/resident/notifications",
+      "after": "http://127.0.0.1:5175/resident/viewing-appointments/3",
+      "expected": "/resident/viewing-appointments/3",
+      "rowCount": 1,
+      "rowText": "看房预约已确认\n\n您 2026-10-10 的看房预约已确认\n\n刚刚",
+      "deepLinkPassed": true,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "apiFailures": []
+    },
+    "staff-您已被分配为看房带看人": {
+      "before": "http://127.0.0.1:5175/staff/notifications",
+      "after": "http://127.0.0.1:5175/staff/viewings",
+      "expected": "/staff/viewings",
+      "rowCount": 1,
+      "rowText": "您已被分配为看房带看人\n\n您已被分配为 2026-10-10 看房预约的带看人，可与预约人沟通看房事宜\n\n刚刚",
+      "deepLinkPassed": true,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "apiFailures": []
+    }
+  },
+  "cleanup": {
+    "exitCode": 0,
+    "stdout": [
+      "appointments",
+      "0",
+      "notifications",
+      "0"
+    ],
+    "stderr": "",
+    "notificationIds": [
+      162,
+      166
+    ],
+    "conversationId": 22
+  }
+}

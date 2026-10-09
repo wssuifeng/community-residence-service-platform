@@ -1,5 +1,7 @@
 package com.community.residence.housing.service;
 
+import com.community.residence.auth.mapper.SysAdminCommunityMapper;
+
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.context.SecurityUtils;
@@ -54,6 +56,8 @@ class ViewingContinuousLimitTest {
     @Mock
     private ViewingAppointmentMapper appointmentMapper;
     @Mock
+    private com.community.residence.reservation.mapper.ResourceReservationMapper resourceReservationMapper;
+    @Mock
     private HousingMapper housingMapper;
     @Mock
     private HousingTimeslotMapper timeslotMapper;
@@ -70,6 +74,9 @@ class ViewingContinuousLimitTest {
     @Mock
     private com.community.residence.conversation.service.ConversationService conversationService;
 
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+
     @InjectMocks
     private ViewingAppointmentService service;
 
@@ -77,6 +84,8 @@ class ViewingContinuousLimitTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(sysAdminCommunityMapper.selectList(any())).thenReturn(java.util.List.of());
+        lenient().when(resourceReservationMapper.selectCount(any())).thenReturn(0L);
         lenient().when(redissonClient.getLock(anyString())).thenReturn(lock);
         try {
             lenient().when(lock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);
@@ -134,7 +143,10 @@ class ViewingContinuousLimitTest {
 
     private ViewingAppointmentVO invokeCreate(LocalTime start, LocalTime end) {
         try (var mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUser).thenReturn(null);
+            mocked.when(SecurityUtils::getUser).thenReturn(
+                    new com.community.residence.common.context.UserContext(1L, "resident1", "RESIDENT", java.util.Set.of()));
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+            mocked.when(() -> SecurityUtils.hasRole("RESIDENT")).thenReturn(true);
             return service.create(dto(start, end));
         }
     }
