@@ -1,0 +1,52 @@
+{
+  "flow": "CF-E3-G 到期 / 当天到期首期门禁与续期放行",
+  "environment": "community_residence_test / backend 8082",
+  "leaseId": 1,
+  "originalEndDate": "2027-12-31",
+  "yesterday": "2026-10-08",
+  "today": "2026-10-09",
+  "expiredFirst": {
+    "status": 200,
+    "code": 5606,
+    "message": "租约已于 2026-10-08 到期，不可支付首期费用，请先续租或办理退租"
+  },
+  "expiredRenew": {
+    "status": 200,
+    "code": 200,
+    "paymentNo": "RENEW20261009983485",
+    "paymentType": "RENEWAL",
+    "paymentStatus": "PENDING"
+  },
+  "expiredRenewClose": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": null,
+      "timestamp": "2026-10-09T22:03:07.3560261",
+      "traceId": null
+    }
+  },
+  "todayFirst": {
+    "status": 200,
+    "code": 200,
+    "paymentNo": "FIRST20261009062736",
+    "paymentType": "FIRST",
+    "paymentStatus": "PENDING"
+  },
+  "todayFirstClose": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": null,
+      "timestamp": "2026-10-09T22:03:07.4360814",
+      "traceId": null
+    }
+  },
+  "assertions": {
+    "expiredFirst5606": true,
+    "expiredRenewAllowedToChannel": true,
+    "todayFirstNotExpired": true
+  }
+}

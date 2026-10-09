@@ -1,0 +1,7 @@
+{
+  "flow": "CF-E3-G 到期 UI 观察（数据库已恢复原值）",
+  "containsExpiryAnnotation": false,
+  "containsFirstDue": true,
+  "errors": [],
+  "requestFailures": []
+}
