@@ -1,0 +1,110 @@
+{
+  "create": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "address": "A-1号楼A-1号楼1单元1002",
+        "assigneeActiveOrders": null,
+        "assigneeId": null,
+        "assigneeName": null,
+        "assigneeShiftLabel": null,
+        "categoryId": 1,
+        "categoryName": "自动化维修服务",
+        "communityId": 2,
+        "contactPhone": "13905710101",
+        "content": "只用于验证跳过受理时的建群行为，随后清理。",
+        "conversationId": null,
+        "createdAt": null,
+        "dispatchFlag": "NORMAL",
+        "id": 4,
+        "orderNo": "WO202610096838",
+        "priority": "LOW",
+        "residentId": 1,
+        "residentName": "张伟",
+        "status": "PENDING",
+        "title": "E4-X2未受理派单观察",
+        "updatedAt": null,
+        "waitedMinutes": 0
+      },
+      "timestamp": "2026-10-09T18:19:19.6228686",
+      "traceId": null
+    }
+  },
+  "order_id": 4,
+  "before_assign": {
+    "status": 200,
+    "data": {
+      "address": "A-1号楼A-1号楼1单元1002",
+      "assigneeActiveOrders": null,
+      "assigneeId": null,
+      "assigneeName": null,
+      "assigneeShiftLabel": null,
+      "categoryId": 1,
+      "categoryName": "自动化维修服务",
+      "communityId": 2,
+      "contactPhone": "13905710101",
+      "content": "只用于验证跳过受理时的建群行为，随后清理。",
+      "conversationId": null,
+      "createdAt": "2026-10-09T18:19:19",
+      "dispatchFlag": "NEW",
+      "id": 4,
+      "orderNo": "WO202610096838",
+      "priority": "LOW",
+      "residentId": 1,
+      "residentName": "张伟",
+      "status": "PENDING",
+      "title": "E4-X2未受理派单观察",
+      "updatedAt": "2026-10-09T18:19:19",
+      "waitedMinutes": 0
+    }
+  },
+  "assign": {
+    "status": 200,
+    "body": {
+      "code": 200,
+      "message": "success",
+      "data": null,
+      "timestamp": "2026-10-09T18:19:19.7657459",
+      "traceId": null
+    }
+  },
+  "after_assign": {
+    "status": 200,
+    "data": {
+      "address": "A-1号楼A-1号楼1单元1002",
+      "assigneeActiveOrders": 1,
+      "assigneeId": 3,
+      "assigneeName": "刘伟民",
+      "assigneeShiftLabel": null,
+      "categoryId": 1,
+      "categoryName": "自动化维修服务",
+      "communityId": 2,
+      "contactPhone": "13905710101",
+      "content": "只用于验证跳过受理时的建群行为，随后清理。",
+      "conversationId": null,
+      "createdAt": "2026-10-09T18:19:19",
+      "dispatchFlag": "NEW",
+      "id": 4,
+      "orderNo": "WO202610096838",
+      "priority": "LOW",
+      "residentId": 1,
+      "residentName": "张伟",
+      "status": "ASSIGNED",
+      "title": "E4-X2未受理派单观察",
+      "updatedAt": "2026-10-09T18:19:19",
+      "waitedMinutes": 0
+    }
+  },
+  "cancel": {
+    "status": 200,
+    "body": {
+      "code": 5302,
+      "message": "工单状态不允许从 ASSIGNED 流转到 CANCELLED",
+      "data": null,
+      "timestamp": "2026-10-09T18:19:19.8813516",
+      "traceId": null
+    }
+  }
+}

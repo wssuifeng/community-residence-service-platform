@@ -1,0 +1,46 @@
+{
+  "login_status": 200,
+  "login_body": {
+    "code": 200,
+    "message": "success",
+    "timestamp": "2026-10-09T18:15:00.8088628",
+    "traceId": null
+  },
+  "user": {
+    "boundCommunities": [],
+    "id": 2,
+    "realName": "李思远",
+    "role": "RESIDENT",
+    "username": "resident2"
+  },
+  "get_conversation": {
+    "status": 403,
+    "body": {
+      "code": 403,
+      "message": "非会话参与者，无权访问会话",
+      "data": null,
+      "timestamp": "2026-10-09T18:15:00.8346548",
+      "traceId": null
+    }
+  },
+  "get_messages": {
+    "status": 403,
+    "body": {
+      "code": 403,
+      "message": "非会话参与者，无权访问会话",
+      "data": null,
+      "timestamp": "2026-10-09T18:15:00.8524755",
+      "traceId": null
+    }
+  },
+  "browser": {
+    "route": "/resident/conversations/11",
+    "body_prefix": "社区居住服务\n首页\n公共资源\n我的预约\n租住与房源\n我的工单\n我的反馈\n公告\n消息\n2\n李\n李思远（居民）\n消息中心\n/\n沟通会话\n沟通会话\n沟通会话\n状态未知\n\n会话状态未知，已临时锁定为只读\n\n暂无消息，说点什么开始沟通\n会话已关闭，历史消息只读留档",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+    ],
+    "request_failures": [],
+    "screenshot": "output/playwright/cf-e4-x1-resident2-cross-space-2026-10-09.png"
+  }
+}
