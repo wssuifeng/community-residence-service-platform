@@ -77,9 +77,11 @@
     }
   ],
   "assertions": {
-    "disabledWechatRejected": false,
+    "disabledWechatRejected": true,
     "alipayCreatedPending": true,
     "leaseUnchanged": true,
-    "pendingClosed": true
+    "pendingClosed": true,
+    "disabledWechatHttpTransport": true,
+    "disabledWechatNoNewOrder": true
   }
 }
