@@ -1,0 +1,38 @@
+CF-E11 工单全事件通知与三端 UI 深链受控回归
+日期：2026-10-10
+环境：隔离库 community_residence_test；后端 8082；前端 5174
+探针：工单 id=1，orderNo=WO202610107743；居民 resident1；管理员 admin1；服务人员 staff1；超管 superadmin
+
+一、后端业务事件（8 个事件）
+1. 提交：管理员 admin1、超管 superadmin 各收到「新工单待受理」；居民/服务人员未收到。
+2. 受理：居民收到「工单已受理」；绑定管理员收到「工单已受理」；超管不重复收到受理事件。
+3. 派单：居民收到「工单已派单」；staff1 收到「新工单派发」；未派单服务人员未收到。
+4. 接单：居民收到「服务人员已接单」；staff1 与绑定管理员分别收到「工单已接单」。
+5. 开始处理：居民收到「工单处理中」。
+6. 提交结果：居民收到「工单已处理完成」；绑定管理员收到「工单待居民确认」。
+7. 居民确认：staff1 收到「居民已确认工单」；绑定管理员收到「工单待终审关闭」。
+8. 终审关闭：居民收到「工单已结束」；绑定管理员收到「工单已关闭」。
+
+二、身份空间与数据核对
+- notification 表 16 条工单通知全部按预期落在 owner_type=RESIDENT 或 USER。
+- resident1（resident id=1）只读到居民身份空间通知；admin1/superadmin/staff1 只读到 USER 身份空间通知。
+- resident1 与 admin1 数字 id 均为 1/2 可能撞号时，无跨 owner_type 串收。
+- 工单状态完整流转：PENDING → TO_ASSIGN → ASSIGNED → ACCEPTED → IN_PROGRESS → TO_CONFIRM → COMPLETED → CLOSED。
+- WORK_ORDER_GROUP 参与者为 resident1（RESIDENT）、admin1（USER）、staff1（USER）；关闭后 conversation.status=CLOSED，历史可查。
+
+三、浏览器 UI / 深链
+- 三端消息中心首条通知点击后均正确跳转：
+  - resident1 → /resident/work-orders/1
+  - admin1 → /admin/work-orders/1
+  - staff1 → /staff/work-orders/1
+- 管理端、服务人员端深链页面无 console/page/API 错误。
+- 居民端详情页额外请求 GET /api/v1/work-orders/1/evaluation；该工单尚未评价，后端按当前设计返回 404「该工单暂无评价」，页面静默展示评价表单，功能可继续使用。该 404 属可选评价查询的交互/接口语义观察项，暂不登记为 50 阶段设计缺陷，留给 60 评估验收判断是否改为显式空态或 200/null。
+
+四、清理
+- 已从隔离库删除工单、处理记录、派单记录、评价（如有）、临时群聊及工单通知。
+- 清理后 work_order=0、WORK_ORDER notification=0、WORK_ORDER_GROUP related_id=1=0。
+- 开发库 community_residence 未写入。
+
+详细 JSON：output/playwright/cf-e11-workorder-notification-audit-20261010.json
+浏览器 JSON：output/playwright/cf-e11-notification-ui-deeplink-20261010.json
+截图：output/playwright/cf-e11-resident-notification-list-20261010.png、cf-e11-resident-notification-deeplink-20261010.png、cf-e11-admin-notification-list-20261010.png、cf-e11-admin-notification-deeplink-20261010.png、cf-e11-staff-notification-list-20261010.png、cf-e11-staff-notification-deeplink-20261010.png

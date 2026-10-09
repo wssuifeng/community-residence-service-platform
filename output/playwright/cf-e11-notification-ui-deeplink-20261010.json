@@ -1,0 +1,46 @@
+{
+  "base": "http://127.0.0.1:5174",
+  "orderId": 1,
+  "roles": {
+    "resident1": {
+      "before": "http://127.0.0.1:5174/resident/notifications",
+      "after": "http://127.0.0.1:5174/resident/work-orders/1",
+      "rowCount": 13,
+      "firstRow": "工单已结束\n\n您的工单 WO202610107743 已终审结束（已关闭）\n\n9 分钟前",
+      "expectedSuffix": "/resident/work-orders/1",
+      "deepLinkPassed": true,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "pageErrors": [],
+      "apiFailures": [
+        "404 GET http://127.0.0.1:5174/api/v1/work-orders/1/evaluation"
+      ],
+      "bodyHead": "社区居住服务\n首页\n公共资源\n我的预约\n租住与房源\n我的工单\n我的反馈\n公告\n消息\n12\n演\n演示居民（居民）\n我的工单\n/\n工单详情\n返回列表\n提交\n10-10 00:32\n受理\n10-10 00:32\n派单\n10-10 00:32\n处理中\n10-10 00:32\n待确认"
+    },
+    "admin1": {
+      "before": "http://127.0.0.1:5174/admin/notifications",
+      "after": "http://127.0.0.1:5174/admin/work-orders/1",
+      "rowCount": 6,
+      "firstRow": "工单已关闭\n\n工单 WO202610107743 已终审关闭\n\n9 分钟前",
+      "expectedSuffix": "/admin/work-orders/1",
+      "deepLinkPassed": true,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "apiFailures": [],
+      "bodyHead": "社区居住服务\n5\n社\n社区管理员（社区管理员）\n看板\n社区管理\n工单调度\n人员排班\n服务人员\n居民\n租住与房源\n公告\n反馈\n预约\n评价\n消息中心\n消息会话\n管理后台 / 工单详情\n社区管理员\n工单管理\n/\nWO202610107743\n普通\nCF-E11-WO-20261010003217\n"
+    },
+    "staff1": {
+      "before": "http://127.0.0.1:5174/staff/notifications",
+      "after": "http://127.0.0.1:5174/staff/work-orders/1",
+      "rowCount": 3,
+      "firstRow": "居民已确认工单\n\n工单 WO202610107743 已被居民确认完成\n\n9 分钟前",
+      "expectedSuffix": "/staff/work-orders/1",
+      "deepLinkPassed": true,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "apiFailures": [],
+      "bodyHead": "社区居住服务\n工作台\n工单列表\n我的带看\n消息\n2\n服\n服务人员（服务人员）\n工单列表\n/\nWO202610107743\n普通\nCF-E11-WO-20261010003217\n已关闭\n工单信息\n演\n演女士\n租客\n提交人\n地址\nA-1号楼1单元1002\n分类\n室内维修\n联系电话\n13905710101"
+    }
+  }
+}
