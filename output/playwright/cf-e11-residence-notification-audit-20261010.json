@@ -1,0 +1,146 @@
+{
+  "environment": "community_residence_test/8082",
+  "events": [
+    {
+      "label": "resident submit approval application",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "communityId": 1,
+            "conversationId": null,
+            "createdAt": null,
+            "houseId": 2,
+            "houseLocation": "1 号楼1 单元102",
+            "id": 3,
+            "leaseId": null,
+            "relationType": "TENANT",
+            "remark": "CF-E11 入住通知审批探针",
+            "residentId": 1,
+            "residentName": "演示居民",
+            "reviewRemark": null,
+            "reviewTime": null,
+            "status": "PENDING"
+          },
+          "timestamp": "2026-10-10T00:57:12.6043715",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "admin approve",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "communityId": 1,
+            "conversationId": 2,
+            "createdAt": "2026-10-10T00:57:12",
+            "houseId": 2,
+            "houseLocation": "1 号楼1 单元102",
+            "id": 3,
+            "leaseId": 2,
+            "relationType": "TENANT",
+            "remark": "CF-E11 入住通知审批探针",
+            "residentId": 1,
+            "residentName": "演示居民",
+            "reviewRemark": "CF-E11 通知审批通过探针",
+            "reviewTime": "2026-10-10T00:57:12.6624042",
+            "status": "APPROVED"
+          },
+          "timestamp": "2026-10-10T00:57:12.677529",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "resident submit rejection application",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": {
+            "communityId": 1,
+            "conversationId": null,
+            "createdAt": null,
+            "houseId": 3,
+            "houseLocation": "1 号楼1 单元201",
+            "id": 4,
+            "leaseId": null,
+            "relationType": "TENANT",
+            "remark": "CF-E11 入住通知驳回探针",
+            "residentId": 1,
+            "residentName": "演示居民",
+            "reviewRemark": null,
+            "reviewTime": null,
+            "status": "PENDING"
+          },
+          "timestamp": "2026-10-10T00:57:12.6915397",
+          "traceId": null
+        }
+      }
+    },
+    {
+      "label": "admin reject",
+      "response": {
+        "http": 200,
+        "body": {
+          "code": 200,
+          "message": "success",
+          "data": null,
+          "timestamp": "2026-10-10T00:57:12.7117167",
+          "traceId": null
+        }
+      }
+    }
+  ],
+  "cleanup": {
+    "exitCode": 0,
+    "stdout": [
+      "applications",
+      "0",
+      "leases",
+      "0",
+      "notifications",
+      "0"
+    ],
+    "stderr": ""
+  },
+  "notifications": {
+    "resident1": [
+      {
+        "id": 27,
+        "title": "入住申请未通过",
+        "content": "您的入住申请未通过：CF-E11 通知驳回探针",
+        "type": "RESIDENCE",
+        "sourceType": "RESIDENCE_APPLICATION",
+        "sourceId": 4,
+        "isRead": 0
+      },
+      {
+        "id": 26,
+        "title": "入住申请已通过",
+        "content": "您的入住申请（1 号楼1 单元102）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+        "type": "LEASE",
+        "sourceType": "LEASE",
+        "sourceId": 2,
+        "isRead": 0
+      }
+    ],
+    "admin1": []
+  },
+  "beforeCleanupDb": [
+    "id\thouse_id\tresident_id\tstatus\tlease_id",
+    "3\t2\t1\tAPPROVED\t2",
+    "4\t3\t1\tREJECTED\tNULL",
+    "id\ttenant_id\thouse_id\tstatus\tconversation_id",
+    "2\t1\t2\tTO_SIGN\t2",
+    "id\ttype\trelated_id\tstatus",
+    "2\tLEASE_GROUP\t2\tACTIVE"
+  ]
+}

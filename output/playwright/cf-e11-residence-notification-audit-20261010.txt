@@ -1,0 +1,11 @@
+CF-E11 入住申请通知子集受控回归
+日期：2026-10-10
+环境：隔离库 community_residence_test；后端 8082
+
+- resident1 在房屋 2 提交入住申请，admin1 审批通过：生成 leaseId=2、LEASE_GROUP conversationId=2，居民收到 `type=LEASE/sourceType=LEASE/sourceId=2` 的「入住申请已通过」通知。
+- resident1 在房屋 3 提交入住申请，admin1 驳回：居民收到 `type=RESIDENCE/sourceType=RESIDENCE_APPLICATION/sourceId=4` 的「入住申请未通过」通知。
+- 通知未投递到 admin1；居民端来源 ID 分别与真实租约 / 申请一致，符合深链映射口径。
+- 审批通过路径状态为 `APPROVED` + 租约 `TO_SIGN`，房屋保持可用；未产生重复租约。
+- 测试申请、租约、居住关系、租约群聊、通知及关联留痕已清理；清理后 applications=0、leases=0、generated notifications=0，开发库未写入。
+
+JSON：output/playwright/cf-e11-residence-notification-audit-20261010.json
