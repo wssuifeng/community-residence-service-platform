@@ -1,0 +1,24 @@
+CF-E11 协议通知链路受控回归（发现 DEF-165）
+日期：2026-10-10
+环境：隔离库 community_residence_test；后端 8082
+
+已执行真实 API 链：审批通过 → 居民承租确认 → 管理方发起协议 → 居民确认 → 管理方确认。
+
+通过范围：
+- 审批通过：居民收到 `LEASE/sourceId=leaseId` 通知。
+- 居民承租确认：绑定管理员收到 `LEASE_TENANCY/sourceId=leaseId` 通知。
+- 管理方发起协议：居民收到 `LEASE_AGREEMENT/sourceId=agreementId`「待确认租赁协议」通知。
+- 管理方确认先于居民时的对方提醒逻辑由代码保留；本链使用居民先确认。
+- 双方确认后租约达到 `ACTIVE`、协议 `SIGNED`、房屋置 `OCCUPIED`，居民收到 `LEASE_AGREEMENT/sourceId=agreementId`「租赁协议已确认」通知。
+
+发现 DEF-165：
+- 设计 §9.19.6 明确要求协议双方确认齐后通知居民与管理方；13 号用例 CF-E3-C 第 10 步也要求双方收到通知。
+- 本次居民先确认协议后，管理端 `admin1` 没有收到协议确认 / 待终审类通知；数据库只有居民侧 `LEASE_AGREEMENT` 通知，管理端通知列表没有新增记录。
+- 根因定位：`AgreementService.notifyCounterpart()` 仅调用 `createForResident`；居民先确认时 `tenantConfirmTime` 已非空，方法没有任何 `createForUser` 管理端投递；双方确认分支也仅通知居民。
+- 影响：管理方无法依赖 C11 通知中心获得「居民已确认协议」与「双方协议已确认」事件，只能依赖租约待办 / 页面刷新；与冻结设计的通知收件矩阵不一致。
+
+当前处置：未擅自修改冻结设计或代码，已登记 DEF-165，待按既有设计补齐「社区绑定管理员」管理方通知并回归身份空间、幂等与深链。
+
+清理：临时模板、申请、租约、协议、群聊、关系和通知均已删除；开发库未写入。
+
+JSON：output/playwright/cf-e11-agreement-notification-audit-20261010.json
