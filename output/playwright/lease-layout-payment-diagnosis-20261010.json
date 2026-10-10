@@ -1,0 +1,35 @@
+{
+  "capturedAt": "2026-10-10T14:35:30.5374142+08:00",
+  "channel": "ALIPAY_SANDBOX",
+  "environment": {
+    "backendPort": 8084,
+    "frontendPort": 5176
+  },
+  "payment": {
+    "paidAt": null,
+    "type": "RENEWAL",
+    "status": "PENDING",
+    "channelTradeNoPresent": false
+  },
+  "browserObservation": {
+    "cashier404": "excashier-sandbox.dl.alipaydev.com/standard/auth.htm",
+    "blankPage": "Previous diagnostic fetch ran from about:blank (origin null), invalid as API evidence. Original tab creation cause unproven.",
+    "retry500": "openapi-sandbox.dl.alipaydev.com/error",
+    "businessPageRestored": true
+  },
+  "officialSources": [
+    "https://opendocs.alipay.com/open/270/105899",
+    "https://opendocs.alipay.com/common/02kkv7"
+  ],
+  "verification": {
+    "leaseComponentTestsPassed": 25,
+    "supportedWidths": [
+      768,
+      1024,
+      1366
+    ],
+    "smallScreenNote": "Below 768px is outside existing design support; desktop-width guidance remains.",
+    "cardOverlap": false,
+    "typecheckAndBuild": "passed"
+  }
+}

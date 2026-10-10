@@ -1442,7 +1442,8 @@ onMounted(() => {
 }
 
 .lease-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 1.3fr);
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-lg);
@@ -1459,6 +1460,7 @@ onMounted(() => {
 
 .lease-title {
   margin: 0;
+  overflow-wrap: anywhere;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
@@ -1488,10 +1490,20 @@ onMounted(() => {
 }
 
 .lease-side {
-  flex-shrink: 0;
+  min-width: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-sm);
+}
+
+.lease-side > .el-button + .el-button {
+  margin-left: 0;
+}
+
+.lease-side > span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* 到期标注：30 天内橙 / 已过期红 */
@@ -2128,7 +2140,9 @@ onMounted(() => {
 
 /* 支付入口旁的说明（可支付时讲口径，不可支付时讲原因——入口不整条消失） */
 .payment-entry-note {
-  margin-left: var(--spacing-sm);
+  /* 长说明独占一行，不参与地址与操作按钮的横向宽度竞争。 */
+  flex-basis: 100%;
+  order: 1;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
@@ -2186,12 +2200,15 @@ onMounted(() => {
   color: var(--color-text-secondary);
 }
 
-/* 响应式：窄屏允许行内元素换行 */
-@media (max-width: 700px) {
+/* 平板及较窄窗口上下排列，保留地址和租期的可读宽度。 */
+@media (max-width: 1199px) {
   .lease-row {
-    flex-wrap: wrap;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
   }
+}
 
+@media (max-width: 700px) {
   .lease-title {
     white-space: normal;
   }
