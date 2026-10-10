@@ -351,11 +351,25 @@ class PaymentServiceTest {
             LeasePayment pending = pendingPayment();
             when(paymentMapper.selectOne(any())).thenReturn(pending);
 
-            paymentService.closePayment("RENEW20260920000123");
+            assertThat(paymentService.closePayment("RENEW20260920000123")).isEqualTo(500L);
 
             ArgumentCaptor<LeasePayment> captor = ArgumentCaptor.forClass(LeasePayment.class);
             verify(paymentMapper).updateById(captor.capture());
             assertThat(captor.getValue().getStatus()).isEqualTo(PaymentStatus.CLOSED);
+        }
+    }
+
+    @Test
+    @DisplayName("关闭：CLOSED 幂等返回同一支付记录ID且不重复更新")
+    void close_alreadyClosed_returnsPaymentId() {
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(1L);
+            LeasePayment payment = pendingPayment();
+            payment.setStatus(PaymentStatus.CLOSED);
+            when(paymentMapper.selectOne(any())).thenReturn(payment);
+
+            assertThat(paymentService.closePayment(payment.getPaymentNo())).isEqualTo(500L);
+            verify(paymentMapper, never()).updateById(any(LeasePayment.class));
         }
     }
 

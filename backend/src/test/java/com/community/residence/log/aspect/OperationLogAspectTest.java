@@ -5,6 +5,11 @@ import com.community.residence.auth.mapper.SysOperationLogMapper;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.context.UserContext;
 import com.community.residence.log.annotation.OperationLog;
+import com.community.residence.payment.dto.CreateFirstPaymentDTO;
+import com.community.residence.payment.dto.CreateRenewPaymentDTO;
+import com.community.residence.payment.entity.LeasePayment;
+import com.community.residence.payment.service.PaymentService;
+import com.community.residence.payment.vo.LeasePaymentVO;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -56,6 +61,7 @@ class OperationLogAspectTest {
         @OperationLog(operationType = "UPDATE", targetType = "NOTICE")
         public void noExpression() {
         }
+
     }
 
     /** 测试参数 DTO（public 字段保证 SpEL 属性访问） */
@@ -95,6 +101,59 @@ class OperationLogAspectTest {
         ResultHolder(Long id) {
             this.id = id;
         }
+    }
+
+    @Test
+    @DisplayName("首期与续约支付留痕使用支付记录主键，不能误用租约ID或业务单号")
+    void paymentTargetId_usesPaymentId() throws Exception {
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUser)
+                    .thenReturn(new UserContext(1L, "resident1", "RESIDENT", Set.of()));
+            LeasePayment payment = new LeasePayment();
+            payment.setId(500L);
+            payment.setLeaseId(20L);
+            payment.setPaymentNo("FIRST20260101000001");
+            Method first = PaymentService.class.getMethod("createFirstPayment", Long.class,
+                    CreateFirstPaymentDTO.class);
+            Method renewal = PaymentService.class.getMethod("createRenewPayment", Long.class,
+                    CreateRenewPaymentDTO.class);
+            recordPaymentOperation(first, new Object[]{20L, new CreateFirstPaymentDTO()},
+                    LeasePaymentVO.from(payment));
+            recordPaymentOperation(renewal, new Object[]{20L, new CreateRenewPaymentDTO()},
+                    LeasePaymentVO.from(payment));
+
+            ArgumentCaptor<SysOperationLog> captor = ArgumentCaptor.forClass(SysOperationLog.class);
+            verify(operationLogMapper, times(2)).insert(captor.capture());
+            assertThat(captor.getAllValues()).allSatisfy(entry -> {
+                assertThat(entry.getTargetType()).isEqualTo("LEASE_PAYMENT");
+                assertThat(entry.getTargetId()).isEqualTo(500L);
+            });
+        }
+    }
+
+    @Test
+    @DisplayName("支付关闭留痕取服务返回的支付记录主键")
+    void closePaymentTargetId_usesPaymentId() throws Exception {
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUser)
+                    .thenReturn(new UserContext(1L, "resident1", "RESIDENT", Set.of()));
+            Method method = PaymentService.class.getMethod("closePayment", String.class);
+            recordPaymentOperation(method, new Object[]{"FIRST20260101000001"}, 500L);
+
+            ArgumentCaptor<SysOperationLog> captor = ArgumentCaptor.forClass(SysOperationLog.class);
+            verify(operationLogMapper).insert(captor.capture());
+            assertThat(captor.getValue().getTargetType()).isEqualTo("LEASE_PAYMENT");
+            assertThat(captor.getValue().getTargetId()).isEqualTo(500L);
+        }
+    }
+
+    private void recordPaymentOperation(Method method, Object[] args, Object result) {
+        JoinPoint jp = mock(JoinPoint.class);
+        MethodSignature signature = mock(MethodSignature.class);
+        when(jp.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(method);
+        when(jp.getArgs()).thenReturn(args);
+        aspect.recordOperation(jp, method.getAnnotation(OperationLog.class), result);
     }
 
     @Test

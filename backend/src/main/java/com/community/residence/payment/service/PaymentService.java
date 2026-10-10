@@ -123,7 +123,7 @@ public class PaymentService {
      */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE",
-            targetType = "LEASE_PAYMENT", targetId = "#result.paymentNo",
+            targetType = "LEASE_PAYMENT", targetId = "#result.id",
             content = "'发起租约续约支付（' + #dto.channel + '，' + #dto.months + ' 个月）'")
     public LeasePaymentVO createRenewPayment(Long leaseId, CreateRenewPaymentDTO dto) {
         Long residentId = SecurityUtils.getUserId();
@@ -207,7 +207,7 @@ public class PaymentService {
      * 锁释放时后到请求立即可见，否则「解锁先于事务提交」重新打开竞态窗口）。
      */
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE",
-            targetType = "LEASE_PAYMENT", targetId = "#result.paymentNo",
+            targetType = "LEASE_PAYMENT", targetId = "#result.id",
             content = "'发起首期费用支付（' + #dto.channel + '）'")
     public LeasePaymentVO createFirstPayment(Long leaseId, CreateFirstPaymentDTO dto) {
         Long residentId = SecurityUtils.getUserId();
@@ -448,8 +448,8 @@ public class PaymentService {
     /** 关闭支付单（本人放弃支付）：仅 PENDING 可关（SUCCESS 已落账不可关，CLOSED 幂等） */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "STATUS",
-            targetType = "LEASE_PAYMENT", targetId = "#paymentNo", content = "'关闭续约支付单'")
-    public void closePayment(String paymentNo) {
+            targetType = "LEASE_PAYMENT", targetId = "#result", content = "'关闭续约支付单'")
+    public Long closePayment(String paymentNo) {
         LeasePayment payment = requirePayment(paymentNo);
         if (!payment.getResidentId().equals(SecurityUtils.getUserId())) {
             throw new ForbiddenException("无权操作他人支付单");
@@ -458,12 +458,13 @@ public class PaymentService {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "已支付的单不可关闭");
         }
         if (PaymentStatus.CLOSED.equals(payment.getStatus())) {
-            return;
+            return payment.getId();
         }
         payment.setStatus(PaymentStatus.CLOSED);
         paymentMapper.updateById(payment);
         log.info("支付单已关闭（居民放弃支付）：paymentNo={}, operator={}",
                 paymentNo, SecurityUtils.getUserId());
+        return payment.getId();
     }
 
     /** 本人支付单列表（居民视角，可选渠道过滤） */

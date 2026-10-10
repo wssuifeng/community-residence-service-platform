@@ -4,6 +4,7 @@ import ElementPlus from 'element-plus'
 import type { ILeasePayment, ILeaseRecord } from '@/types/modules/lease'
 import { ApiError } from '@/utils/request'
 import LeaseFirstPaymentDialog from '../LeaseFirstPaymentDialog.vue'
+import LeaseRenewDialog from '../LeaseRenewDialog.vue'
 
 /**
  * 首期支付弹窗（DEF-068）：打开先回查既有首期单——
@@ -13,7 +14,7 @@ import LeaseFirstPaymentDialog from '../LeaseFirstPaymentDialog.vue'
  * api 层打桩，不打真后端；断言以可见文本与真实 DOM（button/span）为准。
  */
 
-const ALIPAY_FORM = '<form id="alipay">ok</form>'
+const ALIPAY_FORM = '<form id="alipay"><input name="subject" value="租约费用（月租+押金）"></form>'
 const PENDING_NO = 'FIRST20260921437051'
 const PAID_NO = 'FIRST20260921403843'
 
@@ -60,7 +61,7 @@ vi.mock('@/api/payment', () => ({
     mocks.closeCalls.push(paymentNo)
     return null
   },
-  createRenewPayment: async () => ({}),
+  createRenewPayment: async () => mocks.createResult,
   listMyPayments: async () => ({ records: [], total: 0 })
 }))
 
@@ -264,8 +265,8 @@ describe('LeaseFirstPaymentDialog · 支付宝表单注入方式（DEF-129）', 
     const revokeUrl = vi.mocked(URL.revokeObjectURL)
     expect(createUrl).toHaveBeenCalledTimes(1)
     const blob = createUrl.mock.calls[0][0] as Blob
-    expect(blob.type).toBe('text/html')
-    expect(blob.size).toBe(ALIPAY_FORM.length)
+    expect(blob.type).toBe('text/html;charset=utf-8')
+    expect(blob.size).toBe(new TextEncoder().encode(ALIPAY_FORM).length)
     expect(window.open).toHaveBeenCalledWith('blob:mock-alipay-form', '_blank')
     /* 注入面关闭：不再向新窗口文档流 open/write（后端表单尾部自带 submit 脚本） */
     expect(fakeWin.document.open).not.toHaveBeenCalled()
@@ -274,5 +275,41 @@ describe('LeaseFirstPaymentDialog · 支付宝表单注入方式（DEF-129）', 
     expect(fakeWin.addEventListener).toHaveBeenCalledWith('load', expect.any(Function))
     expect(revokeUrl).not.toHaveBeenCalled()
     expect(bodyText()).toContain('已在新窗口打开支付宝')
+  })
+})
+
+
+describe('支付宝中文签名字段编码', () => {
+  it.each([
+    ['首期', LeaseFirstPaymentDialog],
+    ['续约', LeaseRenewDialog]
+  ] as const)('%s 支付窗口用 UTF-8 保留中文表单原文', async (_label, component) => {
+    mocks.listQueue = [[]]
+    mocks.createResult = { ...order('PENDING', PENDING_NO), alipayForm: ALIPAY_FORM }
+    const wrapper = mount(component, {
+      props: { modelValue: false, lease: lease() },
+      global: { plugins: [ElementPlus] },
+      attachTo: document.body
+    })
+    try {
+      await wrapper.setProps({ modelValue: true })
+      await flushPromises()
+      const submit = buttonWith('去支付')
+      expect(submit).toBeDefined()
+      submit!.click()
+      await flushPromises()
+      expect(URL.createObjectURL).toHaveBeenCalledTimes(1)
+      const blob = vi.mocked(URL.createObjectURL).mock.calls[0][0] as Blob
+      expect(blob.type).toBe('text/html;charset=utf-8')
+      const text = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsText(blob, 'UTF-8')
+      })
+      expect(text).toBe(ALIPAY_FORM)
+    } finally {
+      wrapper.unmount()
+    }
   })
 })

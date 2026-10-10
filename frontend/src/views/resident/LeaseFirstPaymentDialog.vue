@@ -188,7 +188,7 @@ async function enterPaymentStep(data: ILeasePayment): Promise<void> {
  * 未转义标记；被拦截时置标记供手动重开。
  */
 function openAlipay(formHtml: string): void {
-  const url = URL.createObjectURL(new Blob([formHtml], { type: 'text/html' }))
+  const url = URL.createObjectURL(new Blob([formHtml], { type: 'text/html;charset=utf-8' }))
   const win = window.open(url, '_blank')
   if (!win) {
     /* 拦截场景同步释放，避免 Blob URL 泄漏 */
