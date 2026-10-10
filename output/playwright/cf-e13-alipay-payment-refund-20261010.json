@@ -1,0 +1,159 @@
+{
+  "capturedAt": "2026-10-10T11:23:07.093495+08:00",
+  "environment": {
+    "database": "community_residence_test",
+    "backendPort": 8084,
+    "frontendPort": 5176,
+    "channel": "ALIPAY_SANDBOX"
+  },
+  "scope": "User-completed sandbox first payment; backend status confirmation; move-out approval and original-channel deposit refund. Not renewal or full CF-E13 browser coverage.",
+  "payments": [
+    {
+      "id": 9,
+      "amount": 13500.0,
+      "paidAt": null,
+      "status": "CLOSED",
+      "channel": "ALIPAY",
+      "leaseId": 20,
+      "paymentNo": "FIRST20261010077853",
+      "paymentType": "FIRST",
+      "channelTradeNoPresent": false
+    },
+    {
+      "id": 10,
+      "amount": 13500.0,
+      "paidAt": "2026-10-10 09:47:01.000000",
+      "status": "SUCCESS",
+      "channel": "ALIPAY",
+      "leaseId": 20,
+      "paymentNo": "FIRST20261010920878",
+      "paymentType": "FIRST",
+      "channelTradeNoPresent": true
+    }
+  ],
+  "depositRefunds": [
+    {
+      "id": 9,
+      "amount": 9000.0,
+      "status": "SUCCESS",
+      "channel": "ALIPAY",
+      "leaseId": 20,
+      "refundedAt": "2026-10-10 09:55:00.000000",
+      "outRequestNo": "RF20261010920878",
+      "moveOutApplicationId": 14,
+      "channelRefundNoPresent": true
+    }
+  ],
+  "lease": {
+    "id": 20,
+    "status": "MOVED_OUT",
+    "deposit": 9000.0,
+    "houseId": 2,
+    "monthlyRent": 4500.0,
+    "depositStatus": "REFUNDED"
+  },
+  "moveOutApplication": {
+    "id": 14,
+    "status": "APPROVED",
+    "leaseId": 20
+  },
+  "house": {
+    "id": 2,
+    "status": "VACANT"
+  },
+  "notifications": [
+    {
+      "id": 167,
+      "title": "入住申请已通过",
+      "sourceId": 20,
+      "ownerType": "RESIDENT",
+      "sourceType": "LEASE"
+    },
+    {
+      "id": 168,
+      "title": "居民已确认承租",
+      "sourceId": 20,
+      "ownerType": "USER",
+      "sourceType": "LEASE_TENANCY"
+    },
+    {
+      "id": 169,
+      "title": "待确认租赁协议",
+      "sourceId": 18,
+      "ownerType": "RESIDENT",
+      "sourceType": "LEASE_AGREEMENT"
+    },
+    {
+      "id": 170,
+      "title": "居民已确认租赁协议",
+      "sourceId": 18,
+      "ownerType": "USER",
+      "sourceType": "LEASE_AGREEMENT"
+    },
+    {
+      "id": 171,
+      "title": "租赁协议已确认",
+      "sourceId": 18,
+      "ownerType": "RESIDENT",
+      "sourceType": "LEASE_AGREEMENT"
+    },
+    {
+      "id": 172,
+      "title": "租赁协议已确认",
+      "sourceId": 18,
+      "ownerType": "USER",
+      "sourceType": "LEASE_AGREEMENT"
+    },
+    {
+      "id": 173,
+      "title": "首期费用支付成功",
+      "sourceId": 10,
+      "ownerType": "RESIDENT",
+      "sourceType": "LEASE_PAYMENT"
+    },
+    {
+      "id": 174,
+      "title": "社区租约首期费用到账",
+      "sourceId": 10,
+      "ownerType": "USER",
+      "sourceType": "LEASE_PAYMENT"
+    },
+    {
+      "id": 175,
+      "title": "居民提交退租申请",
+      "sourceId": 20,
+      "ownerType": "USER",
+      "sourceType": "LEASE_MOVE_OUT"
+    },
+    {
+      "id": 176,
+      "title": "退租申请已通过",
+      "sourceId": 20,
+      "ownerType": "RESIDENT",
+      "sourceType": "LEASE_MOVE_OUT"
+    },
+    {
+      "id": 177,
+      "title": "押金已退还",
+      "sourceId": 20,
+      "ownerType": "RESIDENT",
+      "sourceType": "LEASE"
+    }
+  ],
+  "regression": {
+    "backend": {
+      "passed": 752,
+      "failed": 0,
+      "skipped": 0
+    },
+    "frontend": {
+      "passed": 217,
+      "failed": 0
+    },
+    "frontendTypecheckAndBuild": "passed",
+    "paymentUiTargeted": 8,
+    "operationLogAspectTargeted": 8
+  },
+  "dataRetention": "Paid/refunded sandbox chain retained in isolated test database for user inspection; development database not modified.",
+  "privacy": "No credentials, session tokens, payer/merchant identities or channel trade numbers exported."
+}

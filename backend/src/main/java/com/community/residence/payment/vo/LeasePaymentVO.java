@@ -1,6 +1,7 @@
 package com.community.residence.payment.vo;
 
 import com.community.residence.payment.entity.LeasePayment;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -11,6 +12,10 @@ import java.time.LocalDateTime;
 @Data
 @Schema(description = "租约支付单")
 public class LeasePaymentVO {
+
+    @JsonIgnore
+    @Schema(description = "支付记录主键，仅用于服务端操作留痕", hidden = true)
+    private Long id;
 
     @Schema(description = "业务单号（首期 FIRST+yyyyMMdd+6位随机；续期 RENEW+yyyyMMdd+6位随机）")
     private String paymentNo;
@@ -62,6 +67,7 @@ public class LeasePaymentVO {
 
     public static LeasePaymentVO from(LeasePayment entity) {
         LeasePaymentVO vo = new LeasePaymentVO();
+        vo.setId(entity.getId());
         vo.setPaymentNo(entity.getPaymentNo());
         vo.setLeaseId(entity.getLeaseId());
         vo.setPaymentType(entity.getPaymentType());
