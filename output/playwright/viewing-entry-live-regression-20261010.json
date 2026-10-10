@@ -1,0 +1,98 @@
+{
+  "capturedAt": "2026-10-10T17:37:38.469933",
+  "environment": "isolated 8084/5176",
+  "accountsPrefix": "slot_audit_173737",
+  "appointmentIds": [
+    4,
+    5
+  ],
+  "conversationIds": [
+    24,
+    25
+  ],
+  "slotId": 15,
+  "checks": [
+    {
+      "check": "browser-created template visible to public API",
+      "passed": true,
+      "detail": {
+        "date": "2026-10-12",
+        "slotId": 15
+      }
+    },
+    {
+      "check": "registered resident creates TO_CONFIRM appointment",
+      "passed": true,
+      "detail": {
+        "id": 4,
+        "status": "TO_CONFIRM"
+      }
+    },
+    {
+      "check": "overlapping appointment rejected",
+      "passed": true,
+      "detail": {
+        "code": 5401,
+        "message": "所选时段与已有看房预约重叠"
+      }
+    },
+    {
+      "check": "adjacent appointment allowed",
+      "passed": true,
+      "detail": {
+        "id": 5,
+        "status": "TO_CONFIRM"
+      }
+    },
+    {
+      "check": "other resident denied /viewing-appointments/4",
+      "passed": true,
+      "detail": {
+        "code": 403
+      }
+    },
+    {
+      "check": "other resident denied /conversations/24/messages",
+      "passed": true,
+      "detail": {
+        "code": 403
+      }
+    },
+    {
+      "check": "assigned staff can read group",
+      "passed": true,
+      "detail": {
+        "groupId": 24
+      }
+    },
+    {
+      "check": "admin completes appointment",
+      "passed": true,
+      "detail": {
+        "status": "COMPLETED"
+      }
+    },
+    {
+      "check": "admin marks violation",
+      "passed": true,
+      "detail": {
+        "status": "VIOLATED"
+      }
+    },
+    {
+      "check": "resident receives 看房预约已完成",
+      "passed": true,
+      "detail": {
+        "title": "看房预约已完成"
+      }
+    },
+    {
+      "check": "resident receives 看房预约违约处置",
+      "passed": true,
+      "detail": {
+        "title": "看房预约违约处置"
+      }
+    }
+  ],
+  "dataRetention": "Isolated audit accounts and terminal appointments retained for evidence; payment resident untouched."
+}
