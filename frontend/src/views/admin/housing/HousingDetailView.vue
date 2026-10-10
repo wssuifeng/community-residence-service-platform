@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
@@ -155,6 +155,7 @@ async function handleToggleStatus(): Promise<void> {
 
 /* ------------------------------ 时段配置管理 ------------------------------ */
 
+const timeslotsSection = ref<HTMLElement | null>(null)
 const timeslotRecords = ref<IHousingTimeslot[]>([])
 const timeslotLoading = ref(false)
 
@@ -282,15 +283,17 @@ function goAllViewings(): void {
   router.push({ path: '/admin/housing-lease', query: { tab: 'housings', view: 'viewings' } })
 }
 
-onMounted(async () => {
-  loadDetail()
-  loadTimeslots()
-  loadRelatedViewings()
-  /* 列表卡片「时段」动作经 #timeslots 锚点直达时段区 */
-  if (route.hash === '#timeslots') {
-    await nextTick()
-    document.getElementById('timeslots')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+/* 时段区依赖异步详情的 v-if；等真实节点渲染后再定位，并支持同页 hash 跳转。 */
+watch([timeslotsSection, () => route.hash], ([section, hash]) => {
+  if (section && hash === '#timeslots') {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+}, { flush: 'post' })
+
+onMounted(() => {
+  void loadDetail()
+  void loadTimeslots()
+  void loadRelatedViewings()
 })
 </script>
 
@@ -411,7 +414,7 @@ onMounted(async () => {
 
       <div class="bottom-grid">
         <!-- 左：看房时段配置（列表卡片「时段」动作经 #timeslots 锚定到此） -->
-        <div id="timeslots" class="panel-card">
+        <div id="timeslots" ref="timeslotsSection" class="panel-card">
           <div class="timeslot-head">
             <h2 class="card-title">看房时段配置</h2>
             <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" size="small" @click="openSlotCreate">＋ 新增时段</el-button>
@@ -689,6 +692,11 @@ onMounted(async () => {
   margin: 0;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
+}
+
+/* 顶部导航固定为 60px，锚点落位时为配置标题留出可见空间。 */
+#timeslots {
+  scroll-margin-top: calc(60px + var(--spacing-md));
 }
 
 .timeslot-head {

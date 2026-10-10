@@ -407,7 +407,7 @@ onMounted(() => {
         </router-link>
         <div class="card-actions">
           <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" @click="openEdit(housing)">编辑</el-button>
-          <el-button link type="primary" @click="goTimeslots(housing)">时段</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" @click="goTimeslots(housing)">看房时段</el-button>
           <el-button
             v-permission="['ADMIN', 'SUPER_ADMIN']"
             link
