@@ -48,6 +48,7 @@ const currentTab = ref<TabName>(activeTab.value)
 
 const stats = ref<IEvaluationStatistics | null>(null)
 const statsLoading = ref(false)
+const statsError = ref(false)
 
 const averageRating = computed(() => {
   const total = stats.value?.total ?? 0
@@ -76,9 +77,12 @@ const ratingRows = computed(() => {
 
 async function loadStats(): Promise<void> {
   statsLoading.value = true
+  statsError.value = false
   try {
     stats.value = await getEvaluationStatistics()
   } catch (error) {
+    statsError.value = true
+    stats.value = null
     ElMessage.error(error instanceof Error ? error.message : '评价统计加载失败')
   } finally {
     statsLoading.value = false
@@ -92,14 +96,19 @@ const page = ref(1)
 const size = ref(10)
 const total = ref(0)
 const listLoading = ref(false)
+const listError = ref(false)
 
 async function loadList(): Promise<void> {
   listLoading.value = true
+  listError.value = false
   try {
     const result = await listEvaluations({ page: page.value, size: size.value })
     records.value = result.records
     total.value = result.total
   } catch (error) {
+    listError.value = true
+    records.value = []
+    total.value = 0
     ElMessage.error(error instanceof Error ? error.message : '评价列表加载失败')
   } finally {
     listLoading.value = false
@@ -115,11 +124,13 @@ const workbenchPending = ref<IEvaluation[]>([])
 const workbenchFollowed = ref<IEvaluation[]>([])
 const followupCounts = ref<Map<number, number>>(new Map())
 const workbenchLoading = ref(false)
+const workbenchError = ref(false)
 
 const MAX_WORKBENCH_PAGES = 20
 
 async function loadWorkbench(): Promise<void> {
   workbenchLoading.value = true
+  workbenchError.value = false
   try {
     const unsatisfied: IEvaluation[] = []
     for (let p = 1; p <= MAX_WORKBENCH_PAGES; p++) {
@@ -130,12 +141,8 @@ async function loadWorkbench(): Promise<void> {
     const counts = new Map<number, number>()
     await Promise.all(
       unsatisfied.map(async (item) => {
-        try {
-          const followups = await listEvaluationFollowups(item.id)
-          counts.set(item.id, followups.length)
-        } catch {
-          counts.set(item.id, 0)
-        }
+        const followups = await listEvaluationFollowups(item.id)
+        counts.set(item.id, followups.length)
       })
     )
     workbenchPending.value = unsatisfied.filter((item) => (counts.get(item.id) ?? 0) === 0)
@@ -144,6 +151,12 @@ async function loadWorkbench(): Promise<void> {
     /* 列表收缩后页码回夹，避免停留在空页 */
     const maxPage = Math.max(1, Math.ceil(workbenchPending.value.length / clientSize.value))
     if (clientPage.value > maxPage) clientPage.value = maxPage
+  } catch (error) {
+    workbenchError.value = true
+    workbenchPending.value = []
+    workbenchFollowed.value = []
+    followupCounts.value = new Map()
+    ElMessage.error(error instanceof Error ? error.message : '评价跟进状态加载失败')
   } finally {
     workbenchLoading.value = false
   }
@@ -196,6 +209,8 @@ const displayRecords = computed<IEvaluation[]>(() => {
   const start = (clientPage.value - 1) * clientSize.value
   return clientList.value.slice(start, start + clientSize.value)
 })
+
+const displayError = computed(() => isAllTab.value ? listError.value : workbenchError.value)
 
 const displayTotal = computed(() => (isAllTab.value ? total.value : clientList.value.length))
 
@@ -258,7 +273,7 @@ function pillType(row: IEvaluation): 'completed' | 'rejected' {
 }
 
 function isPendingRow(row: IEvaluation): boolean {
-  return row.isSatisfied === 0 && (followupCounts.value.get(row.id) ?? 0) === 0
+  return row.isSatisfied === 0 && followupCounts.value.has(row.id) && followupCounts.value.get(row.id) === 0
 }
 
 function isFollowedRow(row: IEvaluation): boolean {
@@ -324,7 +339,7 @@ onMounted(() => {
               void-color="var(--color-border)"
               disabled-void-color="var(--color-border)"
             />
-            <span class="rating-count">{{ stats?.total ? `共 ${stats.total} 条评价` : '暂无评价' }}</span>
+            <span class="rating-count">{{ statsError ? '评价统计加载失败' : statsLoading ? '加载中' : stats?.total ? `共 ${stats.total} 条评价` : '暂无评价' }}</span>
           </div>
         </template>
       </AdminStatCard>
@@ -346,6 +361,9 @@ onMounted(() => {
         </div>
       </article>
     </div>
+
+    <div v-if="statsError" role="alert">评价统计加载失败，<el-button text type="primary" @click="loadStats">重试统计</el-button></div>
+    <div v-if="isAllTab && workbenchError" role="alert">跟进状态加载失败，未将失败记录当作待跟进。<el-button text type="primary" @click="loadWorkbench">重试跟进状态</el-button></div>
 
     <!-- 白卡 Tab 条：?tab= 深链契约 -->
     <nav class="tab-bar" role="tablist" aria-label="评价视图切换">
@@ -420,10 +438,15 @@ onMounted(() => {
         </div>
       </article>
 
-      <el-empty v-if="!displayLoading && displayRecords.length === 0" :description="emptyText" :image-size="90" />
+      <div v-if="!displayLoading && displayError" class="load-error" role="alert">
+        <p>评价列表加载失败，请重试</p>
+        <el-button type="primary" @click="load">重新加载</el-button>
+      </div>
+      <el-empty v-else-if="!displayLoading && displayRecords.length === 0" :description="emptyText" :image-size="90" />
     </div>
 
     <Pagination
+      v-if="!displayError"
       :page="isAllTab ? page : clientPage"
       :size="isAllTab ? size : clientSize"
       :total="displayTotal"
@@ -436,6 +459,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.load-error { padding: 32px 16px; text-align: center; }
 /* ---------- 统计头 ---------- */
 
 .stat-row {

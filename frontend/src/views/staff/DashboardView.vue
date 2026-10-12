@@ -11,37 +11,12 @@ import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/
 import type { INotification } from '@/types/modules/notification'
 import { useUserStore } from '@/store/user'
 import { formatRelative } from '@/utils/date'
-import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffPlaceholder'
+import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffResidentPresentation'
 
-/** 工作台（UI设计.md §4.2.1）：问候条 + 今日概览 + 紧急告警 + 待办工单 + 今日进度 + 最新消息 */
+/** 工作台（UI设计.md §4.2.1）：问候条 + 今日概览 + 紧急告警 + 待办工单 + 工单进度 + 最新消息 */
 
-/* ===========================================================================
- * 【MOCK 临时占位区块】2026-09-11 —— 后端接口就绪后请整块删除并改接真实数据
- * ───────────────────────────────────────────────────────────────────────────
- * 用户指示：先造数据保证 UI 完整，但必须标识；缺的接口记为待补项。
- * 全局检索标识：MOCK
- *
- * 待补接口 ①：统计卡趋势指数（百分比）与迷你趋势图
- *   需要：STAFF 可访问的「按日聚合历史快照」接口，例如
- *         GET /api/v1/statistics/staff/trend?days=7
- *   现状：StatisticsController 全部端点均限制管理员角色
- *         （StatisticsController.java 第 27/34/41/48/55 行），STAFF 取不到。
- *
- * 待补接口 ②③：居民性别与居住身份（「张女士 / 业主」组合名与身份标签）
- *   取值已抽到 utils/staffPlaceholder.ts，与工单列表、工单详情共用同一口径；
- *   接口就绪后删除该模块并改读真实字段（详见模块内说明）。
- * =========================================================================== */
-
-/** MOCK：趋势数据（delta 为百分比，正数上升 / 负数下降；
- *  按用户口径着色——上升红、下降绿，纯方向判定，不区分指标语义） */
-const MOCK_TREND: Record<string, { delta: number; points: number[] }> = {
-  todo: { delta: 25, points: [6, 5, 7, 6, 8, 7, 9, 8, 10] },
-  doing: { delta: -40, points: [9, 8, 8, 7, 6, 6, 5, 4, 3] },
-  done: { delta: 33, points: [3, 4, 4, 5, 6, 6, 7, 8, 8] },
-  urgent: { delta: 50, points: [1, 1, 2, 1, 2, 2, 3, 2, 3] }
-}
-
-/* ===================== MOCK 区块结束 ===================== */
+/* 趋势口径尚待确认；不生成百分比或曲线冒充统计结果。 */
+const CHART_COLORS = { warning: '#f59e0b', primary: '#3b6dff', success: '#10b981', danger: '#ef4444' } as const
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -64,7 +39,7 @@ const priorityWeight: Record<string, number> = { URGENT: 3, HIGH: 2, NORMAL: 1, 
 
 const todoCount = ref(0)
 const doingCount = ref(0)
-const todayDoneCount = ref(0)
+const completedCount = ref(0)
 const urgentCount = ref(0)
 const todoOrders = ref<IWorkOrder[]>([])
 const latestNotifications = ref<INotification[]>([])
@@ -90,48 +65,6 @@ const todayLabel = computed(() => {
   return `${now.getMonth() + 1}月${now.getDate()}日 ${week[now.getDay()]}`
 })
 
-/* ---------- 图表：ECharts 不解析 CSS 变量，此处色值与 variables.css T​o​k​e​n 一一对应 ---------- */
-
-const CHART_COLORS = {
-  warning: '#f59e0b',
-  primary: '#3b6dff',
-  success: '#10b981',
-  danger: '#ef4444'
-} as const
-
-/** 迷你趋势图：藏轴藏提示，只留描边 + 浅填充 */
-function buildSpark(points: number[], color: string): ChartOption {
-  return {
-    tooltip: { show: false },
-    grid: { left: 0, right: 0, top: 8, bottom: 2 },
-    xAxis: { type: 'category', data: points.map((_, i) => i), show: false, boundaryGap: false },
-    yAxis: {
-      type: 'value',
-      show: false,
-      min: Math.min(...points) - 1,
-      max: Math.max(...points) + 1
-    },
-    series: [
-      {
-        type: 'line',
-        data: points,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { width: 2, color },
-        areaStyle: { color, opacity: 0.14 }
-      }
-    ]
-  }
-}
-
-/* 趋势图与卡片数值无关，初始化时构建一次即可 */
-const SPARK_OPTIONS: Record<string, ChartOption> = {
-  todo: buildSpark(MOCK_TREND.todo.points, CHART_COLORS.warning),
-  doing: buildSpark(MOCK_TREND.doing.points, CHART_COLORS.primary),
-  done: buildSpark(MOCK_TREND.done.points, CHART_COLORS.success),
-  urgent: buildSpark(MOCK_TREND.urgent.points, CHART_COLORS.danger)
-}
-
 /** 统计卡图标：纯 path 数据，配 currentColor 随卡片语义色变化 */
 const STAT_ICONS: Record<string, string[]> = {
   todo: ['M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z', 'M9 8h6M9 12h6M9 16h3'],
@@ -140,35 +73,27 @@ const STAT_ICONS: Record<string, string[]> = {
   urgent: ['M12 4l9 16H3z', 'M12 10v4M12 17h.01']
 }
 
-const ARROW_UP = 'M12 19V5M5 12l7-7 7 7'
-const ARROW_DOWN = 'M12 5v14M5 12l7 7 7-7'
 
-/* ---------- 统计卡：数值走真实接口，趋势走 MOCK（见上方区块） ---------- */
+/* ---------- 统计卡：数值读取真实列表总数，未定义的趋势不展示假数据 ---------- */
 
 const statCards = computed(() => {
   const defs = [
     { key: 'todo', tone: 'todo', label: '待接单', value: todoCount.value, hint: '已派给您的工单', tab: 'todo' },
     { key: 'doing', tone: 'doing', label: '处理中', value: doingCount.value, hint: '已接单 / 处理中的工单', tab: 'doing' },
-    { key: 'done', tone: 'done', label: '今日完成', value: todayDoneCount.value, hint: '今日提交处理结果的工单', tab: 'done' },
+    { key: 'done', tone: 'done', label: '已完成（未关闭）', value: completedCount.value, hint: '居民已确认、尚未终审关闭的工单', tab: 'done' },
     { key: 'urgent', tone: 'urgent', label: '紧急待接单', value: urgentCount.value, hint: '标记为紧急且尚未接单', tab: 'todo' }
   ]
   return defs.map((def) => {
-    const trend = MOCK_TREND[def.key]
-    return {
-      ...def,
-      delta: Math.abs(trend.delta),
-      /* 用户口径：上升为红、下降为绿（纯方向，不代表好坏） */
-      isUp: trend.delta > 0
-    }
+    return def
   })
 })
 
-/* ---------- 今日进度环形图：三态构成，任一态为 0 也不会空环 ---------- */
+/* ---------- 工单进度环形图：三态构成，任一态为 0 也不会空环 ---------- */
 
-const totalCount = computed(() => todoCount.value + doingCount.value + todayDoneCount.value)
+const totalCount = computed(() => todoCount.value + doingCount.value + completedCount.value)
 
 const donePercent = computed(() =>
-  totalCount.value === 0 ? 0 : Math.round((todayDoneCount.value / totalCount.value) * 100)
+  totalCount.value === 0 ? 0 : Math.round((completedCount.value / totalCount.value) * 100)
 )
 
 const progressOption = computed<ChartOption>(() => ({
@@ -183,7 +108,7 @@ const progressOption = computed<ChartOption>(() => ({
       labelLine: { show: false },
       itemStyle: { borderColor: '#fff', borderWidth: 2 },
       data: [
-        { value: todayDoneCount.value, name: '已完成', itemStyle: { color: CHART_COLORS.success } },
+        { value: completedCount.value, name: '已完成', itemStyle: { color: CHART_COLORS.success } },
         { value: doingCount.value, name: '处理中', itemStyle: { color: CHART_COLORS.primary } },
         { value: todoCount.value, name: '待接单', itemStyle: { color: CHART_COLORS.warning } }
       ]
@@ -197,8 +122,7 @@ async function loadDashboard(): Promise<void> {
   try {
     /* 统计卡片：待接单 / 处理中（已接单+处理中）/ 完成，均由列表接口 total 汇总；
        紧急待接单走 priority 过滤（后端 WorkOrderController 支持该参数）。
-       注意：列表接口无时间范围参数，故"今日完成"实为"累计完成"，
-       待补接口 ④：GET /work-orders 增加 startTime/endTime 参数 */
+       COMPLETED仅表示居民已确认，尚未终审关闭，不冒称当天完成。 */
     const [assigned, accepted, inProgress, done, urgent] = await Promise.all([
       listWorkOrders({ status: 'ASSIGNED', page: 1, size: 5 }),
       listWorkOrders({ status: 'ACCEPTED', page: 1, size: 5 }),
@@ -209,7 +133,7 @@ async function loadDashboard(): Promise<void> {
 
     todoCount.value = assigned.total
     doingCount.value = accepted.total + inProgress.total
-    todayDoneCount.value = done.total
+    completedCount.value = done.total
     urgentCount.value = urgent.total
 
     /* 待办列表：已派单 + 已接单 + 处理中，按紧急程度与时间排序 */
@@ -246,8 +170,7 @@ function goNotifications(): void {
   router.push('/staff/notifications')
 }
 
-/* 头像首字 / 展示名 / 居住身份：取自 MOCK 占位模块（待补接口 ②③），
-   与工单列表、工单详情页共用同一取值口径 */
+/* 头像和姓名读取真实字段；工单没有唯一居住关系时使用中性居民标签。 */
 const initialOf = residentInitial
 const displayName = residentDisplayName
 const relationLabel = residentRelationLabel
@@ -307,15 +230,7 @@ onMounted(() => {
           <span class="stat-main">
             <span class="stat-figures">
               <span class="stat-value">{{ card.value }}</span>
-              <span class="stat-delta" :class="card.isUp ? 'is-up' : 'is-down'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path :d="card.isUp ? ARROW_UP : ARROW_DOWN" />
-                </svg>
-                {{ card.delta }}%
-              </span>
-            </span>
-            <span class="stat-spark">
-              <EChart :option="SPARK_OPTIONS[card.key]" :height="46" />
+              <span class="stat-delta">趋势待明确</span>
             </span>
           </span>
         </button>
@@ -390,10 +305,10 @@ onMounted(() => {
 
       <!-- 右栏：两个容器 + 中间间隔，与左侧待办容器等高 -->
       <div class="side-col">
-        <!-- 今日进度 -->
+        <!-- 工单进度 -->
         <article class="panel progress-panel">
           <header class="panel-header">
-            <h3 class="panel-title">今日进度</h3>
+            <h3 class="panel-title">工单进度</h3>
           </header>
 
           <div class="progress-body">
@@ -411,7 +326,7 @@ onMounted(() => {
             </div>
 
             <ul class="progress-legend">
-              <li><i class="dot is-done" />已完成<em>{{ todayDoneCount }}</em></li>
+              <li><i class="dot is-done" />已完成<em>{{ completedCount }}</em></li>
               <li><i class="dot is-doing" />处理中<em>{{ doingCount }}</em></li>
               <li><i class="dot is-todo" />待接单<em>{{ todoCount }}</em></li>
             </ul>
@@ -887,7 +802,7 @@ onMounted(() => {
   background-color: var(--color-primary-dark);
 }
 
-/* ---------- 今日进度 ---------- */
+/* ---------- 工单进度 ---------- */
 
 .progress-panel {
   display: flex;
