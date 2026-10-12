@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-12",
+  "scope": "bk current manual entry and evidence consolidation; not whole-project acceptance",
+  "manualCases": {
+    "nontransaction": 12,
+    "transactionDeferred": 3,
+    "userResultsNotPrefilled": true
+  },
+  "localLinksAndExplicitAnchors": {
+    "checked": 28,
+    "failures": []
+  },
+  "currentManualDocuments": [
+    {
+      "path": "docs/50_系统测试/11_测试执行入口.md",
+      "sha256": "77ffd302679f66a77422b0e44508a0447ecc8cf03dfe9df7638ec8e1f0cb6d57",
+      "bytes": 5320
+    },
+    {
+      "path": "docs/50_系统测试/12_用户手测清单.md",
+      "sha256": "0e85ef874c325a6e4c7d1ca257d18811268e4836c86d399de5ab3f72f671eec6",
+      "bytes": 2242
+    },
+    {
+      "path": "docs/50_系统测试/13_核心业务流程三端联动手测用例.md",
+      "sha256": "f0f882b8fe027d2d3c9899cccc350f9244d070e808817b011bb7b6dbed158740",
+      "bytes": 16150
+    },
+    {
+      "path": "docs/50_系统测试/18_居民CSV导入示例与复核.md",
+      "sha256": "c2ea0346d20beeac076464c1bc34d4df5f76a27c1769e61ad13ee59f69544e3d",
+      "bytes": 2954
+    },
+    {
+      "path": "docs/50_系统测试/19_展示与统计口径确认方案.md",
+      "sha256": "d66ba065d28d02319df4d7e65ac9664aa7184ea38c2493c0b08b574a0abf54bd",
+      "bytes": 6636
+    }
+  ],
+  "archive": {
+    "files": [
+      {
+        "path": "docs/archive/手测入口历史-20261012/11_测试执行入口.md",
+        "sha256": "47077acf8e800cab51d79bf1793c8034e5c7e924a96d20c7e56db286049854c1",
+        "bytes": 70774,
+        "verified": true
+      },
+      {
+        "path": "docs/archive/手测入口历史-20261012/12_用户手测清单.md",
+        "sha256": "77e9d14d3fa905f351be1ae2e1ee48fd307becd81856ef44cc29b754046d2361",
+        "bytes": 39550,
+        "verified": true
+      },
+      {
+        "path": "docs/archive/手测入口历史-20261012/13_核心业务流程三端联动手测用例.md",
+        "sha256": "59bc035927c4ce0e35a3913df5e5316311de0384b1f40d3a4d9f6b0d364f090f",
+        "bytes": 118405,
+        "verified": true
+      }
+    ],
+    "preservesWorkspaceSnapshot": true,
+    "note": "11原件包含暂停时已保存的两行交接；12/13与改写前HEAD一致。不把11误称为HEAD逐字副本。"
+  },
+  "audit": {
+    "toolExitCode": 1,
+    "errors": 1448,
+    "warnings": 0,
+    "byCode": {
+      "acceptance-missing": 3,
+      "status-symbol-out-of-scope": 1199,
+      "broken-link": 245,
+      "dependency-mismatch": 1
+    },
+    "beforeErrors": 1599,
+    "resolvedStatusMarkerReports": 151,
+    "currentManualEntryErrors": 0,
+    "historicalBrokenLinksIn08": 10,
+    "wholeRepositoryPassed": false
+  },
+  "verificationBoundary": "冻结上游、遗失历史引用保留；不会把链接校验、归档或自动回归替用户填HT，也不会宣布50步骤9～12/60/70完成",
+  "servicesEvidence": "service-closure.json",
+  "readonlyEvidence": "closure-readonly.json",
+  "frontendEvidence": "../nontransaction-core-unit-20261012/frontend-verification.json",
+  "manualDocumentHashMode": "UTF-8 bytes with CRLF normalized to LF; prose files are not raw evidence"
+}

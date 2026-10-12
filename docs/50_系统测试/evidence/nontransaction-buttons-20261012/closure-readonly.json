@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-12T07:55:19.103Z",
+  "scope": "documentation-closure normal-service readonly",
+  "database": "community_residence",
+  "businessWrites": false,
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "正常业务保留1/600/9/1/0/0",
+      "passed": true
+    },
+    {
+      "name": "后端8084契约可访问",
+      "passed": true
+    },
+    {
+      "name": "前端5176可访问",
+      "passed": true
+    },
+    {
+      "name": "程序内渠道仍全部停用",
+      "passed": true
+    },
+    {
+      "name": "收尾只读期间业务数量不变",
+      "passed": true
+    }
+  ],
+  "before": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ],
+  "after": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ]
+}

@@ -1,0 +1,7 @@
+
+# 原始测试证据/归档校验按输出字节保留，不受跨平台自动换行改写。
+/docs/50_系统测试/evidence/nontransaction-buttons-20261012/** -text
+/docs/archive/手测入口历史-20261012/** -text
+
+# 前端原执行日志同样按原始字节保留，仅限本批三个日志副本。
+/docs/50_系统测试/evidence/nontransaction-core-unit-20261012/frontend-*.txt -text

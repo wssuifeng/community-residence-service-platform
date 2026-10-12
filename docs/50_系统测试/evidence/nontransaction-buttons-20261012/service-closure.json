@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-12T15:55:22.9580878+08:00",
+  "normal": [
+    {
+      "port": 8084,
+      "listening": true,
+      "processIds": [
+        14076
+      ]
+    },
+    {
+      "port": 5176,
+      "listening": true,
+      "processIds": [
+        13420
+      ]
+    }
+  ],
+  "isolated": [
+    {
+      "port": 8087,
+      "listening": false,
+      "processIds": []
+    },
+    {
+      "port": 5181,
+      "listening": false,
+      "processIds": []
+    }
+  ],
+  "userBrowserTouched": false
+}
