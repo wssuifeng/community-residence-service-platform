@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-12",
+  "command": "Java17 ./mvnw.cmd package (removed only generated jacoco.exec before run)",
+  "tests": {
+    "total": 941,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "buildSuccess": true,
+  "coverage": {
+    "INSTRUCTION": {
+      "missed": 12592,
+      "covered": 32900,
+      "percent": 72.32
+    },
+    "BRANCH": {
+      "missed": 1367,
+      "covered": 2454,
+      "percent": 64.22
+    },
+    "LINE": {
+      "missed": 2489,
+      "covered": 6729,
+      "percent": 73.0
+    },
+    "COMPLEXITY": {
+      "missed": 1546,
+      "covered": 1674,
+      "percent": 51.99
+    },
+    "METHOD": {
+      "missed": 505,
+      "covered": 796,
+      "percent": 61.18
+    },
+    "CLASS": {
+      "missed": 71,
+      "covered": 142,
+      "percent": 66.67
+    }
+  },
+  "targetClasses": {
+    "com/community/residence/statistics/service/StatisticsService": {
+      "INSTRUCTION": {
+        "missed": 4,
+        "covered": 1123,
+        "percent": 99.65
+      },
+      "BRANCH": {
+        "missed": 5,
+        "covered": 73,
+        "percent": 93.59
+      },
+      "LINE": {
+        "missed": 0,
+        "covered": 170,
+        "percent": 100.0
+      },
+      "COMPLEXITY": {
+        "missed": 5,
+        "covered": 53,
+        "percent": 91.38
+      },
+      "METHOD": {
+        "missed": 0,
+        "covered": 19,
+        "percent": 100.0
+      },
+      "CLASS": {
+        "missed": 0,
+        "covered": 1,
+        "percent": 100.0
+      }
+    },
+    "com/community/residence/community/service/HouseService": {
+      "INSTRUCTION": {
+        "missed": 133,
+        "covered": 501,
+        "percent": 79.02
+      },
+      "BRANCH": {
+        "missed": 11,
+        "covered": 27,
+        "percent": 71.05
+      },
+      "LINE": {
+        "missed": 25,
+        "covered": 111,
+        "percent": 81.62
+      },
+      "COMPLEXITY": {
+        "missed": 11,
+        "covered": 22,
+        "percent": 66.67
+      },
+      "METHOD": {
+        "missed": 2,
+        "covered": 12,
+        "percent": 85.71
+      },
+      "CLASS": {
+        "missed": 0,
+        "covered": 1,
+        "percent": 100.0
+      }
+    }
+  },
+  "baseline": {
+    "backendTests": 910,
+    "linePercent": 71.05,
+    "branchPercent": 62.37,
+    "statisticsLinePercent": 25.3,
+    "houseLinePercent": 52.2
+  },
+  "newTests": {
+    "NontransactionStatisticsCoverageTest": 21,
+    "HouseNontransactionBoundaryTest": 10
+  },
+  "transactionsExecuted": false,
+  "scope": "nontransaction unit/service boundaries; no claim of payment integration"
+}
