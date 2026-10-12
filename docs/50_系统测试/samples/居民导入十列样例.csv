@@ -1,0 +1,13 @@
+﻿社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注
+{COMMUNITY_ID},样例居民01,13900000001,,sample_resident_01,sample01@example.invalid,,,,
+{COMMUNITY_ID},样例居民02,13900000002,,sample_resident_02,sample02@example.invalid,,,,
+{COMMUNITY_ID},样例居民03,13900000003,,sample_resident_03,sample03@example.invalid,,,,
+{COMMUNITY_ID},样例居民04,13900000004,,sample_resident_04,sample04@example.invalid,,,,
+{COMMUNITY_ID},样例居民05,13900000005,,sample_resident_05,sample05@example.invalid,,,,
+{COMMUNITY_ID},样例居民06,13900000006,,sample_resident_06,sample06@example.invalid,,,,
+{COMMUNITY_ID},样例居民07,13900000007,,sample_resident_07,sample07@example.invalid,,,,
+{COMMUNITY_ID},样例居民08,13900000008,,sample_resident_08,sample08@example.invalid,,,,
+{COMMUNITY_ID},样例居民09,13900000009,,sample_resident_09,sample09@example.invalid,{HOUSE_OWNER},OWNER,2026-10-01,
+{COMMUNITY_ID},样例居民10,13900000010,,sample_resident_10,sample10@example.invalid,{HOUSE_TENANT},TENANT,2026-10-01,
+{COMMUNITY_ID},样例居民11,13900000011,,sample_resident_11,sample11@example.invalid,{HOUSE_FAMILY},FAMILY,2026-10-01,
+{COMMUNITY_ID},"样例，居民""十二""",13900000012,,sample_resident_12,sample12@example.invalid,,,,

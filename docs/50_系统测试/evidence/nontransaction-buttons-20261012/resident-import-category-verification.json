@@ -1,0 +1,264 @@
+{
+  "date": "2026-10-12T06:05:45.954Z",
+  "database": "community_residence_payment_config_test",
+  "source": "首次主体真实按钮回归95项中的导入/类别子集，不和完整报告相加",
+  "checks": [
+    {
+      "name": "下载模板真实十列含居住关系",
+      "passed": true
+    },
+    {
+      "name": "CSV十二行真实按钮导入",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "十二行账号与三类关系成功",
+      "passed": true
+    },
+    {
+      "name": "CSV重复导入真实按钮拒绝",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "重复十二行不新增且显示失败明细",
+      "passed": true
+    },
+    {
+      "name": "新格式部分成功且缺项行不残留账号",
+      "passed": true
+    },
+    {
+      "name": "旧四列只建账号不建关系",
+      "passed": true
+    },
+    {
+      "name": "DEF-145类别列表真实可见",
+      "passed": true
+    },
+    {
+      "name": "类别点击选中样式",
+      "passed": true
+    },
+    {
+      "name": "类别提交读回后端一致",
+      "passed": true
+    }
+  ],
+  "importResults": [
+    {
+      "label": "browser-first",
+      "fail": 0,
+      "failRows": [],
+      "success": 12,
+      "successRows": [
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 257,
+          "row": 1,
+          "username": "BI85145954_csv_1"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 258,
+          "row": 2,
+          "username": "BI85145954_csv_2"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 259,
+          "row": 3,
+          "username": "BI85145954_csv_3"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 260,
+          "row": 4,
+          "username": "BI85145954_csv_4"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 261,
+          "row": 5,
+          "username": "BI85145954_csv_5"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 262,
+          "row": 6,
+          "username": "BI85145954_csv_6"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 263,
+          "row": 7,
+          "username": "BI85145954_csv_7"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 264,
+          "row": 8,
+          "username": "BI85145954_csv_8"
+        },
+        {
+          "houseId": 11290,
+          "relationId": 162,
+          "residentId": 265,
+          "row": 9,
+          "username": "BI85145954_csv_9"
+        },
+        {
+          "houseId": 11291,
+          "relationId": 163,
+          "residentId": 266,
+          "row": 10,
+          "username": "BI85145954_csv_10"
+        },
+        {
+          "houseId": 11292,
+          "relationId": 164,
+          "residentId": 267,
+          "row": 11,
+          "username": "BI85145954_csv_11"
+        },
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 268,
+          "row": 12,
+          "username": "BI85145954_csv_12"
+        }
+      ],
+      "total": 12
+    },
+    {
+      "label": "browser-repeat",
+      "fail": 12,
+      "failRows": [
+        {
+          "reason": "用户名已存在",
+          "row": 1
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 2
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 3
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 4
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 5
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 6
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 7
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 8
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 9
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 10
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 11
+        },
+        {
+          "reason": "用户名已存在",
+          "row": 12
+        }
+      ],
+      "success": 0,
+      "successRows": [],
+      "total": 12
+    },
+    {
+      "label": "mixed",
+      "fail": 1,
+      "failRows": [
+        {
+          "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+          "row": 2
+        }
+      ],
+      "success": 1,
+      "successRows": [
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 269,
+          "row": 1,
+          "username": "BI85145954_mixed"
+        }
+      ],
+      "total": 2
+    },
+    {
+      "label": "legacy",
+      "fail": 0,
+      "failRows": [],
+      "success": 1,
+      "successRows": [
+        {
+          "houseId": null,
+          "relationId": null,
+          "residentId": 270,
+          "row": 1,
+          "username": "r13951572333"
+        }
+      ],
+      "total": 1
+    }
+  ],
+  "cleanup": true,
+  "fixtureCleanupCounts": {
+    "community": 0,
+    "house": 0,
+    "work_order": 0,
+    "feedback": 0,
+    "resource_reservation": 0,
+    "work_order_evaluation": 0,
+    "resident": 0,
+    "sys_user": 0
+  },
+  "financialBefore": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "financialAfter": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "transactionsExecuted": false
+}
