@@ -7,8 +7,7 @@ import ConversationChat from '@/components/business/ConversationChat.vue'
 import { getConversation } from '@/api/conversation'
 import {
   listViewingAppointments,
-  completeViewingAppointment,
-  violateViewingAppointment
+  completeViewingAppointment
 } from '@/api/housing'
 import type { IViewingAppointment, ViewingAppointmentStatus } from '@/types/modules/housing'
 import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
@@ -19,7 +18,7 @@ import { formatDateTime } from '@/utils/date'
  * 列表口径（assigned to me）由后端本批实现，前端直接调用 listViewingAppointments；
  * 主从布局：点击行右侧展示预约详情 + R63 看房群聊（服务人员作为 assigned_staff
  * 入群后复用预约 conversationId，会话组件内部处理 WS 推送与轮询兜底）。
- * 操作对齐 R55 状态机：带看人可对已预约的看房登记完成/违约；确认归属管理方，不展示。
+ * 操作对齐 R55 状态机：带看人可对已预约的看房登记完成；确认/违约/冻结归属管理方，不展示。
  */
 
 const tagTypeMap: Record<ViewingAppointmentStatus, 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled'> = {
@@ -81,7 +80,7 @@ async function loadList(): Promise<void> {
   }
 }
 
-/* ------------------------------ 带看登记操作（R55 状态机：RESERVED → COMPLETED / VIOLATED） ------------------------------ */
+/* ------------------------------ 带看登记操作（R55 状态机：RESERVED → COMPLETED） ------------------------------ */
 
 /** 登记完成；后端 ReservationActionDTO 要求 reason 必填，对齐管理端既有调用 */
 async function handleComplete(row: IViewingAppointment): Promise<void> {
@@ -106,28 +105,7 @@ async function handleComplete(row: IViewingAppointment): Promise<void> {
   }
 }
 
-/** 标记违约；计入居民违约记录，理由必填 */
-async function handleViolate(row: IViewingAppointment): Promise<void> {
-  try {
-    const { value } = await ElMessageBox.prompt(
-      '违约将计入访客的违约记录，请谨慎操作',
-      `标记违约 · ${row.housingTitle}`,
-      {
-        confirmButtonText: '确认标记违约',
-        cancelButtonText: '取消',
-        inputPlaceholder: '违约原因（如：预约后未到场）',
-        inputValidator: (input: string) => (input.trim().length > 0 ? true : '请填写违约原因'),
-        type: 'error'
-      }
-    )
-    await violateViewingAppointment(row.id, { reason: value.trim() })
-    ElMessage.success('已标记违约')
-    loadList()
-  } catch (error) {
-    if (error === 'cancel' || error === 'close') return
-    ElMessage.error(error instanceof Error ? error.message : '违约标记失败')
-  }
-}
+
 
 onMounted(loadList)
 </script>
@@ -214,7 +192,6 @@ onMounted(loadList)
             </dl>
             <div v-if="selected.status === 'RESERVED'" class="detail-actions">
               <button type="button" class="action-btn primary" @click="handleComplete(selected)">登记完成</button>
-              <button type="button" class="action-btn danger" @click="handleViolate(selected)">标记违约</button>
             </div>
           </div>
 

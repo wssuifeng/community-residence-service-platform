@@ -1,0 +1,31 @@
+{
+  "userBrowserTouched": false,
+  "date": "2026-10-12T18:27:42.8293818+08:00",
+  "ports": [
+    {
+      "processIds": [
+        21424
+      ],
+      "listening": true,
+      "port": 8084
+    },
+    {
+      "processIds": [
+        26468
+      ],
+      "listening": true,
+      "port": 5176
+    },
+    {
+      "processIds": [],
+      "listening": false,
+      "port": 8087
+    },
+    {
+      "processIds": [],
+      "listening": false,
+      "port": 5181
+    }
+  ],
+  "unrelated8080ServiceTouched": false
+}

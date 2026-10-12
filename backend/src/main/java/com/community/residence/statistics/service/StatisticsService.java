@@ -3,6 +3,7 @@ package com.community.residence.statistics.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.constant.WorkOrderStatus;
+import com.community.residence.common.constant.WorkOrderProcessAction;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.community.entity.Building;
 import com.community.residence.community.entity.Community;
@@ -19,6 +20,8 @@ import com.community.residence.reservation.mapper.ResourceReservationMapper;
 import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.workorder.entity.WorkOrder;
+import com.community.residence.workorder.entity.WorkOrderProcess;
+import com.community.residence.workorder.mapper.WorkOrderProcessMapper;
 import com.community.residence.workorder.mapper.WorkOrderMapper;
 import com.community.residence.workorder.mapper.WorkOrderAssignmentMapper;
 import com.community.residence.workorder.mapper.ServiceCategoryMapper;
@@ -50,6 +53,7 @@ public class StatisticsService {
     private final ResidentMapper residentMapper;
     private final WorkOrderMapper workOrderMapper;
     private final WorkOrderAssignmentMapper assignmentMapper;
+    private final WorkOrderProcessMapper processMapper;
     private final ServiceCategoryMapper serviceCategoryMapper;
     private final SysUserMapper sysUserMapper;
     private final WorkOrderEvaluationMapper evaluationMapper;
@@ -246,62 +250,76 @@ public class StatisticsService {
                 .toList();
     }
 
-    /**
-     * 服务人员按日趋势（DEF-029，STAFF 限本人数据）：近 N 日（默认 7，上限 90）
-     * 各指标的日序列 + 今日概览。指标经 work_order_assignment（本人被派单的工单）
-     * 收敛数据范围——assigned（被派单数）/ completed（已完成，含 TO_CONFIRM 待确认）/
-     * processing（处理中 = ACCEPTED+IN_PROGRESS），逐日序列按 work_order.created_at 归日。
-     */
+    /* 当前负荷由最新派单列表负责；本接口只统计实际发生的本人事件。
+       派入按assignTime、提交结果按STAFF操作时间线归日，同一工单的真实重派/重做可计多次。
+       查询窗口为本地日半开区间，不拿创建日期/当前状态或他人动作推测过去工作量。 */
     public Map<String, Object> staffTrend(int days) {
         Long staffId = SecurityUtils.getUserId();
         int window = Math.min(Math.max(days, 1), 90);
-        LocalDate startDate = LocalDate.now().minusDays(window - 1L);
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(window - 1L);
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
 
-        List<Long> orderIds = assignmentMapper.selectList(
-                        new LambdaQueryWrapper<WorkOrderAssignment>()
-                                .eq(WorkOrderAssignment::getAssigneeId, staffId))
-                .stream().map(WorkOrderAssignment::getWorkOrderId).distinct().toList();
-        List<WorkOrder> orders = orderIds.isEmpty() ? List.of()
+        List<WorkOrderAssignment> assignments = assignmentMapper.selectList(
+                new LambdaQueryWrapper<WorkOrderAssignment>()
+                        .eq(WorkOrderAssignment::getAssigneeId, staffId)
+                        .ge(WorkOrderAssignment::getAssignTime, start)
+                        .lt(WorkOrderAssignment::getAssignTime, end));
+        List<WorkOrderProcess> submissions = processMapper.selectList(
+                new LambdaQueryWrapper<WorkOrderProcess>()
+                        .eq(WorkOrderProcess::getOperatorId, staffId)
+                        .eq(WorkOrderProcess::getOperatorType, RoleConstants.STAFF)
+                        .eq(WorkOrderProcess::getAction, WorkOrderProcessAction.COMPLETE)
+                        .eq(WorkOrderProcess::getNewStatus, WorkOrderStatus.TO_CONFIRM)
+                        .ge(WorkOrderProcess::getCreatedAt, start)
+                        .lt(WorkOrderProcess::getCreatedAt, end));
+
+        /* 子表无community_id，先经工单主表的统一数据范围取得可见ID；
+           仅查本窗口本人事件引用的对象，不用全部历史派单扩大当前职责。 */
+        java.util.Set<Long> referencedIds = new java.util.HashSet<>();
+        assignments.forEach(event -> referencedIds.add(event.getWorkOrderId()));
+        submissions.forEach(event -> referencedIds.add(event.getWorkOrderId()));
+        java.util.Set<Long> visibleIds = referencedIds.isEmpty() ? java.util.Set.of()
                 : workOrderMapper.selectList(new LambdaQueryWrapper<WorkOrder>()
-                        .in(WorkOrder::getId, orderIds)
-                        .ge(WorkOrder::getCreatedAt, startDate.atStartOfDay()));
+                        .select(WorkOrder::getId).in(WorkOrder::getId, referencedIds))
+                        .stream().map(WorkOrder::getId).collect(Collectors.toSet());
 
-        Map<String, Long> assignedTrend = new java.util.LinkedHashMap<>();
-        Map<String, Long> completedTrend = new java.util.LinkedHashMap<>();
-        Map<String, Long> processingTrend = new java.util.LinkedHashMap<>();
-        for (int i = 0; i < window; i++) {
-            String day = startDate.plusDays(i).toString();
-            assignedTrend.put(day, 0L);
-            completedTrend.put(day, 0L);
-            processingTrend.put(day, 0L);
-        }
-        for (WorkOrder order : orders) {
-            String day = order.getCreatedAt().toLocalDate().toString();
-            assignedTrend.merge(day, 1L, Long::sum);
-            if (WorkOrderStatus.COMPLETED.equals(order.getStatus())
-                    || WorkOrderStatus.CLOSED.equals(order.getStatus())
-                    || WorkOrderStatus.TO_CONFIRM.equals(order.getStatus())) {
-                completedTrend.merge(day, 1L, Long::sum);
-            } else if (WorkOrderStatus.ACCEPTED.equals(order.getStatus())
-                    || WorkOrderStatus.IN_PROGRESS.equals(order.getStatus())) {
-                processingTrend.merge(day, 1L, Long::sum);
+        Map<String, Long> assignedTrend = emptyDailyEvents(startDate, window);
+        Map<String, Long> submittedTrend = emptyDailyEvents(startDate, window);
+        for (WorkOrderAssignment event : assignments) {
+            if (visibleIds.contains(event.getWorkOrderId())) {
+                addDailyEvent(assignedTrend, event.getAssignTime());
             }
         }
-
-        String today = LocalDate.now().toString();
+        for (WorkOrderProcess event : submissions) {
+            if (visibleIds.contains(event.getWorkOrderId())) {
+                addDailyEvent(submittedTrend, event.getCreatedAt());
+            }
+        }
         Map<String, Object> result = new HashMap<>();
         result.put("days", window);
         result.put("startDate", startDate.toString());
+        result.put("endDate", today.toString());
         result.put("assignedTrend", assignedTrend);
-        result.put("completedTrend", completedTrend);
-        result.put("processingTrend", processingTrend);
-        result.put("todayAssigned", assignedTrend.getOrDefault(today, 0L));
-        result.put("todayCompleted", completedTrend.getOrDefault(today, 0L));
-        result.put("todayProcessing", processingTrend.getOrDefault(today, 0L));
-        result.put("totalCompleted", orders.stream().filter(o ->
-                WorkOrderStatus.COMPLETED.equals(o.getStatus())
-                        || WorkOrderStatus.CLOSED.equals(o.getStatus())
-                        || WorkOrderStatus.TO_CONFIRM.equals(o.getStatus())).count());
+        result.put("submittedTrend", submittedTrend);
+        result.put("todayAssigned", assignedTrend.get(today.toString()));
+        result.put("todaySubmitted", submittedTrend.get(today.toString()));
+        result.put("totalSubmitted", submittedTrend.values().stream().mapToLong(Long::longValue).sum());
         return result;
+    }
+
+    private Map<String, Long> emptyDailyEvents(LocalDate start, int window) {
+        Map<String, Long> result = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < window; i++) {
+            result.put(start.plusDays(i).toString(), 0L);
+        }
+        return result;
+    }
+
+    private void addDailyEvent(Map<String, Long> events, LocalDateTime occurredAt) {
+        if (occurredAt != null) {
+            events.computeIfPresent(occurredAt.toLocalDate().toString(), (day, count) -> count + 1L);
+        }
     }
 }

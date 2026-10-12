@@ -111,6 +111,7 @@ class ViewingAssignTest {
         appointment.setAppointmentDate(LocalDate.now().plusDays(3));
         appointment.setStatus("RESERVED");
         lenient().when(appointmentMapper.selectById(1L)).thenReturn(appointment);
+        lenient().when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(appointment);
         lenient().when(appointmentMapper.updateById(any(ViewingAppointment.class))).thenReturn(1);
 
         staff = new SysUser();

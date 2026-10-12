@@ -1,6 +1,7 @@
 import { http } from '@/utils/request'
 import type {
   ICommunityOption,
+  IStaffWorkloadStats,
   IDashboardStats,
   IResidentStats,
   IResourceStats,
@@ -36,4 +37,9 @@ export function getResourceStats(query?: StatisticsQuery) {
 /** 看板社区筛选下拉（后端补充端点） */
 export function getCommunityOptions() {
   return http.get<ICommunityOption[]>('/statistics/communities')
+}
+
+/** 本人派入/提交事件统计；不接受staffId以扩大人员范围。 */
+export function getStaffWorkloadStats(days = 7) {
+  return http.get<IStaffWorkloadStats>('/statistics/staff/trend', { days })
 }

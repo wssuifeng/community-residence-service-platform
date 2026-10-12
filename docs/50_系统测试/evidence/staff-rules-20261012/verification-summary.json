@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-12",
+  "scope": "approved 19 event statistics and assigned-staff viewing completion, 50 steps7/8",
+  "backend": {
+    "tests": 938,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "backendCountChange": "旧创建日/状态口径11项替换；新增3项事件测试及5项看房权限测试（净-3），无跳过",
+  "frontend": {
+    "suites": 45,
+    "passed": 287,
+    "finalTargetedPassed": 3,
+    "typecheckBuildPassed": true,
+    "chunkWarningRetained": true
+  },
+  "coverage": {
+    "BRANCH": {
+      "covered": 2458,
+      "missed": 1369,
+      "percent": 64.23
+    },
+    "LINE": {
+      "covered": 6749,
+      "missed": 2489,
+      "percent": 73.06
+    }
+  },
+  "isolatedExpectedChecks": 34,
+  "normalReadonlyChecks": 10,
+  "browserScreenshots": [
+    "workload-1024.png",
+    "workload-768.png",
+    "viewing-completed-1024.png"
+  ],
+  "browserErrors": [],
+  "fixtureCleanup": {
+    "community": 0,
+    "resident": 0,
+    "sys_user": 0
+  },
+  "financialBefore": [
+    0,
+    0
+  ],
+  "financialAfter": [
+    0,
+    0
+  ],
+  "transactionsExecuted": false,
+  "normalCounts": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ],
+  "userHTResultsNotPrefilled": true,
+  "scopeBoundary": "34含前置/否定/读回/UI/并发，不是34条完整业务链，不与bk105/bj818或只读10相加；模拟身份/未来日期仅否定夹具，不当真实流程成功",
+  "toolNotes": "前置类别未造和隔离Vite初次代理未指定导致工具早停，已补夹具及代理自检；跨社区404为统一数据范围隐藏而非失败。独立浏览器，无用户浏览器接管。",
+  "logSources": {
+    "backend-red-before.txt": {
+      "source": "output/runtime/bl-red-tests.log",
+      "sha256": "c7e6a0c1883a480cb78b41e9e6eef2e6057f681be55ea9489e01e0b803324796",
+      "bytes": 6186
+    },
+    "backend-package.txt": {
+      "source": "output/runtime/bl-backend-package.log",
+      "sha256": "be87c5cfce058f363d3b95bff98f3f6db21c0afb76d439f2d489eb8dc098cd9c",
+      "bytes": 306512
+    },
+    "frontend-tests.txt": {
+      "source": "output/runtime/bl-frontend-tests.log",
+      "sha256": "9dbc55ba3eca3e9dfd87088011a90e2000b04e8a188925acc8225dcf0d08dc6a",
+      "bytes": 345
+    },
+    "frontend-targeted.txt": {
+      "source": "output/runtime/bl-targeted-frontend.log",
+      "sha256": "4802343cc09b23aa4fce8fd2cd76325639433cc5631cd97d04072d54b6c2b973",
+      "bytes": 447
+    },
+    "frontend-build.txt": {
+      "source": "output/runtime/bl-frontend-build.log",
+      "sha256": "3331396e00808b63853efcd3a69d76244078bf017af1f2e7d8bd9b2728a3087f",
+      "bytes": 16789
+    }
+  },
+  "files": {
+    "backend-package.txt": {
+      "sha256": "be87c5cfce058f363d3b95bff98f3f6db21c0afb76d439f2d489eb8dc098cd9c",
+      "bytes": 306512
+    },
+    "backend-red-before.txt": {
+      "sha256": "c7e6a0c1883a480cb78b41e9e6eef2e6057f681be55ea9489e01e0b803324796",
+      "bytes": 6186
+    },
+    "development-before.json": {
+      "sha256": "88db73e236884f79fa5f0b7dc35b746bb32ded38563a0e40bb6c2fec400055ad",
+      "bytes": 200
+    },
+    "development-readonly.json": {
+      "sha256": "411160403e23bcfcfd42f6d55fcf63ea74f670933572d98c1ef0c12c8609828e",
+      "bytes": 1075
+    },
+    "frontend-build.txt": {
+      "sha256": "3331396e00808b63853efcd3a69d76244078bf017af1f2e7d8bd9b2728a3087f",
+      "bytes": 16789
+    },
+    "frontend-targeted.txt": {
+      "sha256": "4802343cc09b23aa4fce8fd2cd76325639433cc5631cd97d04072d54b6c2b973",
+      "bytes": 447
+    },
+    "frontend-tests.txt": {
+      "sha256": "9dbc55ba3eca3e9dfd87088011a90e2000b04e8a188925acc8225dcf0d08dc6a",
+      "bytes": 345
+    },
+    "regression.json": {
+      "sha256": "50d783a0171ca3d1638be02468537f8d491c7eac70271b143bbf8e66ad182064",
+      "bytes": 4768
+    },
+    "service-closure.json": {
+      "sha256": "79fb7da20248eddb769c2f71310df8915a9c96a35ac001f0f02a2db8b8da5a57",
+      "bytes": 535
+    },
+    "viewing-completed-1024.png": {
+      "sha256": "5181cafb363e0a3e38286ed32f79b63875d1c89ff02e0562c8e3c21ad86c535f",
+      "bytes": 72161
+    },
+    "workload-1024.png": {
+      "sha256": "0cc7cf4324b6b8127e4a60d9f367cacc5b9c389512b4cb3aee34e74ec19e23fb",
+      "bytes": 88843
+    },
+    "workload-768.png": {
+      "sha256": "eae437192fafff1d12cd4d1a55b2a097f297b69843d3408f5c3fbab0853dafaa",
+      "bytes": 93626
+    },
+    "documentation-verification.json": {
+      "sha256": "b197e3f755f8a13fa4d249f988749ccfac42a3d4261059764aeda2f6dee0d0df",
+      "bytes": 833
+    }
+  }
+}

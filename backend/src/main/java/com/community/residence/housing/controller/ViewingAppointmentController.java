@@ -109,8 +109,8 @@ public class ViewingAppointmentController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "完成预约", description = "已预约 → 已完成")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @Operation(summary = "完成预约", description = "已预约 → 已完成；STAFF仅本人被分配预约，管理员按社区范围")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/complete")
     public ApiResponse<Void> complete(@PathVariable Long id, @RequestBody @Valid ReservationActionDTO dto) {
         appointmentService.complete(id, dto.getReason());

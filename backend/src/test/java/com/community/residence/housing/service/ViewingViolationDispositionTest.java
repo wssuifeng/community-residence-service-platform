@@ -49,6 +49,7 @@ class ViewingViolationDispositionTest {
         lenient().when(violationRecordMapper.selectIdsByUserIdForUpdate(5L)).thenReturn(java.util.List.of(1L, 2L, 3L));
         lenient().when(sysConfigService.getValue("violation.max_count")).thenReturn("3");
         try(var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
             service.violate(1L, "未到场");
             assertEquals(CommonStatus.FROZEN, r.getStatus());
             verify(tokenRevocationService).revokeResident(5L);
@@ -60,6 +61,7 @@ class ViewingViolationDispositionTest {
         lenient().when(residentMapper.selectByIdForUpdate(5L)).thenReturn(r);
         lenient().when(violationRecordMapper.selectIdsByUserIdForUpdate(5L)).thenReturn(java.util.List.of(1L, 2L));
         try(var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
             service.violate(1L, "未到场");
             assertEquals(CommonStatus.ACTIVE, r.getStatus()); verify(tokenRevocationService, never()).revokeResident(anyLong());
         }
@@ -71,12 +73,14 @@ class ViewingViolationDispositionTest {
         lenient().when(violationRecordMapper.selectIdsByUserIdForUpdate(5L)).thenReturn(java.util.List.of(1L, 2L, 3L));
         lenient().when(sysConfigService.getValue("violation.max_count")).thenReturn(config);
         try(var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
             service.violate(1L, "未到场"); assertEquals(CommonStatus.FROZEN, r.getStatus());
         }
     }
     @Test void duplicateMarkDoesNotAddAnotherViolation() {
         ViewingAppointment a = appointment(5L); a.setStatus("VIOLATED");
         try(var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
             assertThrows(com.community.residence.common.exception.BusinessException.class, () -> service.violate(1L, "重复"));
             verifyNoInteractions(residentMapper, violationRecordMapper, tokenRevocationService);
         }
@@ -86,12 +90,14 @@ class ViewingViolationDispositionTest {
         when(residentMapper.selectByIdForUpdate(5L)).thenReturn(r);
         when(violationRecordMapper.selectIdsByUserIdForUpdate(5L)).thenReturn(java.util.List.of(1L, 2L, 3L));
         try(var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
             service.violate(1L, "未到场"); verify(tokenRevocationService, never()).revokeResident(anyLong());
         }
     }
     @Test void historicalGuestDoesNotCountOrFreezeOrNotifyResident() {
         appointment(null);
         try(var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
             service.violate(1L, "历史游客未到场");
             verifyNoInteractions(residentMapper, violationRecordMapper, tokenRevocationService, notificationService);
         }

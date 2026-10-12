@@ -1,0 +1,13 @@
+
+> community-residence-frontend@0.1.0 test
+> vitest run --configLoader native src/views/staff/__tests__/StaffWorkloadDashboard.spec.ts src/views/staff/__tests__/ViewingsWorkbenchView.spec.ts
+
+
+ RUN  v4.1.11 D:/code/community-residence-service-platform/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  3 passed (3)
+   Start at  18:23:34
+   Duration  4.66s (transform 196ms, setup 2.19s, import 193ms, tests 481ms, environment 1.51s)
+

@@ -13,6 +13,7 @@ import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.constant.WorkOrderPriority;
 import com.community.residence.common.constant.WorkOrderStatus;
+import com.community.residence.common.constant.WorkOrderProcessAction;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.common.exception.ForbiddenException;
@@ -432,7 +433,7 @@ public class WorkOrderService {
         if (!transition(order, WorkOrderStatus.TO_CONFIRM)) {
             return;
         }
-        appendProcess(id, "COMPLETE", WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM, solution);
+        appendProcess(id, WorkOrderProcessAction.COMPLETE, WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM, solution);
         notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已处理完成",
                 "您的工单 " + order.getOrderNo() + " 已处理完成，请确认", "WORK_ORDER", "WORK_ORDER", id);
         /* R48/R74 事件 6「提交结果」：另通知该社区绑定管理员 */

@@ -41,6 +41,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /** DEF-158：方案 B 看房预约身份与数据级权限回归。 */
@@ -208,6 +209,69 @@ class ViewingAppointmentRegistrationOnlyTest {
             assertThatThrownBy(() -> service.getById(1L))
                     .isInstanceOf(ForbiddenException.class)
                     .hasMessageContaining("仅可查看分配给本人的预约");
+        }
+    }
+
+    @Test
+    @DisplayName("本人被分配人员可以登记完成并留下备注")
+    void assignedStaffCanComplete() {
+        ViewingAppointment item = appointment(); item.setStatus("RESERVED"); item.setAssignedStaffId(12L);
+        lenient().when(appointmentMapper.selectById(1L)).thenReturn(item);
+        lenient().when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(item);
+        try (MockedStatic<SecurityUtils> mocked = staffIdentity(12L)) {
+            service.complete(1L, "本人完成带看");
+            assertThat(item.getStatus()).isEqualTo("COMPLETED");
+            assertThat(item.getRemark()).isEqualTo("本人完成带看");
+            verify(appointmentMapper).updateById(item);
+        }
+    }
+
+    @Test
+    @DisplayName("其他人员即使知道预约ID也不能登记完成")
+    void otherStaffCannotComplete() {
+        ViewingAppointment item = appointment(); item.setStatus("RESERVED"); item.setAssignedStaffId(12L);
+        lenient().when(appointmentMapper.selectById(1L)).thenReturn(item);
+        lenient().when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(item);
+        try (MockedStatic<SecurityUtils> mocked = staffIdentity(13L)) {
+            assertThatThrownBy(() -> service.complete(1L, "越权完成")).isInstanceOf(ForbiddenException.class);
+            verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
+        }
+    }
+
+    @Test
+    @DisplayName("居民与游客不能借同ID登记完成")
+    void residentAndGuestCannotComplete() {
+        ViewingAppointment item = appointment(); item.setStatus("RESERVED"); item.setAssignedStaffId(12L);
+        when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(item);
+        for (String role : List.of(RoleConstants.RESIDENT, RoleConstants.GUEST)) {
+            try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+                mocked.when(() -> SecurityUtils.hasRole(role)).thenReturn(true);
+                mocked.when(SecurityUtils::getUserId).thenReturn(12L);
+                assertThatThrownBy(() -> service.complete(1L, "同号越权")).isInstanceOf(ForbiddenException.class);
+            }
+        }
+        verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
+    }
+
+    @Test
+    @DisplayName("服务人员不能处置违约")
+    void staffCannotViolate() {
+        try (MockedStatic<SecurityUtils> mocked = staffIdentity(12L)) {
+            assertThatThrownBy(() -> service.violate(1L, "无处置权")).isInstanceOf(ForbiddenException.class);
+            verifyNoInteractions(violationRecordMapper);
+        }
+    }
+
+    @Test
+    @DisplayName("完成时管理端继续校验社区范围")
+    void adminCompletionChecksCommunity() {
+        ViewingAppointment item = appointment(); item.setStatus("RESERVED");
+        when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(item);
+        try (MockedStatic<SecurityUtils> mocked = adminIdentity(9L, Set.of())) {
+            mocked.when(() -> SecurityUtils.checkCommunityAccess(item.getCommunityId()))
+                    .thenThrow(new ForbiddenException("未绑定社区"));
+            assertThatThrownBy(() -> service.complete(1L, "越社区")).isInstanceOf(ForbiddenException.class);
+            verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
         }
     }
 

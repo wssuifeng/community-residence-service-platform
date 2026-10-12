@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-12",
+  "scope": "bl current entry verification, not whole-repository acceptance",
+  "manualLinksChecked": 31,
+  "manualBrokenLinks": [],
+  "cases": {
+    "HT": 12,
+    "FTDeferred": 3,
+    "userResultsPrefilled": false
+  },
+  "audit": {
+    "exitCode": 1,
+    "errors": 1448,
+    "byCode": {
+      "acceptance-missing": 3,
+      "status-symbol-out-of-scope": 1199,
+      "broken-link": 245,
+      "dependency-mismatch": 1
+    },
+    "wholeRepositoryPassed": false,
+    "currentManualErrors": 0
+  },
+  "upstreamAuthorization": "用户采纳19推荐，授权对应30局部修订；10/20/40未修改，archive未修改",
+  "pending": "用户HT效果/体验、金融3FT与详情暂缓、未列异常数据组合/覆盖差距与确定性历史治理；推送及阶段9～12/60/70未执行"
+}

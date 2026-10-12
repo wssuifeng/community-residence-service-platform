@@ -11,8 +11,10 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface ViewingAppointmentMapper extends BaseMapper<ViewingAppointment> {
 
-    /* 状态判定与违约入账在同一行锁内，重复标记不得增加违约次数。 */
-    @Select("SELECT * FROM viewing_appointment WHERE id = #{id} FOR UPDATE")
+    /* 分配/完成归属校验与违约入账共用行锁，重复状态动作不得重复通知或增加次数。 */
+    @Select("SELECT id, user_id, visitor_name, visitor_phone, assigned_staff_id, conversation_id, lease_id, "
+            + "housing_id, community_id, appointment_date, start_time, end_time, status, "
+            + "contact_phone, remark, created_at, updated_at FROM viewing_appointment WHERE id = #{id} FOR UPDATE")
     ViewingAppointment selectByIdForUpdate(@Param("id") Long id);
 
 
