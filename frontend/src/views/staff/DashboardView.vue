@@ -6,6 +6,8 @@ import StatusTag from '@/components/common/StatusTag.vue'
 import EChart, { type ChartOption } from '@/components/common/EChart.vue'
 import { listWorkOrders } from '@/api/workorder'
 import { listNotifications } from '@/api/notification'
+import { getStaffWorkloadStats } from '@/api/statistics'
+import type { IStaffWorkloadStats } from '@/types/modules/statistics'
 import type { IWorkOrder, WorkOrderStatus } from '@/types/modules/workorder'
 import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import type { INotification } from '@/types/modules/notification'
@@ -15,7 +17,7 @@ import { residentDisplayName, residentInitial, residentRelationLabel } from '@/u
 
 /** 工作台（UI设计.md §4.2.1）：问候条 + 今日概览 + 紧急告警 + 待办工单 + 工单进度 + 最新消息 */
 
-/* 趋势口径尚待确认；不生成百分比或曲线冒充统计结果。 */
+/* 当前负荷与实际事件分开；没有快照不生成负荷历史百分比。 */
 const CHART_COLORS = { warning: '#f59e0b', primary: '#3b6dff', success: '#10b981', danger: '#ef4444' } as const
 
 const router = useRouter()
@@ -44,6 +46,40 @@ const urgentCount = ref(0)
 const todoOrders = ref<IWorkOrder[]>([])
 const latestNotifications = ref<INotification[]>([])
 const loading = ref(false)
+
+const workload = ref<IStaffWorkloadStats | null>(null)
+const workloadLoading = ref(false)
+const workloadError = ref('')
+
+const workloadOption = computed<ChartOption>(() => {
+  const data = workload.value
+  const days = Object.keys(data?.assignedTrend ?? {})
+  return {
+    tooltip: { trigger: 'axis' },
+    color: [CHART_COLORS.primary, CHART_COLORS.success],
+    legend: { top: 0, left: 'center', data: ['派入次数', '提交结果次数'] },
+    grid: { left: 40, right: 20, top: 40, bottom: 35 },
+    xAxis: { type: 'category', data: days, axisLabel: { formatter: (value: string) => value.slice(5) } },
+    yAxis: { type: 'value', minInterval: 1 },
+    series: [
+      { name: '派入次数', type: 'line', data: days.map(day => data?.assignedTrend[day] ?? 0) },
+      { name: '提交结果次数', type: 'line', data: days.map(day => data?.submittedTrend[day] ?? 0) }
+    ]
+  }
+})
+
+async function loadWorkload(): Promise<void> {
+  workloadLoading.value = true
+  workloadError.value = ''
+  workload.value = null
+  try {
+    workload.value = await getStaffWorkloadStats(7)
+  } catch (error) {
+    workloadError.value = error instanceof Error ? error.message : '事件统计加载失败'
+  } finally {
+    workloadLoading.value = false
+  }
+}
 
 /* ---------- 问候条：按时段问候 + 当日日期，取自登录态与本地时间 ---------- */
 
@@ -186,6 +222,7 @@ function messageIconClass(item: INotification): string {
 onMounted(() => {
   loadDashboard()
   loadNotifications()
+  loadWorkload()
 })
 </script>
 
@@ -206,7 +243,7 @@ onMounted(() => {
 
     <!-- 今日概览：标题与四张统计卡同处一个白色大容器 -->
     <section class="panel overview-panel">
-      <h2 class="panel-title">今日概览</h2>
+      <h2 class="panel-title">当前工单</h2>
 
       <div class="stat-cards">
         <button
@@ -230,11 +267,28 @@ onMounted(() => {
           <span class="stat-main">
             <span class="stat-figures">
               <span class="stat-value">{{ card.value }}</span>
-              <span class="stat-delta">趋势待明确</span>
+              <span class="stat-delta">当前状态</span>
             </span>
           </span>
         </button>
       </div>
+    </section>
+
+    <section class="panel workload-panel" v-loading="workloadLoading" aria-label="本人工作量事件统计">
+      <header class="panel-header"><h2 class="panel-title">近7日工作量事件</h2></header>
+      <div v-if="workloadError" class="workload-error" role="alert">
+        <p>事件统计加载失败：{{ workloadError }}</p>
+        <button type="button" class="panel-more" @click="loadWorkload">重新加载事件统计</button>
+      </div>
+      <template v-else-if="workload">
+        <p class="workload-summary">
+          今日提交结果 <strong data-testid="today-submitted">{{ workload.todaySubmitted }}</strong> 次 ·
+          近7日派入 <strong>{{ Object.values(workload.assignedTrend).reduce((sum, value) => sum + value, 0) }}</strong> 次 ·
+          近7日提交结果 <strong>{{ workload.totalSubmitted }}</strong> 次
+        </p>
+        <EChart :option="workloadOption" :height="240" />
+        <p class="workload-note">按实际派入和本人提交时间统计；重派、退回后再次提交分别计次，不是去重工单数。</p>
+      </template>
     </section>
 
     <!-- 紧急告警条 -->
@@ -994,6 +1048,11 @@ onMounted(() => {
   font-size: var(--font-size-xs);
   color: var(--color-text-disabled);
 }
+
+.workload-panel { margin-bottom: var(--spacing-lg); min-width: 0; }
+.workload-summary { margin: var(--spacing-md) 0; line-height: 1.8; }
+.workload-note { color: var(--color-text-secondary); font-size: var(--font-size-xs); line-height: 1.6; }
+.workload-error { padding: var(--spacing-md) 0; }
 
 /* ---------- 响应式 ---------- */
 

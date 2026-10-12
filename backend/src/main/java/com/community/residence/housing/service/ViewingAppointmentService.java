@@ -412,14 +412,24 @@ public class ViewingAppointmentService {
                 "您 " + appointment.getAppointmentDate() + " 的看房预约已确认");
     }
 
-    /* 完成预约：RESERVED → COMPLETED */
+    /* 完成预约：在预约行锁内校验当前分配人/管理员社区及RESERVED，防改派与完成竞态、重复通知。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约完成'")
     public void complete(Long id, String remark) {
-        ViewingAppointment appointment = requireAppointment(id);
-        SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
+        ViewingAppointment appointment = requireAppointmentForUpdate(id);
+        if (SecurityUtils.hasRole(RoleConstants.STAFF)) {
+            if (!java.util.Objects.equals(appointment.getAssignedStaffId(), SecurityUtils.getUserId())) {
+                throw new ForbiddenException("仅可完成分配给本人的看房预约");
+            }
+        } else if (SecurityUtils.hasRole(RoleConstants.ADMIN)
+                || SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+            SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
+        } else {
+            throw new ForbiddenException("仅被分配人员或管理端可登记看房完成");
+        }
         validateTransition(appointment, "COMPLETED");
         appointment.setStatus("COMPLETED");
+        appointment.setRemark(remark);
         appointmentMapper.updateById(appointment);
         notifyApplicant(appointment, "看房预约已完成",
                 "您 " + appointment.getAppointmentDate() + " 的看房预约已完成");
@@ -461,6 +471,9 @@ public class ViewingAppointmentService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "DISPOSAL", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约违约处置：' + #reason")
     public void violate(Long id, String reason) {
+        if (!SecurityUtils.hasRole(RoleConstants.ADMIN) && !SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+            throw new ForbiddenException("仅管理端可处置看房违约");
+        }
         ViewingAppointment appointment = appointmentMapper.selectByIdForUpdate(id);
         if (appointment == null) {
             throw new ResourceNotFoundException("看房预约不存在");
@@ -552,7 +565,7 @@ public class ViewingAppointmentService {
             targetType = "VIEWING_APPOINTMENT", targetId = "#id",
             content = "'看房预约分配带看人：' + #assigneeId")
     public ViewingAppointmentVO assign(Long id, Long assigneeId) {
-        ViewingAppointment appointment = requireAppointment(id);
+        ViewingAppointment appointment = requireAppointmentForUpdate(id);
         SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
         SysUser assignee = sysUserMapper.selectById(assigneeId);
         if (assignee == null) {
@@ -733,6 +746,14 @@ public class ViewingAppointmentService {
             throw new ForbiddenException("只有注册并登录的居民账号可预约看房");
         }
         return SecurityUtils.getUserId();
+    }
+
+    private ViewingAppointment requireAppointmentForUpdate(Long id) {
+        ViewingAppointment appointment = appointmentMapper.selectByIdForUpdate(id);
+        if (appointment == null) {
+            throw new ResourceNotFoundException("看房预约不存在");
+        }
+        return appointment;
     }
 
     public ViewingAppointment requireAppointment(Long id) {

@@ -5,3 +5,6 @@
 
 # 前端原执行日志同样按原始字节保留，仅限本批三个日志副本。
 /docs/50_系统测试/evidence/nontransaction-core-unit-20261012/frontend-*.txt -text
+
+# 本批原始日志/截图/JSON按字节封存用于SHA复验。
+/docs/50_系统测试/evidence/staff-rules-20261012/** -text

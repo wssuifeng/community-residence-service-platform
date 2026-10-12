@@ -25,43 +25,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/** 非交易统计边界；staffTrend锁定现行行为，不代表采纳待裁决的归属定义。 */
+/** 非交易统计边界；staffTrend窗口按2026-10-12用户批准事件定义。 */
 @ExtendWith(MockitoExtension.class)
 class NontransactionStatisticsCoverageTest {
  @Mock CommunityMapper communityMapper; @Mock BuildingMapper buildingMapper; @Mock HouseMapper houseMapper;
- @Mock ResidentMapper residentMapper; @Mock WorkOrderMapper workOrderMapper; @Mock WorkOrderAssignmentMapper assignmentMapper;
+ @Mock ResidentMapper residentMapper; @Mock WorkOrderMapper workOrderMapper; @Mock WorkOrderAssignmentMapper assignmentMapper; @Mock WorkOrderProcessMapper processMapper;
  @Mock ServiceCategoryMapper serviceCategoryMapper; @Mock SysUserMapper sysUserMapper; @Mock WorkOrderEvaluationMapper evaluationMapper;
  @Mock ResourceReservationMapper reservationMapper; @Mock LeaseRecordMapper leaseMapper;
  @InjectMocks StatisticsService service;
  @ParameterizedTest @CsvSource({"-4,1","1,1","7,7","90,90","999,90"})
  void emptyTrendClampsWindow(int input,int expected) {
   when(assignmentMapper.selectList(any())).thenReturn(List.of());
+  when(processMapper.selectList(any())).thenReturn(List.of());
   try(MockedStatic<SecurityUtils> s=mockStatic(SecurityUtils.class)) {
    s.when(SecurityUtils::getUserId).thenReturn(7L);Map<String,Object> r=service.staffTrend(input);
    assertThat(r.get("days")).isEqualTo(expected);assertThat((Map<?,?>)r.get("assignedTrend")).hasSize(expected);
-   for(String key:List.of("todayAssigned","todayCompleted","todayProcessing","totalCompleted"))assertThat(r.get(key)).isEqualTo(0L);
+   for(String key:List.of("todayAssigned","todaySubmitted","totalSubmitted"))assertThat(r.get(key)).isEqualTo(0L);
    verifyNoInteractions(workOrderMapper);
-  }
- }
- @ParameterizedTest @CsvSource({"PENDING,0,0","TO_ASSIGN,0,0","ASSIGNED,0,0","ACCEPTED,0,1","IN_PROGRESS,0,1","TO_CONFIRM,1,0","COMPLETED,1,0","CLOSED,1,0","REJECTED,0,0","CANCELLED,0,0"})
- void trendCurrentStatusMapping(String status,long completed,long processing) {
-  WorkOrderAssignment a=new WorkOrderAssignment();a.setWorkOrderId(11L);a.setAssigneeId(7L);
-  WorkOrder o=new WorkOrder();o.setId(11L);o.setStatus(status);o.setCreatedAt(LocalDate.now().atTime(12,0));
-  when(assignmentMapper.selectList(any())).thenReturn(List.of(a,a));when(workOrderMapper.selectList(any())).thenReturn(List.of(o));
-  try(MockedStatic<SecurityUtils> s=mockStatic(SecurityUtils.class)) {
-   s.when(SecurityUtils::getUserId).thenReturn(7L);Map<String,Object> r=service.staffTrend(7);
-   assertThat(r.get("todayAssigned")).isEqualTo(1L);assertThat(r.get("todayCompleted")).isEqualTo(completed);
-   assertThat(r.get("todayProcessing")).isEqualTo(processing);assertThat(r.get("totalCompleted")).isEqualTo(completed);
-  }
- }
- @Test void trendUsesCreatedDayNotAssignmentDay() {
-  WorkOrderAssignment a=new WorkOrderAssignment();a.setWorkOrderId(11L);
-  WorkOrder o=new WorkOrder();o.setStatus("COMPLETED");o.setCreatedAt(LocalDate.now().minusDays(2).atTime(12,0));
-  when(assignmentMapper.selectList(any())).thenReturn(List.of(a));when(workOrderMapper.selectList(any())).thenReturn(List.of(o));
-  try(MockedStatic<SecurityUtils> s=mockStatic(SecurityUtils.class)) {
-   s.when(SecurityUtils::getUserId).thenReturn(7L);Map<String,Object> r=service.staffTrend(7);
-   assertThat(r.get("todayCompleted")).isEqualTo(0L);
-   assertThat(((Map<?,?>)r.get("completedTrend")).get(LocalDate.now().minusDays(2).toString())).isEqualTo(1L);
   }
  }
  @Test void workorderDistributionReadsBackendValues() {

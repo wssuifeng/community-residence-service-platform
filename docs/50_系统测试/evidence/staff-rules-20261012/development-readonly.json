@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-12T10:27:35.352Z",
+  "database": "community_residence",
+  "transactionsExecuted": false,
+  "businessWrites": false,
+  "checks": [
+    {
+      "name": "正常基线保留1/600/9/1/0/0",
+      "passed": true
+    },
+    {
+      "name": "演示登录superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示登录admin1",
+      "passed": true
+    },
+    {
+      "name": "演示登录staff1",
+      "passed": true
+    },
+    {
+      "name": "演示登录resident1",
+      "passed": true
+    },
+    {
+      "name": "正常程序渠道全部停用",
+      "passed": true
+    },
+    {
+      "name": "正常服务事件接口使用新契约",
+      "passed": true
+    },
+    {
+      "name": "正常前端代理指向当前后端",
+      "passed": true
+    },
+    {
+      "name": "正常OpenAPI带看完成存在",
+      "passed": true
+    },
+    {
+      "name": "正常只读期间数量未变",
+      "passed": true
+    }
+  ],
+  "before": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ],
+  "after": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ]
+}

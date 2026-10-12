@@ -1,0 +1,243 @@
+{
+  "date": "2026-10-12T10:24:23.406Z",
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "固定隔离数据库门禁",
+      "passed": true
+    },
+    {
+      "name": "隔离渠道停用",
+      "passed": true
+    },
+    {
+      "name": "改派后旧人员详情权限撤销",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "工单创建30天前不影响真实今日派入",
+      "passed": true
+    },
+    {
+      "name": "旧人员保留昨日真实派入非当前负荷",
+      "passed": true
+    },
+    {
+      "name": "两次实际提交计两次非一单一计",
+      "passed": true
+    },
+    {
+      "name": "旧人员不继承别人提交结果",
+      "passed": true
+    },
+    {
+      "name": "居民同数字ID确认或未来时间不混入",
+      "passed": true
+    },
+    {
+      "name": "日期窗口上限90且下限1",
+      "passed": true
+    },
+    {
+      "name": "居民不能读服务人员事件统计",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "游客不能读事件统计",
+      "passed": true,
+      "detail": {
+        "http": 401,
+        "code": 401
+      }
+    },
+    {
+      "name": "完成拒绝改派前人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "完成拒绝预约居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "完成拒绝跨社区管理",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "完成拒绝游客",
+      "passed": true,
+      "detail": {
+        "http": 401,
+        "code": 401
+      }
+    },
+    {
+      "name": "人员不获得管理动作violate",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "人员不获得管理动作confirm",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "人员不获得管理动作cancel",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "浏览器代理与隔离后端事件对象一致",
+      "passed": true
+    },
+    {
+      "name": "工作台真实显示今日两次提交而非当前完成状态",
+      "passed": true
+    },
+    {
+      "name": "当前卡与历史事件分区",
+      "passed": true
+    },
+    {
+      "name": "无负荷伪趋势与百分比",
+      "passed": true
+    },
+    {
+      "name": "事件工作台无横向溢出1024",
+      "passed": true
+    },
+    {
+      "name": "事件工作台无横向溢出768",
+      "passed": true
+    },
+    {
+      "name": "事件接口失败不伪装零值",
+      "passed": true
+    },
+    {
+      "name": "错误原地重试返回真实事件",
+      "passed": true
+    },
+    {
+      "name": "人员页有完成无违约冻结按钮",
+      "passed": true
+    },
+    {
+      "name": "本人完成按钮成功不再403",
+      "passed": true
+    },
+    {
+      "name": "无未捕获浏览器异常",
+      "passed": true
+    },
+    {
+      "name": "完成状态与备注真实读回",
+      "passed": true
+    },
+    {
+      "name": "重复完成被状态机拒绝且不重复通知",
+      "passed": true
+    },
+    {
+      "name": "并发完成仅一次成功无500",
+      "passed": true
+    },
+    {
+      "name": "本社区管理员仍能完成",
+      "passed": true
+    },
+    {
+      "name": "未运行支付退款",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "communities": [
+    143,
+    144
+  ],
+  "users": [
+    224,
+    225,
+    226,
+    227
+  ],
+  "residents": [
+    327
+  ],
+  "screenshots": [
+    "workload-1024.png",
+    "workload-768.png",
+    "viewing-completed-1024.png"
+  ],
+  "browserErrors": [],
+  "financialBefore": [
+    0,
+    0
+  ],
+  "statistics": {
+    "endDate": "2026-10-12",
+    "todaySubmitted": 2,
+    "assignedTrend": {
+      "2026-10-06": 0,
+      "2026-10-07": 0,
+      "2026-10-08": 0,
+      "2026-10-09": 0,
+      "2026-10-10": 0,
+      "2026-10-11": 0,
+      "2026-10-12": 1
+    },
+    "days": 7,
+    "todayAssigned": 1,
+    "totalSubmitted": 2,
+    "submittedTrend": {
+      "2026-10-06": 0,
+      "2026-10-07": 0,
+      "2026-10-08": 0,
+      "2026-10-09": 0,
+      "2026-10-10": 0,
+      "2026-10-11": 0,
+      "2026-10-12": 2
+    },
+    "startDate": "2026-10-06"
+  },
+  "cleanupCounts": {
+    "community": 0,
+    "resident": 0,
+    "sys_user": 0
+  },
+  "cleanup": true,
+  "financialAfter": [
+    0,
+    0
+  ]
+}

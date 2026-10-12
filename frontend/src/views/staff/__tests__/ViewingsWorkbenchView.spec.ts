@@ -1,4 +1,4 @@
-﻿import { defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import ElementPlus from 'element-plus'
@@ -87,6 +87,10 @@ describe('服务人员我的带看 · R63 看房群聊', () => {
     expect(wrapper.find('[data-testid="conversation-chat"]').text()).toContain('88')
     expect(wrapper.find('[data-testid="appointment-chat"]').exists()).toBe(false)
     expect(mocks.getConversation).toHaveBeenCalledWith(88)
+    expect(wrapper.text()).toContain('登记完成')
+    expect(wrapper.text()).not.toContain('标记违约')
+    expect(wrapper.text()).not.toContain('冻结账号')
+    wrapper.unmount()
   })
 })
 

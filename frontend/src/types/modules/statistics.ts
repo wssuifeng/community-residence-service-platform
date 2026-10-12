@@ -77,3 +77,15 @@ export interface IDistributionItem {
 }
 
 export type { PageQuery }
+
+/** 本人事件次数，不能视作去重工单数或当前负荷历史。 */
+export interface IStaffWorkloadStats {
+  days: number
+  startDate: string
+  endDate: string
+  assignedTrend: Record<string, number>
+  submittedTrend: Record<string, number>
+  todayAssigned: number
+  todaySubmitted: number
+  totalSubmitted: number
+}
