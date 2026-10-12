@@ -39,6 +39,7 @@ import java.util.List;
 public class CommunityController {
 
     private final CommunityService communityService;
+    private final com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
     private final CommunityBatchService communityBatchService;
     private final HousingService housingService;
 
@@ -133,5 +134,13 @@ public class CommunityController {
     public ApiResponse<BatchOperationResultVO> batchUpdateStatus(
             @RequestBody @Valid BatchCommunityStatusDTO dto) {
         return ApiResponse.success(communityBatchService.batchUpdateStatus(dto));
+    }
+    @Operation(summary="查询社区责任人管理员候选",description="仅ADMIN账号，本社区已绑定者优先，支持分页搜索")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @GetMapping("/responsible-admins")
+    public ApiResponse<PageVO<com.community.residence.community.vo.ResponsibleAdminVO>> responsibleAdmins(
+            @RequestParam(required=false) Long communityId, @RequestParam(defaultValue="1") long page,
+            @RequestParam(defaultValue="20") long size, @RequestParam(required=false) String keyword) {
+        return ApiResponse.success(communityResponsibleService.candidates(communityId,page,size,keyword));
     }
 }

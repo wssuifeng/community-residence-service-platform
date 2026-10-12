@@ -25,6 +25,13 @@ public class HousingBriefVO {
     @Schema(description = "状态：AVAILABLE-可租, RESERVED-已预订, RENTED-已出租, OFFLINE-已下线")
     private String status;
 
+    @Schema(description = "占用情况，与发布状态独立")
+    private String occupancy;
+    @Schema(description = "唯一当前申请ID")
+    private Long applicationId;
+    @Schema(description = "唯一当前租约ID")
+    private Long leaseId;
+
     @Schema(description = "月租金")
     private BigDecimal monthlyRent;
 

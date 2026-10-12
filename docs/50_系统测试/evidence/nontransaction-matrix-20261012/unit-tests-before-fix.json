@@ -1,0 +1,30 @@
+{
+  "phase": "beforeFix",
+  "suites": [
+    {
+      "name": "com.community.residence.evaluation.service.EvaluationReadAccessTest",
+      "tests": 4,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.community.residence.notice.service.NoticeReadReceiptAccessTest",
+      "tests": 3,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.community.residence.reservation.service.ReservationContactFallbackTest",
+      "tests": 5,
+      "failures": 4,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "tests": 12,
+  "failures": 11,
+  "errors": 0,
+  "skipped": 0
+}

@@ -62,7 +62,7 @@ export type LeaseAgreementStatus = 'PENDING' | 'PARTIAL' | 'SIGNED' | 'CANCELLED
 /** 协议状态中文标签 */
 export const leaseAgreementStatusLabels: Record<LeaseAgreementStatus, string> = {
   PENDING: '待确认',
-  PARTIAL: '单方已确认',
+  PARTIAL: '待居民确认',
   SIGNED: '双方已确认',
   CANCELLED: '已撤回'
 }
@@ -74,7 +74,7 @@ export type LeaseAgreementSignStatus = 'NONE' | LeaseAgreementStatus
 export const leaseAgreementSignStatusLabels: Record<LeaseAgreementSignStatus, string> = {
   NONE: '未发起协议',
   PENDING: '待签署',
-  PARTIAL: '单方已确认',
+  PARTIAL: '待居民确认',
   SIGNED: '已签署',
   CANCELLED: '协议已撤回'
 }
@@ -114,9 +114,9 @@ export interface ICreateAgreementDTO {
   remark?: string
 }
 
-/** 确认协议请求（POST /lease-agreements/{id}/confirm；按当前身份落居民方或管理方） */
+/** 确认协议请求（POST /lease-agreements/{id}/confirm；仅居民本人同意具体协议） */
 export interface IAgreementConfirmDTO {
-  /** 确认人姓名（缺省取当前账号姓名，快照入库） */
+  /** 兼容旧客户端；后端忽略此值，仅取当前账号姓名 */
   confirmName?: string
   remark?: string
 }

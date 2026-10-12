@@ -9,6 +9,7 @@ import CommunityEditDialog from '@/views/admin/community/CommunityEditDialog.vue
 import BuildingEditDialog from '@/views/admin/community/BuildingEditDialog.vue'
 import UnitEditDialog from '@/views/admin/community/UnitEditDialog.vue'
 import UnitBatchDialog from '@/views/admin/community/UnitBatchDialog.vue'
+import HouseLayoutDialog from '@/views/admin/community/HouseLayoutDialog.vue'
 import HouseEditDialog from '@/views/admin/community/HouseEditDialog.vue'
 import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
 import StructureGenerateDialog from '@/views/admin/community/StructureGenerateDialog.vue'
@@ -40,6 +41,8 @@ import type {
 import { communityStatusLabels, houseStatusLabels } from '@/types/modules/community'
 import type { CommunityStatus, HouseStatus } from '@/types/modules/community'
 import { getDashboardStats } from '@/api/statistics'
+import type { IDashboardStats } from '@/types/modules/statistics'
+import { loadAllPages, mapLimited, StaleStructureLoad } from './structureData'
 import { getHouseResidentList, getResident } from '@/api/resident'
 import type { IHouseResident, IResident } from '@/types/modules/resident'
 import { relationTypeLabels, residenceRelationStatusLabels } from '@/types/modules/resident'
@@ -252,10 +255,16 @@ function selectCommunity(community: ICommunity, force = false): void {
   resetHouseFilters()
   activeBuildingId.value = null
   activeUnitId.value = null
-  loadStructure(community.id)
+  loadStructure(community.id, true)
 }
 
 function clearDetail(): void {
+  structureSeq += 1
+  houseScopeSeq += 1
+  structureLoading.value = false
+  scopeLoading.value = false
+  structureLoaded.value = false
+  structureStats.value = null
   selectedCommunityId.value = null
   selectedCommunity.value = null
   buildings.value = []
@@ -301,6 +310,7 @@ async function focusCommunity(communityId: number): Promise<void> {
 interface UnitNode {
   unit: IUnit
   houses: IHouse[]
+  housesLoaded: boolean
 }
 
 interface BuildingNode {
@@ -311,43 +321,80 @@ interface BuildingNode {
 const buildings = ref<BuildingNode[]>([])
 const structureLoading = ref(false)
 const structureError = ref('')
+const scopeLoading = ref(false)
+const structureStats = ref<IDashboardStats | null>(null)
+let houseScopeSeq = 0
 /** 是否已成功加载过当前社区结构（区分「未加载」与「确实为空」两种空态） */
 const structureLoaded = ref(false)
 
 let structureSeq = 0
 
-/** 结构加载按选中社区整体拉取：计数与筛选得以在本地精确计算，且只覆盖一个社区 */
-async function loadStructure(communityId: number): Promise<void> {
+/* 元数据用于范围选择/结构维护；房屋仅按用户所选范围读取。
+   社区统计独立取聚合接口，不能把首楼栋缓存解释为社区全量。 */
+async function loadStructure(communityId: number, initial = false): Promise<void> {
   const seq = ++structureSeq
-  /* 整体重载即作废在途的单元级局部刷新，防止旧单元的房屋回写到新结构上 */
+  houseScopeSeq += 1
   unitReloadSeq += 1
   structureLoading.value = true
+  scopeLoading.value = false
   structureError.value = ''
   structureLoaded.value = false
+  structureStats.value = null
   buildings.value = []
+  const current = () => seq === structureSeq
   try {
-    const buildingList = (await getBuildingList(communityId, { page: 1, size: 200 })).records
-    const nodes = await Promise.all(
-      buildingList.map(async (building) => {
-        const units = (await getUnitList(building.id, { page: 1, size: 200 })).records
-        const unitNodes = await Promise.all(
-          units.map(async (unit) => ({
-            unit,
-            houses: (await getHouseList(unit.id, { page: 1, size: 200 })).records
-          }))
-        )
-        return { building, units: unitNodes }
-      })
-    )
-    if (seq !== structureSeq) return
+    const [buildingList, stats] = await Promise.all([
+      loadAllPages(query => getBuildingList(communityId, query), current),
+      getDashboardStats({ communityId })
+    ])
+    buildingList.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN', { numeric: true }) || a.id - b.id)
+    const nodes = await mapLimited(buildingList, async building => ({
+      building,
+      units: (await loadAllPages(query => getUnitList(building.id, query), current))
+        .map(unit => ({ unit, houses: [] as IHouse[], housesLoaded: false }))
+    }))
+    if (!current()) return
     buildings.value = nodes
+    structureStats.value = stats
+    if (initial || (activeBuildingId.value !== null && !nodes.some(n => n.building.id === activeBuildingId.value))) {
+      activeBuildingId.value = nodes[0]?.building.id ?? null
+      activeUnitId.value = null
+    }
+    if (activeUnitId.value !== null && !nodes.some(n => n.units.some(u => u.unit.id === activeUnitId.value))) activeUnitId.value = null
     structureLoaded.value = true
+    await loadScopeHouses()
   } catch (error) {
-    if (seq !== structureSeq) return
-    buildings.value = []
+    if (!current() || error instanceof StaleStructureLoad) return
     structureError.value = error instanceof Error ? error.message : '加载结构失败'
   } finally {
-    if (seq === structureSeq) structureLoading.value = false
+    if (current()) structureLoading.value = false
+  }
+}
+
+async function loadScopeHouses(): Promise<void> {
+  const seq = ++houseScopeSeq
+  const directorySeq = structureSeq
+  const current = () => seq === houseScopeSeq && directorySeq === structureSeq
+  scopeLoading.value = true
+  structureError.value = ''
+  const units = buildings.value
+    .filter(node => activeBuildingId.value === null || node.building.id === activeBuildingId.value)
+    .flatMap(node => node.units)
+    .filter(node => (activeUnitId.value === null || node.unit.id === activeUnitId.value) && !node.housesLoaded)
+  try {
+    const results = await mapLimited(units, async node => ({
+      node, houses: await loadAllPages(query => getHouseList(node.unit.id, query), current)
+    }))
+    if (!current()) return
+    for (const { node, houses } of results) {
+      node.houses = houses
+      node.housesLoaded = true
+    }
+  } catch (error) {
+    if (!current() || error instanceof StaleStructureLoad) return
+    structureError.value = error instanceof Error ? error.message : '加载房屋失败'
+  } finally {
+    if (current()) scopeLoading.value = false
   }
 }
 
@@ -362,14 +409,21 @@ let unitReloadSeq = 0
 async function reloadUnitHouses(unitId: number): Promise<void> {
   const seq = ++unitReloadSeq
   try {
-    const houses = (await getHouseList(unitId, { page: 1, size: 200 })).records
+    const directorySeq = structureSeq
+    const houses = await loadAllPages(query => getHouseList(unitId, query), () => seq === unitReloadSeq && directorySeq === structureSeq)
     if (seq !== unitReloadSeq) return
     for (const building of buildings.value) {
       const unitNode = building.units.find((item) => item.unit.id === unitId)
       if (unitNode) {
         unitNode.houses = houses
+        unitNode.housesLoaded = true
         break
       }
+    }
+    const communityId = selectedCommunityId.value
+    if (communityId !== null) {
+      const stats = await getDashboardStats({ communityId })
+      if (seq === unitReloadSeq && directorySeq === structureSeq) structureStats.value = stats
     }
     /* 楼层/状态筛选在新数据下可能已无命中：回落到全部，避免空网格无从解释 */
     if (activeFloor.value !== null && !houses.some((house) => house.floor === activeFloor.value)) {
@@ -414,10 +468,12 @@ const activeStatus = ref<HouseStatus | null>(null)
 function selectBuilding(buildingId: number | null): void {
   activeBuildingId.value = buildingId
   activeUnitId.value = null
+  if (structureLoaded.value) void loadScopeHouses()
 }
 
 function selectUnit(unitId: number | null): void {
   activeUnitId.value = unitId
+  if (structureLoaded.value) void loadScopeHouses()
 }
 
 /* ---------------- 筛选区（唯一入口：范围选择器） ---------------- */
@@ -447,7 +503,7 @@ function handleScopeUnit(value: unknown): void {
     building.units.some((unitNode) => unitNode.unit.id === unitId)
   )
   if (owner && activeBuildingId.value !== owner.building.id) {
-    selectBuilding(owner.building.id)
+    activeBuildingId.value = owner.building.id
   }
   selectUnit(unitId)
 }
@@ -490,6 +546,7 @@ function clearAllFilters(): void {
   resetHouseFilters()
   activeBuildingId.value = null
   activeUnitId.value = null
+  if (structureLoaded.value) void loadScopeHouses()
 }
 
 const activeBuildingName = computed(
@@ -549,15 +606,14 @@ const scopeSummary = computed(() => {
 
 /** 社区关键数字（空置与入住率在房屋状态面上，与结构计数同源） */
 const communityMetrics = computed(() => {
-  const total = houseEntries.value.length
-  const occupied = houseEntries.value.filter((entry) => entry.house.status === 'OCCUPIED').length
-  const vacant = houseEntries.value.filter((entry) => entry.house.status === 'VACANT').length
+  const stats = structureStats.value
+  const total = stats?.houseCount ?? 0
   return {
-    buildings: buildings.value.length,
+    buildings: stats?.buildingCount ?? buildings.value.length,
     units: buildings.value.reduce((sum, building) => sum + building.units.length, 0),
     houses: total,
-    vacant,
-    occupancy: total === 0 ? null : (occupied / total) * 100
+    vacant: stats?.houseStatusDistribution?.VACANT ?? 0,
+    occupancy: total === 0 ? null : ((stats?.occupiedHouseCount ?? 0) / total) * 100
   }
 })
 
@@ -873,13 +929,27 @@ function deleteFromInfo(): void {
 
 /* ---------------- 房屋增删改 ---------------- */
 
+const houseLayoutVisible = ref(false)
+const layoutTargets = ref<IHouse[]>([])
+const layoutMenu = ref<{ x: number; y: number } | null>(null)
+function openLayout(): void {
+  layoutMenu.value = null
+  layoutTargets.value = filteredEntries.value.filter(entry => selectedHouseIds.value.has(entry.house.id)).map(entry => entry.house)
+  if (layoutTargets.value.length) houseLayoutVisible.value = true
+}
+function onLayoutContext(event: MouseEvent, entry: HouseEntry): void {
+  if (!selectedHouseIds.value.has(entry.house.id)) selectedHouseIds.value = new Set([entry.house.id])
+  layoutMenu.value = { x: Math.max(0, Math.min(event.clientX, window.innerWidth - 240)), y: Math.max(0, Math.min(event.clientY, window.innerHeight - 80)) }
+}
+async function handleLayoutsSaved(unitIds: number[]): Promise<void> { for (const id of unitIds) await reloadUnitHouses(id); await refreshSelectedRowStats() }
+watch([activeBuildingId, activeUnitId, activeFloor, activeStatus, houseKeyword], () => { layoutMenu.value = null })
 const houseDialogVisible = ref(false)
 const houseEditing = ref<IHouse | null>(null)
-const houseUnitContext = ref<{ buildingName: string; unitId: number; unitName: string } | null>(null)
+const houseUnitContext = ref<{ buildingName: string; unitId: number; unitName: string; floors?: number } | null>(null)
 
 function openHouseCreate(unit: IUnit, buildingName: string): void {
   houseEditing.value = null
-  houseUnitContext.value = { buildingName, unitId: unit.id, unitName: unit.name }
+  houseUnitContext.value = { buildingName, unitId: unit.id, unitName: unit.name, floors: buildings.value.find(item => item.building.id === unit.buildingId)?.building.floors }
   houseDialogVisible.value = true
 }
 
@@ -888,7 +958,8 @@ function openHouseEdit(entry: HouseEntry): void {
   houseUnitContext.value = {
     buildingName: entry.buildingName,
     unitId: entry.unitId,
-    unitName: entry.unitName
+    unitName: entry.unitName,
+    floors: buildings.value.find(item => item.building.id === entry.buildingId)?.building.floors
   }
   houseDialogVisible.value = true
 }
@@ -1083,8 +1154,11 @@ const buildingOptions = computed(() =>
   buildings.value.map((node) => ({
     id: node.building.id,
     name: node.building.name,
+    floors: node.building.floors,
     units: node.units.length,
-    houses: node.units.reduce((sum, unitNode) => sum + unitNode.houses.length, 0)
+    houses: node.units.every(unitNode => unitNode.housesLoaded)
+      ? node.units.reduce((sum, unitNode) => sum + unitNode.houses.length, 0)
+      : null
   }))
 )
 
@@ -1568,11 +1642,11 @@ async function prepareBuildingCascade(node: BuildingNode): Promise<void> {
   buildingDeletePhase.value = 'loading'
   buildingCascadeError.value = ''
   try {
-    const plan = await Promise.all(
-      node.units.map(async (unitNode) => ({
+    const plan = await mapLimited(
+      node.units, async (unitNode) => ({
         unit: unitNode.unit,
-        houses: (await getHouseList(unitNode.unit.id, { page: 1, size: 200 })).records
-      }))
+        houses: await loadAllPages(query => getHouseList(unitNode.unit.id, query), () => seq === cascadeSeq)
+      })
     )
     if (seq !== cascadeSeq) return
     buildingCascadePlan.value = plan
@@ -2063,7 +2137,7 @@ onMounted(async () => {
                 </svg>
               </span>
               房屋
-              <span v-if="!structureLoading" class="panel-count">{{ houseEntries.length }} 套</span>
+              <span v-if="!structureLoading && !scopeLoading" class="panel-count">{{ filteredEntries.length }} 套</span>
             </h3>
             <!-- 缩放：单元以平行列排布，缩小一点即可多排几列（1.0 为原始尺寸） -->
             <div class="panel-actions">
@@ -2108,7 +2182,7 @@ onMounted(async () => {
               <span class="filter-result">
                 共 {{ scopeSummary.total }} 套 · 已入住 {{ scopeSummary.occupied }} · 空置
                 {{ scopeSummary.vacant }}
-                <template v-if="!structureLoading"> · 全部 {{ houseEntries.length }} 套</template>
+                <template v-if="!structureLoading"> · 社区共 {{ communityMetrics.houses }} 套</template>
               </span>
               <el-button
                 v-if="filtersActive"
@@ -2224,7 +2298,7 @@ onMounted(async () => {
             @pointerup="onHouseGridPointerUp"
             @pointercancel="onHouseGridPointerCancel"
           >
-            <div v-if="structureLoading && !structureLoaded" class="grid-skeleton">
+            <div v-if="(structureLoading && !structureLoaded) || scopeLoading" class="grid-skeleton">
               <el-skeleton :rows="4" animated />
             </div>
 
@@ -2304,6 +2378,7 @@ onMounted(async () => {
                         :data-house-id="entry.house.id"
                         :title="`${entry.house.houseNumber} · ${houseStatusLabels[entry.house.status]}`"
                         @click="onHouseBlockClick($event, entry)"
+                        @contextmenu.prevent.stop="onLayoutContext($event, entry)"
                         @keydown.enter.prevent="openHouseInfo(entry)"
                         @keydown.space.prevent="openHouseInfo(entry)"
                       >
@@ -2394,6 +2469,7 @@ onMounted(async () => {
             <div v-if="selectedHouseCount > 0" class="selection-bar" role="toolbar" aria-label="房屋批量操作">
               <span class="selection-count">已选 {{ selectedHouseCount }} 套</span>
               <span class="selection-actions">
+                <el-button size="small" @click="openLayout">配置户型</el-button>
                 <el-button
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
                   size="small"
@@ -2457,6 +2533,12 @@ onMounted(async () => {
       @view-structure="handleViewStructure"
     />
 
+    <Teleport to="body">
+      <div v-if="layoutMenu" class="layout-menu-dismiss" @click="layoutMenu = null" @contextmenu.prevent="layoutMenu = null" @keydown.esc="layoutMenu = null">
+        <button class="layout-context-menu" :style="{ left: `${layoutMenu.x}px`, top: `${layoutMenu.y}px` }" @click.stop="openLayout">配置所选 {{ selectedHouseCount }} 套房屋户型</button>
+      </div>
+    </Teleport>
+    <HouseLayoutDialog v-model="houseLayoutVisible" :houses="layoutTargets" @saved="handleLayoutsSaved" />
     <HouseEditDialog
       v-model="houseDialogVisible"
       :house="houseEditing"
@@ -4081,4 +4163,9 @@ onMounted(async () => {
     animation: none;
   }
 }
+</style>
+
+<style scoped>
+.layout-menu-dismiss { position: fixed; inset: 0; z-index: 2100; }
+.layout-context-menu { position: fixed; padding: 12px 16px; background: var(--color-bg-elevated, #fff); color: var(--color-text-primary); border: 1px solid var(--color-border, #ddd); border-radius: 8px; box-shadow: 0 6px 24px #0002; cursor: pointer; }
 </style>

@@ -25,12 +25,13 @@ import { SKIP_SYNTAX_HINT, planHouseRows } from '@/views/admin/community/structu
  */
 
 interface BuildingOption {
+  floors: number
   id: number
   name: string
   /** 已有单元数（选项上给出规模感，避免选错楼栋） */
   units: number
   /** 已有房屋数 */
-  houses: number
+  houses: number | null
 }
 
 const props = defineProps<{
@@ -194,6 +195,7 @@ async function handleSubmit(): Promise<void> {
   const valid = await formRef.value?.validate().catch(() => false)
   const buildingId = form.buildingId
   if (!valid || buildingId === undefined) return
+  if (buildsHouses.value && (!selectedBuilding.value || form.floorEnd > selectedBuilding.value.floors)) { ElMessage.error("建房楼层不能超过所选楼栋的总层数"); return }
   if (unitNames.value.length === 0) {
     ElMessage.warning('请先确定单元名前缀')
     return
@@ -287,7 +289,7 @@ async function handleSubmit(): Promise<void> {
           <el-option
             v-for="item in buildingOptions"
             :key="item.id"
-            :label="`${item.name}（${item.units} 个单元 · ${item.houses} 套）`"
+            :label="`${item.name}（${item.units} 个单元 · ${item.houses === null ? '房屋按需加载' : item.houses + ' 套'}）`"
             :value="item.id"
           />
         </el-select>
@@ -330,10 +332,10 @@ async function handleSubmit(): Promise<void> {
       <template v-if="form.withHouses">
         <div class="batch-grid">
           <el-form-item label="楼层 起" label-width="76px">
-            <el-input-number v-model="form.floorStart" :min="1" :max="99" style="width: 100%" />
+            <el-input-number v-model="form.floorStart" :min="1" :max="selectedBuilding?.floors" style="width: 100%" />
           </el-form-item>
           <el-form-item label="止" label-width="40px">
-            <el-input-number v-model="form.floorEnd" :min="1" :max="99" style="width: 100%" />
+            <el-input-number v-model="form.floorEnd" :min="1" :max="selectedBuilding?.floors" style="width: 100%" />
           </el-form-item>
         </div>
         <div class="batch-grid">

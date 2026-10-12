@@ -16,14 +16,14 @@ import type { ILeasePayment, ILeaseRecord, IPaymentChannelOption, PaymentChannel
  * 与 LeaseRenewDialog 的差异（刻意为两个独立组件，避免在 900 行的续租弹窗里
  * 堆分支）：
  * - 无月数选择步骤，仅「选渠道 → 渠道支付 → 轮询确认」；
- * - 支付成功**不改变租期**（首期支付与租约生效解耦，R71），故无新止期回读；
+ * - 支付成功**不改变租期**（协议完成且首期成功后租约生效，R71），故无新止期回读；
  * - 首期只收一次（后端同类型已有「进行中/已完成」单即拒 5904），故**重开弹窗先回查**
  *   既有首期单：命中待支付单 → 以该单渠道续接并直达支付页；命中已支付单 → 明示
  *   已完成并引导到支付记录（DEF-068：此前重开只能停在「选渠道」页，进不去支付页）。
  */
 
 const props = defineProps<{
-  /** 目标租约（弹窗打开期间由调用方保证非空；仅 ACTIVE 租约可发起首期支付） */
+  /** 目标租约（弹窗打开期间由调用方保证非空；TO_SIGN+SIGNED及旧ACTIVE兼容补缴可发起） */
   lease: ILeaseRecord | null
   modelValue: boolean
 }>()
@@ -366,7 +366,7 @@ async function bootstrap(): Promise<void> {
   if (pending) await resumePending(pending)
 }
 
-/** 已支付终态：首期支付不改租约状态（R71），故只回执金额/时间并引导支付记录 */
+/** 已支付终态：首期成功后回执金额/时间，父页面回读正式生效状态 */
 function showPaid(order: ILeasePayment): void {
   paidFirst.value = order
   payment.value = order
@@ -575,7 +575,7 @@ onUnmounted(stopPolling)
       </div>
 
       <p class="pay-tip">
-        首期支付与租约生效相互独立：不支付不影响租约已生效状态，支付结果仅记入支付记录。
+        协议确认且首期费用支付成功后，租约和正式居住关系才生效；首期费用不会顺延租期。
       </p>
     </div>
 

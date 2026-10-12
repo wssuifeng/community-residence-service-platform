@@ -97,6 +97,8 @@ class BatchGenerateHousingTimeslotTest {
         house2.setHouseNumber("102");
 
         lenient().when(houseMapper.selectList(any())).thenReturn(List.of(house1, house2));
+        lenient().when(houseMapper.selectByIdForUpdate(1000L)).thenReturn(house1);
+        lenient().when(houseMapper.selectByIdForUpdate(1001L)).thenReturn(house2);
         lenient().when(unitMapper.selectList(any())).thenReturn(List.of(unit1));
         lenient().when(buildingMapper.selectList(any())).thenReturn(List.of(building));
         /* 无在架房源（首查）；时段去重查询返回空表 */
@@ -289,5 +291,11 @@ class BatchGenerateHousingTimeslotTest {
         item.setStartTime(LocalTime.parse(start));
         item.setEndTime(LocalTime.parse(end));
         return item;
+    }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
     }
 }

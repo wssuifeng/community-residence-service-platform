@@ -291,8 +291,8 @@
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
   | 环境变量配置 | `export DB_PASSWORD="your_password"` + `export JWT_SECRET="your_secret_key"`（≥32 字符）(Linux/Mac)；Windows 用 `set` | 数据库密码必需；JWT 密钥 dev 未设置时用仅限本机的默认值（生产 profile 拒绝默认密钥，见架构设计 §7）；Redis 可选 `REDIS_HOST/REDIS_PORT/REDIS_PASSWORD`（默认 localhost:6379 无密码） |
-  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 **V1~V28 共 28 个迁移、53 张业务表（库内计数 54 = 含 Flyway 历史表）**，无需手动跑脚本：V1（40 张表 DDL）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V4/V5（house 户型朝向字段、看房游客支持）+ V6（五角色演示种子）+ V7（种子社区默认服务类别目录 7 类，R17）+ V8（日志留存配置 log.retention_days=730）+ V9（公告置顶/多目标定向列 + 房源租售类型与户型列）+ V10~V11（预约并发唯一约束 + C2 时段栅格 slot_unit）+ V12（公告表单字段 priority/type）+ V13（公告 GUEST 游客可见目标，R12/DEF-046）+ V14（带看人列与看房沟通消息表，R59）+ V15（租约续约支付单表 lease_payment，R61）+ V16（多方会话三表与看房群聊回填，R63）+ V17（房号同单元唯一 uk_unit_house_number，R62 补）+ V18（社区自动审批两列 + 租约签约状态列 + 租约变更历史/协议模板/租约协议三表，R64/R62 补）+ V19（人员常驻社区/擅长类别/排班三表 + 存量派单回填，R65）+ V20（租住签约闭环 R66~R71，新表 lease_move_out_application——表数 51→52）+ V21（通知归属身份空间分离 DEF-067，表数不变）+ V22（押金状态列 deposit_status + 押金退还单表 lease_deposit_refund，R72——表数 52→53）+ V23（工单群聊 conversation 增 WORK_ORDER_GROUP 类型，R74）+ V24（会话参与者身份空间列 + 复合唯一键 + 存量回填，DEF-098）+ V25（押金状态存量回填）+ V26（入住申请-租约强关联 lease_id + 回填，DEF-080）+ V27（会话 (type, related_id) 唯一键 uk_conversation_type_related，OCR DEF-106，表数不变）+ V28（V21/V26 存量回填修正，仅改数据不改结构，OCR DEF-109/DEF-120）；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量，可由仓库根 `.env` 提供） |
-  | 支付渠道环境变量（可选） | 支付宝：`PAYMENT_ALIPAY_APP_ID` / `PAYMENT_ALIPAY_GATEWAY_URL` / `PAYMENT_ALIPAY_MERCHANT_PRIVATE_KEY` / `PAYMENT_ALIPAY_PUBLIC_KEY`（另可选 `PAYMENT_ALIPAY_RETURN_URL`）；微信：`PAYMENT_WECHAT_MCH_ID` / `PAYMENT_WECHAT_APP_ID` / `PAYMENT_WECHAT_API_V3_KEY` / `PAYMENT_WECHAT_MERCHANT_SERIAL_NO` / `PAYMENT_WECHAT_PRIVATE_KEY`（或 `PAYMENT_WECHAT_PRIVATE_KEY_PATH`） | 租约续约在线支付（R61）的可选凭据，不配置则两渠道禁用（渠道卡片置灰明示）；支付宝沙箱个人可自助开通、微信需商户资质；**变量名以 `backend/src/main/resources/application.yml` 的 `payment.*` 占位符为准**，配置步骤与沙箱网关见 `README.md`「支付渠道配置」节 |
+  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 **V1~V32 共 32 个迁移、54 张业务表（库内计数 55 = 含 Flyway 历史表）**，无需手动跑脚本：V1（40 张表 DDL）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V4/V5（house 户型朝向字段、看房游客支持）+ V6（五角色演示种子）+ V7（种子社区默认服务类别目录 7 类，R17）+ V8（日志留存配置 log.retention_days=730）+ V9（公告置顶/多目标定向列 + 房源租售类型与户型列）+ V10~V11（预约并发唯一约束 + C2 时段栅格 slot_unit）+ V12（公告表单字段 priority/type）+ V13（公告 GUEST 游客可见目标，R12/DEF-046）+ V14（带看人列与看房沟通消息表，R59）+ V15（租约续约支付单表 lease_payment，R61）+ V16（多方会话三表与看房群聊回填，R63）+ V17（房号同单元唯一 uk_unit_house_number，R62 补）+ V18（社区自动审批两列 + 租约签约状态列 + 租约变更历史/协议模板/租约协议三表，R64/R62 补）+ V19（人员常驻社区/擅长类别/排班三表 + 存量派单回填，R65）+ V20（租住签约闭环 R66~R71，新表 lease_move_out_application——表数 51→52）+ V21（通知归属身份空间分离 DEF-067，表数不变）+ V22（押金状态列 deposit_status + 押金退还单表 lease_deposit_refund，R72——表数 52→53）+ V23（工单群聊 conversation 增 WORK_ORDER_GROUP 类型，R74）+ V24（会话参与者身份空间列 + 复合唯一键 + 存量回填，DEF-098）+ V25（押金状态存量回填）+ V26（入住申请-租约强关联 lease_id + 回填，DEF-080）+ V27（会话 (type, related_id) 唯一键 uk_conversation_type_related，OCR DEF-106，表数不变）+ V28（V21/V26 存量回填修正，仅改数据不改结构，OCR DEF-109/DEF-120）+ V29（公共资源图片）+ V30（独立支付渠道配置表，默认停用）+ V31（单栋楼层边界、删除房间数/旧联系人列、户型与责任人ADMIN账号引用）+ V32（租住申请来源价快照/正式关系租约关联）；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量，可由仓库根 `.env` 提供） |
+  | 支付渠道配置（支付宝程序内管理） | 超管进入「系统管理 → 全局配置」，完整填写支付宝 APPID / 应用公钥 / 应用私钥 / 支付宝公钥；私钥留空保留、明确操作更换/清除。服务器加密密钥独立文件默认 `${user.home}/.community-residence/payment/master.key`（可选 `PAYMENT_CONFIG_KEY_FILE` 仅指定路径）。微信仍使用 `PAYMENT_WECHAT_*` 凭据 | 2026-10-11 R61 v1.14：支付宝凭据由独立 `payment_channel_config` 表管理，旧 `PAYMENT_ALIPAY_*` 不再作为渠道来源；V30 默认沙箱、渠道停用，本批只做离线校验，不运行交易，不自动迁移 `.env`。私钥不可回读，备份加密密钥须与数据库分离。步骤见 README「支付渠道配置」 |
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |
   | 前端构建 | `cd frontend && npm run build` | `vue-tsc --noEmit` 类型检查 + 产物 `dist/`（生产由后端静态托管，架构设计 §7） |
@@ -320,7 +320,7 @@
 **六大状态机**（权威定义见 30_系统设计/架构设计.md §6，状态图见
 30_系统设计/assets/02_核心状态机/）：
 1. 工单状态（10状态）：待受理→待派单→已派单→已接单→处理中→待确认→已完成 + 已关闭/已驳回/已取消
-2. 租住状态（**6 状态**，2026-09-21 批次 f 依 R66 扩态）：待审核→**待签约**→已生效→已搬出→已归档 + 已驳回（**审核通过只到「待签约」且房屋不置已入住，承租确认 + 协议双方确认才置已生效**；「即将到期/已到期」为定时任务日期自动判定标注，非状态流转）
+2. 租住状态（**6 状态**，2026-09-21 批次 f 依 R66 扩态）：待审核→**待签约**→已生效→已搬出→已归档 + 已驳回（**审核通过只到「待签约」且房屋不置已入住，管理员发出即管理方同意 + 居民在具体协议正文确认同意后才置已生效（2026-10-11 修正，独立承租确认已删除）**；「即将到期/已到期」为定时任务日期自动判定标注，非状态流转）
 3. 入住申请（**4 状态**，2026-09-21 批次 f 依 R66 扩态）：待审核→已通过 / 已驳回 / **已撤回**（待审核阶段居民可主动撤回）
 4. 资源预约（6状态）：待审核→已预约→已完成 + 已拒绝/已取消/已违约
 5. 看房预约（5状态）：待确认→已预约→已完成 + 已取消/已违约
@@ -369,3 +369,43 @@
    （仓库尚未初始化，首次提交前先 `git init`。）
 4. **多会话并行时**：对 README.md / AGENTS.md 只做本模块相关的小块
    编辑，禁止整文件重写，避免并行会话互相覆盖。
+
+
+## 2026-10-11 社区结构与责任人增量交接
+
+- 当前仍为50步骤7/8；批准设计14已落实：building.floors为单栋边界、不设99/200固定业务上限；房屋单建/编辑/批量和楼栋降层共用父楼栋锁。删除roomCount，单建/结构生成使用layout，多选右键原子同步房屋及挂牌；创建挂牌锁定最新户型。
+- community存responsibleAdminId，服务端校验ADMIN；联系人姓名/电话由账号派生，可选跨社区ADMIN但不赋予管理范围，null真实解绑，引用中的账号不可改非ADMIN。新接口GET /api/v1/communities/responsible-admins及PATCH /api/v1/houses/layout。
+- V31已应用开发库与独立验证库，54张业务表；853/853后端、258/258前端、类型检查/构建/打包通过；真实隔离47项/开发只读9项，详见08§3.77。旧24套超层测试数据定向清理，正常599套及账号保留，本机恢复备份不入库；不是渠道交易。
+- 当前开发8084/5176保留，隔离8087/5181停止；交易暂缓，未提交推送。其余bg业务待办按中控，不扩本轮范围。
+
+## 居民录入增量（2026-10-11 bh-1）
+
+管理员代建/CSV共用resident模型（姓名/手机号/证件号/用户名/邮箱），可同时登记residence_relation，或明确仅账号；communityId为权限锚点，不是resident归属字段。十列CSV兼容旧四列仅账号，每行REQUIRES_NEW，账号/关系/房态/审计一起提交，失败整行回滚。目标房屋须空置且无待处理申请/有效租约，不自动创建或签署租约。设计15，验证08§3.78；未恢复交易或用户全站手测。
+
+## 公共资源上传增量（2026-10-11 bh-3）
+
+PublicResourceListView复用ImageUploader，6张/5MB；BaseUploader逐张回写、部分失败保留、busy事件/迟到响应防护，保存取消语义明确。ResourceImagePolicy验证平台文件/内容并保留原记录历史图片，images字段ALWAYS更新使空数组真实清空；不物理删文件，无新迁移。后端879项（878通过、既有条件跳过1）/前端273通过，独立21项与开发只读13项，08§3.79。开发8084/5176同步保留，隔离8087/5181停止，正常业务1/600/9/1/0/0未改变。
+
+用户批准16/17，定义v1.8与20 v1.17：首期成功后租约及正式租客关系生效，历史占用挂牌保护。bh-2已在2026-10-12按11的bh-6计划实现验证，详下方交接；后续不重新询问已批准规则，不运行交易、主动查单或退款，不提交推送、不动用户浏览器。
+
+## 挂牌与首期生效增量（2026-10-12 bh-2）
+
+- V32应用开发与隔离库，仍54业务表；申请housingId/提交时价快照，关系lease_id唯一且历史留空。审批租客只建待签约/会话；协议SIGNED仍TO_SIGN，FIRST成功显式事务激活/建正式关系/占房，首期不顺延租期、旧ACTIVE补缴不回退。
+- 公开出租可用性HousingOccupancyRules统一SQL先分页过滤，管理占用批量投影与真关联入口；取消/迁出精准本链，保留剩余住户、OFFLINE及挂牌历史，不按最新数据猜测。正常迁出/管理员关系迁出共用租约历史与群聊内核。
+- 后端895/895、前端40套274/274、类型/build/package通过；隔离61项/开发只读20项，08§3.80和evidence/rental-closure-20261012。成功内核mapper/mock事务测试不是渠道交易或真实DB支付结算通过；未写SUCCESS支付单。
+- 当前开发8084/5176同步，后端output/runtime/rental-closure-bh-release-20261012.jar；V32迁移前恢复备份output/db-backups仅本机。正常社区/房屋/居民/租约/支付/退款1/600/9/1/0/0保持；隔离8087/5181收尾停止。用户浏览器不动，未提交推送。
+- 已批准14~17相关工程收口；后续保留交易、最终全站用户复验/未列矩阵、DEF-142/145原现场资料、50步骤9~12及60/70，未经用户重新安排不启动延期任务。
+
+### 2026-10-12 bi当前工程交接
+
+- 公告阅读回执/阅读明细归属、评价父工单权限复用、资源预约选填联系信息回退已修，DEF-174/175/176；907/907后端、274/274前端、类型/build/Java17 package通过。
+- 独立API56/含浏览器124、开发只读18；10页30视口非全站，08§3.81。开发8084/5176使用nontransaction-bi-release-20261012.jar，隔离8087/5181已停止。
+- 正常业务1/600/9/1/0/0未变；不清库、不接管用户浏览器、不提交推送。交易/主动查单/退款和最终用户复验继续暂缓，未列组合/其余UI、DEF-142/145原现场、步骤9～12/60/70保留。旧覆盖率报告匹配/大chunk提示与评价列表错误/空态体验观察未据此结案。
+
+
+## 2026-10-12 bj当前工程交接
+
+- DEF-177工单改派后旧人员列表/管理筛选历史归属泄漏、DEF-178管理端768～1199px未默认收栏已修。910/910后端、41套278/278前端、类型/build/Java17 package通过；API81/综合818（含API，不相加）/开发只读18，08§3.82。
+- 四端53独立route/32别名，52非交易独立route+25Tab/分区=77组231视口、26旧链接、11侧栏交互与79最终截图；不是所有按钮/数据变体全部通过。新覆盖率行71.05%/分支62.37%，旧类不匹配警告消除；大chunk、体验观察及历史文档问题保留。
+- 当前开发8084/5176运行output/runtime/nontransaction-bj-release-20261012.jar，隔离8087/5181停止；正常1/600/9/1/0/0未变，合成账号/公开公告与社区关联回收。未清正常库、操作用户浏览器、交易/查单/退款或提交推送。
+- 金融依赖详情/非空租约卡片、DEF-142/145原现场、未列数据/操作组合与最终用户复验、步骤9～12/60/70继续保留。14～17工程已交付；不要再笼统列非交易剩余route未检查，也不因页面加载关闭完整业务验收。当前证据目录为docs/50_系统测试/evidence/nontransaction-remaining-20261012/。

@@ -51,6 +51,15 @@ public class HousingVO {
     @Schema(description = "状态：AVAILABLE-可租, RESERVED-已预订, RENTED-已出租, OFFLINE-已下线")
     private String status;
 
+    @Schema(description = "占用情况，与发布状态独立")
+    private String occupancy;
+
+    @Schema(description = "唯一当前申请ID，仅管理端回显")
+    private Long applicationId;
+
+    @Schema(description = "唯一当前租约ID，仅管理端回显")
+    private Long leaseId;
+
     @Schema(description = "浏览次数")
     private Integer viewCount;
 

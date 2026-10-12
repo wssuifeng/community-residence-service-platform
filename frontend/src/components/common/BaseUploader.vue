@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { uploadFile } from '@/api/upload'
 import type { UploadFileType } from '@/types/modules/upload'
@@ -22,22 +22,30 @@ const props = withDefaults(
     limit?: number
     /** 预览模式：image 缩略图 / file 文件行 / none 仅计数 */
     preview?: 'image' | 'file' | 'none'
+    disabled?: boolean
   }>(),
   {
     type: 'IMAGE',
     accept: 'image/*',
     maxSize: 5,
     limit: 6,
-    preview: 'image'
+    preview: 'image',
+    disabled: false
   }
 )
 
 const emit = defineEmits<{
   'update:modelValue': [urls: string[]]
+  'busy-change': [busy: boolean]
 }>()
 
 const uploading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
+const failures = ref<{ name: string; message: string }[]>([])
+const previewUrl = ref('')
+const previewVisible = ref(false)
+let mounted = true
+onBeforeUnmount(() => { mounted = false })
 
 /** 上传实现：multipart 表单提交到通用上传接口，返回可访问 fileUrl */
 async function doUpload(file: File): Promise<string> {
@@ -46,7 +54,7 @@ async function doUpload(file: File): Promise<string> {
 }
 
 function handleClick(): void {
-  fileInput.value?.click()
+  if (!uploading.value && !props.disabled) fileInput.value?.click()
 }
 
 async function handleChange(event: Event): Promise<void> {
@@ -54,33 +62,42 @@ async function handleChange(event: Event): Promise<void> {
   const files = Array.from(input.files ?? [])
   input.value = ''
 
-  if (files.length === 0) return
+  if (files.length === 0 || uploading.value || props.disabled) return
+  failures.value = []
   if (props.modelValue.length + files.length > props.limit) {
     ElMessage.warning(`最多上传 ${props.limit} 个文件`)
     return
   }
-
-  const oversized = files.find((file) => file.size > props.maxSize * 1024 * 1024)
-  if (oversized) {
-    ElMessage.warning(`单个文件不能超过 ${props.maxSize}MB`)
-    return
-  }
-
   uploading.value = true
+  emit('busy-change', true)
+  const urls = [...props.modelValue]
   try {
-    const urls: string[] = []
     for (const file of files) {
-      urls.push(await doUpload(file))
+      if (!mounted) break
+      try {
+        if (file.size > props.maxSize * 1024 * 1024) throw new Error(`单个文件不能超过 ${props.maxSize}MB`)
+        const url = await doUpload(file)
+        if (!mounted) break
+        urls.push(url)
+        /* 逐张回写：后一张失败不撤销前面已经成功的文件。 */
+        emit('update:modelValue', [...urls])
+      } catch (error) {
+        if (!mounted) break
+        const message = error instanceof Error ? error.message : '上传失败'
+        failures.value.push({ name: file.name, message })
+      }
     }
-    emit('update:modelValue', [...props.modelValue, ...urls])
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '上传失败')
+    if (mounted && failures.value.length) ElMessage.error('部分文件上传失败，已保留成功项；请重新选择失败文件重试')
   } finally {
-    uploading.value = false
+    if (mounted) {
+      uploading.value = false
+      emit('busy-change', false)
+    }
   }
 }
 
 function handleRemove(url: string): void {
+  if (uploading.value || props.disabled) return
   emit(
     'update:modelValue',
     props.modelValue.filter((item) => item !== url)
@@ -94,14 +111,14 @@ function fileName(url: string): string {
 
 <template>
   <div class="base-uploader">
-    <input ref="fileInput" type="file" hidden :accept="accept" multiple @change="handleChange" />
+    <input ref="fileInput" type="file" hidden :accept="accept" :disabled="disabled || uploading" multiple @change="handleChange" />
 
     <div v-if="preview === 'image'" class="base-uploader-list image-list">
       <div v-for="url in modelValue" :key="url" class="image-item">
-        <img :src="url" :alt="fileName(url)" />
-        <button type="button" class="image-remove" @click="handleRemove(url)">×</button>
+        <button type="button" class="image-preview" :aria-label="`预览图片 ${fileName(url)}`" @click="previewUrl = url; previewVisible = true"><img :src="url" :alt="fileName(url)" /></button>
+        <button type="button" class="image-remove" :aria-label="`移除图片 ${fileName(url)}`" :disabled="disabled || uploading" @click="handleRemove(url)">×</button>
       </div>
-      <el-button v-if="modelValue.length < limit" :loading="uploading" @click="handleClick">
+      <el-button v-if="modelValue.length < limit" :loading="uploading" :disabled="disabled || uploading" @click="handleClick">
         {{ uploading ? '上传中…' : '+ 上传' }}
       </el-button>
     </div>
@@ -110,21 +127,30 @@ function fileName(url: string): string {
       <ul class="base-uploader-list file-list">
         <li v-for="url in modelValue" :key="url">
           <a :href="url" target="_blank" rel="noopener">{{ fileName(url) }}</a>
-          <el-button link type="danger" size="small" @click="handleRemove(url)">删除</el-button>
+          <el-button link type="danger" size="small" :disabled="disabled || uploading" @click="handleRemove(url)">删除</el-button>
         </li>
       </ul>
-      <el-button v-if="modelValue.length < limit" :loading="uploading" @click="handleClick">
+      <el-button v-if="modelValue.length < limit" :loading="uploading" :disabled="disabled || uploading" @click="handleClick">
         {{ uploading ? '上传中…' : '+ 上传附件' }}
       </el-button>
     </template>
 
-    <el-button v-else :loading="uploading" @click="handleClick">
+    <el-button v-else :loading="uploading" :disabled="disabled || uploading" @click="handleClick">
       {{ uploading ? '上传中…' : `+ 上传（${modelValue.length}/${limit}）` }}
     </el-button>
+    <ul v-if="failures.length" class="upload-failures" role="status"><li v-for="(item, index) in failures" :key="index">{{ item.name }}：{{ item.message }}，请重新选择重试。</li></ul>
+    <el-dialog v-model="previewVisible" title="图片预览" width="min(800px, calc(100vw - 32px))" append-to-body>
+      <img v-if="previewVisible" :src="previewUrl" alt="图片大图预览" class="preview-image" />
+    </el-dialog>
   </div>
 </template>
 
 <style scoped>
+.base-uploader { min-width: 0; width: 100%; }
+.image-preview { border: 0; padding: 0; width: 100%; height: 100%; cursor: zoom-in; }
+.preview-image { display: block; max-width: 100%; max-height: 70vh; margin: 0 auto; object-fit: contain; }
+.upload-failures { margin: 8px 0 0; padding-left: 18px; color: var(--color-danger, #b91c1c); overflow-wrap: anywhere; }
+.image-remove:disabled { cursor: not-allowed; opacity: .5; }
 .base-uploader-list.image-list {
   display: flex;
   flex-wrap: wrap;

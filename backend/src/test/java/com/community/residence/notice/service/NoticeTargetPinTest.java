@@ -223,4 +223,6 @@ class NoticeTargetPinTest {
             assertThat(sql).contains("publish_time DESC");
         }
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-12",
+  "before": {
+    "count": 1663,
+    "byCode": {
+      "broken-link": 309,
+      "acceptance-missing": 3,
+      "status-symbol-out-of-scope": 1350,
+      "dependency-mismatch": 1
+    }
+  },
+  "after": {
+    "count": 1599,
+    "byCode": {
+      "acceptance-missing": 3,
+      "status-symbol-out-of-scope": 1350,
+      "broken-link": 245,
+      "dependency-mismatch": 1
+    }
+  },
+  "newIssues": [],
+  "scope": "定向当前总控/50引用修正，历史已完成包/归档及缺失Temp证据不重造",
+  "allDocumentsPassed": false
+}

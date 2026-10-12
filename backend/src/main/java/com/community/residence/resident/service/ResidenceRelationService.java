@@ -42,6 +42,8 @@ public class ResidenceRelationService {
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final LeaseRecordMapper leaseRecordMapper;
+    private final com.community.residence.lease.service.LeaseService leaseService;
+    private final com.community.residence.resident.mapper.ResidenceApplicationMapper applicationMapper;
 
     /** 居民居住关系列表：RESIDENT 限本人，ADMIN 限绑定社区（业务层过滤） */
     public PageVO<RelationVO> pageByResident(Long residentId, long page, long size, String status) {
@@ -57,16 +59,14 @@ public class ResidenceRelationService {
         } else if ("MOVED_OUT".equals(status)) {
             wrapper.isNotNull(ResidenceRelation::getMoveOutDate);
         }
-        Page<ResidenceRelation> result = relationMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
-        PageVO<RelationVO> vo = PageVO.of(result.convert(this::toVO));
-        /* ADMIN 数据级权限：过滤绑定社区（拦截器对 M:N 查询不注入） */
+        /* 授权范围必须先进入SQL再分页；页后过滤会把总数错误改成当前页条数。 */
         if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
             var bound = SecurityUtils.getCommunityIds();
-            List<RelationVO> filtered = vo.getRecords().stream()
-                    .filter(r -> bound.contains(r.getCommunityId())).toList();
-            return PageVO.of(filtered, filtered.size(), page, size);
+            if (bound.isEmpty()) return PageVO.of(List.of(), 0, page, Math.min(size, 100));
+            wrapper.in(ResidenceRelation::getCommunityId, bound);
         }
-        return vo;
+        Page<ResidenceRelation> result = relationMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
+        return PageVO.of(result.convert(this::toVO));
     }
 
     /** 房屋居民列表（ADMIN） */
@@ -88,26 +88,28 @@ public class ResidenceRelationService {
     }
 
     /* 办理迁出：仅在住关系可迁出；联动租约终止与房屋状态回翻 */
-    @Transactional(rollbackFor = Exception.class)
-    public void moveOut(Long id, MoveOutDTO dto) {
+    @Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
+    @com.community.residence.log.annotation.OperationLog(operationType = "STATUS", targetType = "RESIDENCE_RELATION", targetId = "#id", communityId = "#result.communityId", content = "'办理居民迁出'")
+    public ResidenceRelation moveOut(Long id, MoveOutDTO dto) {
         ResidenceRelation relation = requireRelation(id);
         SecurityUtils.checkCommunityAccess(relation.getCommunityId());
         if (relation.getMoveOutDate() != null) {
             throw new BusinessException(ErrorCode.RELATION_NOT_ACTIVE);
         }
-        relation.setMoveOutDate(dto.getMoveOutDate());
-        relationMapper.updateById(relation);
-
-        /* 关联在住租约置为已迁出 */
+        houseMapper.selectByIdForUpdate(relation.getHouseId());
+        /* 精确关联本租约；旧未关联关系只有唯一候选时兼容，不能批量终止多条租约。 */
         List<LeaseRecord> activeLeases = leaseRecordMapper.selectList(
                 new LambdaQueryWrapper<LeaseRecord>()
                         .eq(LeaseRecord::getHouseId, relation.getHouseId())
                         .eq(LeaseRecord::getTenantId, relation.getResidentId())
+                        .eq(relation.getLeaseId() != null, LeaseRecord::getId, relation.getLeaseId())
                         .eq(LeaseRecord::getStatus, "ACTIVE"));
-        activeLeases.forEach(lease -> {
-            lease.setStatus("MOVED_OUT");
-            leaseRecordMapper.updateById(lease);
-        });
+        if (relation.getLeaseId() == null && activeLeases.size() > 1) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "历史居住关系无法唯一关联租约，请核对具体关系");
+        }
+        relation.setMoveOutDate(dto.getMoveOutDate());
+        relationMapper.updateById(relation);
+        activeLeases.forEach(lease -> leaseService.applyTransition(lease, "MOVED_OUT", "居住关系迁出登记"));
 
         /* 房屋无其他在住居民时回翻为空置 */
         Long livingCount = relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
@@ -116,12 +118,14 @@ public class ResidenceRelationService {
         if (livingCount == 0) {
             House house = houseMapper.selectById(relation.getHouseId());
             if (house != null) {
-                house.setStatus(HouseStatusConstant.VACANT);
+                house.setStatus(leaseRecordMapper.selectBlockingIdsForUpdate(relation.getHouseId()).isEmpty()
+                        ? HouseStatusConstant.VACANT : HouseStatusConstant.RESERVED);
                 houseMapper.updateById(house);
             }
         }
         log.info("居民已迁出：relationId={}, residentId={}, houseId={}, operator={}",
                 id, relation.getResidentId(), relation.getHouseId(), SecurityUtils.getUserId());
+        return relation;
     }
 
     public ResidenceRelation requireRelation(Long id) {
@@ -145,13 +149,24 @@ public class ResidenceRelationService {
         if (resident == null) {
             throw new ResourceNotFoundException("居民不存在");
         }
-        House house = houseMapper.selectById(dto.getHouseId());
+        House house = houseMapper.selectByIdForUpdate(dto.getHouseId());
         if (house == null) {
             throw new ResourceNotFoundException("房屋不存在");
         }
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
-        if (HouseStatusConstant.OCCUPIED.equals(house.getStatus())) {
-            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已入住，不可建立居住关系");
+        if (!HouseStatusConstant.VACANT.equals(house.getStatus())) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋非空置，不可直接登记居住关系");
+        }
+        /* 补录不得抢占正在审核/签约或生效租约的房屋，所有竞争路径共享房屋锁。 */
+        if (applicationMapper.selectCount(new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceApplication>()
+                .eq(com.community.residence.resident.entity.ResidenceApplication::getHouseId, house.getId())
+                .eq(com.community.residence.resident.entity.ResidenceApplication::getStatus, "PENDING")) > 0
+                || leaseRecordMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
+                .eq(LeaseRecord::getHouseId, house.getId()).in(LeaseRecord::getStatus,
+                        com.community.residence.common.constant.LeaseStatus.PENDING,
+                        com.community.residence.common.constant.LeaseStatus.TO_SIGN,
+                        com.community.residence.common.constant.LeaseStatus.ACTIVE)) > 0) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "该房屋已有待处理申请或有效租约，请通过原业务链处理");
         }
         if (relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
                 .eq(ResidenceRelation::getHouseId, house.getId())

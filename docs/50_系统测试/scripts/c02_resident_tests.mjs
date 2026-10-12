@@ -165,7 +165,7 @@ async function main() {
       // 阳光花园建一间新房（确保空置）
       const b = await api('POST', '/api/v1/buildings', { token: admin1Tok, body: { communityId: 1, name: `C2楼${Date.now() % 10000}`, floors: 1 } });
       const u = await api('POST', '/api/v1/units', { token: admin1Tok, body: { buildingId: b.data.id, name: '1单元' } });
-      const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 60, roomCount: 1, status: 'VACANT' } });
+      const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 60, status: 'VACANT' } });
       const app = await api('POST', '/api/v1/residence-applications', { token: R.token, body: { houseId: h.data.id, relationType: 'TENANT' } });
       const noReason = await api('PATCH', `/api/v1/residence-applications/${app.data.id}/reject`, { token: admin1Tok, body: { reason: '' } });
       const withReason = await api('PATCH', `/api/v1/residence-applications/${app.data.id}/reject`, { token: admin1Tok, body: { reason: '房屋已被预定' } });
@@ -261,7 +261,7 @@ async function main() {
     else {
       const b = await api('POST', '/api/v1/buildings', { token: admin1Tok, body: { communityId: 1, name: `E2楼${Date.now() % 10000}`, floors: 1 } });
       const u = await api('POST', '/api/v1/units', { token: admin1Tok, body: { buildingId: b.data.id, name: '1单元' } });
-      const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 70, roomCount: 2, status: 'VACANT' } });
+      const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 70, status: 'VACANT' } });
       const app = await api('POST', '/api/v1/residence-applications', { token: R.token, body: { houseId: h.data.id, relationType: 'TENANT' } });
       await api('PATCH', `/api/v1/residence-applications/${app.data.id}/approve`, { token: admin1Tok, body: { leaseStartDate: future(1), leaseEndDate: future(365), monthlyRent: 2000, deposit: 4000 } });
       const relId = q(`SELECT id FROM residence_relation WHERE resident_id=(SELECT id FROM resident WHERE username='${R.username}')  AND move_out_date IS NULL LIMIT 1`);

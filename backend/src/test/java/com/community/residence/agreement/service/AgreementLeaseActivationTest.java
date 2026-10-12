@@ -60,7 +60,7 @@ import static org.mockito.Mockito.when;
  * ① 发起前置校验 tenant_confirm_at 非空（否则 5601）；
  * ② 双方确认达成 SIGNED 联动租约 TO_SIGN → ACTIVE + 房屋置已入住 +
  *    lease_change_log(STATUS) + 租约群聊系统消息；
- * ③ 租约已生效时重复联动幂等；④ 越界状态拒绝生效。
+ * ③ 首期费用支付成功后才生效时重复联动幂等；④ 越界状态拒绝生效。
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -136,7 +136,7 @@ class AgreementLeaseActivationTest {
         pendingAgreement.setCommunityId(3L);
         pendingAgreement.setTenantId(RESIDENT_ID);
         pendingAgreement.setTitle("演示社区1栋101 租赁协议");
-        pendingAgreement.setStatus("PENDING");
+        pendingAgreement.setStatus("PARTIAL");
         /* 管理方已确认，待居民确认即达成 SIGNED */
         pendingAgreement.setAdminConfirmTime(LocalDateTime.now().minusMinutes(5));
         pendingAgreement.setAdminConfirmName("王管理");
@@ -147,55 +147,15 @@ class AgreementLeaseActivationTest {
         house.setStatus("VACANT");
 
         when(leaseMapper.selectById(LEASE_ID)).thenReturn(toSignLease);
+        when(leaseMapper.selectByIdForUpdate(LEASE_ID)).thenReturn(toSignLease);
         when(agreementMapper.selectById(AGREEMENT_ID)).thenReturn(pendingAgreement);
+        when(agreementMapper.selectByIdForUpdate(AGREEMENT_ID)).thenReturn(pendingAgreement);
         when(houseMapper.selectById(5L)).thenReturn(house);
         /* 统一内核条件更新（DEF-115）：正常流转返回 1 行 */
         when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
         Resident resident = new Resident();
         resident.setRealName("张居民");
         when(residentMapper.selectById(RESIDENT_ID)).thenReturn(resident);
-    }
-
-    @Test
-    @DisplayName("发起协议前置校验：未确认承租拒绝 LEASE_TENANCY_NOT_CONFIRMED(5601)")
-    void createAgreement_withoutTenancyConfirm_rejected() {
-        assertThat(toSignLease.getTenantConfirmAt()).isNull();
-        CreateAgreementDTO dto = new CreateAgreementDTO();
-        dto.setLeaseId(LEASE_ID);
-
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            assertThatThrownBy(() -> agreementService.createAgreement(dto))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
-                            .isEqualTo(ErrorCode.LEASE_TENANCY_NOT_CONFIRMED));
-            verify(agreementMapper, never()).insert(any(LeaseAgreement.class));
-        }
-    }
-
-    @Test
-    @DisplayName("发起协议：已确认承租则正常生成协议（前置校验放行）")
-    void createAgreement_withTenancyConfirm_ok() {
-        toSignLease.setTenantConfirmAt(LocalDateTime.now().minusHours(1));
-        toSignLease.setTenantConfirmBy(RESIDENT_ID);
-        when(agreementMapper.selectCount(any())).thenReturn(0L);
-        when(templateMapper.selectOne(any())).thenReturn(defaultTemplate());
-
-        CreateAgreementDTO dto = new CreateAgreementDTO();
-        dto.setLeaseId(LEASE_ID);
-
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(ADMIN_ID);
-
-            var vo = agreementService.createAgreement(dto);
-
-            assertThat(vo.getStatus()).isEqualTo("PENDING");
-            verify(agreementMapper).insert(any(LeaseAgreement.class));
-            verify(leaseMapper).updateById(toSignLease);
-            assertThat(toSignLease.getAgreementStatus()).isEqualTo("PENDING");
-            /* 身份空间断言（DEF-067）：协议发起触达居民，标注 createForResident */
-            verify(notificationService).createForResident(eq(RESIDENT_ID), eq(3L),
-                    eq("待确认租赁协议"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"), any());
-        }
     }
 
     @Test
@@ -228,10 +188,10 @@ class AgreementLeaseActivationTest {
             var vo = agreementService.confirm(AGREEMENT_ID, dto);
 
             assertThat(vo.getStatus()).isEqualTo("SIGNED");
-            assertThat(toSignLease.getStatus()).isEqualTo("ACTIVE");
+            assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
             assertThat(toSignLease.getAgreementStatus()).isEqualTo("SIGNED");
-            assertThat(house.getStatus()).isEqualTo("OCCUPIED");
-            verify(changeLogService).logStatus(eq(LEASE_ID), eq("TO_SIGN"), eq("ACTIVE"), anyString());
+            assertThat(house.getStatus()).isEqualTo("VACANT");
+            verify(changeLogService, never()).logStatus(eq(LEASE_ID), eq("TO_SIGN"), eq("ACTIVE"), anyString());
             verify(conversationService).sendSystemMessage(eq(CONVERSATION_ID), anyString());
             /* 身份空间断言（DEF-067）：双方确认达成触达居民，标注 createForResident */
             verify(notificationService).createForResident(eq(RESIDENT_ID), eq(3L),
@@ -244,58 +204,10 @@ class AgreementLeaseActivationTest {
     }
 
     @Test
-    @DisplayName("居民先确认协议：通知社区绑定管理员")
-    void residentConfirm_notifiesBoundAdmins() {
-        pendingAgreement.setAdminConfirmTime(null);
-        pendingAgreement.setAdminConfirmName(null);
-        SysAdminCommunity binding = new SysAdminCommunity();
-        binding.setAdminId(ADMIN_ID);
-        binding.setCommunityId(3L);
-        SysUser admin = new SysUser();
-        admin.setId(ADMIN_ID);
-        admin.setRole(RoleConstants.ADMIN);
-        admin.setStatus("ACTIVE");
-        when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of(binding));
-        when(sysUserMapper.selectList(any())).thenReturn(List.of(admin));
-
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
-            mocked.when(() -> SecurityUtils.hasRole(RoleConstants.RESIDENT)).thenReturn(true);
-
-            var vo = agreementService.confirm(AGREEMENT_ID, new AgreementConfirmDTO());
-
-            assertThat(vo.getStatus()).isEqualTo("PARTIAL");
-            verify(notificationService).createForUser(eq(ADMIN_ID), eq(3L),
-                    eq("居民已确认租赁协议"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"),
-                    eq(AGREEMENT_ID));
-        }
-    }
-
-    @Test
-    @DisplayName("单方确认：仅落 PARTIAL，不触发生效联动")
-    void confirm_singleSide_partialOnly() {
-        pendingAgreement.setAdminConfirmTime(null);
-        pendingAgreement.setAdminConfirmName(null);
-
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(ADMIN_ID);
-            mocked.when(() -> SecurityUtils.hasRole(com.community.residence.common.constant.RoleConstants.RESIDENT))
-                    .thenReturn(false);
-
-            AgreementConfirmDTO dto = new AgreementConfirmDTO();
-            var vo = agreementService.confirm(AGREEMENT_ID, dto);
-
-            assertThat(vo.getStatus()).isEqualTo("PARTIAL");
-            assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
-            assertThat(house.getStatus()).isEqualTo("VACANT");
-            verify(conversationService, never()).sendSystemMessage(anyLong(), anyString());
-        }
-    }
-
-    @Test
     @DisplayName("生效联动幂等：租约已 ACTIVE 时不再流转、不重复写房态")
     void confirm_bothSidesAlreadyActive_noRepeatActivation() {
         toSignLease.setStatus("ACTIVE");
+        pendingAgreement.setStatus("SIGNED");
 
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);

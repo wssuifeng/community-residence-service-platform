@@ -60,7 +60,7 @@ const form = reactive({
   houseNumberWidth: 2,
   skipItems: '',
   area: undefined as number | undefined,
-  roomCount: undefined as number | undefined,
+  layout: '',
   description: '',
   houseStatus: 'VACANT' as HouseStatus
 })
@@ -167,7 +167,7 @@ function buildPayload(dryRun: boolean) {
     skipItems: trimmed(form.skipItems),
     houseStatus: buildsHouses.value ? form.houseStatus : undefined,
     area: buildsHouses.value ? form.area : undefined,
-    roomCount: buildsHouses.value ? form.roomCount : undefined,
+    layout: buildsHouses.value ? form.layout : undefined,
     description: trimmed(form.description),
     dryRun
   }
@@ -274,7 +274,7 @@ watch(visible, (value) => {
   form.houseNumberWidth = 2
   form.skipItems = ''
   form.area = undefined
-  form.roomCount = undefined
+  form.layout = ''
   form.description = ''
   form.houseStatus = 'VACANT'
   formRef.value?.clearValidate()
@@ -425,7 +425,7 @@ watch(
           </header>
           <div class="field-grid">
             <el-form-item label="每单元楼层数">
-              <el-input-number v-model="form.floorsPerUnit" :min="0" :max="99" style="width: 100%" />
+              <el-input-number v-model="form.floorsPerUnit" :min="0" style="width: 100%" />
             </el-form-item>
             <el-form-item label="每层户数">
               <el-input-number v-model="form.housesPerFloor" :min="0" :max="99" style="width: 100%" />
@@ -499,15 +499,7 @@ watch(
                 style="width: 100%"
               />
             </el-form-item>
-            <el-form-item label="房间数">
-              <el-input-number
-                v-model="form.roomCount"
-                :min="1"
-                :max="20"
-                :disabled="!buildsHouses"
-                style="width: 100%"
-              />
-            </el-form-item>
+            <el-form-item label="户型"><el-input v-model="form.layout" placeholder="如：三室一厅一卫" maxlength="50" /></el-form-item>
             <el-form-item label="初始状态">
               <el-select v-model="form.houseStatus" :disabled="!buildsHouses" style="width: 100%">
                 <el-option

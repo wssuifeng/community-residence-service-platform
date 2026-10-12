@@ -312,7 +312,7 @@ public class StructureGenerateService {
         item.setHouseNumber(row.houseNumber());
         item.setFloor(row.floor());
         item.setArea(dto.getArea());
-        item.setRoomCount(dto.getRoomCount());
+        item.setLayout(dto.getLayout());
         item.setDescription(dto.getDescription());
         item.setStatus(status);
         return item;

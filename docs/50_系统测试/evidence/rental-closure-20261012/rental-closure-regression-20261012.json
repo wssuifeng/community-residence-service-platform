@@ -1,0 +1,263 @@
+{
+  "date": "2026-10-12",
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "successKernel": "内存单元测试另附，不代表真实渠道通过",
+  "checks": [
+    {
+      "name": "隔离数据库身份",
+      "passed": true
+    },
+    {
+      "name": "隔离支付/退款记录为零",
+      "passed": true
+    },
+    {
+      "name": "游客不能提交入住申请",
+      "passed": true
+    },
+    {
+      "name": "租客必须明确来源挂牌",
+      "passed": true
+    },
+    {
+      "name": "来源必须属于同一房屋",
+      "passed": true
+    },
+    {
+      "name": "出售挂牌不能提交出租入住",
+      "passed": true
+    },
+    {
+      "name": "来源价快照来自指定挂牌而非最新",
+      "passed": true
+    },
+    {
+      "name": "占用过滤在分页前且total一致",
+      "passed": true
+    },
+    {
+      "name": "显式状态不绕过隐藏",
+      "passed": true
+    },
+    {
+      "name": "显式下线状态不暴露历史挂牌",
+      "passed": true
+    },
+    {
+      "name": "占用旧详情链接拒绝",
+      "passed": true
+    },
+    {
+      "name": "占用可约时段拒绝",
+      "passed": true
+    },
+    {
+      "name": "占用原始时段模板拒绝",
+      "passed": true
+    },
+    {
+      "name": "占用浏览计数入口拒绝",
+      "passed": true
+    },
+    {
+      "name": "其他居民同房申请拒绝",
+      "passed": true
+    },
+    {
+      "name": "占用房屋新看房拒绝",
+      "passed": true
+    },
+    {
+      "name": "既有看房预约不自动取消",
+      "passed": true
+    },
+    {
+      "name": "无关系租客没有提前入住",
+      "passed": true
+    },
+    {
+      "name": "管理详情回显精确申请",
+      "passed": true
+    },
+    {
+      "name": "范围外管理详情拒绝",
+      "passed": true
+    },
+    {
+      "name": "挂牌改价不改申请快照",
+      "passed": true
+    },
+    {
+      "name": "其他居民不能读取申请",
+      "passed": true
+    },
+    {
+      "name": "范围外管理员不能审核",
+      "passed": true
+    },
+    {
+      "name": "房屋卡片保留发布与占用双维度",
+      "passed": true
+    },
+    {
+      "name": "浏览器申请入口精确打开审核",
+      "passed": true
+    },
+    {
+      "name": "浏览器金额预填申请快照",
+      "passed": true
+    },
+    {
+      "name": "1024审核无页面横向溢出",
+      "passed": true
+    },
+    {
+      "name": "768审核无页面横向溢出",
+      "passed": true
+    },
+    {
+      "name": "浏览器审核真实保存待签约",
+      "passed": true
+    },
+    {
+      "name": "审核后只建待签约及会话",
+      "passed": true
+    },
+    {
+      "name": "审核改价留原价采用价及备注",
+      "passed": true
+    },
+    {
+      "name": "发出即管理方同意且正文为审核价",
+      "passed": true
+    },
+    {
+      "name": "仅撤回协议不释放租约",
+      "passed": true
+    },
+    {
+      "name": "居民看具体正文再确认",
+      "passed": true
+    },
+    {
+      "name": "真实居民动作记录SIGNED",
+      "passed": true
+    },
+    {
+      "name": "协议完成未付仍无正式关系",
+      "passed": true
+    },
+    {
+      "name": "管理端待首期占用正确",
+      "passed": true
+    },
+    {
+      "name": "TO_SIGN+SIGNED首期入口可达",
+      "passed": true
+    },
+    {
+      "name": "1024待首期页面无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "768待首期页面无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "通知不谎报提前生效",
+      "passed": true
+    },
+    {
+      "name": "管理员不能绕过首期激活",
+      "passed": true
+    },
+    {
+      "name": "取消待首期结束本链协议/会话",
+      "passed": true
+    },
+    {
+      "name": "取消不自动发布人工下线",
+      "passed": true
+    },
+    {
+      "name": "曾被占用挂牌不物理删除",
+      "passed": true
+    },
+    {
+      "name": "手动重新发布后解除业务占用",
+      "passed": true
+    },
+    {
+      "name": "撤回申请恢复可见并保留历史",
+      "passed": true
+    },
+    {
+      "name": "驳回申请恢复可见",
+      "passed": true
+    },
+    {
+      "name": "真实双账号并发只能一条成功",
+      "passed": true
+    },
+    {
+      "name": "自动审批同样不提前生效",
+      "passed": true
+    },
+    {
+      "name": "出售展示边界保持",
+      "passed": true
+    },
+    {
+      "name": "真实迁出兼容唯一历史未关联关系",
+      "passed": true
+    },
+    {
+      "name": "正常迁出不自动发布人工下线",
+      "passed": true
+    },
+    {
+      "name": "无剩余占用时恢复公开",
+      "passed": true
+    },
+    {
+      "name": "迁出历史挂牌仍不可物理删除",
+      "passed": true
+    },
+    {
+      "name": "精确租约关系迁出不伤剩余住户",
+      "passed": true
+    },
+    {
+      "name": "有剩余住户不释放公开",
+      "passed": true
+    },
+    {
+      "name": "管理员迁出也释放本租约及挂牌",
+      "passed": true
+    },
+    {
+      "name": "管理员迁出复用租约历史内核",
+      "passed": true
+    },
+    {
+      "name": "全流程支付退款记录仍为零",
+      "passed": true
+    },
+    {
+      "name": "浏览器无未捕获JS错误",
+      "passed": true
+    }
+  ],
+  "browserErrors": [],
+  "cleanup": true,
+  "before": [
+    "0",
+    "0"
+  ],
+  "legacyFixtures": "管理员登记关系/租约后定向设旧ACTIVE，验证迁出，支付与退款仍0",
+  "after": [
+    "0",
+    "0"
+  ]
+}

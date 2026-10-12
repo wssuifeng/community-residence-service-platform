@@ -29,7 +29,7 @@ public class LeaseAgreementController {
 
     private final AgreementService agreementService;
 
-    @Operation(summary = "发起租约协议", description = "管理方按模板生成协议正文快照并送居民确认；同租约存在未完成协议时拒绝")
+    @Operation(summary = "发起租约协议", description = "管理方同意并发出协议正文快照，记录管理方同意并待居民确认；同租约存在未完成协议时拒绝")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping
     public ApiResponse<LeaseAgreementVO> create(@RequestBody @Valid CreateAgreementDTO dto) {
@@ -50,8 +50,8 @@ public class LeaseAgreementController {
         return ApiResponse.success(agreementService.getById(id));
     }
 
-    @Operation(summary = "确认协议", description = "按当前身份落居民方或管理方，双方均确认后协议生效并同步租约签约状态")
-    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
+    @Operation(summary = "确认协议", description = "仅居民本人同意当前正文快照；管理员发出时已同意，协议完成且首期成功后租约生效")
+    @PreAuthorize("hasRole('RESIDENT')")
     @PostMapping("/{id}/confirm")
     public ApiResponse<LeaseAgreementVO> confirm(@PathVariable Long id,
                                                  @RequestBody @Valid AgreementConfirmDTO dto) {

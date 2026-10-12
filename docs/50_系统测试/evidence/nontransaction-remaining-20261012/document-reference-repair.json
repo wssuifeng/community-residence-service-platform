@@ -1,0 +1,587 @@
+{
+  "date": "2026-10-12",
+  "repairs": [
+    {
+      "document": "docs/00_总控.md",
+      "line": 33,
+      "before": "frontend/public/images/handtest/",
+      "after": "../frontend/public/images/handtest/"
+    },
+    {
+      "document": "docs/50_系统测试/05_测试环境与数据.md",
+      "line": 31,
+      "before": "dist/",
+      "after": "../../frontend/dist/"
+    },
+    {
+      "document": "docs/50_系统测试/05_测试环境与数据.md",
+      "line": 60,
+      "before": "backend/",
+      "after": "../../backend/"
+    },
+    {
+      "document": "docs/50_系统测试/05_测试环境与数据.md",
+      "line": 62,
+      "before": "frontend/",
+      "after": "../../frontend/"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 42,
+      "before": "log/aspect/",
+      "after": "../../backend/src/main/java/com/community/residence/log/aspect/"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 101,
+      "before": "schedule/",
+      "after": "../../backend/src/main/java/com/community/residence/schedule/"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 107,
+      "before": "接口设计.md",
+      "after": "../30_系统设计/接口设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 133,
+      "before": "接口设计.md",
+      "after": "../30_系统设计/接口设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 189,
+      "before": "output/playwright/24-staff-viewing-group-fixed.png",
+      "after": "evidence/historical-reference-restored-20261012/24-staff-viewing-group-fixed.png"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 189,
+      "before": "25-resident-viewing-group-fixed.png",
+      "after": "evidence/historical-reference-restored-20261012/25-resident-viewing-group-fixed.png"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 1535,
+      "before": "output/playwright/20-admin-confirm-assign.png",
+      "after": "evidence/historical-reference-restored-20261012/20-admin-confirm-assign.png"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 354,
+      "before": "接口设计.md",
+      "after": "../30_系统设计/接口设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 481,
+      "before": "AGENTS.md",
+      "after": "../../AGENTS.md"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 481,
+      "before": "UI设计.md",
+      "after": "../30_系统设计/UI设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 615,
+      "before": "数据库设计.md",
+      "after": "../30_系统设计/数据库设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 640,
+      "before": "接口设计.md",
+      "after": "../30_系统设计/接口设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 705,
+      "before": "数据库设计.md",
+      "after": "../30_系统设计/数据库设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 705,
+      "before": "接口设计.md",
+      "after": "../30_系统设计/接口设计.md"
+    },
+    {
+      "document": "docs/50_系统测试/_中控.md",
+      "line": 705,
+      "before": "决策日志.md",
+      "after": "../90_全局/决策日志.md"
+    },
+    {
+      "document": "docs/50_系统测试/evidence/浏览器级E2E验证报告.md",
+      "line": 168,
+      "before": "13_核心业务流程三端联动手测用例.md",
+      "after": "../13_核心业务流程三端联动手测用例.md"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/24-staff-viewing-group-fixed.png",
+      "after": "evidence/historical-reference-restored-20261012/24-staff-viewing-group-fixed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "25-resident-viewing-group-fixed.png",
+      "after": "evidence/historical-reference-restored-20261012/25-resident-viewing-group-fixed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/12-core-duplicate-application.png",
+      "after": "evidence/historical-reference-restored-20261012/12-core-duplicate-application.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/09-core-admin-housing-list.png",
+      "after": "evidence/historical-reference-restored-20261012/09-core-admin-housing-list.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "09-core-admin-timeslot-detail.png",
+      "after": "evidence/historical-reference-restored-20261012/09-core-admin-timeslot-detail.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "14-timeslot-sunday-created.png",
+      "after": "evidence/historical-reference-restored-20261012/14-timeslot-sunday-created.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/18-cancelled-viewing-readonly.png",
+      "after": "evidence/historical-reference-restored-20261012/18-cancelled-viewing-readonly.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/20-admin-confirm-assign.png",
+      "after": "evidence/historical-reference-restored-20261012/20-admin-confirm-assign.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "24-staff-viewing-group-fixed.png",
+      "after": "evidence/historical-reference-restored-20261012/24-staff-viewing-group-fixed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/23-admin-viewing-completed.png",
+      "after": "evidence/historical-reference-restored-20261012/23-admin-viewing-completed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/registered-viewing-flow-guest-detail.png",
+      "after": "evidence/historical-reference-restored-20261012/registered-viewing-flow-guest-detail.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "registered-viewing-login.png",
+      "after": "evidence/historical-reference-restored-20261012/registered-viewing-login.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-apply-before.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-apply-before.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "lease-chain-application-submitted.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-application-submitted.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-approve-form-filled.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-approve-form-filled.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-admin-group-created.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-admin-group-created.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-resident-new-lease.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-resident-new-lease.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-resident-tenancy-confirmed.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-resident-tenancy-confirmed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "lease-chain-admin-detail-after-tenancy-confirm.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-admin-detail-after-tenancy-confirm.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-admin-agreement-pending.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-admin-agreement-pending.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-admin-agreement-signed.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-admin-agreement-signed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-resident-agreement-signed.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-resident-agreement-signed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-resident-moveout-dialog.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-resident-moveout-dialog.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "lease-chain-resident-moveout-submitted.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-resident-moveout-submitted.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-admin-moveout-approve-dialog.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-admin-moveout-approve-dialog.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "lease-chain-admin-moveout-approved.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-admin-moveout-approved.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-admin-moveout-approved.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-admin-moveout-approved.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "output/playwright/lease-chain-resident-after-moveout.png",
+      "after": "evidence/historical-reference-restored-20261012/lease-chain-resident-after-moveout.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-resident-submitted.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-resident-submitted.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-admin-after-intake.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-admin-after-intake.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-admin-after-assign.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-admin-after-assign.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-staff-after-accept.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-staff-after-accept.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-staff-to-confirm.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-staff-to-confirm.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-resident-confirmed.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-resident-confirmed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-admin-closed.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-admin-closed.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-resident-after-admin-close.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-resident-after-admin-close.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-resident-rating-form.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-resident-rating-form.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "workorder-chain-resident-rated.png",
+      "after": "evidence/historical-reference-restored-20261012/workorder-chain-resident-rated.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "09-core-admin-housing-list.png",
+      "after": "evidence/historical-reference-restored-20261012/09-core-admin-housing-list.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "10-core-resident-housing-detail.png",
+      "after": "evidence/historical-reference-restored-20261012/10-core-resident-housing-detail.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "11-core-resident-reservation.png",
+      "after": "evidence/historical-reference-restored-20261012/11-core-resident-reservation.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "cf-e1-community-audit.png",
+      "after": "evidence/historical-reference-restored-20261012/cf-e1-community-audit.png",
+      "matchedBy": "exact-token-not-stale-line"
+    },
+    {
+      "document": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "before": "cf-e2-residents-audit.png",
+      "after": "evidence/historical-reference-restored-20261012/cf-e2-residents-audit.png",
+      "matchedBy": "exact-token-not-stale-line"
+    }
+  ],
+  "historicalEvidenceCopies": {
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/24-staff-viewing-group-fixed.png": {
+      "source": "output/playwright/24-staff-viewing-group-fixed.png",
+      "sha256": "85efb39bf2747103ace43ad74b5e0783db8e3f15295f4b85a7367d5663b975ca",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/25-resident-viewing-group-fixed.png": {
+      "source": "output/playwright/25-resident-viewing-group-fixed.png",
+      "sha256": "6e494a8cbc45beb613d5066067be72b9dd757c4d5cfa9a0e85a9306a69478948",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/12-core-duplicate-application.png": {
+      "source": "output/playwright/12-core-duplicate-application.png",
+      "sha256": "ef97b56d535e49a1fbfc1eca8c44a554a0b5a46cbf6b1729a91df490d14619da",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/09-core-admin-housing-list.png": {
+      "source": "output/playwright/09-core-admin-housing-list.png",
+      "sha256": "85bf8e662ab197f6b493159d115b4682b5430a06f78079d179b0a2c67f787c1c",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/09-core-admin-timeslot-detail.png": {
+      "source": "output/playwright/09-core-admin-timeslot-detail.png",
+      "sha256": "85bf8e662ab197f6b493159d115b4682b5430a06f78079d179b0a2c67f787c1c",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/14-timeslot-sunday-created.png": {
+      "source": "output/playwright/14-timeslot-sunday-created.png",
+      "sha256": "641351960b39c347082804e49a24e811c5534221900b621522d4277cf8594dd9",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/18-cancelled-viewing-readonly.png": {
+      "source": "output/playwright/18-cancelled-viewing-readonly.png",
+      "sha256": "2438945121a73476e3657d8c4ea3f3e78ff65657ffb3ca9ba4dd143c9e84142e",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/20-admin-confirm-assign.png": {
+      "source": "output/playwright/20-admin-confirm-assign.png",
+      "sha256": "e90ae82fb76565a05c123ad31bffdb38c98c8e318671910e0d47fe929674868a",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/23-admin-viewing-completed.png": {
+      "source": "output/playwright/23-admin-viewing-completed.png",
+      "sha256": "acbfb1fde61498910b79a5b5dbd6e5f80fa3acc8c96c4918ff28bbdc3efdbad8",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/registered-viewing-flow-guest-detail.png": {
+      "source": "output/playwright/registered-viewing-flow-guest-detail.png",
+      "sha256": "9d83132444eec92ade445abb844b8964eee764ab3cd892a2ee3d03be3c840793",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/registered-viewing-login.png": {
+      "source": "output/playwright/registered-viewing-login.png",
+      "sha256": "05a7de2705af1f387c94a44d898afb8966d98101a1a2a8c3a5d9cdca3e3ed929",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-apply-before.png": {
+      "source": "output/playwright/lease-chain-apply-before.png",
+      "sha256": "97e3761f124e43853e2c63f91d017c9ef905a132348a5d5db411aa164f056405",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-application-submitted.png": {
+      "source": "output/playwright/lease-chain-application-submitted.png",
+      "sha256": "b1d2b92195a3c19d41a26df6ca2359f41c9d2af25c17c96252c9737c7fbc5c99",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-approve-form-filled.png": {
+      "source": "output/playwright/lease-chain-approve-form-filled.png",
+      "sha256": "402cad946614927d36ad2784d40a706ae727c803ded28e55a769419d62170466",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-admin-group-created.png": {
+      "source": "output/playwright/lease-chain-admin-group-created.png",
+      "sha256": "988d3d433515d6698e9aa9bc72fd699c71a8066b7a4a8f0630d064ed2f5dcd58",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-resident-new-lease.png": {
+      "source": "output/playwright/lease-chain-resident-new-lease.png",
+      "sha256": "4bcbb594c59c4122c2737f15f0c1f9eb4ef048c90750b1fdfefc9ee029e82d57",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-resident-tenancy-confirmed.png": {
+      "source": "output/playwright/lease-chain-resident-tenancy-confirmed.png",
+      "sha256": "ad65b14242e6480509e07c297cc2a806036e58e6dfc2b50436ea4c48163d2945",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-admin-detail-after-tenancy-confirm.png": {
+      "source": "output/playwright/lease-chain-admin-detail-after-tenancy-confirm.png",
+      "sha256": "35b53af067ec1f9e696450453dbf705975db2bd342755714c22afb3b9ae467a6",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-admin-agreement-pending.png": {
+      "source": "output/playwright/lease-chain-admin-agreement-pending.png",
+      "sha256": "3a932835956f9c104cdaf2799e7e3c09e27d6c15d5ba793f11b4cb1501f1e096",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-admin-agreement-signed.png": {
+      "source": "output/playwright/lease-chain-admin-agreement-signed.png",
+      "sha256": "5251b99fa8c74aef8b5a5e0aeab4b9b7757dd92818749468cce1a365e1da0a64",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-resident-agreement-signed.png": {
+      "source": "output/playwright/lease-chain-resident-agreement-signed.png",
+      "sha256": "cdcf5727d8fb677367d07c31042422562323bc7689eccbfdfdc2e1590b4cb9a0",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-resident-moveout-dialog.png": {
+      "source": "output/playwright/lease-chain-resident-moveout-dialog.png",
+      "sha256": "9c67c2ee4b2ea324c238d87e5f2bbf608c7fb283146d225d723fec60618b55d4",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-resident-moveout-submitted.png": {
+      "source": "output/playwright/lease-chain-resident-moveout-submitted.png",
+      "sha256": "5ea3625c8b6d1f302d5fca612e3614b843085fe4565cddfd462fc18121a686d2",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-admin-moveout-approve-dialog.png": {
+      "source": "output/playwright/lease-chain-admin-moveout-approve-dialog.png",
+      "sha256": "7568fe002228ed92c46dfe62b4b4d59fe4a62b226c14b034205d36171910d588",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-admin-moveout-approved.png": {
+      "source": "output/playwright/lease-chain-admin-moveout-approved.png",
+      "sha256": "a4a886eb8380454af4223552a763d10dc965c12c49a7b6efa1fe27c527ace73d",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/lease-chain-resident-after-moveout.png": {
+      "source": "output/playwright/lease-chain-resident-after-moveout.png",
+      "sha256": "b881dbf84ad99b997c41cd00ecfa34ad5041f7aed62f55d8803452dc6a5a746b",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-resident-submitted.png": {
+      "source": "output/playwright/workorder-chain-resident-submitted.png",
+      "sha256": "c073b0bd8a5b5a34a9db167fff96b55dc46f978004d0b5e978ba1ed70ba79a27",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-admin-after-intake.png": {
+      "source": "output/playwright/workorder-chain-admin-after-intake.png",
+      "sha256": "e91952c739a67d9ae35e9d85b0f66d59afaea701c387a264a0a51fbe44de9b54",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-admin-after-assign.png": {
+      "source": "output/playwright/workorder-chain-admin-after-assign.png",
+      "sha256": "d95317c9702ab63e696eb85cccb5d4b2464ae1e36481572e489bc9b35a594e1b",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-staff-after-accept.png": {
+      "source": "output/playwright/workorder-chain-staff-after-accept.png",
+      "sha256": "3acbb299df0d172507166aa5669da30dc890f0837316f80838f5a9ab46fcc4ab",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-staff-to-confirm.png": {
+      "source": "output/playwright/workorder-chain-staff-to-confirm.png",
+      "sha256": "3a8d34f8b865e543d053831f229b95696598d48e9438959afe9094b2cc46d36b",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-resident-confirmed.png": {
+      "source": "output/playwright/workorder-chain-resident-confirmed.png",
+      "sha256": "9260111f44cd0d67aefa434084c43931914ce56293077bf233d109c016158ced",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-admin-closed.png": {
+      "source": "output/playwright/workorder-chain-admin-closed.png",
+      "sha256": "05557ae7f2f07aab391360708280eec5407984f70a592fd0cee9eb3e7300afed",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-resident-after-admin-close.png": {
+      "source": "output/playwright/workorder-chain-resident-after-admin-close.png",
+      "sha256": "d633cb387afba691bc65d0ea180cb768bd913ec6b7c0bc202dfb8a9554397480",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-resident-rating-form.png": {
+      "source": "output/playwright/workorder-chain-resident-rating-form.png",
+      "sha256": "ede334d698c0eb5083d3f3e95c09b4676cd73d00e0fac8d0055cf78e45fbda1b",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/workorder-chain-resident-rated.png": {
+      "source": "output/playwright/workorder-chain-resident-rated.png",
+      "sha256": "0b994d87fd680c714e7c85b571330c9e575eeef37ebbc63d12567acea6fb1920",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/10-core-resident-housing-detail.png": {
+      "source": "output/playwright/10-core-resident-housing-detail.png",
+      "sha256": "cd21e93a152e07dd4422ddc0c2f61804f9cc94cd714b93a7b0c58aeb0e10a813",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/11-core-resident-reservation.png": {
+      "source": "output/playwright/11-core-resident-reservation.png",
+      "sha256": "dd00afed0d3a2a12d5837665051711230af34977a021f07cd2e62a676dfc158b",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/cf-e1-community-audit.png": {
+      "source": "output/playwright/cf-e1-community-audit.png",
+      "sha256": "bd36cf5e8a807dab9e8725c3e9246fcbafc6555d48b7505b2a15b861014d9bde",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    },
+    "docs/50_系统测试/evidence/historical-reference-restored-20261012/cf-e2-residents-audit.png": {
+      "source": "output/playwright/cf-e2-residents-audit.png",
+      "sha256": "fe2b94578bff154047bb5de7e6dccef0b83caedfec76504e13135261c0629079",
+      "scope": "仅归并已存在历史证据，不代表本轮重跑或当前规则验证"
+    }
+  },
+  "plainReferenceCorrectionsIn13": 11,
+  "notReconstructed": "Temp遗失截图、已完成包/归档未修改；当前50相同文件名的现存证据只改归并引用，不改历史验证结论"
+}

@@ -75,7 +75,7 @@ async function main() {
         const us = (await api('GET', `/api/v1/buildings/${b.id}/units`)).data?.records ?? (await api('GET', `/api/v1/buildings/${b.id}/units`)).data ?? [];
         const u = us[0];
         if (u) {
-          const nh = await api('POST', '/api/v1/houses', { token: adminTok, body: { unitId: u.id, houseNumber: `SM${Date.now() % 10000}`, floor: 9, area: 60, roomCount: 1, layout: '一室', orientation: '南', status: 'VACANT', description: 'C2-012 自愈补房' } });
+          const nh = await api('POST', '/api/v1/houses', { token: adminTok, body: { unitId: u.id, houseNumber: `SM${Date.now() % 10000}`, floor: 9, area: 60, layout: '一室', orientation: '南', status: 'VACANT', description: 'C2-012 自愈补房' } });
           if (nh.data?.id) vacant = { id: nh.data.id };
         }
       }
@@ -292,7 +292,7 @@ async function main() {
           const us = (await api('GET', `/api/v1/buildings/${b.id}/units`)).data?.records ?? [];
           const u = us[0];
           if (u) {
-            const nh = await api('POST', '/api/v1/houses', { token: adminTok, body: { unitId: u.id, houseNumber: `SMR${Date.now() % 10000}`, floor: 9, area: 60, roomCount: 1, layout: '一室', orientation: '南', status: 'VACANT', description: 'C2-012 终态构造补房' } });
+            const nh = await api('POST', '/api/v1/houses', { token: adminTok, body: { unitId: u.id, houseNumber: `SMR${Date.now() % 10000}`, floor: 9, area: 60, layout: '一室', orientation: '南', status: 'VACANT', description: 'C2-012 终态构造补房' } });
             if (nh.data?.id) vacant = { id: nh.data.id };
           }
         }

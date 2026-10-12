@@ -283,25 +283,6 @@ function statusTagView(row: ILeaseRecord): { label: string; type: TagType } {
   return map[row.status]
 }
 
-/* ---------- 承租确认（R67/V20：发起租赁协议的前置条件） ---------- */
-
-/**
- * 承租是否已确认。返回三态：true/false 为该租约已明确的状态，
- * `undefined` 表示后端未返回 `tenantConfirmAt` 字段（字段缺失 ≠ 未确认）——
- * 此时不阻断协议发起，交由后端 5601 把关，避免前端误挡合法操作。
- */
-const tenancyConfirmed = computed<boolean | undefined>(() => {
-  const row = lease.value
-  if (!row) return undefined
-  if (row.status === 'PENDING') return undefined
-  return !!row.tenantConfirmAt
-})
-
-/** 待签约/已生效阶段才涉及承租确认展示（待审核还没有这一环节） */
-const showTenancyState = computed(
-  () => lease.value?.status === 'TO_SIGN' || lease.value?.status === 'ACTIVE'
-)
-
 const AGREEMENT_TAG_TYPE: Record<LeaseAgreementSignStatus, TagType> = {
   NONE: 'canceled',
   PENDING: 'pending',
@@ -491,12 +472,9 @@ async function handleEditSubmit(): Promise<void> {
 
 /* ---------- 状态流转（与列表页同一状态机口径） ---------- */
 
-/**
- * 审核入口（OCR DEF-123，与列表页 handleApprove 对齐）：PENDING 走「审核通过」→ TO_SIGN；
- * TO_SIGN 走「置为生效」→ ACTIVE（常规流程由协议双方确认自动生效，此处为管理方直通通道）。
- */
+/** 审核仅到待签约，生效由居民确认具体协议驱动。 */
 const canApprove = computed(
-  () => lease.value?.status === 'PENDING' || lease.value?.status === 'TO_SIGN'
+  () => lease.value?.status === 'PENDING'
 )
 const canReject = computed(() => lease.value?.status === 'PENDING')
 const canRenew = computed(() => lease.value?.status === 'ACTIVE')
@@ -512,22 +490,12 @@ const hasStatusAction = computed(
 )
 
 async function handleApprove(): Promise<void> {
-  if (!lease.value) return
-  const isToSign = lease.value.status === 'TO_SIGN'
+  if (!lease.value || lease.value.status !== 'PENDING') return
   try {
-    await ElMessageBox.confirm(
-      isToSign
-        ? `确定将租约（${lease.value.tenantName} · ${lease.value.houseLocation}）置为已生效？\n` +
-            '常规流程由租赁协议双方确认后自动生效，此处为管理方直接生效通道；生效后房屋置已入住。' +
-            (tenancyConfirmed.value ? '' : '\n注意：该租约居民尚未确认承租。')
-        : `确定通过该租约（${lease.value.tenantName} · ${lease.value.houseLocation}）？通过后租约进入「待签约」，待居民确认承租并由双方确认协议后才正式生效。`,
-      isToSign ? '租约置为已生效' : '租约审批通过',
-      { type: 'info', confirmButtonText: '确认', cancelButtonText: '取消' }
-    )
-  } catch {
-    return
-  }
-  await doTransition('ACTIVE', isToSign ? '租约已生效' : '已审核通过，租约进入待签约')
+    await ElMessageBox.confirm('审核通过后租约进入待签约；管理员发出协议，居民同意后才会生效。',
+      '租约审批通过', { type: 'info', confirmButtonText: '确认', cancelButtonText: '取消' })
+  } catch { return }
+  await doTransition('TO_SIGN', '已审核通过，租约进入待签约')
 }
 
 async function handleReject(): Promise<void> {
@@ -712,12 +680,6 @@ onMounted(fetchDetail)
             :label="leaseAgreementSignStatusLabels[agreementStatus]"
             :type="AGREEMENT_TAG_TYPE[agreementStatus]"
           />
-          <!-- 承租确认（R67）：发起协议的前置条件，状态条上与协议/租约状态并列可见 -->
-          <StatusTag
-            v-if="showTenancyState"
-            :label="tenancyConfirmed ? '承租已确认' : '承租待确认'"
-            :type="tenancyConfirmed ? 'completed' : 'pending'"
-          />
           <!-- 押金状态（R72）：五态徽标，与租约状态并列 -->
           <span class="deposit-pill" :data-deposit="depositStatus">押金{{ depositLabel }}</span>
           <StatusTag :label="statusTagView(lease).label" :type="statusTagView(lease).type" />
@@ -771,16 +733,7 @@ onMounted(fetchDetail)
                 <dt>登记时间</dt>
                 <dd>{{ formatDateTime(lease.createdAt) }}</dd>
               </div>
-              <!-- 承租确认（R67）：未确认时管理方的协议发起会被后端拒绝，故在详情显著位置说明 -->
-              <div v-if="showTenancyState" class="info-row">
-                <dt>承租确认</dt>
-                <dd v-if="tenancyConfirmed" class="tenancy-done">
-                  已确认 · {{ lease.tenantConfirmAt ? formatDateTime(lease.tenantConfirmAt) : '时间未记录' }}
-                </dd>
-                <dd v-else class="tenancy-pending">
-                  居民尚未确认承租——确认后方可发起租赁协议
-                </dd>
-              </div>
+
             </dl>
 
             <span class="block-label">
@@ -981,7 +934,7 @@ onMounted(fetchDetail)
                 :loading="actionLoading"
                 @click="handleApprove"
               >
-                {{ lease.status === 'TO_SIGN' ? '置为生效' : '审核通过' }}
+                审核通过
               </el-button>
               <el-button
                 v-if="canReject"
@@ -1042,9 +995,9 @@ onMounted(fetchDetail)
 
           <AgreementSignPanel
             :lease-id="lease.id"
+              :lease-status="lease.status"
             role="ADMIN"
             :community-id="lease.communityId"
-            :tenancy-confirmed="tenancyConfirmed"
             @changed="refreshAll"
           />
 
@@ -1470,14 +1423,6 @@ onMounted(fetchDetail)
   color: var(--color-text-disabled);
 }
 
-/* 承租确认两态：已确认绿、待确认橙（并作为协议入口受阻的原因说明） */
-.tenancy-done {
-  color: var(--color-success);
-}
-
-.tenancy-pending {
-  color: var(--color-warning);
-}
 
 /* 关联看房（R69）：紧凑列表，一行一预约 */
 .viewing-list {

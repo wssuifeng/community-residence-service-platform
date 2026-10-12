@@ -145,7 +145,7 @@ class ViewingAppointmentRegistrationOnlyTest {
 
         try (MockedStatic<SecurityUtils> mocked = residentIdentity(7L)) {
             assertThatThrownBy(() -> service.getById(1L))
-                    .isInstanceOf(com.community.residence.common.exception.BusinessException.class)
+                    .isInstanceOf(ForbiddenException.class)
                     .hasMessageContaining("无权查看他人预约");
         }
     }
@@ -160,7 +160,7 @@ class ViewingAppointmentRegistrationOnlyTest {
 
         try (MockedStatic<SecurityUtils> mocked = residentIdentity(7L)) {
             assertThatThrownBy(() -> service.getById(1L))
-                    .isInstanceOf(com.community.residence.common.exception.BusinessException.class)
+                    .isInstanceOf(ForbiddenException.class)
                     .hasMessageContaining("无权查看他人预约");
         }
     }
@@ -206,7 +206,7 @@ class ViewingAppointmentRegistrationOnlyTest {
 
         try (MockedStatic<SecurityUtils> mocked = staffIdentity(13L)) {
             assertThatThrownBy(() -> service.getById(1L))
-                    .isInstanceOf(com.community.residence.common.exception.BusinessException.class)
+                    .isInstanceOf(ForbiddenException.class)
                     .hasMessageContaining("仅可查看分配给本人的预约");
         }
     }
@@ -237,6 +237,18 @@ class ViewingAppointmentRegistrationOnlyTest {
 
         assertThat(appointment.getStatus()).isEqualTo("CANCELLED");
         verify(appointmentMapper).updateById(appointment);
+    }
+
+    @Test
+    @DisplayName("其他居民取消预约使用专用403拒绝，且不写入状态")
+    void residentCancel_otherResidentUsesForbiddenException() {
+        ViewingAppointment row = appointment(); row.setUserId(7L);
+        when(appointmentMapper.selectById(1L)).thenReturn(row);
+        try (MockedStatic<SecurityUtils> mocked = residentIdentity(8L)) {
+            assertThatThrownBy(() -> service.cancel(1L, "不应执行"))
+                    .isInstanceOf(ForbiddenException.class);
+        }
+        verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
     }
 
     private MockedStatic<SecurityUtils> residentIdentity(Long userId) {
@@ -317,5 +329,9 @@ class ViewingAppointmentRegistrationOnlyTest {
         appointment.setEndTime(LocalTime.of(11, 0));
         appointment.setStatus("TO_CONFIRM");
         return appointment;
+    }
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
     }
 }

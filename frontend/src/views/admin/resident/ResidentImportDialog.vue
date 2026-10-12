@@ -16,7 +16,7 @@ const visible = defineModel<boolean>({ required: true })
 /** imported 携带导入结果，父层刷新列表与统计卡（失败行不触发也刷新，成功行已生效） */
 const emit = defineEmits<{ imported: [result: IResidentImportVO] }>()
 
-const CSV_HEADERS = '社区ID,姓名,手机号,证件号'
+const CSV_HEADERS = '社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
 const selectedFile = ref<File | null>(null)
@@ -26,7 +26,7 @@ const result = ref<IResidentImportVO | null>(null)
 const canUpload = computed(() => selectedFile.value !== null && !uploading.value)
 
 function downloadTemplate(): void {
-  const content = `${CSV_HEADERS}\n1,张三,13800138000,110101199001011234\n`
+  const content = `${CSV_HEADERS}\n1,张三,13800138000,,,,1,OWNER,2026-01-01,台账录入\n`
   const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -87,14 +87,15 @@ watch(visible, (value) => {
   <el-dialog
     v-model="visible"
     title="批量导入居民"
-    width="640px"
+    width="min(900px, calc(100vw - 32px))"
     :close-on-click-modal="false"
   >
     <!-- 上传段：模板下载 + 单文件选择 -->
     <div class="import-toolbar">
       <el-button text type="primary" @click="downloadTemplate">下载导入模板</el-button>
-      <span class="toolbar-hint">UTF-8 编码 CSV，表头：{{ CSV_HEADERS }}；证件号可留空</span>
+      <span class="toolbar-hint">UTF-8 编码 CSV，表头：{{ CSV_HEADERS }}；选填项可留空</span>
     </div>
+    <el-alert type="info" :closable="false" title="房屋ID、关系类型和入住日期须全有或全无；空白表示仅建账号。房屋ID不是房号，请替换示例ID；旧四列模板继续支持，仅创建账号。每行账号与关系一起成功或一起回滚，不生成租约。" />
     <el-upload
       drag
       :limit="1"
@@ -131,6 +132,7 @@ watch(visible, (value) => {
               <code class="cell-code">{{ row.initialPassword }}</code>
             </template>
           </el-table-column>
+          <el-table-column label="居住关系" min-width="200"><template #default="{ row }"><span>{{ row.relationId ? `关系 ${row.relationId} · 房屋 ${row.houseId}` : '仅建账号（无居住关系）' }}</span></template></el-table-column>
           <el-table-column label="" width="60">
             <template #default="{ row }">
               <el-button
@@ -176,11 +178,13 @@ watch(visible, (value) => {
 .import-toolbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
 }
 
 .toolbar-hint {
+  overflow-wrap: anywhere;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }

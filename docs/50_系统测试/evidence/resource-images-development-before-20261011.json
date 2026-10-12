@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-11",
+  "transactionsExecuted": false,
+  "businessWrites": false,
+  "checks": [
+    {
+      "name": "开发数据库身份",
+      "passed": true
+    },
+    {
+      "name": "V31迁移有效",
+      "passed": true
+    },
+    {
+      "name": "运行中DTO包含email",
+      "passed": true
+    },
+    {
+      "name": "运行中DTO包含houseId",
+      "passed": true
+    },
+    {
+      "name": "运行中DTO包含relationType",
+      "passed": true
+    },
+    {
+      "name": "运行中DTO包含moveInDate",
+      "passed": true
+    },
+    {
+      "name": "运行中DTO包含remark",
+      "passed": true
+    },
+    {
+      "name": "开发渠道继续停用",
+      "passed": true
+    },
+    {
+      "name": "现有居民列表可加载",
+      "passed": true
+    },
+    {
+      "name": "前端5176可访问",
+      "passed": true
+    },
+    {
+      "name": "当前业务数据数量保持不变",
+      "passed": true
+    }
+  ],
+  "before": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "after": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ]
+}

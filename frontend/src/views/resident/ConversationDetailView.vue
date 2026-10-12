@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import ConversationChat from '@/components/business/ConversationChat.vue'
 import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
 import { getConversation, listConversations } from '@/api/conversation'
-import { confirmTenancy, getLease } from '@/api/lease'
+import { getLease } from '@/api/lease'
 import { conversationStatusLabels, conversationTypeLabels } from '@/types/modules/conversation'
 import type { IConversation } from '@/types/modules/conversation'
 import type { ILeaseRecord } from '@/types/modules/lease'
 import { leaseStatusLabels } from '@/types/modules/lease'
-import { useUserStore } from '@/store/user'
 
 /**
  * 沟通会话详情（R63 v1.5 / R68 批次 f）：看房群聊 / 租约群聊 / 居民-管理员直通的独立会话页。
@@ -20,7 +18,7 @@ import { useUserStore } from '@/store/user'
  * 1. 会话状态：status='CLOSED'（租约归档或申请取消后关闭）时把 closed 传给聊天组件，
  *    输入区换成「会话已关闭」提示并停收停发，历史消息只读；
  * 2. 租约群聊（type='LEASE_GROUP'，relatedId=租约 ID）业务入口条：
- *    预约看房 / 确认承租 / 查看协议，三者都受同一份租约详情驱动。
+ *    预约看房 / 查看协议并确认，三者都受同一份租约详情驱动。
  *
  * 会话来源取 `GET /conversations/{id}`；该端点未就绪时回落到会话列表
  * 查找（列表上限 50 条）。两者都失败时**状态未知**：按已关闭只读降级
@@ -89,38 +87,6 @@ async function loadConversation(): Promise<void> {
 
 /* ------------------------------ 租约群聊业务入口（R69/R67/R64） ------------------------------ */
 
-/** 租约群聊含居民与多名社区管理员：仅租约本人的居民账号可确认承租（后端同样强校验） */
-const userStore = useUserStore()
-/* tenantId 比较口径澄清（OCR 误报防复发，DEF-122）：居民登录态 AuthUser.id 即
-   resident 空间 ID（AuthService.residentLogin 用 resident.getId() 签发 JWT），
-   与 lease.tenantId 同为 resident.id，两值同空间可直接相等比较——不是 sys_user.id，
-   勿按"跨表比较"误判改写 */
-const isLeaseTenant = computed(
-  () => lease.value !== null && lease.value.tenantId === userStore.user?.id
-)
-
-/** 待签约且尚未确认承租 → 露出「确认承租」入口 */
-const canConfirmTenancy = computed(
-  () => lease.value?.status === 'TO_SIGN' && !lease.value?.tenantConfirmAt && isLeaseTenant.value
-)
-
-const confirming = ref(false)
-
-async function handleConfirmTenancy(): Promise<void> {
-  const current = lease.value
-  if (!current) return
-  confirming.value = true
-  try {
-    await confirmTenancy(current.id)
-    ElMessage.success('已确认承租，等待社区管理方发起租赁协议')
-    lease.value = await getLease(current.id)
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '确认承租失败')
-  } finally {
-    confirming.value = false
-  }
-}
-
 /**
  * 预约看房：会话内不重复实现三步预约（房源页已有一套日历/时段/提交流程），
  * 跳房源 Hub 并把 fromLease 作为「本次看房归属哪份租约」的上下文提示；
@@ -137,7 +103,7 @@ function goReserveViewing(): void {
 /** 查看协议：会话内直接打开签约面板（居民侧可查看正文并在线确认） */
 const agreementVisible = ref(false)
 
-/** 协议状态变化（确认/发起/撤回）后回读租约，刷新入口条的承租与协议徽标 */
+/** 协议状态变化（确认/发起/撤回）后回读租约，刷新入口条的协议徽标 */
 async function refreshLease(): Promise<void> {
   const current = lease.value
   if (!current) return
@@ -199,7 +165,7 @@ onMounted(async () => {
           <span class="biz-meta">
             租期 {{ lease.startDate }} ~ {{ lease.endDate }} ·
             租约状态 {{ leaseStatusLabels[lease.status] }} ·
-            {{ lease.tenantConfirmAt ? '已确认承租' : '待确认承租' }}
+            {{ lease.agreementStatus === 'SIGNED' ? '协议已确认' : '协议待确认' }}
           </span>
         </template>
         <span v-else class="biz-meta">租约信息暂不可用（可能已归档或无权查看）</span>
@@ -208,16 +174,7 @@ onMounted(async () => {
         <el-button size="small" round :disabled="!lease" @click="goReserveViewing">
           预约看房
         </el-button>
-        <el-button
-          v-if="canConfirmTenancy"
-          size="small"
-          type="primary"
-          round
-          :loading="confirming"
-          @click="handleConfirmTenancy"
-        >
-          确认承租
-        </el-button>
+
         <el-button
           size="small"
           :type="lease?.agreementStatus && lease.agreementStatus !== 'NONE' ? 'primary' : 'default'"
@@ -231,8 +188,8 @@ onMounted(async () => {
     </div>
 
     <!-- 群聊内确认承租后的引导：管理方发起协议前无须居民额外操作 -->
-    <p v-if="isLeaseGroup && lease?.status === 'TO_SIGN' && !canConfirmTenancy" class="biz-hint">
-      您已确认承租，等待社区管理方发起租赁协议；协议送达后可在「查看协议」中在线确认。
+    <p v-if="isLeaseGroup && lease?.status === 'TO_SIGN'" class="biz-hint">
+      管理方发出协议后，请在「查看协议」中阅读正文并确认同意；协议确认后继续保留房屋，首期费用支付成功后正式生效，无需另行确认承租。
     </p>
 
     <!-- 租约群聊的关闭态文案传租约口径（DEF-122：组件默认文案已改中性，业务语义由调用方补） -->
@@ -247,6 +204,7 @@ onMounted(async () => {
       <AgreementSignPanel
         v-if="lease"
         :lease-id="lease.id"
+              :lease-status="lease.status"
         role="RESIDENT"
         :community-id="lease.communityId"
         :self-managed="false"

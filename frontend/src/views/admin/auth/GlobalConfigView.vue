@@ -6,6 +6,7 @@ import { getConfigList, updateConfig } from '@/api/resident'
 import { getChannelLevels, updateChannelLevels } from '@/api/notification'
 import type { ISysConfig } from '@/types/modules/resident'
 import type { IChannelLevels } from '@/types/modules/notification'
+import AlipayChannelConfigPanel from './AlipayChannelConfigPanel.vue'
 
 /**
  * 全局配置 Tab（自 resident/GlobalConfigView.vue 原样迁入系统管理页，任务 12 只换壳）：
@@ -137,6 +138,7 @@ const editForm = reactive({
 })
 
 /** 日志保留期走数字输入（el-input-number 绑定数字，编辑表单值为字符串） */
+const isRegistrationEnabled = computed(() => editForm.key === 'registration.enabled')
 const isRetentionDays = computed(() => editForm.key === LOG_RETENTION_KEY)
 const retentionDays = computed({
   get: () => Number(editForm.value) || undefined,
@@ -150,6 +152,9 @@ const editRules: FormRules = {
     { required: true, message: '请输入配置值', trigger: 'blur' },
     {
       validator: (_rule, value: string, callback) => {
+        if (isRegistrationEnabled.value && !['true', 'false'].includes(value)) {
+          return callback(new Error('注册开关只能选择开启或关闭'))
+        }
         if (!isRetentionDays.value) return callback()
         const num = Number(value)
         if (!Number.isInteger(num) || num <= 0) {
@@ -214,6 +219,8 @@ onMounted(() => {
       :closable="false"
       show-icon
     />
+
+    <AlipayChannelConfigPanel />
 
     <!-- 通知渠道分级专用卡片（R51 DEF-037：勾选轻交互，非表单） -->
     <div class="table-panel channel-panel">
@@ -292,6 +299,10 @@ onMounted(() => {
             />
             <div class="config-hint">日志保留期（天），默认 730；到期自动清理并通知超级管理员</div>
           </template>
+          <el-select v-else-if="isRegistrationEnabled" v-model="editForm.value" aria-label="注册开关">
+            <el-option label="开启注册" value="true" />
+            <el-option label="关闭注册" value="false" />
+          </el-select>
           <el-input
             v-else
             v-model="editForm.value"

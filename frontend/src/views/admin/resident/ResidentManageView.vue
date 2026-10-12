@@ -119,9 +119,7 @@ const listRefreshKey = ref(0)
 
 function refreshAfterMutation(): void {
   loadStats()
-  if (activeTab.value === 'list') {
-    listRefreshKey.value += 1
-  }
+  listRefreshKey.value += 1
 }
 </script>
 
@@ -189,7 +187,7 @@ function refreshAfterMutation(): void {
     </nav>
 
     <ResidentListView v-if="activeTab === 'list'" :key="listRefreshKey" @go-relations="goRelations" />
-    <ResidenceRelationListView v-else :preset-resident-id="presetResidentId" />
+    <ResidenceRelationListView v-else :key="listRefreshKey" :preset-resident-id="presetResidentId" />
 
     <ResidentAdminCreateDialog v-model="createDialogVisible" @created="refreshAfterMutation" />
     <ResidentImportDialog v-model="importDialogVisible" @imported="refreshAfterMutation" />

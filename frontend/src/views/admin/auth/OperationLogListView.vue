@@ -13,6 +13,8 @@ import Pagination from '@/components/common/Pagination.vue'
 /** 操作人类型中文标签 */
 const operatorTypeLabels: Record<string, string> = {
   ADMIN: '管理员',
+  SUPER_ADMIN: '超级管理员',
+  SYSTEM: '系统',
   STAFF: '服务人员',
   RESIDENT: '居民'
 }
@@ -75,8 +77,8 @@ async function load(): Promise<void> {
       operatorType: (operatorTypeFilter.value || undefined) as IOperationLog['operatorType'],
       module: moduleFilter.value.trim() || undefined,
       action: actionFilter.value.trim() || undefined,
-      startTime: dateRange.value?.[0] ? `${dateRange.value[0]} 00:00:00` : undefined,
-      endTime: dateRange.value?.[1] ? `${dateRange.value[1]} 23:59:59` : undefined
+      startTime: dateRange.value?.[0] ? `${dateRange.value[0]}T00:00:00` : undefined,
+      endTime: dateRange.value?.[1] ? `${dateRange.value[1]}T23:59:59` : undefined
     })
     logs.value = result.records
     total.value = result.total
@@ -230,8 +232,8 @@ onMounted(load)
           <el-descriptions-item label="操作描述" :span="2">
             {{ detail.description }}
           </el-descriptions-item>
-          <el-descriptions-item label="请求参数" :span="2">
-            <pre class="request-params">{{ formatRequestParams(detail.requestParams) }}</pre>
+          <el-descriptions-item label="请求参数（安全白名单）" :span="2">
+            <pre class="request-params">{{ detail.requestParams ? formatRequestParams(detail.requestParams) : '未采集可展示的安全参数（历史日志不补录）' }}</pre>
           </el-descriptions-item>
         </el-descriptions>
       </div>

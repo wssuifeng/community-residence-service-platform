@@ -35,10 +35,8 @@ public class House {
     @Schema(description = "建筑面积（平方米）")
     private BigDecimal area;
 
-    @Schema(description = "房间数")
-    private Integer roomCount;
-
     @Schema(description = "户型（如 2室1厅1卫）")
+    @com.baomidou.mybatisplus.annotation.TableField(updateStrategy = com.baomidou.mybatisplus.annotation.FieldStrategy.ALWAYS)
     private String layout;
 
     @Schema(description = "朝向")

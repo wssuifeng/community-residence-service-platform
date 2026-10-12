@@ -35,10 +35,6 @@ public class CreateHouseDTO {
     @DecimalMin(value = "0", message = "建筑面积不能为负数")
     private BigDecimal area;
 
-    @Schema(description = "房间数")
-    @Min(value = 0, message = "房间数不能为负数")
-    private Integer roomCount;
-
     @Schema(description = "户型（如 2室1厅1卫）")
     @Size(max = 50, message = "户型最多 50 字符")
     private String layout;

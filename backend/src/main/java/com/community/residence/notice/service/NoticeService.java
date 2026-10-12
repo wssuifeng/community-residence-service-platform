@@ -271,10 +271,7 @@ public class NoticeService {
             return toVO(notice);
         }
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
-            if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
-                    || !visibleToResident(notice, SecurityUtils.getUserId())) {
-                throw new ResourceNotFoundException("公告不存在或已下线");
-            }
+            checkResidentVisibility(notice, SecurityUtils.getUserId());
         } else if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
                 || !visibleToGuest(notice.getId())) {
             /* 游客/未登录（DEF-046）：公开口径加可见性维度（纯广播 OR GUEST 目标） */
@@ -413,10 +410,8 @@ public class NoticeService {
     @Transactional(rollbackFor = Exception.class)
     public void recordView(Long id) {
         Notice notice = requireNotice(id);
-        if (!NoticeStatus.PUBLISHED.equals(notice.getStatus())) {
-            throw new ResourceNotFoundException("公告不存在或已下线");
-        }
         Long userId = SecurityUtils.getUserId();
+        checkResidentVisibility(notice, userId);
         Long exists = viewRecordMapper.selectCount(new LambdaQueryWrapper<NoticeViewRecord>()
                 .eq(NoticeViewRecord::getNoticeId, id)
                 .eq(NoticeViewRecord::getUserId, userId));
@@ -432,7 +427,7 @@ public class NoticeService {
 
     /** 公告查看记录分页（ADMIN；公告归属已在入口校验） */
     public PageVO<NoticeViewRecordVO> viewers(Long id, long page, long size) {
-        requireNotice(id);
+        checkManageAccess(requireNotice(id));
         Page<NoticeViewRecord> result = viewRecordMapper.selectPage(new Page<>(page, Math.min(size, 100)),
                 new LambdaQueryWrapper<NoticeViewRecord>()
                         .eq(NoticeViewRecord::getNoticeId, id)
@@ -457,6 +452,14 @@ public class NoticeService {
             throw new ResourceNotFoundException("公告不存在");
         }
         return notice;
+    }
+
+    /* 阅读回执与正文使用同一可见性约束，避免子接口绕过定向范围与过期下线。 */
+    private void checkResidentVisibility(Notice notice, Long residentId) {
+        if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
+                || !visibleToResident(notice, residentId)) {
+            throw new ResourceNotFoundException("公告不存在或已下线");
+        }
     }
 
     /* 管理权限：SUPER_ADMIN 全局；ADMIN 限公告目标社区在绑定集合内（无目标的广播仅超管管理）。

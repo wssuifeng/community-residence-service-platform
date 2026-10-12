@@ -150,7 +150,8 @@ class WorkOrderServiceExtraTest {
                     .hasRole(RoleConstants.RESIDENT)).thenReturn(false);
             mocked.when(() -> com.community.residence.common.context.SecurityUtils
                     .hasRole(RoleConstants.STAFF)).thenReturn(true);
-            when(assignmentMapper.selectList(any())).thenReturn(List.of());
+            when(workOrderMapper.selectPage(any(), any()))
+                    .thenReturn(new Page<WorkOrder>(1, 10, 0).setRecords(List.of()));
 
             var vo = workOrderService.page(1, 10, null, null, null, null, null, null, null, null, null);
             assertThat(vo.getTotal()).isEqualTo(0);

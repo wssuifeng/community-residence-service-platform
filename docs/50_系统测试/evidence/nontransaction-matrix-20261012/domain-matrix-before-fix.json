@@ -1,0 +1,431 @@
+{
+  "date": "2026-10-12T02:14:04.020Z",
+  "database": "community_residence_payment_config_test",
+  "backend": "http://127.0.0.1:8087/api/v1",
+  "frontend": "http://127.0.0.1:5181",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "固定隔离库门禁",
+      "passed": true
+    },
+    {
+      "name": "双支付渠道停用",
+      "passed": true
+    },
+    {
+      "name": "公告草稿居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告居民不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "社区公告目标居民可读",
+      "passed": true
+    },
+    {
+      "name": "社区公告其他社区居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "社区公告游客不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "定向公告触达本社区居民",
+      "passed": true
+    },
+    {
+      "name": "公告不触达其他社区",
+      "passed": true
+    },
+    {
+      "name": "他社区居民不可写公告阅读",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "公告阅读记录归本人",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不可读公告阅读明细",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "反馈详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈详情拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈首次回复进入会话",
+      "passed": true
+    },
+    {
+      "name": "本人可读完整反馈会话",
+      "passed": true
+    },
+    {
+      "name": "居民不能办结反馈",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈办结通知本人",
+      "passed": true
+    },
+    {
+      "name": "办结后不可追加会话",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5004
+      }
+    },
+    {
+      "name": "办结历史消息仍可读",
+      "passed": true
+    },
+    {
+      "name": "游客不能创建公共资源预约",
+      "passed": true,
+      "detail": {
+        "http": 401,
+        "code": 401
+      }
+    },
+    {
+      "name": "预约详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "预约详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "预约详情拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "他社区管理员不能确认预约",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "其他居民不能取消预约",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "预约确认通知本人",
+      "passed": true
+    },
+    {
+      "name": "已确认预约阻断同容量冲突",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5401
+      }
+    },
+    {
+      "name": "取消预约后释放同一时段",
+      "passed": true
+    },
+    {
+      "name": "选填联系电话省略仍成功创建",
+      "passed": false,
+      "detail": {
+        "http": 500,
+        "code": 500
+      }
+    },
+    {
+      "name": "非提交人不能评价工单",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "评价详情拒绝其他居民",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "评价详情拒绝未派服务人员",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "评价详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "评价详情授权本人",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权被派人员",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权社区管理员",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权超管",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不能评价跟进",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "跟进记录留存",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不能读跟进记录",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "一单一评阻断重复",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5502
+      }
+    },
+    {
+      "name": "工单全链终审关闭",
+      "passed": true
+    },
+    {
+      "name": "工单终审关闭沟通群",
+      "passed": true
+    },
+    {
+      "name": "支付退款数量完全未变",
+      "passed": true
+    }
+  ],
+  "failures": [
+    {
+      "name": "他社区居民不可写公告阅读",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "他社区管理员不可读公告阅读明细",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "选填联系电话省略仍成功创建",
+      "passed": false,
+      "detail": {
+        "http": 500,
+        "code": 500
+      }
+    },
+    {
+      "name": "评价详情拒绝其他居民",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "评价详情拒绝未派服务人员",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    }
+  ],
+  "communities": [
+    75,
+    76
+  ],
+  "users": [
+    88,
+    89,
+    90,
+    91
+  ],
+  "residents": [
+    88,
+    89,
+    90
+  ],
+  "cleanup": true,
+  "financialBefore": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "financialAfter": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "financialAfterCleanup": {
+    "payments": 0,
+    "refunds": 0
+  }
+}

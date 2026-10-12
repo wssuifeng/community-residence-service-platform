@@ -25,10 +25,16 @@ public class Community {
     private String address;
 
     @Schema(description = "联系电话")
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String contactPhone;
 
     @Schema(description = "联系人")
+    @com.baomidou.mybatisplus.annotation.TableField(exist = false)
     private String contactPerson;
+
+    @Schema(description = "责任人系统账号ID，必须为ADMIN")
+    @com.baomidou.mybatisplus.annotation.TableField(updateStrategy = com.baomidou.mybatisplus.annotation.FieldStrategy.ALWAYS)
+    private Long responsibleAdminId;
 
     @Schema(description = "社区简介")
     private String description;

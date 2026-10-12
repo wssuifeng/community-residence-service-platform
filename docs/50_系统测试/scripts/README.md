@@ -122,3 +122,8 @@ SELECT COALESCE(MAX(seq), 0) FROM notification;                       -- 记下�
   变化须补插对齐行或重新生成 jmx**（第五轮已补插 2 行对齐）。
 - track_c_ui.py 的 DEF-018 用例依赖社区 1 存在停用类别「绿化养护2171」（is_active=0，
   纯净重建后须预置，POST /api/v1/service-categories 传 isActive=0）。
+
+
+## V31兼容说明（2026-10-11）
+
+现行01/02/05种子及C1相关API工具已删除room_count/roomCount；community不再插入自由联系人列。05先建社区、后建ADMIN账号，再写责任人ID，避免悬空外键。仅修改现行脚本兼容性，本轮未重导种子/清空正常社区；05内历史交易夹具不是本轮执行的渠道测试。旧退役04展示数据、历史证据和已执行Flyway迁移不回改。V31后目标库为54张业务表、含Flyway历史表共55张。

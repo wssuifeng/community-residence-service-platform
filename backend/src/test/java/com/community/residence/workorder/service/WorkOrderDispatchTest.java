@@ -283,17 +283,18 @@ class WorkOrderDispatchTest {
     }
 
     @Test
-    @DisplayName("列表：assigneeId 无派单记录 → 空页（不执行分页查询）")
+    @DisplayName("列表：assigneeId 无当前派单 → 数据库返回空页")
     void page_assigneeIdWithoutAssignment_returnsEmpty() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked = mockSecurity()) {
-            when(assignmentMapper.selectList(any())).thenReturn(List.of());
+            when(workOrderMapper.selectPage(any(), any()))
+                    .thenReturn(new Page<WorkOrder>(1, 20, 0).setRecords(List.of()));
 
             PageVO<WorkOrderVO> vo = workOrderService.page(1, 20, null, null, null, null, null,
                     null, null, 42L, null);
 
             assertThat(vo.getRecords()).isEmpty();
             assertThat(vo.getTotal()).isEqualTo(0);
-            verify(workOrderMapper, never()).selectPage(any(), any());
+            verify(workOrderMapper).selectPage(any(), any());
         }
     }
 

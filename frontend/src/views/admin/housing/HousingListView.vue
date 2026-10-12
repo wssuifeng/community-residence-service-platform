@@ -35,6 +35,8 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const occupancyLabels: Record<string, string> = { FREE: '可申请', APPLYING: '申请待审核', TO_SIGN: '待签约', WAITING_FIRST_PAYMENT: '待首期费用', OCCUPIED: '已入住' }
+
 
 /** 房源状态 → StatusTag 语义色（可租=绿 / 已预订=黄 / 已出租=蓝 / 已下架=灰） */
 const tagTypeMap: Record<HousingStatus, 'completed' | 'pending' | 'processing' | 'canceled'> = {
@@ -405,7 +407,10 @@ onMounted(() => {
             </div>
           </div>
         </router-link>
+        <p v-if="housing.occupancy" style="margin:8px 12px">发布：{{ housing.status === 'OFFLINE' ? '已下线' : '已发布' }} / {{ occupancyLabels[housing.occupancy] ?? housing.occupancy }}</p>
         <div class="card-actions">
+          <el-button v-if="housing.leaseId" link type="primary" @click="router.push(`/admin/leases/${housing.leaseId}`)">查看租约</el-button>
+          <el-button v-else-if="housing.applicationId" link type="primary" @click="router.push({path:'/admin/housing-lease',query:{tab:'applications',applicationId:housing.applicationId}})">查看入住申请</el-button>
           <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" @click="openEdit(housing)">编辑</el-button>
           <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" link type="primary" @click="goTimeslots(housing)">看房时段</el-button>
           <el-button

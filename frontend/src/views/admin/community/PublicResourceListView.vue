@@ -29,6 +29,7 @@ import {
 import StatusTag from '@/components/common/StatusTag.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import ImageUploader from '@/components/common/ImageUploader.vue'
 
 /** 星期标签（后端 dayOfWeek 1-周一 … 7-周日，CreateTimeSlotDTO @Schema） */
 const DAY_OF_WEEK_LABELS: Record<number, string> = {
@@ -124,8 +125,7 @@ const dialogVisible = ref(false)
 const editingId = ref<number | null>(null)
 const formRef = ref<FormInstance>()
 
-/** 表单态 DTO：社区外键未选择时为 undefined（提交前经 rules 校验收敛） */
-type ResourceForm = Omit<IPublicResourceDTO, 'communityId'> & { communityId?: number }
+type ResourceForm = Omit<IPublicResourceDTO, 'communityId' | 'images'> & { communityId?: number; images: string[] }
 
 const form = reactive<ResourceForm>({
   communityId: undefined,
@@ -138,8 +138,28 @@ const form = reactive<ResourceForm>({
   bookingUnit: 'HOURLY',
   advanceBookingDays: undefined,
   description: '',
-  rules: ''
+  rules: '',
+  images: []
 })
+
+const uploading = ref(false)
+const saving = ref(false)
+let originalForm = ''
+
+/* 取消仅放弃资源关联；已上传文件可能共用，不在此入口物理删除。 */
+async function beforeClose(done: () => void): Promise<void> {
+  if (uploading.value || saving.value) return
+  if (JSON.stringify(form) !== originalForm) {
+    try { await ElMessageBox.confirm('放弃未保存的资源修改？原资源图片不会改变。', '放弃修改', { confirmButtonText: '放弃修改', cancelButtonText: '继续编辑', type: 'warning' }) }
+    catch { return }
+  }
+  done()
+}
+
+/** 列表首图（无图为空数组/旧后端缺字段时返回 undefined，单元格显示占位符） */
+function firstImage(row: IPublicResource): string | undefined {
+  return row.images?.[0]
+}
 
 const rules: FormRules = {
   communityId: [{ required: true, message: '请选择所属社区', trigger: 'change' }],
@@ -160,6 +180,8 @@ function openCreate(): void {
   form.advanceBookingDays = undefined
   form.description = ''
   form.rules = ''
+  form.images = []
+  originalForm = JSON.stringify(form)
   dialogVisible.value = true
 }
 
@@ -176,18 +198,23 @@ function openEdit(row: IPublicResource): void {
   form.advanceBookingDays = row.advanceBookingDays ?? undefined
   form.description = row.description ?? ''
   form.rules = row.rules ?? ''
+  form.images = [...(row.images ?? [])]
+  originalForm = JSON.stringify(form)
   dialogVisible.value = true
 }
 
 async function handleSubmit(): Promise<void> {
+  if (uploading.value || saving.value) return
   const valid = await formRef.value?.validate().catch(() => false)
-  if (!valid) return
+  if (!valid || uploading.value || saving.value) return
+  saving.value = true
   try {
     const payload: IPublicResourceDTO = {
       ...form,
       communityId: form.communityId as number,
       capacity: form.capacity ?? undefined,
-      advanceBookingDays: form.advanceBookingDays ?? undefined
+      advanceBookingDays: form.advanceBookingDays ?? undefined,
+      images: [...form.images]
     }
     if (editingId.value === null) {
       await createResource(payload)
@@ -200,7 +227,7 @@ async function handleSubmit(): Promise<void> {
     load()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '保存失败')
-  }
+  } finally { saving.value = false }
 }
 
 /* ---------------------------------- 时段配置 ---------------------------------- */
@@ -369,6 +396,12 @@ onMounted(() => {
     <template v-else>
       <el-table v-loading="loading" :data="resources" border>
         <el-table-column prop="id" label="ID" width="64" />
+        <el-table-column label="图片" width="88">
+          <template #default="{ row }">
+            <img v-if="firstImage(row)" :src="firstImage(row)" :alt="row.name" class="row-cover" />
+            <span v-else class="row-cover-empty">—</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="资源名称" min-width="140" show-overflow-tooltip />
         <el-table-column prop="communityName" label="所属社区" min-width="130" show-overflow-tooltip />
         <el-table-column label="类型" width="100">
@@ -418,9 +451,13 @@ onMounted(() => {
     <el-dialog
       v-model="dialogVisible"
       :title="editingId === null ? '新建公共资源' : '编辑公共资源'"
-      width="560px"
+      width="min(640px, calc(100vw - 32px))"
+      :before-close="beforeClose"
+      :close-on-click-modal="false"
+      :close-on-press-escape="!uploading && !saving"
+      destroy-on-close
     >
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="formRef" class="resource-form" :model="form" :rules="rules" label-width="100px" :disabled="saving">
         <el-form-item label="所属社区" prop="communityId">
           <el-select v-model="form.communityId" placeholder="请选择社区" style="width: 100%">
             <el-option
@@ -500,10 +537,17 @@ onMounted(() => {
             maxlength="500"
           />
         </el-form-item>
+        <el-form-item label="资源图片">
+          <div class="resource-images">
+            <p>{{ form.images.length }} / 6 张；JPG/JPEG/PNG/GIF，单张不超过5MB。</p>
+            <ImageUploader v-model="form.images" :limit="6" :disabled="saving" @busy-change="uploading = $event" />
+            <p>第一张用于列表预览；移除后保存生效，无图时展示资源类型图标。</p>
+          </div>
+        </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button :disabled="uploading || saving" @click="beforeClose(() => { dialogVisible = false })">取消</el-button>
+        <el-button type="primary" :loading="saving" :disabled="uploading || saving" @click="handleSubmit">保存资源</el-button>
       </template>
     </el-dialog>
 
@@ -589,6 +633,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.resource-form { max-height: 62vh; overflow-y: auto; padding-right: 8px; }
+.resource-images { width: 100%; min-width: 0; }
+.resource-images p { margin: 4px 0 10px; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
 .list-toolbar {
   display: flex;
   justify-content: space-between;
@@ -611,6 +658,20 @@ onMounted(() => {
 
 .empty-hint {
   margin-bottom: var(--spacing-md);
+}
+
+/* 列表首图缩略图（无图占位符） */
+.row-cover {
+  display: block;
+  width: 56px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.row-cover-empty {
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-xs);
 }
 
 .timeslot-form {

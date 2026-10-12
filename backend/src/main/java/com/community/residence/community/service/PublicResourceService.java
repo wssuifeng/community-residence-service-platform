@@ -33,6 +33,7 @@ public class PublicResourceService {
     private final PublicResourceMapper resourceMapper;
     private final ResourceReservationMapper reservationMapper;
     private final CommunityService communityService;
+    private final ResourceImagePolicy imagePolicy;
 
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "PUBLIC_RESOURCE", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建公共资源：' + #dto.name")
@@ -108,6 +109,7 @@ public class PublicResourceService {
     }
 
     private void applyDto(PublicResource resource, CreateResourceDTO dto) {
+        String images = imagePolicy.normalize(dto.getImages(), resource.getImages());
         resource.setCommunityId(dto.getCommunityId());
         resource.setName(dto.getName());
         resource.setType(dto.getType());
@@ -120,6 +122,7 @@ public class PublicResourceService {
             resource.setSlotUnit(com.community.residence.reservation.service.SlotGrids.DEFAULT_SLOT_UNIT);
         }
         resource.setDescription(dto.getDescription());
+        resource.setImages(images);
     }
 
     /* Slot Grid 栅格粒度校验：取值限 15/30/60（08 §3.7；@Min/@Max 拦截范围外，

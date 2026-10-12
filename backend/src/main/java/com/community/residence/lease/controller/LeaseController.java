@@ -68,14 +68,6 @@ public class LeaseController {
      * 承租确认（R67，接口设计.md 9.19）：仅租约本人、仅待签约状态；
      * 幂等且不覆盖首次留痕（tenant_confirm_at/by 只写一次），确认后通知本社区管理方。
      */
-    @Operation(summary = "承租确认", description = "居民对本人待签约租约确认承租；幂等，不覆盖首次确认留痕")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @PostMapping("/{id}/tenancy-confirm")
-    public ApiResponse<LeaseVO> tenancyConfirm(@PathVariable Long id) {
-        return ApiResponse.success(leaseService.tenancyConfirm(id));
-    }
-
-    /** 该租约关联的看房预约列表（R69 双向关联）：居民限本人租约，ADMIN 限绑定社区 */
     @Operation(summary = "租约关联看房预约列表", description = "会话内发起的看房预约按 lease_id 归属，居民限本人租约")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}/viewings")
@@ -167,8 +159,8 @@ public class LeaseController {
     }
 
     @Operation(summary = "更新租住状态",
-            description = "状态机流转校验：待审核→待签约/已生效/已驳回，待签约→已生效/已驳回；"
-                    + "流转到已生效时同步把房屋置为已入住")
+            description = "状态机流转校验：待审核→待签约/已驳回，待签约→已驳回；"
+                    + "生效仅由协议完成后的首期费用成功驱动，不提供管理员直接生效")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/status")
     public ApiResponse<Void> updateStatus(@PathVariable Long id,

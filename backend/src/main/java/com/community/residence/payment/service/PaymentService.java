@@ -67,7 +67,7 @@ public class PaymentService {
     private static final DateTimeFormatter PAYMENT_NO_DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final int PAYMENT_NO_RETRY_LIMIT = 5;
 
-    /** 首期支付固定月数（R71：首月租金 + 押金，与租约生效解耦） */
+    /** 首期支付固定月数（R71：首月租金 + 押金，确认成功后正式生效） */
     private static final int FIRST_PAYMENT_MONTHS = 1;
 
     /** 首期支付渠道订单标题（与续期区分，便于对账） */
@@ -81,6 +81,18 @@ public class PaymentService {
     private final PaymentChannelClient alipayChannelClient;
     private final PaymentChannelClient wechatChannelClient;
     private RedissonClient redissonClient;
+    private org.springframework.transaction.support.TransactionTemplate settlementTransaction;
+    private com.community.residence.lease.service.LeaseService leaseService;
+
+    /** 本地落账显式事务：不依赖同类调用的@Transactional代理；远程查单在事务外。 */
+    @Autowired
+    public void setSettlementInfrastructure(org.springframework.transaction.PlatformTransactionManager manager,
+            com.community.residence.lease.service.LeaseService service) {
+        this.settlementTransaction = new org.springframework.transaction.support.TransactionTemplate(manager);
+        this.settlementTransaction.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_READ_COMMITTED);
+        this.leaseService = service;
+    }
+
 
     public PaymentService(LeasePaymentMapper paymentMapper,
                           LeaseRecordMapper leaseMapper,
@@ -199,7 +211,7 @@ public class PaymentService {
      * （首期只收一次，判定先于到期校验）；已有**进行中（PENDING）**首期单 → 原样返回该单并
      * 重新获取渠道凭据（居民手动关闭平台窗口后不再永久卡死）；**已关闭（CLOSED）或从未发起** →
      * 允许新建单。渠道凭据获取失败关单并抛「发起支付失败」。
-     * **首期支付与租约生效解耦**：支付成功不顺延 end_date（见 settleSuccess 分支）。
+     * 首期成功后正式生效，但不顺延 end_date（见 settleSuccess 分支）。
      * 并发防护（DEF-107）：同租约发起经 Redisson 分布式锁 `lock:payment:first:{leaseId}`
      * 串行化——V15 lease_payment 自认无库级「同租约同期单」唯一约束，锁是防并发
      * 双 PENDING 双收款的唯一防线；方法级事务刻意不加（口径同
@@ -218,9 +230,10 @@ public class PaymentService {
         if (!lease.getTenantId().equals(residentId)) {
             throw new ForbiddenException("无权对他人租约发起首期费用支付");
         }
-        if (!LeaseStatus.ACTIVE.equals(lease.getStatus())) {
+        if (!LeaseStatus.ACTIVE.equals(lease.getStatus())
+                && !(LeaseStatus.TO_SIGN.equals(lease.getStatus()) && "SIGNED".equals(lease.getAgreementStatus()))) {
             throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,
-                    "仅已生效租约可支付首期费用，当前状态：" + lease.getStatus());
+                    "请先确认协议，待首期费用租约或旧已生效租约才能支付首期费用");
         }
 
         /* 锁内完成「已结清计数 + PENDING 续接 + insert」的 check-then-act 互斥（DEF-107）：
@@ -356,7 +369,6 @@ public class PaymentService {
     }
 
     /** 主动查单并落账：渠道异常 WARN 吞掉（保留 PENDING）；成功则回写+延展+通知（同一事务） */
-    @Transactional(rollbackFor = Exception.class)
     public void queryAndSettle(LeasePayment payment) {
         PaymentChannelClient client = clientOf(payment.getChannel());
         ChannelTradeResult result;
@@ -374,21 +386,37 @@ public class PaymentService {
         settleSuccess(payment, result);
     }
 
-    /** 支付成功落账：回写支付单 + 延展租期 + 双方通知（同一事务，已 SUCCESS 不重复延展） */
-    @Transactional(rollbackFor = Exception.class)
+    /** 支付成功落账：首期激活/续期延展、支付单和通知同事务（同一事务，已 SUCCESS 不重复延展） */
     protected void settleSuccess(LeasePayment payment, ChannelTradeResult result) {
+        if (result == null) return;
+        settlementTransaction.executeWithoutResult(status -> applySettlement(payment, result));
+    }
+
+    /* 显式事务内：房屋→租约→支付单锁，同一笔成功仅处理一次。 */
+    private void applySettlement(LeasePayment payment, ChannelTradeResult result) {
         /* 幂等重入保护：并发轮询下前一笔事务已落账则跳过 */
         LeasePayment current = paymentMapper.selectById(payment.getId());
         if (current == null || !PaymentStatus.PENDING.equals(current.getStatus())) {
             return;
         }
-        LeaseRecord lease = leaseMapper.selectById(current.getLeaseId());
-        if (lease == null) {
-            log.error("支付单对应租约不存在，仅回写支付状态：paymentNo={}, leaseId={}",
-                    current.getPaymentNo(), current.getLeaseId());
-        } else if (PaymentType.FIRST.equals(current.getPaymentType())) {
-            /* 首期落账（R71）：只回写支付状态与通知，**不顺延 end_date**
-               ——首期费用与租约生效解耦，租期由签约/续租动作决定 */
+        LeaseRecord lease = leaseService.lockForSettlement(current.getLeaseId());
+        current = paymentMapper.selectByIdForUpdate(payment.getId());
+        if (current == null || !PaymentStatus.PENDING.equals(current.getStatus())) return;
+        if (PaymentType.FIRST.equals(current.getPaymentType())) {
+            Long otherFirst = paymentMapper.selectCount(new LambdaQueryWrapper<LeasePayment>()
+                .eq(LeasePayment::getLeaseId, current.getLeaseId()).eq(LeasePayment::getPaymentType, PaymentType.FIRST)
+                .eq(LeasePayment::getStatus, PaymentStatus.SUCCESS).ne(LeasePayment::getId, current.getId()));
+            if (otherFirst != null && otherFirst > 0) throw new BusinessException(ErrorCode.PAYMENT_ALREADY_EXISTS);
+        }
+        current.setStatus(PaymentStatus.SUCCESS);
+        current.setChannelTradeNo(result.channelTradeNo());
+        current.setPaidAt(result.paidAt() != null ? result.paidAt() : LocalDateTime.now());
+        paymentMapper.updateById(current);
+        if (PaymentType.FIRST.equals(current.getPaymentType())) {
+            if (!LeaseStatus.ACTIVE.equals(lease.getStatus())) {
+                leaseService.applyTransition(lease, LeaseStatus.ACTIVE, "协议完成且首期费用支付成功，正式生效");
+            }
+            /* 首期成功激活租约与正式关系，但不顺延 end_date；租期沿用审核约定。 */
             log.info("首期费用支付成功（租期不变）：paymentNo={}, leaseId={}, amount={}",
                     current.getPaymentNo(), lease.getId(), current.getAmount());
             /* 押金状态联动（R72）：首期费用中的押金部分入账 → 已缴（deposit_status=PAID）；
@@ -436,10 +464,6 @@ public class PaymentService {
             }
         }
 
-        current.setStatus(PaymentStatus.SUCCESS);
-        current.setChannelTradeNo(result.channelTradeNo());
-        current.setPaidAt(result.paidAt() != null ? result.paidAt() : LocalDateTime.now());
-        paymentMapper.updateById(current);
         payment.setStatus(PaymentStatus.SUCCESS);
         payment.setChannelTradeNo(result.channelTradeNo());
         payment.setPaidAt(current.getPaidAt());
@@ -451,6 +475,8 @@ public class PaymentService {
             targetType = "LEASE_PAYMENT", targetId = "#result", content = "'关闭续约支付单'")
     public Long closePayment(String paymentNo) {
         LeasePayment payment = requirePayment(paymentNo);
+        payment = paymentMapper.selectByIdForUpdate(payment.getId());
+        if (payment == null) throw new ResourceNotFoundException("支付单已不存在");
         if (!payment.getResidentId().equals(SecurityUtils.getUserId())) {
             throw new ForbiddenException("无权操作他人支付单");
         }

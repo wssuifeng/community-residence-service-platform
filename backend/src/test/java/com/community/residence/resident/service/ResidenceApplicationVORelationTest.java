@@ -220,4 +220,6 @@ class ResidenceApplicationVORelationTest {
         application.setLeaseId(LINKED_LEASE_ID);
         assertThat(ApplicationVO.from(application).getLeaseId()).isEqualTo(LINKED_LEASE_ID);
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

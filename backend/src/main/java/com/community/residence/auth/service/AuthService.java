@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,8 +39,10 @@ public class AuthService {
     private final TokenBlacklistService tokenBlacklistService;
     private final AdminCommunityCacheService adminCommunityCacheService;
     private final PasswordEncoder passwordEncoder;
+    private final TokenRevocationService tokenRevocationService;
 
     /** 管理端登录：SUPER_ADMIN/ADMIN/STAFF（sys_user 表），ADMIN 加载绑定社区 */
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public LoginVO adminLogin(LoginDTO dto) {
         SysUser user = sysUserMapper.selectByUsername(dto.getUsername());
         /* 登录失败统一措辞（不区分账号不存在/密码错误，防账号枚举）；账号存在但被冻结时明确提示 */
@@ -51,11 +55,12 @@ public class AuthService {
                 ? adminCommunityCacheService.getCommunityIds(user.getId())
                 : Set.of();
 
-        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole(), tokenRevocationService.currentRevision(user.getId(), user.getRole()));
         return buildLoginVO(token, user.getId(), user.getUsername(), user.getRealName(), user.getRole(), communityIds);
     }
 
     /** 居民端登录（resident 表），登录即视为 RESIDENT 角色 */
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public LoginVO residentLogin(LoginDTO dto) {
         Resident resident = residentMapper.selectByUsername(dto.getUsername());
         if (resident == null || !passwordEncoder.matches(dto.getPassword(), resident.getPasswordHash())) {
@@ -63,7 +68,7 @@ public class AuthService {
         }
         requireActive(resident.getStatus());
 
-        String token = jwtUtil.generateToken(resident.getId(), resident.getUsername(), RoleConstants.RESIDENT);
+        String token = jwtUtil.generateToken(resident.getId(), resident.getUsername(), RoleConstants.RESIDENT, tokenRevocationService.currentRevision(resident.getId(), RoleConstants.RESIDENT));
         return buildLoginVO(token, resident.getId(), resident.getUsername(),
                 resident.getRealName(), RoleConstants.RESIDENT, Set.of());
     }

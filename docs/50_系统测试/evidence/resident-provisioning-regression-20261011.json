@@ -1,0 +1,239 @@
+{
+  "date": "2026-10-11",
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "隔离数据库身份",
+      "passed": true
+    },
+    {
+      "name": "单建返回真实关系与房屋ID",
+      "passed": true
+    },
+    {
+      "name": "账号邮箱真实保存",
+      "passed": true
+    },
+    {
+      "name": "关系与账号真实关联",
+      "passed": true
+    },
+    {
+      "name": "房屋同步已入住",
+      "passed": true
+    },
+    {
+      "name": "新账号登录后可见真实关系",
+      "passed": true
+    },
+    {
+      "name": "关系拒绝时整个单建失败",
+      "passed": true
+    },
+    {
+      "name": "关系失败后账号零残留",
+      "passed": true
+    },
+    {
+      "name": "跨社区房屋拒绝且无账号残留",
+      "passed": true
+    },
+    {
+      "name": "半填关系拒绝且无账号残留",
+      "passed": true
+    },
+    {
+      "name": "未来入住日期拒绝且无账号残留",
+      "passed": true
+    },
+    {
+      "name": "非法邮箱拒绝且无账号残留",
+      "passed": true
+    },
+    {
+      "name": "CSV按行部分成功",
+      "passed": true
+    },
+    {
+      "name": "CSV成功行返回真实关系",
+      "passed": true
+    },
+    {
+      "name": "CSV失败行账号回滚",
+      "passed": true
+    },
+    {
+      "name": "重复导入没有重复账号或关系",
+      "passed": true
+    },
+    {
+      "name": "旧模板兼容且明确没有关系",
+      "passed": true
+    },
+    {
+      "name": "社区管理员可见本次登记居民",
+      "passed": true
+    },
+    {
+      "name": "范围外代建拒绝",
+      "passed": true
+    },
+    {
+      "name": "未自动创建租约",
+      "passed": true
+    },
+    {
+      "name": "默认明确同时登记关系",
+      "passed": true
+    },
+    {
+      "name": "表单1024无页面级横向溢出",
+      "passed": true
+    },
+    {
+      "name": "表单768无页面级横向溢出",
+      "passed": true
+    },
+    {
+      "name": "真实表单提交返回账号与关系",
+      "passed": true
+    },
+    {
+      "name": "真实表单邮箱和关系落库",
+      "passed": true
+    },
+    {
+      "name": "导入明确新模板关系与旧模板账号模式",
+      "passed": true
+    },
+    {
+      "name": "独立浏览器无脚本异常",
+      "passed": true
+    },
+    {
+      "name": "支付和退款记录无变化",
+      "passed": true
+    }
+  ],
+  "cleanup": true,
+  "before": [
+    "0",
+    "0"
+  ],
+  "layout768": {
+    "width": 768,
+    "scroll": 768,
+    "overflow": [
+      {
+        "tag": "TABLE",
+        "cls": "el-table__header",
+        "right": 1264,
+        "width": 1000,
+        "text": "居民手机号身份证号（脱敏）注册时间状态操作"
+      },
+      {
+        "tag": "COLGROUP",
+        "cls": "",
+        "right": 1264,
+        "width": 1000,
+        "text": ""
+      },
+      {
+        "tag": "COL",
+        "cls": "",
+        "right": 794,
+        "width": 190,
+        "text": ""
+      },
+      {
+        "tag": "COL",
+        "cls": "",
+        "right": 954,
+        "width": 160,
+        "text": ""
+      },
+      {
+        "tag": "COL",
+        "cls": "",
+        "right": 1044,
+        "width": 90,
+        "text": ""
+      },
+      {
+        "tag": "COL",
+        "cls": "",
+        "right": 1264,
+        "width": 220,
+        "text": ""
+      },
+      {
+        "tag": "THEAD",
+        "cls": "",
+        "right": 1264,
+        "width": 1000,
+        "text": "居民手机号身份证号（脱敏）注册时间状态操作"
+      },
+      {
+        "tag": "TR",
+        "cls": "",
+        "right": 1264,
+        "width": 1000,
+        "text": "居民手机号身份证号（脱敏）注册时间状态操作"
+      },
+      {
+        "tag": "TH",
+        "cls": "el-table_1_column_3 is-leaf el-table__cell",
+        "right": 794,
+        "width": 190,
+        "text": "身份证号（脱敏）"
+      },
+      {
+        "tag": "DIV",
+        "cls": "cell",
+        "right": 794,
+        "width": 190,
+        "text": "身份证号（脱敏）"
+      },
+      {
+        "tag": "TH",
+        "cls": "el-table_1_column_4 is-leaf el-table__cell",
+        "right": 954,
+        "width": 160,
+        "text": "注册时间"
+      },
+      {
+        "tag": "DIV",
+        "cls": "cell",
+        "right": 954,
+        "width": 160,
+        "text": "注册时间"
+      },
+      {
+        "tag": "TH",
+        "cls": "el-table_1_column_5 is-leaf el-table__cell",
+        "right": 1044,
+        "width": 90,
+        "text": "状态"
+      },
+      {
+        "tag": "DIV",
+        "cls": "cell",
+        "right": 1044,
+        "width": 90,
+        "text": "状态"
+      }
+    ]
+  },
+  "browser": {
+    "pageErrors": [],
+    "screenshots": [
+      "output/playwright/bh-resident-form-1024-20261011.png",
+      "output/playwright/bh-resident-form-768-20261011.png"
+    ]
+  },
+  "after": [
+    "0",
+    "0"
+  ]
+}

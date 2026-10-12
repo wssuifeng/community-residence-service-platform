@@ -42,7 +42,7 @@ async function main() {
   // 准备：阳光花园空置房（新建）
   const b = await api('POST', '/api/v1/buildings', { token: admin1Tok, body: { communityId: 1, name: `C3楼${Date.now() % 10000}`, floors: 1 } });
   const u = await api('POST', '/api/v1/units', { token: admin1Tok, body: { buildingId: b.data.id, name: '1单元' } });
-  const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 80, roomCount: 2, status: 'VACANT' } });
+  const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 80, status: 'VACANT' } });
   const houseId = h.data.id;
 
   // ══ TC-C3-001 登记成功 ══

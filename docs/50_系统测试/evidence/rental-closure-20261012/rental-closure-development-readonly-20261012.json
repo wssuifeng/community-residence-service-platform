@@ -1,0 +1,104 @@
+{
+  "scope": "rental-closure",
+  "date": "2026-10-12",
+  "transactionsExecuted": false,
+  "businessWrites": false,
+  "checks": [
+    {
+      "name": "开发数据库身份",
+      "passed": true
+    },
+    {
+      "name": "V32迁移有效",
+      "passed": true
+    },
+    {
+      "name": "运行申请DTO包含houseId",
+      "passed": true
+    },
+    {
+      "name": "运行申请DTO包含housingId",
+      "passed": true
+    },
+    {
+      "name": "运行申请DTO包含relationType",
+      "passed": true
+    },
+    {
+      "name": "运行申请VO包含housingId",
+      "passed": true
+    },
+    {
+      "name": "运行申请VO包含listedMonthlyRent",
+      "passed": true
+    },
+    {
+      "name": "运行申请VO包含listedDeposit",
+      "passed": true
+    },
+    {
+      "name": "运行管理挂牌VO包含occupancy",
+      "passed": true
+    },
+    {
+      "name": "运行管理挂牌VO包含applicationId",
+      "passed": true
+    },
+    {
+      "name": "运行管理挂牌VO包含leaseId",
+      "passed": true
+    },
+    {
+      "name": "正式关系唯一关联约束",
+      "passed": true
+    },
+    {
+      "name": "来源挂牌外键有效",
+      "passed": true
+    },
+    {
+      "name": "开发渠道继续停用",
+      "passed": true
+    },
+    {
+      "name": "运行中图片契约包含6张限制",
+      "passed": true
+    },
+    {
+      "name": "现有房屋挂牌卡片可加载",
+      "passed": true
+    },
+    {
+      "name": "现有居民列表可加载",
+      "passed": true
+    },
+    {
+      "name": "前端5176可访问",
+      "passed": true
+    },
+    {
+      "name": "核查期间业务数据不变",
+      "passed": true
+    },
+    {
+      "name": "迁移及同步前后业务数量不变",
+      "passed": true
+    }
+  ],
+  "before": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "after": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ]
+}

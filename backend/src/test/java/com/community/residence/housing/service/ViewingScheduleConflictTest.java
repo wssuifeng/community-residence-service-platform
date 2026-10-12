@@ -7,6 +7,7 @@ import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.context.SecurityUtils;
 import com.community.residence.common.context.UserContext;
 import com.community.residence.common.exception.BusinessException;
+import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.housing.dto.CreateViewingAppointmentDTO;
 import com.community.residence.housing.entity.Housing;
@@ -211,18 +212,13 @@ class ViewingScheduleConflictTest {
     }
 
     @Test
-    @DisplayName("游客预约（userId=null）跳过日程冲突检查：仅同房源冲突检测，不触达两域日程查询")
-    void create_guest_skipsScheduleCheck() {
-        when(appointmentMapper.selectCount(any())).thenReturn(0L);
-        when(appointmentMapper.insert(any(ViewingAppointment.class))).thenReturn(1);
-
-        ViewingAppointmentVO vo = invokeGuestCreate(LocalTime.of(10, 0), LocalTime.of(11, 0));
-
-        assertThat(vo.getStatus()).isEqualTo("TO_CONFIRM");
-        /* 日程冲突检查被跳过：两域查询均不触达；同房源冲突检查恰好一次 */
-        verify(appointmentMapper, never()).selectList(any());
+    @DisplayName("游客新建看房预约被拒绝：预约能力收归注册居民账号")
+    void create_guest_rejected() {
+        assertThatThrownBy(() -> invokeGuestCreate(LocalTime.of(10, 0), LocalTime.of(11, 0)))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessageContaining("只有注册并登录的居民账号可预约看房");
+        verify(appointmentMapper, never()).selectCount(any());
         verify(resourceReservationMapper, never()).selectCount(any());
-        verify(appointmentMapper, org.mockito.Mockito.times(1)).selectCount(any());
     }
 
     /* ---- 脚手架 ---- */
@@ -268,5 +264,9 @@ class ViewingScheduleConflictTest {
         t.setEndTime(LocalTime.of(18, 0));
         t.setIsAvailable(1);
         return t;
+    }
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
     }
 }

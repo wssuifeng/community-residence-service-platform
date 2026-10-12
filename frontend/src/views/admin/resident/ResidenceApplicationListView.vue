@@ -1,13 +1,15 @@
 <script setup lang="ts">
 /** 入住申请（「租住与房源」Hub 的入住申请 Tab，批次 g 由「居民」页迁入）：
- *  状态筛选 + 通过（生成居住关系与待签约租住记录）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
-import { onMounted, reactive, ref } from 'vue'
+ *  状态筛选 + 通过（租客只生成待签约租约）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
+import { onMounted, reactive, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import {
   approveResidenceApplication,
   getResidenceApplicationList,
+  getResidenceApplication,
   rejectResidenceApplication
 } from '@/api/resident'
 import type {
@@ -21,6 +23,17 @@ import FilterPanel from '@/components/common/FilterPanel.vue'
 import Pagination from '@/components/common/Pagination.vue'
 
 const emit = defineEmits<{ reviewed: [] }>()
+const route = useRoute()
+/* 占用入口指向明确申请，不按居民或房屋猜最新；隐藏的Hub面板不弹窗。 */
+watch(() => [route.query.tab, route.query.applicationId], async ([tab, rawId]) => {
+  const id = Number(rawId)
+  if (tab !== 'applications' || !Number.isSafeInteger(id) || id <= 0) return
+  try {
+    const target = await getResidenceApplication(id)
+    if (route.query.tab === 'applications' && Number(route.query.applicationId) === id && target.status === 'PENDING') openApprove(target)
+  } catch { /* 统一请求层提示无权或已不存在，不退回猜测申请。 */ }
+})
+
 
 const records = ref<IResidenceApplication[]>([])
 const loading = ref(false)
@@ -75,7 +88,7 @@ function handleReset(): void {
   load()
 }
 
-/* 审批通过：填写租住起止/租金（通过后自动创建居住关系与租住记录） */
+/* 租客审核只生成待签约租约；正式关系延后至首期成功。 */
 const approveVisible = ref(false)
 const approveLoading = ref(false)
 const approveFormRef = ref<FormInstance>()
@@ -100,8 +113,8 @@ function openApprove(row: IResidenceApplication): void {
   Object.assign(approveForm, {
     leaseStartDate: todayISO(),
     leaseEndDate: '',
-    monthlyRent: undefined,
-    depositAmount: undefined,
+    monthlyRent: row.listedMonthlyRent ?? undefined,
+    depositAmount: row.housingId ? (row.listedDeposit ?? 0) : undefined,
     remark: ''
   })
   approveVisible.value = true
@@ -121,7 +134,7 @@ async function handleApprove(): Promise<void> {
       deposit: approveForm.depositAmount,
       remark: approveForm.remark.trim() || undefined
     })
-    ElMessage.success('审批通过，已创建居住关系与租住记录')
+    ElMessage.success(approveTarget.value?.relationType === 'TENANT' ? '审批通过，已生成待签约租约；首期成功后正式入住' : '审批通过，已建立居住关系')
     approveVisible.value = false
     load()
     emit('reviewed')
@@ -163,7 +176,13 @@ async function handleReject(row: IResidenceApplication): Promise<void> {
   }
 }
 
-onMounted(load)
+onMounted(async () => {
+  await load()
+  const id = Number(route.query.applicationId)
+  if (route.query.tab === 'applications' && Number.isSafeInteger(id) && id > 0) {
+    try { const target = await getResidenceApplication(id); if (route.query.tab === 'applications' && Number(route.query.applicationId) === id && target.status === 'PENDING') openApprove(target) } catch { /* 请求层统一提示。 */ }
+  }
+})
 </script>
 
 <template>
@@ -236,7 +255,7 @@ onMounted(load)
     <el-dialog v-model="approveVisible" title="审批通过" width="520px">
       <el-alert
         v-if="approveTarget"
-        :title="`通过后将为「${approveTarget.residentName}」自动创建「${approveTarget.houseLocation}」的居住关系与租住记录`"
+        :title="approveTarget.relationType === 'TENANT' ? `通过后为「${approveTarget.residentName}」生成待签约租约，正式关系在协议确认且首期成功后建立` : `通过后为「${approveTarget.residentName}」建立居住关系`"
         type="info"
         :closable="false"
         class="approve-tip"
@@ -259,6 +278,12 @@ onMounted(load)
             placeholder="选择结束日期"
             style="width: 100%"
           />
+        </el-form-item>
+        <el-form-item label="来源挂牌">
+          <span>{{ approveTarget?.housingId ? `挂牌 #${approveTarget.housingId}` : '历史申请未记录来源，请人工核对金额' }}</span>
+        </el-form-item>
+        <el-form-item label="申请时价格">
+          <span>{{ approveTarget?.listedMonthlyRent != null ? `月租 ¥${approveTarget.listedMonthlyRent} / 押金 ¥${approveTarget.listedDeposit ?? 0}` : '未记录，不按最新挂牌猜测' }}</span>
         </el-form-item>
         <el-form-item label="月租金（元）" prop="monthlyRent">
           <el-input-number

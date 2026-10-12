@@ -22,4 +22,8 @@ public interface AuthTokenBlacklistMapper extends BaseMapper<AuthTokenBlacklist>
     @Select("SELECT MAX(blacklist_time) FROM auth_token_blacklist "
             + "WHERE jti LIKE #{jtiPrefix} AND reason = 'PERMISSION_CHANGE' AND expire_time > NOW()")
     LocalDateTime selectLatestRevocationTime(@Param("jtiPrefix") String jtiPrefix);
+    /* 已提交吊销记录的递增主键作为权限代次，避免秒级时间相等时误伤重新登录。 */
+    @Select("SELECT MAX(id) FROM auth_token_blacklist "
+            + "WHERE jti LIKE #{jtiPrefix} AND reason = 'PERMISSION_CHANGE' AND expire_time > NOW()")
+    Long selectLatestRevocationId(@Param("jtiPrefix") String jtiPrefix);
 }

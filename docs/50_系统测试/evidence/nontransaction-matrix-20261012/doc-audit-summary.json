@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-12",
+  "mode": "read-only",
+  "initialErrors": 1666,
+  "finalErrors": 1663,
+  "categories": {
+    "broken-link": 309,
+    "acceptance-missing": 3,
+    "status-symbol-out-of-scope": 1350,
+    "dependency-mismatch": 1
+  },
+  "newIssues": 0,
+  "passed": false,
+  "businessAcceptance": "not_evaluated",
+  "scope": "本批只修当前状态口径与触及行，历史全库问题不批量关闭。"
+}

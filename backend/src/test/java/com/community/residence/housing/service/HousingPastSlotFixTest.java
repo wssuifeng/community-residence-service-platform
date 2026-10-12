@@ -248,4 +248,8 @@ class HousingPastSlotFixTest {
         verify(appointmentMapper).insert(captor.capture());
         assertThat(captor.getValue().getAppointmentDate()).isEqualTo(tomorrow);
     }
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
+    }
 }

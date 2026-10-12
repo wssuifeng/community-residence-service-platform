@@ -1,0 +1,14 @@
+{
+  "database": "community_residence",
+  "migration": "31",
+  "counts": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "businessWrites": false,
+  "transactionsExecuted": false
+}

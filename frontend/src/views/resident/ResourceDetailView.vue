@@ -27,6 +27,12 @@ const loading = ref(true)
 /** 资源不属于当前登录居民的入住社区：按三段流的社区分配口径拒绝展示预约入口 */
 const notInMyCommunity = ref(false)
 
+/** 画廊当前主图下标（多图时经缩略图切换） */
+const activeImage = ref(0)
+
+/** 资源图片（契约：无图为空数组 []；旧后端缺字段时同样按无图处理，回退类型图标） */
+const images = computed<string[]>(() => resource.value?.images ?? [])
+
 /** 资源类型 → 线性 SVG 图标（与列表页一致） */
 function typeIcon(type: ResourceType): string {
   switch (type) {
@@ -136,6 +142,7 @@ async function load(): Promise<void> {
       return
     }
     resource.value = detail
+    activeImage.value = 0
     const slotPage = await getTimeslotList(resourceId, { page: 1, size: 100 })
     templates.value = slotPage.records
     void loadBookableSlots()
@@ -171,12 +178,32 @@ onMounted(load)
 
     <template v-else-if="resource">
       <div class="detail-layout">
-        <!-- 左：资源主视觉（无图片字段，类型图标大块占位） -->
-        <div class="gallery">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <path :d="typeIcon(resource.type)" />
-          </svg>
-          <span class="gallery-type">{{ resourceTypeLabels[resource.type] ?? resource.type }}</span>
+        <!-- 左：资源主视觉（有图=主图 + 缩略图切换，无图回退类型图标大块占位） -->
+        <div class="gallery-wrap">
+          <div class="gallery">
+            <img
+              v-if="images.length > 0"
+              class="gallery-main"
+              :src="images[activeImage]"
+              :alt="resource.name"
+            />
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <path :d="typeIcon(resource.type)" />
+            </svg>
+            <span class="gallery-type">{{ resourceTypeLabels[resource.type] ?? resource.type }}</span>
+          </div>
+          <div v-if="images.length > 1" class="gallery-thumbs">
+            <button
+              v-for="(image, index) in images"
+              :key="index"
+              type="button"
+              class="gallery-thumb"
+              :class="{ active: activeImage === index }"
+              @click="activeImage = index"
+            >
+              <img :src="image" :alt="`${resource.name} - 缩略图 ${index + 1}`" />
+            </button>
+          </div>
         </div>
 
         <!-- 右：信息面板 + 预约入口 -->
@@ -315,7 +342,12 @@ onMounted(load)
   align-items: start;
 }
 
-/* 资源主视觉：主色浅底 + 大号类型图标 */
+/* 资源主视觉：有图=16:9 大图（cover），无图=主色浅底 + 大号类型图标 */
+.gallery-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
 .gallery {
   position: relative;
   display: flex;
@@ -328,10 +360,67 @@ onMounted(load)
   color: var(--color-primary);
 }
 
+.gallery-main {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .gallery svg {
   width: 132px;
   height: 132px;
   opacity: 0.9;
+}
+
+/* 缩略图条（多图切换）：横向滚动，hover 才显滚动条；选中态主色描边（与房源详情同款） */
+.gallery-thumbs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-xs);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.gallery-thumbs:hover {
+  scrollbar-color: var(--color-text-disabled) transparent;
+}
+
+.gallery-thumbs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.gallery-thumbs::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--radius-pill);
+}
+
+.gallery-thumbs:hover::-webkit-scrollbar-thumb {
+  background: var(--color-text-disabled);
+}
+
+.gallery-thumb {
+  flex-shrink: 0;
+  width: 120px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--color-bg-hover);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.gallery-thumb.active {
+  border-color: var(--color-primary);
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .gallery-type {

@@ -1,0 +1,47 @@
+{
+  "purpose": "核对既有CF-E4完整流转与通知深链证据；2026-10-12只做证据映射，未重跑原场景。",
+  "sourceDate": "2026-10-10",
+  "sources": [
+    {
+      "path": "output/playwright/cf-e11-workorder-notification-audit-20261010.json",
+      "sha256": "56f2d46b7d669ef1c66283b638e187ff570d150adc0790aafe02b65a67446bd2"
+    },
+    {
+      "path": "output/playwright/cf-e11-notification-ui-deeplink-20261010.json",
+      "sha256": "5a20f23a3e97b08cc317370f620c372404eee75cb43398d91bbaea800a737d20"
+    }
+  ],
+  "roles": [
+    {
+      "role": "resident1",
+      "detailHttp": 200,
+      "finalStatus": "CLOSED",
+      "deepLinkPassed": true,
+      "pageErrors": [],
+      "expectedOptional404": [
+        "404 GET http://127.0.0.1:5174/api/v1/work-orders/1/evaluation"
+      ]
+    },
+    {
+      "role": "admin1",
+      "detailHttp": 200,
+      "finalStatus": "CLOSED",
+      "deepLinkPassed": true,
+      "pageErrors": [],
+      "expectedOptional404": []
+    },
+    {
+      "role": "staff1",
+      "detailHttp": 200,
+      "finalStatus": "CLOSED",
+      "deepLinkPassed": true,
+      "pageErrors": [],
+      "expectedOptional404": []
+    },
+    {
+      "role": "superadmin",
+      "detailHttp": 200,
+      "finalStatus": "CLOSED"
+    }
+  ]
+}

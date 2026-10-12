@@ -94,6 +94,7 @@ class ViewingNotificationFixTest {
         appointment.setAppointmentDate(LocalDate.now().plusDays(3));
         appointment.setStatus("TO_CONFIRM");
         lenient().when(appointmentMapper.selectById(1L)).thenReturn(appointment);
+        lenient().when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(appointment);
         lenient().when(appointmentMapper.updateById(any(ViewingAppointment.class))).thenReturn(1);
     }
 
@@ -248,6 +249,10 @@ class ViewingNotificationFixTest {
         mocked.when(() -> com.community.residence.common.context.SecurityUtils.hasRole("SUPER_ADMIN"))
                 .thenReturn(false);
         return mocked;
+    }
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
     }
 }
 

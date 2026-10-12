@@ -6,26 +6,145 @@
     "locale": "zh-CN",
     "output": "02_租住记录状态机图.html",
     "quality_profile": "showcase",
-    "viewBox": [980, 720]
+    "viewBox": [
+      980,
+      720
+    ]
   },
   "lanes": [
-    { "id": "main", "label": "主流程" },
-    { "id": "terminal", "label": "终态" }
+    {
+      "id": "main",
+      "label": "主流程"
+    },
+    {
+      "id": "terminal",
+      "label": "终态"
+    }
   ],
   "states": [
-    { "id": "PENDING", "type": "start", "label": "待审核", "sublabel": "租住登记申请", "lane": "main", "col": 0, "step": "01" },
-    { "id": "TO_SIGN", "type": "waiting", "label": "待签约", "sublabel": "协议确认后生效", "lane": "main", "col": 1, "step": "02", "tag": "新增（R66）" },
-    { "id": "ACTIVE", "type": "active", "label": "已生效", "sublabel": "租期进行中", "lane": "main", "col": 2, "step": "03", "tag": "自动标注" },
-    { "id": "MOVED_OUT", "type": "waiting", "label": "已搬出", "sublabel": "搬出登记（R70）", "lane": "main", "col": 3, "step": "04" },
-    { "id": "ARCHIVED", "type": "success", "label": "已归档", "sublabel": "归档后不可修改（R16）", "lane": "main", "col": 4, "step": "05", "tag": "终态" },
-    { "id": "REJECTED", "type": "failure", "label": "已驳回", "sublabel": "附理由，租约群聊终止", "lane": "terminal", "col": 0, "tag": "终态" }
+    {
+      "id": "PENDING",
+      "type": "start",
+      "label": "待审核",
+      "sublabel": "租住登记申请",
+      "lane": "main",
+      "col": 0,
+      "step": "01"
+    },
+    {
+      "id": "TO_SIGN",
+      "type": "waiting",
+      "label": "待签约",
+      "sublabel": "首期成功后生效",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "新增（R66）"
+    },
+    {
+      "id": "ACTIVE",
+      "type": "active",
+      "label": "已生效",
+      "sublabel": "租期进行中",
+      "lane": "main",
+      "col": 2,
+      "step": "03",
+      "tag": "自动标注"
+    },
+    {
+      "id": "MOVED_OUT",
+      "type": "waiting",
+      "label": "已搬出",
+      "sublabel": "搬出登记（R70）",
+      "lane": "main",
+      "col": 3,
+      "step": "04"
+    },
+    {
+      "id": "ARCHIVED",
+      "type": "success",
+      "label": "已归档",
+      "sublabel": "归档后不可修改（R16）",
+      "lane": "main",
+      "col": 4,
+      "step": "05",
+      "tag": "终态"
+    },
+    {
+      "id": "REJECTED",
+      "type": "failure",
+      "label": "已驳回",
+      "sublabel": "附理由，租约群聊终止",
+      "lane": "terminal",
+      "col": 0,
+      "tag": "终态"
+    }
   ],
   "transitions": [
-    { "id": "approve", "from": "PENDING", "to": "TO_SIGN", "label": "审核通过", "labelAt": [171, 202] },
-    { "id": "sign", "from": "TO_SIGN", "to": "ACTIVE", "label": "双方在线确认", "note": "承租确认（前置）", "labelAt": [325, 202] },
-    { "id": "move-out", "from": "ACTIVE", "to": "MOVED_OUT", "label": "搬出登记（R70）", "labelAt": [479, 202] },
-    { "id": "archive", "from": "MOVED_OUT", "to": "ARCHIVED", "label": "归档", "labelAt": [633, 202] },
-    { "id": "reject", "from": "PENDING", "to": "REJECTED", "label": "审核驳回", "variant": "security", "fromSide": "bottom", "toSide": "top", "via": [[94, 330], [402, 330]], "labelAt": [160, 250] }
+    {
+      "id": "approve",
+      "from": "PENDING",
+      "to": "TO_SIGN",
+      "label": "审核通过",
+      "labelAt": [
+        171,
+        202
+      ]
+    },
+    {
+      "id": "sign",
+      "from": "TO_SIGN",
+      "to": "ACTIVE",
+      "label": "首期支付成功",
+      "note": "协议已SIGNED",
+      "labelAt": [
+        325,
+        202
+      ]
+    },
+    {
+      "id": "move-out",
+      "from": "ACTIVE",
+      "to": "MOVED_OUT",
+      "label": "搬出登记（R70）",
+      "labelAt": [
+        479,
+        202
+      ]
+    },
+    {
+      "id": "archive",
+      "from": "MOVED_OUT",
+      "to": "ARCHIVED",
+      "label": "归档",
+      "labelAt": [
+        633,
+        202
+      ]
+    },
+    {
+      "id": "reject",
+      "from": "PENDING",
+      "to": "REJECTED",
+      "label": "审核驳回",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          94,
+          330
+        ],
+        [
+          402,
+          330
+        ]
+      ],
+      "labelAt": [
+        160,
+        250
+      ]
+    }
   ],
   "cards": [
     {
@@ -33,8 +152,8 @@
       "title": "主流程",
       "items": [
         "待审核 → 待签约 → 已生效 → 已搬出 → 已归档，主流程逐个阶段推进",
-        "审核通过只到「待签约」：房屋不置已入住，居住关系按 R9 建立（R66）",
-        "承租确认是发起协议的前置条件，本身不改变租约状态；协议双方在线确认才置「已生效」"
+        "审核只建待签约租约与群聊，协议完成且首期成功才建立正式租客关系与房屋入住",
+        "管理方发出即同意，居民同意具体正文；SIGNED仍待首期，FIRST成功同事务激活且幂等"
       ]
     },
     {
@@ -49,7 +168,7 @@
       "dot": "rose",
       "title": "终态",
       "items": [
-        "已驳回为终态：待审核驳回附理由（申请撤回不改租约状态，租约维持待签约），租约群聊同时终止",
+        "待审核或待签约可驳回；取消待签约租约终止本链协议/群聊，释放占用但不覆盖人工下线",
         "已归档为生命周期终点：归档后记录不可修改（R16），历史可查"
       ]
     }

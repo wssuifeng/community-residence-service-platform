@@ -49,6 +49,10 @@ class LeaseServiceTest {
     @Mock
     private LeaseChangeLogService changeLogService;
 
+    @Mock private com.community.residence.payment.mapper.LeasePaymentMapper paymentMapper;
+    @Mock private com.community.residence.resident.mapper.ResidenceRelationMapper relationMapper;
+    @Mock private com.community.residence.agreement.mapper.LeaseAgreementMapper agreementMapper;
+    @Mock private com.community.residence.conversation.service.ConversationService conversationService;
     @InjectMocks
     private LeaseService leaseService;
 
@@ -56,6 +60,9 @@ class LeaseServiceTest {
 
     @BeforeEach
     void setUp() {
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""), com.community.residence.agreement.entity.LeaseAgreement.class);
+        org.mockito.Mockito.lenient().when(paymentMapper.selectCount(org.mockito.ArgumentMatchers.any())).thenReturn(1L);
+
         activeLease = new LeaseRecord();
         activeLease.setId(1L);
         activeLease.setTenantId(1L);
@@ -94,6 +101,7 @@ class LeaseServiceTest {
             pending.setCommunityId(1L);
             pending.setStatus("PENDING");
             when(leaseMapper.selectById(1L)).thenReturn(pending);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(pending);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
             dto.setStatus("ARCHIVED");
@@ -113,6 +121,7 @@ class LeaseServiceTest {
             pending.setCommunityId(1L);
             pending.setStatus("PENDING");
             when(leaseMapper.selectById(1L)).thenReturn(pending);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(pending);
             when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
@@ -120,8 +129,11 @@ class LeaseServiceTest {
             leaseService.updateStatus(1L, dto);
             assertThat(pending.getStatus()).isEqualTo("TO_SIGN");
 
-            dto.setStatus("ACTIVE");
-            leaseService.updateStatus(1L, dto);
+            pending.setHouseId(1L); pending.setTenantId(1L);
+            com.community.residence.community.entity.House vacant = new com.community.residence.community.entity.House(); vacant.setId(1L); vacant.setStatus("VACANT");
+            when(houseMapper.selectById(1L)).thenReturn(vacant);
+            pending.setAgreementStatus("SIGNED");
+            leaseService.applyTransition(pending, "ACTIVE", "居民已同意具体协议");
             assertThat(pending.getStatus()).isEqualTo("ACTIVE");
 
             dto.setStatus("MOVED_OUT");
@@ -134,6 +146,7 @@ class LeaseServiceTest {
     @DisplayName("到期标注：ACTIVE 且结束日在 30 天内 → EXPIRING")
     void toVO_expiringFlag() {
         when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             var vo = leaseService.getById(1L);
@@ -146,6 +159,7 @@ class LeaseServiceTest {
     void toVO_expiredFlag() {
         activeLease.setEndDate(LocalDate.now().minusDays(1));
         when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             var vo = leaseService.getById(1L);

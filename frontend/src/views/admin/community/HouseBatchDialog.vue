@@ -176,6 +176,8 @@ const duplicatedNumbers = computed(() => [
   )
 ])
 
+const selectedBuilding = computed(() => formBuildings.value.find(item => item.id === formBuildingId.value))
+
 async function handleFormCommunityChange(): Promise<void> {
   formBuildingId.value = ''
   form.unitId = undefined
@@ -289,6 +291,7 @@ watch(visible, (value) => {
 async function handleSubmit(): Promise<void> {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid || form.unitId === undefined) return
+  if (!selectedBuilding.value || form.floorEnd > selectedBuilding.value.floors) { ElMessage.error("建房楼层不能超过所选楼栋的总层数"); return }
   if (generatedRows.value.length === 0) {
     ElMessage.error('当前生成清单为空，请调整楼层/房号范围或跳过规则')
     return
@@ -389,9 +392,9 @@ async function handleSubmit(): Promise<void> {
       <div class="batch-section">生成规则</div>
       <el-form-item label="楼层范围">
         <div class="range-inputs">
-          <el-input-number v-model="form.floorStart" :min="1" :max="99" />
+          <el-input-number v-model="form.floorStart" :min="1" :max="selectedBuilding?.floors" />
           <span class="range-sep">至</span>
-          <el-input-number v-model="form.floorEnd" :min="form.floorStart" :max="99" />
+          <el-input-number v-model="form.floorEnd" :min="form.floorStart" :max="selectedBuilding?.floors" />
           <span class="range-sep">层</span>
         </div>
       </el-form-item>

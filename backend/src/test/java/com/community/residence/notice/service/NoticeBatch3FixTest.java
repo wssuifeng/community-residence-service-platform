@@ -243,4 +243,6 @@ class NoticeBatch3FixTest {
         dto.setPublishTime(LocalDateTime.of(2026, 9, 14, 12, 0));
         return dto;
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

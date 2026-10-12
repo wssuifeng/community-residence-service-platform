@@ -77,6 +77,10 @@ class LeaseSigningClosureTest {
     @Mock
     private SysAdminCommunityMapper sysAdminCommunityMapper;
 
+    @Mock private com.community.residence.payment.mapper.LeasePaymentMapper paymentMapper;
+    @Mock private com.community.residence.resident.mapper.ResidenceRelationMapper relationMapper;
+    @Mock private com.community.residence.agreement.mapper.LeaseAgreementMapper agreementMapper;
+    @Mock private com.community.residence.conversation.service.ConversationService conversationService;
     @InjectMocks
     private LeaseService leaseService;
 
@@ -84,89 +88,22 @@ class LeaseSigningClosureTest {
 
     @BeforeEach
     void setUp() {
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""), com.community.residence.agreement.entity.LeaseAgreement.class);
+        org.mockito.Mockito.lenient().when(paymentMapper.selectCount(org.mockito.ArgumentMatchers.any())).thenReturn(1L);
+
         toSignLease = new LeaseRecord();
         toSignLease.setId(LEASE_ID);
         toSignLease.setTenantId(RESIDENT_ID);
         toSignLease.setCommunityId(3L);
         toSignLease.setHouseId(5L);
         toSignLease.setStatus("TO_SIGN");
+        toSignLease.setAgreementStatus("SIGNED");
         toSignLease.setStartDate(LocalDate.now());
         toSignLease.setEndDate(LocalDate.now().plusMonths(12));
         toSignLease.setConversationId(66L);
         Resident resident = new Resident();
         resident.setRealName("张居民");
         when(residentMapper.selectById(RESIDENT_ID)).thenReturn(resident);
-    }
-
-    @Test
-    @DisplayName("承租确认：本人待签约租约写入 tenant_confirm_at/by 并通知本社区管理员")
-    void tenancyConfirm_ownToSignLease_writesTraceAndNotifiesAdmins() {
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
-            when(leaseMapper.selectById(LEASE_ID)).thenReturn(toSignLease);
-            SysAdminCommunity binding = new SysAdminCommunity();
-            binding.setAdminId(ADMIN_ID);
-            binding.setCommunityId(3L);
-            when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of(binding));
-
-            LeaseVO vo = leaseService.tenancyConfirm(LEASE_ID);
-
-            assertThat(vo.getTenantConfirmAt()).isNotNull();
-            assertThat(vo.getTenantConfirmBy()).isEqualTo(RESIDENT_ID);
-            assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
-            verify(leaseMapper).updateById(toSignLease);
-            verify(notificationService).createForUser(eq(ADMIN_ID), eq(3L), eq("居民已确认承租"),
-                    anyString(), eq("LEASE"), eq("LEASE_TENANCY"), eq(LEASE_ID));
-        }
-    }
-
-    @Test
-    @DisplayName("承租确认幂等：重复确认不覆盖首次留痕、不重复通知")
-    void tenancyConfirm_repeat_keepsFirstTrace() {
-        toSignLease.setTenantConfirmAt(java.time.LocalDateTime.now().minusHours(2));
-        toSignLease.setTenantConfirmBy(RESIDENT_ID);
-        java.time.LocalDateTime first = toSignLease.getTenantConfirmAt();
-
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
-            when(leaseMapper.selectById(LEASE_ID)).thenReturn(toSignLease);
-
-            LeaseVO vo = leaseService.tenancyConfirm(LEASE_ID);
-
-            assertThat(vo.getTenantConfirmAt()).isEqualTo(first);
-            verify(leaseMapper, never()).updateById(any(LeaseRecord.class));
-            verify(notificationService, never()).createForUser(anyLong(), anyLong(), anyString(),
-                    anyString(), anyString(), anyString(), anyLong());
-            verify(notificationService, never()).createForResident(anyLong(), anyLong(), anyString(),
-                    anyString(), anyString(), anyString(), anyLong());
-        }
-    }
-
-    @Test
-    @DisplayName("承租确认越权：非本人 403")
-    void tenancyConfirm_othersLease_forbidden() {
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(999L);
-            when(leaseMapper.selectById(LEASE_ID)).thenReturn(toSignLease);
-
-            assertThatThrownBy(() -> leaseService.tenancyConfirm(LEASE_ID))
-                    .isInstanceOf(ForbiddenException.class);
-        }
-    }
-
-    @Test
-    @DisplayName("承租确认状态约束：非待签约拒绝 LEASE_STATUS_INVALID(5602)")
-    void tenancyConfirm_nonToSign_rejected() {
-        toSignLease.setStatus("ACTIVE");
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
-            when(leaseMapper.selectById(LEASE_ID)).thenReturn(toSignLease);
-
-            assertThatThrownBy(() -> leaseService.tenancyConfirm(LEASE_ID))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
-                            .isEqualTo(ErrorCode.LEASE_STATUS_INVALID));
-        }
     }
 
     @Test
@@ -214,7 +151,8 @@ class LeaseSigningClosureTest {
                 notificationService,
                 org.mockito.Mockito.mock(org.springframework.messaging.simp.SimpMessagingTemplate.class),
                 org.mockito.Mockito.mock(com.community.residence.messaging.service.WebSocketSessionService.class),
-                org.mockito.Mockito.mock(com.community.residence.conversation.service.ConversationService.class));
+                org.mockito.Mockito.mock(com.community.residence.conversation.service.ConversationService.class),
+                org.mockito.Mockito.mock(com.community.residence.auth.service.TokenRevocationService.class));
 
         ViewingAppointment appointment = new ViewingAppointment();
         appointment.setId(31L);
@@ -243,6 +181,7 @@ class LeaseSigningClosureTest {
     @DisplayName("状态流转到已生效：房屋置已入住（TO_SIGN → ACTIVE 联动）")
     void applyTransition_toActive_marksHouseOccupied() {
         House house = new House();
+        house.setStatus("VACANT");
         house.setId(5L);
         house.setCommunityId(3L);
         house.setStatus("VACANT");

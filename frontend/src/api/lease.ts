@@ -56,15 +56,7 @@ export function getLeaseChanges(id: number) {
   return http.get<ILeaseChange[]>(`/leases/${id}/changes`)
 }
 
-/* ------------------------- R67 承租确认（V20 租住签约闭环） ------------------------- */
 
-/**
- * 承租确认（R67）：居民本人对「待签约」租约确认承租，记录确认人与时间。
- * 幂等且不覆盖首次留痕；确认后管理方方可发起租赁协议。
- */
-export function confirmTenancy(id: number) {
-  return http.post<ILeaseRecord>(`/leases/${id}/tenancy-confirm`)
-}
 
 /* ------------------------- R69 租约关联看房预约（V20） ------------------------- */
 

@@ -1,0 +1,211 @@
+{
+  "date": "2026-10-11",
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "隔离库身份",
+      "passed": true
+    },
+    {
+      "name": "社区保存责任人ID并回显资料",
+      "passed": true
+    },
+    {
+      "name": "非管理员账号不能绑定",
+      "passed": true
+    },
+    {
+      "name": "超级管理员不能绑定",
+      "passed": true
+    },
+    {
+      "name": "不存在账号不能绑定",
+      "passed": true
+    },
+    {
+      "name": "候选含其他ADMIN且本社区绑定优先",
+      "passed": true
+    },
+    {
+      "name": "候选不泄露密码字段",
+      "passed": true
+    },
+    {
+      "name": "跨社区不能查询责任人候选",
+      "passed": true
+    },
+    {
+      "name": "账号资料变更同步联系人",
+      "passed": true
+    },
+    {
+      "name": "已绑定责任人不能改为服务人员",
+      "passed": true
+    },
+    {
+      "name": "清空责任人后数据库引用为空",
+      "passed": true
+    },
+    {
+      "name": "6层楼拒绝第9层房屋",
+      "passed": true
+    },
+    {
+      "name": "先修改楼栋属性后可建第9层",
+      "passed": true
+    },
+    {
+      "name": "已有9层房屋拒绝降至6层",
+      "passed": true
+    },
+    {
+      "name": "1000层属性与第1000层房屋允许",
+      "passed": true
+    },
+    {
+      "name": "1000层楼拒绝1001层",
+      "passed": true
+    },
+    {
+      "name": "编辑房屋同样不能超出楼层",
+      "passed": true
+    },
+    {
+      "name": "批量超层仅失败行不写入",
+      "passed": true
+    },
+    {
+      "name": "并发建房与降层第1轮无虚空层",
+      "passed": true
+    },
+    {
+      "name": "并发建房与降层第2轮无虚空层",
+      "passed": true
+    },
+    {
+      "name": "并发建房与降层第3轮无虚空层",
+      "passed": true
+    },
+    {
+      "name": "并发建房与降层第4轮无虚空层",
+      "passed": true
+    },
+    {
+      "name": "批量户型修改数量",
+      "passed": true
+    },
+    {
+      "name": "真实房屋与挂牌户型同步",
+      "passed": true
+    },
+    {
+      "name": "选区包含不存在项整体拒绝",
+      "passed": true
+    },
+    {
+      "name": "拒绝后房屋值不变",
+      "passed": true
+    },
+    {
+      "name": "单屋编辑同步挂牌",
+      "passed": true
+    },
+    {
+      "name": "单屋清空户型同步挂牌",
+      "passed": true
+    },
+    {
+      "name": "多选清空户型同步挂牌",
+      "passed": true
+    },
+    {
+      "name": "空选区不能提交",
+      "passed": true
+    },
+    {
+      "name": "跨权限选区整体拒绝",
+      "passed": true
+    },
+    {
+      "name": "跨权限拒绝后原屋和挂牌不变",
+      "passed": true
+    },
+    {
+      "name": "被选责任人不会自动得到社区管理权",
+      "passed": true
+    },
+    {
+      "name": "结构生成统一户型",
+      "passed": true
+    },
+    {
+      "name": "数据库已移除房间数",
+      "passed": true
+    },
+    {
+      "name": "现行OpenAPI无roomCount",
+      "passed": true
+    },
+    {
+      "name": "右键保留两个已选卡片",
+      "passed": true
+    },
+    {
+      "name": "真实卡片弹窗保存后房屋同步",
+      "passed": true
+    },
+    {
+      "name": "真实弹窗保存后挂牌同步",
+      "passed": true
+    },
+    {
+      "name": "1024结构页无页面级横向溢出",
+      "passed": true
+    },
+    {
+      "name": "768结构页无页面级横向溢出",
+      "passed": true
+    },
+    {
+      "name": "单屋户型实际可见而非原生template隐藏",
+      "passed": true
+    },
+    {
+      "name": "单屋表单上限随9层楼属性",
+      "passed": true
+    },
+    {
+      "name": "社区表单使用责任人账号选择",
+      "passed": true
+    },
+    {
+      "name": "电话只读不能独立填写",
+      "passed": true
+    },
+    {
+      "name": "独立页面无脚本异常",
+      "passed": true
+    },
+    {
+      "name": "交易记录无变化",
+      "passed": true
+    }
+  ],
+  "cleanup": true,
+  "before": [
+    "0",
+    "0"
+  ],
+  "browser": {
+    "pageErrors": [],
+    "screenshots": [
+      "output/playwright/bg-structure-1024-20261011.png",
+      "output/playwright/bg-structure-768-20261011.png"
+    ]
+  },
+  "after": [
+    "0",
+    "0"
+  ]
+}

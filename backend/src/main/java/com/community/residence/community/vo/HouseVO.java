@@ -33,9 +33,6 @@ public class HouseVO {
     @Schema(description = "建筑面积（平方米）")
     private BigDecimal area;
 
-    @Schema(description = "房间数")
-    private Integer roomCount;
-
     @Schema(description = "户型")
     private String layout;
 
@@ -59,7 +56,6 @@ public class HouseVO {
         vo.setHouseNumber(entity.getHouseNumber());
         vo.setFloor(entity.getFloor());
         vo.setArea(entity.getArea());
-        vo.setRoomCount(entity.getRoomCount());
         vo.setLayout(entity.getLayout());
         vo.setOrientation(entity.getOrientation());
         vo.setStatus(entity.getStatus());

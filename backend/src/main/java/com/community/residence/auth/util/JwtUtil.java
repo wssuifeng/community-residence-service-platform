@@ -36,6 +36,11 @@ public class JwtUtil {
 
     /** 签发 Access Token：jti 全局唯一（UUID），登出黑名单以 jti 为键 */
     public String generateToken(Long userId, String username, String role) {
+        return generateToken(userId, username, role, null);
+    }
+
+    /** 新登录附带签名保护的权限代次；不将社区绑定写入JWT，旧签发入口保持兼容。 */
+    public String generateToken(Long userId, String username, String role, Long revision) {
         Date now = new Date();
         Date expire = new Date(now.getTime() + accessTtl.toMillis());
         return Jwts.builder()
@@ -43,6 +48,7 @@ public class JwtUtil {
                 .subject(String.valueOf(userId))
                 .claim("username", username)
                 .claim("role", role)
+                .claim("permissionRevision", revision)
                 .issuedAt(now)
                 .expiration(expire)
                 .signWith(key)

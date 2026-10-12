@@ -1,7 +1,7 @@
 -- =============================================================================
 -- 01_seed_extension.sql · 50 系统测试 · 步骤 5 · 测试专用种子扩展
 -- =============================================================================
--- 前提：00_create_test_db.sql 已建库，且后端已对测试库完成 Flyway V1~V8
+-- 前提：00_create_test_db.sql 已建库，且后端已对测试库完成 Flyway V1~V31
 --       （含超管 superadmin / V6 五角色演示种子 / V7 服务类别 / V8 日志留存配置）。
 -- 执行（先切到测试库！）：
 --   mysql -u root -p community_residence_test < 01_seed_extension.sql
@@ -42,8 +42,8 @@
 -- -----------------------------------------------------------------------------
 -- 1. 测试专用社区 TEST-清源里（完整四级结构 + 房屋状态全覆盖）
 -- -----------------------------------------------------------------------------
-INSERT INTO community (name, address, contact_phone, contact_person, description, status)
-SELECT 'TEST-清源里社区', '测试市静心路 66 号', '0571-88000066', '测试物业中心',
+INSERT INTO community (name, address, responsible_admin_id, description, status)
+SELECT 'TEST-清源里社区', '测试市静心路 66 号', NULL,
        '50 阶段测试专用社区（步骤 5 种子扩展）', 'ACTIVE'
 WHERE NOT EXISTS (SELECT 1 FROM community WHERE name = 'TEST-清源里社区');
 
@@ -74,28 +74,28 @@ SET @test_unit2_id = (SELECT id FROM unit WHERE building_id = @test_building_id 
 -- 6 套房屋：状态覆盖 VACANT / OCCUPIED / RESERVED / MAINTENATION（五状态中
 -- RESERVED/MAINTENANCE 为 V1 注释口径；停用语义由 MAINTENANCE+描述表达，
 -- 用例设计若需独立停用态以 04 用例文件口径为准）
-INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout, orientation, status, description)
-SELECT @test_unit_id, @test_community_id, '101', 1, 79.00, 2, '2室1厅1卫', 'SOUTH', 'OCCUPIED', '测试房屋：test_resident 入住'
+INSERT INTO house (unit_id, community_id, house_number, floor, area, layout, orientation, status, description)
+SELECT @test_unit_id, @test_community_id, '101', 1, 79.00, '2室1厅1卫', 'SOUTH', 'OCCUPIED', '测试房屋：test_resident 入住'
 WHERE NOT EXISTS (SELECT 1 FROM house WHERE unit_id = @test_unit_id AND house_number = '101');
 
-INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout, orientation, status, description)
-SELECT @test_unit_id, @test_community_id, '102', 1, 118.00, 3, '3室2厅2卫', 'SOUTH', 'VACANT', '测试房屋：空置 + 在架房源（看房预约链路）'
+INSERT INTO house (unit_id, community_id, house_number, floor, area, layout, orientation, status, description)
+SELECT @test_unit_id, @test_community_id, '102', 1, 118.00, '3室2厅2卫', 'SOUTH', 'VACANT', '测试房屋：空置 + 在架房源（看房预约链路）'
 WHERE NOT EXISTS (SELECT 1 FROM house WHERE unit_id = @test_unit_id AND house_number = '102');
 
-INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout, orientation, status, description)
-SELECT @test_unit_id, @test_community_id, '201', 2, 79.00, 2, '2室1厅1卫', 'NORTH', 'RESERVED', '测试房屋：预留态'
+INSERT INTO house (unit_id, community_id, house_number, floor, area, layout, orientation, status, description)
+SELECT @test_unit_id, @test_community_id, '201', 2, 79.00, '2室1厅1卫', 'NORTH', 'RESERVED', '测试房屋：预留态'
 WHERE NOT EXISTS (SELECT 1 FROM house WHERE unit_id = @test_unit_id AND house_number = '201');
 
-INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout, orientation, status, description)
-SELECT @test_unit_id, @test_community_id, '301', 3, 79.00, 2, '2室1厅1卫', 'SOUTH', 'MAINTENANCE', '测试房屋：维护中'
+INSERT INTO house (unit_id, community_id, house_number, floor, area, layout, orientation, status, description)
+SELECT @test_unit_id, @test_community_id, '301', 3, 79.00, '2室1厅1卫', 'SOUTH', 'MAINTENANCE', '测试房屋：维护中'
 WHERE NOT EXISTS (SELECT 1 FROM house WHERE unit_id = @test_unit_id AND house_number = '301');
 
-INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout, orientation, status, description)
-SELECT @test_unit2_id, @test_community_id, '101', 1, 95.00, 3, '3室1厅1卫', 'EAST', 'VACANT', '测试房屋：空置（删除保护用，无业务引用）'
+INSERT INTO house (unit_id, community_id, house_number, floor, area, layout, orientation, status, description)
+SELECT @test_unit2_id, @test_community_id, '101', 1, 95.00, '3室1厅1卫', 'EAST', 'VACANT', '测试房屋：空置（删除保护用，无业务引用）'
 WHERE NOT EXISTS (SELECT 1 FROM house WHERE unit_id = @test_unit2_id AND house_number = '101');
 
-INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout, orientation, status, description)
-SELECT @test_unit2_id, @test_community_id, '201', 2, 95.00, 3, '3室1厅1卫', 'WEST', 'VACANT', '测试房屋：空置（N7 批量外的对照房）'
+INSERT INTO house (unit_id, community_id, house_number, floor, area, layout, orientation, status, description)
+SELECT @test_unit2_id, @test_community_id, '201', 2, 95.00, '3室1厅1卫', 'WEST', 'VACANT', '测试房屋：空置（N7 批量外的对照房）'
 WHERE NOT EXISTS (SELECT 1 FROM house WHERE unit_id = @test_unit2_id AND house_number = '201');
 
 SET @test_house_101 = (SELECT id FROM house WHERE unit_id = @test_unit_id AND house_number = '101' LIMIT 1);

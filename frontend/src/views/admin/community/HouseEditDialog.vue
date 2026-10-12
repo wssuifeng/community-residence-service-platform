@@ -9,7 +9,7 @@ import { houseStatusLabels } from '@/types/modules/community'
 /**
  * 房屋新建/编辑小对话框（第三轮 C4，结构总览网格便捷操作用）：
  * 所属单元由网格入口锁定（楼栋/单元上下文已知，后端 update 亦拒绝变更 unitId），
- * 免去三级联动选择。新建只留快速字段（门牌/楼层/面积/状态，
+ * 免去三级联动选择。新建和编辑均提供户型；楼层上限取所属楼栋属性（
  * CreateHouseDTO 必填项为 unitId/houseNumber/floor/area，status 可选默认空置）；
  * 编辑字段与原「房屋管理」Tab 编辑对话框同契约（updateHouse，不含 status——
  * 状态变更须走 updateHouseStatus 留痕接口，入口在总览网格悬浮钮/信息卡）。
@@ -19,7 +19,7 @@ const props = defineProps<{
   /** 编辑目标：null = 新建（按 unitContext 快速添加单间） */
   house: IHouse | null
   /** 网格入口所在单元上下文（只读展示楼栋/单元） */
-  unitContext: { buildingName: string; unitId: number; unitName: string } | null
+  unitContext: { buildingName: string; unitId: number; unitName: string; floors?: number } | null
 }>()
 
 const visible = defineModel<boolean>({ required: true })
@@ -34,7 +34,6 @@ const form = reactive<{
   floor: number
   area?: number
   status: HouseStatus
-  roomCount?: number
   layout: string
   orientation: string
   description: string
@@ -43,7 +42,6 @@ const form = reactive<{
   floor: 1,
   area: undefined,
   status: 'VACANT',
-  roomCount: undefined,
   layout: '',
   orientation: '',
   description: ''
@@ -57,14 +55,13 @@ const rules: FormRules = {
   area: [{ required: true, message: '请输入建筑面积', trigger: 'blur' }]
 }
 
-/* 每次打开按目标/上下文重置（新建=快速四字段默认值；编辑=整单回显） */
+/* 每次打开按目标/上下文重置，新建默认值或编辑整单回显。 */
 watch(visible, (value) => {
   if (!value) return
   if (props.house) {
     form.houseNumber = props.house.houseNumber
     form.floor = props.house.floor
     form.area = props.house.area ?? undefined
-    form.roomCount = props.house.roomCount ?? undefined
     form.layout = props.house.layout ?? ''
     form.orientation = props.house.orientation ?? ''
     form.description = props.house.description ?? ''
@@ -73,7 +70,6 @@ watch(visible, (value) => {
     form.floor = 1
     form.area = undefined
     form.status = 'VACANT'
-    form.roomCount = undefined
     form.layout = ''
     form.orientation = ''
     form.description = ''
@@ -93,7 +89,6 @@ async function handleSubmit(): Promise<void> {
         houseNumber: form.houseNumber,
         floor: form.floor,
         area: form.area,
-        roomCount: form.roomCount,
         layout: form.layout,
         orientation: form.orientation,
         description: form.description
@@ -106,6 +101,9 @@ async function handleSubmit(): Promise<void> {
         houseNumber: form.houseNumber,
         floor: form.floor,
         area: form.area,
+        layout: form.layout,
+        orientation: form.orientation,
+        description: form.description,
         status: form.status
       }
       await createHouse(payload)
@@ -137,7 +135,7 @@ async function handleSubmit(): Promise<void> {
         <el-input v-model="form.houseNumber" placeholder="如：101" maxlength="20" />
       </el-form-item>
       <el-form-item label="所在楼层" prop="floor">
-        <el-input-number v-model="form.floor" :min="1" :max="99" />
+        <el-input-number v-model="form.floor" :min="1" :max="unitContext?.floors" />
       </el-form-item>
       <el-form-item label="建筑面积(㎡)" prop="area">
         <el-input-number v-model="form.area" :min="1" :max="10000" :precision="2" />
@@ -152,26 +150,22 @@ async function handleSubmit(): Promise<void> {
           />
         </el-select>
       </el-form-item>
-      <template v-else>
-        <el-form-item label="户型">
-          <el-input v-model="form.layout" placeholder="如：2室1厅1卫" maxlength="20" />
-        </el-form-item>
-        <el-form-item label="房间数">
-          <el-input-number v-model="form.roomCount" :min="1" :max="20" />
-        </el-form-item>
-        <el-form-item label="朝向">
-          <el-input v-model="form.orientation" placeholder="如：南北" maxlength="10" />
-        </el-form-item>
-        <el-form-item label="描述">
-          <el-input
-            v-model="form.description"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入房屋描述"
-            maxlength="200"
-          />
-        </el-form-item>
-      </template>
+      <el-form-item label="户型">
+        <el-input v-model="form.layout" placeholder="如：2室1厅1卫" maxlength="20" />
+      </el-form-item>
+
+      <el-form-item label="朝向">
+        <el-input v-model="form.orientation" placeholder="如：南北" maxlength="10" />
+      </el-form-item>
+      <el-form-item label="描述">
+        <el-input
+          v-model="form.description"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入房屋描述"
+          maxlength="200"
+        />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">取消</el-button>

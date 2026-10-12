@@ -328,29 +328,19 @@ describe('管理端租约详情 · 押金退还成功刷新链（OCR DEF-123）'
   })
 })
 
-describe('管理端租约详情 · TO_SIGN 置为生效入口（OCR DEF-123，与列表页对齐）', () => {
-  it('待签约租约提供「置为生效」入口：确认后走 TO_SIGN→ACTIVE 流转', async () => {
-    api.getLease.mockResolvedValue(leaseOf('TO_SIGN', { tenantConfirmAt: null }))
-    /* 确认框直接放行（弹窗交互本身不属本用例关注点） */
-    const confirmSpy = vi.spyOn(ElMessageBox, 'confirm').mockResolvedValue('confirm' as never)
-
+describe('管理端租约详情 · 不得绕过居民协议确认', () => {
+  it('待签约租约不再提供直接生效或重复审核按钮', async () => {
+    api.getLease.mockResolvedValue(leaseOf('TO_SIGN'))
     const wrapper = await mountDetail()
-    const activate = wrapper.findAll('button').find((item) => item.text().trim() === '置为生效')
-    expect(activate, '待签约租约应有「置为生效」入口').toBeTruthy()
-
-    await activate!.trigger('click')
-    await flushPromises()
-    confirmSpy.mockRestore()
-
-    expect(api.updateLeaseStatus).toHaveBeenCalledWith(1, { status: 'ACTIVE', remark: undefined })
+    expect(wrapper.findAll('button').some(b => ['置为生效', '审核通过'].includes(b.text().trim()))).toBe(false)
+    expect(api.updateLeaseStatus).not.toHaveBeenCalled()
   })
-
-  it('待审核租约按钮文案仍为「审核通过」（不因入口放宽改变 PENDING 语义）', async () => {
+  it('待审核只进入待签约，不直接生效', async () => {
     api.getLease.mockResolvedValue(leaseOf('PENDING'))
-
+    vi.spyOn(ElMessageBox, 'confirm').mockResolvedValue('confirm' as never)
     const wrapper = await mountDetail()
-
-    expect(wrapper.findAll('button').some((item) => item.text().trim() === '审核通过')).toBe(true)
-    expect(wrapper.findAll('button').some((item) => item.text().trim() === '置为生效')).toBe(false)
+    await wrapper.findAll('button').find(b => b.text().trim() === '审核通过')!.trigger('click')
+    await flushPromises()
+    expect(api.updateLeaseStatus).toHaveBeenCalledWith(1, { status: 'TO_SIGN', remark: undefined })
   })
 })

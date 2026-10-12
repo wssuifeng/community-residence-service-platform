@@ -61,6 +61,7 @@ public class SysConfigService {
 
     @Transactional(rollbackFor = Exception.class)
     public void update(String key, String value) {
+        validateValue(key, value);
         SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getConfigKey, key));
         if (config == null) {
@@ -76,6 +77,13 @@ public class SysConfigService {
         log.info("全局配置已更新：key={}, value={}", key, value);
     }
 
+    /* 注册开关是布尔配置，不接受Boolean.parseBoolean会静默当false的任意文本。 */
+    private void validateValue(String key, String value) {
+        if (KEY_REGISTRATION_ENABLED.equals(key) && !"true".equals(value) && !"false".equals(value)) {
+            throw new IllegalArgumentException("注册开关仅允许true或false");
+        }
+    }
+
     /** 居民注册开关（缺省视为开启，配置键未初始化时不阻断注册） */
     public boolean isRegistrationEnabled() {
         String value = getValue(KEY_REGISTRATION_ENABLED);
@@ -85,6 +93,7 @@ public class SysConfigService {
     /** 插入或更新（键不存在则建；R51 渠道分级配置等后建键使用），缓存同步清理 */
     @Transactional(rollbackFor = Exception.class)
     public void upsert(String key, String value, String description) {
+        validateValue(key, value);
         SysConfig config = sysConfigMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
                 .eq(SysConfig::getConfigKey, key));
         if (config == null) {

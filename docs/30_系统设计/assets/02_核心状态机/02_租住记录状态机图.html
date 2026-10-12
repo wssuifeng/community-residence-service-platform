@@ -5042,7 +5042,7 @@
 
         <!-- Transition paths -->
         <path data-edge-from="PENDING" data-edge-to="TO_SIGN" data-edge-label="审核通过" data-edge-key="0" data-edge-id="approve" data-composition-points="153,157;189,157" d="M 153 157 L 189 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="TO_SIGN" data-edge-to="ACTIVE" data-edge-label="双方在线确认" data-edge-key="1" data-edge-id="sign" data-composition-points="307,157;343,157" d="M 307 157 L 343 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="TO_SIGN" data-edge-to="ACTIVE" data-edge-label="首期支付成功" data-edge-key="1" data-edge-id="sign" data-composition-points="307,157;343,157" d="M 307 157 L 343 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
         <path data-edge-from="ACTIVE" data-edge-to="MOVED_OUT" data-edge-label="搬出登记（R70）" data-edge-key="2" data-edge-id="move-out" data-composition-points="461,157;497,157" d="M 461 157 L 497 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
         <path data-edge-from="MOVED_OUT" data-edge-to="ARCHIVED" data-edge-label="归档" data-edge-key="3" data-edge-id="archive" data-composition-points="615,157;651,157" d="M 615 157 L 651 157" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
         <path data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="审核驳回" data-edge-key="4" data-edge-id="reject" data-composition-points="94,188;94,330;402,330;402,450" d="M 94 188 L 94 320 Q 94 330 104 330 L 392 330 Q 402 330 402 340 L 402 450" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
@@ -5061,8 +5061,8 @@
           <text data-detail="context" x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">租住登记申请</text>
         </g>
 
-        <g id="node-TO_SIGN" data-node-id="TO_SIGN" data-node-label="待签约" tabindex="0" role="button" aria-label="聚焦待签约，协议确认后生效, 主流程" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="协议确认后生效" data-node-tag="新增（R66）" data-node-context="主流程">
-          <title>待签约 · 协议确认后生效 · 主流程 · 新增（R66）</title>
+        <g id="node-TO_SIGN" data-node-id="TO_SIGN" data-node-label="待签约" tabindex="0" role="button" aria-label="聚焦待签约，首期成功后生效, 主流程" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="首期成功后生效" data-node-tag="新增（R66）" data-node-context="主流程">
+          <title>待签约 · 首期成功后生效 · 主流程 · 新增（R66）</title>
           <rect x="189" y="126" width="118" height="62" rx="7" class="c-mask"/>
           <rect x="189" y="126" width="118" height="62" rx="7" class="c-cloud" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(290 132) scale(0.6875)">
@@ -5070,7 +5070,7 @@
           </g>
         <text data-detail="fine" x="199" y="140" class="t-cloud" font-size="7" font-weight="700">02</text>
           <text data-node-label="" data-detail-anchor="" x="248" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">待签约</text>
-          <text data-detail="context" x="248" y="163" class="t-muted" font-size="7" text-anchor="middle">协议确认后生效</text>
+          <text data-detail="context" x="248" y="163" class="t-muted" font-size="7" text-anchor="middle">首期成功后生效</text>
         <text data-detail="fine" x="248" y="177" class="t-cloud" font-size="7" text-anchor="middle">新增（R66）</text>
         </g>
 
@@ -5131,10 +5131,10 @@
           <rect x="145.4" y="191" width="51.2" height="16" rx="4" class="c-mask"/>
           <text x="171" y="202" class="t-muted" font-size="8" text-anchor="middle">审核通过</text>
         </g>
-        <g data-detail="context" data-edge-from="TO_SIGN" data-edge-to="ACTIVE" data-edge-label="双方在线确认" data-edge-key="1" data-edge-id="sign">
-          <rect x="279.8" y="191" width="90.4" height="27" rx="4" class="c-mask"/>
-          <text x="325" y="202" class="t-muted" font-size="8" text-anchor="middle">双方在线确认</text>
-        <text data-detail="fine" x="325" y="213" class="t-dim" font-size="7" text-anchor="middle">承租确认（前置）</text>
+        <g data-detail="context" data-edge-from="TO_SIGN" data-edge-to="ACTIVE" data-edge-label="首期支付成功" data-edge-key="1" data-edge-id="sign">
+          <rect x="289.6" y="191" width="70.80000000000001" height="27" rx="4" class="c-mask"/>
+          <text x="325" y="202" class="t-muted" font-size="8" text-anchor="middle">首期支付成功</text>
+        <text data-detail="fine" x="325" y="213" class="t-dim" font-size="7" text-anchor="middle">协议已SIGNED</text>
         </g>
         <g data-detail="context" data-edge-from="ACTIVE" data-edge-to="MOVED_OUT" data-edge-label="搬出登记（R70）" data-edge-key="2" data-edge-id="move-out">
           <rect x="436.25" y="191" width="85.5" height="16" rx="4" class="c-mask"/>
@@ -5366,8 +5366,8 @@
         </div>
         <ul>
           <li>&bull; 待审核 → 待签约 → 已生效 → 已搬出 → 已归档，主流程逐个阶段推进</li>
-          <li>&bull; 审核通过只到「待签约」：房屋不置已入住，居住关系按 R9 建立（R66）</li>
-          <li>&bull; 承租确认是发起协议的前置条件，本身不改变租约状态；协议双方在线确认才置「已生效」</li>
+          <li>&bull; 审核只建待签约租约与群聊，协议完成且首期成功才建立正式租客关系与房屋入住</li>
+          <li>&bull; 管理方发出即同意，居民同意具体正文；SIGNED仍待首期，FIRST成功同事务激活且幂等</li>
         </ul>
       </div>
 
@@ -5388,7 +5388,7 @@
           <h3>终态</h3>
         </div>
         <ul>
-          <li>&bull; 已驳回为终态：待审核驳回附理由（申请撤回不改租约状态，租约维持待签约），租约群聊同时终止</li>
+          <li>&bull; 待审核或待签约可驳回；取消待签约租约终止本链协议/群聊，释放占用但不覆盖人工下线</li>
           <li>&bull; 已归档为生命周期终点：归档后记录不可修改（R16），历史可查</li>
         </ul>
       </div>

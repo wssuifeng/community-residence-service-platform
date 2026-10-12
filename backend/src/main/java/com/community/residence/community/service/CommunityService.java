@@ -114,6 +114,7 @@ public class CommunityService {
     private static final int DEFAULT_LEASE_MONTHS = 12;
 
     private final CommunityMapper communityMapper;
+    private final CommunityResponsibleService communityResponsibleService;
     private final BuildingMapper buildingMapper;
     private final UnitMapper unitMapper;
     private final HouseMapper houseMapper;
@@ -168,6 +169,7 @@ public class CommunityService {
         applyDto(community, dto);
         community.setStatus(CommonStatus.ACTIVE);
         communityMapper.insert(community);
+        communityResponsibleService.fillContacts(java.util.List.of(community));
         return CommunityVO.from(community);
     }
 
@@ -179,6 +181,7 @@ public class CommunityService {
         SecurityUtils.checkCommunityAccess(community.getId());
         applyDto(community, dto);
         communityMapper.updateById(community);
+        communityResponsibleService.fillContacts(java.util.List.of(community));
         return CommunityVO.from(community);
     }
 
@@ -196,6 +199,7 @@ public class CommunityService {
                         .like(Community::getAddress, keyword))
                 .orderByDesc(Community::getId);
         Page<Community> result = communityMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
+        communityResponsibleService.fillContacts(result.getRecords());
         return PageVO.of(result.convert(CommunityVO::from));
     }
 
@@ -307,6 +311,8 @@ public class CommunityService {
         List<Long> housingIds = housingMapper.selectList(
                 new LambdaQueryWrapper<Housing>().eq(Housing::getCommunityId, id))
                 .stream().map(Housing::getId).toList();
+        residenceApplicationMapper.delete(new LambdaQueryWrapper<ResidenceApplication>()
+                .eq(ResidenceApplication::getCommunityId, id));
         if (!housingIds.isEmpty()) {
             housingTimeslotMapper.delete(new LambdaQueryWrapper<HousingTimeslot>()
                     .in(HousingTimeslot::getHousingId, housingIds));
@@ -349,8 +355,7 @@ public class CommunityService {
                 .eq(StaffSchedule::getCommunityId, id));
         agreementTemplateMapper.delete(new LambdaQueryWrapper<AgreementTemplate>()
                 .eq(AgreementTemplate::getCommunityId, id));
-        residenceApplicationMapper.delete(new LambdaQueryWrapper<ResidenceApplication>()
-                .eq(ResidenceApplication::getCommunityId, id));
+
         residenceRelationMapper.delete(new LambdaQueryWrapper<ResidenceRelation>()
                 .eq(ResidenceRelation::getCommunityId, id));
 
@@ -408,6 +413,7 @@ public class CommunityService {
         if (community == null) {
             throw new ResourceNotFoundException("社区不存在");
         }
+        communityResponsibleService.fillContacts(java.util.List.of(community));
         return community;
     }
 
@@ -423,8 +429,8 @@ public class CommunityService {
     private void applyDto(Community community, CreateCommunityDTO dto) {
         community.setName(dto.getName());
         community.setAddress(dto.getAddress());
-        community.setContactPhone(dto.getContactPhone());
-        community.setContactPerson(dto.getContactPerson());
+        communityResponsibleService.validate(dto.getResponsibleAdminId());
+        community.setResponsibleAdminId(dto.getResponsibleAdminId());
         community.setDescription(dto.getDescription());
         /* 自动化开关：字段缺省按「关闭 + 12 个月」落库，避免前端旧版本漏传时写成 NULL */
         community.setAutoApproveResidence(dto.getAutoApproveResidence() == null ? 0 : dto.getAutoApproveResidence());

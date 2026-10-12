@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-11",
+  "backend": {
+    "suites": 124,
+    "tests": 866,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "suites": 39,
+    "tests": 265,
+    "failures": 0
+  },
+  "typecheckAndBuild": "passed",
+  "isolatedChecks": 28,
+  "developmentReadonlyChecks": 11,
+  "transactionsExecuted": false,
+  "isolationFixtureCleanup": true,
+  "services": {
+    "developmentBackend": 8084,
+    "developmentFrontend": 5176,
+    "isolationStopped": [
+      8087,
+      5181
+    ]
+  },
+  "remaining": [
+    "bh-2 scheme16 review and implementation",
+    "bh-3 scheme17 review and implementation",
+    "DEF-142/145 original scene evidence",
+    "unlisted matrices and final user retest"
+  ],
+  "jarSha256": "df038965bfb4bc866ae1db926197cd671c113a427b5adcc8d7f8c84464aaffc2"
+}

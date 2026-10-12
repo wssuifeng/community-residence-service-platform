@@ -21,7 +21,7 @@ import FilterPanel from '@/components/common/FilterPanel.vue'
  * 租住管理（管理端主入口）：页头 + 到期提醒条 + 多条件筛选 + 白卡 5 Tab + 单表格。
  *
  * 分组口径（Tab 为客户端分组、单一数据源全量拉取一次）：在租 = ACTIVE 且无到期标注；
- * 待签约 = TO_SIGN（R66：审核通过后租约不直接生效，待居民确认承租与协议确认）；
+ * 待签约 = TO_SIGN（R66：审核通过后租约不直接生效，待管理员发出与居民同意协议）；
  * 即将到期/已到期 = ACTIVE 且 expiryFlag=EXPIRING/EXPIRED（后端日期派生标注，非状态值——
  * 分组取后端标注，绝不把标注当 status 传参）；历史 = 待审核/已搬出/已归档/已驳回。
  * 分组阈值与后端到期提醒任务口径一致（sys_config lease.reminder_days，默认 30 天）。
@@ -123,7 +123,7 @@ function remainingDays(endDate: string): number {
 const activeLeases = computed(() =>
   leases.value.filter((row) => row.status === 'ACTIVE' && !row.expiryFlag)
 )
-/* 待签约（R66/R67）：审核已通过但协议未双方确认，管理方需盯承租确认与协议发起 */
+/* 待签约（R66/R67）：审核已通过但协议未双方确认，管理方需发出协议并等待居民确认 */
 const toSignLeases = computed(() => leases.value.filter((row) => row.status === 'TO_SIGN'))
 const expiringLeases = computed(() =>
   leases.value
@@ -146,10 +146,6 @@ const toSignCount = computed(() => toSignLeases.value.length)
 const expiringCount = computed(() => expiringLeases.value.length)
 const expiredCount = computed(() => expiredLeases.value.length)
 
-/** 待签约中尚未确认承租的条数（承租确认是发起协议的前置条件，管理方待办焦点） */
-const tenancyPendingCount = computed(
-  () => toSignLeases.value.filter((row) => !row.tenantConfirmAt).length
-)
 
 /* ---------- 提醒条：N/M 由列表真实派生，为 0 整条隐藏 ---------- */
 
@@ -290,17 +286,6 @@ function statusTagView(row: ILeaseRecord): { label: string; type: TagType } {
   return map[row.status]
 }
 
-/**
- * 承租确认状态（R67）：仅待签约/已生效需呈现——待审核阶段还没有承租确认环节。
- * 后端未返回 tenantConfirmAt 字段时按「未确认」处理（与后端 5601 拦截口径一致）。
- */
-function tenancyConfirmed(row: ILeaseRecord): boolean {
-  return !!row.tenantConfirmAt
-}
-
-function showTenancyState(row: ILeaseRecord): boolean {
-  return row.status === 'TO_SIGN' || row.status === 'ACTIVE'
-}
 
 /** 签约状态语义色：未发起灰、待签署黄、单方已确认蓝、已签署绿、已撤回灰 */
 const AGREEMENT_TAG_TYPE: Record<LeaseAgreementSignStatus, TagType> = {
@@ -361,21 +346,12 @@ async function transitionStatus(
 }
 
 async function handleApprove(row: ILeaseRecord): Promise<void> {
-  const isToSign = row.status === 'TO_SIGN'
+  if (row.status !== 'PENDING') return
   try {
-    await ElMessageBox.confirm(
-      isToSign
-        ? `确定将租约 ${leaseNo(row.id)}（${row.tenantName} · ${row.houseLocation}）置为已生效？\n` +
-            '常规流程由租赁协议双方确认后自动生效，此处为管理方直接生效通道；生效后房屋置已入住。' +
-            (tenancyConfirmed(row) ? '' : '\n注意：该租约居民尚未确认承租。')
-        : `确定通过与「${row.tenantName}」的租约 ${leaseNo(row.id)}？通过后租约进入「待签约」，待居民确认承租并由双方确认协议后才正式生效。`,
-      isToSign ? '租约置为已生效' : '租约审批通过',
-      { type: 'info', confirmButtonText: '确认', cancelButtonText: '取消' }
-    )
-  } catch {
-    return
-  }
-  await transitionStatus(row, 'ACTIVE', isToSign ? '租约已生效' : '已审核通过，租约进入待签约')
+    await ElMessageBox.confirm('审核通过后租约进入待签约；管理员发出协议，居民同意后才会生效。',
+      '租约审批通过', { type: 'info', confirmButtonText: '确认', cancelButtonText: '取消' })
+  } catch { return }
+  await transitionStatus(row, 'TO_SIGN', '已审核通过，租约进入待签约')
 }
 
 async function handleReject(row: ILeaseRecord): Promise<void> {
@@ -662,7 +638,7 @@ onMounted(() => {
 
 <template>
   <section class="admin-lease">
-    <AdminPageHeader title="租约管理" subtitle="租约属性 · 待签约与承租确认 · 到期 · 续退租 · 协议签约">
+    <AdminPageHeader title="租约管理" subtitle="租约属性 · 协议确认 · 到期 · 续退租">
       <!-- 跨 Tab 直达 Hub 兄弟分区（批次 g：退租申请与协议模板已并入同一 Hub） -->
       <el-button @click="router.push({ path: '/admin/housing-lease', query: { tab: 'moveout' } })">退租申请审核</el-button>
       <el-button @click="router.push({ path: '/admin/housing-lease', query: { tab: 'agreements' } })">协议模板</el-button>
@@ -750,13 +726,6 @@ onMounted(() => {
       >
         待签约
         <span v-if="toSignCount > 0" class="tab-badge is-warning">{{ toSignCount }}</span>
-        <span
-          v-if="tenancyPendingCount > 0"
-          class="tab-note"
-          title="承租确认是发起租赁协议的前置条件"
-        >
-          {{ tenancyPendingCount }} 待确认承租
-        </span>
       </button>
       <button
         type="button"
@@ -852,17 +821,6 @@ onMounted(() => {
             />
           </template>
         </el-table-column>
-        <!-- 承租确认（R67）：发起租赁协议的前置条件，未确认时管理方动作受阻，需显式可见 -->
-        <el-table-column label="承租确认" width="110">
-          <template #default="{ row }">
-            <StatusTag
-              v-if="showTenancyState(row)"
-              :label="tenancyConfirmed(row) ? '已确认' : '待确认'"
-              :type="tenancyConfirmed(row) ? 'completed' : 'pending'"
-            />
-            <span v-else class="cell-secondary">—</span>
-          </template>
-        </el-table-column>
         <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <StatusTag :label="statusTagView(row).label" :type="statusTagView(row).type" />
@@ -891,26 +849,10 @@ onMounted(() => {
                 驳回
               </el-button>
             </template>
-            <!-- 待签约（R66/R67）：协议在详情页发起；未确认承租时协议入口会被后端拒绝，提示到位 -->
             <template v-else-if="row.status === 'TO_SIGN'">
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                text
-                type="success"
-                size="small"
-                @click.stop="handleApprove(row)"
-              >
-                置为生效
-              </el-button>
-              <el-button
-                v-permission="['ADMIN', 'SUPER_ADMIN']"
-                text
-                type="danger"
-                size="small"
-                @click.stop="handleReject(row)"
-              >
-                驳回
-              </el-button>
+              <el-button text type="primary" size="small" @click.stop="goDetail(row)">查看 / 发出协议</el-button>
+              <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" text type="danger" size="small"
+                @click.stop="handleReject(row)">驳回</el-button>
             </template>
             <template v-else-if="row.status === 'ACTIVE'">
               <el-button

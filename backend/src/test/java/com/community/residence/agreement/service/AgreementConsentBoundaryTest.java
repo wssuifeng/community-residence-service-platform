@@ -1,6 +1,8 @@
 package com.community.residence.agreement.service;
 
 import com.community.residence.agreement.dto.AgreementConfirmDTO;
+import com.community.residence.agreement.dto.CreateAgreementDTO;
+import com.community.residence.agreement.entity.AgreementTemplate;
 import com.community.residence.agreement.entity.LeaseAgreement;
 import com.community.residence.agreement.mapper.AgreementTemplateMapper;
 import com.community.residence.agreement.mapper.LeaseAgreementMapper;
@@ -8,13 +10,17 @@ import com.community.residence.auth.entity.SysAdminCommunity;
 import com.community.residence.auth.entity.SysUser;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
+import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.RoleConstants;
 import com.community.residence.common.context.SecurityUtils;
+import com.community.residence.common.exception.BusinessException;
+import com.community.residence.common.exception.ForbiddenException;
 import com.community.residence.community.entity.House;
 import com.community.residence.community.mapper.BuildingMapper;
 import com.community.residence.community.mapper.CommunityMapper;
 import com.community.residence.community.mapper.HouseMapper;
 import com.community.residence.community.mapper.UnitMapper;
+import com.community.residence.conversation.entity.Conversation;
 import com.community.residence.conversation.mapper.ConversationMapper;
 import com.community.residence.conversation.service.ConversationService;
 import com.community.residence.lease.entity.LeaseRecord;
@@ -37,8 +43,10 @@ import org.mockito.quality.Strictness;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -49,21 +57,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 承约重复确认收口回归（DEF-078）：
- * 居民的「同意承租」只在承约端点采集一次——已承约的租约，**管理方确认协议时
- * 引用承约留痕回填居民侧确认**，双方齐即达成 SIGNED 并联动租约生效，
- * 居民无需为同一同意二次点击。
- * 反向断言：未承约时管理方单方确认仍只落 PARTIAL（不得借该规则误生效）。
+ * 协议签署与租约生效联动回归（R64 + R66 v1.8）：
+ * ① 发起前置校验 tenant_confirm_at 非空（否则 5601）；
+ * ② 双方确认达成 SIGNED 联动租约 TO_SIGN → ACTIVE + 房屋置已入住 +
+ *    lease_change_log(STATUS) + 租约群聊系统消息；
+ * ③ 首期费用支付成功后才生效时重复联动幂等；④ 越界状态拒绝生效。
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-@DisplayName("协议确认复用承租确认留痕（DEF-078）")
-class AgreementTenancyConsentReuseTest {
+@DisplayName("租赁协议与租约生效联动（R64/R66）")
+class AgreementConsentBoundaryTest {
 
     private static final Long LEASE_ID = 8L;
-    private static final Long AGREEMENT_ID = 22L;
+    private static final Long AGREEMENT_ID = 21L;
     private static final Long RESIDENT_ID = 1L;
     private static final Long ADMIN_ID = 2L;
+    private static final Long CONVERSATION_ID = 66L;
 
     @Mock
     private AgreementTemplateMapper templateMapper;
@@ -104,7 +113,6 @@ class AgreementTenancyConsentReuseTest {
     private LeaseRecord toSignLease;
     private LeaseAgreement pendingAgreement;
     private House house;
-    private LocalDateTime tenancyConfirmedAt;
 
     @BeforeEach
     void setUp() {
@@ -113,7 +121,6 @@ class AgreementTenancyConsentReuseTest {
                 sysAdminCommunityMapper, sysUserMapper, notificationService, changeLogService,
                 conversationMapper, conversationService, leaseService);
 
-        tenancyConfirmedAt = LocalDateTime.now().minusHours(3);
         toSignLease = new LeaseRecord();
         toSignLease.setId(LEASE_ID);
         toSignLease.setTenantId(RESIDENT_ID);
@@ -122,10 +129,7 @@ class AgreementTenancyConsentReuseTest {
         toSignLease.setStatus("TO_SIGN");
         toSignLease.setStartDate(LocalDate.now());
         toSignLease.setEndDate(LocalDate.now().plusMonths(12));
-        toSignLease.setConversationId(66L);
-        /* 居民已通过承约端点表达同意承租 */
-        toSignLease.setTenantConfirmAt(tenancyConfirmedAt);
-        toSignLease.setTenantConfirmBy(RESIDENT_ID);
+        toSignLease.setConversationId(CONVERSATION_ID);
 
         pendingAgreement = new LeaseAgreement();
         pendingAgreement.setId(AGREEMENT_ID);
@@ -134,82 +138,70 @@ class AgreementTenancyConsentReuseTest {
         pendingAgreement.setTenantId(RESIDENT_ID);
         pendingAgreement.setTitle("演示社区1栋101 租赁协议");
         pendingAgreement.setStatus("PENDING");
+        /* 管理方已确认，待居民确认即达成 SIGNED */
+        pendingAgreement.setAdminConfirmTime(LocalDateTime.now().minusMinutes(5));
+        pendingAgreement.setAdminConfirmName("王管理");
 
         house = new House();
         house.setId(5L);
         house.setCommunityId(3L);
         house.setStatus("VACANT");
 
-        Resident resident = new Resident();
-        resident.setId(RESIDENT_ID);
-        resident.setRealName("张居民");
-        resident.setUsername("resident1");
-
         when(leaseMapper.selectById(LEASE_ID)).thenReturn(toSignLease);
+        when(leaseMapper.selectByIdForUpdate(LEASE_ID)).thenReturn(toSignLease);
         when(agreementMapper.selectById(AGREEMENT_ID)).thenReturn(pendingAgreement);
+        when(agreementMapper.selectByIdForUpdate(AGREEMENT_ID)).thenReturn(pendingAgreement);
         when(houseMapper.selectById(5L)).thenReturn(house);
-        when(residentMapper.selectById(RESIDENT_ID)).thenReturn(resident);
         /* 统一内核条件更新（DEF-115）：正常流转返回 1 行 */
         when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
+        Resident resident = new Resident();
+        resident.setRealName("张居民");
+        when(residentMapper.selectById(RESIDENT_ID)).thenReturn(resident);
     }
 
-    @Test
-    @DisplayName("已承约：管理方确认即引用承约留痕补居民侧 → SIGNED + 租约 TO_SIGN→ACTIVE（居民不再二次确认）")
-    void adminConfirm_afterTenancyConfirm_reusesTraceAndActivates() {
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(ADMIN_ID);
-            mocked.when(() -> SecurityUtils.hasRole(RoleConstants.RESIDENT)).thenReturn(false);
-
-            var vo = agreementService.confirm(AGREEMENT_ID, new AgreementConfirmDTO());
-
-            assertThat(vo.getStatus()).isEqualTo("SIGNED");
-            /* 居民侧确认 = 承约留痕（时间取首次承约时间，早于管理方确认） */
-            assertThat(pendingAgreement.getTenantConfirmTime()).isEqualTo(tenancyConfirmedAt);
-            assertThat(pendingAgreement.getTenantConfirmName()).isEqualTo("张居民");
-            assertThat(pendingAgreement.getAdminConfirmTime()).isAfter(tenancyConfirmedAt);
-            /* 生效联动（R66 v1.8）不被绕过 */
-            assertThat(toSignLease.getStatus()).isEqualTo("ACTIVE");
-            assertThat(house.getStatus()).isEqualTo("OCCUPIED");
-            verify(changeLogService).logStatus(eq(LEASE_ID), eq("TO_SIGN"), eq("ACTIVE"), anyString());
-        }
+    private MockedStatic<SecurityUtils> actor(boolean resident, Long id) {
+        var auth = mockStatic(SecurityUtils.class);
+        auth.when(SecurityUtils::getUserId).thenReturn(id);
+        auth.when(() -> SecurityUtils.hasRole(RoleConstants.RESIDENT)).thenReturn(resident);
+        auth.when(() -> SecurityUtils.hasRole(RoleConstants.ADMIN)).thenReturn(!resident);
+        return auth;
     }
 
-    @Test
-    @DisplayName("未承约：管理方单方确认仍只落 PARTIAL、不生效（防误放行）")
-    void adminConfirm_withoutTenancyConfirm_partialOnly() {
-        toSignLease.setTenantConfirmAt(null);
-        toSignLease.setTenantConfirmBy(null);
-
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(ADMIN_ID);
-            mocked.when(() -> SecurityUtils.hasRole(RoleConstants.RESIDENT)).thenReturn(false);
-
-            var vo = agreementService.confirm(AGREEMENT_ID, new AgreementConfirmDTO());
-
-            assertThat(vo.getStatus()).isEqualTo("PARTIAL");
-            assertThat(pendingAgreement.getTenantConfirmTime()).isNull();
+    @Test void issueThenAcceptUsesActualResidentAction() {
+        when(agreementMapper.selectCount(any())).thenReturn(0L);
+        when(templateMapper.selectOne(any())).thenReturn(defaultTemplate());
+        when(agreementMapper.insert(any(LeaseAgreement.class))).thenAnswer(inv -> {
+            pendingAgreement = inv.getArgument(0); pendingAgreement.setId(AGREEMENT_ID);
+            when(agreementMapper.selectById(AGREEMENT_ID)).thenReturn(pendingAgreement);
+            when(agreementMapper.selectByIdForUpdate(AGREEMENT_ID)).thenReturn(pendingAgreement);
+            return 1;
+        });
+        try (var auth = actor(false, ADMIN_ID)) {
+            CreateAgreementDTO dto = new CreateAgreementDTO(); dto.setLeaseId(LEASE_ID);
+            var issued = agreementService.createAgreement(dto);
+            assertThat(issued.getAdminConfirmTime()).isNotNull();
+            assertThat(issued.getTenantConfirmTime()).isNull();
             assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
             assertThat(house.getStatus()).isEqualTo("VACANT");
-            verify(conversationService, never()).sendSystemMessage(anyLong(), anyString());
+        }
+        try (var auth = actor(true, RESIDENT_ID)) {
+            var accepted = agreementService.confirm(AGREEMENT_ID, new AgreementConfirmDTO());
+            assertThat(accepted.getStatus()).isEqualTo("SIGNED");
+            assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
+            assertThat(house.getStatus()).isEqualTo("VACANT");
+            verify(changeLogService, never()).logStatus(eq(LEASE_ID), eq("TO_SIGN"), eq("ACTIVE"), anyString());
+            verify(conversationService).sendSystemMessage(eq(CONVERSATION_ID), anyString());
         }
     }
 
-    @Test
-    @DisplayName("居民先自行确认协议：不覆盖居民侧首次留痕（既有行为不回归）")
-    void residentConfirmFirst_keepsOwnTrace() {
-        toSignLease.setTenantConfirmAt(null);
-
-        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
-            mocked.when(() -> SecurityUtils.hasRole(RoleConstants.RESIDENT)).thenReturn(true);
-
-            var vo = agreementService.confirm(AGREEMENT_ID, new AgreementConfirmDTO());
-
-            /* 居民确认后仅单方（管理方未确认）→ PARTIAL，居民侧时间为本人确认时刻 */
-            assertThat(vo.getStatus()).isEqualTo("PARTIAL");
-            assertThat(pendingAgreement.getTenantConfirmTime()).isNotNull();
-            assertThat(pendingAgreement.getTenantConfirmName()).isEqualTo("张居民");
-            assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
-        }
+    private AgreementTemplate defaultTemplate() {
+        AgreementTemplate template = new AgreementTemplate();
+        template.setId(1L);
+        template.setName("标准租赁协议");
+        template.setContent("甲方：{{社区名称}}，房屋：{{房屋位置}}，月租：{{月租金}}");
+        template.setIsDefault(1);
+        template.setStatus("ACTIVE");
+        template.setCommunityId(3L);
+        return template;
     }
 }

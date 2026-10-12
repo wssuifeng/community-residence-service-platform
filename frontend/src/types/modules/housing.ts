@@ -54,6 +54,9 @@ export const housingTimeslotStatusLabels: Record<HousingTimeslotStatus, string> 
  * 无消费方后已从类型删除。
  */
 export interface IHousing {
+  occupancy?: string
+  applicationId?: number | null
+  leaseId?: number | null
   id: number
   communityId: number
   communityName: string

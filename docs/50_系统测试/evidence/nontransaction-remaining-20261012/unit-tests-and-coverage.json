@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-12",
+  "tests": {
+    "run": 910,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "mavenBuildSuccess": true,
+  "executionDataReset": "backend/target/jacoco.exec",
+  "classesMatchWarning": false,
+  "counters": {
+    "INSTRUCTION": {
+      "missed": 13673,
+      "covered": 31819,
+      "percent": 69.94
+    },
+    "BRANCH": {
+      "missed": 1438,
+      "covered": 2383,
+      "percent": 62.37
+    },
+    "LINE": {
+      "missed": 2669,
+      "covered": 6549,
+      "percent": 71.05
+    },
+    "COMPLEXITY": {
+      "missed": 1596,
+      "covered": 1624,
+      "percent": 50.43
+    },
+    "METHOD": {
+      "missed": 519,
+      "covered": 782,
+      "percent": 60.11
+    },
+    "CLASS": {
+      "missed": 72,
+      "covered": 141,
+      "percent": 66.2
+    }
+  },
+  "note": "本轮新执行数据；全项目实际覆盖率不等于测试数，不宣称80%门槛通过",
+  "backendJarSha256": "f24591a83a5f5c35e7a42c799d5c102cd253362e7ecc78c06d2165157d07edf8",
+  "jacocoXmlSha256": "4c99e05682981ebd40358ce594c4a882107a37aec2317a9887cf542f49eac31d",
+  "frontend": {
+    "suites": 41,
+    "tests": 278,
+    "failures": 0,
+    "typecheck": true,
+    "build": true,
+    "largeChunkWarning": true
+  },
+  "newRedTests": {
+    "DEF-177": {
+      "run": 3,
+      "failures": 3
+    },
+    "DEF-178": {
+      "run": 4,
+      "failures": 4
+    }
+  }
+}

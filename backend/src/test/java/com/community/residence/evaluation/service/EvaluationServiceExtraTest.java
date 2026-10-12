@@ -47,6 +47,9 @@ class EvaluationServiceExtraTest {
     @Mock
     private SysUserMapper sysUserMapper;
 
+    @Mock
+    private com.community.residence.workorder.service.WorkOrderService workOrderService;
+
     @InjectMocks
     private EvaluationService evaluationService;
 

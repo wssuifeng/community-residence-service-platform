@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-12T02:29:17.734Z",
+  "database": "community_residence",
+  "transactionsExecuted": false,
+  "businessWrites": false,
+  "checks": [
+    {
+      "name": "开发业务数量与bh迁移前一致",
+      "passed": true
+    },
+    {
+      "name": "开发只读期间业务数量不变",
+      "passed": true
+    }
+  ],
+  "before": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "after": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ]
+}

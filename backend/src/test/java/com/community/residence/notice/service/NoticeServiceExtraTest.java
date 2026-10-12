@@ -270,4 +270,6 @@ class NoticeServiceExtraTest {
             org.mockito.Mockito.verify(noticeMapper).deleteById(3L);
         }
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

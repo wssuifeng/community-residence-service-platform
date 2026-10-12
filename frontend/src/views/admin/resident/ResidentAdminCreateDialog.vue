@@ -4,8 +4,11 @@ import { reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { adminCreateResident } from '@/api/resident'
+import ResidentHouseSelector from './ResidentHouseSelector.vue'
+import { loadAllPages } from '@/utils/paged'
+import { relationTypeLabels } from '@/types/modules/resident'
 import { getCommunityList } from '@/api/community'
-import type { IAdminCreateResidentVO } from '@/types/modules/resident'
+import type { IAdminCreateResidentVO, RelationType } from '@/types/modules/resident'
 import type { ICommunity } from '@/types/modules/community'
 
 /**
@@ -19,9 +22,13 @@ const visible = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ created: [result: IAdminCreateResidentVO] }>()
 
 const communities = ref<ICommunity[]>([])
+const communityLoadError = ref('')
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 /** 代建结果：非空时对话框切换为结果展示段 */
+const createRelation = ref(true)
+watch(createRelation, value => { if (!value) { form.houseId = undefined; form.remark = '' } })
+
 const result = ref<IAdminCreateResidentVO | null>(null)
 
 const form = reactive({
@@ -29,7 +36,12 @@ const form = reactive({
   realName: '',
   phone: '',
   idCard: '',
-  username: ''
+  username: '',
+  email: '',
+  houseId: undefined as number | undefined,
+  relationType: 'OWNER' as RelationType,
+  moveInDate: new Date().toLocaleDateString('sv-SE'),
+  remark: ''
 })
 
 /* 校验口径与后端 AdminCreateResidentDTO 注解逐条对齐 */
@@ -46,6 +58,7 @@ const rules: FormRules = {
   idCard: [
     { pattern: /^\d{17}[\dXx]$/, message: '身份证号格式不正确（18 位，尾号可为 X）', trigger: 'blur' }
   ],
+  email: [{ type: 'email', message: '邮箱格式不正确', trigger: 'blur' }],
   username: [
     { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名仅支持字母、数字、下划线', trigger: 'blur' },
     {
@@ -63,10 +76,11 @@ const rules: FormRules = {
 
 /* 社区下拉：ADMIN 数据级权限由后端限定（仅返回绑定社区），前端全量渲染 */
 async function loadCommunities(): Promise<void> {
+  communityLoadError.value = ''
   try {
-    const page = await getCommunityList({ page: 1, size: 200 })
-    communities.value = page.records
-  } catch {
+    communities.value = await loadAllPages(query => getCommunityList(query))
+  } catch (error) {
+    communityLoadError.value = error instanceof Error ? error.message : '社区加载失败，请重试'
     communities.value = []
   }
 }
@@ -79,6 +93,12 @@ watch(visible, (value) => {
   form.phone = ''
   form.idCard = ''
   form.username = ''
+  form.email = ''
+  form.houseId = undefined
+  form.relationType = 'OWNER'
+  form.moveInDate = new Date().toLocaleDateString('sv-SE')
+  form.remark = ''
+  createRelation.value = true
   formRef.value?.clearValidate()
   if (communities.value.length === 0) {
     loadCommunities()
@@ -88,6 +108,10 @@ watch(visible, (value) => {
 async function handleSubmit(): Promise<void> {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid || form.communityId === undefined) return
+  if (createRelation.value && (!form.houseId || !form.moveInDate)) {
+    ElMessage.warning('请完整选择房屋和入住日期')
+    return
+  }
   submitting.value = true
   try {
     result.value = await adminCreateResident({
@@ -95,7 +119,10 @@ async function handleSubmit(): Promise<void> {
       realName: form.realName.trim(),
       phone: form.phone.trim(),
       idCard: form.idCard.trim() || undefined,
-      username: form.username.trim() || undefined
+      username: form.username.trim() || undefined,
+      email: form.email.trim() || undefined,
+      ...(createRelation.value ? { houseId: form.houseId, relationType: form.relationType,
+        moveInDate: form.moveInDate, remark: form.remark.trim() || undefined } : {})
     })
     emit('created', result.value)
   } catch (error) {
@@ -120,7 +147,7 @@ async function copyText(text: string): Promise<void> {
   <el-dialog
     v-model="visible"
     :title="result ? '代建成功' : '代建居民'"
-    width="480px"
+    width="min(640px, calc(100vw - 32px))"
     :close-on-click-modal="false"
   >
     <!-- 结果段：初始密码仅本次返回，关闭后不可再查 -->
@@ -137,10 +164,11 @@ async function copyText(text: string): Promise<void> {
         <el-button text type="primary" size="small" @click="copyText(result.initialPassword)">复制</el-button>
       </div>
       <p class="result-hint">居民首次登录后建议尽快修改密码。</p>
+      <el-alert :type="result.relationId ? 'success' : 'info'" :closable="false" :title="result.relationId ? `居住关系已登记：关系ID ${result.relationId}，房屋ID ${result.houseId}` : '仅创建账号，尚未登记居住关系；所选社区不是账号的居住归属。'" />
     </div>
 
     <!-- 表单段 -->
-    <el-form v-else ref="formRef" :model="form" :rules="rules" label-width="88px">
+    <el-form v-else ref="formRef" class="resident-form" :model="form" :rules="rules" label-width="88px">
       <el-form-item label="所属社区" prop="communityId">
         <el-select
           v-model="form.communityId"
@@ -155,6 +183,9 @@ async function copyText(text: string): Promise<void> {
           />
         </el-select>
       </el-form-item>
+      <el-alert v-if="communityLoadError" :title="communityLoadError" type="error" :closable="false" /><el-button v-if="communityLoadError" text @click="loadCommunities">重新加载社区</el-button>
+      <el-form-item label="登记关系"><el-switch v-model="createRelation" active-text="同时登记居住关系" inactive-text="仅建账号" /></el-form-item>
+      <el-alert v-if="!createRelation" type="info" :closable="false" title="仅建账号：社区用于权限校验，不代表已入住或已有居住关系。" />
       <el-form-item label="真实姓名" prop="realName">
         <el-input v-model="form.realName" placeholder="居民真实姓名" maxlength="50" />
       </el-form-item>
@@ -172,6 +203,15 @@ async function copyText(text: string): Promise<void> {
         />
         <span class="form-hint">选填，4~20 字符（字母/数字/下划线）；初始密码为手机号后 6 位</span>
       </el-form-item>
+      <el-form-item label="邮箱"><el-input v-model="form.email" placeholder="选填，与居民资料一致" maxlength="100" /></el-form-item>
+      <template v-if="createRelation">
+        <el-divider content-position="left">居住关系</el-divider>
+        <ResidentHouseSelector v-model="form.houseId" :community-id="form.communityId" />
+        <el-form-item label="关系类型"><el-select v-model="form.relationType" style="width:100%"><el-option v-for="(label, value) in relationTypeLabels" :key="value" :value="value" :label="label" /></el-select></el-form-item>
+        <el-form-item label="入住日期"><el-date-picker v-model="form.moveInDate" type="date" value-format="YYYY-MM-DD" :disabled-date="(date: Date) => date.getTime() > Date.now()" style="width:100%" /></el-form-item>
+        <el-form-item label="关系备注"><el-input v-model="form.remark" placeholder="选填，记录本次登记说明" maxlength="200" /></el-form-item>
+        <p class="form-hint">此处登记居住关系，不自动创建或签署租赁协议。</p>
+      </template>
     </el-form>
 
     <template #footer>
@@ -189,6 +229,8 @@ async function copyText(text: string): Promise<void> {
 </template>
 
 <style scoped>
+.resident-form { max-height: 62vh; overflow-y: auto; padding-right: 8px; }
+
 .form-hint {
   display: block;
   margin-top: var(--spacing-xs);

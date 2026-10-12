@@ -28,6 +28,15 @@ public class ResidenceApplication {
     @Schema(description = "申请房屋ID")
     private Long houseId;
 
+    @Schema(description = "申请来源挂牌ID；历史缺失不猜测补填")
+    private Long housingId;
+
+    @Schema(description = "申请提交时挂牌月租快照")
+    private java.math.BigDecimal listedMonthlyRent;
+
+    @Schema(description = "申请提交时挂牌押金快照")
+    private java.math.BigDecimal listedDeposit;
+
     @Schema(description = "审批通过生成的租约ID（V26 强关联，审批通过内核同一事务回写；NULL=无关联租约或存量无法判定）")
     private Long leaseId;
 

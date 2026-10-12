@@ -38,12 +38,15 @@ public class HouseService {
     private final UnitMapper unitMapper;
     private final HouseStatusHistoryMapper historyMapper;
     private final ResidenceRelationMapper residenceRelationMapper;
+    private final BuildingBoundaryService buildingBoundaryService;
+    private final HouseLayoutService houseLayoutService;
 
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSE", targetId = "#result.id", communityId = "#result.communityId", content = "'创建房屋：' + #dto.houseNumber")
     public HouseVO create(CreateHouseDTO dto) {
         Unit unit = requireUnit(dto.getUnitId());
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());
+        buildingBoundaryService.validateFloor(unit, dto.getFloor());
         requireHouseNumberAvailable(unit.getId(), dto.getHouseNumber(), null);
         House house = new House();
         house.setUnitId(unit.getId());
@@ -79,9 +82,11 @@ public class HouseService {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "房屋不允许变更所属单元");
         }
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
+        buildingBoundaryService.validateFloor(requireUnit(house.getUnitId()), dto.getFloor());
         requireHouseNumberAvailable(house.getUnitId(), dto.getHouseNumber(), house.getId());
         applyDto(house, dto);
         houseMapper.updateById(house);
+        houseLayoutService.synchronize(house.getId(), house.getLayout());
         return HouseVO.from(house);
     }
 
@@ -170,7 +175,6 @@ public class HouseService {
         house.setHouseNumber(dto.getHouseNumber());
         house.setFloor(dto.getFloor());
         house.setArea(dto.getArea());
-        house.setRoomCount(dto.getRoomCount());
         house.setLayout(dto.getLayout());
         house.setOrientation(dto.getOrientation());
         if (StringUtils.hasText(dto.getStatus())) {
@@ -208,10 +212,12 @@ public class HouseService {
      * （大批量写入不产生逐行 select 的 N+1），null 时走逐行 requireHouseNumberAvailable
      * 库内唯一校验（原单单元批量创建口径不变）。
      */
+    @Transactional(rollbackFor = Exception.class)
     public com.community.residence.community.vo.BatchCreateResultVO insertHouses(
             Unit unit, List<CreateHouseDTO> items, java.util.Set<String> preloadedNumbers) {
         List<com.community.residence.community.vo.BatchCreateResultVO.Row> rows = new java.util.ArrayList<>();
         /* 本批次已出现的房号（同单元内请求自身去重，保留首次出现者） */
+        com.community.residence.community.entity.Building building = buildingBoundaryService.lockBuilding(unit.getBuildingId());
         java.util.Set<String> seenNumbers = new java.util.HashSet<>();
         int success = 0;
         for (int i = 0; i < items.size(); i++) {
@@ -229,6 +235,7 @@ public class HouseService {
                 continue;
             }
             try {
+                buildingBoundaryService.validateLockedFloor(building, item.getFloor());
                 if (preloadedNumbers != null) {
                     if (houseNumber != null && preloadedNumbers.contains(houseNumber)) {
                         rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.fail(

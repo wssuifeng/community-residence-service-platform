@@ -13,6 +13,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
+import com.community.residence.common.constant.RoleConstants;
 
 /**
  * 用户级令牌吊销（接口设计.md 9.10.1.7/9.10.1.8/9.10.2 业务规则）：
@@ -54,7 +56,7 @@ public class TokenRevocationService {
     private void revoke(String scope, Long userId) {
         AuthTokenBlacklist record = new AuthTokenBlacklist();
         // 虚拟 jti：scope 前缀隔离两套账号体系，避免 userId 重叠互相误伤
-        record.setJti("USER-" + scope + "-" + userId + "-" + System.currentTimeMillis());
+        record.setJti("USER-" + scope + "-" + userId + "-" + UUID.randomUUID());
         record.setUserId(userId);
         record.setExpireTime(LocalDateTime.now().plus(REVOKE_RETENTION));
         record.setReason("PERMISSION_CHANGE");
@@ -66,6 +68,21 @@ public class TokenRevocationService {
         } catch (RedisConnectionFailureException e) {
             log.warn("Redis 不可用，用户吊销已写 DB，缓存未生效：scope={}, userId={}", scope, userId);
         }
+    }
+
+    /** 登录时读取DB权限代次，不依赖时钟/缓存；事务提交后的绑定变更立即反映到新令牌。 */
+    public long currentRevision(Long userId, String role) {
+        String scope = RoleConstants.RESIDENT.equals(role) ? SCOPE_RESIDENT : SCOPE_ADMIN;
+        Long revision = blacklistMapper.selectLatestRevocationId("USER-" + scope + "-" + userId + "-%");
+        return revision == null ? 0L : revision;
+    }
+
+    /* 新令牌比较递增吊销记录ID；旧令牌仍按原秒级保守口径拒绝，不能用<放过同秒旧令牌。 */
+    public boolean isTokenRevoked(Long userId, String role, Date issuedAt, Long revision) {
+        if (issuedAt == null || revision != null && revision < 0) return true;
+        if (revision != null) return currentRevision(userId, role) > revision;
+        return RoleConstants.RESIDENT.equals(role)
+                ? isResidentRevoked(userId, issuedAt) : isAdminUserRevoked(userId, issuedAt);
     }
 
     /** 校验居民令牌是否被用户级吊销（签发时间早于吊销时间即失效） */

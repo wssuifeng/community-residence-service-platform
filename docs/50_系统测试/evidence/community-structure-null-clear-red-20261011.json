@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-11",
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "隔离库身份",
+      "passed": true
+    },
+    {
+      "name": "社区保存责任人ID并回显资料",
+      "passed": true
+    },
+    {
+      "name": "非管理员账号不能绑定",
+      "passed": true
+    },
+    {
+      "name": "超级管理员不能绑定",
+      "passed": true
+    },
+    {
+      "name": "不存在账号不能绑定",
+      "passed": true
+    },
+    {
+      "name": "候选含其他ADMIN且本社区绑定优先",
+      "passed": true
+    },
+    {
+      "name": "候选不泄露密码字段",
+      "passed": true
+    },
+    {
+      "name": "跨社区不能查询责任人候选",
+      "passed": true
+    },
+    {
+      "name": "账号资料变更同步联系人",
+      "passed": true
+    }
+  ],
+  "cleanup": true,
+  "before": [
+    "0",
+    "0"
+  ],
+  "error": "清空责任人后数据库引用为空"
+}

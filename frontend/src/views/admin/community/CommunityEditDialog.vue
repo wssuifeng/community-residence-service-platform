@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createCommunity, updateCommunity } from '@/api/community'
-import type { ICommunity, ICreateCommunityDTO } from '@/types/modules/community'
+import { createCommunity, updateCommunity, getResponsibleAdmins } from '@/api/community'
+import type { ICommunity, ICreateCommunityDTO, IResponsibleAdmin } from '@/types/modules/community'
 
 /**
  * 社区新建/编辑对话框（任务 3 自 CommunityListView 表单逻辑收编抽取：
@@ -24,12 +24,28 @@ const submitting = ref(false)
 const form = reactive<ICreateCommunityDTO>({
   name: '',
   address: '',
-  contactPhone: '',
-  contactPerson: '',
+  responsibleAdminId: null,
   description: '',
   autoApproveResidence: 0,
   defaultLeaseMonths: 12
 })
+
+const responsibleOptions = ref<Array<IResponsibleAdmin & { currentOnly?: boolean }>>([])
+const responsibleLoading = ref(false)
+let responsibleRequest = 0
+async function loadResponsibleAdmins(keyword: string): Promise<void> {
+  const version = ++responsibleRequest
+  responsibleLoading.value = true
+  try {
+    const result = await getResponsibleAdmins({ communityId: props.community?.id, keyword, size: 100 })
+    if (version !== responsibleRequest) return
+    const selected = responsibleOptions.value.find(item => item.id === form.responsibleAdminId)
+    responsibleOptions.value = result.records
+    if (selected && !result.records.some(item => item.id === selected.id)) responsibleOptions.value.unshift(selected)
+  } catch (error) { if (version === responsibleRequest) ElMessage.error(error instanceof Error ? error.message : '责任人候选加载失败') }
+  finally { if (version === responsibleRequest) responsibleLoading.value = false }
+}
+const selectedResponsible = computed(() => responsibleOptions.value.find(item => item.id === form.responsibleAdminId))
 
 const rules: FormRules = {
   name: [{ required: true, message: '请输入社区名称', trigger: 'blur' }],
@@ -38,11 +54,16 @@ const rules: FormRules = {
 
 /* 每次打开按编辑目标重置表单（新建为全空，自动化变量回落默认值） */
 watch(visible, (value) => {
-  if (!value) return
+  if (!value) {
+    responsibleRequest++
+    responsibleLoading.value = false
+    return
+  }
   form.name = props.community?.name ?? ''
   form.address = props.community?.address ?? ''
-  form.contactPhone = props.community?.contactPhone ?? ''
-  form.contactPerson = props.community?.contactPerson ?? ''
+  form.responsibleAdminId = props.community?.responsibleAdminId ?? null
+  responsibleOptions.value = props.community?.responsibleAdminId ? [{ id: props.community.responsibleAdminId, realName: props.community.contactPerson ?? '管理员', phone: props.community.contactPhone ?? '', boundToCommunity: false, currentOnly: true }] : []
+  void loadResponsibleAdmins('')
   form.description = props.community?.description ?? ''
   form.autoApproveResidence = props.community?.autoApproveResidence ?? 0
   form.defaultLeaseMonths = props.community?.defaultLeaseMonths ?? 12
@@ -54,12 +75,11 @@ async function handleSubmit(): Promise<void> {
   if (!valid) return
   submitting.value = true
   try {
-    /* 可选文本留空时传 undefined（后端 contactPhone @Pattern 不接受空字符串） */
+    /* 责任人以null明确解除；联系人姓名和电话不作为输入。 */
     const payload: ICreateCommunityDTO = {
       name: form.name.trim(),
       address: form.address.trim(),
-      contactPhone: (form.contactPhone ?? '').trim() || undefined,
-      contactPerson: (form.contactPerson ?? '').trim() || undefined,
+      responsibleAdminId: form.responsibleAdminId ?? null,
       description: (form.description ?? '').trim() || undefined,
       autoApproveResidence: form.autoApproveResidence ? 1 : 0,
       defaultLeaseMonths: form.defaultLeaseMonths ?? 12
@@ -91,12 +111,17 @@ async function handleSubmit(): Promise<void> {
       <el-form-item label="社区地址" prop="address">
         <el-input v-model="form.address" placeholder="请输入社区地址" maxlength="100" />
       </el-form-item>
-      <el-form-item label="联系人" prop="contactPerson">
-        <el-input v-model="form.contactPerson" placeholder="请输入联系人" maxlength="20" />
+      <el-form-item label="社区责任人">
+        <el-select v-model="form.responsibleAdminId" clearable filterable remote :remote-method="loadResponsibleAdmins" :loading="responsibleLoading" placeholder="搜索管理员姓名或电话" style="width: 100%">
+          <el-option-group v-if="responsibleOptions.some(item => item.currentOnly)" label="当前责任人">
+            <el-option v-for="admin in responsibleOptions.filter(item => item.currentOnly)" :key="admin.id" :value="admin.id" :label="`${admin.realName} · ${admin.phone}`" />
+          </el-option-group>
+          <el-option-group v-for="bound in [true, false]" :key="String(bound)" :label="bound ? '已绑定本社区' : '其他管理员'">
+            <el-option v-for="admin in responsibleOptions.filter(item => !item.currentOnly && item.boundToCommunity === bound)" :key="admin.id" :value="admin.id" :label="`${admin.realName} · ${admin.phone}`" />
+          </el-option-group>
+        </el-select>
       </el-form-item>
-      <el-form-item label="联系电话" prop="contactPhone">
-        <el-input v-model="form.contactPhone" placeholder="请输入联系电话" maxlength="20" />
-      </el-form-item>
+      <el-form-item label="联系电话"><span>{{ selectedResponsible?.phone || '未设置' }}</span></el-form-item>
       <el-form-item label="社区简介" prop="description">
         <el-input
           v-model="form.description"

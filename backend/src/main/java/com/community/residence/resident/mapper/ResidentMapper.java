@@ -10,6 +10,11 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface ResidentMapper extends BaseMapper<Resident> {
 
+    /* 同一居民的看房违约计数与冻结串行化；不改变账号的社区归属模型。 */
+    @Select("SELECT * FROM resident WHERE id = #{id} FOR UPDATE")
+    Resident selectByIdForUpdate(@Param("id") Long id);
+
+
     /* 按用户名查询（登录用，唯一键 uk_username 保证至多一条） */
     @Select("SELECT id, username, password_hash, real_name, phone, id_card, email, avatar_url, "
             + "status, created_at, updated_at FROM resident WHERE username = #{username}")

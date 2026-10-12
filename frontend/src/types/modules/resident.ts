@@ -110,6 +110,11 @@ export interface IAdminCreateResidentDTO {
   idCard?: string
   /** 用户名（选填，^[a-zA-Z0-9_]+$ 4~20 字符；留空服务端按手机号生成） */
   username?: string
+  email?: string
+  houseId?: number
+  relationType?: RelationType
+  moveInDate?: string
+  remark?: string
 }
 
 /** 代建居民结果（初始密码明文仅本次返回，供管理员转交居民） */
@@ -117,6 +122,8 @@ export interface IAdminCreateResidentVO {
   residentId: number
   username: string
   initialPassword: string
+  relationId?: number | null
+  houseId?: number | null
 }
 
 /** CSV 批量导入成功行（行号从 1 计，不含表头） */
@@ -124,6 +131,9 @@ export interface IResidentImportSuccessRow {
   row: number
   username: string
   initialPassword: string
+  residentId?: number
+  relationId?: number | null
+  houseId?: number | null
 }
 
 /** CSV 批量导入失败行 */
@@ -149,6 +159,9 @@ export interface IResidentImportVO {
  * emergencyPhone/houseAddress 后端 VO 均未返回，真实字段为 relationType/houseLocation）
  */
 export interface IResidenceApplication {
+  housingId?: number | null
+  listedMonthlyRent?: number | null
+  listedDeposit?: number | null
   id: number
   residentId: number
   residentName: string
@@ -177,6 +190,7 @@ export interface IResidenceApplication {
 
 /** 提交入住申请请求（后端 CreateApplicationDTO 实际契约） */
 export interface ICreateResidenceApplicationDTO {
+  housingId?: number
   houseId: number
   relationType: RelationType
   remark?: string

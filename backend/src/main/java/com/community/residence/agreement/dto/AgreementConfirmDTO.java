@@ -9,7 +9,7 @@ import lombok.Data;
 @Schema(description = "协议确认请求")
 public class AgreementConfirmDTO {
 
-    @Schema(description = "确认人姓名（缺省取当前账号姓名，快照入库）")
+    @Schema(description = "兼容旧客户端字段，服务端忽略请求姓名，仅记录当前居民账号姓名（缺省取当前账号姓名，快照入库）")
     @Size(max = 50, message = "确认人姓名最多 50 字符")
     private String confirmName;
 

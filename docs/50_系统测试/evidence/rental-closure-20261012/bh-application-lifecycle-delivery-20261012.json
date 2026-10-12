@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "D:\\code\\community-residence-service-platform\\docs\\30_系统设计\\assets\\02_核心状态机\\05_入住申请状态机.lifecycle.json",
+  "output": "D:\\code\\community-residence-service-platform\\docs\\30_系统设计\\assets\\02_核心状态机\\05_入住申请状态机图.html",
+  "specification": {
+    "sha256": "8c8452e8cdd954afe160f2723105b5c4ee393306035bb97206344e704fe40514",
+    "bytes": 3612
+  },
+  "artifact": {
+    "sha256": "eb1d1d88d97e8f54bf22431500526d3b5631397afe94c97889a4b8a24231ce97",
+    "bytes": 704117
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

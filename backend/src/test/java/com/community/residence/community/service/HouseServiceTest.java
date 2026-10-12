@@ -94,4 +94,8 @@ class HouseServiceTest {
             verify(historyMapper, org.mockito.Mockito.never()).insert(any(HouseStatusHistory.class));
         }
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.BuildingBoundaryService buildingBoundaryService;
+    @org.mockito.Mock
+    private com.community.residence.community.service.HouseLayoutService houseLayoutService;
 }

@@ -16,6 +16,10 @@ public class CreateApplicationDTO {
     @NotNull(message = "申请房屋不能为空")
     private Long houseId;
 
+    @Schema(description = "来源挂牌ID，租客申请必填；金额由服务器读取")
+    @jakarta.validation.constraints.Positive(message = "来源挂牌ID必须为正整数")
+    private Long housingId;
+
     @Schema(description = "关系类型：OWNER-业主, TENANT-租客, FAMILY-家属")
     @NotBlank(message = "关系类型不能为空")
     @Pattern(regexp = "^(OWNER|TENANT|FAMILY)$", message = "关系类型不合法")

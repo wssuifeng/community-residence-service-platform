@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-11",
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "隔离数据库身份",
+      "passed": true
+    },
+    {
+      "name": "真实图片上传后可访问",
+      "passed": true
+    },
+    {
+      "name": "伪装图片HTTP拒绝",
+      "passed": true
+    },
+    {
+      "name": "资源图片真实保存返回数组",
+      "passed": true
+    },
+    {
+      "name": "新增外部URL拒绝且原图不变",
+      "passed": true
+    },
+    {
+      "name": "不存在平台图拒绝且原图不变",
+      "passed": true
+    },
+    {
+      "name": "超6张拒绝且原图不变",
+      "passed": true
+    },
+    {
+      "name": "路径越界拒绝且原图不变",
+      "passed": true
+    },
+    {
+      "name": "空数组清空但不物理删除文件",
+      "passed": true
+    },
+    {
+      "name": "历史外部图可原样保留",
+      "passed": true
+    },
+    {
+      "name": "图片表单没有URL输入框",
+      "passed": true
+    },
+    {
+      "name": "1024资源图片表单无页面横向溢出",
+      "passed": true
+    },
+    {
+      "name": "768资源图片表单无页面横向溢出",
+      "passed": true
+    },
+    {
+      "name": "真实浏览器上传并保存资源图",
+      "passed": true
+    },
+    {
+      "name": "居民不可修改公共资源图片",
+      "passed": true
+    },
+    {
+      "name": "居民详情真实加载上传图片",
+      "passed": true
+    },
+    {
+      "name": "预览大图可见",
+      "passed": true
+    },
+    {
+      "name": "移除后取消原图不变",
+      "passed": true
+    },
+    {
+      "name": "浏览器移除后保存明确清空",
+      "passed": true
+    },
+    {
+      "name": "浏览器无脚本异常",
+      "passed": true
+    },
+    {
+      "name": "支付退款记录数量不变",
+      "passed": true
+    }
+  ],
+  "cleanup": true,
+  "before": [
+    "0",
+    "0"
+  ],
+  "pageErrors": [],
+  "after": [
+    "0",
+    "0"
+  ],
+  "uploadedFixtureFiles": [
+    "/uploads/789f2fdf405e45ab926d3e7222d0330c.png",
+    "/uploads/2f2bb92d861e422ca74970e8b36e9de8.png"
+  ],
+  "uploadFilesCleanup": true
+}

@@ -43,4 +43,7 @@ public class CreateResourceDTO {
     @Schema(description = "资源描述")
     @Size(max = 1000, message = "资源描述最多 1000 字符")
     private String description;
+
+    @Schema(description = "展示图片列表（最多6张；新图必须为平台上传路径，旧原图可保留；空数组清空，总长1000字符）")
+    private String[] images;
 }

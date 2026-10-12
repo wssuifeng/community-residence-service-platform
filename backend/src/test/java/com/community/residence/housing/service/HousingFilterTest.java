@@ -126,6 +126,7 @@ class HousingFilterTest {
         house.setId(5L);
         house.setCommunityId(3L);
         house.setLayout("3室2厅");
+        when(houseMapper.selectByIdForUpdate(5L)).thenReturn(house);
         when(houseMapper.selectById(5L)).thenReturn(house);
         when(housingMapper.selectCount(any())).thenReturn(0L);
         when(housingMapper.insert(any(Housing.class))).thenAnswer(inv -> {
@@ -151,5 +152,12 @@ class HousingFilterTest {
         assertThat(captor.getValue().getLayout()).isEqualTo("3室2厅");
         assertThat(captor.getValue().getRentType()).isEqualTo("RENT");
         assertThat(vo.getLayout()).isEqualTo("3室2厅");
+        verify(houseMapper).selectByIdForUpdate(5L);
+    }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
     }
 }

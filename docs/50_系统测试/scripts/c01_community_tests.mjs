@@ -154,10 +154,10 @@ async function main() {
     const b1 = (bl.data?.records ?? []).find(x => x.name.replace(/ /g,'') === '1号楼') ?? bl.data?.records?.[0];
     const ul = await api('GET', `/api/v1/buildings/${b1.id}/units`);
     const u1 = (ul.data?.records ?? [])[0];
-    const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u1.id, houseNumber: '202C1', floor: 2, area: 90.5, roomCount: 2, layout: '两室一厅', orientation: '南', status: 'VACANT', description: '' } });
+    const h = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u1.id, houseNumber: '202C1', floor: 2, area: 90.5, layout: '两室一厅', orientation: '南', status: 'VACANT', description: '' } });
     const hid = h.data?.id;
     const d = await api('GET', `/api/v1/houses/${hid}`);
-    const up = await api('PUT', `/api/v1/houses/${hid}`, { token: admin1Tok, body: { unitId: u1.id, houseNumber: '202C1', floor: 2, area: 95, roomCount: 2, layout: '两室一厅', orientation: '南', status: 'VACANT', description: '改后' } });
+    const up = await api('PUT', `/api/v1/houses/${hid}`, { token: admin1Tok, body: { unitId: u1.id, houseNumber: '202C1', floor: 2, area: 95, layout: '两室一厅', orientation: '南', status: 'VACANT', description: '改后' } });
     const s1 = await api('PATCH', `/api/v1/houses/${hid}/status`, { token: admin1Tok, body: { status: 'MAINTENANCE', remark: '设备检修' } });
     const s2 = await api('PATCH', `/api/v1/houses/${hid}/status`, { token: admin1Tok, body: { status: 'VACANT', remark: '检修完成' } });
     const hist = await api('GET', `/api/v1/houses/${hid}/status-history`);
@@ -170,7 +170,7 @@ async function main() {
       ok(s1) && ok(s2) && Number(histN) >= 2,
       `变更=${s1.code}/${s2.code} 历史条数=${histN}（VACANT→MAINTENANCE→VACANT 留痕）`);
     // 016：非法枚举 + 居民变更
-    const h2 = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u1.id, houseNumber: '203C1', floor: 2, area: 90, roomCount: 2, layout: 'x', orientation: 'x', status: 'VACANT' } });
+    const h2 = await api('POST', '/api/v1/houses', { token: admin1Tok, body: { unitId: u1.id, houseNumber: '203C1', floor: 2, area: 90, layout: 'x', orientation: 'x', status: 'VACANT' } });
     const bad = await api('PATCH', `/api/v1/houses/${h2.data.id}/status`, { token: admin1Tok, body: { status: 'FOO', remark: 'x' } });
     const resChange = await api('PATCH', `/api/v1/houses/${h2.data.id}/status`, { token: res1Tok, body: { status: 'MAINTENANCE', remark: 'x' } });
     tc('TC-C1-016', '非法枚举拒+居民变更 403', rej(bad) && resChange.status === 403, `非法值=${bad.code} 居民=${resChange.status}`);
@@ -271,7 +271,7 @@ async function main() {
     const cid = c.data.id;
     const b = await api('POST', '/api/v1/buildings', { token: superTok, body: { communityId: cid, name: '级联楼', floors: 1 } });
     const u = await api('POST', '/api/v1/units', { token: superTok, body: { buildingId: b.data.id, name: '1单元' } });
-    const h = await api('POST', '/api/v1/houses', { token: superTok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 50, roomCount: 1, status: 'VACANT' } });
+    const h = await api('POST', '/api/v1/houses', { token: superTok, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 50, status: 'VACANT' } });
     await api('POST', '/api/v1/service-categories', { token: superTok, body: { communityId: cid, name: '级联类别' } });
     const uname = `cascad_adm_${Date.now() % 100000}`;
     const adm = await api('POST', '/api/v1/sys-users', { token: superTok, body: { username: uname, password: 'Admin123456', realName: '级联管理员', phone: uniqPhone(), role: 'ADMIN' } });

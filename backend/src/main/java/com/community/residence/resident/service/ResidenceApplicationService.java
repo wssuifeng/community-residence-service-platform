@@ -54,9 +54,9 @@ import java.util.Set;
 
 /**
  * 入住申请业务逻辑：PENDING → APPROVED / REJECTED / WITHDRAWN 状态机（终态不可变更，R66 增撤回）。
- * 审批通过（人工或社区自动）建立居住关系 + 租住记录 + 租约群聊（同一事务）；
+ * 审批通过（人工或社区自动）租客仅建立待签约租约与群聊，不提前正式居住关系；
  * **审核通过 ≠ 租约生效**（R66 v1.8 口径）：租约落 TO_SIGN 待签约、房屋保持空置，
- * 待租赁协议双方确认（AgreementService）才置 ACTIVE 并翻转房屋为已入住。
+ * 待协议完成且首期成功才建立正式关系、置ACTIVE与房屋已入住。
  */
 @Slf4j
 @Service
@@ -85,7 +85,7 @@ public class ResidenceApplicationService {
     private final NotificationService notificationService;
 
     /* 提交申请：锁定房屋行后串行检查申请、租约与居住关系，避免多账号抢同一房屋或重复建租约。 */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public ApplicationVO create(CreateApplicationDTO dto) {
         House house = lockHouse(dto.getHouseId());
         if (house == null) {
@@ -106,10 +106,25 @@ public class ResidenceApplicationService {
         application.setRelationType(dto.getRelationType());
         application.setStatus("PENDING");
         application.setRemark(dto.getRemark());
+        if ("TENANT".equals(dto.getRelationType())) {
+            if (dto.getHousingId() == null) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "租客申请必须从具体挂牌进入，来源挂牌不能为空");
+            }
+            Housing listing = housingMapper.selectByIdForUpdate(dto.getHousingId());
+            if (listing == null || !house.getId().equals(listing.getHouseId())
+                    || "SALE".equals(listing.getRentType())
+                    || !("AVAILABLE".equals(listing.getStatus()) || "RESERVED".equals(listing.getStatus()))) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "来源挂牌不属于申请房屋、不是出租或已下线");
+            }
+            communityService.requireActiveCommunity(house.getCommunityId());
+            application.setHousingId(listing.getId());
+            application.setListedMonthlyRent(listing.getMonthlyRent());
+            application.setListedDeposit(listing.getDeposit());
+        }
         applicationMapper.insert(application);
 
         /* 社区开启「入住申请自动通过」（R62 补，社区级开关）：提交即完成审批，
-           免去人工审核；租期按社区默认月数推导，租金与押金取房源挂牌值（未挂牌则待管理方补录） */
+           免去人工审核；租期按社区默认月数推导，租金与押金取明确来源挂牌的申请时快照 */
         Community community = communityService.requireCommunity(house.getCommunityId());
         if (community.getAutoApproveResidence() != null && community.getAutoApproveResidence() == 1) {
             autoApprove(application, house, community);
@@ -122,18 +137,8 @@ public class ResidenceApplicationService {
         int months = community.getDefaultLeaseMonths() == null || community.getDefaultLeaseMonths() < 1
                 ? DEFAULT_LEASE_MONTHS : community.getDefaultLeaseMonths();
         LocalDate startDate = LocalDate.now();
-        BigDecimal monthlyRent = BigDecimal.ZERO;
-        BigDecimal deposit = null;
-        Housing listing = housingMapper.selectOne(new LambdaQueryWrapper<Housing>()
-                .eq(Housing::getHouseId, house.getId())
-                .orderByDesc(Housing::getId)
-                .last("LIMIT 1"));
-        if (listing != null) {
-            if (listing.getMonthlyRent() != null) {
-                monthlyRent = listing.getMonthlyRent();
-            }
-            deposit = listing.getDeposit();
-        }
+        BigDecimal monthlyRent = application.getListedMonthlyRent() != null ? application.getListedMonthlyRent() : BigDecimal.ZERO;
+        BigDecimal deposit = application.getListedDeposit();
         applyApproval(application, house, startDate, startDate.plusMonths(months), monthlyRent, deposit,
                 null, "社区已开启入住申请自动通过，系统自动审批");
         log.info("入住申请自动通过：applicationId={}, houseId={}, leaseMonths={}, rent={}",
@@ -160,7 +165,7 @@ public class ResidenceApplicationService {
     }
 
     /* 审批通过：建立居住关系 + 租住记录 + 房屋状态翻转，同一事务 */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     @com.community.residence.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESIDENCE_APPLICATION", targetId = "#id", content = "'入住申请审核通过'")
     public ApplicationVO approve(Long id, ApproveApplicationDTO dto) {
         ResidenceApplication application = requireApplication(id);
@@ -175,6 +180,9 @@ public class ResidenceApplicationService {
             throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已被入住，无法通过申请");
         }
         ensureApprovalAvailable(application);
+        if (!leaseRecordMapper.selectBlockingIdsForUpdate(application.getHouseId()).isEmpty()) {
+            throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已有进行中的租约，不能重复审核");
+        }
         /* 抢占式终态条件更新（OCR DEF-117）：并发「管理员审批 × 居民撤回」都读到 PENDING 时，
            仅一方能落 APPROVED（WHERE status='PENDING' 抢占）；0 行即并发赢家已处理——
            重读后已 APPROVED 视为重复审批幂等返回既有结果，其余终态按已审核拒绝。
@@ -202,23 +210,26 @@ public class ResidenceApplicationService {
     }
 
     /**
-     * 审批通过内核：建立居住关系 + 租住记录（仅 TENANT，落 TO_SIGN 待签约）+ 租约群聊 + 申请落终态。
+     * 审批通过内核：TENANT 只建待签约租约及群聊；非租客建立居住关系；申请落终态。
      * 人工审批与社区自动审批共用，差异仅在租期/租金来源与审核人是否留痕（自动审批无人工审核者）。
-     * R66 v1.8：**不**翻转房屋状态（签约生效时才置 OCCUPIED）；群聊生命周期开始于审核通过，
+     * R66 v1.8：**不**翻转房屋状态（协议完成且首期成功时才置 OCCUPIED）；群聊生命周期开始于审核通过，
      * 参与者 = 申请居民 + 该社区全部启用 ADMIN，会话 ID 回写 lease_record.conversation_id。
      */
     private void applyApproval(ResidenceApplication application, House house, LocalDate startDate,
                                LocalDate endDate, BigDecimal monthlyRent, BigDecimal deposit,
                                Long reviewerId, String reviewRemark) {
         /* 居住关系：TENANT 建租住记录；OWNER/FAMILY 建关系即可（租约由 C3 独立登记） */
-        ResidenceRelation relation = new ResidenceRelation();
-        relation.setResidentId(application.getResidentId());
-        relation.setCommunityId(application.getCommunityId());
-        relation.setHouseId(application.getHouseId());
-        relation.setRelationType(application.getRelationType());
-        relation.setMoveInDate(startDate);
-        relation.setIsPrimary(1);
-        relationMapper.insert(relation);
+        ResidenceRelation relation = null;
+        if (!"TENANT".equals(application.getRelationType())) {
+            relation = new ResidenceRelation();
+            relation.setResidentId(application.getResidentId());
+            relation.setCommunityId(application.getCommunityId());
+            relation.setHouseId(application.getHouseId());
+            relation.setRelationType(application.getRelationType());
+            relation.setMoveInDate(startDate);
+            relation.setIsPrimary(1);
+            relationMapper.insert(relation);
+        }
 
         if ("TENANT".equals(application.getRelationType())) {
             String houseLocation = buildHouseLocation(house);
@@ -235,8 +246,14 @@ public class ResidenceApplicationService {
             lease.setRemark("入住申请审批通过自动建立");
             leaseRecordMapper.insert(lease);
             changeLogService.logCreate(lease, "入住申请审批通过自动建立（待签约）");
+            LeaseRecord listedPrice = new LeaseRecord();
+            listedPrice.setId(lease.getId()); listedPrice.setStartDate(startDate); listedPrice.setEndDate(endDate);
+            listedPrice.setMonthlyRent(application.getListedMonthlyRent()); listedPrice.setDeposit(application.getListedDeposit());
+            listedPrice.setRemark(lease.getRemark());
+            changeLogService.logAttributeChanges(listedPrice, lease,
+                    "来源挂牌#" + application.getHousingId() + "申请时价对照；审核备注：" + (reviewRemark == null ? "" : reviewRemark));
 
-            /* R68 租约群聊：审核通过即建群（幂等），居民确认承租与看房预约均在该会话内进行 */
+            /* R68 租约群聊：审核通过即建群（幂等），协议确认与租住沟通在该会话内进行 */
             Conversation conversation = conversationService.createLeaseGroup(lease.getId(),
                     application.getCommunityId(), application.getResidentId(),
                     "租约沟通·" + houseLocation);
@@ -260,7 +277,7 @@ public class ResidenceApplicationService {
             }
             notificationService.createForResident(application.getResidentId(), application.getCommunityId(),
                     "入住申请已通过",
-                    "您的入住申请（" + houseLocation + "）已审批通过，租约待签约，请确认承租后由管理方发起租赁协议",
+                    "您的入住申请（" + houseLocation + "）已审批通过，租约待签约，请查看管理方发出的协议并确认同意，首期费用支付成功后正式入住",
                     "LEASE", "LEASE", lease.getId());
         } else {
             notificationService.createForResident(application.getResidentId(), application.getCommunityId(),
@@ -275,7 +292,7 @@ public class ResidenceApplicationService {
         application.setReviewRemark(reviewRemark);
         applicationMapper.updateById(application);
         log.info("入住申请审批内核完成：applicationId={}, relationId={}, reviewer={}",
-                application.getId(), relation.getId(), reviewerId);
+                application.getId(), relation == null ? null : relation.getId(), reviewerId);
     }
 
     /**
@@ -399,7 +416,7 @@ public class ResidenceApplicationService {
     }
 
     /* 审批拒绝：终态不可变更 */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     @com.community.residence.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESIDENCE_APPLICATION", targetId = "#id", content = "'入住申请驳回：' + #dto.reason")
     public void reject(Long id, RejectApplicationDTO dto) {
         ResidenceApplication application = requireApplication(id);

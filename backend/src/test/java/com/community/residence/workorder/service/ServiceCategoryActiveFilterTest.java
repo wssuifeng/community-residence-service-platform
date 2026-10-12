@@ -83,4 +83,6 @@ class ServiceCategoryActiveFilterTest {
         c.setIsActive(isActive);
         return c;
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

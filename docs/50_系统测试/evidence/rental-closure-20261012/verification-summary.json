@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-12",
+  "backend": {
+    "tests": 895,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "focusedSuites": [
+    {
+      "name": "com.community.residence.housing.service.HousingOccupancyBoundaryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.community.residence.lease.service.LeaseFirstPaymentGateTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.community.residence.payment.service.FirstPaymentActivationTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.community.residence.resident.service.ResidenceRelationEngineeringTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "frontend": {
+    "files": 40,
+    "tests": 274,
+    "failures": 0
+  },
+  "buildAndPackage": true,
+  "realChannelTrades": false,
+  "kernelEvidence": "真实LeaseService+mapper mock与mock事务管理器；证明成功内核门禁/幂等和事务调用，不是渠道成功或真实DB支付落账/回滚证据。",
+  "legacyFixtures": "隔离旧ACTIVE测试迁出，不写成功支付单，不冒充新租约支付生效。",
+  "isolation": "隔离库community_residence_payment_config_test，8087/5181，无头msedge；开发8084/5176只读，正常业务数量不变。"
+}

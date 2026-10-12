@@ -1,0 +1,1082 @@
+{
+  "date": "2026-10-12T02:33:32.742Z",
+  "database": "community_residence_payment_config_test",
+  "backend": "http://127.0.0.1:8087/api/v1",
+  "frontend": "http://127.0.0.1:5181",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "固定隔离库门禁",
+      "passed": true
+    },
+    {
+      "name": "双支付渠道停用",
+      "passed": true
+    },
+    {
+      "name": "公告草稿居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告居民不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "社区公告目标居民可读",
+      "passed": true
+    },
+    {
+      "name": "社区公告其他社区居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "社区公告游客不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "定向公告触达本社区居民",
+      "passed": true
+    },
+    {
+      "name": "公告不触达其他社区",
+      "passed": true
+    },
+    {
+      "name": "他社区居民不可写公告阅读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告阅读记录归本人",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不可读公告阅读明细",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈详情拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈首次回复进入会话",
+      "passed": true
+    },
+    {
+      "name": "本人可读完整反馈会话",
+      "passed": true
+    },
+    {
+      "name": "居民不能办结反馈",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈办结通知本人",
+      "passed": true
+    },
+    {
+      "name": "办结后不可追加会话",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5004
+      }
+    },
+    {
+      "name": "办结历史消息仍可读",
+      "passed": true
+    },
+    {
+      "name": "游客不能创建公共资源预约",
+      "passed": true,
+      "detail": {
+        "http": 401,
+        "code": 401
+      }
+    },
+    {
+      "name": "预约详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "预约详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "预约详情拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "他社区管理员不能确认预约",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "其他居民不能取消预约",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "预约确认通知本人",
+      "passed": true
+    },
+    {
+      "name": "已确认预约阻断同容量冲突",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5401
+      }
+    },
+    {
+      "name": "取消预约后释放同一时段",
+      "passed": true
+    },
+    {
+      "name": "选填联系电话省略仍成功创建",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "省略联系信息使用本人档案且非空",
+      "passed": true
+    },
+    {
+      "name": "非提交人不能评价工单",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "评价详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "评价详情拒绝未派服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "评价详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "评价详情授权本人",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权被派人员",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权社区管理员",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权超管",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不能评价跟进",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "跟进记录留存",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不能读跟进记录",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "一单一评阻断重复",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5502
+      }
+    },
+    {
+      "name": "工单全链终审关闭",
+      "passed": true
+    },
+    {
+      "name": "工单终审关闭沟通群",
+      "passed": true
+    },
+    {
+      "name": "支付退款数量完全未变",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/notices 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "admin /admin/notices 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/notices 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "admin /admin/notices 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/notices 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "admin /admin/notices 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/feedbacks 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "admin /admin/feedbacks 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/feedbacks 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "admin /admin/feedbacks 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/feedbacks 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "admin /admin/feedbacks 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/reservations 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "admin /admin/reservations 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/reservations 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "admin /admin/reservations 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/reservations 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "admin /admin/reservations 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/evaluations 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "admin /admin/evaluations 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/evaluations 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "admin /admin/evaluations 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/evaluations 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "admin /admin/evaluations 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/notices 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "resident /resident/notices 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/notices 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "resident /resident/notices 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/notices 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "resident /resident/notices 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/notices/9 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "resident /resident/notices/9 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/notices/9 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "resident /resident/notices/9 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/notices/9 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "resident /resident/notices/9 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/feedbacks 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "resident /resident/feedbacks 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/feedbacks 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "resident /resident/feedbacks 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/feedbacks 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "resident /resident/feedbacks 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/feedbacks/8 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "resident /resident/feedbacks/8 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/feedbacks/8 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "resident /resident/feedbacks/8 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/feedbacks/8 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "resident /resident/feedbacks/8 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/reservations 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "resident /resident/reservations 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/reservations 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "resident /resident/reservations 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/reservations 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "resident /resident/reservations 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/work-orders/9 1440px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1440
+      }
+    },
+    {
+      "name": "resident /resident/work-orders/9 1440px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/work-orders/9 1024px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 1024
+      }
+    },
+    {
+      "name": "resident /resident/work-orders/9 1024px加载结束",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/work-orders/9 768px页面无横向溢出",
+      "passed": true,
+      "detail": {
+        "width": 768
+      }
+    },
+    {
+      "name": "resident /resident/work-orders/9 768px加载结束",
+      "passed": true
+    },
+    {
+      "name": "浏览器办结反馈明确只读",
+      "passed": true
+    },
+    {
+      "name": "浏览器管理员可打开公告阅读明细",
+      "passed": true
+    },
+    {
+      "name": "浏览器评价跟进记录可达",
+      "passed": true
+    },
+    {
+      "name": "stranger浏览器越权显示错误且不泄露评价",
+      "passed": true
+    },
+    {
+      "name": "otherStaff浏览器越权显示错误且不泄露评价",
+      "passed": true
+    },
+    {
+      "name": "评价列表失败结束加载",
+      "passed": true
+    },
+    {
+      "name": "评价列表恢复后显示夹具",
+      "passed": true
+    },
+    {
+      "name": "独立浏览器无未捕获脚本错误",
+      "passed": true
+    },
+    {
+      "name": "本次夹具关联及合成账号精准回收",
+      "passed": true,
+      "detail": {
+        "community": 0,
+        "house": 0,
+        "work_order": 0,
+        "feedback": 0,
+        "resource_reservation": 0,
+        "work_order_evaluation": 0,
+        "resident": 0,
+        "sys_user": 0
+      }
+    }
+  ],
+  "failures": [],
+  "communities": [
+    83,
+    84
+  ],
+  "users": [
+    104,
+    105,
+    106,
+    107
+  ],
+  "residents": [
+    100,
+    101,
+    102
+  ],
+  "cleanup": true,
+  "financialBefore": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "financialAfter": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "browser": {
+    "mode": "independent-headless",
+    "pages": [
+      {
+        "role": "admin",
+        "url": "/admin/notices",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/notices",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/notices",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/feedbacks",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/feedbacks",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/feedbacks",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/reservations",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/reservations",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/reservations",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/evaluations",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/evaluations",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "admin",
+        "url": "/admin/evaluations",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/notices",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/notices",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/notices",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/notices/9",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/notices/9",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/notices/9",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/feedbacks",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/feedbacks",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/feedbacks",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/feedbacks/8",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/feedbacks/8",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/feedbacks/8",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/reservations",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/reservations",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/reservations",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/work-orders/9",
+        "width": 1440,
+        "scrollWidth": 1440,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/work-orders/9",
+        "width": 1024,
+        "scrollWidth": 1024,
+        "loading": 0,
+        "viteError": false
+      },
+      {
+        "role": "resident",
+        "url": "/resident/work-orders/9",
+        "width": 768,
+        "scrollWidth": 768,
+        "loading": 0,
+        "viteError": false
+      }
+    ],
+    "errors": [],
+    "blocked": [],
+    "screenshots": [
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-admin--admin-notices-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-admin--admin-feedbacks-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-admin--admin-reservations-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-admin--admin-evaluations-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-resident--resident-notices-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-resident--resident-notices-9-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-resident--resident-feedbacks-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-resident--resident-feedbacks-8-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-resident--resident-reservations-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-resident--resident-work-orders-9-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-notice-viewers-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-evaluation-followup-768.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-denied-stranger.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-denied-otherStaff.png",
+      "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-evaluation-load-error.png"
+    ],
+    "interactions": [
+      {
+        "role": "stranger",
+        "url": "/resident/work-orders/9",
+        "responses": [
+          {
+            "path": "/api/v1/work-orders/9",
+            "http": 403
+          },
+          {
+            "path": "/api/v1/work-orders/9/attachments",
+            "http": 403
+          },
+          {
+            "path": "/api/v1/work-orders/9/timeline",
+            "http": 403
+          }
+        ]
+      },
+      {
+        "role": "otherStaff",
+        "url": "/staff/work-orders/9",
+        "responses": [
+          {
+            "path": "/api/v1/work-orders/9",
+            "http": 403
+          }
+        ]
+      }
+    ]
+  },
+  "financialAfterCleanup": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "fixtureCleanupCounts": {
+    "community": 0,
+    "house": 0,
+    "work_order": 0,
+    "feedback": 0,
+    "resource_reservation": 0,
+    "work_order_evaluation": 0,
+    "resident": 0,
+    "sys_user": 0
+  },
+  "uiObservations": [
+    {
+      "scope": "evaluation-list-error",
+      "observation": "受控失败toast提示，但内容区仍是暂无评价；刷新可恢复，无就地重试入口。",
+      "classification": "体验观察交60，不按50判定需求满足性",
+      "screenshot": "docs/50_系统测试/evidence/nontransaction-matrix-20261012/bi-evaluation-load-error.png"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "backend": {
+    "tests": 907,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "focused": [
+    {
+      "name": "com.community.residence.evaluation.service.EvaluationReadAccessTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.community.residence.notice.service.NoticeReadReceiptAccessTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.community.residence.reservation.service.ReservationContactFallbackTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "runtime": "Java17",
+  "package": true,
+  "realTransactions": false,
+  "countSource": "本次Maven最终汇总；未计入target/surefire-reports中18项历史残留XML。"
+}

@@ -37,6 +37,7 @@ import java.util.List;
 public class SysUserService {
 
     private final SysUserMapper sysUserMapper;
+    private final com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
     private final SysAdminCommunityMapper adminCommunityMapper;
     private final CommunityService communityService;
     private final PasswordEncoder passwordEncoder;
@@ -67,6 +68,7 @@ public class SysUserService {
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#id", content = "'更新系统用户'")
     public SysUserVO update(Long id, UpdateSysUserDTO dto) {
         SysUser user = requireUser(id);
+        communityResponsibleService.validateRoleChange(id, dto.getRole());
         checkPhoneUnique(dto.getPhone(), id);
         user.setRealName(dto.getRealName());
         user.setPhone(dto.getPhone());

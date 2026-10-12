@@ -91,10 +91,14 @@ public class ResidentController {
         return ApiResponse.success(residentService.adminCreate(dto));
     }
 
-    @Operation(summary = "批量导入居民（CSV）", description = "R8 v1.2；UTF-8 CSV，表头：社区ID,姓名,手机号,证件号；部分成功语义，失败行返回行号与原因")
+    @Operation(summary = "批量导入居民（CSV）", description = "R8 v1.2；UTF-8 CSV，表头支持旧四列和十列账号/居住关系模板；每行账号+关系独立事务，部分成功语义，失败行返回行号与原因")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ResidentImportVO> importCsv(@RequestParam("file") MultipartFile file) {
+        if (file != null && file.getSize() > 5 * 1024 * 1024) {
+            throw new com.community.residence.common.exception.BusinessException(
+                    com.community.residence.common.constant.ErrorCode.INVALID_PARAM, "CSV不能超过5MB，请拆分导入");
+        }
         if (file == null || file.isEmpty()) {
             return ApiResponse.success(residentService.importCsv(null));
         }

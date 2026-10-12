@@ -157,4 +157,6 @@ class NoticeServiceTest {
                     .insert(any(com.community.residence.notice.entity.NoticeViewRecord.class));
         }
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

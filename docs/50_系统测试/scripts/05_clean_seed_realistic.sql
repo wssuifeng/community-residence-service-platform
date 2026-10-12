@@ -2,7 +2,7 @@
 -- 05_clean_seed_realistic.sql · 50 系统测试 · 步骤 4/5（取代 04 的展示数据口径）
 -- =============================================================================
 -- 用途：把「开发库 community_residence」与「测试库 community_residence_test」
---       重置为 **Flyway V1~V26 + 本脚本** 的干净、可演示、像真实社区的数据。
+--       重置为 **Flyway V1~V31 + 本脚本** 的干净、可演示、像真实社区的数据。
 --       用户口径（2026-09-21）：「数据库清理一下，把那些杂七杂八的测试库数据都
 --       清理，留几个干净像真实社区名字的社区数据进去」。
 --
@@ -16,8 +16,8 @@
 -- -----------------------------------------------------------------------------
 --   1) 清空目标库：DROP DATABASE + CREATE DATABASE（utf8mb4 / utf8mb4_unicode_ci）
 --      —— 见 00_create_test_db.sql 与 03_cleanup.sql 的口径 A；
---   2) 启动后端一次，令 Flyway 应用 **V1~V26（53 张业务表 + Flyway 历史表
---      `flyway_schema_history`，库内 `information_schema` 计数共 54）**，
+--   2) 启动后端一次，令 Flyway 应用 **V1~V31（54 张业务表 + Flyway 历史表
+--      `flyway_schema_history`，库内 `information_schema` 计数共 55）**，
 --      SPRING_DATASOURCE_URL 指向目标库（不改代码，环境变量覆盖 JDBC URL）：
 --        Windows: set SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/<db>?characterEncoding=UTF-8^&serverTimezone=Asia/Shanghai^&useSSL=false^&allowPublicKeyRetrieval=true
 --        （同一方式覆盖 DB_USERNAME/DB_PASSWORD/JWT_SECRET，启动命令不变）
@@ -169,15 +169,15 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =============================================================================
 START TRANSACTION;
 
-INSERT INTO community (id, name, address, contact_phone, contact_person, description,
+INSERT INTO community (id, name, address, responsible_admin_id, description,
                        status, auto_approve_residence, default_lease_months, created_at, updated_at) VALUES
-(1, '阳光花园社区', '示范市幸福路 88 号', '0571-88880001', '阳光花园物业服务中心',
+(1, '阳光花园社区', '示范市幸福路 88 号', NULL,
  '建成于 2012 年的多层住宅社区，共 3 栋楼、6 个单元，绿化率 38%，配套社区食堂与地下车库。',
  'ACTIVE', 0, 12, NOW() - INTERVAL 400 DAY, NOW() - INTERVAL 30 DAY),
-(2, '翠湖名庭社区', '示范市湖滨大道 216 号', '0571-88880002', '翠湖名庭物业服务中心',
+(2, '翠湖名庭社区', '示范市湖滨大道 216 号', NULL,
  '临湖改善型社区，共 2 栋楼、6 个单元，设业主会所与健身房，入住申请由系统自动通过。',
  'ACTIVE', 1, 12, NOW() - INTERVAL 300 DAY, NOW() - INTERVAL 20 DAY),
-(3, '滨江雅苑社区', '示范市滨江东路 15 号', '0571-88880003', '滨江雅苑物业服务中心',
+(3, '滨江雅苑社区', '示范市滨江东路 15 号', NULL,
  '江景高层社区，共 2 栋楼、4 个单元，24 小时安保与管家服务，租期以两年为主。',
  'ACTIVE', 0, 24, NOW() - INTERVAL 200 DAY, NOW() - INTERVAL 10 DAY);
 
@@ -212,14 +212,13 @@ INSERT INTO unit (id, building_id, community_id, name, description, created_at, 
 /* 房屋生成规则：每个单元 1 户/层，房号 = 层号 + "0" + 单元序号（如 1 单元 3 层 = 301）；
    建模层数即 building.floors（社区 1 = 6 层、社区 2 = 4 层、社区 3 = 5 层）⇒ 共 80 户；
    户型按层号循环：89.5㎡ 两室一厅 / 120㎡ 三室两厅 / 143.5㎡ 四室两厅；朝向按层号 4 循环。 */
-INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout,
+INSERT INTO house (unit_id, community_id, house_number, floor, area, layout,
                    orientation, status, created_at, updated_at)
 SELECT u.id,
        u.community_id,
        CONCAT(f.n, '0', LEFT(u.name, 1)),
        f.n,
        CASE MOD(f.n, 3) WHEN 1 THEN 89.50 WHEN 2 THEN 120.00 ELSE 143.50 END,
-       CASE MOD(f.n, 3) WHEN 1 THEN 2 WHEN 2 THEN 3 ELSE 4 END,
        CASE MOD(f.n, 3) WHEN 1 THEN '2室1厅1卫' WHEN 2 THEN '3室2厅1卫' ELSE '4室2厅2卫' END,
        CASE MOD(f.n, 4) WHEN 1 THEN 'SOUTH' WHEN 2 THEN 'EAST' WHEN 3 THEN 'NORTH' ELSE 'WEST' END,
        'VACANT',
@@ -264,6 +263,9 @@ INSERT INTO sys_user (id, username, password_hash, real_name, phone, email, role
  'wangjianjun@cuihu-mingting.example.com', 'STAFF', 'ACTIVE', NOW() - INTERVAL 300 DAY, NOW() - INTERVAL 30 DAY),
 (5, 'admin2', '$2a$10$kj977BcADCP9XTSC0aitbudmApBbZbflmkJephDL8xTygdJEjwCwK', '赵敏', '13805710102',
  'zhaomin@cuihu-mingting.example.com', 'ADMIN', 'ACTIVE', NOW() - INTERVAL 300 DAY, NOW() - INTERVAL 30 DAY);
+
+/* V31责任人绑定真实ADMIN账号；账号创建后写入，避免悬空外键。 */
+UPDATE community SET responsible_admin_id = CASE id WHEN 2 THEN 5 ELSE 2 END WHERE id IN (1, 2, 3);
 
 INSERT INTO sys_admin_community (admin_id, community_id, created_at) VALUES
 (2, 1, NOW() - INTERVAL 400 DAY),

@@ -6,22 +6,139 @@
     "locale": "zh-CN",
     "output": "05_入住申请状态机图.html",
     "quality_profile": "showcase",
-    "viewBox": [980, 720]
+    "viewBox": [
+      980,
+      720
+    ]
   },
   "lanes": [
-    { "id": "main", "label": "主流程" },
-    { "id": "terminal", "label": "终态" }
+    {
+      "id": "main",
+      "label": "主流程"
+    },
+    {
+      "id": "terminal",
+      "label": "终态"
+    }
   ],
   "states": [
-    { "id": "PENDING", "type": "start", "label": "待审核", "sublabel": "居民提交入住申请", "lane": "main", "col": 0, "step": "01" },
-    { "id": "APPROVED", "type": "success", "label": "已通过", "sublabel": "建立居住关系（R9）", "lane": "terminal", "col": 0, "tag": "终态" },
-    { "id": "WITHDRAWN", "type": "failure", "label": "已撤回", "sublabel": "居民主动撤回（R66）", "lane": "terminal", "col": 1, "tag": "终态" },
-    { "id": "REJECTED", "type": "failure", "label": "已驳回", "sublabel": "附驳回理由", "lane": "terminal", "col": 2, "tag": "终态" }
+    {
+      "id": "PENDING",
+      "type": "start",
+      "label": "待审核",
+      "sublabel": "居民提交入住申请",
+      "lane": "main",
+      "col": 0,
+      "step": "01"
+    },
+    {
+      "id": "APPROVED",
+      "type": "success",
+      "label": "已通过",
+      "sublabel": "租客待签约（R66）",
+      "lane": "terminal",
+      "col": 0,
+      "tag": "终态"
+    },
+    {
+      "id": "WITHDRAWN",
+      "type": "failure",
+      "label": "已撤回",
+      "sublabel": "居民主动撤回（R66）",
+      "lane": "terminal",
+      "col": 1,
+      "tag": "终态"
+    },
+    {
+      "id": "REJECTED",
+      "type": "failure",
+      "label": "已驳回",
+      "sublabel": "附驳回理由",
+      "lane": "terminal",
+      "col": 2,
+      "tag": "终态"
+    }
   ],
   "transitions": [
-    { "id": "approve", "from": "PENDING", "to": "APPROVED", "label": "通过", "note": "含社区自动通过", "fromSide": "bottom", "toSide": "top", "via": [[94, 400], [402, 400]], "labelAt": [248, 240] },
-    { "id": "withdraw", "from": "PENDING", "to": "WITHDRAWN", "label": "居民主动撤回（R66）", "variant": "security", "route": "straight", "fromSide": "left", "toSide": "top", "via": [[60, 157], [60, 360], [556, 360]], "labelAt": [300, 330] },
-    { "id": "reject", "from": "PENDING", "to": "REJECTED", "label": "驳回（理由）", "variant": "security", "route": "straight", "fromSide": "right", "toSide": "right", "via": [[790, 157], [790, 479], [769, 479]], "labelAt": [830, 330] }
+    {
+      "id": "approve",
+      "from": "PENDING",
+      "to": "APPROVED",
+      "label": "通过",
+      "note": "含社区自动通过",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          94,
+          400
+        ],
+        [
+          402,
+          400
+        ]
+      ],
+      "labelAt": [
+        248,
+        240
+      ]
+    },
+    {
+      "id": "withdraw",
+      "from": "PENDING",
+      "to": "WITHDRAWN",
+      "label": "居民主动撤回（R66）",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "left",
+      "toSide": "top",
+      "via": [
+        [
+          60,
+          157
+        ],
+        [
+          60,
+          360
+        ],
+        [
+          556,
+          360
+        ]
+      ],
+      "labelAt": [
+        300,
+        330
+      ]
+    },
+    {
+      "id": "reject",
+      "from": "PENDING",
+      "to": "REJECTED",
+      "label": "驳回（理由）",
+      "variant": "security",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [
+        [
+          790,
+          157
+        ],
+        [
+          790,
+          479
+        ],
+        [
+          769,
+          479
+        ]
+      ],
+      "labelAt": [
+        830,
+        330
+      ]
+    }
   ],
   "cards": [
     {
@@ -37,8 +154,8 @@
       "dot": "amber",
       "title": "两机口径差异",
       "items": [
-        "本状态机与租住记录状态机（§6.2）相互独立：申请「已通过」只建立居住关系，不等于租约生效",
-        "租约生效以 §6.2「协议双方在线确认」为准（R66）"
+        "申请「已通过」：租客只建待签约租约与群聊；业主/家属沿用关系规则",
+        "租客须协议确认且首期成功，才建立正式居住关系并使租约生效（R66/R71）"
       ]
     },
     {

@@ -6,12 +6,14 @@ withDefaults(
   defineProps<{
     modelValue: string[]
     limit?: number
+    disabled?: boolean
   }>(),
-  { limit: 6 }
+  { limit: 6, disabled: false }
 )
 
 defineEmits<{
   'update:modelValue': [urls: string[]]
+  'busy-change': [busy: boolean]
 }>()
 </script>
 
@@ -22,7 +24,9 @@ defineEmits<{
     accept="image/jpeg,image/png,image/gif"
     :max-size="5"
     :limit="limit"
+    :disabled="disabled"
     preview="image"
+    @busy-change="$emit('busy-change', $event)"
     @update:model-value="$emit('update:modelValue', $event)"
   />
 </template>

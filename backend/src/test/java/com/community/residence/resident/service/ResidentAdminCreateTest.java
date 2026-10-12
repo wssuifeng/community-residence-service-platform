@@ -50,6 +50,16 @@ class ResidentAdminCreateTest {
     @Mock
     private SysOperationLogMapper sysOperationLogMapper;
 
+    @Mock private com.community.residence.community.mapper.HouseMapper houseMapper;
+    @Mock private com.community.residence.community.service.CommunityService communityService;
+    @Mock private ResidenceRelationService residenceRelationService;
+    @Mock private org.springframework.transaction.PlatformTransactionManager transactionManager;
+    @org.mockito.Spy private jakarta.validation.Validator validator = jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
+
+    @org.junit.jupiter.api.BeforeEach void transactionSetup() {
+        org.mockito.Mockito.lenient().when(transactionManager.getTransaction(any())).thenAnswer(inv -> new org.springframework.transaction.support.SimpleTransactionStatus());
+    }
+
     @InjectMocks
     private ResidentService residentService;
 

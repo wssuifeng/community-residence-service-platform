@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import java.util.Iterator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -61,6 +65,8 @@ public class FileUploadService {
             if (file.getSize() > IMAGE_MAX_BYTES) {
                 throw new BusinessException(ErrorCode.INVALID_PARAM, "图片不能超过 5MB");
             }
+            try (InputStream input = file.getInputStream()) { validateImageContent(input, extension); }
+            catch (IOException exception) { throw new BusinessException(ErrorCode.INVALID_PARAM, "图片内容无法读取"); }
         } else if ("DOCUMENT".equals(fileType)) {
             if (!DOCUMENT_EXTENSIONS.contains(extension)) {
                 throw new BusinessException(ErrorCode.INVALID_PARAM, "文档仅支持 pdf/doc/docx/txt");
@@ -91,6 +97,41 @@ public class FileUploadService {
         String extension = extensionOf(file.getOriginalFilename());
         String type = IMAGE_EXTENSIONS.contains(extension) ? "IMAGE" : "DOCUMENT";
         return upload(file, type);
+    }
+
+    /** 校验资源新引用必须来自平台上传的真实图片；不接受路径或扩展名伪装。 */
+    public void requireUploadedImage(String url) {
+        if (url == null || !url.matches("/uploads/[0-9a-f]{32}\\.(jpg|jpeg|png|gif)")) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "新增资源图片必须由平台上传，不支持外部URL或自定义路径");
+        }
+        Path file = storageDir.resolve(url.substring("/uploads/".length()));
+        if (!Files.isRegularFile(file)) throw new BusinessException(ErrorCode.INVALID_PARAM, "上传图片不存在，请重新上传");
+        try {
+            if (Files.size(file) > IMAGE_MAX_BYTES) throw new BusinessException(ErrorCode.INVALID_PARAM, "图片不能超过5MB");
+            try (InputStream input = Files.newInputStream(file)) { validateImageContent(input, extensionOf(url)); }
+        } catch (IOException exception) { throw new BusinessException(ErrorCode.INVALID_PARAM, "上传图片无法读取，请重新上传"); }
+    }
+
+    /* 不信任Content-Type；读取真实格式并解码抽样像素，避免只看扩展名或伪造签名。
+       抽样限制内存解码尺寸，不增加新的业务像素上限。 */
+    private void validateImageContent(InputStream input, String extension) {
+        try (ImageInputStream stream = ImageIO.createImageInputStream(input)) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
+            if (!readers.hasNext()) throw new BusinessException(ErrorCode.INVALID_PARAM, "文件不是支持的真实图片");
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(stream, true, true);
+                String format = reader.getFormatName().toLowerCase(Locale.ROOT);
+                String expected = "jpg".equals(extension) ? "jpeg" : extension;
+                if (!expected.equals(format)) throw new BusinessException(ErrorCode.INVALID_PARAM, "图片真实格式与扩展名不一致");
+                int width = reader.getWidth(0), height = reader.getHeight(0);
+                if (width < 1 || height < 1) throw new BusinessException(ErrorCode.INVALID_PARAM, "图片尺寸无效");
+                var param = reader.getDefaultReadParam();
+                param.setSourceSubsampling(Math.max(1, width / 1024), Math.max(1, height / 1024), 0, 0);
+                if (reader.read(0, param) == null) throw new BusinessException(ErrorCode.INVALID_PARAM, "图片内容无效");
+            } finally { reader.dispose(); }
+        } catch (BusinessException exception) { throw exception; }
+        catch (IOException | RuntimeException exception) { throw new BusinessException(ErrorCode.INVALID_PARAM, "图片损坏或内容无法读取"); }
     }
 
     private String extensionOf(String filename) {

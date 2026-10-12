@@ -1,12 +1,13 @@
 package com.community.residence.payment.config;
 
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
  * 支付渠道凭据配置（R61：凭据齐全才启用渠道，缺任一项该渠道禁用并明示）。
- * 密钥类配置经环境变量注入，默认空 = 渠道禁用；生产同理由环境注入，不入库不入库房。
+ * 支付宝字段仅作独立配置服务构建的内部 SDK 快照，不再从环境变量装配；微信沿用环境凭据门控。
  */
 @Data
 @Component
@@ -29,6 +30,7 @@ public class PaymentProperties {
         /** 网关（沙箱 openapi-sandbox.dl.alipaydev.com，生产 openapi.alipay.com） */
         private String gatewayUrl;
         /** 应用私钥（PKCS8） */
+        @ToString.Exclude
         private String merchantPrivateKey;
         /** 支付宝公钥（非应用公钥） */
         private String alipayPublicKey;

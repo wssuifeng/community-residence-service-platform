@@ -239,8 +239,9 @@
 | 租约状态 | 卡片操作 | 说明 |
 |---------|---------|------|
 | `PENDING` 待审核 | 撤回申请（对应申请侧）/ 查看 | 居民可在待审核阶段撤回（R66） |
-| **`TO_SIGN` 待签约** | **「确认承租」**（R67）+ 「预约看房」 | 文案「确认后由社区管理方发起租赁协议」；确认后管理端方可发起协议 |
-| `ACTIVE` 已生效 | 「支付首期费用」（R71）/「续租」（R61）/「申请退租」（R70，弹窗填搬出日期 + 原因） | 首期费用 = 月租 + 押金，双渠道 |
+| **`TO_SIGN` 待签约** | 「查看协议」→正文内「同意协议」+「预约看房」 | 无承租确认；未发出时提示等待管理方发出；发出即管理方同意，居民仅在具体协议处同意一次 |
+| `TO_SIGN`且协议SIGNED 待首期 | 「支付首期费用」（R71） | 未支付不显示已入住；渠道停用明示，不可绕过 |
+| `ACTIVE` 已生效 | 旧记录可补缴首期/「续租」（R61）/「申请退租」（R70，弹窗填搬出日期 + 原因） | 首期费用 = 月租 + 押金，双渠道 |
 | `MOVED_OUT` 已搬出 | 查看（只读）+「押金退还记录」 | 退租审核通过后到达；**押金状态与退还记录在此态可见（R72）** |
 | `ARCHIVED` / `REJECTED` | 查看（只读） | 终态 |
 
@@ -358,7 +359,7 @@ tab 状态写入 URL query、`v-show` 保挂载、子视图 query 原样透传�
 | tab | 名称 | 承载页面 | tab 角色可见性 |
 |-----|------|---------|---------------|
 | `applications` | **入住申请**（**默认 tab**） | `admin/resident/ResidenceApplicationListView.vue`（**v1.2 从「居民」页迁出**） | ADMIN / SUPER_ADMIN |
-| `leases` | **租约管理** | `admin/lease/LeaseListView.vue`（状态含「待签约 / 已生效」+ 承租确认状态 + 字段级变更历史 + 到期提醒） | ADMIN / SUPER_ADMIN |
+| `leases` | **租约管理** | `admin/lease/LeaseListView.vue`（状态含「待签约 / 已生效」+ 协议确认进度 + 字段级变更历史 + 到期提醒） | ADMIN / SUPER_ADMIN |
 | `housings` | **房源管理** | `admin/housing/HousingManageView.vue`（既有房源页；规格允许「既有房源页组件」或社区一体化页 `HousesWithHousingView.vue` 二选一，**实施采用既有房源页**）；看房预约为其页内分区 `?view=viewings` | ADMIN / SUPER_ADMIN |
 | `moveout` | **退租申请** | `admin/lease/MoveOutApplicationView.vue`（R70 审核，按申请 ID 倒序、最新在前；**v1.3 增押金状态列与「发起押金退还」入口（R72）**：审核通过后可按实缴押金发起**原渠道原路退款**，弹窗内金额可改（默认全额）、渠道只读、退还结果与**失败原因**可见并可重试，见接口设计 §9.20.1） | ADMIN / SUPER_ADMIN |
 | `agreements` | **协议模板** | `admin/lease/AgreementTemplateView.vue`（R64；正文 `{{变量}}` + 模板附件 + 默认模板 + 启停） | **仅 SUPER_ADMIN / ADMIN**（全局模板 `communityId` 为空时仅超管可维护）。**角色不可见时该取值按「非法」处理回落 `applications`**——手工拼 query 也进不去 |
@@ -373,7 +374,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 | 路由路径 | 页面名称 | 说明 |
 |---------|---------|------|
-| **`/admin/leases/:id`** | **租约详情** | **隐藏下钻路由，原样直达、不重定向**（规格明文）：租约属性 + 关联房屋/居民 + 承租确认状态 + **押金状态（`deposit_status` 徽标，v1.3 R72）** + 协议（「发起协议」未确认承租时禁用并提示 5601）+ 支付记录 + 该租约看房与带看记录（R69）+ 变更历史 + **「发起押金退还」入口（v1.3 R72）** |
+| **`/admin/leases/:id`** | **租约详情** | **隐藏下钻路由，原样直达、不重定向**（规格明文）：租约属性 + 关联房屋/居民 + 协议确认进度 + **押金状态（`deposit_status` 徽标，v1.3 R72）** + 协议（管理方发出即同意、居民查看具体正文后同意）+ 支付记录 + 该租约看房与带看记录（R69）+ 变更历史 + **「发起押金退还」入口（v1.3 R72）** |
 | `/admin/housings/:id` | 房源详情 | 隐藏下钻路由，**原样直达**（与 `/admin/leases/:id` 同理：静态段 `housings` 的 redirect 只匹配无子段路径，动态段 `:id` 优先承接带 id 的 URL）；房源信息 + 可预约时段 + 浏览统计 |
 | `/admin/residents?tab=applications` | 居民页旧 tab | 「居民」页 Tab 收敛为 `?tab=list` / `?tab=relations`；旧深链 `?tab=applications` 由**页内兼容逻辑**（`ResidentManageView`）改落 **`/admin/housing-lease?tab=applications`**（防旧链接停成空页）；居民页另提供跳转 Hub 入住申请 tab 的入口链接 |
 | `/admin/leases/expiring` | 即将到期 | **已于 2026-09-09 界面冗余清理退役**（并入租约列表页筛选，见决策日志同日条目），非本批变更 |
@@ -764,6 +765,8 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 - 筛选条件变化自动刷新列表
 - 点击姓名进入居民详情页
 - 冻结/解冻二次确认后执行
+
+**代建/导入增量（R8 v1.16，2026-10-11）**：代建默认“同时登记居住关系”，社区→楼栋→单元→空置房屋级联，录入关系类型/入住日期/备注及邮箱；完整分页，切换上级清下级并拒绝迟到响应。可明确切换“仅建账号”，说明社区只用于鉴权。失败保留表单；成功显示真实关系ID/房屋ID或仅账号，初始密码仅本次展示。弹窗按视口限宽，长表单内部滚动。导入提供十列CSV、旧四列兼容提示和逐行关系结果；保存成功刷新居民及居住关系Tab。完整功能见50/15。
 
 ---
 
@@ -1329,8 +1332,8 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 | 派单 / **分配带看人** | ADMIN | 工单操作列派单按钮 / 看房预约分配带看人（R59） |
 | **受理** | ADMIN（限绑定社区）/ SUPER_ADMIN | **工单列表与工单详情按钮，仅 `PENDING` 待受理可见**（R74，v1.4）；受理成功 → `TO_ASSIGN` 并自动建立工单临时群聊 |
 | **终审结束** | ADMIN（限绑定社区）/ SUPER_ADMIN | **工单详情按钮，仅 `COMPLETED` 已完成可见**（R74，v1.4）；复用既有「关闭工单」按钮改文案 / 改前置，成功后 → `CLOSED` 并触发会话资源回收 |
-| **发起协议** | ADMIN/SUPER_ADMIN | 租约详情；**未确认承租时禁用并提示原因（5601）** |
-| **确认承租 / 申请退租 / 支付首期费用** | RESIDENT（限本人租约） | 「我的租约」卡片按钮，**管理端不可代确认承租** |
+| **同意并发出协议** | ADMIN/SUPER_ADMIN | 仅 TO_SIGN 租约详情；发出即记录管理方同意，居民同意前不生效 |
+| **同意协议 / 申请退租 / 支付首期费用** | RESIDENT（限本人租约） | 协议同意只在正文内；管理端不可代居民同意。退租与支付保持原入口 |
 | **协议在线确认** | RESIDENT / ADMIN / SUPER_ADMIN | 按当前身份落居民方或管理方（R64） |
 | 接单 | STAFF | 工单详情接单按钮 |
 | **看房登记完成** | STAFF（限被分配人） | 「我的带看」工作台（R59） |
@@ -1501,8 +1504,8 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 | R62 补 | /admin/community（社区表单自动审批开关 + 默认租期） | 社区级入住申请自动通过 |
 | R64 | /admin/housing-lease?tab=agreements, 协议签约面板（`AgreementSignPanel`，居民/管理端共用） | 租赁协议轻量版（模板 + 快照 + 双方在线确认）（**v1.2 起模板 canonical 为 Hub `agreements` tab，旧路径 `/admin/agreement-templates` redirect**） |
 | R65 | /admin/staff-schedules, /admin/staff-capabilities, /admin/work-orders（调度标记） | 工单调度与人员排班 |
-| **R66** | **/resident/housing-lease?tab=lease（我的租约·待签约）+ /resident/housings/:id/apply + /admin/housing-lease?tab=leases + 租约群聊** | **租住申请与签约闭环**：申请 → 审核通过（待签约 + 建群）→ 协议双方确认 → 生效；申请可撤回；「发起协议」未确认承租时禁用（**v1.2：申请审核入口迁至 Hub `applications` tab**） |
-| **R67** | **/resident/housing-lease?tab=lease 待签约卡片「确认承租」+ `/resident/conversations/:id` 会话入口** | **承租确认**（居民专属；确认后管理端方可发起协议） |
+| **R66** | **/resident/housing-lease?tab=lease（我的租约·待签约）+ /resident/housings/:id/apply + /admin/housing-lease?tab=leases + 租约群聊** | **租住申请与签约闭环**：申请 → 审核通过（待签约 + 建群）→ 协议确认 → 首期成功 → 生效；申请可撤回；「同意并发出协议」无承租前置（**v1.2：申请审核入口迁至 Hub `applications` tab**） |
+| **R67** | **我的租约或租约群聊 → 查看协议 → 协议正文** | 删除独立承租按钮；居民仅对具体快照点“同意协议”，姓名取本人账号，未发出则等待管理方 |
 | **R68** | **/resident/conversations/:id、/admin/conversations（会话类型与状态）+ 会话关闭只读态** | **租约群聊自动开设与生命周期**（LEASE_GROUP；CLOSED 停发、历史只读） |
 | **R69** | **/resident/conversations/:id 业务入口条（预约看房）+ /admin/leases/:id 看房与带看记录** | **会话内业务发起与看房-租约双向关联** |
 | **R70** | **/resident/housing-lease?tab=lease「申请退租」弹窗 + /admin/housing-lease?tab=moveout 退租申请审核** | **居民自助退租**（搬出日期 + 原因 → 管理端审核 → 已搬出联动）（**v1.2：审核入口由独立侧栏项改指 Hub `moveout` tab**） |
@@ -1536,7 +1539,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 |---------|----------|------|
 | E1 | /admin/community → /admin/community?tab=tree → ?tab=houses → ?tab=resources | 社区初始化 |
 | E2 | /auth/register → /resident/profile → /admin/housing-lease?tab=applications | 居民注册与入住申请（**v1.2：管理端审核入口迁至 Hub 默认 tab**） |
-| E3 | /resident/housings/:id/apply → /admin/housing-lease?tab=applications → /resident/housing-lease?tab=lease（待签约 + 确认承租）→ /resident/conversations/:id（租约群聊）→ 协议签约面板（双方确认）→ 已生效 → 定时任务到期提醒 → /resident/notifications | 租住登记与到期提醒（**v1.1 补入 v1.8 签约闭环环节；v1.2 管理端审核入口改指 Hub**） |
+| E3 | /resident/housings/:id/apply → /admin/housing-lease?tab=applications → /resident/housing-lease?tab=lease（待签约 + 查看协议）→ /resident/conversations/:id（租约群聊）→ 协议签约面板（管理方发出即同意 → 居民正文同意）→ 待首期费用 → 首期成功/已生效 → 定时任务到期提醒 → /resident/notifications | 租住登记与到期提醒（**v1.1 补入 v1.8 签约闭环环节；v1.2 管理端审核入口改指 Hub**） |
 | E4 | /resident/work-orders/create → /admin/work-orders → /staff/work-orders → /resident/work-orders/:id | 工单全流程 |
 | E5 | /admin/notices/create → /resident/notices | 公告发布与查看 |
 | E6 | /resident/feedbacks/create → /admin/feedbacks | 反馈提交与会话（管理端详情已并入列表页） |
@@ -1634,3 +1637,27 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 **下一步：UI 设计自审核**
 
+
+> **2026-10-11 协议交互当前口径**：取消所有确认承租/承约按钮与徽标；管理方仅发出/查看/撤回，不再点确认签署。居民在正文弹窗中点“同意协议”，明确同意本份快照。管理方未完成旧协议缺留痕则提示撤回重发。历史 signed 保持只读。
+
+
+## 支付宝四项配置表单（2026-10-11，R61 v1.14）
+
+入口沿用 `/admin/system?tab=configs`，仅超管，新增独立支付宝配置卡片，现有键值表与通知分级不变。完整四项：APPID、应用公钥（与私钥匹配）、应用私钥（用于加签，密码输入、只写不回显）、支付宝公钥（用于验签，不能误填应用公钥）。两份公钥多行可换行，私钥留空提示「保留已保存私钥」，新配置首次四项必填；明确勾选清除私钥并二次确认。默认沙箱，环境只有沙箱/正式选项，不提供任意网关；显著显示「交易暂缓，渠道保持停用」「仅离线校验，不代表支付宝验签/交易通过」。加载失败禁用保存并提供重试，版本冲突不自动覆盖，失败清空私钥输入、不丢非敏感字段；保存成功清空私钥并更新版本/已配置提示。窄屏操作区折行，Key 文本不扩大容器，输入和状态标签不得横向溢出。首个配置不会自动导入 `.env` 或启用旧交易。
+
+## 2026-10-11 社区结构与责任人功能交互增量
+
+依据用户批准的14设计：楼栋总层数输入不设99/200等固定业务上限；房屋/批量楼层输入上限随目标楼栋变化，超层范围在生成前阻断。删除所有房间数输入，结构生成/单建/编辑统一录户型。房屋卡片保留框选与Ctrl/Cmd多选，右键已选卡片保持选区、未选卡片切换为单选，菜单与操作条均提供配置户型；弹窗明确选区及旧值差异、失败保留表单，成功刷新所有涉及单元。社区表单使用可搜索的ADMIN责任人选择框，本社区绑定候选优先，电话只读；清空表示未设置，姓名/电话随账号实时变化，不手填副本。完整功能页与接口对照见50/14，不加入其他业务功能。
+
+本批交互实施补充：当前责任人尚未出现在候选页时使用独立“当前责任人”回显，不猜测已绑定；关闭表单令旧查询失效。多选保存后逐个刷新涉及的所有单元，失败保留原输入；1024/768真实浏览器证据见50/08§3.77。
+
+
+## 2026-10-11 bh-6批准交互增量
+
+依据20 v1.17与16/17。租赁协议确认后显示“待首期费用”，仍临时保留，不提前显示已入住；首期成功才正式生效。居民首期按钮在TO_SIGN+SIGNED可达，渠道停用仍明示；未签协议引导确认，不另有承租动作。挂牌占用、金额预填/留痕与来源按16，不删除占用历史。
+
+公共资源新建/编辑用ImageUploader替代URL文本框：数量提示6张/5MB，点击预览、逐张移除、首图列表预览，缩略图换行。部分失败保留成功项并提示具体失败；上传/保存中不能关闭或重复保存；修改后取消先确认，保存失败保留输入，空数组清空引用。沿已有字段与社区权限，不加独立文件页面/排序/裁切。
+
+### bh-2实际交互契约（2026-10-12）
+
+入住审核弹窗只读显示来源挂牌/申请时价，并预填月租/押金，修改金额真实留痕；租客通过提示仅生成待签约租约。房屋挂牌卡片与房源列表分开展示发布/占用，点击申请使用applicationId深链进入明确审核，租约使用leaseId详情。居民不可申请空态给“我的入住申请/返回房源”；协议正文同意按钮不叫“同意并生效”，SIGNED显示待首期且首期入口可达，未签则说明前置条件。确认通知/申请说明/会话/首期弹窗同步付费生效口径，不重复承租确认。1024/768定向布局证据在50/08§3.80，只记录观察，不等于全站UI评估已通过。

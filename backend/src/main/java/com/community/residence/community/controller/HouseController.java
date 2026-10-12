@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HouseController {
 
     private final HouseService houseService;
+    private final com.community.residence.community.service.HouseLayoutService houseLayoutService;
 
     @Operation(summary = "创建房屋")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
@@ -94,5 +95,11 @@ public class HouseController {
                                                                    @RequestParam(defaultValue = "1") long page,
                                                                    @RequestParam(defaultValue = "20") long size) {
         return ApiResponse.success(houseService.statusHistory(id, page, size));
+    }
+    @Operation(summary="原子配置所选房屋户型", description="仅修改明确选区，同步关联挂牌；任何非法项整体拒绝")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PatchMapping("/houses/layout")
+    public ApiResponse<Integer> updateLayout(@RequestBody @Valid com.community.residence.community.dto.BatchHouseLayoutDTO dto) {
+        return ApiResponse.success(houseLayoutService.update(dto));
     }
 }
