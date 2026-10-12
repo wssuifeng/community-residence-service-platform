@@ -1,0 +1,13 @@
+
+> community-residence-frontend@0.1.0 test
+> vitest run --configLoader native src/views/admin/resident/__tests__/ResidentImportReset.spec.ts src/views/admin/evaluation/__tests__/EvaluationLoadState.spec.ts src/utils/__tests__/staffResidentPresentation.spec.ts
+
+
+ RUN  v4.1.11 D:/code/community-residence-service-platform/frontend
+
+
+ Test Files  3 passed (3)
+      Tests  7 passed (7)
+   Start at  14:40:40
+   Duration  52.86s (transform 1.39s, setup 28.79s, import 1.23s, tests 249ms, environment 21.48s)
+

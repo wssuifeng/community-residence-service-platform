@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-12",
+  "scope": "bk existing frontend execution logs consolidation, not a rerun",
+  "fullUnit": {
+    "suites": 44,
+    "passed": 285
+  },
+  "resumeTargetedUnit": {
+    "suites": 3,
+    "passed": 7
+  },
+  "typecheckBuildPassed": true,
+  "chunkWarningRetained": true,
+  "evidenceMeaning": "依据原日志的测试汇总及vue-tsc && vite build完成输出；不将285与7相加，也不重构日志中未记录的退出码",
+  "files": [
+    {
+      "source": "output/runtime/bk-frontend-tests.log",
+      "evidence": "docs/50_系统测试/evidence/nontransaction-core-unit-20261012/frontend-all-tests.txt",
+      "sha256": "c410fa7084760891b82a351d023a8d50fa06b5eb04b05013f26117edbaffab7f",
+      "bytes": 345,
+      "kind": "full-unit"
+    },
+    {
+      "source": "output/runtime/bk-resume-targeted-tests.log",
+      "evidence": "docs/50_系统测试/evidence/nontransaction-core-unit-20261012/frontend-targeted-tests.txt",
+      "sha256": "4bac9da35a85618baf8dc40483621eed7d7a132827856338112aef698e87fe8b",
+      "bytes": 519,
+      "kind": "resume-targeted-unit"
+    },
+    {
+      "source": "output/runtime/bk-resume-frontend-build.log",
+      "evidence": "docs/50_系统测试/evidence/nontransaction-core-unit-20261012/frontend-build.txt",
+      "sha256": "e6309238d551c28c3f195c0c1c8b8bbb8bf1e73fdadba5555dde3dce5d1cefb4",
+      "bytes": 17171,
+      "kind": "resume-typecheck-build"
+    }
+  ]
+}

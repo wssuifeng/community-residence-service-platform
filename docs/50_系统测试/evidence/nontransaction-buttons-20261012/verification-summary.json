@@ -115,6 +115,44 @@
     "workorder-closed-1024.png": {
       "sha256": "dcfaa0cf602166ecce3b1ad6237ab640266c064418130fbdfdb7963ecbfa7770",
       "bytes": 157832
+    },
+    "closure-readonly.json": {
+      "sha256": "630b36dc8615a7e9965e33c330427d9c09451c21703b07f2d1d5c076bc76e40e",
+      "bytes": 740
+    },
+    "service-closure.json": {
+      "sha256": "60794d3fd3650d95bd9dd665c0077c41a792e14a1282ce378d0fe67281b4e04a",
+      "bytes": 517
+    },
+    "documentation-verification.json": {
+      "sha256": "9f29b1f09eec4317bfec633ec9cfd96a0215748ee627a317b47dc724bc1b3d99",
+      "bytes": 3203
     }
+  },
+  "closureVerification": {
+    "normalReadonlyChecks": 5,
+    "meaning": "文档收尾另一次只读保护核对，不与105/26或其他矩阵相加",
+    "normalCounts": [
+      1,
+      600,
+      9,
+      1,
+      0,
+      0
+    ],
+    "isolatedStopped": [
+      8087,
+      5181
+    ],
+    "normalRetained": [
+      8084,
+      5176
+    ],
+    "userBrowserTouched": false,
+    "reports": [
+      "closure-readonly.json",
+      "service-closure.json",
+      "documentation-verification.json"
+    ]
   }
 }
