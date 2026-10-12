@@ -2,14 +2,14 @@
 /** CSV 批量导入居民对话框（DEF-038，R8 v1.2）：模板下载 + 部分成功结果完整展示 */
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import type { UploadFile } from 'element-plus'
+import type { UploadFile, UploadUserFile } from 'element-plus'
 import { importResidents } from '@/api/resident'
 import type { IResidentImportVO } from '@/types/modules/resident'
 
 /**
- * 后端契约：UTF-8 CSV，表头「社区ID,姓名,手机号,证件号」，证件号可空列；
+ * 后端契约：UTF-8 CSV，新模板十列含账号与具体居住关系，兼容旧四列账号模板；
  * 部分成功语义——结果必须完整展示（成功行账号+初始密码可复制、失败行行号+原因）。
- * 后端无文件大小限制，前端 5MB 防呆（超大 CSV 行数也远超人工核对能力）。
+ * 前后端均限制单文件5MB；房屋/关系类型/入住日期须全有或全无。
  */
 
 const visible = defineModel<boolean>({ required: true })
@@ -19,6 +19,7 @@ const emit = defineEmits<{ imported: [result: IResidentImportVO] }>()
 const CSV_HEADERS = '社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
+const fileList = ref<UploadUserFile[]>([])
 const selectedFile = ref<File | null>(null)
 const uploading = ref(false)
 const result = ref<IResidentImportVO | null>(null)
@@ -79,6 +80,7 @@ async function copyText(text: string): Promise<void> {
 watch(visible, (value) => {
   if (!value) return
   selectedFile.value = null
+  fileList.value = []
   result.value = null
 })
 </script>
@@ -97,6 +99,7 @@ watch(visible, (value) => {
     </div>
     <el-alert type="info" :closable="false" title="房屋ID、关系类型和入住日期须全有或全无；空白表示仅建账号。房屋ID不是房号，请替换示例ID；旧四列模板继续支持，仅创建账号。每行账号与关系一起成功或一起回滚，不生成租约。" />
     <el-upload
+      v-model:file-list="fileList"
       drag
       :limit="1"
       accept=".csv"
