@@ -1,0 +1,534 @@
+{
+  "startedAt": "2026-10-12T05:11:05.549Z",
+  "sdkVersion": "4.40.1033.ALL",
+  "sandboxOnly": true,
+  "amount": "0.01",
+  "freshOrders": true,
+  "isolation": {
+    "businessApi": false,
+    "database": false,
+    "frontendFramework": false,
+    "blob": false,
+    "existingOrder": false,
+    "userBrowser": false,
+    "nativeSdkForm": true,
+    "systemProxyChanged": false,
+    "browserProxy": "direct",
+    "credentials": "same verified sandbox app, input only"
+  },
+  "probes": [
+    {
+      "mode": "POST",
+      "initialCookieCount": 0,
+      "events": [
+        {
+          "method": "POST",
+          "status": 302,
+          "url": {
+            "scheme": "https:",
+            "host": "openapi-sandbox.dl.alipaydev.com",
+            "path": "/gateway.do",
+            "keys": [
+              "charset",
+              "method",
+              "version",
+              "app_id",
+              "sign_type",
+              "timestamp",
+              "alipay_sdk",
+              "format"
+            ]
+          },
+          "outgoing": {
+            "signedKeys": [
+              "alipay_sdk",
+              "app_id",
+              "biz_content",
+              "charset",
+              "format",
+              "method",
+              "sign_type",
+              "timestamp",
+              "version"
+            ],
+            "rsa2Valid": true,
+            "bizPresent": true,
+            "productCode": "FAST_INSTANT_TRADE_PAY",
+            "totalAmount": "0.01",
+            "freshDiagnosticOrder": true,
+            "bodyPresent": true,
+            "charset": "UTF-8",
+            "contentType": "application/x-www-form-urlencoded",
+            "subjectHasReplacement": false
+          },
+          "location": {
+            "scheme": "https:",
+            "host": "unitradeprod-sandbox.dl.alipaydev.com",
+            "path": "/appAssign.htm",
+            "keys": [
+              "alipay_exterface_invoke_assign_target",
+              "alipay_exterface_invoke_assign_sign"
+            ]
+          },
+          "responseHeaders": {
+            "date": "Mon, 12 Oct 2026 05:11:26 GMT",
+            "server": "nginx/1.6.2",
+            "content-length": "0"
+          }
+        },
+        {
+          "method": "GET",
+          "status": 302,
+          "url": {
+            "scheme": "https:",
+            "host": "unitradeprod-sandbox.dl.alipaydev.com",
+            "path": "/appAssign.htm",
+            "keys": [
+              "alipay_exterface_invoke_assign_target",
+              "alipay_exterface_invoke_assign_sign"
+            ]
+          },
+          "location": {
+            "scheme": "https:",
+            "host": "excashier-sandbox.dl.alipaydev.com",
+            "path": "/standard/auth.htm",
+            "keys": [
+              "payOrderId"
+            ]
+          },
+          "responseHeaders": {
+            "date": "Mon, 12 Oct 2026 05:11:27 GMT",
+            "server": "nginx/1.6.2",
+            "content-length": "0"
+          }
+        },
+        {
+          "method": "GET",
+          "status": 200,
+          "url": {
+            "scheme": "https:",
+            "host": "excashier-sandbox.dl.alipaydev.com",
+            "path": "/standard/auth.htm",
+            "keys": [
+              "payOrderId"
+            ]
+          },
+          "responseHeaders": {
+            "date": "Mon, 12 Oct 2026 05:11:28 GMT",
+            "server": "nginx/1.6.2",
+            "content-type": "text/html;charset=GBK"
+          }
+        }
+      ],
+      "failedResources": [
+        {
+          "url": {
+            "scheme": "https:",
+            "host": "umidprod.stable.alipay.net",
+            "path": "/service/clear.png",
+            "keys": [
+              "xt",
+              "xa"
+            ]
+          },
+          "resourceType": "image",
+          "errorCategory": "net::ERR_NAME_NOT_RESOLVED"
+        },
+        {
+          "url": {
+            "scheme": "http:",
+            "host": "rds.stable.alipay.net",
+            "path": "/ua_excashier_rds_auth.js",
+            "keys": [
+              "t"
+            ]
+          },
+          "resourceType": "script",
+          "errorCategory": "request_failed"
+        },
+        {
+          "url": {
+            "scheme": "https:",
+            "host": "seccliprod.stable.alipay.net",
+            "path": "/api/do.htm",
+            "keys": [
+              "serviceId",
+              "data"
+            ]
+          },
+          "resourceType": "image",
+          "errorCategory": "net::ERR_NAME_NOT_RESOLVED"
+        },
+        {
+          "url": {
+            "scheme": "http:",
+            "host": "umidprod.stable.alipay.net",
+            "path": "/service/um.json",
+            "keys": []
+          },
+          "resourceType": "xhr",
+          "errorCategory": "request_failed"
+        },
+        {
+          "url": {
+            "scheme": "http:",
+            "host": "umidprod.stable.alipay.net",
+            "path": "/service/um.json",
+            "keys": [
+              "data",
+              "_callback"
+            ]
+          },
+          "resourceType": "script",
+          "errorCategory": "request_failed"
+        }
+      ],
+      "final": {
+        "scheme": "https:",
+        "host": "excashier-sandbox.dl.alipaydev.com",
+        "path": "/standard/auth.htm",
+        "keys": [
+          "payOrderId"
+        ]
+      },
+      "dom": {
+        "htmlLength": 74398,
+        "bodyTextLength": 266,
+        "scripts": 45,
+        "bodyChildCount": 16,
+        "iframeCount": 3
+      },
+      "observation": {
+        "title": "支付宝 - 网上支付 安全快速！",
+        "invalidSignature": false,
+        "whitelabel": false,
+        "error404Text": false,
+        "loginPage": false,
+        "paymentQrMention": true
+      },
+      "queryAfter": {
+        "httpStatus": 200,
+        "code": "40004",
+        "subCode": "ACQ.TRADE_NOT_EXIST",
+        "tradeStatus": null,
+        "sdkResponseParsed": true,
+        "responseHasSign": true
+      },
+      "orderNo": "ISO20261012131123F86BD0737B8D"
+    },
+    {
+      "mode": "GET",
+      "initialCookieCount": 0,
+      "events": [
+        {
+          "method": "GET",
+          "status": 302,
+          "url": {
+            "scheme": "https:",
+            "host": "openapi-sandbox.dl.alipaydev.com",
+            "path": "/gateway.do",
+            "keys": [
+              "alipay_sdk",
+              "app_id",
+              "biz_content",
+              "charset",
+              "format",
+              "method",
+              "sign_type",
+              "timestamp",
+              "version"
+            ]
+          },
+          "outgoing": {
+            "signedKeys": [
+              "alipay_sdk",
+              "app_id",
+              "biz_content",
+              "charset",
+              "format",
+              "method",
+              "sign_type",
+              "timestamp",
+              "version"
+            ],
+            "rsa2Valid": true,
+            "bizPresent": true,
+            "productCode": "FAST_INSTANT_TRADE_PAY",
+            "totalAmount": "0.01",
+            "freshDiagnosticOrder": true,
+            "bodyPresent": false,
+            "charset": "UTF-8",
+            "subjectHasReplacement": false
+          },
+          "location": {
+            "scheme": "https:",
+            "host": "unitradeprod-sandbox.dl.alipaydev.com",
+            "path": "/appAssign.htm",
+            "keys": [
+              "alipay_exterface_invoke_assign_target",
+              "alipay_exterface_invoke_assign_sign"
+            ]
+          },
+          "responseHeaders": {
+            "date": "Mon, 12 Oct 2026 05:11:33 GMT",
+            "server": "nginx/1.6.2",
+            "content-length": "0"
+          }
+        },
+        {
+          "method": "GET",
+          "status": 302,
+          "url": {
+            "scheme": "https:",
+            "host": "unitradeprod-sandbox.dl.alipaydev.com",
+            "path": "/appAssign.htm",
+            "keys": [
+              "alipay_exterface_invoke_assign_target",
+              "alipay_exterface_invoke_assign_sign"
+            ]
+          },
+          "location": {
+            "scheme": "https:",
+            "host": "excashier-sandbox.dl.alipaydev.com",
+            "path": "/standard/auth.htm",
+            "keys": [
+              "payOrderId"
+            ]
+          },
+          "responseHeaders": {
+            "date": "Mon, 12 Oct 2026 05:11:34 GMT",
+            "server": "nginx/1.6.2",
+            "content-length": "0"
+          }
+        },
+        {
+          "method": "GET",
+          "status": 200,
+          "url": {
+            "scheme": "https:",
+            "host": "excashier-sandbox.dl.alipaydev.com",
+            "path": "/standard/auth.htm",
+            "keys": [
+              "payOrderId"
+            ]
+          },
+          "responseHeaders": {
+            "date": "Mon, 12 Oct 2026 05:11:43 GMT",
+            "server": "nginx/1.6.2",
+            "content-type": "text/html;charset=GBK"
+          }
+        }
+      ],
+      "failedResources": [
+        {
+          "url": {
+            "scheme": "http:",
+            "host": "rds.stable.alipay.net",
+            "path": "/ua_excashier_rds_auth.js",
+            "keys": [
+              "t"
+            ]
+          },
+          "resourceType": "script",
+          "errorCategory": "request_failed"
+        },
+        {
+          "url": {
+            "scheme": "http:",
+            "host": "umidprod.stable.alipay.net",
+            "path": "/service/um.json",
+            "keys": []
+          },
+          "resourceType": "xhr",
+          "errorCategory": "request_failed"
+        },
+        {
+          "url": {
+            "scheme": "http:",
+            "host": "umidprod.stable.alipay.net",
+            "path": "/service/um.json",
+            "keys": [
+              "data",
+              "_callback"
+            ]
+          },
+          "resourceType": "script",
+          "errorCategory": "request_failed"
+        },
+        {
+          "url": {
+            "scheme": "https:",
+            "host": "umidprod.stable.alipay.net",
+            "path": "/service/clear.png",
+            "keys": [
+              "xt",
+              "xa"
+            ]
+          },
+          "resourceType": "image",
+          "errorCategory": "net::ERR_NAME_NOT_RESOLVED"
+        },
+        {
+          "url": {
+            "scheme": "https:",
+            "host": "seccliprod.stable.alipay.net",
+            "path": "/api/do.htm",
+            "keys": [
+              "serviceId",
+              "data"
+            ]
+          },
+          "resourceType": "image",
+          "errorCategory": "net::ERR_NAME_NOT_RESOLVED"
+        }
+      ],
+      "final": {
+        "scheme": "https:",
+        "host": "excashier-sandbox.dl.alipaydev.com",
+        "path": "/standard/auth.htm",
+        "keys": [
+          "payOrderId"
+        ]
+      },
+      "dom": {
+        "htmlLength": 74399,
+        "bodyTextLength": 266,
+        "scripts": 45,
+        "bodyChildCount": 16,
+        "iframeCount": 3
+      },
+      "observation": {
+        "title": "支付宝 - 网上支付 安全快速！",
+        "invalidSignature": false,
+        "whitelabel": false,
+        "error404Text": false,
+        "loginPage": false,
+        "paymentQrMention": true
+      },
+      "queryAfter": {
+        "httpStatus": 200,
+        "code": "40004",
+        "subCode": "ACQ.TRADE_NOT_EXIST",
+        "tradeStatus": null,
+        "sdkResponseParsed": true,
+        "responseHasSign": true
+      },
+      "orderNo": "ISO2026101213113111A12A5EE8DD"
+    }
+  ],
+  "paymentConfirmed": false,
+  "health": {
+    "httpStatus": 200,
+    "ready": true,
+    "sandboxOnly": true,
+    "amount": "0.01",
+    "businessDependencies": false
+  },
+  "queryControl": {
+    "httpStatus": 200,
+    "code": "40004",
+    "subCode": "ACQ.TRADE_NOT_EXIST",
+    "tradeStatus": null,
+    "sdkResponseParsed": true,
+    "responseHasSign": true
+  },
+  "directHttp": {
+    "transport": "Node native fetch GET, no browser/proxy/cookies",
+    "events": [
+      {
+        "method": "GET",
+        "status": 302,
+        "url": {
+          "scheme": "https:",
+          "host": "openapi-sandbox.dl.alipaydev.com",
+          "path": "/gateway.do",
+          "keys": [
+            "alipay_sdk",
+            "app_id",
+            "biz_content",
+            "charset",
+            "format",
+            "method",
+            "sign_type",
+            "timestamp",
+            "version"
+          ]
+        },
+        "outgoing": {
+          "signedKeys": [
+            "alipay_sdk",
+            "app_id",
+            "biz_content",
+            "charset",
+            "format",
+            "method",
+            "sign_type",
+            "timestamp",
+            "version"
+          ],
+          "rsa2Valid": true,
+          "bizPresent": true,
+          "productCode": "FAST_INSTANT_TRADE_PAY",
+          "totalAmount": "0.01",
+          "freshDiagnosticOrder": true,
+          "bodyPresent": false,
+          "charset": "UTF-8",
+          "subjectHasReplacement": false
+        },
+        "responseHeaders": {
+          "date": "Mon, 12 Oct 2026 05:11:13 GMT",
+          "server": "Tengine/2.1.0",
+          "content-length": "0"
+        }
+      },
+      {
+        "method": "GET",
+        "status": 302,
+        "url": {
+          "scheme": "https:",
+          "host": "unitradeprod-sandbox.dl.alipaydev.com",
+          "path": "/appAssign.htm",
+          "keys": [
+            "alipay_exterface_invoke_assign_target",
+            "alipay_exterface_invoke_assign_sign"
+          ]
+        },
+        "responseHeaders": {
+          "date": "Mon, 12 Oct 2026 05:11:14 GMT",
+          "server": "Tengine/2.1.0",
+          "content-length": "0"
+        }
+      },
+      {
+        "method": "GET",
+        "status": 200,
+        "url": {
+          "scheme": "https:",
+          "host": "excashier-sandbox.dl.alipaydev.com",
+          "path": "/standard/auth.htm",
+          "keys": [
+            "payOrderId"
+          ]
+        },
+        "responseHeaders": {
+          "date": "Mon, 12 Oct 2026 05:11:25 GMT",
+          "server": "Tengine/2.1.0",
+          "content-type": "text/html;charset=GBK"
+        }
+      }
+    ],
+    "final": {
+      "scheme": "https:",
+      "host": "excashier-sandbox.dl.alipaydev.com",
+      "path": "/standard/auth.htm",
+      "keys": [
+        "payOrderId"
+      ]
+    },
+    "bodyCharacterCount": 62243,
+    "invalidSignature": false,
+    "whitelabel": false,
+    "paymentQrMention": false
+  },
+  "finishedAt": "2026-10-12T05:11:45.797Z"
+}
