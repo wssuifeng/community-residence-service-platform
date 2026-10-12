@@ -8,7 +8,7 @@ import { listWorkOrders, acceptWorkOrder, processWorkOrder } from '@/api/workord
 import type { IWorkOrder, WorkOrderPriority, WorkOrderStatus } from '@/types/modules/workorder'
 import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatDateTime } from '@/utils/date'
-import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffPlaceholder'
+import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffResidentPresentation'
 
 /** 我的工单（UI设计.md §4.2 / §3.3）：状态 Tab + 工单卡片列表（对照 design-mockups/staff/02） */
 

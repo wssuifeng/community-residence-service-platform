@@ -25,7 +25,7 @@ import type {
 } from '@/types/modules/workorder'
 import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
 import { formatDateTime } from '@/utils/date'
-import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffPlaceholder'
+import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffResidentPresentation'
 import { useUserStore } from '@/store/user'
 
 /** 工单详情（UI设计.md §4.2.2）：面包屑 + 状态条 + 工单信息 / 处理时间线 / 操作面板（对照 design-mockups/staff/03） */
