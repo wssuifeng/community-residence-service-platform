@@ -1,0 +1,13 @@
+﻿社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注
+131,样例居民01,13970698101,,BI87064187_csv_1,sample01@example.invalid,,,,
+131,样例居民02,13970698102,,BI87064187_csv_2,sample02@example.invalid,,,,
+131,样例居民03,13970698103,,BI87064187_csv_3,sample03@example.invalid,,,,
+131,样例居民04,13970698104,,BI87064187_csv_4,sample04@example.invalid,,,,
+131,样例居民05,13970698105,,BI87064187_csv_5,sample05@example.invalid,,,,
+131,样例居民06,13970698106,,BI87064187_csv_6,sample06@example.invalid,,,,
+131,样例居民07,13970698107,,BI87064187_csv_7,sample07@example.invalid,,,,
+131,样例居民08,13970698108,,BI87064187_csv_8,sample08@example.invalid,,,,
+131,样例居民09,13970698109,,BI87064187_csv_9,sample09@example.invalid,11325,OWNER,2026-10-01,
+131,样例居民10,13970698110,,BI87064187_csv_10,sample10@example.invalid,11326,TENANT,2026-10-01,
+131,样例居民11,13970698111,,BI87064187_csv_11,sample11@example.invalid,11327,FAMILY,2026-10-01,
+131,"样例，居民""十二""",13970698112,,BI87064187_csv_12,sample12@example.invalid,,,,

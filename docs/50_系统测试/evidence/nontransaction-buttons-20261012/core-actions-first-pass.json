@@ -1,0 +1,1072 @@
+{
+  "date": "2026-10-12T06:05:45.954Z",
+  "database": "community_residence_payment_config_test",
+  "backend": "http://127.0.0.1:8087/api/v1",
+  "frontend": "http://127.0.0.1:5181",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "固定隔离库门禁",
+      "passed": true
+    },
+    {
+      "name": "双支付渠道停用",
+      "passed": true
+    },
+    {
+      "name": "公告草稿居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告居民不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "社区公告目标居民可读",
+      "passed": true
+    },
+    {
+      "name": "社区公告其他社区居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "社区公告游客不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "定向公告触达本社区居民",
+      "passed": true
+    },
+    {
+      "name": "公告不触达其他社区",
+      "passed": true
+    },
+    {
+      "name": "他社区居民不可写公告阅读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告阅读记录归本人",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不可读公告阅读明细",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈详情拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈首次回复进入会话",
+      "passed": true
+    },
+    {
+      "name": "本人可读完整反馈会话",
+      "passed": true
+    },
+    {
+      "name": "居民不能办结反馈",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈办结通知本人",
+      "passed": true
+    },
+    {
+      "name": "办结后不可追加会话",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5004
+      }
+    },
+    {
+      "name": "办结历史消息仍可读",
+      "passed": true
+    },
+    {
+      "name": "游客不能创建公共资源预约",
+      "passed": true,
+      "detail": {
+        "http": 401,
+        "code": 401
+      }
+    },
+    {
+      "name": "预约详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "预约详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "预约详情拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "他社区管理员不能确认预约",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "其他居民不能取消预约",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "预约确认通知本人",
+      "passed": true
+    },
+    {
+      "name": "已确认预约阻断同容量冲突",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5401
+      }
+    },
+    {
+      "name": "取消预约后释放同一时段",
+      "passed": true
+    },
+    {
+      "name": "选填联系电话省略仍成功创建",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "省略联系信息使用本人档案且非空",
+      "passed": true
+    },
+    {
+      "name": "非提交人不能评价工单",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "评价详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "评价详情拒绝未派服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "评价详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "评价详情授权本人",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权被派人员",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权社区管理员",
+      "passed": true
+    },
+    {
+      "name": "评价详情授权超管",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不能评价跟进",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "跟进记录留存",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不能读跟进记录",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "一单一评阻断重复",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5502
+      }
+    },
+    {
+      "name": "工单全链终审关闭",
+      "passed": true
+    },
+    {
+      "name": "工单终审关闭沟通群",
+      "passed": true
+    },
+    {
+      "name": "支付退款数量完全未变",
+      "passed": true
+    },
+    {
+      "name": "下载模板真实十列含居住关系",
+      "passed": true
+    },
+    {
+      "name": "CSV十二行真实按钮导入",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "十二行账号与三类关系成功",
+      "passed": true
+    },
+    {
+      "name": "CSV重复导入真实按钮拒绝",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "重复十二行不新增且显示失败明细",
+      "passed": true
+    },
+    {
+      "name": "新格式部分成功且缺项行不残留账号",
+      "passed": true
+    },
+    {
+      "name": "旧四列只建账号不建关系",
+      "passed": true
+    },
+    {
+      "name": "DEF-145类别列表真实可见",
+      "passed": true
+    },
+    {
+      "name": "类别点击选中样式",
+      "passed": true
+    },
+    {
+      "name": "居民提交工单",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "类别提交读回后端一致",
+      "passed": true
+    },
+    {
+      "name": "管理员按钮受理并建群",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "服务人员页面不伪造姓名称谓",
+      "passed": true
+    },
+    {
+      "name": "服务人员按钮接单",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "服务人员按钮开始处理",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "服务人员提交处理结果",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "居民按钮确认完成",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "居民按钮提交评价",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "管理员按钮新增评价跟进",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "跟进后切换分组可见",
+      "passed": true
+    },
+    {
+      "name": "管理员按钮终审关闭",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "终审读回关闭与会话只读",
+      "passed": true
+    },
+    {
+      "name": "取消确认框退出不改变状态",
+      "passed": true
+    },
+    {
+      "name": "居民按钮取消工单",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "列表失败明确错误态不是空态",
+      "passed": true
+    },
+    {
+      "name": "错误状态原地重试成功",
+      "passed": true
+    },
+    {
+      "name": "居民按钮提交反馈",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "管理员按钮回复反馈",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "居民按钮回复反馈",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "管理员按钮办结反馈",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "反馈办结后居民回复入口消失",
+      "passed": true
+    },
+    {
+      "name": "居民按钮提交公共资源预约",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "预约按钮提交日期读回一致",
+      "passed": true
+    },
+    {
+      "name": "居民按钮取消公共资源预约",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "取消资源预约读回状态",
+      "passed": true
+    },
+    {
+      "name": "服务人员工作台不展示MOCK趋势百分比",
+      "passed": true
+    },
+    {
+      "name": "非今日数据不冒称今日完成",
+      "passed": true
+    },
+    {
+      "name": "真实按钮浏览器无未捕获脚本错误",
+      "passed": true
+    },
+    {
+      "name": "真实计划写操作均成功",
+      "passed": true
+    },
+    {
+      "name": "本次夹具关联及合成账号精准回收",
+      "passed": true,
+      "detail": {
+        "community": 0,
+        "house": 0,
+        "work_order": 0,
+        "feedback": 0,
+        "resource_reservation": 0,
+        "work_order_evaluation": 0,
+        "resident": 0,
+        "sys_user": 0
+      }
+    }
+  ],
+  "failures": [],
+  "communities": [
+    125,
+    126
+  ],
+  "users": [
+    188,
+    189,
+    190,
+    191
+  ],
+  "residents": [
+    254,
+    255,
+    256,
+    257,
+    258,
+    259,
+    260,
+    261,
+    262,
+    263,
+    264,
+    265,
+    266,
+    267,
+    268,
+    269,
+    270
+  ],
+  "cleanup": true,
+  "financialBefore": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "financialAfter": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "buttons": {
+    "operations": [
+      {
+        "name": "下载CSV模板",
+        "method": "browser-local"
+      },
+      {
+        "name": "CSV十二行真实按钮导入",
+        "path": "/residents/import",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "CSV重复导入真实按钮拒绝",
+        "path": "/residents/import",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "居民提交工单",
+        "path": "/work-orders",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "管理员按钮受理并建群",
+        "path": "/work-orders/75/intake",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "服务人员按钮接单",
+        "path": "/work-orders/75/accept",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "服务人员按钮开始处理",
+        "path": "/work-orders/75/process",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "服务人员提交处理结果",
+        "path": "/work-orders/75/complete",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "居民按钮确认完成",
+        "path": "/work-orders/75/confirm",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "居民按钮提交评价",
+        "path": "/work-orders/75/evaluation",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "管理员按钮新增评价跟进",
+        "path": "/evaluations/40/followup",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "管理员按钮终审关闭",
+        "path": "/work-orders/75/close",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "居民按钮取消工单",
+        "path": "/work-orders/76/cancel",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "居民按钮提交反馈",
+        "path": "/feedbacks",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "管理员按钮回复反馈",
+        "path": "/feedbacks/30/messages",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "居民按钮回复反馈",
+        "path": "/feedbacks/30/messages",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "管理员按钮办结反馈",
+        "path": "/feedbacks/30/close",
+        "method": "PATCH",
+        "http": 200
+      },
+      {
+        "name": "居民按钮提交公共资源预约",
+        "path": "/resource-reservations",
+        "method": "POST",
+        "http": 200
+      },
+      {
+        "name": "居民按钮取消公共资源预约",
+        "path": "/resource-reservations/81/cancel",
+        "method": "PATCH",
+        "http": 200
+      }
+    ],
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/api/v1/residents/import",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/residents/import",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/work-orders",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/work-orders/75/intake",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/work-orders/75/accept",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/work-orders/75/process",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/work-orders/75/complete",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/work-orders/75/confirm",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/work-orders/75/evaluation",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/evaluations/40/followup",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/work-orders/75/close",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/work-orders/76/cancel",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/feedbacks",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/feedbacks/30/messages",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/feedbacks/30/messages",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/feedbacks/30/close",
+        "http": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/resource-reservations",
+        "http": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/v1/resource-reservations/81/cancel",
+        "http": 200
+      }
+    ],
+    "errors": [],
+    "screenshots": [
+      "docs/50_系统测试/evidence/nontransaction-buttons-20261012/import-reopen-ready-1024.png",
+      "docs/50_系统测试/evidence/nontransaction-buttons-20261012/category-visible-selected-1024.png",
+      "docs/50_系统测试/evidence/nontransaction-buttons-20261012/workorder-closed-1024.png",
+      "docs/50_系统测试/evidence/nontransaction-buttons-20261012/evaluation-load-error-1024.png",
+      "docs/50_系统测试/evidence/nontransaction-buttons-20261012/feedback-closed-1024.png",
+      "docs/50_系统测试/evidence/nontransaction-buttons-20261012/reservation-cancelled-1024.png",
+      "docs/50_系统测试/evidence/nontransaction-buttons-20261012/staff-data-labels-1024.png"
+    ],
+    "importResults": [
+      {
+        "label": "browser-first",
+        "fail": 0,
+        "failRows": [],
+        "success": 12,
+        "successRows": [
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 257,
+            "row": 1,
+            "username": "BI85145954_csv_1"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 258,
+            "row": 2,
+            "username": "BI85145954_csv_2"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 259,
+            "row": 3,
+            "username": "BI85145954_csv_3"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 260,
+            "row": 4,
+            "username": "BI85145954_csv_4"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 261,
+            "row": 5,
+            "username": "BI85145954_csv_5"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 262,
+            "row": 6,
+            "username": "BI85145954_csv_6"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 263,
+            "row": 7,
+            "username": "BI85145954_csv_7"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 264,
+            "row": 8,
+            "username": "BI85145954_csv_8"
+          },
+          {
+            "houseId": 11290,
+            "relationId": 162,
+            "residentId": 265,
+            "row": 9,
+            "username": "BI85145954_csv_9"
+          },
+          {
+            "houseId": 11291,
+            "relationId": 163,
+            "residentId": 266,
+            "row": 10,
+            "username": "BI85145954_csv_10"
+          },
+          {
+            "houseId": 11292,
+            "relationId": 164,
+            "residentId": 267,
+            "row": 11,
+            "username": "BI85145954_csv_11"
+          },
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 268,
+            "row": 12,
+            "username": "BI85145954_csv_12"
+          }
+        ],
+        "total": 12
+      },
+      {
+        "label": "browser-repeat",
+        "fail": 12,
+        "failRows": [
+          {
+            "reason": "用户名已存在",
+            "row": 1
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 2
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 3
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 4
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 5
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 6
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 7
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 8
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 9
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 10
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 11
+          },
+          {
+            "reason": "用户名已存在",
+            "row": 12
+          }
+        ],
+        "success": 0,
+        "successRows": [],
+        "total": 12
+      },
+      {
+        "label": "mixed",
+        "fail": 1,
+        "failRows": [
+          {
+            "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+            "row": 2
+          }
+        ],
+        "success": 1,
+        "successRows": [
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 269,
+            "row": 1,
+            "username": "BI85145954_mixed"
+          }
+        ],
+        "total": 2
+      },
+      {
+        "label": "legacy",
+        "fail": 0,
+        "failRows": [],
+        "success": 1,
+        "successRows": [
+          {
+            "houseId": null,
+            "relationId": null,
+            "residentId": 270,
+            "row": 1,
+            "username": "r13951572333"
+          }
+        ],
+        "total": 1
+      }
+    ],
+    "reopen": {
+      "files": 1,
+      "inputFiles": 1,
+      "disabled": false
+    }
+  },
+  "financialAfterCleanup": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "fixtureCleanupCounts": {
+    "community": 0,
+    "house": 0,
+    "work_order": 0,
+    "feedback": 0,
+    "resource_reservation": 0,
+    "work_order_evaluation": 0,
+    "resident": 0,
+    "sys_user": 0
+  }
+}

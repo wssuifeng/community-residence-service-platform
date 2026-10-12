@@ -1,0 +1,15 @@
+{
+  "tag": "BI81412147",
+  "database": "community_residence_payment_config_test",
+  "reason": "bk前次Node等待响应未捕获退出留下的本线程夹具；只按核对ID回收",
+  "before": {
+    "resident": 15,
+    "sys_user": 4
+  },
+  "after": {
+    "resident": 0,
+    "sys_user": 0,
+    "community": 0
+  },
+  "transactionsExecuted": false
+}
