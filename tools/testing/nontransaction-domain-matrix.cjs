@@ -1,7 +1,7 @@
 /* 批次bi：固定隔离库，四域真实API权限矩阵；禁止支付/主动查单/退款。 */
 const fs=require('node:fs'),assert=require('node:assert/strict')
 const {database,base,frontend,sql,id,request}=require('./nontransaction-fixture-helpers.cjs')
-const remaining=process.argv.includes('--remaining'),run=Date.now().toString().slice(-8),tag=(remaining?'BJ':'BI')+run,out='docs/50_系统测试/evidence/'+(remaining?'nontransaction-remaining-20261012':'nontransaction-matrix-20261012')
+const buttons=process.argv.includes('--buttons'),remaining=process.argv.includes('--remaining'),run=Date.now().toString().slice(-8),tag=(remaining?'BJ':'BI')+run,out='docs/50_系统测试/evidence/'+(buttons?'nontransaction-buttons-20261012':remaining?'nontransaction-remaining-20261012':'nontransaction-matrix-20261012')
 const evidence={date:new Date().toISOString(),database,backend:base,frontend,transactionsExecuted:false,checks:[],failures:[],communities:[],users:[],residents:[],cleanup:false}
 const auth={},fixture={tag}
 function check(name,ok,detail){const row={name,passed:!!ok,...(detail?{detail}:{})};evidence.checks.push(row);if(!ok)evidence.failures.push(row)}
@@ -95,7 +95,8 @@ async function notification(name,session,source,id0){const rows=await request('/
   const orderEnd=await request('/work-orders/'+order.id,'GET',undefined,auth.resident.token);check('工单全链终审关闭',orderEnd.status==='CLOSED')
   const group=sql('SELECT status FROM conversation WHERE type=\'WORK_ORDER_GROUP\' AND related_id='+id(order.id));check('工单终审关闭沟通群',group[0]?.[0]==='CLOSED')
   evidence.financialAfter=finances();check('支付退款数量完全未变',JSON.stringify(evidence.financialBefore)===JSON.stringify(evidence.financialAfter))
-  if(remaining){await require('./nontransaction-remaining-regression.cjs').run({auth,fixture,evidence,check,out});if(!process.argv.includes('--api-only')){await require('./nontransaction-remaining-browser.cjs').fixtures({auth,fixture,check});await require('./nontransaction-remaining-browser.cjs').run({auth,fixture,evidence,check,out})}}
+  if(buttons)await require('./nontransaction-button-regression.cjs').run({auth,fixture,evidence,check,out});
+  else if(remaining){await require('./nontransaction-remaining-regression.cjs').run({auth,fixture,evidence,check,out});if(!process.argv.includes('--api-only')){await require('./nontransaction-remaining-browser.cjs').fixtures({auth,fixture,check});await require('./nontransaction-remaining-browser.cjs').run({auth,fixture,evidence,check,out})}}
   else if(!process.argv.includes('--api-only'))await require('./nontransaction-domain-browser.cjs').run({auth,fixture,evidence,check,out})
  }catch(e){evidence.error=e.message;process.exitCode=1}
  finally{

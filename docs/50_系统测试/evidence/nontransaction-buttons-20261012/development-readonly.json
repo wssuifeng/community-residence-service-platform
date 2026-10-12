@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-12T06:47:21.433Z",
+  "database": "community_residence",
+  "transactionsExecuted": false,
+  "businessWrites": false,
+  "checks": [
+    {
+      "name": "开发业务数量与bh迁移前一致",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/notices",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/notices",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/feedbacks",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/feedbacks",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/resource-reservations",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/resource-reservations",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/evaluations",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/evaluations",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/evaluations/unsatisfied",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/evaluations/unsatisfied",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/statistics/evaluations",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/statistics/evaluations",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/payment/channels",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/payment/channels",
+      "passed": true
+    },
+    {
+      "name": "开发渠道继续停用",
+      "passed": true
+    },
+    {
+      "name": "演示登录契约/api/v1/auth/admin/login",
+      "passed": true
+    },
+    {
+      "name": "演示账号可用superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示登录契约/api/v1/auth/admin/login",
+      "passed": true
+    },
+    {
+      "name": "演示账号可用admin1",
+      "passed": true
+    },
+    {
+      "name": "演示登录契约/api/v1/auth/admin/login",
+      "passed": true
+    },
+    {
+      "name": "演示账号可用staff1",
+      "passed": true
+    },
+    {
+      "name": "演示登录契约/api/v1/auth/resident/login",
+      "passed": true
+    },
+    {
+      "name": "演示账号可用resident1",
+      "passed": true
+    },
+    {
+      "name": "前端5176可访问",
+      "passed": true
+    },
+    {
+      "name": "开发只读期间业务数量不变",
+      "passed": true
+    }
+  ],
+  "before": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "demoAccounts": [
+    {
+      "username": "superadmin",
+      "role": "SUPER_ADMIN",
+      "loginVerified": true
+    },
+    {
+      "username": "admin1",
+      "role": "ADMIN",
+      "loginVerified": true
+    },
+    {
+      "username": "staff1",
+      "role": "STAFF",
+      "loginVerified": true
+    },
+    {
+      "username": "resident1",
+      "role": "RESIDENT",
+      "loginVerified": true
+    }
+  ],
+  "after": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ]
+}

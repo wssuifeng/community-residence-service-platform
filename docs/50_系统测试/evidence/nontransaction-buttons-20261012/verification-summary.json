@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-12",
+  "assertions": 105,
+  "successfulNamedActions": 23,
+  "namedActionsMeaning": "1次本地模板下载+22次成功的真实按钮API写操作；另有1次STAFF完成403，作为设计冲突单独记录",
+  "writeRequests": 23,
+  "expectedPermissionDenials": 1,
+  "browserErrors": [],
+  "designConflict": {
+    "type": "viewing-complete-role",
+    "uiDesign": "STAFF限被分配人可登记完成",
+    "interfaceDesign": "ADMIN/SUPER_ADMIN",
+    "observedHttp": 403,
+    "implementationChanged": false
+  },
+  "screenshots": [
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/import-reopen-ready-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/category-visible-selected-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/workorder-closed-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/evaluation-load-error-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/feedback-closed-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/reservation-cancelled-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/viewing-complete-role-conflict-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/application-before-withdraw-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/application-withdrawn-1024.png",
+    "docs/50_系统测试/evidence/nontransaction-buttons-20261012/staff-data-labels-1024.png"
+  ],
+  "fixtureCleanup": {
+    "community": 0,
+    "house": 0,
+    "work_order": 0,
+    "feedback": 0,
+    "resource_reservation": 0,
+    "work_order_evaluation": 0,
+    "resident": 0,
+    "sys_user": 0
+  },
+  "transactionsExecuted": false,
+  "financialCountsUnchanged": true,
+  "counting": "105含API前置/业务读回/按钮/否定与回收，不与首次95或导入子集相加；不是105条完整业务链",
+  "intermediateEvidence": "core-actions-first-pass.json为首次主体操作快照，固定名截图已被最终复验覆盖，图像只配套最终domain-matrix-browser.json；import-reopen-debug.png为工具时序排查，不作缺陷修复前原图。",
+  "files": {
+    "application-before-withdraw-1024.png": {
+      "sha256": "188acaaa0c0bb194db715360926d0ced199dd7adcf05d506129586bff3e62424",
+      "bytes": 40992
+    },
+    "application-withdrawn-1024.png": {
+      "sha256": "9f6d55349b2036fb1f7093879a2bb395ddc8f5bbb962ec1c21b390509fb2c342",
+      "bytes": 56367
+    },
+    "category-visible-selected-1024.png": {
+      "sha256": "ce00fa5adf220f5f1739a6141647a1541eaa42e6571f1a6a48aa3d2b252d097a",
+      "bytes": 51473
+    },
+    "core-actions-first-pass.json": {
+      "sha256": "a57dab6c36bbe90dcc0d168ec524a6726a6ef6e593939bd3900bd40b97a8568d",
+      "bytes": 22939
+    },
+    "development-readonly.json": {
+      "sha256": "4af9f921fdc892bb94b1516bec65dce7f6c660a8d9839594cab4d7f850f7594b",
+      "bytes": 2930
+    },
+    "domain-matrix-browser.json": {
+      "sha256": "f3be529ff8168e6fc3ec62a785302d5947396f2ef581069f3527cd6b66062880",
+      "bytes": 26255
+    },
+    "downloaded-template.csv": {
+      "sha256": "e978bde929d4efece749f3c11ed7bd3e15025d05dfdce1cdeba3ced481acfc6c",
+      "bytes": 154
+    },
+    "evaluation-load-error-1024.png": {
+      "sha256": "159aa9100a2566fd6d3365181466ba57d82f9817e1cd99cef4c64be71b847912",
+      "bytes": 34237
+    },
+    "executed-12-residents.csv": {
+      "sha256": "caaa7d86a0a7d3319ccaded6f0a1b36add57a4e9bff8545bdd1f7ba81a148acb",
+      "bytes": 1125
+    },
+    "feedback-closed-1024.png": {
+      "sha256": "6a8c2f53845c91d78ca77ab3e52372e0b8f0fd81f858926a77a98064e971c958",
+      "bytes": 47032
+    },
+    "import-reopen-debug.png": {
+      "sha256": "f3a9c979b59b8599cbca05cda8892840beafadcd86d1211cd71dc95ea8e197a7",
+      "bytes": 128930
+    },
+    "import-reopen-ready-1024.png": {
+      "sha256": "8bf48a5ff077db89934e4e5f899a13639ade24cee702a801fec23f2a1ca52cb6",
+      "bytes": 127188
+    },
+    "interrupted-fixture-cleanup.json": {
+      "sha256": "eff56f2cb70451553dd2a1bee4b4b1884732301c261c42b392ff2c350d16f082",
+      "bytes": 349
+    },
+    "reservation-cancelled-1024.png": {
+      "sha256": "feb23228fc3c529a36496d7eca007311e2464d7bd35eb100600ac37a9f623aeb",
+      "bytes": 79243
+    },
+    "resident-import-category-verification.json": {
+      "sha256": "e6b80ce3e4f6bf9136153bbb564cd2468cc5845af1d404cc54c71d0b4aeaadda",
+      "bytes": 6007
+    },
+    "staff-data-labels-1024.png": {
+      "sha256": "8d056435a4faebacc785edbc36bdd8f7939f002f5cb229aa05cf8e52f9b7f466",
+      "bytes": 66864
+    },
+    "viewing-complete-role-conflict-1024.png": {
+      "sha256": "7c04432bb49b2b87729542458afce444e9a736ab008161abfa41472ffe75609d",
+      "bytes": 76002
+    },
+    "viewing-completed-1024.png": {
+      "sha256": "a39cca748d7facb960e1e06e13a2213dbc03ebab2034076d76c8c77ec6d3e26e",
+      "bytes": 75928
+    },
+    "workorder-closed-1024.png": {
+      "sha256": "dcfaa0cf602166ecce3b1ad6237ab640266c064418130fbdfdb7963ecbfa7770",
+      "bytes": 157832
+    }
+  }
+}
