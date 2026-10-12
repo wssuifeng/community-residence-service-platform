@@ -105,10 +105,28 @@ class BatchGenerateHousingTest {
         house2.setHouseNumber("102");
 
         lenient().when(houseMapper.selectList(any())).thenReturn(List.of(house1, house2));
+        lenient().when(houseMapper.selectByIdForUpdate(1000L)).thenReturn(house1);
+        lenient().when(houseMapper.selectByIdForUpdate(1001L)).thenReturn(house2);
         lenient().when(unitMapper.selectList(any())).thenReturn(List.of(unit1, unit2));
         lenient().when(buildingMapper.selectList(any())).thenReturn(List.of(building1));
         /* 无在架房源（首查） */
         lenient().when(housingMapper.selectList(any())).thenReturn(List.of());
+    }
+
+    @Test
+    @DisplayName("挂牌使用加锁后最新户型，不使用批量查询旧快照")
+    void batchGenerate_usesLockedLatestLayout() {
+        House current = new House();
+        org.springframework.beans.BeanUtils.copyProperties(house1, current);
+        current.setLayout("四室两厅两卫");
+        org.mockito.Mockito.when(houseMapper.selectByIdForUpdate(house1.getId())).thenReturn(current);
+        try (MockedStatic<SecurityUtils> ignored = mockStatic(SecurityUtils.class)) {
+            housingService.batchGenerate(baseDto());
+        }
+        ArgumentCaptor<Housing> inserted = ArgumentCaptor.forClass(Housing.class);
+        verify(housingMapper, times(2)).insert(inserted.capture());
+        assertThat(inserted.getAllValues()).filteredOn(item -> item.getHouseId().equals(house1.getId()))
+                .extracting(Housing::getLayout).containsExactly("四室两厅两卫");
     }
 
     private BatchGenerateHousingDTO baseDto() {
@@ -228,5 +246,11 @@ class BatchGenerateHousingTest {
             assertThat(result.getCreated()).isEqualTo(1);
             assertThat(result.getSkipped()).isEqualTo(1);
         }
+    }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
     }
 }

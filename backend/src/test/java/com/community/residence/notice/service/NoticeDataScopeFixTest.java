@@ -425,4 +425,6 @@ class NoticeDataScopeFixTest {
         b.setCommunityId(communityId);
         return b;
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

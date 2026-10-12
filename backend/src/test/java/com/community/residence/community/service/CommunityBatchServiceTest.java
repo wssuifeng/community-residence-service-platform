@@ -159,4 +159,6 @@ class CommunityBatchServiceTest {
         dto.setStatus(status);
         return dto;
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

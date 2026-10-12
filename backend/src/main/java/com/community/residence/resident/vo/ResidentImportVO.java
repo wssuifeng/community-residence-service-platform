@@ -38,6 +38,15 @@ public class ResidentImportVO {
         @Schema(description = "初始密码（明文仅本次返回）")
         private String initialPassword;
 
+        @Schema(description = "本次创建居民账号ID")
+        private Long residentId;
+
+        @Schema(description = "本次登记关系ID，空表示仅账号")
+        private Long relationId;
+
+        @Schema(description = "本次登记关系房屋ID，空表示仅账号")
+        private Long houseId;
+
         public static SuccessRow of(int row, String username, String initialPassword) {
             SuccessRow r = new SuccessRow();
             r.setRow(row);

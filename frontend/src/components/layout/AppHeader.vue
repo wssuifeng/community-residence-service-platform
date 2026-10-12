@@ -99,6 +99,7 @@ async function handleBellItemClick(item: {
 <template>
   <header class="app-header">
     <div class="app-header-inner">
+      <slot name="menu-toggle" />
       <router-link to="/" class="app-header-logo">
         <AppLogo :size="22" />
         <span>社区居住服务</span>

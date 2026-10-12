@@ -10,6 +10,7 @@ import {
   listLeaseAgreements
 } from '@/api/agreement'
 import { getLease } from '@/api/lease'
+import type { LeaseStatus } from '@/types/modules/lease'
 import type {
   IAgreementTemplate,
   ILeaseAgreement,
@@ -34,19 +35,14 @@ import { formatDateTime } from '@/utils/date'
 const props = defineProps<{
   /** 租约 ID（必填） */
   leaseId: number
-  /** 当前身份：ADMIN-管理方（发起/确认/撤回），RESIDENT-居民方（确认） */
+  /** 当前身份：ADMIN-管理方（同意并发出/撤回），RESIDENT-居民方（确认） */
   role: 'ADMIN' | 'RESIDENT'
   /** 社区 ID（可选；缺省由组件内部查租约补全，仅影响可用模板清单） */
   communityId?: number
+  /** 已知租约状态；缺省由本组件读取，只有待签约可发出。 */
+  leaseStatus?: LeaseStatus
   /** 是否自带白卡容器（默认 true，页面直挂用）；嵌在弹窗等已有容器内时传 false */
   selfManaged?: boolean
-  /**
-   * 承租是否已确认（R67/V20，仅管理方相关）：`false` 表示居民尚未确认承租，
-   * 此时**禁用**「发起协议」并说明原因（后端同样拒绝 LEASE_TENANCY_NOT_CONFIRMED 5601）。
-   * `undefined` 表示调用方未知该状态（如后端尚未返回 tenantConfirmAt）——此时放行，
-   * 由后端把关，避免前端字段缺失把合法操作挡住。
-   */
-  tenancyConfirmed?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -59,6 +55,8 @@ const loading = ref(false)
 const submitting = ref(false)
 /* 社区归属兜底来源（props.communityId 缺省时才请求） */
 const leaseCommunityId = ref<number | null>(null)
+const resolvedLeaseStatus = ref<LeaseStatus | null>(null)
+const canIssue = computed(() => (props.leaseStatus ?? resolvedLeaseStatus.value) === 'TO_SIGN')
 
 /** 当前协议 = 最新一条非已撤回协议；历史协议 = 已撤回流水 */
 const current = computed(
@@ -106,12 +104,17 @@ async function load(): Promise<void> {
 
 /* 社区归属兜底：拿不到只降级模板选择，不阻塞协议流程 */
 async function resolveCommunity(): Promise<void> {
-  if (props.communityId != null) return
+  if (props.communityId != null && props.leaseStatus != null) return
+  const leaseId = props.leaseId
   try {
-    const detail = await getLease(props.leaseId)
+    const detail = await getLease(leaseId)
+    if (leaseId !== props.leaseId) return
     leaseCommunityId.value = detail.communityId
+    resolvedLeaseStatus.value = detail.status
   } catch {
+    if (leaseId !== props.leaseId) return
     leaseCommunityId.value = null
+    resolvedLeaseStatus.value = null
   }
 }
 
@@ -165,6 +168,7 @@ async function openCreate(): Promise<void> {
 }
 
 async function handleCreateSubmit(): Promise<void> {
+  if (!canIssue.value || submitting.value) return
   submitting.value = true
   try {
     await createLeaseAgreement({
@@ -173,7 +177,7 @@ async function handleCreateSubmit(): Promise<void> {
       title: createForm.title.trim() || undefined,
       remark: createForm.remark.trim() || undefined
     })
-    ElMessage.success('协议已发起，等待双方确认')
+    ElMessage.success('已同意并发出协议，等待居民确认')
     createVisible.value = false
     await load()
     emit('changed')
@@ -186,30 +190,14 @@ async function handleCreateSubmit(): Promise<void> {
 
 /* ---------- 确认 ---------- */
 
-/** 管理方确认：单次二次确认（确认后落管理方确认人与时间，不可自行撤销） */
-async function handleAdminConfirm(item: ILeaseAgreement): Promise<void> {
-  try {
-    await ElMessageBox.confirm(
-      `确认以管理方身份确认协议「${item.title}」？确认后记录您的姓名与时间，如需变更须先撤回再重新发起。`,
-      '管理方确认协议',
-      { type: 'warning', confirmButtonText: '确认签署', cancelButtonText: '取消' }
-    )
-  } catch {
-    return
-  }
-  await doConfirm(item)
-}
-
-/**
- * 确认动作（**仅管理方入口**）：DEF-078 去重后，居民「同意承租」只在承约
- * （`POST /leases/{id}/tenancy-confirm`）采集一次，管理方确认协议时由后端引用该留痕，
- * 因此居民侧不再需要（也不提供）二次确认入口——确认人姓名由后端按当前账号解析。
- */
+/** 仅居民本人在当前正文内明确同意；姓名由后端读取当前账号。 */
 async function doConfirm(item: ILeaseAgreement): Promise<void> {
+  if (submitting.value) return
   submitting.value = true
   try {
     await confirmLeaseAgreement(item.id, {})
-    ElMessage.success('协议已确认')
+    ElMessage.success('已同意协议，首期费用支付成功后正式生效')
+    contentVisible.value = false
     await load()
     emit('changed')
   } catch (error) {
@@ -258,13 +246,12 @@ const isAdmin = computed(() => props.role === 'ADMIN')
 const adminConfirmed = computed(() => !!current.value?.adminConfirmTime)
 const tenantConfirmed = computed(() => !!current.value?.tenantConfirmTime)
 
-/* ---------- 承租确认前置（R67：未确认承租时管理端不可发起协议） ---------- */
-
-/** 居民尚未确认承租（仅 tenancyConfirmed 显式为 false 时判定为受阻，undefined=未知则放行） */
-const tenancyBlocked = computed(() => props.tenancyConfirmed === false)
-const createDisabledReason = computed(() =>
-  tenancyBlocked.value ? '居民尚未确认承租，确认后方可发起租赁协议' : ''
-)
+/** 旧协议缺管理方留痕须撤回重发；不允许由新流程凭空补签。 */
+const legacyConsentMissing = computed(() => !!current.value && current.value.status !== 'SIGNED' && !adminConfirmed.value)
+const canAcceptContent = computed(() => !isAdmin.value && !!contentTarget.value
+  && contentTarget.value.id === current.value?.id
+  && ['PENDING', 'PARTIAL'].includes(contentTarget.value.status)
+  && !!contentTarget.value.adminConfirmTime)
 
 onMounted(async () => {
   await Promise.all([load(), resolveCommunity()])
@@ -339,72 +326,32 @@ defineExpose({ reload: load })
         <p class="remark-text">{{ current.remark }}</p>
       </div>
 
+      <el-alert v-if="legacyConsentMissing" type="warning" :closable="false" show-icon
+        title="旧协议缺少管理方同意记录" description="请联系管理员撤回后重新发出；旧承租留痕不能代替您对本协议的确认。" />
       <div class="panel-actions">
-        <el-button size="small" type="primary" plain @click="openContent(current)">查看协议正文</el-button>
-        <template v-if="isAdmin">
-          <el-button
-            v-if="!adminConfirmed"
-            size="small"
-            type="primary"
-            :loading="submitting"
-            @click="handleAdminConfirm(current)"
-          >
-            确认协议
-          </el-button>
-          <el-button size="small" type="danger" plain :loading="submitting" @click="handleCancel(current)">
-            撤回协议
-          </el-button>
-        </template>
-        <!-- 居民侧（DEF-078 去重）：承租确认（承约）即签署意愿留痕，
-             管理方确认时引用该留痕 → **不再提供居民二次确认入口** -->
-        <p v-else class="action-hint resident-tenancy-note">
-          承租确认（承约）即您的签署意愿留痕；管理方确认协议时引用该留痕并直接推进，您无需再次确认。
-        </p>
+        <el-button size="small" type="primary" plain @click="openContent(current)">
+          {{ !isAdmin && current.status !== 'SIGNED' ? '查看协议并确认' : '查看协议正文' }}
+        </el-button>
+        <el-button v-if="isAdmin && current.status !== 'SIGNED'" size="small" type="danger" plain
+          :loading="submitting" @click="handleCancel(current)">撤回协议</el-button>
       </div>
-
-      <!-- 提示按协议状态而非「本人是否已确认」判定：双方都已确认时不能再提示等待对方 -->
-      <p v-if="current.status === 'SIGNED'" class="action-hint">
-        双方已确认，协议已生效并同步租约签约状态，可随时查看协议正文。
-      </p>
-      <p v-else-if="isAdmin && adminConfirmed" class="action-hint">
-        您已确认本协议，协议已引用居民承约留痕并即时生效。
-      </p>
-      <p v-else-if="!isAdmin && tenantConfirmed" class="action-hint">
-        您的承约留痕已计入本协议，等待社区管理方确认后生效。
-      </p>
+      <p v-if="current.status === 'SIGNED'" class="action-hint">双方已同意。首期费用支付成功后租约才正式生效；可随时查看本协议及确认记录。</p>
+      <p v-else-if="isAdmin && adminConfirmed" class="action-hint">您发出协议时已表示同意，正在等待居民确认，无需重复同意。</p>
+      <p v-else-if="!isAdmin && adminConfirmed" class="action-hint">请查看协议正文，再决定是否同意。尚未同意时租约不会生效；如有异议可联系管理员修改并重发。</p>
     </template>
 
     <!-- 空态：无任何未撤回协议 -->
     <template v-else>
       <div class="empty-block">
         <p v-if="isAdmin" class="empty-text">
-          该租约尚未发起协议。协议为线下签署的可上传模板附件备案，也可直接用模板正文生成电子协议送居民确认。
+          该租约尚未发出协议。发出代表管理方同意，居民同意具体协议且首期费用支付成功后，租约才会生效。
         </p>
-        <p v-else class="empty-text">管理方尚未发起协议。</p>
+        <p v-else class="empty-text">管理方尚未发出协议。入住申请已表达您的租住意愿，协议送达后再确认具体条款即可。</p>
       </div>
 
-      <!-- 承租确认前置说明（R67）：未确认时把入口置灰并给出原因，而不是让用户点了才被后端拒绝 -->
-      <el-alert
-        v-if="isAdmin && tenancyBlocked"
-        type="warning"
-        :closable="false"
-        show-icon
-        class="tenancy-alert"
-        title="居民尚未确认承租"
-        description="承租确认是发起租赁协议的前置条件：居民在「我的租约 → 待签约」或租约群聊内确认后，管理方方可发起协议。"
-      />
-
+      <p v-if="isAdmin && !canIssue" class="action-hint">仅待签约租约可以发出协议；其他状态保持历史只读。</p>
       <div v-if="isAdmin" class="panel-actions">
-        <el-button
-          type="primary"
-          size="small"
-          :disabled="tenancyBlocked"
-          :title="createDisabledReason"
-          @click="openCreate"
-        >
-          发起协议
-        </el-button>
-        <span v-if="tenancyBlocked" class="action-block-hint">{{ createDisabledReason }}</span>
+        <el-button type="primary" size="small" :disabled="!canIssue" @click="openCreate">同意并发出协议</el-button>
       </div>
     </template>
 
@@ -426,7 +373,7 @@ defineExpose({ reload: load })
     </el-collapse>
 
     <!-- 协议正文快照：文档型排版，保留换行 -->
-    <el-drawer v-model="contentVisible" title="协议正文" size="620px">
+    <el-drawer v-model="contentVisible" title="协议正文" size="min(620px, 100vw)">
       <template v-if="contentTarget">
         <div class="content-head">
           <h3 class="content-title">{{ contentTarget.title }}</h3>
@@ -451,11 +398,17 @@ defineExpose({ reload: load })
         </div>
         <pre v-if="contentTarget.content" class="content-body">{{ contentTarget.content }}</pre>
         <el-empty v-else description="本协议无正文文本（以模板附件为准）" :image-size="70" />
+        <p v-if="canAcceptContent" class="action-hint">点击“同意协议”表示您同意以上当前协议及其附件。平台会记录您的账号姓名和确认时间；如需修改，请先联系管理员撤回重发。</p>
+      </template>
+      <template #footer>
+        <el-button @click="contentVisible = false">关闭</el-button>
+        <el-button v-if="canAcceptContent && contentTarget" type="primary" :loading="submitting"
+          :disabled="submitting" @click="doConfirm(contentTarget)">同意协议</el-button>
       </template>
     </el-drawer>
 
     <!-- 发起协议（管理方） -->
-    <el-dialog v-model="createVisible" title="发起租赁协议" width="520px">
+    <el-dialog v-model="createVisible" title="同意并发出租赁协议" width="min(520px, 96vw)">
       <el-alert
         v-if="effectiveCommunityId == null"
         type="warning"
@@ -465,6 +418,7 @@ defineExpose({ reload: load })
         title="未能获取租约所属社区"
         description="无法列出可选模板，将按该社区默认模板生成协议正文；若该社区无默认模板，请先在「协议模板」中配置。"
       />
+      <p class="action-hint">请确认所选模板及租约内容。发出即代表您以管理方身份同意本协议，并记录您的姓名与时间；居民确认且首期费用支付成功后租约生效。</p>
       <el-form label-width="90px" @submit.prevent>
         <el-form-item label="协议模板">
           <el-select
@@ -505,7 +459,7 @@ defineExpose({ reload: load })
       <p class="dialog-note">发起后正文以模板占位符渲染成快照存库，模板后续修改不影响本次协议。</p>
       <template #footer>
         <el-button @click="createVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleCreateSubmit">确认发起</el-button>
+        <el-button type="primary" :loading="submitting" @click="handleCreateSubmit">同意并发出协议</el-button>
       </template>
     </el-dialog>
   </article>

@@ -54,7 +54,7 @@ public class ResidenceApplicationController {
     }
 
     @Operation(summary = "审批通过",
-            description = "建立居住关系与待签约租约并创建租约群聊；房屋保持空置，待协议双方确认后生效")
+            description = "租客仅建立待签约租约及群聊；正式关系与房屋入住在协议完成且首期成功后建立")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/approve")
     public ApiResponse<ApplicationVO> approve(@PathVariable Long id,

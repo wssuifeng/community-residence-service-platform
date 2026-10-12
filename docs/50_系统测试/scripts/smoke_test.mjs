@@ -146,7 +146,7 @@ async function main() {
     adminTok = adminTok2;
     const b = await api('POST', '/api/v1/buildings', { token: adminTok2, body: { communityId: cid, name: '冒烟1号楼', floors: 3, description: '' }, expectStatus: 200 });
     const u = await api('POST', '/api/v1/units', { token: adminTok2, body: { buildingId: b.data.id, name: '1单元', description: '' }, expectStatus: 200 });
-    const h = await api('POST', '/api/v1/houses', { token: adminTok2, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 88.5, roomCount: 2, layout: '两室一厅', orientation: '南', status: 'VACANT', description: '' }, expectStatus: 200 });
+    const h = await api('POST', '/api/v1/houses', { token: adminTok2, body: { unitId: u.data.id, houseNumber: '101', floor: 1, area: 88.5, layout: '两室一厅', orientation: '南', status: 'VACANT', description: '' }, expectStatus: 200 });
     const r = await api('POST', '/api/v1/resources', { token: adminTok2, body: { communityId: cid, name: '冒烟活动室', type: 'ACTIVITY_ROOM', location: '1号楼首层', capacity: 20, description: '' }, expectStatus: 200 });
     const t = await api('POST', `/api/v1/resources/${r.data.id}/timeslots`, { token: adminTok2, body: { dayOfWeek: 1, startTime: '09:00:00', endTime: '11:00:00', isAvailable: 1 }, expectStatus: 200 });
     record('E1-社区初始化', true, `社区/楼栋/单元/房屋(${h.data.status})/资源/时段 全链创建成功（社区ID=${cid}）`);

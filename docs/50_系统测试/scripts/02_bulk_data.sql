@@ -55,9 +55,9 @@ proc: BEGIN
     -- -------------------------------------------------------------------------
     START TRANSACTION;
 
-    INSERT INTO community (name, address, contact_phone, contact_person, description, status)
+    INSERT INTO community (name, address, responsible_admin_id, description, status)
     SELECT CONCAT('TEST-BULK-', ch.c, '社区'), CONCAT('批量测试市 ', ch.c, ' 路 ', ch.n, ' 号'),
-           CONCAT('0571-88', LPAD(ch.n, 6, '0')), '批量测试物业', '50 阶段 N7 批量数据社区', 'ACTIVE'
+           NULL, '50 阶段 N7 批量数据社区', 'ACTIVE'
     FROM (SELECT 'A' AS c, 1 AS n UNION SELECT 'B', 2 UNION SELECT 'C', 3 UNION SELECT 'D', 4 UNION SELECT 'E', 5) ch;
 
     INSERT INTO building (community_id, name, floors, description)
@@ -103,12 +103,11 @@ proc: BEGIN
         WHERE NOT EXISTS (SELECT 1 FROM service_category sc WHERE sc.community_id = v_cid AND sc.name = cat.name);
 
         -- 房屋：每单元 5 层 × 10 房 = 50 套，20 单元 → 1000 套
-        INSERT INTO house (unit_id, community_id, house_number, floor, area, room_count, layout, orientation, status, description)
+        INSERT INTO house (unit_id, community_id, house_number, floor, area, layout, orientation, status, description)
         SELECT u.id, v_cid,
                CONCAT(f.n, LPAD(rm.n, 2, '0')),
                f.n,
                55 + ((f.n * 10 + rm.n) MOD 40) * 1.5,
-               1 + ((f.n + rm.n) MOD 3),
                ELT(1 + ((f.n + rm.n) MOD 3), '1室1厅1卫', '2室1厅1卫', '3室2厅2卫'),
                ELT(1 + (rm.n MOD 4), 'SOUTH', 'NORTH', 'EAST', 'WEST'),
                CASE WHEN (f.n * 10 + rm.n) MOD 10 <= 6 THEN 'OCCUPIED'

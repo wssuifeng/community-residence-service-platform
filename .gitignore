@@ -52,3 +52,14 @@ docs/archive/参考资料归档-*/
 
 # 验收截图回归产物（沿用 2026-09-16「回归本地不入库」口径）
 frontend/acceptance-shots/
+
+# 支付配置服务器加密密钥：即使部署者误放在仓库也不得提交。
+**/payment-config-master.key
+**/.community-residence/payment/
+**/master.key
+
+# 本机服务使用的构建JAR副本（生成型大体积产物，避免锁住target构建文件，不入库）
+output/runtime/
+
+# 本机数据库恢复备份：包含账号/业务数据和可能的配置密文，不作为公开测试证据。
+output/db-backups/

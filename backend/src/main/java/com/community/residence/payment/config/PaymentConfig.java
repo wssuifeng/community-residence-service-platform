@@ -4,29 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.community.residence.payment.service.channel.AlipayChannelClient;
+import com.community.residence.payment.service.AlipayChannelConfigService;
+import com.community.residence.payment.service.channel.ManagedAlipayChannelClient;
 import com.community.residence.payment.service.channel.DisabledChannelClient;
 import com.community.residence.payment.service.channel.PaymentChannelClient;
 import com.community.residence.payment.service.channel.WechatChannelClient;
 
 /**
- * 支付渠道客户端装配：凭据齐全装配对应实现，缺失装配 Disabled
- * （enabled()=false，发起支付抛「该支付渠道未配置」业务异常）。
- * SDK 客户端在装配期一次性构建（AlipayClient 线程安全可复用），
- * 凭据配置错误在启动日志 WARN 明示而非启动失败（渠道禁用不阻断，决策日志口径）。
+ * 支付渠道客户端装配：支付宝由数据库独立配置按版本读取，本批保持停用；
+ * 微信沿用环境凭据门控。支付宝不回退到旧环境变量，不在启动期读取私钥。
  */
 @Slf4j
 @Configuration
 public class PaymentConfig {
 
-    /** 支付宝渠道客户端（凭据齐全时） */
+    /** 支付宝凭据来源为超管独立配置，停用/缺失不回退到环境变量。 */
     @Bean
-    public PaymentChannelClient alipayChannelClient(PaymentProperties properties) {
-        if (properties.getAlipay().isConfigured()) {
-            return new AlipayChannelClient(properties);
-        }
-        log.warn("支付渠道 ALIPAY 凭据未配置，该渠道禁用（payment.alipay.* 四项齐全才启用）");
-        return new DisabledChannelClient("ALIPAY");
+    public PaymentChannelClient alipayChannelClient(AlipayChannelConfigService configService) {
+        return new ManagedAlipayChannelClient(configService);
     }
 
     /** 微信渠道客户端（凭据齐全时） */

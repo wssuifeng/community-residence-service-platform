@@ -125,6 +125,7 @@ class PaymentServiceTest {
         paymentService = new PaymentService(paymentMapper, leaseMapper,
                 sysAdminCommunityMapper, notificationService, paymentProperties,
                 alipayChannelClient, wechatChannelClient);
+        SettlementTestInfrastructure.install(paymentService, paymentMapper, leaseMapper);
         paymentService.setRedissonClient(redissonClient);
 
         activeLease = new LeaseRecord();

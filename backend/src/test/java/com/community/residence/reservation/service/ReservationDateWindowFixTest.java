@@ -30,16 +30,15 @@ import org.redisson.api.RedissonClient;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -149,41 +148,43 @@ class ReservationDateWindowFixTest {
     @Test
     @DisplayName("今日已结束时段（endTime<=now）：拒绝 5403「已过去的时段」")
     void create_todayPastSlot_rejected() {
-        /* 00:00~00:01 死区内无法构造 start<end<=now 的必然过去时段，其余时刻均可：
-           00:31 后用固定 00:00~00:30；00:01~00:31 用 00:00~当前分钟 */
-        LocalTime now = LocalTime.now();
-        assumeThat(now.isAfter(LocalTime.of(0, 1)))
-                .as("跨午夜死区（00:00~00:01）无法构造必过去时段，跳过").isTrue();
-        LocalTime start = LocalTime.of(0, 0);
-        LocalTime end = now.isAfter(LocalTime.of(0, 30))
-                ? LocalTime.of(0, 30)
-                : now.truncatedTo(ChronoUnit.MINUTES);
-        CreateReservationDTO dto = dto(LocalDate.now(), start, end);
-
-        assertThatThrownBy(() -> service.create(dto))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
-                        .isEqualTo(ErrorCode.RESERVATION_PAST_SLOT))
-                .hasMessageContaining("已过去的时段");
-        verify(reservationMapper, never()).insert(any(ResourceReservation.class));
+        withFixedBusinessClock(() -> {
+            CreateReservationDTO dto = dto(LocalDate.now(), LocalTime.of(0, 0), LocalTime.of(0, 30));
+            assertThatThrownBy(() -> service.create(dto))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                            .isEqualTo(ErrorCode.RESERVATION_PAST_SLOT))
+                    .hasMessageContaining("已过去的时段");
+            verify(reservationMapper, never()).insert(any(ResourceReservation.class));
+        });
     }
 
     @Test
     @DisplayName("今日未来时段（30 分钟栅格对齐）：放行")
     void create_todayFutureSlot_ok() {
-        /* 22:00 后今天已无安全的 30 分钟对齐未来栅格（跨午夜窗口不稳定），跳过 */
-        assumeThat(LocalTime.now().getHour()).as("跨午夜时段用例不稳定，22:00 后跳过")
-                .isLessThanOrEqualTo(21);
-        LocalTime start = LocalTime.now().truncatedTo(ChronoUnit.HOURS).plusHours(2);
-        LocalTime end = start.plusMinutes(30);
-        when(timeslotMapper.selectList(any()))
-                .thenReturn(List.of(template(LocalDate.now(), LocalTime.of(0, 0), LocalTime.of(23, 59))));
-        when(reservationMapper.selectCount(any())).thenReturn(0L);
-        when(reservationMapper.insert(any(ResourceReservation.class))).thenReturn(1);
+        withFixedBusinessClock(() -> {
+            LocalTime start = LocalTime.now().plusHours(2);
+            LocalTime end = start.plusMinutes(30);
+            List<ResourceTimeslot> todaySlots = List.of(template(
+                    LocalDate.now(), LocalTime.of(0, 0), LocalTime.of(23, 59)));
+            when(timeslotMapper.selectList(any())).thenReturn(todaySlots);
+            when(reservationMapper.selectCount(any())).thenReturn(0L);
+            when(reservationMapper.insert(any(ResourceReservation.class))).thenReturn(1);
+            ReservationVO vo = invokeCreate(LocalDate.now(), start, end);
+            assertThat(vo.getStatus()).isEqualTo(ReservationStatus.PENDING);
+        });
+    }
 
-        ReservationVO vo = invokeCreate(LocalDate.now(), start, end);
-
-        assertThat(vo.getStatus()).isEqualTo(ReservationStatus.PENDING);
+    /* 固定业务日和时间，消除夜间/跨午夜跳过；服务端日期与时段判断仍真实执行。 */
+    private void withFixedBusinessClock(Runnable assertions) {
+        LocalDate today = LocalDate.of(2026, 10, 10);
+        LocalTime now = LocalTime.of(10, 0);
+        try (var dates = mockStatic(LocalDate.class, CALLS_REAL_METHODS);
+             var times = mockStatic(LocalTime.class, CALLS_REAL_METHODS)) {
+            dates.when(LocalDate::now).thenReturn(today);
+            times.when(LocalTime::now).thenReturn(now);
+            assertions.run();
+        }
     }
 
     private ReservationVO invokeCreate(LocalDate date, LocalTime start, LocalTime end) {

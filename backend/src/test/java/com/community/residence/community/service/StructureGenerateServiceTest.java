@@ -229,7 +229,6 @@ class StructureGenerateServiceTest {
     void generate_persistsWholeChain() {
         StructureBatchGenerateDTO dto = houseDto(1, 1, 2, 2, 3);
         dto.setHouseNumberPrefix("A-");
-        dto.setRoomCount(3);
         dto.setDescription("批量生成");
         dto.setHouseStatus("RESERVED");
         when(buildingMapper.selectList(any())).thenReturn(List.of());
@@ -261,7 +260,6 @@ class StructureGenerateServiceTest {
                 .containsExactly(1, 1, 1, 2, 2, 2);
         assertThat(firstUnitHouses.get(0).getUnitId()).isEqualTo(100L);
         assertThat(firstUnitHouses.get(0).getArea()).isEqualByComparingTo("80.5");
-        assertThat(firstUnitHouses.get(0).getRoomCount()).isEqualTo(3);
         assertThat(firstUnitHouses.get(0).getDescription()).isEqualTo("批量生成");
         assertThat(firstUnitHouses.get(0).getStatus()).isEqualTo("RESERVED");
     }
@@ -451,4 +449,10 @@ class StructureGenerateServiceTest {
             return BatchCreateResultVO.of(items.size(), items.size(), rows);
         });
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.BuildingBoundaryService buildingBoundaryService;
+    @org.mockito.Mock
+    private com.community.residence.community.service.HouseLayoutService houseLayoutService;
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

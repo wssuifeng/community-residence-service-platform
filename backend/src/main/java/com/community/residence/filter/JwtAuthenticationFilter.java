@@ -51,12 +51,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (claims != null && !tokenBlacklistService.isBlacklisted(claims.getId())) {
             Long userId = jwtUtil.extractUserId(claims);
             String role = jwtUtil.extractRole(claims);
-            /* 用户级吊销（区分账号体系，居民与后台账号 ID 空间隔离）：
-               冻结/改密/权限变更后，存量令牌（iat 早于吊销时间）全部失效 */
-            boolean revoked = RoleConstants.RESIDENT.equals(role)
-                    ? tokenRevocationService.isResidentRevoked(userId, claims.getIssuedAt())
-                    : tokenRevocationService.isAdminUserRevoked(userId, claims.getIssuedAt());
-            if (claims.getIssuedAt() == null || !revoked) {
+            /* 新登录按DB权限代次吊销；旧令牌保留时间戳校验，两套身份空间独立。 */
+            Object revisionClaim = claims.get("permissionRevision");
+            boolean integralRevision = revisionClaim instanceof Integer || revisionClaim instanceof Long;
+            Long revision = integralRevision ? ((Number) revisionClaim).longValue() : null;
+            boolean invalidRevision = revisionClaim != null && !integralRevision;
+            boolean revoked = invalidRevision || tokenRevocationService.isTokenRevoked(userId, role, claims.getIssuedAt(), revision);
+            if (!revoked) {
                 String username = jwtUtil.extractUsername(claims);
 
                 Set<Long> communityIds = RoleConstants.ADMIN.equals(role)

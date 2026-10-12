@@ -8,7 +8,7 @@ import { createHousing, updateHousing, updateHousingStatus, getHousingDetail } f
 import { http } from '@/utils/request'
 import type { ICommunity, IBuilding, IUnit } from '@/types/modules/community'
 import type { HousingRentType, HousingStatus } from '@/types/modules/housing'
-import { housingRentTypeLabels, housingStatusLabels } from '@/types/modules/housing'
+import { housingRentTypeLabels } from '@/types/modules/housing'
 
 /**
  * 房屋与房源一体化（R62，v1.5；2026-09-20 用户反馈改版为带图卡片 + 筛选）：
@@ -20,6 +20,9 @@ import { housingRentTypeLabels, housingStatusLabels } from '@/types/modules/hous
 
 /* 契约：GET /communities/houses-manage → 分页房屋主线项（R62 v1.5，接口设计.md §9.15.3） */
 interface HousingBrief {
+  occupancy?: string
+  applicationId?: number | null
+  leaseId?: number | null
   id: number
   title: string
   status: HousingStatus
@@ -50,6 +53,8 @@ interface HouseManageItem {
 const HOUSING_PLACEHOLDER = '/housing-placeholder.png'
 
 const router = useRouter()
+const occupancyLabels: Record<string, string> = { FREE: '可申请', APPLYING: '申请待审核', TO_SIGN: '待签约', WAITING_FIRST_PAYMENT: '待首期费用', OCCUPIED: '已入住' }
+
 
 /* ===================== 筛选 + 卡片列表 ===================== */
 
@@ -602,7 +607,7 @@ async function handleBatchSubmit(): Promise<void> {
             class="cover-state"
             :data-state="item.housing ? item.housing.status : 'UNLISTED'"
           >
-            {{ item.housing ? housingStatusLabels[item.housing.status] : '未挂牌' }}
+            {{ item.housing ? `${item.housing.status === 'OFFLINE' ? '已下线' : '已发布'} / ${occupancyLabels[item.housing.occupancy ?? 'FREE'] ?? item.housing.occupancy}` : '未挂牌' }}
           </span>
           <span v-if="item.housing" class="cover-type">{{ housingRentTypeLabels[item.housing.rentType] }}</span>
         </div>
@@ -626,6 +631,10 @@ async function handleBatchSubmit(): Promise<void> {
         </div>
 
         <footer class="card-actions">
+          <el-button v-if="item.housing?.leaseId" size="small" plain
+            @click="router.push(`/admin/leases/${item.housing.leaseId}`)">查看租约</el-button>
+          <el-button v-else-if="item.housing?.applicationId" size="small" plain
+            @click="router.push({ path: '/admin/housing-lease', query: { tab: 'applications', applicationId: item.housing.applicationId } })">查看入住申请</el-button>
           <el-button
             v-permission="['ADMIN', 'SUPER_ADMIN']"
             size="small"

@@ -299,4 +299,8 @@ class HousingAvailableSlotsTest {
 
         assertThat(housingService.availableSlots(1L, monday, monday)).isEmpty();
     }
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
+    }
 }

@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 租赁协议轻量版（R64）：模板维护 + 按租约生成协议快照 + 双方在线确认留痕。
+ * 租赁协议轻量版（R64）：管理方同意并发出正文快照，居民本人确认同意，首期成功后租约才生效。
  * 边界（2026-09-21 用户裁决）：平台自建，不引入第三方电子签与 CA 证书，
  * 因此确认记录是「平台内确认留痕」而非《电子签名法》意义的可靠电子签名；
  * 协议正文以快照入库，模板与租约后续变更均不回溯改写已生成协议。
@@ -195,14 +195,11 @@ public class AgreementService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "LEASE_AGREEMENT", targetId = "#result.id", content = "'发起租约协议'")
     public LeaseAgreementVO createAgreement(CreateAgreementDTO dto) {
-        LeaseRecord lease = requireLease(dto.getLeaseId());
+        requireManager();
+        LeaseRecord lease = lockLease(dto.getLeaseId());
         SecurityUtils.checkCommunityAccess(lease.getCommunityId());
-        if ("ARCHIVED".equals(lease.getStatus())) {
-            throw new BusinessException(ErrorCode.OPERATION_FAILED, "已归档的租约不可发起协议");
-        }
-        /* R67/R66 v1.8 前置：承租确认是发起协议的必要条件（居民未确认承租则协议无对象） */
-        if (lease.getTenantConfirmAt() == null) {
-            throw new BusinessException(ErrorCode.LEASE_TENANCY_NOT_CONFIRMED);
+        if (!LeaseStatus.TO_SIGN.equals(lease.getStatus())) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "仅待签约租约可发出协议");
         }
         Long openCount = agreementMapper.selectCount(new LambdaQueryWrapper<LeaseAgreement>()
                 .eq(LeaseAgreement::getLeaseId, lease.getId())
@@ -221,6 +218,10 @@ public class AgreementService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "模板不属于该租约所在社区");
         }
 
+        if (!"ACTIVE".equals(template.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_FAILED, "协议模板已停用，请选择启用的模板");
+        }
+
         String houseLocation = houseLocation(lease);
         LeaseAgreement agreement = new LeaseAgreement();
         agreement.setLeaseId(lease.getId());
@@ -233,14 +234,17 @@ public class AgreementService {
         agreement.setContent(render(template.getContent(), lease, houseLocation));
         agreement.setTemplateFileUrl(template.getFileUrl());
         agreement.setTemplateFileName(template.getFileName());
-        agreement.setStatus("PENDING");
+        agreement.setStatus("PARTIAL");
+        agreement.setAdminId(SecurityUtils.getUserId());
+        agreement.setAdminConfirmName(resolveConfirmName());
+        agreement.setAdminConfirmTime(LocalDateTime.now());
         agreement.setTenantId(lease.getTenantId());
         agreement.setRemark(dto.getRemark());
         agreement.setCreatedBy(SecurityUtils.getUserId());
         agreementMapper.insert(agreement);
 
-        markLeaseAgreementStatus(lease, "PENDING");
-        changeLogService.logAgreement(lease.getId(), "发起协议", agreement.getTitle());
+        markLeaseAgreementStatus(lease, "PARTIAL");
+        changeLogService.logAgreement(lease.getId(), "管理方同意并发出协议", agreement.getTitle());
         notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
                 "待确认租赁协议", "您的租约（" + houseLocation + "）已生成租赁协议，请在「我的租约」中查看并确认",
                 "LEASE", "LEASE_AGREEMENT", agreement.getId());
@@ -249,103 +253,61 @@ public class AgreementService {
         return LeaseAgreementVO.from(agreement);
     }
 
-    /**
-     * 协议确认：按当前身份落到居民方或管理方，两方均确认后置为已确认并同步租约签约状态。
-     * 已确认过的一方重复确认不覆盖首次留痕（首次确认时间才具证明意义）。
-     */
+    /* 居民仅对当前协议快照确认；锁定后重读防止撤回/重发竞争，已完成重试不改首次留痕。 */
     @Transactional(rollbackFor = Exception.class)
     public LeaseAgreementVO confirm(Long id, AgreementConfirmDTO dto) {
         LeaseAgreement agreement = requireAgreement(id);
+        requireTenant(agreement);
+        LeaseRecord lease = lockLease(agreement.getLeaseId());
+        agreement = lockAgreement(id);
+        requireTenant(agreement);
+        if (!SecurityUtils.getUserId().equals(lease.getTenantId())) {
+            throw new ForbiddenException("无权确认他人租约");
+        }
+        if ("SIGNED".equals(agreement.getStatus())) {
+            return LeaseAgreementVO.from(agreement);
+        }
         if (!OPEN_STATUS.contains(agreement.getStatus())) {
-            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
-                    "当前协议状态不可确认：" + agreement.getStatus());
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "当前协议已撤回或不可确认");
         }
-        LeaseRecord lease = requireLease(agreement.getLeaseId());
-        LocalDateTime now = LocalDateTime.now();
-        String operatorName = resolveConfirmName(dto.getConfirmName());
-
-        if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
-            if (!SecurityUtils.getUserId().equals(agreement.getTenantId())) {
-                throw new ForbiddenException("无权确认他人协议");
-            }
-            if (agreement.getTenantConfirmTime() == null) {
-                agreement.setTenantConfirmTime(now);
-                agreement.setTenantConfirmName(operatorName);
-            }
-        } else {
-            SecurityUtils.checkCommunityAccess(agreement.getCommunityId());
-            if (agreement.getAdminConfirmTime() == null) {
-                agreement.setAdminConfirmTime(now);
-                agreement.setAdminConfirmName(operatorName);
-            }
-            /* DEF-078 去重：居民「同意承租」只在承约（POST /leases/{id}/tenancy-confirm）采集一次。
-               已承约的租约，管理方确认时**引用承约留痕回填居民侧确认**（时间取首次承约时间，
-               必然早于管理方确认），居民不再为同一同意二次点击；居民若想先看协议再确认，
-               自行调用确认时其 tenantConfirmTime 已被写入，此处不覆盖。 */
-            if (agreement.getTenantConfirmTime() == null && lease.getTenantConfirmAt() != null) {
-                agreement.setTenantConfirmTime(lease.getTenantConfirmAt());
-                agreement.setTenantConfirmName(tenancyConfirmName(lease));
-                log.info("协议居民侧确认引用承租确认留痕：agreementId={}, leaseId={}, 承约时间={}",
-                        id, lease.getId(), lease.getTenantConfirmAt());
-            }
+        if (agreement.getAdminConfirmTime() == null) {
+            throw new BusinessException(ErrorCode.OPERATION_FAILED, "旧协议缺少管理方同意记录，请联系管理员撤回后重新发出");
         }
+        if (!LeaseStatus.TO_SIGN.equals(lease.getStatus())) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "仅待签约租约可确认协议");
+        }
+        String operatorName = resolveConfirmName();
+        agreement.setTenantConfirmTime(LocalDateTime.now());
+        agreement.setTenantConfirmName(operatorName);
         if (StringUtils.hasText(dto.getRemark())) {
             agreement.setRemark(dto.getRemark());
         }
-
-        boolean bothConfirmed = agreement.getTenantConfirmTime() != null && agreement.getAdminConfirmTime() != null;
-        agreement.setStatus(bothConfirmed ? "SIGNED" : "PARTIAL");
+        agreement.setStatus("SIGNED");
         agreementMapper.updateById(agreement);
-        markLeaseAgreementStatus(lease, agreement.getStatus());
-        changeLogService.logAgreement(lease.getId(),
-                bothConfirmed ? "双方确认完成" : "单方确认",
+        markLeaseAgreementStatus(lease, "SIGNED");
+        changeLogService.logAgreement(lease.getId(), "居民同意协议，双方确认完成",
                 agreement.getTitle() + "（" + operatorName + "）");
-
-        /* 通知对方：居民确认后提醒管理方，管理方确认后提醒居民；
-           双方齐（SIGNED）时联动租约生效（TO_SIGN → ACTIVE + 房态翻转 + 群聊留痕） */
-        notifyCounterpart(agreement, lease, bothConfirmed);
-        if (bothConfirmed) {
-            activateLeaseOnSigned(agreement, lease);
-        }
-        log.info("协议确认：agreementId={}, status={}, operator={}", id, agreement.getStatus(), operatorName);
+        notifyCounterpart(agreement, lease);
+        conversationService.sendSystemMessage(lease.getConversationId(),
+                "租赁协议双方已确认，房屋继续保留；首期费用支付成功后租约及正式居住关系才生效。");
+        log.info("居民确认协议：agreementId={}, operator={}", id, operatorName);
         return LeaseAgreementVO.from(agreement);
-    }
-
-    /**
-     * 双方确认达成 SIGNED 时的租约生效联动（R66 v1.8）：
-     * 委托 LeaseService.applyTransition 统一流转内核完成 TO_SIGN → ACTIVE +
-     * house.status=OCCUPIED + lease_change_log(STATUS)（OCR DEF-115：消灭与状态端点
-     * 各写一份状态机判定的双实现漂移，并发由内核条件更新互斥）。
-     * 幂等：租约已 ACTIVE 时不再重复流转（重复回调/重入安全，跳过群消息）；
-     * 越界状态由内核按 STATE_TRANSITION_INVALID 拒绝（不得借签约生效）。
-     */
-    private void activateLeaseOnSigned(LeaseAgreement agreement, LeaseRecord lease) {
-        if (LeaseStatus.ACTIVE.equals(lease.getStatus())) {
-            return;
-        }
-        leaseService.applyTransition(lease, LeaseStatus.ACTIVE, "租赁协议双方确认完成，租约生效");
-
-        /* 群聊留痕：会话生命周期内（审核通过建群）以系统消息告知双方租约已生效 */
-        Long conversationId = lease.getConversationId();
-        if (conversationId == null) {
-            Conversation group = conversationMapper.selectOne(new LambdaQueryWrapper<Conversation>()
-                    .eq(Conversation::getType, ConversationType.LEASE_GROUP)
-                    .eq(Conversation::getRelatedId, lease.getId())
-                    .last("LIMIT 1"));
-            conversationId = group != null ? group.getId() : null;
-        }
-        conversationService.sendSystemMessage(conversationId,
-                "租赁协议双方已确认，租约已正式生效。");
-        log.info("协议签署联动租约生效：agreementId={}, leaseId={}, conversationId={}",
-                agreement.getId(), lease.getId(), conversationId);
     }
 
     /** 撤回协议（管理方）：仅未完成协议可撤回，租约签约状态回落为未发起 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "LEASE_AGREEMENT", targetId = "#id", content = "'撤回租约协议：' + #reason")
     public void cancel(Long id, String reason) {
+        requireManager();
+        if (!StringUtils.hasText(reason)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "撤回原因不能为空");
+        }
         LeaseAgreement agreement = requireAgreement(id);
         SecurityUtils.checkCommunityAccess(agreement.getCommunityId());
+        LeaseRecord lease = lockLease(agreement.getLeaseId());
+        agreement = lockAgreement(id);
+        SecurityUtils.checkCommunityAccess(agreement.getCommunityId());
+        if ("CANCELLED".equals(agreement.getStatus())) return;
         if (!OPEN_STATUS.contains(agreement.getStatus())) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
                     "仅待确认或单方已确认的协议可撤回，当前状态：" + agreement.getStatus());
@@ -353,7 +315,6 @@ public class AgreementService {
         agreement.setStatus("CANCELLED");
         agreement.setCancelReason(reason);
         agreementMapper.updateById(agreement);
-        LeaseRecord lease = requireLease(agreement.getLeaseId());
         markLeaseAgreementStatus(lease, "NONE");
         changeLogService.logAgreement(lease.getId(), "撤回协议", reason);
         notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
@@ -442,26 +403,13 @@ public class AgreementService {
 
     /* 协议确认通知：居民与社区绑定启用管理员均使用各自身份空间收件；
        管理方通知不能依赖页面待办刷新，否则居民先确认后管理端无法收到状态事件。 */
-    private void notifyCounterpart(LeaseAgreement agreement, LeaseRecord lease, boolean bothConfirmed) {
-        String houseLocation = houseLocation(lease);
-        if (bothConfirmed) {
-            notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
-                    "租赁协议已确认", "您的租赁协议（" + houseLocation + "）双方均已确认，可随时在「我的租约」中查看",
-                    "LEASE", "LEASE_AGREEMENT", agreement.getId());
-            notifyCommunityAdmins(lease, "租赁协议已确认",
-                    "租约 #" + lease.getId() + "（" + houseLocation + "）双方已确认，租约已正式生效",
-                    agreement.getId());
-            return;
-        }
-        if (agreement.getTenantConfirmTime() == null) {
-            notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
-                    "待确认租赁协议", "管理方已确认租赁协议（" + houseLocation + "），请及时查看并确认",
-                    "LEASE", "LEASE_AGREEMENT", agreement.getId());
-            return;
-        }
-        notifyCommunityAdmins(lease, "居民已确认租赁协议",
-                "租约 #" + lease.getId() + "（" + houseLocation + "）居民已确认协议，请管理方确认",
-                agreement.getId());
+    private void notifyCounterpart(LeaseAgreement agreement, LeaseRecord lease) {
+        String location = houseLocation(lease);
+        notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
+                "租赁协议已确认", "您的租赁协议（" + location + "）双方均已同意，房屋继续保留，首期费用支付成功后租约才生效",
+                "LEASE", "LEASE_AGREEMENT", agreement.getId());
+        notifyCommunityAdmins(lease, "租赁协议已确认",
+                "租约 #" + lease.getId() + "（" + location + "）居民已同意协议，待首期费用支付成功后正式生效", agreement.getId());
     }
 
     /* 协议事件的管理方收件人：与承租确认、到期提醒共用社区绑定管理员口径，
@@ -586,33 +534,47 @@ public class AgreementService {
         vo.setCommunityName(community != null ? community.getName() : null);
     }
 
-    /* 承约留痕的居民姓名（DEF-078 引用回填用）：resident.realName，缺失回落到账号名 */
-    private String tenancyConfirmName(LeaseRecord lease) {
-        Resident resident = residentMapper.selectById(lease.getTenantId());
-        if (resident != null && StringUtils.hasText(resident.getRealName())) {
-            return resident.getRealName();
-        }
-        return resident != null && StringUtils.hasText(resident.getUsername())
-                ? resident.getUsername() : "居民本人";
-    }
-
-    /* 确认人姓名：优先取请求值，缺省取当前账号姓名（居民取 resident.realName，系统账号取 sys_user.real_name） */
-    private String resolveConfirmName(String requested) {
-        if (StringUtils.hasText(requested)) {
-            return requested.trim();
-        }
+    /* 确认人仅取当前账号，不信任客户端代填姓名。 */
+    private String resolveConfirmName() {
         Long userId = SecurityUtils.getUserId();
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             Resident resident = residentMapper.selectById(userId);
             if (resident != null && StringUtils.hasText(resident.getRealName())) {
                 return resident.getRealName();
             }
+            return resident != null && StringUtils.hasText(resident.getUsername())
+                    ? resident.getUsername() : SecurityUtils.getUser().getUsername();
         }
         SysUser sysUser = sysUserMapper.selectById(userId);
         if (sysUser != null) {
             return StringUtils.hasText(sysUser.getRealName()) ? sysUser.getRealName() : sysUser.getUsername();
         }
         return SecurityUtils.getUser() != null ? SecurityUtils.getUser().getUsername() : "未知";
+    }
+
+    private void requireManager() {
+        if (!SecurityUtils.hasRole(RoleConstants.ADMIN) && !SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+            throw new ForbiddenException("仅管理方可同意并发出或撤回协议");
+        }
+    }
+
+    private void requireTenant(LeaseAgreement agreement) {
+        if (!SecurityUtils.hasRole(RoleConstants.RESIDENT)
+                || !SecurityUtils.getUserId().equals(agreement.getTenantId())) {
+            throw new ForbiddenException("仅协议居民本人可确认同意");
+        }
+    }
+
+    private LeaseRecord lockLease(Long id) {
+        LeaseRecord lease = leaseMapper.selectByIdForUpdate(id);
+        if (lease == null) throw new ResourceNotFoundException("租住记录不存在");
+        return lease;
+    }
+
+    private LeaseAgreement lockAgreement(Long id) {
+        LeaseAgreement agreement = agreementMapper.selectByIdForUpdate(id);
+        if (agreement == null) throw new ResourceNotFoundException("租约协议不存在");
+        return agreement;
     }
 
     private AgreementTemplate requireTemplate(Long id) {

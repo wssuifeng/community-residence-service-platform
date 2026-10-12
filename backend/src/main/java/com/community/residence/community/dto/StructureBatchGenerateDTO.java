@@ -61,7 +61,6 @@ public class StructureBatchGenerateDTO {
 
     @Schema(description = "每单元楼层数（可空，默认 0 表示不生成房屋；楼层 1..该值）")
     @Min(value = 0, message = "每单元楼层数不能为负数")
-    @Max(value = 200, message = "每单元楼层数最多 200")
     private Integer floorsPerUnit;
 
     @Schema(description = "每层房号数（可空，默认 0 表示不生成房屋；序号 1..该值）")
@@ -92,14 +91,13 @@ public class StructureBatchGenerateDTO {
     @DecimalMin(value = "0", message = "建筑面积不能为负数")
     private BigDecimal area;
 
-    @Schema(description = "房间数（可空，全部房屋统一）")
-    @Min(value = 0, message = "房间数不能为负数")
-    private Integer roomCount;
-
     @Schema(description = "房屋描述（可空，全部房屋统一）")
     @Size(max = 1000, message = "房屋描述最多 1000 字符")
     private String description;
 
     @Schema(description = "仅预览（true 时零写入，只返回预计生成清单与各类计数）")
     private Boolean dryRun;
+    @Schema(description = "本批房屋户型，如三室一厅一卫")
+    @Size(max = 50, message = "户型最多50字符")
+    private String layout;
 }

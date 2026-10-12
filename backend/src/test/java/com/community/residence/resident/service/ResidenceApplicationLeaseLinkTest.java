@@ -113,6 +113,10 @@ class ResidenceApplicationLeaseLinkTest {
 
     @BeforeEach
     void setUp() {
+        com.community.residence.housing.entity.Housing source = new com.community.residence.housing.entity.Housing();
+        source.setId(1L); source.setHouseId(HOUSE_ID); source.setCommunityId(1L); source.setStatus("AVAILABLE"); source.setRentType("RENT"); source.setMonthlyRent(new java.math.BigDecimal("2800"));
+        org.mockito.Mockito.lenient().when(housingMapper.selectByIdForUpdate(1L)).thenReturn(source);
+
         application = new ResidenceApplication();
         application.setId(APPLICATION_ID);
         application.setResidentId(RESIDENT_ID);
@@ -186,7 +190,7 @@ class ResidenceApplicationLeaseLinkTest {
         community.setDefaultLeaseMonths(12);
         when(communityService.requireCommunity(COMMUNITY_ID)).thenReturn(community);
         when(applicationMapper.selectCount(any())).thenReturn(0L);
-        when(housingMapper.selectOne(any())).thenReturn(null);
+
 
         try (MockedStatic<SecurityUtils> mocked = loginAsAdmin()) {
             mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
@@ -195,6 +199,7 @@ class ResidenceApplicationLeaseLinkTest {
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(HOUSE_ID);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
             dto.setRemark("申请");
 
@@ -229,7 +234,7 @@ class ResidenceApplicationLeaseLinkTest {
         community.setDefaultLeaseMonths(12);
         when(communityService.requireCommunity(COMMUNITY_ID)).thenReturn(community);
         when(applicationMapper.selectCount(any())).thenReturn(0L);
-        when(housingMapper.selectOne(any())).thenReturn(null);
+
 
         try (MockedStatic<SecurityUtils> mocked = loginAsAdmin()) {
             mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
@@ -238,6 +243,7 @@ class ResidenceApplicationLeaseLinkTest {
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(HOUSE_ID);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
             applicationService.create(dto);
         }
@@ -303,4 +309,6 @@ class ResidenceApplicationLeaseLinkTest {
         assertThat(application.getStatus()).isEqualTo("WITHDRAWN");
         verify(conversationService, org.mockito.Mockito.never()).closeLeaseGroup(any());
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

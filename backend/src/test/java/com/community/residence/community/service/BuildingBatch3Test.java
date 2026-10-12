@@ -332,4 +332,10 @@ class BuildingBatch3Test {
         dto.setArea(area);
         return dto;
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.BuildingBoundaryService buildingBoundaryService;
+    @org.mockito.Mock
+    private com.community.residence.community.service.HouseLayoutService houseLayoutService;
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

@@ -356,4 +356,10 @@ class HouseManageListTest {
 
         assertThat(boundSql.getSql()).isEqualTo(sql);
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
+    }
 }

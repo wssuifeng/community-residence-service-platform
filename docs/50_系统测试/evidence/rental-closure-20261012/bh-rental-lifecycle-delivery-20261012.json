@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "lifecycle",
+  "input": "D:\\code\\community-residence-service-platform\\docs\\30_系统设计\\assets\\02_核心状态机\\02_租住记录状态机.lifecycle.json",
+  "output": "D:\\code\\community-residence-service-platform\\docs\\30_系统设计\\assets\\02_核心状态机\\02_租住记录状态机图.html",
+  "specification": {
+    "sha256": "14eb24080d17209ad224ea47444ee8dc5a1d1efbe1c774ae175b96f3047348c6",
+    "bytes": 4026
+  },
+  "artifact": {
+    "sha256": "65e45ac889e55c3b138a00d723624cd4d53db38c25b67149e2fceb810af0eb43",
+    "bytes": 708893
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

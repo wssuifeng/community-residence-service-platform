@@ -133,7 +133,7 @@ const form = reactive({
   houseSuffix: '',
   skip: '',
   area: undefined as number | undefined,
-  roomCount: undefined as number | undefined,
+  layout: '',
   houseStatus: 'VACANT' as HouseStatus
 })
 
@@ -314,7 +314,7 @@ watch(visible, (value) => {
     form.houseSuffix = ''
     form.skip = ''
     form.area = undefined
-    form.roomCount = undefined
+    form.layout = ''
     form.houseStatus = 'VACANT'
   }
   formRef.value?.clearValidate()
@@ -327,7 +327,7 @@ function houseRows(unitId: number): IHouseDTO[] {
     houseNumber: row.houseNumber,
     floor: row.floor,
     area: form.area,
-    roomCount: form.roomCount,
+    layout: form.layout,
     status: form.houseStatus
   }))
 }
@@ -361,6 +361,7 @@ async function submitCreate(): Promise<void> {
   const valid = await formRef.value?.validate().catch(() => false)
   const communityId = form.communityId
   if (!valid || communityId === undefined) return
+  if (floorMismatch.value) { ElMessage.error('建房楼层不能超过该楼栋总层数，请先修改总层数或生成范围'); return }
   if (blocked.value) {
     ElMessage.error(limitWarning.value || '请先修正表单')
     return
@@ -531,7 +532,7 @@ const hiddenBuildingCount = computed(() =>
         <el-input v-model="editForm.name" placeholder="如：1号楼" maxlength="50" />
       </el-form-item>
       <el-form-item label="总层数" prop="floors">
-        <el-input-number v-model="editForm.floors" :min="1" :max="99" />
+        <el-input-number v-model="editForm.floors" :min="1" />
       </el-form-item>
       <el-form-item label="描述" prop="description">
         <el-input
@@ -591,7 +592,7 @@ const hiddenBuildingCount = computed(() =>
 
       <div class="batch-grid">
         <el-form-item label="总层数" prop="floors" label-width="88px">
-          <el-input-number v-model="form.floors" :min="1" :max="99" style="width: 100%" />
+          <el-input-number v-model="form.floors" :min="1" style="width: 100%" />
         </el-form-item>
         <el-form-item label="描述" label-width="88px">
           <el-input v-model="form.description" placeholder="选填，本批统一" maxlength="200" />
@@ -644,10 +645,10 @@ const hiddenBuildingCount = computed(() =>
         <template v-if="form.withHouses">
           <div class="batch-grid">
             <el-form-item label="楼层 起" label-width="76px">
-              <el-input-number v-model="form.floorStart" :min="1" :max="99" style="width: 100%" />
+              <el-input-number v-model="form.floorStart" :min="1" :max="form.floors" style="width: 100%" />
             </el-form-item>
             <el-form-item label="楼层 止" label-width="76px">
-              <el-input-number v-model="form.floorEnd" :min="1" :max="99" style="width: 100%" />
+              <el-input-number v-model="form.floorEnd" :min="1" :max="form.floors" style="width: 100%" />
             </el-form-item>
           </div>
           <div class="batch-grid">
@@ -680,9 +681,7 @@ const hiddenBuildingCount = computed(() =>
                 style="width: 100%"
               />
             </el-form-item>
-            <el-form-item label="房间数" label-width="88px">
-              <el-input-number v-model="form.roomCount" :min="1" :max="20" style="width: 100%" />
-            </el-form-item>
+            <el-form-item label="户型" label-width="88px"><el-input v-model="form.layout" placeholder="如：三室一厅一卫" maxlength="50" /></el-form-item>
           </div>
           <el-form-item label="初始状态">
             <el-select v-model="form.houseStatus" style="width: 100%">
@@ -738,7 +737,7 @@ const hiddenBuildingCount = computed(() =>
         </template>
       </p>
       <p v-if="floorMismatch" class="batch-preview-note is-warning">
-        房屋最高到 {{ form.floorEnd }} 层，而楼栋总层数为 {{ form.floors }}：建议先把总层数改到 {{ form.floorEnd }}，避免楼栋层数据与房屋互相矛盾。
+        房屋最高到 {{ form.floorEnd }} 层，而楼栋总层数为 {{ form.floors }}：必须先把总层数改到 {{ form.floorEnd }}，避免楼栋层数据与房屋互相矛盾。
       </p>
       <p v-if="duplicateNames.length > 0" class="batch-preview-note is-warning">
         该社区已存在同名楼栋：{{ duplicateNames.join('、') }}（后端不做楼栋重名校验，继续创建会得到同名楼栋）。

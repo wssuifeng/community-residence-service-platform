@@ -111,4 +111,6 @@ class CommunityServiceTest {
         assertThatThrownBy(() -> communityService.update(1L, dto))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

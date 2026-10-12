@@ -26,6 +26,9 @@ public class CommunityVO {
     @Schema(description = "联系人")
     private String contactPerson;
 
+    @Schema(description = "社区责任人系统账号ID")
+    private Long responsibleAdminId;
+
     @Schema(description = "社区简介")
     private String description;
 
@@ -47,6 +50,7 @@ public class CommunityVO {
     public static CommunityVO from(Community entity) {
         CommunityVO vo = new CommunityVO();
         vo.setId(entity.getId());
+        vo.setResponsibleAdminId(entity.getResponsibleAdminId());
         vo.setName(entity.getName());
         vo.setAddress(entity.getAddress());
         vo.setContactPhone(entity.getContactPhone());

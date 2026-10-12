@@ -58,6 +58,10 @@ class LeaseStateMachineFixTest {
     @Mock
     private com.community.residence.auth.mapper.SysAdminCommunityMapper sysAdminCommunityMapper;
 
+    @Mock private com.community.residence.payment.mapper.LeasePaymentMapper paymentMapper;
+    @Mock private com.community.residence.resident.mapper.ResidenceRelationMapper relationMapper;
+    @Mock private com.community.residence.agreement.mapper.LeaseAgreementMapper agreementMapper;
+    @Mock private com.community.residence.conversation.service.ConversationService conversationService;
     @InjectMocks
     private LeaseService leaseService;
 
@@ -65,6 +69,12 @@ class LeaseStateMachineFixTest {
 
     @BeforeEach
     void setUp() {
+        for (Class<?> entity : new Class<?>[]{com.community.residence.resident.entity.ResidenceRelation.class, com.community.residence.payment.entity.LeasePayment.class}) {
+            com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""), entity);
+        }
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""), com.community.residence.agreement.entity.LeaseAgreement.class);
+        org.mockito.Mockito.lenient().when(paymentMapper.selectCount(org.mockito.ArgumentMatchers.any())).thenReturn(1L);
+
         activeLease = new LeaseRecord();
         activeLease.setId(1L);
         activeLease.setTenantId(1L);
@@ -83,6 +93,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
             dto.setStatus("ARCHIVED");
@@ -99,6 +110,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
             when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
@@ -135,6 +147,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(2L)).thenReturn(pendingLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(2L)).thenReturn(pendingLease);
             when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
             when(houseMapper.selectById(5L)).thenReturn(house);
             when(houseMapper.updateById(any(com.community.residence.community.entity.House.class)))
@@ -147,8 +160,8 @@ class LeaseStateMachineFixTest {
             /* 到待签约为止房态保持空置（R66 v1.8：审核通过不置已入住） */
             assertThat(house.getStatus()).isEqualTo("VACANT");
 
-            dto.setStatus("ACTIVE");
-            leaseService.updateStatus(2L, dto);
+            pendingLease.setAgreementStatus("SIGNED");
+            leaseService.applyTransition(pendingLease, "ACTIVE", "居民已同意具体协议");
             assertThat(pendingLease.getStatus()).isEqualTo("ACTIVE");
             assertThat(house.getStatus()).isEqualTo("OCCUPIED");
             verify(houseMapper).updateById(any(com.community.residence.community.entity.House.class));
@@ -162,6 +175,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
             when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
@@ -180,6 +194,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
 
             assertThatThrownBy(() -> leaseService.update(1L, dto()))
                     .isInstanceOf(BusinessException.class)
@@ -194,6 +209,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(1L)).thenReturn(activeLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
             when(leaseMapper.updateById(any(LeaseRecord.class))).thenReturn(1);
             /* toVO 内部依赖：房屋名等（宽松桩） */
             when(houseMapper.selectById(1L)).thenReturn(null);
@@ -217,6 +233,7 @@ class LeaseStateMachineFixTest {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             when(leaseMapper.selectById(3L)).thenReturn(pendingLease);
+            org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(3L)).thenReturn(pendingLease);
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
             dto.setStatus("ACTIVE");
@@ -229,7 +246,7 @@ class LeaseStateMachineFixTest {
     }
 
     @Test
-    @DisplayName("OCR DEF-115：并发同目标流转条件更新 0 行 + 已为目标状态 → 幂等返回不重复留痕")
+    @DisplayName("OCR DEF-115：房屋锁后重读已为目标状态 → 幂等返回不重复留痕")
     void applyTransition_concurrentSameTarget_idempotentNoRepeatLog() {
         LeaseRecord toSignLease = new LeaseRecord();
         toSignLease.setId(4L);
@@ -237,13 +254,13 @@ class LeaseStateMachineFixTest {
         toSignLease.setCommunityId(1L);
         toSignLease.setHouseId(5L);
         toSignLease.setStatus("TO_SIGN");
+        toSignLease.setAgreementStatus("SIGNED");
 
-        /* 条件更新返回 0 行（并发赢家已完成流转），重读已是 ACTIVE → 幂等返回 */
+        /* 房屋锁后重读已是 ACTIVE（并发赢家已完成流转） → 幂等返回 */
         LeaseRecord winner = new LeaseRecord();
         winner.setId(4L);
         winner.setStatus("ACTIVE");
-        when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(0);
-        when(leaseMapper.selectById(4L)).thenReturn(winner);
+        when(leaseMapper.selectByIdForUpdate(4L)).thenReturn(winner);
 
         leaseService.applyTransition(toSignLease, "ACTIVE", "测试");
 
@@ -253,7 +270,7 @@ class LeaseStateMachineFixTest {
     }
 
     @Test
-    @DisplayName("OCR DEF-115：条件更新 0 行且状态漂移（非目标状态）→ STATE_TRANSITION_INVALID")
+    @DisplayName("OCR DEF-115：房屋锁后重读状态漂移（非目标状态）→ STATE_TRANSITION_INVALID")
     void applyTransition_concurrentDrift_rejected() {
         LeaseRecord toSignLease = new LeaseRecord();
         toSignLease.setId(4L);
@@ -261,13 +278,13 @@ class LeaseStateMachineFixTest {
         toSignLease.setCommunityId(1L);
         toSignLease.setHouseId(5L);
         toSignLease.setStatus("TO_SIGN");
+        toSignLease.setAgreementStatus("SIGNED");
 
-        /* 0 行且重读为 REJECTED（并发被驳回）→ 按并发状态冲突拒绝 */
+        /* 房屋锁后重读为 REJECTED（并发被驳回）→ 按并发状态冲突拒绝 */
         LeaseRecord drifted = new LeaseRecord();
         drifted.setId(4L);
         drifted.setStatus("REJECTED");
-        when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(0);
-        when(leaseMapper.selectById(4L)).thenReturn(drifted);
+        when(leaseMapper.selectByIdForUpdate(4L)).thenReturn(drifted);
 
         assertThatThrownBy(() -> leaseService.applyTransition(toSignLease, "ACTIVE", "测试"))
                 .isInstanceOf(BusinessException.class)

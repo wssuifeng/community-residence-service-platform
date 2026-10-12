@@ -52,7 +52,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("承约门槛：本人 + 待签约（看房/群聊非门槛）")
-class LeaseTenancyConfirmGateTest {
+class LeaseAgreementActivationGateTest {
 
     private static final Long LEASE_ID = 9L;
     private static final Long RESIDENT_ID = 1L;
@@ -111,83 +111,24 @@ class LeaseTenancyConfirmGateTest {
         return mocked;
     }
 
-    @Test
-    @DisplayName("①无看房预约 + 无租约群聊 → 承约成功（不再抛 5607/5608）")
-    void tenancyConfirm_withoutViewingAndConversation_succeeds() {
-        try (MockedStatic<SecurityUtils> mocked = loginAsResident(RESIDENT_ID)) {
-            LeaseVO vo = leaseService.tenancyConfirm(LEASE_ID);
-
-            assertThat(vo.getTenantConfirmAt()).isNotNull();
-            assertThat(vo.getTenantConfirmBy()).isEqualTo(RESIDENT_ID);
-            /* 承约不改变租约状态（生效仍由协议双方确认触发，R66 v1.8） */
+    @Test void administratorCannotActivateWithoutResidentAgreement() {
+        when(leaseMapper.selectByIdForUpdate(LEASE_ID)).thenReturn(toSignLease);
+        var dto = new com.community.residence.lease.dto.UpdateLeaseStatusDTO(); dto.setStatus("ACTIVE");
+        try (var auth = mockStatic(SecurityUtils.class)) {
+            assertThatThrownBy(() -> leaseService.updateStatus(LEASE_ID, dto))
+                    .isInstanceOf(BusinessException.class).hasMessageContaining("首期");
             assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
-            verify(leaseMapper).updateById(toSignLease);
-            verify(changeLogService).logAgreement(eq(LEASE_ID), eq("居民确认承租"), anyString());
-            verify(notificationService).createForUser(eq(ADMIN_ID), eq(1L), eq("居民已确认承租"),
-                    anyString(), eq("LEASE"), eq("LEASE_TENANCY"), eq(LEASE_ID));
         }
     }
 
-    @Test
-    @DisplayName("②管理端已确认（TO_SIGN）+ 居民确认 → 承约留痕写入（正向门槛）")
-    void tenancyConfirm_adminApprovedThenResident_succeeds() {
-        try (MockedStatic<SecurityUtils> mocked = loginAsResident(RESIDENT_ID)) {
-            LeaseVO vo = leaseService.tenancyConfirm(LEASE_ID);
-            assertThat(vo.getTenantConfirmAt()).isNotNull();
-            assertThat(vo.getStatus()).isEqualTo("TO_SIGN");
-        }
+    @Test void transitionKernelRejectsUnsignedAgreement() {
+        assertThatThrownBy(() -> leaseService.applyTransition(toSignLease, "ACTIVE", "绕过协议"))
+                .isInstanceOf(BusinessException.class);
+        assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
     }
 
-    @Test
-    @DisplayName("③幂等：重复承约不覆盖首次留痕、不重复通知")
-    void tenancyConfirm_repeat_keepsFirstTrace() {
-        LocalDateTime first = LocalDateTime.now().minusDays(2);
-        toSignLease.setTenantConfirmAt(first);
-        toSignLease.setTenantConfirmBy(RESIDENT_ID);
-
-        try (MockedStatic<SecurityUtils> mocked = loginAsResident(RESIDENT_ID)) {
-            LeaseVO vo = leaseService.tenancyConfirm(LEASE_ID);
-
-            assertThat(vo.getTenantConfirmAt()).isEqualTo(first);
-            verify(leaseMapper, never()).updateById(any(LeaseRecord.class));
-            verify(notificationService, never()).createForUser(anyLong(), anyLong(), anyString(),
-                    anyString(), anyString(), anyString(), anyLong());
-        }
-    }
-
-    @Test
-    @DisplayName("④越权：非本人承约 → 403（门槛之一仍生效）")
-    void tenancyConfirm_othersLease_forbidden() {
-        try (MockedStatic<SecurityUtils> mocked = loginAsResident(999L)) {
-            assertThatThrownBy(() -> leaseService.tenancyConfirm(LEASE_ID))
-                    .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("无权对他人租约确认承租");
-        }
-    }
-
-    @Test
-    @DisplayName("⑤状态门禁：非待签约 → 5602 LEASE_STATUS_INVALID（门槛之二仍生效）")
-    void tenancyConfirm_nonToSign_rejected() {
-        toSignLease.setStatus("ACTIVE");
-
-        try (MockedStatic<SecurityUtils> mocked = loginAsResident(RESIDENT_ID)) {
-            assertThatThrownBy(() -> leaseService.tenancyConfirm(LEASE_ID))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
-                            .isEqualTo(ErrorCode.LEASE_STATUS_INVALID));
-        }
-    }
-
-    @Test
-    @DisplayName("⑥已到期/已驳回等其它状态同样按状态机拒绝，且不写留痕")
-    void tenancyConfirm_rejectedStatus_noTrace() {
-        toSignLease.setStatus("REJECTED");
-
-        try (MockedStatic<SecurityUtils> mocked = loginAsResident(RESIDENT_ID)) {
-            assertThatThrownBy(() -> leaseService.tenancyConfirm(LEASE_ID))
-                    .isInstanceOf(BusinessException.class);
-            assertThat(toSignLease.getTenantConfirmAt()).isNull();
-            verify(leaseMapper, never()).updateById(any(LeaseRecord.class));
-        }
+    @Test void removedTenancyRouteIsNotExposed() {
+        assertThat(java.util.Arrays.stream(com.community.residence.lease.controller.LeaseController.class.getDeclaredMethods())
+                .map(java.lang.reflect.Method::getName)).doesNotContain("tenancyConfirm");
     }
 }

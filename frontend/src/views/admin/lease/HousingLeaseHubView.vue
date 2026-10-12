@@ -39,7 +39,7 @@ type HubTab = 'applications' | 'leases' | 'housings' | 'moveout' | 'agreements'
 /** Tab 顺序即业务流顺序：申请审核 → 租约 → 房屋房源 → 退租 → 协议模板 */
 const TAB_ITEMS: Array<{ value: HubTab; label: string; desc: string; roles?: string[] }> = [
   { value: 'applications', label: '入住申请', desc: '入住申请审核 · 通过后落待签约租约并建群聊' },
-  { value: 'leases', label: '租约管理', desc: '租约台账 · 承租确认 · 续退租 · 变更历史' },
+  { value: 'leases', label: '租约管理', desc: '租约台账 · 协议确认 · 首期生效 · 续退租' },
   { value: 'housings', label: '房源管理', desc: '房屋与房源一体化 · 挂牌上下架 · 看房预约' },
   { value: 'moveout', label: '退租申请', desc: '居民自助退租申请审核（R70）' },
   { value: 'agreements', label: '协议模板', desc: '租赁协议模板与附件备案（R64）', roles: ['SUPER_ADMIN', 'ADMIN'] }

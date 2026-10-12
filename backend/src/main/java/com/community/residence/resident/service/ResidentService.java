@@ -24,6 +24,14 @@ import com.community.residence.resident.vo.AdminCreateResidentVO;
 import com.community.residence.resident.vo.ResidentImportVO;
 import com.community.residence.resident.vo.ResidentVO;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Validator;
+import com.community.residence.community.mapper.HouseMapper;
+import com.community.residence.community.service.CommunityService;
+import com.community.residence.resident.dto.AdminCreateRelationDTO;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
+import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,6 +64,11 @@ public class ResidentService {
     private final TokenRevocationService tokenRevocationService;
     private final SysConfigService sysConfigService;
     private final SysOperationLogMapper sysOperationLogMapper;
+    private final HouseMapper houseMapper;
+    private final CommunityService communityService;
+    private final ResidenceRelationService residenceRelationService;
+    private final PlatformTransactionManager transactionManager;
+    private final Validator validator;
 
     /** 居民自助注册：受 registration.enabled 配置控制；用户名/手机号唯一 */
     @Transactional(rollbackFor = Exception.class)
@@ -162,61 +175,34 @@ public class ResidentService {
                 id, dto.getStatus(), dto.getReason(), SecurityUtils.getUserId());
     }
 
-    /**
-     * 管理员代建居民（R8 v1.2）：初始密码服务端生成（手机号后 6 位），
-     * 明文仅本次返回；resident 无 community_id 列，社区经数据级权限锚点
-     * （绑定社区校验）确认管理范围；操作写 sys_operation_log。
-     */
+    /* 代建明确区分仅账号和账号+关系；整个请求事务内保存，不自动建立或签署租约。 */
     @Transactional(rollbackFor = Exception.class)
     public AdminCreateResidentVO adminCreate(AdminCreateResidentDTO dto) {
-        SecurityUtils.checkCommunityAccess(dto.getCommunityId());
-        String username = StringUtils.hasText(dto.getUsername())
-                ? dto.getUsername() : "r" + dto.getPhone();
-        String initialPassword = dto.getPhone().substring(5);
-        AdminCreateResidentVO vo = createResidentAccount(username, dto.getRealName(),
-                dto.getPhone(), dto.getIdCard(), initialPassword, null);
-        logOperation("CREATE", vo.getResidentId(), dto.getCommunityId(),
-                "{\"realName\":\"" + dto.getRealName() + "\",\"source\":\"ADMIN_CREATE\"}");
-        log.info("管理员代建居民：residentId={}, username={}, operator={}",
-                vo.getResidentId(), username, SecurityUtils.getUserId());
-        return vo;
+        return provisionResident(dto, "ADMIN_CREATE");
     }
 
-    /**
-     * CSV 批量导入（R8 v1.2 扩展）：UTF-8，首行表头（社区ID,姓名,手机号,证件号）；
-     * 部分成功语义——逐行独立事务（经 self 代理避免同类内调用 @Transactional 失效，
-     * 此处改为行级 try-catch + 手动回退：插入失败即该行失败，不影响已成功行）；
-     * CSV 解析自实现（处理逗号/引号转义），不引入 EasyExcel（AGENTS 排除先例）。
-     */
+    /* 导入每行独立REQUIRES_NEW事务，成功结果必须在提交后收集；失败行不会留下账号或关系。 */
     public ResidentImportVO importCsv(InputStream in) {
         List<String[]> rows = parseCsv(in);
         ResidentImportVO result = new ResidentImportVO();
         List<ResidentImportVO.SuccessRow> successRows = new ArrayList<>();
         List<ResidentImportVO.FailRow> failRows = new ArrayList<>();
+        TransactionTemplate transaction = new TransactionTemplate(transactionManager);
+        transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
         for (int i = 0; i < rows.size(); i++) {
             int rowNo = i + 1;
-            String[] cols = rows.get(i);
             try {
-                if (cols.length < 3) {
-                    throw new IllegalArgumentException("列数不足（需至少 社区ID,姓名,手机号）");
-                }
-                Long communityId = Long.parseLong(cols[0].trim());
-                String realName = cols[1].trim();
-                String phone = cols[2].trim();
-                String idCard = cols.length > 3 ? cols[3].trim() : null;
-                if (!phone.matches("^1[3-9]\\d{9}$")) {
-                    throw new IllegalArgumentException("手机号格式不正确");
-                }
-                SecurityUtils.checkCommunityAccess(communityId);
-                AdminCreateResidentVO created = createResidentAccount(
-                        "r" + phone, realName, phone, idCard, phone.substring(5), communityId);
-                successRows.add(ResidentImportVO.SuccessRow.of(
-                        rowNo, created.getUsername(), created.getInitialPassword()));
-                logOperation("CREATE", created.getResidentId(), communityId,
-                        "{\"realName\":\"" + realName + "\",\"source\":\"CSV_IMPORT\"}");
-            } catch (Exception e) {
-                String reason = e instanceof BusinessException be
-                        ? be.getMessage() : e.getMessage();
+                AdminCreateResidentDTO dto = parseResidentRow(rows.get(i));
+                AdminCreateResidentVO created = transaction.execute(status -> provisionResident(dto, "CSV_IMPORT"));
+                ResidentImportVO.SuccessRow row = ResidentImportVO.SuccessRow.of(rowNo,
+                        created.getUsername(), created.getInitialPassword());
+                row.setResidentId(created.getResidentId());
+                row.setRelationId(created.getRelationId());
+                row.setHouseId(created.getHouseId());
+                successRows.add(row);
+            } catch (Exception exception) {
+                String reason = exception instanceof BusinessException ? exception.getMessage()
+                        : exception instanceof IllegalArgumentException ? exception.getMessage() : "本行保存失败，请核对数据或联系管理员";
                 failRows.add(ResidentImportVO.FailRow.of(rowNo, reason));
             }
         }
@@ -230,21 +216,93 @@ public class ResidentService {
         return result;
     }
 
-    /* 账号创建公共路径：唯一性校验 + 落库，返回代建结果 */
-    private AdminCreateResidentVO createResidentAccount(String username, String realName,
-                                                        String phone, String idCard,
-                                                        String initialPassword, Long communityId) {
+    private AdminCreateResidentDTO parseResidentRow(String[] columns) {
+        if (columns.length < 3 || columns.length > 10) {
+            throw new IllegalArgumentException("列数不符（需社区ID,姓名,手机号及可选关系字段，最多10列）");
+        }
+        AdminCreateResidentDTO dto = new AdminCreateResidentDTO();
+        dto.setCommunityId(Long.parseLong(columns[0].trim()));
+        dto.setRealName(columns[1].trim());
+        dto.setPhone(columns[2].trim());
+        dto.setIdCard(optionalColumn(columns, 3));
+        dto.setUsername(optionalColumn(columns, 4));
+        dto.setEmail(optionalColumn(columns, 5));
+        String houseId = optionalColumn(columns, 6);
+        dto.setHouseId(houseId == null ? null : Long.parseLong(houseId));
+        dto.setRelationType(optionalColumn(columns, 7));
+        String moveIn = optionalColumn(columns, 8);
+        try {
+            dto.setMoveInDate(moveIn == null ? null : LocalDate.parse(moveIn));
+        } catch (java.time.format.DateTimeParseException exception) {
+            throw new IllegalArgumentException("入住日期须为YYYY-MM-DD");
+        }
+        dto.setRemark(optionalColumn(columns, 9));
+        return dto;
+    }
+
+    private String optionalColumn(String[] columns, int index) {
+        return columns.length > index && StringUtils.hasText(columns[index]) ? columns[index].trim() : null;
+    }
+
+    /* 单建与每行CSV共用DTO校验、权限/房屋归属及持久化；审计不记录密码和证件原文。 */
+    private AdminCreateResidentVO provisionResident(AdminCreateResidentDTO dto, String source) {
+        var violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            String message = violations.stream().map(jakarta.validation.ConstraintViolation::getMessage)
+                    .sorted().collect(java.util.stream.Collectors.joining("；"));
+            throw new BusinessException(ErrorCode.INVALID_PARAM, message);
+        }
+        SecurityUtils.checkCommunityAccess(dto.getCommunityId());
+        communityService.requireCommunity(dto.getCommunityId());
+        if (dto.getHouseId() == null) {
+            if (dto.getRelationType() != null || dto.getMoveInDate() != null || StringUtils.hasText(dto.getRemark())) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期");
+            }
+        } else {
+            if (!StringUtils.hasText(dto.getRelationType()) || dto.getMoveInDate() == null) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "登记居住关系须同时填写房屋、关系类型和入住日期");
+            }
+            var house = houseMapper.selectByIdForUpdate(dto.getHouseId());
+            if (house == null) {
+                throw new ResourceNotFoundException("房屋不存在或无权访问");
+            }
+            SecurityUtils.checkCommunityAccess(house.getCommunityId());
+            if (!house.getCommunityId().equals(dto.getCommunityId())) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "所选房屋不属于所选社区");
+            }
+        }
+        String username = StringUtils.hasText(dto.getUsername()) ? dto.getUsername().trim() : "r" + dto.getPhone();
         checkUsernameUnique(username);
-        checkPhoneUnique(phone, null);
+        checkPhoneUnique(dto.getPhone(), null);
+        String initialPassword = dto.getPhone().substring(5);
         Resident resident = new Resident();
         resident.setUsername(username);
         resident.setPasswordHash(passwordEncoder.encode(initialPassword));
-        resident.setRealName(realName);
-        resident.setPhone(phone);
-        resident.setIdCard(idCard);
+        resident.setRealName(dto.getRealName().trim());
+        resident.setPhone(dto.getPhone());
+        resident.setIdCard(dto.getIdCard());
+        resident.setEmail(dto.getEmail());
         resident.setStatus(CommonStatus.ACTIVE);
-        residentMapper.insert(resident);
-        return AdminCreateResidentVO.of(resident.getId(), username, initialPassword);
+        try {
+            residentMapper.insert(resident);
+        } catch (org.springframework.dao.DuplicateKeyException exception) {
+            throw new BusinessException(ErrorCode.DATA_EXISTS, "用户名或手机号已存在");
+        }
+        AdminCreateResidentVO result = AdminCreateResidentVO.of(resident.getId(), username, initialPassword);
+        if (dto.getHouseId() != null) {
+            AdminCreateRelationDTO relation = new AdminCreateRelationDTO();
+            relation.setResidentId(resident.getId());
+            relation.setHouseId(dto.getHouseId());
+            relation.setRelationType(dto.getRelationType());
+            relation.setMoveInDate(dto.getMoveInDate());
+            relation.setRemark(dto.getRemark());
+            var saved = residenceRelationService.adminCreate(relation);
+            result.setRelationId(saved.getId());
+            result.setHouseId(dto.getHouseId());
+        }
+        logOperation("CREATE", resident.getId(), dto.getCommunityId(),
+                "{\"source\":\"" + source + "\",\"relationId\":" + result.getRelationId() + ",\"houseId\":" + result.getHouseId() + "}");
+        return result;
     }
 
     private void logOperation(String operationType, Long targetId, Long communityId, String content) {
@@ -262,6 +320,7 @@ public class ResidentService {
 
     /* 轻量 CSV 解析：支持双引号包裹与引号内转义（"" 表示字面引号，逗号不分割） */
     private List<String[]> parseCsv(InputStream in) {
+        if (in == null) throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV文件不能为空");
         List<String[]> rows = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(in, StandardCharsets.UTF_8))) {
@@ -269,7 +328,11 @@ public class ResidentService {
             boolean first = true;
             while (line != null) {
                 if (first) {
-                    /* 首行为表头，跳过 */
+                    String header = line.replace("\uFEFF", "").trim();
+                    if (!header.equals("社区ID,姓名,手机号,证件号")
+                            && !header.equals("社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注")) {
+                        throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV表头不符，请下载当前导入模板");
+                    }
                     first = false;
                 } else if (!line.isBlank()) {
                     rows.add(splitCsvLine(line));

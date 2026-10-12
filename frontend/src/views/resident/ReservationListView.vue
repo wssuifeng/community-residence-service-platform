@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import { listReservations, cancelReservation } from '@/api/reservation'
+import { getResource } from '@/api/community'
 import { listViewingAppointments } from '@/api/housing'
 import type { IResourceReservation, ReservationStatus } from '@/types/modules/reservation'
 import { reservationStatusLabels } from '@/types/modules/reservation'
@@ -226,11 +227,34 @@ async function loadList(): Promise<void> {
       return true
     })
     total.value = result.total
+    /* 资源首图按当前页分组回捞（预约单不携带图片，见下方 loadResourceCovers） */
+    await loadResourceCovers()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载预约列表失败')
   } finally {
     loading.value = false
   }
+}
+
+/* ---------- 资源首图（预约单不携带图片：按资源 ID 回捞，契约见 public_resource.images） ---------- */
+
+/** 资源 ID → 首图；无图/回捞失败不落键，卡片回退资源类型图标占位 */
+const resourceCovers = ref<Map<number, string>>(new Map())
+
+async function loadResourceCovers(): Promise<void> {
+  const ids = [...new Set(records.value.map((row) => row.resourceId))]
+  const covers = new Map<number, string>()
+  await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const cover = (await getResource(id)).images?.[0]
+        if (cover) covers.set(id, cover)
+      } catch {
+        /* 资源已删除/不可见：保持类型图标占位，不阻塞预约列表 */
+      }
+    })
+  )
+  resourceCovers.value = covers
 }
 
 /** 时段文案：9月10日 18:00-19:00（startTime/endTime 可能带秒） */
@@ -473,9 +497,14 @@ onMounted(() => {
 
           <!-- 分组卡：单资源一卡，时段为行（同资源多时段合并，避免重复展示资源信息） -->
           <article v-for="group in groupedReservations" v-else :key="group.resourceId" class="reservation-card">
-            <!-- 资源无图片字段：用资源类型 SVG 占位块（每资源一次） -->
+            <!-- 资源首图（有图显示图片，无图回退资源类型 SVG 占位块；每资源一次） -->
             <span class="resource-thumb">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <img
+                v-if="resourceCovers.get(group.resourceId)"
+                :src="resourceCovers.get(group.resourceId)"
+                :alt="group.resourceName"
+              />
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" />
                 <path d="M3 9h18M8 4v5" />
                 <path d="M8 14h4M8 17h6" />
@@ -846,6 +875,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+}
+
+.resource-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .resource-thumb svg {

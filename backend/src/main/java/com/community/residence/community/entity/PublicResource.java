@@ -1,5 +1,7 @@
 package com.community.residence.community.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
@@ -39,6 +41,10 @@ public class PublicResource {
 
     @Schema(description = "资源描述")
     private String description;
+
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
+    @Schema(description = "展示图片地址（逗号分隔，空列表保存为NULL并清空原引用）")
+    private String images;
 
     @Schema(description = "软删除标记：0-未删除, 1-已删除")
     @TableLogic

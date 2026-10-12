@@ -19,6 +19,9 @@ public class ResidenceRelation {
     @Schema(description = "关系ID")
     private Long id;
 
+    @Schema(description = "正式租客关系对应租约ID；历史/手工关系为空，不弱关联猜测")
+    private Long leaseId;
+
     @Schema(description = "居民ID")
     private Long residentId;
 

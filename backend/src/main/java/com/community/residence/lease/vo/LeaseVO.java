@@ -58,12 +58,6 @@ public class LeaseVO {
     @Schema(description = "协议签约状态：NONE-未发起, PENDING-待确认, PARTIAL-单方已确认, SIGNED-双方已确认, CANCELLED-已撤回")
     private String agreementStatus;
 
-    @Schema(description = "承租确认时间（R67，为空表示居民尚未确认承租，管理端不可发起协议）")
-    private LocalDateTime tenantConfirmAt;
-
-    @Schema(description = "承租确认人居民ID（R67）")
-    private Long tenantConfirmBy;
-
     @Schema(description = "租约群聊ID（R68，为空表示尚未建群）")
     private Long conversationId;
 
@@ -89,8 +83,6 @@ public class LeaseVO {
         vo.setDepositStatus(entity.getDepositStatus());
         vo.setStatus(entity.getStatus());
         vo.setAgreementStatus(entity.getAgreementStatus());
-        vo.setTenantConfirmAt(entity.getTenantConfirmAt());
-        vo.setTenantConfirmBy(entity.getTenantConfirmBy());
         vo.setConversationId(entity.getConversationId());
         vo.setContractUrl(entity.getContractUrl());
         vo.setRemark(entity.getRemark());

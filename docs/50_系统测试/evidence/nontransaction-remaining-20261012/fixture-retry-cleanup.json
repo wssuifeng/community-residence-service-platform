@@ -1,0 +1,19 @@
+{
+  "reason": "公共已发布公告需先撤回再删除，修正测试夹具清理，不是应用缺陷",
+  "users": [
+    132,
+    133,
+    134,
+    135
+  ],
+  "residents": [
+    121,
+    122,
+    123
+  ],
+  "notice": 18,
+  "payments": "0",
+  "refunds": "0",
+  "remainingUsers": "0",
+  "remainingResidents": "0"
+}

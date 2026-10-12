@@ -77,6 +77,7 @@ class FirstPaymentDepositStatusTest {
         when(paymentProperties.getNotifyUrl()).thenReturn(null);
         paymentService = new PaymentService(paymentMapper, leaseMapper, sysAdminCommunityMapper,
                 notificationService, paymentProperties, alipayChannelClient, wechatChannelClient);
+        SettlementTestInfrastructure.install(paymentService, paymentMapper, leaseMapper);
 
         lease = new LeaseRecord();
         lease.setId(LEASE_ID);

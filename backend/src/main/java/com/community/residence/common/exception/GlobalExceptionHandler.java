@@ -12,19 +12,27 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.sql.SQLTimeoutException;
 import java.util.UUID;
 
 /**
- * 全局异常处理（架构设计.md §9.2 / 接口设计.md §3.1 的映射实现）。
+ * 全局异常处理（架构设计.md §9.2 / 接口设计.md §3.1 §3.3 的映射实现）。
  * 业务异常返回 HTTP 200 + 5xxx；HTTP 层异常返回对应状态码；
  * 5xx 不向前端暴露堆栈，仅返回 traceId 供排查。
+ *
+ * 标准错误码规范落地（2026-09-23，DEF-099）：框架级请求错误
+ * （方法不支持 / 媒体类型不支持 / 请求体不可读 / 路由不存在）一律按
+ * **语义正确的 HTTP 状态码**（405 / 415 / 400 / 404）返回统一 ApiResponse，
+ * 禁止落入 500 兜底。安全行为不回退：`@PreAuthorize` 拒绝仍为 403、认证失败仍为 401。
  */
 @Slf4j
 @RestControllerAdvice
@@ -107,14 +115,47 @@ public class GlobalExceptionHandler {
         return badRequest(message);
     }
 
+    /* ---- 框架级请求错误（DEF-099）：按语义 HTTP 状态码返回统一 ApiResponse ----
+       这些异常发生在进入业务代码之前，原实现落入 500 兜底 ⇒ 错误语义丢失、排障困难。
+       标准（接口设计.md §3.3）：405 / 415 / 400 / 404 保持 HTTP 语义正确。 */
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
+        log.warn("请求方法不支持：uri={}, method={}, supported={}",
+                request.getRequestURI(), e.getMethod(), e.getSupportedHttpMethods());
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiResponse.error(ErrorCode.REQUEST_METHOD_NOT_ALLOWED));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMediaTypeNotSupported(
+            HttpMediaTypeNotSupportedException e, HttpServletRequest request) {
+        log.warn("请求内容类型不支持：uri={}, contentType={}, supported={}",
+                request.getRequestURI(), e.getContentType(), e.getSupportedMediaTypes());
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(ApiResponse.error(ErrorCode.REQUEST_MEDIA_TYPE_UNSUPPORTED));
+    }
+
+    /* ---- 404：无对应处理器（未开启 throw-exception-if-no-handler-found 时兜底） ---- */
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoHandlerFound(
+            NoHandlerFoundException e, HttpServletRequest request) {
+        log.info("路由不存在：uri={}", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ErrorCode.REQUEST_PATH_NOT_FOUND));
+    }
+
     /* ---- 400：请求体不可读（DEF-A：原文案「请求体格式不合法」对调用方不可行动——
        既说不清是缺 body 还是 JSON 写错，也看不出该怎么改；改为说明「缺什么/怎么办」。
        请求体是否必填由各端点 @RequestBody(required) 决定，本处理器只兜"读不出来"） ---- */
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnreadable(HttpMessageNotReadableException e) {
-        log.warn("请求体不可读：{}", e.getMessage());
-        return badRequest("请求体缺失或格式不正确，请提交合法的 JSON 请求体");
+        log.warn("请求体不可读（不记录解析原文，避免泄露凭据）");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.REQUEST_BODY_MALFORMED));
     }
 
     /* ---- 404：无对应路由（落到静态资源处理器） ---- */
@@ -124,7 +165,7 @@ public class GlobalExceptionHandler {
             org.springframework.web.servlet.resource.NoResourceFoundException e, HttpServletRequest request) {
         log.info("路由不存在：{}", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ErrorCode.NOT_FOUND, "接口不存在"));
+                .body(ApiResponse.error(ErrorCode.REQUEST_PATH_NOT_FOUND));
     }
 
     /* ---- 403：@PreAuthorize 功能级权限拒绝（越权尝试 100% 记日志） ---- */

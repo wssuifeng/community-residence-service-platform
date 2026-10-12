@@ -48,8 +48,63 @@ const pageSize = computed({
 
 <style scoped>
 .pagination-bar {
+  container-type: inline-size;
+  min-width: 0;
+  width: 100%;
   display: flex;
   justify-content: center;
   padding: var(--spacing-md) 0;
+}
+
+/* 平板内容区保留全部分页控件，只换行而非撑宽页面或隐藏跳页能力。 */
+:deep(.el-pagination) {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: var(--spacing-sm);
+}
+
+/* 仅内容区较窄时分组换行，上一页/页码/下一页保持同一行。 */
+@container (max-width: 650px) {
+  :deep(.el-pagination) {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: var(--spacing-xs);
+  }
+  :deep(.el-pagination__total) {
+    grid-row: 1;
+    grid-column: 1;
+    justify-self: end;
+    margin: 0;
+  }
+  :deep(.el-pagination__sizes) {
+    grid-row: 1;
+    grid-column: 2 / 4;
+    margin: 0;
+  }
+  :deep(.btn-prev) {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: end;
+    margin: 0;
+  }
+  :deep(.el-pager) {
+    grid-row: 2;
+    grid-column: 2;
+    margin: 0;
+  }
+  :deep(.btn-next) {
+    grid-row: 2;
+    grid-column: 3;
+    justify-self: start;
+    margin: 0;
+  }
+  :deep(.el-pagination__jump) {
+    grid-row: 3;
+    grid-column: 1 / 4;
+    justify-self: center;
+    margin: 0;
+  }
 }
 </style>

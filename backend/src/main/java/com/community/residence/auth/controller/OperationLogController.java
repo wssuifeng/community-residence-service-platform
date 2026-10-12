@@ -36,10 +36,13 @@ public class OperationLogController {
             @RequestParam(required = false) String operatorType,
             @RequestParam(required = false) String operationType,
             @RequestParam(required = false) String targetType,
+            @RequestParam(required = false) String module,
+            @RequestParam(required = false) String action,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
         return ApiResponse.success(operationLogService.page(page, size, operatorId, operatorType,
-                operationType, targetType, startTime, endTime));
+                (operationType != null ? operationType : action), targetType, startTime, endTime, module, keyword));
     }
 
     @Operation(summary = "操作日志详情")

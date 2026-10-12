@@ -1,0 +1,45 @@
+/* 批次bj：原设计工单剩余分支，只操作固定隔离夹具。 */
+const {request,sql,id}=require('./nontransaction-fixture-helpers.cjs')
+async function run({auth,fixture,evidence,check}){
+ const categoryId=Number(sql('SELECT id FROM service_category WHERE community_id='+id(fixture.A.id)+' ORDER BY id DESC LIMIT 1')[0][0])
+ async function order(name){return request('/work-orders','POST',{categoryId,title:fixture.tag+name,content:'bj非交易分支',contactPhone:'13900000001',priority:'NORMAL'},auth.resident.token)}
+ async function denied(name,path,method,data,token,status=403){const r=await request(path,method,data,token,true);check(name,r.status===status,{http:r.status,code:r.code})}
+ const pending=await order('待受理取消');await denied('他人不能取消待受理工单','/work-orders/'+pending.id+'/cancel','PATCH',{remark:'越权'},auth.stranger.token)
+ const illegal=await request('/work-orders/'+pending.id+'/close','PATCH',{},auth.adminA.token,true);check('待受理不能直接终审关闭',illegal.code===5302,{code:illegal.code})
+ await request('/work-orders/'+pending.id+'/cancel','PATCH',{remark:'本人取消'},auth.resident.token);check('本人待受理工单可取消',(await request('/work-orders/'+pending.id,'GET',undefined,auth.resident.token)).status==='CANCELLED')
+ const cancellation=await order('受理后取消');await request('/work-orders/'+cancellation.id+'/intake','PATCH',{},auth.adminA.token);await request('/work-orders/'+cancellation.id+'/cancel','PATCH',{remark:'取消'},auth.resident.token)
+ const n=Number(sql('SELECT COUNT(*) FROM work_order_process WHERE work_order_id='+id(cancellation.id))[0][0]);await request('/work-orders/'+cancellation.id+'/cancel','PATCH',{remark:'重复取消'},auth.resident.token,true);check('重复取消不重复过程留痕',Number(sql('SELECT COUNT(*) FROM work_order_process WHERE work_order_id='+id(cancellation.id))[0][0])===n)
+ const reject=await order('受理后驳回');await request('/work-orders/'+reject.id+'/intake','PATCH',{},auth.adminA.token);await request('/work-orders/'+reject.id+'/reject','PATCH',{remark:'驳回原因'},auth.adminA.token);check('待派单可驳回',(await request('/work-orders/'+reject.id,'GET',undefined,auth.resident.token)).status==='REJECTED')
+ const reassign=await order('改派边界');fixture.reassignedOrderId=reassign.id
+ await request('/work-orders/'+reassign.id+'/intake','PATCH',{},auth.adminA.token)
+ await request('/work-orders/'+reassign.id+'/assign','PATCH',{assigneeId:auth.staff.user.id},auth.adminA.token)
+ await request('/work-orders/'+reassign.id+'/assign','PATCH',{assigneeId:auth.otherStaff.user.id},auth.adminA.token)
+ await denied('改派后旧人员不能读详情','/work-orders/'+reassign.id,'GET',undefined,auth.staff.token)
+ await denied('改派后旧人员不能读时间线','/work-orders/'+reassign.id+'/timeline','GET',undefined,auth.staff.token)
+ await denied('改派后旧人员不能读附件','/work-orders/'+reassign.id+'/attachments','GET',undefined,auth.staff.token)
+ const query='/work-orders?size=1&keyword='+encodeURIComponent(fixture.tag+'改派边界')
+ const oldPage=await request(query,'GET',undefined,auth.staff.token);check('改派后旧人员列表不泄露工单且total正确',oldPage.total===0&&oldPage.records.length===0,{total:oldPage.total,ids:oldPage.records.map(r=>r.id)})
+ const newPage=await request(query,'GET',undefined,auth.otherStaff.token);check('改派后新人员列表保留工单',newPage.total===1&&newPage.records[0].id===reassign.id,{total:newPage.total})
+ const widened=await request(query+'&assigneeId='+auth.otherStaff.user.id,'GET',undefined,auth.staff.token);check('旧处理人传新处理人筛选不能扩大本人范围',widened.total===0&&widened.records.length===0)
+ const newFilter=await request(query+'&assigneeId='+auth.otherStaff.user.id,'GET',undefined,auth.adminA.token);check('管理列表新处理人筛选命中当前工单',newFilter.total===1&&newFilter.records[0].id===reassign.id)
+ const oldFilter=await request(query+'&assigneeId='+auth.staff.user.id,'GET',undefined,auth.adminA.token);check('管理列表按当前处理人筛选而非历史派单',oldFilter.total===0,{total:oldFilter.total})
+ check('新处理人员详情可达',(await request('/work-orders/'+reassign.id,'GET',undefined,auth.otherStaff.token)).id===reassign.id)
+ await denied('旧处理人不能接单','/work-orders/'+reassign.id+'/accept','PATCH',{},auth.staff.token)
+ await request('/work-orders/'+reassign.id+'/accept','PATCH',{},auth.otherStaff.token);await request('/work-orders/'+reassign.id+'/process','PATCH',{},auth.otherStaff.token)
+ const afterAccepted=await request('/work-orders/'+reassign.id+'/assign','PATCH',{assigneeId:auth.staff.user.id},auth.adminA.token,true);check('处理中不允许再改派',afterAccepted.code===5302,{code:afterAccepted.code})
+ await request('/work-orders/'+reassign.id+'/complete','PATCH',{remark:'第一次处理'},auth.otherStaff.token)
+ await denied('其他居民不能退回处理','/work-orders/'+reassign.id+'/return','PATCH',{remark:'他人退回'},auth.stranger.token)
+ await request('/work-orders/'+reassign.id+'/return','PATCH',{remark:'本人不满意'},auth.resident.token);check('居民退回重新进入处理中',(await request('/work-orders/'+reassign.id,'GET',undefined,auth.otherStaff.token)).status==='IN_PROGRESS')
+ await request('/work-orders/'+reassign.id+'/complete','PATCH',{remark:'重新处理'},auth.otherStaff.token);await request('/work-orders/'+reassign.id+'/confirm','PATCH',{},auth.resident.token)
+ await request('/work-orders/'+reassign.id+'/evaluation','POST',{rating:5,isSatisfied:true,content:'改派后新处理人员评价'},auth.resident.token)
+ await denied('改派后旧人员不可读取评价','/work-orders/'+reassign.id+'/evaluation','GET',undefined,auth.staff.token)
+ check('新人员可读取评价',(await request('/work-orders/'+reassign.id+'/evaluation','GET',undefined,auth.otherStaff.token)).workOrderId===reassign.id)
+ await request('/work-orders/'+reassign.id+'/close','PATCH',{},auth.adminA.token)
+ const processes=Number(sql('SELECT COUNT(*) FROM work_order_process WHERE work_order_id='+id(reassign.id))[0][0]);await request('/work-orders/'+reassign.id+'/close','PATCH',{},auth.adminA.token);check('重复终审不重复过程留痕',Number(sql('SELECT COUNT(*) FROM work_order_process WHERE work_order_id='+id(reassign.id))[0][0])===processes)
+ const groupId=Number(sql("SELECT id FROM conversation WHERE type='WORK_ORDER_GROUP' AND related_id="+id(reassign.id))[0][0]);fixture.closedGroupId=groupId
+ check('闭群后居民历史消息可读',Array.isArray(await request('/conversations/'+groupId+'/messages','GET',undefined,auth.resident.token)))
+ await denied('非参与者不能读取已闭群历史','/conversations/'+groupId+'/messages','GET',undefined,auth.stranger.token)
+ await denied('非参与超管也不自动获取会话','/conversations/'+groupId,'GET',undefined,auth.super.token)
+ const send=await request('/conversations/'+groupId+'/messages','POST',{content:'闭群追加',messageType:'TEXT'},auth.resident.token,true);check('闭群后追加消息被5604拒绝',send.code===5604,{code:send.code})
+}
+module.exports={run}

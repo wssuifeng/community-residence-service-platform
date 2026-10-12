@@ -65,7 +65,7 @@ public class HousingController {
         return ApiResponse.success(housingService.update(id, dto));
     }
 
-    @Operation(summary = "删除房源", description = "有未完成看房预约时不可删除")
+    @Operation(summary = "删除房源", description = "有未完成看房预约，或曾被租住占用的挂牌不可物理删除；停止公开请下线")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id) {

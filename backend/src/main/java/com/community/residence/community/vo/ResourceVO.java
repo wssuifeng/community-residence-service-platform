@@ -3,8 +3,10 @@ package com.community.residence.community.vo;
 import com.community.residence.community.entity.PublicResource;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 /** 公共资源信息响应 */
 @Data
@@ -38,6 +40,9 @@ public class ResourceVO {
     @Schema(description = "资源描述")
     private String description;
 
+    @Schema(description = "展示图片地址列表（无图返回空数组，与 housing.images 同口径）")
+    private String[] images;
+
     @Schema(description = "创建时间")
     private LocalDateTime createdAt;
 
@@ -51,7 +56,20 @@ public class ResourceVO {
         vo.setCapacity(entity.getCapacity());
         vo.setSlotUnit(entity.getSlotUnit());
         vo.setDescription(entity.getDescription());
+        vo.setImages(splitImages(entity.getImages()));
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;
+    }
+
+    /* 逗号分隔存储 → 图片数组（与 housing.images 同口径）：null / 空白 / 空项一律归一为
+       空数组（不返回 null），并顺带清理项首尾空白，避免前端拿到空串渲染坏图 */
+    private static String[] splitImages(String images) {
+        if (!StringUtils.hasText(images)) {
+            return new String[0];
+        }
+        return Arrays.stream(images.split(","))
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .toArray(String[]::new);
     }
 }

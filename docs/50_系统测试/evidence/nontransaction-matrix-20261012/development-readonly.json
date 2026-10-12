@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-12T02:46:35.766Z",
+  "database": "community_residence",
+  "transactionsExecuted": false,
+  "businessWrites": false,
+  "checks": [
+    {
+      "name": "开发业务数量与bh迁移前一致",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/notices",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/notices",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/feedbacks",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/feedbacks",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/resource-reservations",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/resource-reservations",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/evaluations",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/evaluations",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/evaluations/unsatisfied",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/evaluations/unsatisfied",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/statistics/evaluations",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/statistics/evaluations",
+      "passed": true
+    },
+    {
+      "name": "GET契约/api/v1/payment/channels",
+      "passed": true
+    },
+    {
+      "name": "开发只读/api/v1/payment/channels",
+      "passed": true
+    },
+    {
+      "name": "开发渠道继续停用",
+      "passed": true
+    },
+    {
+      "name": "前端5176可访问",
+      "passed": true
+    },
+    {
+      "name": "开发只读期间业务数量不变",
+      "passed": true
+    }
+  ],
+  "before": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "after": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ]
+}

@@ -49,8 +49,14 @@ instance.interceptors.response.use(
       return Promise.reject(new ApiError(401, '令牌已失效，请重新登录', 401))
     }
     const body = error.response?.data
-    const message = body?.message ?? httpErrorMessage(status)
-    return Promise.reject(new ApiError(body?.code ?? status, message, status))
+    // 框架级请求错误（405/415/400/404）由后端返回语义正确的 HTTP 状态码 +
+    // 统一 ApiResponse 响应体（接口设计.md §3.3）；此处优先取后端标准业务码与 message，
+    // 仅在响应体不可读（网关/代理/网络故障）时退回本地兜底文案——status === 0 才是真网络异常。
+    const fallbackMessage = httpErrorMessage(status)
+    const bodyMessage = typeof body?.message === 'string' && body.message ? body.message : undefined
+    const bodyCode = typeof body?.code === 'number' ? body.code : undefined
+    const message = bodyMessage ?? fallbackMessage
+    return Promise.reject(new ApiError(bodyCode ?? status, message, status))
   }
 )
 
@@ -58,10 +64,20 @@ function httpErrorMessage(status: number): string {
   switch (status) {
     case 400:
       return '请求参数不合法'
+    case 401:
+      return '令牌已失效，请重新登录'
     case 403:
       return '无权访问'
     case 404:
       return '资源不存在'
+    case 405:
+      return '请求方法不被支持'
+    case 415:
+      return '请求内容类型不被支持'
+    case 409:
+      return '数据已存在'
+    case 503:
+      return '系统繁忙，请稍后重试'
     case 0:
       return '网络异常，请检查连接'
     default:

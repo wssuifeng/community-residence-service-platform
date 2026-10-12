@@ -275,7 +275,7 @@ public class WorkOrderService {
 
     /* 工单分页：sort 为空/DEFAULT 保持 id 倒序（既有行为不变）；WAIT_DESC 等待时长降序
        （以提交时间升序近似，等待最久者置前）；PRIORITY 紧急优先 + 提交时间升序。
-       assigneeId 为处理人筛选（工单表无处理人列，先取派单记录命中的工单 ID 集合） */
+       assigneeId 与 STAFF 范围均以最新派单归属为准，分页前收敛，历史派单只用于留痕 */
     public PageVO<WorkOrderVO> page(long page, long size, String status, String statuses,
                                     String priority, Long categoryId, String keyword,
                                     LocalDateTime startTime, LocalDateTime endTime,
@@ -293,32 +293,31 @@ public class WorkOrderService {
                         .or().like(WorkOrder::getContent, keyword)
                         .or().like(WorkOrder::getOrderNo, keyword));
         if (assigneeId != null) {
-            List<Long> assignedOrderIds = assignmentMapper.selectList(
-                            new LambdaQueryWrapper<WorkOrderAssignment>()
-                                    .eq(WorkOrderAssignment::getAssigneeId, assigneeId))
-                    .stream().map(WorkOrderAssignment::getWorkOrderId).distinct().toList();
-            if (assignedOrderIds.isEmpty()) {
-                return PageVO.of(List.of(), 0, page, size);
-            }
-            wrapper.in(WorkOrder::getId, assignedOrderIds);
+            restrictCurrentAssignee(wrapper, assigneeId);
         }
-        /* RESIDENT 限本人；STAFF 限派给本人（工单表无法直查派单表，先取派单ID集合） */
+        /* 本人范围与显式处理人筛选取交集，不能通过筛选参数扩大读取权限。 */
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             wrapper.eq(WorkOrder::getResidentId, SecurityUtils.getUserId());
         } else if (SecurityUtils.hasRole(RoleConstants.STAFF)) {
-            List<Long> orderIds = assignmentMapper.selectList(
-                            new LambdaQueryWrapper<WorkOrderAssignment>()
-                                    .eq(WorkOrderAssignment::getAssigneeId, SecurityUtils.getUserId()))
-                    .stream().map(WorkOrderAssignment::getWorkOrderId).distinct().toList();
-            if (orderIds.isEmpty()) {
-                return PageVO.of(List.of(), 0, page, size);
-            }
-            wrapper.in(WorkOrder::getId, orderIds);
+            restrictCurrentAssignee(wrapper, SecurityUtils.getUserId());
         }
         applySort(wrapper, sort);
         Page<WorkOrder> result = workOrderMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
         return PageVO.of(result.getRecords() == null ? List.of() : toVOList(result.getRecords()),
                 result.getTotal(), result.getCurrent(), result.getSize());
+    }
+
+    /* 与详情 checkAssignee 的 id 倒序口径一致；EXISTS 在数据库分页与计数之前过滤。
+       仅参数绑定人员 ID，不能将历史任一次派单当作当前列表读取授权。 */
+    private void restrictCurrentAssignee(LambdaQueryWrapper<WorkOrder> wrapper, Long assigneeId) {
+        wrapper.apply("""
+                EXISTS (SELECT 1 FROM work_order_assignment current_assignment
+                    WHERE current_assignment.work_order_id = work_order.id
+                      AND current_assignment.assignee_id = {0}
+                      AND current_assignment.id = (
+                          SELECT MAX(latest_assignment.id) FROM work_order_assignment latest_assignment
+                          WHERE latest_assignment.work_order_id = work_order.id))
+                """, assigneeId);
     }
 
     /* 排序装配：取值由 SORT_* 常量枚举，非枚举值回落默认 id 倒序。
@@ -395,7 +394,7 @@ public class WorkOrderService {
         fillAcceptTime(id);
         appendProcess(id, "ACCEPT", WorkOrderStatus.ASSIGNED, WorkOrderStatus.ACCEPTED, remark);
         /* R48/R74 事件 4「接单」：通知服务人员（留痕提醒）+ 该社区绑定管理员；
-           §9.4.2.6 既有正文另写的「通知居民」作额外提醒保留 */
+           §9.4.2.6 正文的「通知居民」按用户裁决 2026-09-23 属**必须收到**项（§9.21.4 事件 4 该格 ✅） */
         notifyCurrentAssignee(order, "工单已接单",
                 "工单 " + order.getOrderNo() + " 已接单，请按约上门", id);
         notifyCommunityAdmins(order, "工单已接单",
@@ -416,8 +415,8 @@ public class WorkOrderService {
             return;
         }
         appendProcess(id, "PROCESS", WorkOrderStatus.ACCEPTED, WorkOrderStatus.IN_PROGRESS, remark);
-        /* R48/R74 事件 5「开始处理」：事件集本身无必须收件对象；
-           §9.4.2.7 既有正文的「通知居民」作额外提醒保留 */
+        /* R48/R74 事件 5「开始处理」：收件对象＝居民提交人（**必须收到**，
+           用户裁决 2026-09-23：§9.4.2.7 正文写到的收件人即必须送到，§9.21.4 事件 5 该格 ✅） */
         notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单处理中",
                 "您的工单 " + order.getOrderNo() + " 服务人员已开始处理",
                 "WORK_ORDER", "WORK_ORDER", id);

@@ -23,13 +23,9 @@ public class CreateCommunityDTO {
     @Size(max = 255, message = "详细地址最多 255 字符")
     private String address;
 
-    @Schema(description = "联系电话（座机或手机号）")
-    @Pattern(regexp = "^\\d{3,4}-\\d{7,8}$|^1[3-9]\\d{9}$", message = "联系电话格式不正确")
-    private String contactPhone;
-
-    @Schema(description = "联系人")
-    @Size(max = 50, message = "联系人最多 50 字符")
-    private String contactPerson;
+    @Schema(description = "社区责任人账号ID，必须为ADMIN；null表示未设置")
+    @jakarta.validation.constraints.Positive
+    private Long responsibleAdminId;
 
     @Schema(description = "社区简介")
     @Size(max = 1000, message = "社区简介最多 1000 字符")

@@ -174,18 +174,15 @@ async function submitAndApprove(): Promise<number> {
 /** 走到「租约已生效」：审核通过 → 确认承租 → 协议双方确认 */
 async function activateLease(): Promise<number> {
   const leaseId = await submitAndApprove()
-  const leaseApi = await import('@/api/lease')
   const agreementApi = await import('@/api/agreement')
 
   actAs('RESIDENT', 1)
-  await leaseApi.confirmTenancy(leaseId)
   actAs('ADMIN', 1)
   const agreement = (await agreementApi.createLeaseAgreement({ leaseId, templateId: 1 } as never)) as {
     id: number
   }
-  await agreementApi.confirmLeaseAgreement(agreement.id, { party: 'ADMIN' } as never)
   actAs('RESIDENT', 1)
-  await agreementApi.confirmLeaseAgreement(agreement.id, { party: 'TENANT' } as never)
+  await agreementApi.confirmLeaseAgreement(agreement.id, {})
   expect(backend().state.leases.find((item) => item.id === leaseId)?.status).toBe('ACTIVE')
   return leaseId
 }
@@ -340,92 +337,36 @@ describe('模拟 E2E · CF-E3-A 审核通过只到「待签约」', () => {
  * 核心：CF-E3-C 承租确认 → 发起协议 → 双方确认 → 生效
  * ==========================================================================*/
 
-describe('模拟 E2E · CF-E3-C 承租确认与协议双方确认', () => {
-  it('CF-E3-C 未确认承租发起协议被拒 5601（越序拦截）', async () => {
+describe('模拟 E2E · CF-E3-C 发出协议与居民确认', () => {
+  it('发出即管理方同意，不要求旧承租留痕且不自动生效', async () => {
     const leaseId = await submitAndApprove()
-
-    const agreementApi = await import('@/api/agreement')
     actAs('ADMIN', 1)
-    await expect(
-      agreementApi.createLeaseAgreement({ leaseId, templateId: 1 } as never)
-    ).rejects.toMatchObject({ code: 5601 })
-    expect(backend().state.agreements).toHaveLength(0)
+    const api = await import('@/api/agreement')
+    const issued = await api.createLeaseAgreement({ leaseId, templateId: 1 })
+    expect(issued.status).toBe('PARTIAL')
+    expect(issued.adminConfirmTime).toBeTruthy()
+    expect(issued.tenantConfirmTime).toBeNull()
+    expect(backend().state.leases[0].status).toBe('TO_SIGN')
   })
-
-  it('CF-E3-C 承租确认（页面操作）幂等且不覆盖首次留痕；确认后协议可发起', async () => {
-    const leaseId = await submitAndApprove()
-    /* 确认承租前有二次确认弹窗（ElMessageBox.confirm），测试里直接确认 */
-    vi.spyOn(ElMessageBox, 'confirm').mockResolvedValue('confirm' as never)
-
+  it('居民没有独立确认承租入口，协议确认留在正文中', async () => {
+    await submitAndApprove()
     actAs('RESIDENT', 1)
     const { wrapper } = await mountPage(ResidentLeaseListView, '/resident/housing-lease')
+    expect(wrapper.findAll('button').some(b => b.text().trim() === '确认承租')).toBe(false)
     expect(pageText()).toContain('待签约')
-
-    await clickButton(wrapper, '确认承租')
-    const lease = backend().state.leases.find((item) => item.id === leaseId)
-    const firstConfirmAt = lease?.tenantConfirmAt
-    expect(firstConfirmAt).toBeTruthy()
-    expect(lease?.tenantConfirmBy).toBe(1)
-
-    /* 幂等：再次确认不覆盖首次留痕（§6.7b） */
-    const leaseApi = await import('@/api/lease')
-    await leaseApi.confirmTenancy(leaseId)
-    expect(backend().state.leases.find((item) => item.id === leaseId)?.tenantConfirmAt).toBe(firstConfirmAt)
-
-    /* 前置满足后协议可发起，正文按发起时租约数据渲染为快照 */
-    const agreementApi = await import('@/api/agreement')
-    actAs('ADMIN', 1)
-    const agreement = (await agreementApi.createLeaseAgreement({ leaseId, templateId: 1 } as never)) as {
-      status: string
-      content: string
-    }
-    expect(agreement.status).toBe('PENDING')
-    expect(agreement.content).toContain('演示居民')
-    expect(backend().state.leases.find((item) => item.id === leaseId)?.agreementStatus).toBe('PENDING')
   })
-
-  it('CF-E3-C 双方确认 → 租约 ACTIVE + 房屋已入住 + 变更历史 STATUS/AGREEMENT + 群聊系统消息', async () => {
-    const leaseId = await submitAndApprove()
-    const leaseApi = await import('@/api/lease')
-    const agreementApi = await import('@/api/agreement')
-
-    actAs('RESIDENT', 1)
-    await leaseApi.confirmTenancy(leaseId)
-    actAs('ADMIN', 1)
-    const agreement = (await agreementApi.createLeaseAgreement({ leaseId, templateId: 1 } as never)) as {
-      id: number
-    }
-
-    /* 承约后管理方确认一次即 SIGNED（DEF-078 去重：管理方确认时引用承约留痕，
-       居民不再被要求二次确认）→ 联动生效 + 房屋已入住 */
-    await agreementApi.confirmLeaseAgreement(agreement.id, { party: 'ADMIN' } as never)
-
-    const lease = backend().state.leases.find((item) => item.id === leaseId)
-    expect(backend().state.agreements[0].status).toBe('SIGNED')
-    expect(backend().state.agreements[0].tenantConfirmedAt).toBe(lease?.tenantConfirmAt)
-    expect(lease?.status).toBe('ACTIVE')
-    expect(backend().state.houses.find((item) => item.id === lease?.houseId)?.status).toBe('OCCUPIED')
-
-    const changeTypes = backend()
-      .state.leaseChanges.filter((item) => item.leaseId === leaseId)
-      .map((item) => item.changeType)
-    expect(changeTypes).toContain('STATUS')
-    expect(changeTypes).toContain('AGREEMENT')
-
-    /* 群聊出现系统消息 + 居民收「租约已生效」通知 */
-    const conversationId = lease?.conversationId ?? 0
-    expect(
-      backend().state.conversationMessages.some(
-        (item) => item.conversationId === conversationId && item.senderType === 'SYSTEM'
-      )
-    ).toBe(true)
-    expect(backend().state.notifications.some((item) => item.sourceType === 'LEASE_SIGN')).toBe(true)
-
-    /* 幂等：重复确认不重复触发状态流转 */
+  it('居民本人同意后生效、房态翻转与通知，重复确认不重复流转', async () => {
+    const leaseId = await activateLease()
+    const lease = backend().state.leases.find(x => x.id === leaseId)!
+    const agreement = backend().state.agreements[0]
+    expect(agreement.tenantConfirmTime).toBeTruthy()
+    expect(lease.status).toBe('ACTIVE')
+    expect(backend().state.houses.find(x => x.id === lease.houseId)?.status).toBe('OCCUPIED')
+    expect(backend().state.conversationMessages.some(x => x.senderType === 'SYSTEM')).toBe(true)
     const before = backend().state.leaseChanges.length
-    await agreementApi.confirmLeaseAgreement(agreement.id, { party: 'TENANT' } as never)
-    expect(backend().state.leases.find((item) => item.id === leaseId)?.status).toBe('ACTIVE')
-    expect(backend().state.leaseChanges.length).toBe(before)
+    const api = await import('@/api/agreement')
+    await api.confirmLeaseAgreement(agreement.id, {})
+    expect(backend().state.leaseChanges).toHaveLength(before)
   })
 })
 
@@ -684,10 +625,8 @@ describe('模拟 E2E · CF-E3-F 退租闭环（押金退还段待实现，跳过
 
 describe('模拟 E2E · CF-E11 通知身份空间隔离', () => {
   it('CF-E11 撞号对 resident1(id=1) 与超管(id=1)：居民口径通知不得出现在超管列表，反之亦然', async () => {
-    const leaseId = await submitAndApprove()
-    const leaseApi = await import('@/api/lease')
+    await submitAndApprove()
     actAs('RESIDENT', 1)
-    await leaseApi.confirmTenancy(leaseId)
 
     expect(
       backend().state.notifications.filter((item) => item.ownerType === 'RESIDENT' && item.userId === 1).length
@@ -1094,22 +1033,17 @@ describe('模拟 E2E · CF-E9 运营看板数据核对', () => {
 })
 
 describe('模拟 E2E · CF-E10 权限与越权拒绝', () => {
-  it('CF-E10 管理端不可代居民确认承租（403）；居民不可访问他人租约（403）', async () => {
+  it('管理端不能代居民同意协议，其他居民不能确认他人协议', async () => {
     const leaseId = await submitAndApprove()
-    const leaseApi = await import('@/api/lease')
-
-    /* 承租确认是居民专属动作：管理端（含超管）调用 403，不可代确认 */
+    const api = await import('@/api/agreement')
+    actAs('ADMIN', 1)
+    const issued = await api.createLeaseAgreement({ leaseId, templateId: 1 })
     for (const role of ['ADMIN', 'SUPER_ADMIN'] as const) {
       actAs(role, 1)
-      await expect(leaseApi.confirmTenancy(leaseId)).rejects.toMatchObject({ code: 403 })
+      await expect(api.confirmLeaseAgreement(issued.id, {})).rejects.toMatchObject({ code: 403 })
     }
-    expect(backend().state.leases.find((item) => item.id === leaseId)?.tenantConfirmAt).toBeFalsy()
-
-    /* 数据级权限：另一位居民看不到、也操作不了这条租约 */
     actAs('RESIDENT', 2)
-    const otherList = await leaseApi.getLeaseList({})
-    expect(otherList.records).toHaveLength(0)
-    await expect(leaseApi.confirmTenancy(leaseId)).rejects.toMatchObject({ code: 403 })
+    await expect(api.confirmLeaseAgreement(issued.id, {})).rejects.toMatchObject({ code: 403 })
   })
 })
 

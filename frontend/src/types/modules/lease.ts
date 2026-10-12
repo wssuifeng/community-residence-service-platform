@@ -173,13 +173,6 @@ export interface ILeaseRecord {
   expiryFlag?: LeaseExpiryFlag | null
   /** 协议签约状态（V18：NONE-未发起协议，其余与协议状态同义；展示用，不参与状态机） */
   agreementStatus?: LeaseAgreementSignStatus
-  /**
-   * 承租确认时间（V20/R67）：TO_SIGN 租约由居民确认承租后写入，是管理方发起租赁协议的前置条件。
-   * 未确认时后端可能不返回该字段（undefined）或返回 null，两者都按「未确认」处理。
-   */
-  tenantConfirmAt?: string | null
-  /** 承租确认人（resident.id） */
-  tenantConfirmBy?: number | null
   /** 租约群聊 ID（V20/R68，conversation.id；会话页与「我的租约」互跳用） */
   conversationId?: number | null
   /**

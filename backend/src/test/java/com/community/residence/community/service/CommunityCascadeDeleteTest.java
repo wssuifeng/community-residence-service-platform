@@ -515,4 +515,6 @@ class CommunityCascadeDeleteTest {
         refundOrder.verify(leaseDepositRefundMapper).delete(any());
         refundOrder.verify(leaseRecordMapper).deleteBatchIds(List.of(99L));
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

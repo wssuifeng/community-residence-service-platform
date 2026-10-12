@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import java.time.LocalDate;
 
 /** 管理员代建居民请求（R8 v1.2；初始密码服务端生成：手机号后 6 位，明文仅本次返回） */
 @Data
@@ -34,4 +38,25 @@ public class AdminCreateResidentDTO {
     @Size(min = 4, max = 20, message = "用户名长度 4~20 字符")
     @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名仅支持字母、数字、下划线")
     private String username;
+
+    @Schema(description = "邮箱（沿居民账号资料模型）")
+    @Email(message = "邮箱格式不正确")
+    @Size(max = 100, message = "邮箱最多100字符")
+    private String email;
+
+    @Schema(description = "同时登记关系的房屋ID；空为仅创建账号")
+    @Positive(message = "房屋ID必须为正整数")
+    private Long houseId;
+
+    @Schema(description = "关系类型：OWNER/TENANT/FAMILY，与houseId同时填写")
+    @Pattern(regexp = "^(OWNER|TENANT|FAMILY)$", message = "关系类型取值OWNER/TENANT/FAMILY")
+    private String relationType;
+
+    @Schema(description = "入住日期，与houseId同时填写")
+    @PastOrPresent(message = "入住日期不能晚于今天")
+    private LocalDate moveInDate;
+
+    @Schema(description = "居住关系备注（审计留痕）")
+    @Size(max = 200, message = "备注最多200字符")
+    private String remark;
 }

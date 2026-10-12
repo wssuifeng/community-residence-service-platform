@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import LeaseRenewDialog from './LeaseRenewDialog.vue'
 import LeaseFirstPaymentDialog from './LeaseFirstPaymentDialog.vue'
@@ -9,18 +9,13 @@ import LeaseMoveOutDialog from './LeaseMoveOutDialog.vue'
 import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
 import LeaseTimeline from '@/components/business/LeaseTimeline.vue'
 import {
-  confirmTenancy,
   getLeaseChanges,
   getLeaseList,
   listDepositRefunds,
   listLeasePayments
 } from '@/api/lease'
 import { formatDateTime } from '@/utils/date'
-import { ApiError } from '@/utils/request'
 
-/* 承约前置错误码（后端 ErrorCode.java：5607 看房未完成 / 5608 会话未建立，DEF-077） */
-const TENANCY_VIEWING_REQUIRED = 5607
-const TENANCY_CONVERSATION_REQUIRED = 5608
 import {
   depositRefundStatusLabels,
   depositStatusLabels,
@@ -47,7 +42,7 @@ import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
  * 其余折叠为「历史租约 N 条」（同一房屋多次租住不再重复铺开）。
  *
  * 主卡动作按状态分流（一一对应后端端点，前端不做状态猜测）：
- * - 待签约 TO_SIGN：确认承租（POST /leases/{id}/tenancy-confirm），是管理方发起协议的前置条件；
+ * - 待签约 TO_SIGN：查看管理方发出的具体协议并确认同意；
  * - 已生效 ACTIVE：支付首期费用（/first-payments）、续租（三步支付弹窗）、申请退租（/move-out-applications）；
  * - 已搬出 MOVED_OUT：只读 + 押金状态与押金退还记录（R72，居民侧只读不可发起）。
  *
@@ -87,7 +82,7 @@ function handleTabChange(value: string | number | boolean | undefined): void {
 const headSub = computed(() =>
   tab.value === 'payments'
     ? '首期与续期支付流水，以及押金退还记录与状态流转合并的租约明细时间线'
-    : '本人租约的租期与租金：待签约可确认承租，已生效可付首期、续租或申请退租'
+    : '本人租约的租期与租金：待签约先确认协议、再付首期；成功后正式生效，可续租或申请退租'
 )
 
 /* ------------------------------ 租约 tab ------------------------------ */
@@ -123,7 +118,7 @@ async function loadLeases(): Promise<void> {
 }
 
 /* ------------------------------ 各租约支付记录（R71） ------------------------------
- * 首期支付不改租约状态、不顺延租期，支付结果只存在于支付单上；
+ * 首期成功使待签约租约生效、不顺延租期；支付凭据取自支付单。
  * 故卡片级「首期已支付 / 待支付首期费用」与展开区支付记录都取自本表。
  */
 
@@ -168,13 +163,13 @@ function firstPaymentText(row: ILeaseRecord): string | null {
 }
 
 /**
- * 待支付首期：已生效、支付单已取回、无成功首期单，且**止期未过**（DEF-069）。
+ * 待支付首期：待签约且SIGNED或旧ACTIVE、支付单已取回、无成功首期单，且**止期未过**（DEF-069）。
  * 止期已过的租约业务上不再收首期费用（首期只对起租有效），故不再提供入口，
  * 由 firstPayBlockedText 说明原因；未取到支付单时不判定，避免误报。
  */
 function firstPaymentDue(row: ILeaseRecord): boolean {
   return (
-    row.status === 'ACTIVE' &&
+    (row.status === 'ACTIVE' || (row.status === 'TO_SIGN' && row.agreementStatus === 'SIGNED')) &&
     !paymentsUnknown(row) &&
     firstPaymentOf(row) === null &&
     expiryOf(row) !== 'EXPIRED'
@@ -433,14 +428,13 @@ interface PaymentEntry {
 
 /**
  * 支付入口解析（R71 首期 / R61 续租 + 用户口径「押金/租金就放首期付费里，不做独立支付」）：
- * 首期费用 = 首月租金 + 押金，一次收取；续租按所选月数支付租金，二者都不改租约状态。
+ * 首期费用 = 首月租金 + 押金，一次收取并激活租约；续租按所选月数支付租金，不重复激活。
  *
  * 结清口径只认 FIRST（OCR DEF-111）：押金只随首期单收取，续租 RENEWAL 成功不代表首期已收；
  * 原「任一 SUCCESS 即结清」会把只付过续租的在租约误判已结清、隐藏首期入口，连带堵死押金链路。
  *
- * 入口**任何状态都不整条消失**，但可点的 FIRST 动作收敛为「已生效且未结清且止期未过」——
- * 后端 createFirstPayment 仅放行 ACTIVE，TO_SIGN 点了必然 400（OCR DEF-111）：
- * - ACTIVE 未结清未过止期 → 可点「待支付首期费用」；
+ * 入口始终显示：TO_SIGN+SIGNED 未结清且未过止期可付首期；旧 ACTIVE 可兼容补缴。
+ * - 未确认协议 → 引导阅读具体正文；确认后才可点首期；
  * - 支付单取不回（unknown）→ 不给可点支付动作，改「支付记录加载失败」+ 重试入口
  *   （结清与否无法判定时盲发起只会把错误甩给后端）；
  * - 已结清 / 止期已过 / 未生效 / 终态 → 入口仍在，**置禁用并给出原因**；
@@ -469,12 +463,12 @@ function paymentEntryOf(row: ILeaseRecord): PaymentEntry {
           : '首期费用已结清，无可支付项；历史支付记录仍在下方可查。'
     }
   }
-  if (row.status === 'ACTIVE') {
+  if (row.status === 'ACTIVE' || (row.status === 'TO_SIGN' && row.agreementStatus === 'SIGNED')) {
     if (!expired) {
       return {
         label: '待支付首期费用',
         action: 'FIRST',
-        note: '首期费用 = 首月租金 + 押金（一次收取，不做拆分支付），支付不改租约状态。'
+        note: '首期费用 = 首月租金 + 押金（一次收取，不做拆分支付），协议完成且支付成功后才正式入住；首期不顺延租期。'
       }
     }
     return {
@@ -487,7 +481,7 @@ function paymentEntryOf(row: ILeaseRecord): PaymentEntry {
     return {
       label: '支付首期费用',
       action: 'NONE',
-      note: '租约尚未生效：承租确认与协议双方确认后生效，届时可在此支付首期费用。'
+      note: '租约尚未生效：请先查看并同意管理方发出的具体协议，再支付首期费用；两者完成后才正式生效。'
     }
   }
   if (row.status === 'PENDING') {
@@ -529,7 +523,7 @@ function rentPaidState(row: ILeaseRecord): string {
   return paymentsOf(row).some((item) => item.status === 'SUCCESS') ? '已支付' : '待支付'
 }
 
-/** 首期支付成功不改租约状态（R71 解耦），仅刷新支付记录与列表金额展示 */
+/** 首期成功后回读租约正式生效状态、关系及支付记录 */
 function handleFirstPaySuccess(): void {
   loadLeases()
   void refreshLeasePayments(firstPayTarget.value?.id)
@@ -560,65 +554,6 @@ function handleMoveOutSuccess(): void {
   loadLeases()
 }
 
-/* ------------------------------ 确认承租（R67） ------------------------------ */
-
-/** 待签约且尚未确认承租 */
-function needsTenancyConfirm(row: ILeaseRecord): boolean {
-  return row.status === 'TO_SIGN' && !row.tenantConfirmAt
-}
-
-/** 待签约且已确认承租（等待管理方发起协议） */
-function tenancyConfirmed(row: ILeaseRecord): boolean {
-  return row.status === 'TO_SIGN' && !!row.tenantConfirmAt
-}
-
-const tenancyConfirming = ref<number | null>(null)
-
-/**
- * 承约不再设前置（用户裁决 2026-09-22）：看房与租约沟通群都只是**自愿的交通手段**，
- * 后端已撤掉 DEF-077 硬前置（5607/5608 仅保留错误码定义）。
- * 这里只对**旧构建/旁路数据**仍可能返回的这两个码做**非阻断兜底**：
- * 如实提示一句、不弹阻断式弹窗、不强制跳转，居民可稍后重试或直接联系管理员。
- * 返回 true 表示已就地消化该错误（不再按普通失败提示）。
- */
-function notifyTenancySoftBlocked(error: unknown): boolean {
-  if (!(error instanceof ApiError)) return false
-  if (error.code !== TENANCY_VIEWING_REQUIRED && error.code !== TENANCY_CONVERSATION_REQUIRED) {
-    return false
-  }
-  ElMessage.warning(
-    `${error.message}（看房与沟通群都只是自愿手段，不影响承约；可稍后重试或联系社区管理员）`
-  )
-  return true
-}
-
-/** 确认承租：居民专属动作（管理端不可代确认），二次确认后调用端点，管理方即可直接推进协议确认 */
-async function handleTenancyConfirm(row: ILeaseRecord): Promise<void> {
-  try {
-    await ElMessageBox.confirm(
-      `确认承租「${row.houseLocation}」（租期 ${row.startDate} ~ ${row.endDate}，月租 ${money(row.monthlyRent)}）？\n` +
-        '确认后社区管理方即可直接发起并确认租赁协议（管理方确认时引用本次承约留痕），租约随之生效。\n' +
-        '（提示：承租确认是居民侧的签署意愿留痕，居民无需再次确认协议；看房与沟通群不构成承约前置。）',
-      '确认承租',
-      { type: 'info', confirmButtonText: '确认承租', cancelButtonText: '再想想' }
-    )
-  } catch {
-    return
-  }
-  tenancyConfirming.value = row.id
-  try {
-    await confirmTenancy(row.id)
-    ElMessage.success('已确认承租，社区管理方可直接推进协议确认')
-    await loadLeases()
-  } catch (error) {
-    /* 5607/5608 只作非阻断提示（后端已撤硬前置）；其余错误沿用既有如实提示 */
-    if (!notifyTenancySoftBlocked(error)) {
-      ElMessage.error(error instanceof Error ? error.message : '确认承租失败')
-    }
-  } finally {
-    tenancyConfirming.value = null
-  }
-}
 
 /* ------------------------------ 租约明细 tab（押金 + 三源时间线，R72/R73） ------------------------------ */
 
@@ -880,7 +815,7 @@ onMounted(() => {
                 协议{{ agreementLabel(group.current) }}
               </span>
               <span class="status-pill" :data-status="group.current.status">
-                {{ leaseStatusLabels[group.current.status] }}
+                {{ group.current.status === 'TO_SIGN' && group.current.agreementStatus === 'SIGNED' ? '待首期费用' : leaseStatusLabels[group.current.status] }}
               </span>
 
               <!-- 押金状态徽标（R72）：未缴/已缴/退还中/已退还/已抵扣，居民侧只读 -->
@@ -892,7 +827,7 @@ onMounted(() => {
                 押金{{ depositLabel(group.current) }}
               </span>
 
-              <!-- 首期费用状态（R71）：首期支付不改租约状态、不顺延租期，
+              <!-- 首期费用状态（R71）：首期成功激活租约、不顺延租期，
                    故支付结果必须单独在卡片上呈现，否则居民付完款看不到任何反馈 -->
               <span v-if="firstPaymentText(group.current)" class="first-pay-pill">
                 {{ firstPaymentText(group.current) }}
@@ -908,22 +843,6 @@ onMounted(() => {
               <p v-if="expiryAnnotationText(group.current)" class="expiry-note">
                 {{ expiryAnnotationText(group.current) }}
               </p>
-
-              <!-- 待签约（R67）：确认承租是管理方发起协议的前置条件，仅在未确认时露出 -->
-              <el-button
-                v-if="needsTenancyConfirm(group.current)"
-                class="lease-action"
-                type="primary"
-                round
-                size="small"
-                :loading="tenancyConfirming === group.current.id"
-                @click.stop="handleTenancyConfirm(group.current)"
-              >
-                确认承租
-              </el-button>
-              <span v-else-if="tenancyConfirmed(group.current)" class="action-hint-pill">
-                已确认承租
-              </span>
 
               <!-- 支付入口区（R71/R61 + DEF-111）：**任何状态都可见**，不再整条消失；
                    可支付时点开首期付费弹窗，取数失败时给重试入口，无可支付项时保留禁用入口 + 原因说明 -->
@@ -1020,44 +939,20 @@ onMounted(() => {
                 <dt>到期说明</dt>
                 <dd>{{ expiryText(group.current) }}</dd>
               </div>
-              <!-- 承租确认留痕（R67）：待签约租约的关键状态，已确认时展示时间供居民核对 -->
-              <div v-if="group.current.status === 'TO_SIGN'" class="expand-item">
-                <dt>承租确认</dt>
-                <dd>
-                  {{ group.current.tenantConfirmAt ? formatDateTime(group.current.tenantConfirmAt) : '尚未确认（确认后由社区管理方发起租赁协议）' }}
-                </dd>
-              </div>
               <div class="expand-item expand-remark">
                 <dt>备注</dt>
                 <dd>{{ group.current.remark?.trim() || '无' }}</dd>
               </div>
             </dl>
 
-            <!-- 待签约且未确认承租时，展开区给一处同款引导（列表行按钮在窄屏可能被挤到换行） -->
-            <div v-if="needsTenancyConfirm(group.current)" class="expand-cta">
-              <p class="expand-cta-text">
-                确认承租后社区管理方即可直接发起并确认租赁协议（管理方确认时引用本次承约留痕），租约随之生效。
-                （承租确认即居民侧签署意愿留痕，居民无需再次确认协议。）
-              </p>
-              <el-button
-                type="primary"
-                round
-                size="small"
-                :loading="tenancyConfirming === group.current.id"
-                @click.stop="handleTenancyConfirm(group.current)"
-              >
-                确认承租
-              </el-button>
-              <!-- 自愿的交通手段（用户裁决）：看房与沟通群都不是承约前置，只作可选提示 -->
-              <p class="expand-optional-hint">
-                想去看看房？可在「房源信息」页对目标房源预约看房；看房与沟通群都是自愿手段，不构成承约前置。
-              </p>
-            </div>
+            <p v-if="group.current.status === 'TO_SIGN'" class="expand-cta-text">
+              等待管理方发出协议后，在“查看协议”中阅读条款并确认同意；协议确认后继续保留房屋，首期费用支付成功后正式生效，无需额外确认承租。
+            </p>
 
-            <!-- 首期费用（R71）：支付不改租约状态，故在此给出可操作入口与支付结果 -->
+            <!-- 首期费用（R71）：首期成功激活租约，在此提供入口与支付结果 -->
             <div v-if="firstPaymentDue(group.current)" class="expand-cta">
               <p class="expand-cta-text">
-                首期费用（首月租金 + 押金）尚未支付。支付成功后租约状态不变（首期与租期解耦），
+                首期费用（首月租金 + 押金）尚未支付。协议确认且首期支付成功后正式生效，租期不顺延；
                 支付结果记入下方支付记录。
               </p>
               <el-button
@@ -1193,10 +1088,10 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- 租赁协议（R64 轻量版 + DEF-078）：居民侧查看协议正文；居民只在承约确认一次，
-                 管理方确认时引用承约留痕，故居民侧不再有二次确认入口（面板内自处理） -->
+            <!-- 租赁协议：居民查看当前正文并确认一次，管理方发出时已同意。 -->
             <AgreementSignPanel
               :lease-id="group.current.id"
+              :lease-status="group.current.status"
               role="RESIDENT"
               :community-id="group.current.communityId"
               @changed="loadLeases"

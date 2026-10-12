@@ -1,0 +1,260 @@
+{
+  "date": "2026-10-12T02:03:53.657Z",
+  "database": "community_residence_payment_config_test",
+  "backend": "http://127.0.0.1:8087/api/v1",
+  "frontend": "http://127.0.0.1:5181",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "固定隔离库门禁",
+      "passed": true
+    },
+    {
+      "name": "双支付渠道停用",
+      "passed": true
+    },
+    {
+      "name": "公告草稿居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "公告居民不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "公告跨社区管理员不可发布",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "社区公告目标居民可读",
+      "passed": true
+    },
+    {
+      "name": "社区公告其他社区居民不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "社区公告游客不可读",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "定向公告触达本社区居民",
+      "passed": true
+    },
+    {
+      "name": "公告不触达其他社区",
+      "passed": true
+    },
+    {
+      "name": "他社区居民不可写公告阅读",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "公告阅读记录归本人",
+      "passed": true
+    },
+    {
+      "name": "他社区管理员不可读公告阅读明细",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "反馈详情拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝其他居民",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈详情拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝他社区管理员",
+      "passed": true,
+      "detail": {
+        "http": 404,
+        "code": 404
+      }
+    },
+    {
+      "name": "反馈详情拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息读取拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈消息写入拒绝服务人员",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈首次回复进入会话",
+      "passed": true
+    },
+    {
+      "name": "本人可读完整反馈会话",
+      "passed": true
+    },
+    {
+      "name": "居民不能办结反馈",
+      "passed": true,
+      "detail": {
+        "http": 403,
+        "code": 403
+      }
+    },
+    {
+      "name": "反馈办结通知本人",
+      "passed": true
+    },
+    {
+      "name": "办结后不可追加会话",
+      "passed": true,
+      "detail": {
+        "http": 200,
+        "code": 5004
+      }
+    },
+    {
+      "name": "办结历史消息仍可读",
+      "passed": true
+    },
+    {
+      "name": "游客不能创建公共资源预约",
+      "passed": false,
+      "detail": {
+        "http": 401,
+        "code": 401
+      }
+    }
+  ],
+  "failures": [
+    {
+      "name": "他社区居民不可写公告阅读",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "他社区管理员不可读公告阅读明细",
+      "passed": false,
+      "detail": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "游客不能创建公共资源预约",
+      "passed": false,
+      "detail": {
+        "http": 401,
+        "code": 401
+      }
+    }
+  ],
+  "communities": [
+    69,
+    70
+  ],
+  "users": [
+    76,
+    77,
+    78,
+    79
+  ],
+  "residents": [
+    79,
+    80,
+    81
+  ],
+  "cleanup": true,
+  "financialBefore": {
+    "payments": 0,
+    "refunds": 0
+  },
+  "error": "POST /resource-reservations: 500/500 系统内部错误",
+  "financialAfterCleanup": {
+    "payments": 0,
+    "refunds": 0
+  }
+}

@@ -236,7 +236,7 @@ public class ReservationService {
             reservation.setEndTime(dto.getEndTime());
             reservation.setStatus(ReservationStatus.PENDING);
             reservation.setPurpose(dto.getPurpose());
-            reservation.setContactPhone(dto.getContactPhone());
+            reservation.setContactPhone(resolveContactPhone(userId, dto.getContactPhone()));
             reservation.setRemark(dto.getRemark());
             try {
                 reservationMapper.insert(reservation);
@@ -250,6 +250,19 @@ public class ReservationService {
                 unlockQuietly(lock);
             }
         }
+    }
+
+    /* 联系电话保持选填；落库须非空，省略时从当前居民档案取值，不接收其他居民ID。 */
+    private String resolveContactPhone(Long residentId, String requestedPhone) {
+        String phone = requestedPhone;
+        if (!StringUtils.hasText(phone)) {
+            Resident resident = residentMapper.selectById(residentId);
+            phone = resident != null ? resident.getPhone() : null;
+        }
+        if (!StringUtils.hasText(phone) || !phone.matches("^1[3-9]\\d{9}$")) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "请补充联系电话或完善居民手机号");
+        }
+        return phone;
     }
 
     public ReservationVO getById(Long id) {

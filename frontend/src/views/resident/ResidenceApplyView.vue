@@ -16,7 +16,7 @@ import { relationTypeLabels } from '@/types/modules/resident'
  * 申请租住（R62 补：居民端此前缺少直接的租住申请入口；R62 补 v2：社区级自动通过）。
  * 流程：选择身份（租客 / 业主 / 家属）→ 提交入住申请 → 管理方审核通过后
  * 生成居住关系与租约（租期从审核通过起算）。
- * 社区开启「入住申请自动通过」后提交即时生效，本页据社区配置切换文案与结果态，
+ * 社区开启「入住申请自动通过」后提交即自动审核，正式租客关系延后至协议与首期成功，本页据社区配置切换文案与结果态，
  * 结果态以提交响应的 status 为准（不靠前端猜测社区开关）。
  *
  * 批次 g：已有待审核申请被拒（后端 ErrorCode.APPLICATION_PENDING_EXISTS）时，
@@ -84,6 +84,7 @@ async function handleSubmit(): Promise<void> {
   try {
     const application = await createResidenceApplication({
       houseId: housing.value.houseId,
+      housingId: housing.value.id,
       relationType: form.relationType,
       remark: form.remark.trim() === '' ? undefined : form.remark.trim()
     })
@@ -132,8 +133,8 @@ onMounted(() => {
       <h1>申请租住</h1>
       <p class="page-head-sub">
         {{ communityAutoApprove
-          ? '本社区入住申请即时生效：提交后立即生成居住关系与租约'
-          : '提交后由社区管理方审核，审核通过即生成居住关系与租约' }}
+          ? '本社区自动审核：提交后保留房屋并生成待签约租约；协议确认且首期成功后入住'
+          : '提交后临时保留房屋，由管理方审核；协议确认且首期成功后正式入住' }}
       </p>
     </header>
 
@@ -168,6 +169,12 @@ onMounted(() => {
       </div>
     </div>
 
+    <div v-else-if="!loading && !housing" class="result-card card">
+      <h2>该房源已下线或暂不可申请</h2>
+      <p>房屋可能已被入住申请或租约保留。请查看本人申请进度，或选择其他房源。</p>
+      <el-button type="primary" @click="goHub('application')">查看我的入住申请</el-button>
+      <el-button @click="router.push('/resident/housings')">返回房源列表</el-button>
+    </div>
     <div v-else-if="housing" class="apply-layout">
       <!-- 左：房源摘要 -->
       <aside class="housing-summary card">
@@ -226,8 +233,8 @@ onMounted(() => {
 
         <div class="form-tip">
           <template v-if="communityAutoApprove">
-            <p>· 本社区已开启入住申请自动通过，提交后立即生成居住关系与租约；</p>
-            <p>· 租期按社区默认租期起算，租金与押金取房源当前挂牌值；</p>
+            <p>· 本社区已开启入住申请自动通过，提交后立即生成待签约租约，不提前建立正式租客关系；</p>
+            <p>· 租期按社区默认租期起算，租金与押金取本次申请提交时的挂牌价快照；</p>
             <p>· 租约生成后可在「租住契约」查看，并在管理方发起协议后在线确认租赁协议。</p>
           </template>
           <template v-else>

@@ -114,4 +114,8 @@ class BuildingServiceTest {
                     .isInstanceOf(BusinessException.class);
         }
     }
+    @org.mockito.Mock
+    private com.community.residence.community.service.BuildingBoundaryService buildingBoundaryService;
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
 }

@@ -95,7 +95,7 @@ export interface IOperationLog {
   id: number
   operatorId: number
   operatorName: string
-  operatorType: 'ADMIN' | 'STAFF' | 'RESIDENT'
+  operatorType: 'ADMIN' | 'SUPER_ADMIN' | 'STAFF' | 'RESIDENT' | 'SYSTEM'
   module: string
   action: string
   targetType?: string
@@ -114,7 +114,7 @@ export interface IOperationLogDetail extends IOperationLog {
 /** 操作日志查询参数（接口设计.md 9.10.3.1） */
 export interface IOperationLogQuery extends PageQuery {
   operatorId?: number
-  operatorType?: 'ADMIN' | 'STAFF' | 'RESIDENT'
+  operatorType?: 'ADMIN' | 'SUPER_ADMIN' | 'STAFF' | 'RESIDENT' | 'SYSTEM'
   module?: string
   action?: string
   startTime?: string

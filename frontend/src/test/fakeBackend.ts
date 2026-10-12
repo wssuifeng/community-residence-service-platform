@@ -251,8 +251,10 @@ export interface FakeAgreement {
   templateId: number
   status: 'PENDING' | 'PARTIAL' | 'SIGNED' | 'CANCELLED'
   content: string
-  tenantConfirmedAt?: string | null
-  adminConfirmedAt?: string | null
+  tenantConfirmTime?: string | null
+  adminConfirmTime?: string | null
+  adminConfirmName?: string | null
+  tenantConfirmName?: string | null
   /** 管理方撤回原因（§9.17.9：cancel 的 reason 落 cancel_reason） */
   cancelReason?: string | null
   createdAt: string
@@ -1180,26 +1182,6 @@ export class FakeBackend {
     },
     getLeaseChanges: async (id: number) =>
       this.state.leaseChanges.filter((item) => item.leaseId === id).map((item) => ({ ...item })),
-    confirmTenancy: async (id: number) => {
-      const actor = currentActor()
-      const lease = this.state.leases.find((item) => item.id === id)
-      if (!lease) fail(CODES.NOT_FOUND, '租约不存在')
-      if (actor.role === 'ADMIN' || actor.role === 'SUPER_ADMIN') {
-        /* 管理端不可代确认（R67 越权拒绝） */
-        fail(CODES.FORBIDDEN, '管理端不可代居民确认承租')
-      }
-      /* 仅本人租约可确认（§9.19.3） */
-      this.assertLeaseOwned(lease, actor)
-      /* 承约不设硬前置（用户裁决 2026-09-22）：看房与租约沟通群都只是**自愿的交通手段**，
-         不构成承约门槛——后端已撤掉 DEF-077 硬前置（5607/5608 仅保留错误码定义）。
-         承约后由管理方直接推进协议确认（见 confirmLeaseAgreement 的 DEF-078 去重）。 */
-      if (!lease.tenantConfirmAt) {
-        lease.tenantConfirmAt = nowIso()
-        lease.tenantConfirmBy = actor.id
-      }
-      /* 幂等：重复确认不覆盖首次留痕 */
-      return this.leaseView(lease)
-    },
     listLeasePayments: async (id: number) =>
       this.state.payments
         .filter((item) => item.leaseId === id)
@@ -1292,7 +1274,7 @@ export class FakeBackend {
       const lease = this.state.leases.find((item) => item.id === id)
       if (!lease) fail(CODES.NOT_FOUND, '租约不存在')
       const allowed: Record<string, string[]> = {
-        TO_SIGN: ['ACTIVE', 'REJECTED'],
+        TO_SIGN: ['REJECTED'],
         ACTIVE: ['MOVED_OUT'],
         MOVED_OUT: ['ARCHIVED'],
         PENDING: ['TO_SIGN', 'REJECTED']
@@ -1682,10 +1664,9 @@ export class FakeBackend {
     createLeaseAgreement: async (data: { leaseId: number; templateId: number }) => {
       const lease = this.state.leases.find((item) => item.id === data.leaseId)
       if (!lease) fail(CODES.NOT_FOUND, '租约不存在')
-      /* 前置：未确认承租 → 5601（R67） */
-      if (!lease.tenantConfirmAt) {
-        fail(CODES.LEASE_TENANCY_NOT_CONFIRMED, '居民尚未确认承租，不可发起协议')
-      }
+      const actor = currentActor()
+      if (!['ADMIN', 'SUPER_ADMIN'].includes(actor.role)) fail(CODES.FORBIDDEN, '仅管理方可发出协议')
+      if (lease.status !== 'TO_SIGN') fail(CODES.LEASE_STATUS_INVALID, '仅待签约可发出协议')
       const unfinished = this.state.agreements.find(
         (item) => item.leaseId === data.leaseId && item.status !== 'SIGNED' && item.status !== 'CANCELLED'
       )
@@ -1695,23 +1676,24 @@ export class FakeBackend {
         id: this.nextId('agreement'),
         leaseId: data.leaseId,
         templateId: data.templateId,
-        status: 'PENDING',
+        status: 'PARTIAL',
         /* 正文按发起时租约数据渲染为快照（R64） */
         content: (template?.content ?? '')
           .replace('{{tenantName}}', lease.tenantName)
           .replace('{{houseLocation}}', lease.houseLocation)
           .replace('{{monthlyRent}}', String(lease.monthlyRent)),
-        tenantConfirmedAt: null,
-        adminConfirmedAt: null,
+        tenantConfirmTime: null,
+        adminConfirmTime: nowIso(),
+        adminConfirmName: '管理方' + actor.id,
         createdAt: nowIso()
       }
       this.state.agreements.push(agreement)
-      lease.agreementStatus = 'PENDING'
+      lease.agreementStatus = 'PARTIAL'
       this.state.leaseChanges.push({
         id: this.nextId('leaseChange'),
         leaseId: lease.id,
         changeType: 'AGREEMENT',
-        newValue: 'PENDING',
+        newValue: 'PARTIAL',
         operatorType: 'ADMIN',
         createdAt: nowIso()
       })
@@ -1722,23 +1704,21 @@ export class FakeBackend {
       if (!found) fail(CODES.NOT_FOUND, '租赁协议不存在')
       return found
     },
-    confirmLeaseAgreement: async (id: number, data: { party: 'TENANT' | 'ADMIN'; remark?: string }) => {
+    confirmLeaseAgreement: async (id: number, _data: { remark?: string } = {}) => {
       const agreement = this.state.agreements.find((item) => item.id === id)
       if (!agreement) fail(CODES.NOT_FOUND, '租赁协议不存在')
-      if (agreement.status === 'CANCELLED') fail(CODES.LEASE_STATUS_INVALID, '协议已撤回')
       const lease = this.state.leases.find((item) => item.id === agreement.leaseId)
-      if (data.party === 'TENANT') {
-        if (!agreement.tenantConfirmedAt) agreement.tenantConfirmedAt = nowIso()
-      } else {
-        if (!agreement.adminConfirmedAt) agreement.adminConfirmedAt = nowIso()
-        /* DEF-078 去重：居民「同意承租」只在承约采集一次——管理方确认时若协议上还没有
-           居民侧留痕，直接引用租约的承约留痕（与后端 AgreementService.confirm 同口径） */
-        if (!agreement.tenantConfirmedAt && lease?.tenantConfirmAt) {
-          agreement.tenantConfirmedAt = lease.tenantConfirmAt
-        }
-      }
+      if (!lease) fail(CODES.NOT_FOUND, '租约不存在')
+      const actor = currentActor()
+      if (actor.role !== 'RESIDENT' || actor.id !== lease.tenantId) fail(CODES.FORBIDDEN, '仅居民本人可同意协议')
+      if (agreement.status === 'SIGNED') return agreement
+      if (agreement.status === 'CANCELLED') fail(CODES.LEASE_STATUS_INVALID, '协议已撤回')
+      if (!agreement.adminConfirmTime) fail(CODES.LEASE_STATUS_INVALID, '旧协议须撤回重发')
+      if (lease.status !== 'TO_SIGN') fail(CODES.LEASE_STATUS_INVALID, '仅待签约可确认协议')
+      agreement.tenantConfirmTime = nowIso()
+      agreement.tenantConfirmName = '居民' + actor.id
       /* 双方齐 → SIGNED；联动：TO_SIGN → ACTIVE + 房屋置已入住（§6.2/§6.7a） */
-      if (agreement.tenantConfirmedAt && agreement.adminConfirmedAt) {
+      if (agreement.tenantConfirmTime && agreement.adminConfirmTime) {
         agreement.status = 'SIGNED'
         if (lease && lease.status === 'TO_SIGN') {
           this.changeStatus(lease, 'ACTIVE', 'SYSTEM')
@@ -1770,6 +1750,7 @@ export class FakeBackend {
       return agreement
     },
     cancelLeaseAgreement: async (id: number, reason: string) => {
+      if (!['ADMIN', 'SUPER_ADMIN'].includes(currentActor().role)) fail(CODES.FORBIDDEN, '仅管理方可撤回')
       const agreement = this.state.agreements.find((item) => item.id === id)
       if (!agreement) fail(CODES.NOT_FOUND, '租赁协议不存在')
       if (agreement.status === 'SIGNED') fail(CODES.LEASE_STATUS_INVALID, '已双方确认的协议不可撤回')

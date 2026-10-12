@@ -5,10 +5,16 @@ import com.community.residence.housing.entity.ViewingAppointment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Select;
 
 /** 看房预约数据访问 */
 @Mapper
 public interface ViewingAppointmentMapper extends BaseMapper<ViewingAppointment> {
+
+    /* 状态判定与违约入账在同一行锁内，重复标记不得增加违约次数。 */
+    @Select("SELECT * FROM viewing_appointment WHERE id = #{id} FOR UPDATE")
+    ViewingAppointment selectByIdForUpdate(@Param("id") Long id);
+
 
     /*
      * 看房 → 租约 指向修正（DEF-081）：审批建租约时，把该居民该房屋下

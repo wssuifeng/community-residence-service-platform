@@ -1,4 +1,6 @@
 package com.community.residence.resident.service;
+import com.community.residence.common.context.SecurityUtils;
+import com.community.residence.housing.entity.Housing;
 
 import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.HouseStatusConstant;
@@ -96,6 +98,10 @@ class ResidenceApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
+        com.community.residence.housing.entity.Housing source = new com.community.residence.housing.entity.Housing();
+        source.setId(1L); source.setHouseId(1L); source.setCommunityId(1L); source.setStatus("AVAILABLE"); source.setRentType("RENT"); source.setMonthlyRent(new java.math.BigDecimal("2800"));
+        org.mockito.Mockito.lenient().when(housingMapper.selectByIdForUpdate(1L)).thenReturn(source);
+
         vacantHouse = new House();
         vacantHouse.setId(1L);
         vacantHouse.setUnitId(1L);
@@ -126,12 +132,14 @@ class ResidenceApplicationServiceTest {
             listing.setHouseId(1L);
             listing.setMonthlyRent(new BigDecimal("2500.00"));
             listing.setDeposit(new BigDecimal("5000.00"));
-            when(housingMapper.selectOne(any())).thenReturn(listing);
+            when(housingMapper.selectByIdForUpdate(1L)).thenReturn(listing);
+            listing.setId(1L); listing.setStatus("AVAILABLE");
             when(conversationService.createLeaseGroup(any(), any(), any(), any()))
                     .thenReturn(leaseGroupConversation());
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(1L);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
 
             applicationService.create(dto);
@@ -148,7 +156,7 @@ class ResidenceApplicationServiceTest {
             assertThat(lease.getEndDate()).isEqualTo(LocalDate.now().plusMonths(3));
 
             /* 居住关系建立、房屋**保持空置**（不再翻转 OCCUPIED）、申请落 APPROVED */
-            verify(relationMapper).insert(any(ResidenceRelation.class));
+            verify(relationMapper, never()).insert(any(ResidenceRelation.class));
             assertThat(vacantHouse.getStatus()).isEqualTo(HouseStatusConstant.VACANT);
             ArgumentCaptor<ResidenceApplication> appCaptor = ArgumentCaptor.forClass(ResidenceApplication.class);
             verify(applicationMapper).updateById(appCaptor.capture());
@@ -183,6 +191,7 @@ class ResidenceApplicationServiceTest {
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(1L);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
 
             applicationService.create(dto);
@@ -223,6 +232,7 @@ class ResidenceApplicationServiceTest {
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(1L);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
 
             assertThatThrownBy(() -> applicationService.create(dto))
@@ -243,6 +253,7 @@ class ResidenceApplicationServiceTest {
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(1L);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
 
             assertThatThrownBy(() -> applicationService.create(dto))
@@ -262,7 +273,7 @@ class ResidenceApplicationServiceTest {
             when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
             when(applicationMapper.update(isNull(), any())).thenReturn(1);
             when(applicationMapper.updateById(any(ResidenceApplication.class))).thenReturn(1);
-            when(relationMapper.insert(any(com.community.residence.resident.entity.ResidenceRelation.class))).thenReturn(1);
+
             when(leaseRecordMapper.insert(any(com.community.residence.lease.entity.LeaseRecord.class))).thenReturn(1);
             when(conversationService.createLeaseGroup(any(), any(), any(), any()))
                     .thenReturn(leaseGroupConversation());
@@ -483,6 +494,7 @@ class ResidenceApplicationServiceTest {
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(1L);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
 
             assertThatThrownBy(() -> applicationService.create(dto))
@@ -503,6 +515,7 @@ class ResidenceApplicationServiceTest {
 
             CreateApplicationDTO dto = new CreateApplicationDTO();
             dto.setHouseId(1L);
+            dto.setHousingId(1L);
             dto.setRelationType("TENANT");
 
             assertThatThrownBy(() -> applicationService.create(dto))
@@ -545,5 +558,54 @@ class ResidenceApplicationServiceTest {
         approved.setRelationType("TENANT");
         approved.setStatus("APPROVED");
         return approved;
+    }
+    @org.mockito.Mock
+    private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
+
+    @Test
+    void explicitSourcePriceIsFrozenAtSubmission() {
+        Community community = new Community(); community.setId(1L); community.setAutoApproveResidence(0);
+        when(communityService.requireCommunity(1L)).thenReturn(community);
+        when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+        var source = new Housing(); source.setId(88L); source.setHouseId(1L); source.setCommunityId(1L);
+        source.setStatus("AVAILABLE"); source.setRentType("RENT"); source.setMonthlyRent(new BigDecimal("3500")); source.setDeposit(new BigDecimal("7000"));
+        when(housingMapper.selectByIdForUpdate(88L)).thenReturn(source);
+        CreateApplicationDTO dto = new CreateApplicationDTO(); dto.setHouseId(1L); dto.setHousingId(88L); dto.setRelationType("TENANT");
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getUserId).thenReturn(1L);
+            var result = applicationService.create(dto);
+            source.setMonthlyRent(new BigDecimal("9999"));
+            assertThat(result.getHousingId()).isEqualTo(88L);
+            assertThat(result.getListedMonthlyRent()).isEqualByComparingTo("3500");
+            assertThat(result.getListedDeposit()).isEqualByComparingTo("7000");
+            verify(housingMapper, never()).selectOne(any());
+            verify(relationMapper, never()).insert(any(ResidenceRelation.class));
+        }
+    }
+
+    @Test
+    void tenantMissingSourceIsRejectedWithoutInsert() {
+        when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+        CreateApplicationDTO dto = new CreateApplicationDTO(); dto.setHouseId(1L); dto.setRelationType("TENANT");
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getUserId).thenReturn(1L);
+            assertThatThrownBy(() -> applicationService.create(dto)).isInstanceOf(BusinessException.class).hasMessageContaining("来源挂牌");
+            verify(applicationMapper, never()).insert(any(ResidenceApplication.class));
+        }
+    }
+
+    @Test
+    void wrongHouseOrSaleSourceIsRejected() {
+        when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+        var source = new Housing(); source.setId(88L); source.setHouseId(99L); source.setStatus("AVAILABLE"); source.setRentType("RENT");
+        when(housingMapper.selectByIdForUpdate(88L)).thenReturn(source);
+        CreateApplicationDTO dto = new CreateApplicationDTO(); dto.setHouseId(1L); dto.setHousingId(88L); dto.setRelationType("TENANT");
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getUserId).thenReturn(1L);
+            assertThatThrownBy(() -> applicationService.create(dto)).isInstanceOf(BusinessException.class);
+            source.setHouseId(1L); source.setRentType("SALE");
+            assertThatThrownBy(() -> applicationService.create(dto)).isInstanceOf(BusinessException.class);
+            verify(applicationMapper, never()).insert(any(ResidenceApplication.class));
+        }
     }
 }

@@ -221,6 +221,9 @@ public class LeaseMoveOutApplicationService {
                     "当前退租申请状态不可通过：" + application.getStatus());
         }
         LeaseRecord lease = requireLease(application.getLeaseId());
+        houseMapper.selectByIdForUpdate(application.getHouseId());
+        LeaseRecord lockedLease = leaseMapper.selectByIdForUpdate(application.getLeaseId());
+        if (lockedLease != null) lease = lockedLease;
         if (!LeaseStatus.ACTIVE.equals(lease.getStatus())) {
             throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,
                     "仅已生效租约可办理退租，当前状态：" + lease.getStatus());
@@ -250,7 +253,7 @@ public class LeaseMoveOutApplicationService {
         application.setReviewTime(reviewTime);
         application.setRejectReason(null);
 
-        /* ② 居住关系迁出：该租客在本租约房屋下未迁出的关系（同房屋可能有多条，逐条终止） */
+        /* ② 居住关系迁出：本租约精确关联的关系；旧未关联关系仅在唯一候选时兼容 */
         List<ResidenceRelation> relations = relationMapper.selectList(new LambdaQueryWrapper<ResidenceRelation>()
                 .eq(ResidenceRelation::getResidentId, application.getResidentId())
                 .eq(ResidenceRelation::getHouseId, application.getHouseId())
@@ -260,6 +263,8 @@ public class LeaseMoveOutApplicationService {
                     application.getLeaseId());
         } else {
             for (ResidenceRelation relation : relations) {
+                if (!lease.getId().equals(relation.getLeaseId())
+                        && !(relation.getLeaseId() == null && relations.size() == 1)) continue;
                 relation.setMoveOutDate(application.getMoveOutDate());
                 relationMapper.updateById(relation);
             }
@@ -277,7 +282,11 @@ public class LeaseMoveOutApplicationService {
         if (house == null) {
             log.warn("退租通过但房屋不存在，跳过房态回置：houseId={}", application.getHouseId());
         } else {
-            house.setStatus(HouseStatusConstant.VACANT);
+            Long remaining = relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
+                    .eq(ResidenceRelation::getHouseId, application.getHouseId()).isNull(ResidenceRelation::getMoveOutDate));
+            house.setStatus(remaining != null && remaining > 0 ? HouseStatusConstant.OCCUPIED
+                    : leaseMapper.selectBlockingIdsForUpdate(application.getHouseId()).isEmpty()
+                        ? HouseStatusConstant.VACANT : HouseStatusConstant.RESERVED);
             houseMapper.updateById(house);
         }
 
@@ -286,7 +295,8 @@ public class LeaseMoveOutApplicationService {
                 ? dto.getHousingStatus() : DEFAULT_HOUSING_STATUS;
         int updatedListings = housingMapper.update(null, new LambdaUpdateWrapper<Housing>()
                 .set(Housing::getStatus, housingStatus)
-                .eq(Housing::getHouseId, application.getHouseId()));
+                .eq(Housing::getHouseId, application.getHouseId())
+                .ne(!"OFFLINE".equals(housingStatus), Housing::getStatus, "OFFLINE"));
         log.info("在架房源状态回收：houseId={}, housingStatus={}, affected={}",
                 application.getHouseId(), housingStatus, updatedListings);
 

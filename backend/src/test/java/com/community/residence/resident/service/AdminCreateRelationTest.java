@@ -51,8 +51,30 @@ class AdminCreateRelationTest {
     @Mock
     private LeaseRecordMapper leaseRecordMapper;
 
+    @Mock private com.community.residence.resident.mapper.ResidenceApplicationMapper applicationMapper;
+
     @InjectMocks
     private ResidenceRelationService relationService;
+
+    @Test void reservedHouseCannotBypassApproval() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> ignored = mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(residentMapper.selectById(10L)).thenReturn(resident());
+            House h = vacantHouse(); h.setStatus("RESERVED");
+            when(houseMapper.selectByIdForUpdate(101L)).thenReturn(h);
+            assertThatThrownBy(() -> relationService.adminCreate(dto())).isInstanceOf(BusinessException.class);
+            org.mockito.Mockito.verify(relationMapper, org.mockito.Mockito.never()).insert(any(ResidenceRelation.class));
+        }
+    }
+
+    @Test void pendingApplicationCannotBeBypassedByDirectRelation() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> ignored = mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            when(residentMapper.selectById(10L)).thenReturn(resident());
+            when(houseMapper.selectByIdForUpdate(101L)).thenReturn(vacantHouse());
+            when(applicationMapper.selectCount(any())).thenReturn(1L);
+            assertThatThrownBy(() -> relationService.adminCreate(dto())).isInstanceOf(BusinessException.class);
+            org.mockito.Mockito.verify(relationMapper, org.mockito.Mockito.never()).insert(any(ResidenceRelation.class));
+        }
+    }
 
     @Test
     @DisplayName("D-端点3：空置房屋直建关系成功——房屋置 OCCUPIED、isPrimary=1")
@@ -61,12 +83,13 @@ class AdminCreateRelationTest {
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
             mocked.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(5L);
             org.mockito.Mockito.lenient().when(residentMapper.selectById(10L)).thenReturn(resident());
-            when(houseMapper.selectById(101L)).thenReturn(vacantHouse());
+            when(houseMapper.selectByIdForUpdate(101L)).thenReturn(vacantHouse());
             when(relationMapper.selectCount(any())).thenReturn(0L);
             when(relationMapper.insert(any(ResidenceRelation.class))).thenAnswer(inv -> {
                 inv.getArgument(0, ResidenceRelation.class).setId(200L);
                 return 1;
             });
+            org.mockito.Mockito.lenient().when(houseMapper.selectById(101L)).thenReturn(vacantHouse());
             /* toVO 装配链（居民/单元/楼栋回填） */
             org.mockito.Mockito.lenient().when(residentMapper.selectById(any())).thenReturn(resident());
             Unit unit = new Unit();
@@ -102,7 +125,7 @@ class AdminCreateRelationTest {
             when(residentMapper.selectById(10L)).thenReturn(resident());
             House occupied = vacantHouse();
             occupied.setStatus("OCCUPIED");
-            when(houseMapper.selectById(101L)).thenReturn(occupied);
+            when(houseMapper.selectByIdForUpdate(101L)).thenReturn(occupied);
 
             assertThatThrownBy(() -> relationService.adminCreate(dto()))
                     .isInstanceOf(BusinessException.class)
@@ -125,7 +148,7 @@ class AdminCreateRelationTest {
                     .thenReturn(new com.community.residence.common.context.UserContext(
                             5L, "admin1", "ADMIN", java.util.Set.of(2L)));
             when(residentMapper.selectById(10L)).thenReturn(resident());
-            when(houseMapper.selectById(101L)).thenReturn(vacantHouse());
+            when(houseMapper.selectByIdForUpdate(101L)).thenReturn(vacantHouse());
 
             assertThatThrownBy(() -> relationService.adminCreate(dto()))
                     .isInstanceOf(com.community.residence.common.exception.ForbiddenException.class);

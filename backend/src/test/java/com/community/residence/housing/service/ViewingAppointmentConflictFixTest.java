@@ -274,4 +274,8 @@ class ViewingAppointmentConflictFixTest {
     private LocalDate date() {
         return LocalDate.now().plusDays(7);
     }
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
+    }
 }

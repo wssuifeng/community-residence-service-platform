@@ -21,6 +21,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 
@@ -38,6 +41,7 @@ import java.time.LocalDateTime;
 public class OperationLogAspect {
 
     private final SysOperationLogMapper operationLogMapper;
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     private final SpelExpressionParser spelParser = new SpelExpressionParser();
     private final ParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
@@ -55,7 +59,7 @@ public class OperationLogAspect {
             entry.setOperationType(operationLogAnnotation.operationType());
             entry.setTargetType(operationLogAnnotation.targetType());
             entry.setTargetId(resolveLong(joinPoint, operationLogAnnotation.targetId(), result));
-            entry.setContent(jsonContent(resolveContent(joinPoint, operationLogAnnotation, result)));
+            entry.setContent(jsonContent(resolveContent(joinPoint, operationLogAnnotation, result), joinPoint));
             fillRequestMeta(entry);
             entry.setCreatedAt(LocalDateTime.now());
             operationLogMapper.insert(entry);
@@ -66,14 +70,16 @@ public class OperationLogAspect {
         }
     }
 
-    /* content 列为 JSON 类型（sys_operation_log DDL）：统一包裹 {"action":...} 结构 */
-    private String jsonContent(String text) {
-        String escaped = text == null ? "" : text
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "");
-        return "{\"action\":\"" + escaped + "\"}";
+    /* 复用既有JSON列保留action；仅HTTP调用追加安全白名单，不读取或保存原始请求体。 */
+    private String jsonContent(String text, JoinPoint joinPoint) throws Exception {
+        Map<String, Object> content = new LinkedHashMap<>();
+        content.put("action", text == null ? "" : text);
+        if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes) {
+            Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+            Map<String, Object> params = SafeOperationParameters.capture(method, joinPoint.getArgs());
+            if (!params.isEmpty()) content.put("requestParams", params);
+        }
+        return JSON.writeValueAsString(content);
     }
 
     /* 解析 SpEL（#参数名/#result），表达式为空或求值失败返回 null */

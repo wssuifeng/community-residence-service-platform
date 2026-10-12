@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-12T04:06:22.038Z",
+  "scope": "50步骤7/8批次bj，仅现行非交易设计符合性",
+  "defectsFixed": [
+    "DEF-177",
+    "DEF-178"
+  ],
+  "backend": {
+    "run": 910,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "suites": 41,
+    "tests": 278,
+    "failures": 0,
+    "typecheck": true,
+    "build": true,
+    "largeChunkWarning": true
+  },
+  "apiChecks": 81,
+  "totalWithBrowser": 818,
+  "notAdditive": "818项已包含基础接口、布局等断言，不能与81相加，也不等于818条业务用例",
+  "routes": {
+    "independent": 53,
+    "independentChecked": 52,
+    "independentFinancialDeferred": 1,
+    "cases": 77,
+    "viewportChecks": 231,
+    "widths": [
+      1440,
+      1024,
+      768
+    ],
+    "legacyAliasesChecked": 26
+  },
+  "browser": {
+    "errors": 0,
+    "blockedRequests": 0,
+    "failedHttpResponses": 0,
+    "screenshots": 79,
+    "sidebarInteractiveChecks": 11
+  },
+  "development": {
+    "checks": 18,
+    "counts": [
+      "1",
+      "600",
+      "9",
+      "1",
+      "0",
+      "0"
+    ],
+    "backend": 8084,
+    "frontend": 5176,
+    "jar": "nontransaction-bj-release-20261012.jar"
+  },
+  "isolatedCleanup": {
+    "syntheticUsers": 0,
+    "syntheticResidents": 0,
+    "publicBjNotices": 0,
+    "payments": 0,
+    "refunds": 0
+  },
+  "coverage": {
+    "INSTRUCTION": {
+      "missed": 13673,
+      "covered": 31819,
+      "percent": 69.94
+    },
+    "BRANCH": {
+      "missed": 1438,
+      "covered": 2383,
+      "percent": 62.37
+    },
+    "LINE": {
+      "missed": 2669,
+      "covered": 6549,
+      "percent": 71.05
+    },
+    "COMPLEXITY": {
+      "missed": 1596,
+      "covered": 1624,
+      "percent": 50.43
+    },
+    "METHOD": {
+      "missed": 519,
+      "covered": 782,
+      "percent": 60.11
+    },
+    "CLASS": {
+      "missed": 72,
+      "covered": 141,
+      "percent": 66.2
+    }
+  },
+  "coverageClassMismatchWarning": false,
+  "transactionsExecuted": false,
+  "businessDataCleared": false,
+  "userBrowserTouched": false,
+  "committed": false,
+  "pushed": false,
+  "deferred": [
+    "支付/查单/退款及金融自动取数详情、非空租约卡片",
+    "DEF-142原Excel文件与入口、DEF-145原类别与入口",
+    "最终用户复验与未列业务数据/操作组合",
+    "50步骤9～12及60/70；体验观察仅登记，未进行需求验收"
+  ],
+  "documentationAudit": {
+    "date": "2026-10-12",
+    "before": {
+      "count": 1663,
+      "byCode": {
+        "broken-link": 309,
+        "acceptance-missing": 3,
+        "status-symbol-out-of-scope": 1350,
+        "dependency-mismatch": 1
+      }
+    },
+    "after": {
+      "count": 1599,
+      "byCode": {
+        "acceptance-missing": 3,
+        "status-symbol-out-of-scope": 1350,
+        "broken-link": 245,
+        "dependency-mismatch": 1
+      }
+    },
+    "newIssues": [],
+    "scope": "定向当前总控/50引用修正，历史已完成包/归档及缺失Temp证据不重造",
+    "allDocumentsPassed": false
+  },
+  "services": {
+    "developmentBackend": {
+      "port": 8084,
+      "pid": 22984
+    },
+    "developmentFrontend": {
+      "port": 5176,
+      "pid": 8960,
+      "proxyReadOnlyVerified": true,
+      "proxyProbe": "/api/v1/housings?size=1"
+    },
+    "isolatedStopped": true
+  },
+  "whitespaceDiffCheckPassed": true,
+  "newJsonSensitiveFieldCheckPassed": true
+}

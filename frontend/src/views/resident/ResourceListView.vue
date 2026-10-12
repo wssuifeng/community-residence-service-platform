@@ -22,7 +22,7 @@ const noRelation = ref(false)
 
 const hasResources = computed(() => resources.value.length > 0)
 
-/** 资源类型 → 线性 SVG 图标（与全站 stroke 图标语言一致） */
+/** 资源类型 → 线性 SVG 图标（与全站 stroke 图标语言一致；资源无图时的回退主视觉） */
 function typeIcon(type: ResourceType): string {
   switch (type) {
     case 'GYM':
@@ -33,6 +33,11 @@ function typeIcon(type: ResourceType): string {
     default:
       return 'M3 5h18v10H3zM8 19h8M12 15v4M7 9h2M12 9h2M17 9h.01'
   }
+}
+
+/** 资源首图（契约：无图为空数组 []；旧后端缺字段时同样按无图处理，回退类型图标不空白） */
+function coverImage(resource: IPublicResource): string | undefined {
+  return resource.images?.[0]
 }
 
 async function load(): Promise<void> {
@@ -96,7 +101,13 @@ onMounted(load)
         class="resource-card"
       >
         <div class="resource-media">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <img
+            v-if="coverImage(resource)"
+            class="resource-media-img"
+            :src="coverImage(resource)"
+            :alt="resource.name"
+          />
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
             <path :d="typeIcon(resource.type)" />
           </svg>
         </div>
@@ -196,14 +207,21 @@ onMounted(load)
   box-shadow: var(--shadow-md);
 }
 
-/* 类型图标主视觉区：主色浅底 + 大号线性图标（资源无图片字段的占位语言） */
+/* 主视觉区（3:2 横向）：有图显示图片（object-fit: cover），无图回退主色浅底 + 大号线性类型图标 */
 .resource-media {
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 2;
   background: var(--color-primary-bg);
   color: var(--color-primary);
+  overflow: hidden;
+}
+
+.resource-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .resource-media svg {

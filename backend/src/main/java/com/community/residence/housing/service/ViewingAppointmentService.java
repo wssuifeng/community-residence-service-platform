@@ -3,6 +3,7 @@ package com.community.residence.housing.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.community.residence.auth.entity.SysAdminCommunity;
+import com.community.residence.auth.service.TokenRevocationService;
 import com.community.residence.auth.entity.SysUser;
 import com.community.residence.auth.mapper.SysAdminCommunityMapper;
 import com.community.residence.auth.mapper.SysUserMapper;
@@ -104,25 +105,27 @@ public class ViewingAppointmentService {
     private final SimpMessagingTemplate messagingTemplate;
     private final WebSocketSessionService webSocketSessionService;
     private final ConversationService conversationService;
+    private final TokenRevocationService tokenRevocationService;
 
     /**
      * 创建预约：仅居民账号可提交，身份取自令牌；时段落在房源模板内 + 冲突检测。
      * DEF-045：今日已结束时段（endTime<=now）拒绝（5804），与可约时段接口同口径。
      * R55 冲突校验复用 C7（R33）机制——「Redisson 分布式锁 + 数据库唯一约束
      * （V10 uk_viewing_slot）」双保险：锁内做区间重叠判定（与 C7 同口径，
-     * 含半重叠/包含/被包含，仅首尾相接放行）后单条 INSERT 自动提交；
-     * 完全同槽竞态漏网由唯一约束兜底。刻意不加 @Transactional（理由同 C7）。
+     * 含半重叠/包含/被包含，仅首尾相接放行）。房屋行锁保留到事务提交，
+     * 与入住申请串行，完整同槽另由唯一约束兜底。
      * DEF-062：锁内落库前增「预约人日程冲突」检查（跨房源 + 跨域）——同账号
      * 同日与任意看房预约或任意资源预约时间区间重叠即拒 5807（「影分身」拦截；
      * 新建预约均有账号，历史游客记录不参与新建冲突检查）。
      */
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public ViewingAppointmentVO create(CreateViewingAppointmentDTO dto) {
         requireResidentIdentity();
         ViewingAppointment appointment = insertAppointment(dto);
         /* R63 预约创建即建群：居民 + 该社区启用管理员入群；历史游客预约
            不进入新建路径；建群与
            conversation_id 回写发生在锁外——insertAppointment 返回时锁已
-           释放，预约行已落库可承载回写（OCR DEF-118 注释时序修正：
+           释放，但房屋行锁仍保留至本事务提交；预约、群聊及指向共同落库（OCR DEF-118 注释时序修正：
            原「建群在锁内落库之后」与实现不符） */
         Conversation conversation = conversationService.createViewingGroup(
                 appointment.getId(), appointment.getCommunityId(),
@@ -141,6 +144,7 @@ public class ViewingAppointmentService {
      * 会话已关闭（CLOSED，退租通过/租约归档后停收停发）拒绝 5604（DEF-110，
      * 接口设计 §9.19.7 错误码消费点）。
      */
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public ViewingAppointmentVO createInConversation(Long conversationId, CreateViewingAppointmentDTO dto) {
         requireResidentIdentity();
         Conversation conversation = conversationService.requireLeaseGroup(conversationId);
@@ -201,16 +205,17 @@ public class ViewingAppointmentService {
 
     /**
      * 预约创建内核（R55/R60/DEF-045/DEF-062）：身份解析、可约校验、日程冲突检查
-     * 与落库一律在此完成；`@Transactional` 刻意不加（理由同 C7 冲突检测：
-     * 锁内单条 INSERT 自动提交，完全同槽竞态由 V10 唯一约束兜底）。
+     * 与落库一律在调用方事务中完成；先锁真实房屋，再检查公开可用性与预约冲突。
+     * 房屋行锁持有至提交，覆盖分布式时段锁释放后的窗口，V10 兜底完全同槽。
      * 会话内发起与房源页发起共用，保证两条入口的状态机与冲突口径完全一致。
      */
     private ViewingAppointment insertAppointment(CreateViewingAppointmentDTO dto) {
         if (dto.getHousingId() == null) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "房源不能为空");
         }
+        housingMapper.lockHouseForHousing(dto.getHousingId());
         Housing housing = housingMapper.selectById(dto.getHousingId());
-        if (housing == null || !"AVAILABLE".equals(housing.getStatus())) {
+        if (housing == null || housingMapper.publicAvailabilityCount(dto.getHousingId()) == 0) {
             throw new ResourceNotFoundException("房源不存在或不可预约");
         }
         if (!dto.getEndTime().isAfter(dto.getStartTime())) {
@@ -330,11 +335,11 @@ public class ViewingAppointmentService {
         ViewingAppointment appointment = requireAppointment(id);
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             if (!java.util.Objects.equals(appointment.getUserId(), SecurityUtils.getUserId())) {
-                throw new BusinessException(ErrorCode.FORBIDDEN, "无权查看他人预约");
+                throw new ForbiddenException("无权查看他人预约");
             }
         } else if (SecurityUtils.hasRole(RoleConstants.STAFF)) {
             if (!java.util.Objects.equals(appointment.getAssignedStaffId(), SecurityUtils.getUserId())) {
-                throw new BusinessException(ErrorCode.FORBIDDEN, "仅可查看分配给本人的预约");
+                throw new ForbiddenException("仅可查看分配给本人的预约");
             }
         } else if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
             SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
@@ -426,7 +431,7 @@ public class ViewingAppointmentService {
         ViewingAppointment appointment = requireAppointment(id);
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             if (!java.util.Objects.equals(appointment.getUserId(), SecurityUtils.getUserId())) {
-                throw new BusinessException(ErrorCode.FORBIDDEN, "仅预约人本人可取消");
+                throw new ForbiddenException("仅预约人本人可取消");
             }
         } else if (SecurityUtils.hasRole(RoleConstants.ADMIN)
                 || SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
@@ -451,11 +456,15 @@ public class ViewingAppointmentService {
         }
     }
 
-    /* 标记违约：RESERVED → VIOLATED；居民违约写 violation_record（游客无账号不计） */
+    /* 标记违约：预约行锁防重；账号级统一计数达到现行阈值后冻结并吊销旧令牌。
+       历史游客只保留预约处置，不生成账号级计数或通知。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "DISPOSAL", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约违约处置：' + #reason")
     public void violate(Long id, String reason) {
-        ViewingAppointment appointment = requireAppointment(id);
+        ViewingAppointment appointment = appointmentMapper.selectByIdForUpdate(id);
+        if (appointment == null) {
+            throw new ResourceNotFoundException("看房预约不存在");
+        }
         SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
         validateTransition(appointment, "VIOLATED");
         appointment.setStatus("VIOLATED");
@@ -463,6 +472,7 @@ public class ViewingAppointmentService {
         appointmentMapper.updateById(appointment);
 
         if (appointment.getUserId() != null) {
+            Resident resident = residentMapper.selectByIdForUpdate(appointment.getUserId());
             ViolationRecord record = new ViolationRecord();
             record.setUserId(appointment.getUserId());
             record.setViolationType("VIEWING_NO_SHOW");
@@ -470,9 +480,35 @@ public class ViewingAppointmentService {
             record.setPunishment("记录违约");
             record.setRemark(reason);
             violationRecordMapper.insert(record);
+            int count = violationRecordMapper.selectIdsByUserIdForUpdate(appointment.getUserId()).size();
+            if (resident != null && count >= violationLimit()) {
+                if (!CommonStatus.FROZEN.equals(resident.getStatus())) {
+                    resident.setStatus(CommonStatus.FROZEN);
+                    residentMapper.updateById(resident);
+                    tokenRevocationService.revokeResident(resident.getId());
+                }
+                record.setPunishment("违约次数达到上限，账号已冻结");
+                violationRecordMapper.updateById(record);
+            }
         }
         notifyApplicant(appointment, "看房预约违约处置",
                 "您 " + appointment.getAppointmentDate() + " 的看房预约被标记违约：" + reason);
+    }
+
+    /* 非法或非正阈值按接口设计默认三次，不允许静默冻结所有居民。 */
+    private int violationLimit() {
+        String configured = sysConfigService.getValue("violation.max_count");
+        if (configured != null) {
+            try {
+                int limit = Integer.parseInt(configured);
+                if (limit > 0) {
+                    return limit;
+                }
+            } catch (NumberFormatException ignored) {
+                log.warn("违约阈值非法，使用默认三次");
+            }
+        }
+        return 3;
     }
 
     /* R55「确认/取消均通知对方」（DEF-023）：预约人有账号时经通知中心触达（resident.id

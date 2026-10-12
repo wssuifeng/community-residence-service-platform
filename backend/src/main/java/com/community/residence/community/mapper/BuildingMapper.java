@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Select;
 
 /** 楼栋数据访问（软删除，删除时间随软删除一并写入） */
 @Mapper
@@ -22,4 +23,7 @@ public interface BuildingMapper extends BaseMapper<Building> {
     /* 物理删除单条（楼栋级联删除 D-端点1：绕过 @TableLogic，消除 FK 引用） */
     @Delete("DELETE FROM building WHERE id = #{id}")
     int physicalDeleteById(@Param("id") Long id);
+    /* 同一楼栋的建房和层数变更按父记录串行。 */
+    @Select("SELECT id, community_id, name, floors, description, is_deleted, deleted_at, created_at, updated_at FROM building WHERE id = #{id} AND is_deleted = 0 FOR UPDATE")
+    Building selectByIdForUpdate(@Param("id") Long id);
 }

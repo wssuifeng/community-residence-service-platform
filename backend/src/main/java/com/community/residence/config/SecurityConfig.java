@@ -65,6 +65,8 @@ public class SecurityConfig {
                         // 游客只读：房源浏览计数仍公开；看房预约创建归居民账号
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
                                 "/api/v1/housings/{id}/view").permitAll()
+                        /* 支付密钥管理在读取请求体之前鉴权，不让非超管进入参数/密钥解析。 */
+                        .requestMatchers("/api/v1/payment/channel-config/**").hasRole("SUPER_ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         // 未认证：401 + 统一响应体

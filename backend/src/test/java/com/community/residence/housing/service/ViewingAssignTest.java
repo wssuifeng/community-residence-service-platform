@@ -258,4 +258,8 @@ class ViewingAssignTest {
                 anyString(), anyString(), anyString(), eq(1L));
         assertThat(vo.getAssigneeName()).isEqualTo("王管理");
     }
+    @org.junit.jupiter.api.BeforeEach
+    void rentalAvailabilityFixture() {
+        org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
+    }
 }

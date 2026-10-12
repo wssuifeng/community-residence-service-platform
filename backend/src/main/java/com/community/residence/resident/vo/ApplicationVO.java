@@ -29,6 +29,15 @@ public class ApplicationVO {
     @Schema(description = "房屋位置（楼栋-单元-房号）")
     private String houseLocation;
 
+    @Schema(description = "申请来源挂牌ID；历史缺失不猜测补填")
+    private Long housingId;
+
+    @Schema(description = "申请提交时挂牌月租快照")
+    private java.math.BigDecimal listedMonthlyRent;
+
+    @Schema(description = "申请提交时挂牌押金快照")
+    private java.math.BigDecimal listedDeposit;
+
     @Schema(description = "关系类型：OWNER-业主, TENANT-租客, FAMILY-家属")
     private String relationType;
 
@@ -59,6 +68,9 @@ public class ApplicationVO {
         vo.setResidentId(entity.getResidentId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setHouseId(entity.getHouseId());
+        vo.setHousingId(entity.getHousingId());
+        vo.setListedMonthlyRent(entity.getListedMonthlyRent());
+        vo.setListedDeposit(entity.getListedDeposit());
         vo.setLeaseId(entity.getLeaseId());
         vo.setRelationType(entity.getRelationType());
         vo.setStatus(entity.getStatus());

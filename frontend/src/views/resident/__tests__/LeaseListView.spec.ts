@@ -221,9 +221,18 @@ describe('LeaseListView · 首期结清口径与入口收敛（DEF-111）', () =
     expect(buttonTexts(wrapper)).toContain('待支付首期费用')
   })
 
-  it('TO_SIGN 租约不显示待支付首期入口（后端 createFirstPayment 仅放行 ACTIVE）', async () => {
+  it('TO_SIGN且SIGNED显示待首期费用并开放首期入口', async () => {
+    mocks.state.leases = [lease({ id: 52, status: 'TO_SIGN', agreementStatus: 'SIGNED' })]
+    mocks.state.payments = { 52: [] }
+    const wrapper = await mountList()
+    expect(wrapper.text()).toContain('待首期费用')
+    expect(buttonTexts(wrapper)).toContain('待支付首期费用')
+    expect(wrapper.text()).toContain('支付成功后才正式入住')
+  })
+
+  it('TO_SIGN未确认协议不开放首期，提示先确认再支付', async () => {
     mocks.state.leases = [
-      lease({ id: 52, status: 'TO_SIGN', tenantConfirmAt: '2026-09-21T10:00:00' })
+      lease({ id: 52, status: 'TO_SIGN' })
     ]
     mocks.state.payments = { 52: [] }
 
@@ -233,7 +242,7 @@ describe('LeaseListView · 首期结清口径与入口收敛（DEF-111）', () =
     expect(buttonTexts(wrapper)).not.toContain('支付首期')
     /* 入口保留禁用态并说明原因（不整条消失，点了不再 400） */
     expect(wrapper.text()).toContain('租约尚未生效')
-    expect(wrapper.text()).toContain('届时可在此支付首期费用')
+    expect(wrapper.text()).toContain('再支付首期费用')
   })
 
   it('支付列表加载失败且租约已搬出：不给可点支付入口，仅重试加载', async () => {

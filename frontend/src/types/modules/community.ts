@@ -62,6 +62,7 @@ export const resourceStatusLabels: Record<ResourceStatus, string> = {
 
 /** 社区实体（接口设计.md 9.1.1.1 响应） */
 export interface ICommunity {
+  responsibleAdminId?: number | null
   id: number
   name: string
   address: string
@@ -81,8 +82,7 @@ export interface ICommunity {
 export interface ICreateCommunityDTO {
   name: string
   address: string
-  contactPhone?: string
-  contactPerson?: string
+  responsibleAdminId?: number | null
   description?: string
   /** 入住申请自动通过开关（0/1；缺省 0） */
   autoApproveResidence?: number
@@ -163,7 +163,6 @@ export interface IHouse {
   houseNumber: string
   floor: number
   area?: number
-  roomCount?: number
   layout?: string
   orientation?: string
   status: HouseStatus
@@ -171,13 +170,11 @@ export interface IHouse {
   createdAt: string
 }
 
-/** 创建/更新房屋请求（后端 CreateHouseDTO：roomCount/layout，无 propertyType/monthlyRent） */
 export interface IHouseDTO {
   unitId: number
   houseNumber: string
   floor: number
   area?: number
-  roomCount?: number
   layout?: string
   orientation?: string
   status?: HouseStatus
@@ -209,7 +206,7 @@ export interface IHouseStatusHistory {
 
 /* ---------------------------------- 公共资源 ---------------------------------- */
 
-/** 公共资源实体（接口设计.md 9.1.5.1 响应） */
+/** 公共资源实体（接口设计.md 9.1.5.1 响应；images 为 2026-09-29 用户裁决新增） */
 export interface IPublicResource {
   id: number
   communityId: number
@@ -224,11 +221,13 @@ export interface IPublicResource {
   advanceBookingDays?: number
   description?: string
   rules?: string
+  /** 展示图片（public_resource.images 逗号分隔存储，接口按数组返回；无图为空数组 []，不是 null） */
+  images: string[]
   status: ResourceStatus
   createdAt: string
 }
 
-/** 创建/更新公共资源请求（接口设计.md 9.1.5.1 请求体，9.1.5.2 同） */
+/** 创建/更新公共资源请求（接口设计.md 9.1.5.1 请求体，9.1.5.2 同；images 为 2026-09-29 用户裁决新增） */
 export interface IPublicResourceDTO {
   communityId: number
   name: string
@@ -241,6 +240,8 @@ export interface IPublicResourceDTO {
   advanceBookingDays?: number
   description?: string
   rules?: string
+  /** 展示图片地址数组（界面一行一个 URL，提交前拆分；无图传空数组 []） */
+  images: string[]
 }
 
 /** 资源列表查询参数（接口设计.md 9.1.5.5） */
@@ -361,7 +362,6 @@ export interface IStructureBatchGenerateDTO {
   houseStatus?: HouseStatus
   /** 房屋建筑面积（生成房屋时必填，后端 CreateHouseDTO 约束） */
   area?: number
-  roomCount?: number
   description?: string
   /** true=仅预览不落库（零写入） */
   dryRun?: boolean
@@ -385,3 +385,6 @@ export interface IStructureBatchGenerateResult {
   dedupedCount: number
   failures: IBatchFailure[]
 }
+
+/** 社区责任人候选，不含凭据。 */
+export interface IResponsibleAdmin { id: number; realName: string; phone: string; boundToCommunity: boolean }

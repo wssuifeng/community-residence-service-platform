@@ -245,3 +245,12 @@ export function deleteTimeslot(id: number) {
 export function getTimeslotList(resourceId: number, params?: ITimeslotQuery) {
   return http.get<PageResult<IResourceTimeslot>>(`/resources/${resourceId}/timeslots`, params)
 }
+
+/** 责任人最小必要候选，社区绑定优先。 */
+export function getResponsibleAdmins(params: { communityId?: number; page?: number; size?: number; keyword?: string }) {
+  return http.get<PageResult<import('@/types/modules/community').IResponsibleAdmin>>('/communities/responsible-admins', params)
+}
+/** 原子修改明确选区及关联挂牌的户型。 */
+export function updateHouseLayouts(houseIds: number[], layout: string) {
+  return http.patch<number>('/houses/layout', { houseIds, layout })
+}

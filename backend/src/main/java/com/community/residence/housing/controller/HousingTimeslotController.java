@@ -93,10 +93,11 @@ public class HousingTimeslotController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "房源时段列表", description = "公开；游客选择预约时段用")
+    @Operation(summary = "房源时段列表", description = "公开；仅可见挂牌可读，管理端按社区权限维护")
     @GetMapping("/housings/{housingId}/timeslots")
     public ApiResponse<List<HousingTimeslot>> list(@PathVariable Long housingId,
                                                    @RequestParam(required = false) Integer dayOfWeek) {
+        housingService.getById(housingId);
         return ApiResponse.success(timeslotMapper.selectList(
                 new LambdaQueryWrapper<HousingTimeslot>()
                         .eq(HousingTimeslot::getHousingId, housingId)

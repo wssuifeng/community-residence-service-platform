@@ -1,0 +1,93 @@
+{
+  "date": "2026-10-12",
+  "scope": "bi非交易四域剩余组合；不是全站/渠道/最终用户验收",
+  "backend": {
+    "tests": 907,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "newTests": 12,
+    "countSource": "本次Maven package最终汇总"
+  },
+  "frontend": {
+    "files": 40,
+    "tests": 274,
+    "failures": 0
+  },
+  "java17Package": true,
+  "typecheckAndBuild": true,
+  "apiChecks": 56,
+  "apiAndBrowserChecks": 124,
+  "representativePages": 10,
+  "viewportCombinations": 30,
+  "widths": [
+    1440,
+    1024,
+    768
+  ],
+  "developmentReadonlyChecks": 18,
+  "normalBusinessCounts": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "fixedDefects": [
+    "DEF-174",
+    "DEF-175",
+    "DEF-176"
+  ],
+  "realChannelTrades": false,
+  "refunds": false,
+  "userBrowserTouched": false,
+  "commitOrPush": false,
+  "docAudit": {
+    "errors": 1663,
+    "brokenLinks": 309,
+    "acceptanceFormat": 3,
+    "statusSymbols": 1350,
+    "dependencyMismatch": 1,
+    "passed": false,
+    "scope": "历史全库问题保持；本批仅定向修正当前口径。",
+    "beforeErrors": 1666,
+    "newIssues": 0
+  },
+  "fixtureCleanupCounts": {
+    "community": 0,
+    "house": 0,
+    "work_order": 0,
+    "feedback": 0,
+    "resource_reservation": 0,
+    "work_order_evaluation": 0,
+    "resident": 0,
+    "sys_user": 0
+  },
+  "observations": [
+    "只覆盖本批代表页，不代表全站UI、360px、财务面板或60体验验收。",
+    "初轮工具401/必填reason、Drawer动画/异步等待已校正，不登记为系统缺陷。",
+    "评价列表请求失败时有toast提示，但内容区仍显示“暂无评价”，无就地重试；恢复经刷新验证。交互观察交60，不当作已裁决设计缺陷。"
+  ],
+  "evidence": [
+    "domain-matrix-before-fix.json",
+    "domain-matrix-api.json",
+    "domain-matrix-browser.json",
+    "unit-tests-before-fix.json",
+    "unit-tests-after-fix.json",
+    "development-before-start.json",
+    "development-readonly.json",
+    "historical-workorder-evidence.json"
+  ],
+  "paymentActiveQuery": false,
+  "isolatedServicesStopped": true,
+  "developmentRuntime": {
+    "backendPort": 8084,
+    "frontendPort": 5176,
+    "snapshot": "output/runtime/nontransaction-bi-release-20261012.jar"
+  },
+  "warnings": [
+    "既有前端大chunk提示保留。",
+    "JaCoCo旧执行数据类匹配警告保留，本批不据此声明最新覆盖率达标。"
+  ]
+}

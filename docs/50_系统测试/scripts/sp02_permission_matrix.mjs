@@ -136,7 +136,7 @@ async function main() {
       ['1a建社区', 'POST', '/api/v1/communities', { name: 'X居民越权', address: 'x', contactPhone: '13800009998', contactPerson: 'x' }],
       ['1b建楼栋', 'POST', '/api/v1/buildings', { communityId: 1, name: 'X楼', floors: 1 }],
       ['1c建单元', 'POST', '/api/v1/units', { buildingId: 1, name: 'X单元' }],
-      ['1d建房屋', 'POST', '/api/v1/houses', { unitId: 1, houseNumber: 'X99', floor: 1, area: 50, roomCount: 1, status: 'VACANT' }],
+      ['1d建房屋', 'POST', '/api/v1/houses', { unitId: 1, houseNumber: 'X99', floor: 1, area: 50, status: 'VACANT' }],
       ['2房屋状态变更', 'PATCH', '/api/v1/houses/1/status', { status: 'MAINTENANCE' }],
       ['3a建资源', 'POST', '/api/v1/resources', { communityId: 1, name: 'X资源', type: 'OTHER', capacity: 1 }],
       ['3b建时段', 'POST', '/api/v1/resources/1/timeslots', { dayOfWeek: 1, startTime: '01:00:00', endTime: '02:00:00', isAvailable: 1 }],

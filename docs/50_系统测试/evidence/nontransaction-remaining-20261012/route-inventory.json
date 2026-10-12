@@ -1,0 +1,1156 @@
+{
+  "date": "2026-10-12T04:01:24.900Z",
+  "source": "frontend/src/router/{admin,resident,staff,guest}.ts",
+  "widths": [
+    1440,
+    1024,
+    768
+  ],
+  "navigation": "1440加载后依次切换1024/768，验证断点响应，别名单独加载",
+  "routes": [
+    {
+      "group": "admin",
+      "path": "/admin",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/dashboard",
+      "name": "AdminDashboard",
+      "title": "运营看板",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/community",
+      "name": "AdminCommunity",
+      "title": "社区管理",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/work-orders",
+      "name": "AdminWorkOrders",
+      "title": "工单调度",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/residents",
+      "name": "AdminResidents",
+      "title": "居民管理",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/housing-lease",
+      "name": "AdminHousingLease",
+      "title": "租住与房源",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/notices",
+      "name": "AdminNotices",
+      "title": "公告管理",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/feedbacks",
+      "name": "AdminFeedbacks",
+      "title": "反馈管理",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/reservations",
+      "name": "AdminReservations",
+      "title": "预约管理",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/evaluations",
+      "name": "AdminEvaluations",
+      "title": "评价管理",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/system",
+      "name": "AdminSystem",
+      "title": "系统管理",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/staff-schedules",
+      "name": "AdminStaffSchedules",
+      "title": "人员排班",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/staff-capabilities",
+      "name": "AdminStaffCapabilities",
+      "title": "服务人员",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/communities/:id",
+      "name": "AdminCommunityDetail",
+      "title": "社区详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/work-orders/:id",
+      "name": "AdminWorkOrderDetail",
+      "title": "工单详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/leases/:id",
+      "name": "AdminLeaseDetail",
+      "title": "租约详情",
+      "redirect": false,
+      "scope": "deferred-financial-detail"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/residents/:id",
+      "name": "AdminResidentDetail",
+      "title": "居民详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/housings/:id",
+      "name": "AdminHousingDetail",
+      "title": "房源详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/notifications",
+      "name": "AdminNotifications",
+      "title": "通知列表",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/conversations",
+      "name": "AdminConversations",
+      "title": "消息会话",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/conversations/:id",
+      "name": "AdminConversationDetail",
+      "title": "消息会话",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/statistics/dashboard",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/statistics/details",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/communities",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/buildings",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/units",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/houses",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/resources",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/residence-applications",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/residence-relations",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/leases",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/housings",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/move-out-applications",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/agreement-templates",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/configs",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/service-categories",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/resource-reservations",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/violations",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/viewing-appointments",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/notices/create",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/notices/:id",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/feedbacks/:id",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/evaluations/:id/followup",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/sys-users",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/sys-users/:id/communities",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "admin",
+      "path": "/admin/operation-logs",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "resident",
+      "path": "/resident",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/home",
+      "name": "ResidentHome",
+      "title": "首页",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/profile",
+      "name": "ResidentProfile",
+      "title": "个人中心",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/housing-lease",
+      "name": "ResidentHousingLease",
+      "title": "租住与房源",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/work-orders",
+      "name": "ResidentWorkOrders",
+      "title": "我的工单",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/work-orders/create",
+      "name": "ResidentWorkOrderCreate",
+      "title": "提交工单",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/work-orders/:id",
+      "name": "ResidentWorkOrderDetail",
+      "title": "工单详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/feedbacks",
+      "name": "ResidentFeedbacks",
+      "title": "我的反馈",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/feedbacks/create",
+      "name": "ResidentFeedbackCreate",
+      "title": "提交反馈",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/feedbacks/:id",
+      "name": "ResidentFeedbackDetail",
+      "title": "反馈详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/reservations",
+      "name": "ResidentReservations",
+      "title": "我的预约",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/resources",
+      "name": "ResidentResources",
+      "title": "公共资源",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/resources/:id",
+      "name": "ResidentResourceDetail",
+      "title": "资源详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/reservations/create",
+      "name": "ResidentReservationCreate",
+      "title": "创建预约",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/notices",
+      "name": "ResidentNotices",
+      "title": "公告通知",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/notices/:id",
+      "name": "ResidentNoticeDetail",
+      "title": "公告详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/notifications",
+      "name": "ResidentNotifications",
+      "title": "消息中心",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/conversations/:id",
+      "name": "ResidentConversationDetail",
+      "title": "沟通会话",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/housings/:id",
+      "name": "ResidentHousingDetail",
+      "title": "房源详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/housings/:id/reserve",
+      "name": "ResidentHousingReserve",
+      "title": "预约看房",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/housings/:id/apply",
+      "name": "ResidentHousingApply",
+      "title": "申请租住",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/viewing-appointments/:id",
+      "name": "ResidentViewingAppointmentDetail",
+      "title": "看房预约详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/viewing-appointments",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/leases",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "resident",
+      "path": "/resident/housings",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "staff",
+      "path": "/staff",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "staff",
+      "path": "/staff/dashboard",
+      "name": "StaffDashboard",
+      "title": "工作台首页",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "staff",
+      "path": "/staff/work-orders",
+      "name": "StaffWorkOrders",
+      "title": "工单列表",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "staff",
+      "path": "/staff/work-orders/:id",
+      "name": "StaffWorkOrderDetail",
+      "title": "工单详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "staff",
+      "path": "/staff/viewings",
+      "name": "StaffViewings",
+      "title": "我的带看",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "staff",
+      "path": "/staff/notifications",
+      "name": "StaffNotifications",
+      "title": "消息中心",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "guest",
+      "path": "/guest",
+      "redirect": true,
+      "scope": "legacy-alias"
+    },
+    {
+      "group": "guest",
+      "path": "/guest/home",
+      "name": "GuestHome",
+      "title": "首页",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "guest",
+      "path": "/guest/housings",
+      "name": "GuestHousings",
+      "title": "房源浏览",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "guest",
+      "path": "/guest/housings/:id",
+      "name": "GuestHousingDetail",
+      "title": "房源详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "guest",
+      "path": "/guest/notices",
+      "name": "GuestNotices",
+      "title": "公开公告",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "guest",
+      "path": "/guest/notices/:id",
+      "name": "GuestNoticeDetail",
+      "title": "公告详情",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "guest",
+      "path": "/auth/login",
+      "name": "Login",
+      "title": "登录",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    },
+    {
+      "group": "guest",
+      "path": "/auth/register",
+      "name": "Register",
+      "title": "注册",
+      "redirect": false,
+      "scope": "page-load-and-layout"
+    }
+  ],
+  "cases": [
+    {
+      "role": "admin",
+      "path": "/admin/dashboard",
+      "url": "/admin/dashboard",
+      "title": "运营看板",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/community",
+      "url": "/admin/community",
+      "title": "社区管理",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/work-orders",
+      "url": "/admin/work-orders",
+      "title": "工单调度",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/residents",
+      "url": "/admin/residents",
+      "title": "居民管理",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/housing-lease",
+      "url": "/admin/housing-lease",
+      "title": "租住与房源",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/notices",
+      "url": "/admin/notices",
+      "title": "公告管理",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/feedbacks",
+      "url": "/admin/feedbacks",
+      "title": "反馈管理",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/reservations",
+      "url": "/admin/reservations",
+      "title": "预约管理",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/evaluations",
+      "url": "/admin/evaluations",
+      "title": "评价管理",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "super",
+      "path": "/admin/system",
+      "url": "/admin/system",
+      "title": "系统管理",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/staff-schedules",
+      "url": "/admin/staff-schedules",
+      "title": "人员排班",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/staff-capabilities",
+      "url": "/admin/staff-capabilities",
+      "title": "服务人员",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/communities/:id",
+      "url": "/admin/communities/105",
+      "title": "社区详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/work-orders/:id",
+      "url": "/admin/work-orders/58",
+      "title": "工单详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/residents/:id",
+      "url": "/admin/residents/133",
+      "title": "居民详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/housings/:id",
+      "url": "/admin/housings/64",
+      "title": "房源详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/notifications",
+      "url": "/admin/notifications",
+      "title": "通知列表",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/conversations",
+      "url": "/admin/conversations",
+      "title": "消息会话",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/conversations/:id",
+      "url": "/admin/conversations/101",
+      "title": "消息会话",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/home",
+      "url": "/resident/home",
+      "title": "首页",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/profile",
+      "url": "/resident/profile",
+      "title": "个人中心",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/housing-lease",
+      "url": "/resident/housing-lease",
+      "title": "租住与房源",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/work-orders",
+      "url": "/resident/work-orders",
+      "title": "我的工单",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/work-orders/create",
+      "url": "/resident/work-orders/create",
+      "title": "提交工单",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/work-orders/:id",
+      "url": "/resident/work-orders/58",
+      "title": "工单详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/feedbacks",
+      "url": "/resident/feedbacks",
+      "title": "我的反馈",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/feedbacks/create",
+      "url": "/resident/feedbacks/create",
+      "title": "提交反馈",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/feedbacks/:id",
+      "url": "/resident/feedbacks/19",
+      "title": "反馈详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/reservations",
+      "url": "/resident/reservations",
+      "title": "我的预约",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/resources",
+      "url": "/resident/resources",
+      "title": "公共资源",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/resources/:id",
+      "url": "/resident/resources/25",
+      "title": "资源详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/reservations/create",
+      "url": "/resident/reservations/create?resourceId=25",
+      "title": "创建预约",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/notices",
+      "url": "/resident/notices",
+      "title": "公告通知",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/notices/:id",
+      "url": "/resident/notices/25",
+      "title": "公告详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/notifications",
+      "url": "/resident/notifications",
+      "title": "消息中心",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/conversations/:id",
+      "url": "/resident/conversations/101",
+      "title": "沟通会话",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/housings/:id",
+      "url": "/resident/housings/64",
+      "title": "房源详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/housings/:id/reserve",
+      "url": "/resident/housings/64/reserve",
+      "title": "预约看房",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/housings/:id/apply",
+      "url": "/resident/housings/64/apply",
+      "title": "申请租住",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "path": "/resident/viewing-appointments/:id",
+      "url": "/resident/viewing-appointments/50",
+      "title": "看房预约详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "staff",
+      "path": "/staff/dashboard",
+      "url": "/staff/dashboard",
+      "title": "工作台首页",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "staff",
+      "path": "/staff/work-orders",
+      "url": "/staff/work-orders",
+      "title": "工单列表",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "staff",
+      "path": "/staff/work-orders/:id",
+      "url": "/staff/work-orders/58",
+      "title": "工单详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "staff",
+      "path": "/staff/viewings",
+      "url": "/staff/viewings",
+      "title": "我的带看",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "staff",
+      "path": "/staff/notifications",
+      "url": "/staff/notifications",
+      "title": "消息中心",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "guest",
+      "path": "/guest/home",
+      "url": "/guest/home",
+      "title": "首页",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "guest",
+      "path": "/guest/housings",
+      "url": "/guest/housings",
+      "title": "房源浏览",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "guest",
+      "path": "/guest/housings/:id",
+      "url": "/guest/housings/64",
+      "title": "房源详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "guest",
+      "path": "/guest/notices",
+      "url": "/guest/notices",
+      "title": "公开公告",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "guest",
+      "path": "/guest/notices/:id",
+      "url": "/guest/notices/26",
+      "title": "公告详情",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "guest",
+      "path": "/auth/login",
+      "url": "/auth/login",
+      "title": "登录",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "guest",
+      "path": "/auth/register",
+      "url": "/auth/register",
+      "title": "注册",
+      "scope": "page-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/community?tab=tree",
+      "path": "/admin/community",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/community?tab=housing",
+      "path": "/admin/community",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/community?tab=resources",
+      "path": "/admin/community",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/dashboard?tab=overview",
+      "path": "/admin/dashboard",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/dashboard?tab=details",
+      "path": "/admin/dashboard",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/housing-lease?tab=applications",
+      "path": "/admin/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/housing-lease?tab=leases",
+      "path": "/admin/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/housing-lease?tab=housings",
+      "path": "/admin/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/housing-lease?tab=moveout",
+      "path": "/admin/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/housing-lease?tab=agreements",
+      "path": "/admin/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "super",
+      "url": "/admin/system?tab=users",
+      "path": "/admin/system",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "super",
+      "url": "/admin/system?tab=configs",
+      "path": "/admin/system",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "super",
+      "url": "/admin/system?tab=logs",
+      "path": "/admin/system",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/residents?tab=list",
+      "path": "/admin/residents",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/residents?tab=relations",
+      "path": "/admin/residents",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/reservations?tab=reservations",
+      "path": "/admin/reservations",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "url": "/admin/reservations?tab=violations",
+      "path": "/admin/reservations",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "url": "/resident/housing-lease?tab=lease",
+      "path": "/resident/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "url": "/resident/housing-lease?tab=housing",
+      "path": "/resident/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "url": "/resident/housing-lease?tab=application",
+      "path": "/resident/housing-lease",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "url": "/resident/reservations?tab=resource",
+      "path": "/resident/reservations",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "resident",
+      "url": "/resident/reservations?tab=viewing",
+      "path": "/resident/reservations",
+      "scope": "hub-tab-load-and-layout"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/housing-lease",
+      "url": "/admin/housing-lease?tab=housings&view=houses",
+      "scope": "housing-subview"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/housing-lease",
+      "url": "/admin/housing-lease?tab=housings&view=viewings",
+      "scope": "housing-subview"
+    },
+    {
+      "role": "admin",
+      "path": "/admin/housing-lease",
+      "url": "/admin/housing-lease?tab=housings&view=list",
+      "scope": "housing-subview"
+    }
+  ],
+  "exclusions": [
+    {
+      "path": "/admin/leases/:id",
+      "reason": "详情自动读取押金/退款，待交易区块恢复后用真实租约核查"
+    }
+  ],
+  "notes": [
+    "独立页面与Hub各Tab核查加载、归属、页面溢出，不代替所有按钮/全业务组合",
+    "居民租约Tab本批无租约，为真实空态；非空费用/协议与支付退款区块不在本次范围",
+    "系统支付配置只读/offline，不保存凭据或启用渠道",
+    "旧别名单宽度核查重定向，不重复计为独立功能页"
+  ]
+}

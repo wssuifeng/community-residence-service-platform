@@ -5038,12 +5038,12 @@
         <text x="72" y="424" class="t-dim" font-size="10" font-weight="600">03 / 终态</text>
 
         <!-- Primary lifecycle rail -->
-        <path d="M 154 157 L 286 157" class="a-emphasis" stroke-width="2.2" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 154 157 L 132 157" class="a-emphasis" stroke-width="2.2" marker-end="url(#arrowhead-emphasis)"/>
 
         <!-- Transition paths -->
         <path data-edge-from="PENDING" data-edge-to="APPROVED" data-edge-label="通过" data-edge-key="0" data-edge-id="approve" data-composition-points="94,188;94,400;402,400;402,450" d="M 94 188 L 94 390 Q 94 400 104 400 L 392 400 Q 402 400 402 410 L 402 450" class="a-default" stroke-width="1.1" marker-end="url(#arrowhead)"/>
         <path data-edge-from="PENDING" data-edge-to="WITHDRAWN" data-edge-label="居民主动撤回（R66）" data-edge-key="1" data-edge-id="withdraw" data-composition-points="35,157;60,157;60,360;556,360;556,450" d="M 35 157 L 50 157 Q 60 157 60 167 L 60 350 Q 60 360 70 360 L 546 360 Q 556 360 556 370 L 556 450" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
-        <path data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="驳回（理由）" data-edge-key="2" data-edge-id="reject" data-composition-points="153,157;790,157;790,479;769,479" d="M 153 157 L 780 157 Q 790 157 790 167 L 790 469 Q 790 479 780 479 L 769 479" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="PENDING" data-edge-to="REJECTED" data-edge-label="驳回（理由）" data-edge-key="2" data-edge-id="reject" data-composition-points="153,157;790,157;790,479;769,479;769,479" d="M 153 157 L 780 157 Q 790 157 790 167 L 790 469 Q 790 479 780 479 L 769 479 L 769 479" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
 
         <!-- States -->
         <g id="node-PENDING" data-node-id="PENDING" data-node-label="待审核" tabindex="0" role="button" aria-label="聚焦待审核，居民提交入住申请, 主流程" aria-pressed="false" data-node-kind="start" data-node-sublabel="居民提交入住申请" data-node-context="主流程">
@@ -5059,8 +5059,8 @@
           <text data-detail="context" x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">居民提交入住申请</text>
         </g>
 
-        <g id="node-APPROVED" data-node-id="APPROVED" data-node-label="已通过" tabindex="0" role="button" aria-label="聚焦已通过，建立居住关系（R9）, 终态" aria-pressed="false" data-node-kind="success" data-node-sublabel="建立居住关系（R9）" data-node-tag="终态" data-node-context="终态">
-          <title>已通过 · 建立居住关系（R9） · 终态 · 终态</title>
+        <g id="node-APPROVED" data-node-id="APPROVED" data-node-label="已通过" tabindex="0" role="button" aria-label="聚焦已通过，租客待签约（R66）, 终态" aria-pressed="false" data-node-kind="success" data-node-sublabel="租客待签约（R66）" data-node-tag="终态" data-node-context="终态">
+          <title>已通过 · 租客待签约（R66） · 终态 · 终态</title>
           <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
           <rect x="343" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-database" transform="translate(444 456) scale(0.6875)">
@@ -5068,7 +5068,7 @@
             <path d="m5.2 8 1.8 1.8 3.8-4"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">已通过</text>
-          <text data-detail="context" x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">建立居住关系（R9）</text>
+          <text data-detail="context" x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">租客待签约（R66）</text>
         <text data-detail="fine" x="402" y="497" class="t-database" font-size="7" text-anchor="middle">终态</text>
         </g>
 
@@ -5333,8 +5333,8 @@
           <h3>两机口径差异</h3>
         </div>
         <ul>
-          <li>&bull; 本状态机与租住记录状态机（§6.2）相互独立：申请「已通过」只建立居住关系，不等于租约生效</li>
-          <li>&bull; 租约生效以 §6.2「协议双方在线确认」为准（R66）</li>
+          <li>&bull; 申请「已通过」：租客只建待签约租约与群聊；业主/家属沿用关系规则</li>
+          <li>&bull; 租客须协议确认且首期成功，才建立正式居住关系并使租约生效（R66/R71）</li>
         </ul>
       </div>
 

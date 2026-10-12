@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-11",
+  "batch": "bg-3",
+  "backend": {
+    "sourceSuites": 123,
+    "tests": 853,
+    "failures": 0,
+    "errors": 0
+  },
+  "frontend": {
+    "suites": 38,
+    "tests": 258
+  },
+  "typecheck": "passed (build runs vue-tsc --noEmit)",
+  "build": "passed",
+  "isolatedRegressionChecks": 47,
+  "developmentReadonlyChecks": 9,
+  "migration": "V31 applied to development and isolated databases",
+  "transactionsExecuted": false,
+  "coverageReportRecomputed": false,
+  "docsAudit": {
+    "passed": false,
+    "diagnosticCount": 1666,
+    "newFeatureLinksChecked": true
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "date": "2026-10-11",
+  "scope": "bh-3公共资源图片上传",
+  "transactionsExecuted": false,
+  "definitionVersion": "v1.8",
+  "requirementsVersion": "v1.17",
+  "backend": {
+    "suites": 126,
+    "tests": 879,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "conditionalSkippedSuites": [
+      "com.community.residence.housing.service.HousingPastSlotFixTest"
+    ]
+  },
+  "frontend": {
+    "suites": 40,
+    "tests": 273,
+    "failed": 0,
+    "typecheck": true,
+    "build": true
+  },
+  "package": true,
+  "isolatedChecks": 21,
+  "developmentReadonlyChecks": 13,
+  "businessCountsBefore": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "businessCountsAfter": [
+    "1",
+    "600",
+    "9",
+    "1",
+    "0",
+    "0"
+  ],
+  "notCompleted": [
+    "bh-2挂牌金额与申请占用闭环实现",
+    "首期成功后的正式关系与租约生效内核",
+    "渠道交易实测（继续暂缓）",
+    "最终用户全站复验"
+  ],
+  "environment": {
+    "developmentBackend": 8084,
+    "developmentFrontend": 5176,
+    "isolatedServicesStopped": [
+      8087,
+      5181
+    ],
+    "fixtureCleanup": true,
+    "userBrowserTouched": false
+  },
+  "docsAudit": {
+    "errors": 1666,
+    "brokenLinks": 309,
+    "acceptanceMissing": 3,
+    "statusSymbolsOutsideControl": 1353,
+    "dependencyMismatch": 1,
+    "scopePassed": true,
+    "globalPassed": false
+  }
+}

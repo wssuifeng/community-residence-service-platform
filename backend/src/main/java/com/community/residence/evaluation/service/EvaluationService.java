@@ -24,6 +24,7 @@ import com.community.residence.resident.entity.Resident;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.workorder.entity.WorkOrder;
 import com.community.residence.workorder.mapper.WorkOrderMapper;
+import com.community.residence.workorder.service.WorkOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,7 @@ public class EvaluationService {
     private final WorkOrderMapper workOrderMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
+    private final WorkOrderService workOrderService;
 
     /* 提交评价：工单须 COMPLETED（居民确认后）；仅提交人；一单一评 */
     @Transactional(rollbackFor = Exception.class)
@@ -79,8 +81,9 @@ public class EvaluationService {
         return toVO(evaluation);
     }
 
-    /** 按工单查评价（拥有工单访问权限的用户） */
+    /* 评价是工单子资源：先复用父工单的本人/最新派单/社区授权，再查询评价。 */
     public EvaluationVO getByWorkOrder(Long workOrderId) {
+        workOrderService.getById(workOrderId);
         WorkOrderEvaluation evaluation = evaluationMapper.selectOne(
                 new LambdaQueryWrapper<WorkOrderEvaluation>()
                         .eq(WorkOrderEvaluation::getWorkOrderId, workOrderId));

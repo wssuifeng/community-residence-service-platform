@@ -47,6 +47,7 @@ public class BuildingService {
     private final com.community.residence.housing.mapper.HousingTimeslotMapper housingTimeslotMapper;
     private final com.community.residence.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
     private final CommunityService communityService;
+    private final BuildingBoundaryService buildingBoundaryService;
 
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "BUILDING", targetId = "#result.id", communityId = "#dto.communityId", content = "'创建楼栋：' + #dto.name")
@@ -71,6 +72,7 @@ public class BuildingService {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "楼栋不允许变更所属社区");
         }
         SecurityUtils.checkCommunityAccess(building.getCommunityId());
+        buildingBoundaryService.validateReduction(id, dto.getFloors());
         building.setName(dto.getName());
         building.setFloors(dto.getFloors());
         building.setDescription(dto.getDescription());

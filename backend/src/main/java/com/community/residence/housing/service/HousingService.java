@@ -109,11 +109,11 @@ public class HousingService {
     private final CommunityService communityService;
     private final StringRedisTemplate redisTemplate;
 
-    /* 上架房源：社区由房屋推导；同一房屋仅允许一条非下线房源 */
+    /* 上架房源：锁定房屋后读取最新户型，与房屋户型修改串行；社区由房屋推导。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSING", targetId = "#result.id", content = "'创建房源：' + #dto.title")
     public HousingVO create(CreateHousingDTO dto) {
-        House house = houseMapper.selectById(dto.getHouseId());
+        House house = houseMapper.selectByIdForUpdate(dto.getHouseId());
         if (house == null) {
             throw new ResourceNotFoundException("房屋不存在");
         }
@@ -143,6 +143,9 @@ public class HousingService {
     public HousingVO update(Long id, CreateHousingDTO dto) {
         Housing housing = requireHousing(id);
         SecurityUtils.checkCommunityAccess(housing.getCommunityId());
+        housingMapper.lockHouseForHousing(id);
+        Housing current = housingMapper.selectByIdForUpdate(id);
+        if (current != null) housing = current;
         if (!housing.getHouseId().equals(dto.getHouseId())) {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "房源不允许变更关联房屋");
         }
@@ -157,11 +160,17 @@ public class HousingService {
     public void delete(Long id) {
         Housing housing = requireHousing(id);
         SecurityUtils.checkCommunityAccess(housing.getCommunityId());
+        housingMapper.lockHouseForHousing(id);
+        Housing current = housingMapper.selectByIdForUpdate(id);
+        if (current != null) housing = current;
         Long activeCount = appointmentMapper.selectCount(new LambdaQueryWrapper<ViewingAppointment>()
                 .eq(ViewingAppointment::getHousingId, id)
                 .in(ViewingAppointment::getStatus, ACTIVE_APPOINTMENT_STATUS));
         if (activeCount > 0) {
             throw new BusinessException(ErrorCode.DATA_EXISTS, "房源存在未完成看房预约，无法删除");
+        }
+        if (housingMapper.rentalHistoryCount(id) > 0) {
+            throw new BusinessException(ErrorCode.DATA_EXISTS, "该挂牌已有租住占用历史，只能下线，不能删除");
         }
         housingMapper.deleteById(id);
         log.info("房源已删除：housingId={}, operator={}", id, SecurityUtils.getUserId());
@@ -170,10 +179,12 @@ public class HousingService {
     /** 房源详情（公开；游客访问已出租/下线房源返回 404） */
     public HousingVO getById(Long id) {
         Housing housing = requireHousing(id);
-        if (!isManager() && !PUBLIC_STATUS.contains(housing.getStatus())) {
+        if (!isManager() && housingMapper.publicAvailabilityCount(id) == 0) {
             throw new ResourceNotFoundException("房源不存在或已下线");
         }
-        return toVO(housing, pendingViewDelta(id));
+        HousingVO vo = toVO(housing, pendingViewDelta(id));
+        if (isManager()) fillOccupancies(List.of(vo));
+        return vo;
     }
 
     /** 房源分页列表（公开；游客默认只见可租/已预订） */
@@ -195,13 +206,15 @@ public class HousingService {
                         .like(Housing::getTitle, keyword)
                         .or().like(Housing::getDescription, keyword))
                 .orderByDesc(Housing::getId);
-        if (!isManager() && !StringUtils.hasText(status)) {
-            wrapper.in(Housing::getStatus, PUBLIC_STATUS);
+        if (!isManager()) {
+            wrapper.apply(HousingOccupancyRules.PUBLIC);
         }
         Page<Housing> result = housingMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
         /* 未回写增量按页内 id 集合 multiGet 一次取回（N2：不做逐行查询） */
         Map<Long, Long> viewDeltas = pendingViewDeltas(result.getRecords());
-        return PageVO.of(result.convert(h -> toVO(h, viewDeltas.get(h.getId()))));
+        PageVO<HousingVO> vo = PageVO.of(result.convert(h -> toVO(h, viewDeltas.get(h.getId()))));
+        if (isManager()) fillOccupancies(vo.getRecords());
+        return vo;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -209,6 +222,9 @@ public class HousingService {
     public void updateStatus(Long id, UpdateHousingStatusDTO dto) {
         Housing housing = requireHousing(id);
         SecurityUtils.checkCommunityAccess(housing.getCommunityId());
+        housingMapper.lockHouseForHousing(id);
+        Housing current = housingMapper.selectByIdForUpdate(id);
+        if (current != null) housing = current;
         housing.setStatus(dto.getStatus());
         housingMapper.updateById(housing);
         log.info("房源状态变更：housingId={}, status={}, operator={}",
@@ -222,6 +238,9 @@ public class HousingService {
     @Transactional(rollbackFor = Exception.class)
     public Long recordView(Long id) {
         Housing housing = requireHousing(id);
+        if (!isManager() && housingMapper.publicAvailabilityCount(id) == 0) {
+            throw new ResourceNotFoundException("房源不存在或不可见");
+        }
         try {
             Long increment = redisTemplate.opsForValue().increment(VIEW_COUNT_KEY_PREFIX + id);
             return (long) effectiveViewCount(housing.getViewCount(), increment);
@@ -314,6 +333,9 @@ public class HousingService {
      */
     public List<AvailableSlotVO> availableSlots(Long housingId, LocalDate startDate, LocalDate endDate) {
         requireHousing(housingId);
+        if (!isManager() && housingMapper.publicAvailabilityCount(housingId) == 0) {
+            throw new ResourceNotFoundException("房源已下线或已被入住业务占用，请查看我的入住申请");
+        }
         LocalDate end = endDate != null ? endDate : startDate.plusDays(6);
         List<HousingTimeslot> templates = timeslotMapper.selectList(
                 new LambdaQueryWrapper<HousingTimeslot>()
@@ -469,7 +491,11 @@ public class HousingService {
 
         int created = 0;
         List<Long> createdHousingIds = new ArrayList<>();
-        for (House house : houses) {
+        for (House candidate : houses.stream().sorted(java.util.Comparator.comparing(House::getId)).toList()) {
+            House house = houseMapper.selectByIdForUpdate(candidate.getId());
+            if (house == null) {
+                throw new ResourceNotFoundException("房屋已删除，请刷新挂牌范围");
+            }
             if (listedHouseIds.contains(house.getId())) {
                 continue;
             }
@@ -593,6 +619,18 @@ public class HousingService {
         Set<Long> result = new java.util.HashSet<>(a);
         result.retainAll(b);
         return result;
+    }
+
+    /* 一次批量读取管理列表占用，历史重复链不猜测最新申请/租约。 */
+    private void fillOccupancies(List<HousingVO> records) {
+        if (records.isEmpty()) return;
+        Map<Long, com.community.residence.housing.vo.HousingOccupancyVO> rows = housingMapper.selectOccupancies(
+            records.stream().map(HousingVO::getId).toList()).stream().collect(java.util.stream.Collectors.toMap(
+                com.community.residence.housing.vo.HousingOccupancyVO::getId, java.util.function.Function.identity()));
+        for (HousingVO vo : records) {
+            var row = rows.get(vo.getId());
+            if (row != null) { vo.setOccupancy(row.getOccupancy()); vo.setApplicationId(row.getApplicationId()); vo.setLeaseId(row.getLeaseId()); }
+        }
     }
 
     public Housing requireHousing(Long id) {
@@ -752,6 +790,12 @@ public class HousingService {
             latestHousingByHouse.put(housing.getHouseId(), housing);
         }
 
+        Map<Long, com.community.residence.housing.vo.HousingOccupancyVO> occupancyRows = new HashMap<>();
+        if (!latestHousingByHouse.isEmpty()) {
+            for (var row : housingMapper.selectOccupancies(latestHousingByHouse.values().stream().map(Housing::getId).toList())) {
+                occupancyRows.put(row.getId(), row);
+            }
+        }
         List<HouseManageItemVO> items = new ArrayList<>(houses.size());
         for (House house : houses) {
             HouseManageItemVO item = new HouseManageItemVO();
@@ -771,7 +815,12 @@ public class HousingService {
             item.setLayout(house.getLayout());
             item.setHouseStatus(house.getStatus());
             Housing housing = latestHousingByHouse.get(house.getId());
-            item.setHousing(housing != null ? HousingBriefVO.from(housing) : null);
+            HousingBriefVO brief = housing != null ? HousingBriefVO.from(housing) : null;
+            if (brief != null && occupancyRows.containsKey(brief.getId())) {
+                var occupancy = occupancyRows.get(brief.getId());
+                brief.setOccupancy(occupancy.getOccupancy()); brief.setApplicationId(occupancy.getApplicationId()); brief.setLeaseId(occupancy.getLeaseId());
+            }
+            item.setHousing(brief);
             items.add(item);
         }
         return items;
