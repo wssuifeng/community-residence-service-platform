@@ -1,0 +1,13 @@
+
+> community-residence-frontend@0.1.0 test
+> vitest run --configLoader native
+
+
+ RUN  v4.1.11 D:/code/community-residence-service-platform/frontend
+
+
+ Test Files  49 passed (49)
+      Tests  305 passed (305)
+   Start at  21:20:08
+   Duration  115.86s (transform 2.77s, setup 43.34s, import 3.92s, tests 29.24s, environment 33.20s)
+

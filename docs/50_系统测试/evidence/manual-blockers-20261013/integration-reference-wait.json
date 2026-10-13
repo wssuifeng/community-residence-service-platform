@@ -1,0 +1,339 @@
+{
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "管理空间手机号登录",
+      "passed": true
+    },
+    {
+      "name": "居民空间手机号登录",
+      "passed": true
+    },
+    {
+      "name": "中文用户名登录",
+      "passed": true
+    },
+    {
+      "name": "中文用户名重复拒绝",
+      "passed": true
+    },
+    {
+      "name": "用户名不能碰撞他人手机号",
+      "passed": true
+    },
+    {
+      "name": "真实户型选项而非冗余值",
+      "passed": true
+    },
+    {
+      "name": "真实房屋户型筛选",
+      "passed": true
+    },
+    {
+      "name": "旧冗余户型不命中",
+      "passed": true
+    },
+    {
+      "name": "详情展示源房屋户型",
+      "passed": true
+    },
+    {
+      "name": "批量跨社区整区拒绝",
+      "passed": true
+    },
+    {
+      "name": "楼层越界拒绝且不是500",
+      "passed": true
+    },
+    {
+      "name": "楼层拒绝面积无部分写入",
+      "passed": true
+    },
+    {
+      "name": "多属性保存同步真实房屋与挂牌",
+      "passed": true
+    },
+    {
+      "name": "gbk-twelve接口成功",
+      "passed": true
+    },
+    {
+      "name": "GBK十列表头与中文账号十二行成功",
+      "passed": true
+    },
+    {
+      "name": "gbk-repeat接口成功",
+      "passed": true
+    },
+    {
+      "name": "GBK重复十二行拒绝",
+      "passed": true
+    },
+    {
+      "name": "wrong-community接口成功",
+      "passed": true
+    },
+    {
+      "name": "错归属逐行拒绝并不残留账号",
+      "passed": true
+    },
+    {
+      "name": "占用房源从公开列表隐藏",
+      "passed": true
+    },
+    {
+      "name": "占用户型不向游客泄露",
+      "passed": true
+    },
+    {
+      "name": "ADMIN保留自己社区占用户型",
+      "passed": true
+    },
+    {
+      "name": "ADMIN不能获取另社区选项",
+      "passed": true
+    },
+    {
+      "name": "占用记录不能物理删除且有业务提示",
+      "passed": true
+    },
+    {
+      "name": "卡片全部按钮可达1024",
+      "passed": true
+    },
+    {
+      "name": "卡片全部按钮可达768",
+      "passed": true
+    },
+    {
+      "name": "ADMIN真实按钮编辑保存不再500",
+      "passed": true
+    },
+    {
+      "name": "保存确实更新并未新增",
+      "passed": true
+    },
+    {
+      "name": "下架确认明确不取消占用",
+      "passed": true
+    },
+    {
+      "name": "ADMIN真实下架按钮不再500",
+      "passed": true
+    },
+    {
+      "name": "主动下线保留占用与历史",
+      "passed": true
+    },
+    {
+      "name": "导入窗口显示真实社区ID",
+      "passed": true
+    },
+    {
+      "name": "真实房屋ID按位置可见",
+      "passed": false
+    },
+    {
+      "name": "不产生交易或退款记录",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "occupied-card-1024.png",
+    "occupied-card-768.png"
+  ],
+  "browserErrors": [],
+  "residents": [
+    358,
+    359,
+    360,
+    361,
+    362,
+    363,
+    364,
+    365,
+    366,
+    367,
+    368,
+    369,
+    370
+  ],
+  "users": [
+    231
+  ],
+  "communities": [
+    151,
+    152
+  ],
+  "financialBefore": [
+    "0",
+    "0"
+  ],
+  "gbk-twelve": {
+    "fail": 0,
+    "failRows": [],
+    "success": 12,
+    "successRows": [
+      {
+        "houseId": 11390,
+        "relationId": 198,
+        "residentId": 359,
+        "row": 1,
+        "username": "导入住户_807375_1"
+      },
+      {
+        "houseId": 11391,
+        "relationId": 199,
+        "residentId": 360,
+        "row": 2,
+        "username": "导入住户_807375_2"
+      },
+      {
+        "houseId": 11392,
+        "relationId": 200,
+        "residentId": 361,
+        "row": 3,
+        "username": "导入住户_807375_3"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 362,
+        "row": 4,
+        "username": "导入住户_807375_4"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 363,
+        "row": 5,
+        "username": "导入住户_807375_5"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 364,
+        "row": 6,
+        "username": "导入住户_807375_6"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 365,
+        "row": 7,
+        "username": "导入住户_807375_7"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 366,
+        "row": 8,
+        "username": "导入住户_807375_8"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 367,
+        "row": 9,
+        "username": "导入住户_807375_9"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 368,
+        "row": 10,
+        "username": "导入住户_807375_10"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 369,
+        "row": 11,
+        "username": "导入住户_807375_11"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 370,
+        "row": 12,
+        "username": "导入住户_807375_12"
+      }
+    ],
+    "total": 12
+  },
+  "gbk-repeat": {
+    "fail": 12,
+    "failRows": [
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 1
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 2
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 3
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 4
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 5
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 6
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 7
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 8
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 9
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 10
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 11
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 12
+      }
+    ],
+    "success": 0,
+    "successRows": [],
+    "total": 12
+  },
+  "wrong-community": {
+    "fail": 1,
+    "failRows": [
+      {
+        "reason": "房屋不存在或无权访问",
+        "row": 1
+      }
+    ],
+    "success": 0,
+    "successRows": [],
+    "total": 1
+  },
+  "error": "真实房屋ID按位置可见",
+  "cleanup": true,
+  "financialAfter": [
+    "0",
+    "0"
+  ]
+}

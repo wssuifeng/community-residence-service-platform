@@ -1,0 +1,360 @@
+{
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "管理空间手机号登录",
+      "passed": true
+    },
+    {
+      "name": "居民空间手机号登录",
+      "passed": true
+    },
+    {
+      "name": "中文用户名登录",
+      "passed": true
+    },
+    {
+      "name": "中文用户名重复拒绝",
+      "passed": true
+    },
+    {
+      "name": "用户名不能碰撞他人手机号",
+      "passed": true
+    },
+    {
+      "name": "真实户型选项而非冗余值",
+      "passed": true
+    },
+    {
+      "name": "真实房屋户型筛选",
+      "passed": true
+    },
+    {
+      "name": "旧冗余户型不命中",
+      "passed": true
+    },
+    {
+      "name": "详情展示源房屋户型",
+      "passed": true
+    },
+    {
+      "name": "批量跨社区整区拒绝",
+      "passed": true
+    },
+    {
+      "name": "楼层越界拒绝且不是500",
+      "passed": true
+    },
+    {
+      "name": "楼层拒绝面积无部分写入",
+      "passed": true
+    },
+    {
+      "name": "多属性保存同步真实房屋与挂牌",
+      "passed": true
+    },
+    {
+      "name": "gbk-twelve接口成功",
+      "passed": true
+    },
+    {
+      "name": "GBK十列表头与中文账号十二行成功",
+      "passed": true
+    },
+    {
+      "name": "gbk-repeat接口成功",
+      "passed": true
+    },
+    {
+      "name": "GBK重复十二行拒绝",
+      "passed": true
+    },
+    {
+      "name": "wrong-community接口成功",
+      "passed": true
+    },
+    {
+      "name": "错归属逐行拒绝并不残留账号",
+      "passed": true
+    },
+    {
+      "name": "占用房源从公开列表隐藏",
+      "passed": true
+    },
+    {
+      "name": "占用户型不向游客泄露",
+      "passed": true
+    },
+    {
+      "name": "ADMIN保留自己社区占用户型",
+      "passed": true
+    },
+    {
+      "name": "ADMIN不能获取另社区选项",
+      "passed": true
+    },
+    {
+      "name": "占用记录不能物理删除且有业务提示",
+      "passed": true
+    },
+    {
+      "name": "卡片全部按钮可达1024",
+      "passed": true
+    },
+    {
+      "name": "卡片全部按钮可达768",
+      "passed": true
+    },
+    {
+      "name": "ADMIN真实按钮编辑保存不再500",
+      "passed": true
+    },
+    {
+      "name": "保存确实更新并未新增",
+      "passed": true
+    },
+    {
+      "name": "下架确认明确不取消占用",
+      "passed": true
+    },
+    {
+      "name": "ADMIN真实下架按钮不再500",
+      "passed": true
+    },
+    {
+      "name": "主动下线保留占用与历史",
+      "passed": true
+    },
+    {
+      "name": "导入窗口显示真实社区ID",
+      "passed": true
+    },
+    {
+      "name": "真实房屋ID按位置可见",
+      "passed": true
+    },
+    {
+      "name": "对照下载保留真实房屋ID",
+      "passed": true
+    },
+    {
+      "name": "模板使用选择社区ID而非硬编码1",
+      "passed": true
+    },
+    {
+      "name": "CSV实际上传按钮",
+      "passed": true
+    },
+    {
+      "name": "CSV按钮中文账号导入成功",
+      "passed": true
+    },
+    {
+      "name": "不产生交易或退款记录",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "occupied-card-1024.png",
+    "occupied-card-768.png",
+    "csv-reference-768.png",
+    "structure-before-edit.png"
+  ],
+  "browserErrors": [
+    "Failed to fetch dynamically imported module: http://127.0.0.1:5181/src/views/admin/community/CommunityStructureView.vue"
+  ],
+  "residents": [
+    385,
+    386,
+    387,
+    388,
+    389,
+    390,
+    391,
+    392,
+    393,
+    394,
+    395,
+    396,
+    397,
+    398
+  ],
+  "users": [
+    233
+  ],
+  "communities": [
+    155,
+    156
+  ],
+  "financialBefore": [
+    "0",
+    "0"
+  ],
+  "gbk-twelve": {
+    "fail": 0,
+    "failRows": [],
+    "success": 12,
+    "successRows": [
+      {
+        "houseId": 11414,
+        "relationId": 204,
+        "residentId": 386,
+        "row": 1,
+        "username": "导入住户_789842_1"
+      },
+      {
+        "houseId": 11415,
+        "relationId": 205,
+        "residentId": 387,
+        "row": 2,
+        "username": "导入住户_789842_2"
+      },
+      {
+        "houseId": 11416,
+        "relationId": 206,
+        "residentId": 388,
+        "row": 3,
+        "username": "导入住户_789842_3"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 389,
+        "row": 4,
+        "username": "导入住户_789842_4"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 390,
+        "row": 5,
+        "username": "导入住户_789842_5"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 391,
+        "row": 6,
+        "username": "导入住户_789842_6"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 392,
+        "row": 7,
+        "username": "导入住户_789842_7"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 393,
+        "row": 8,
+        "username": "导入住户_789842_8"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 394,
+        "row": 9,
+        "username": "导入住户_789842_9"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 395,
+        "row": 10,
+        "username": "导入住户_789842_10"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 396,
+        "row": 11,
+        "username": "导入住户_789842_11"
+      },
+      {
+        "houseId": null,
+        "relationId": null,
+        "residentId": 397,
+        "row": 12,
+        "username": "导入住户_789842_12"
+      }
+    ],
+    "total": 12
+  },
+  "gbk-repeat": {
+    "fail": 12,
+    "failRows": [
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 1
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 2
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 3
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 4
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 5
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 6
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 7
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 8
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 9
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 10
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 11
+      },
+      {
+        "reason": "用户名已存在或与已注册手机号冲突",
+        "row": 12
+      }
+    ],
+    "success": 0,
+    "successRows": [],
+    "total": 12
+  },
+  "wrong-community": {
+    "fail": 1,
+    "failRows": [
+      {
+        "reason": "房屋不存在或无权访问",
+        "row": 1
+      }
+    ],
+    "success": 0,
+    "successRows": [],
+    "total": 1
+  },
+  "error": "locator.waitFor: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.grid-block[data-house-id=\"11417\"]') to be visible\u001b[22m\n",
+  "cleanup": true,
+  "financialAfter": [
+    "0",
+    "0"
+  ]
+}

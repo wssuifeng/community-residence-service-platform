@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-13",
+  "userFileCopiedIntoRepository": false,
+  "csv": {
+    "encoding": "GB18030/GBK compatible",
+    "headerMatchesCurrentModel": true,
+    "rows": 12,
+    "utf8DecodeFailed": true,
+    "originalPersonalRowsNotSaved": true
+  },
+  "housing": {
+    "rootCause": "DataScopeInterceptor注入未限定community_id，HouseMapper加锁JOIN的两张表均有同名列",
+    "failingMapper": "HousingMapper.lockHouseForHousing",
+    "updateEndpointAlreadyUsesUpdate": true,
+    "statusEndpointSharesLock": true
+  },
+  "livingModel": "resident独立账号，residence_relation关联resident/house并存OWNER/TENANT/FAMILY；当前直录仅允许空房；无parent_resident_id父子账号模型"
+}

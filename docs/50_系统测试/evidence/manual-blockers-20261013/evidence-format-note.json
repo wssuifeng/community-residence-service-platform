@@ -1,0 +1,6 @@
+{
+  "rawTranscripts": "*.txt",
+  "preserved": true,
+  "formatException": "Maven/Vitest原始转录含行末空白和末尾空行，不为通过代码格式检查改写原始证据；其余暂存源码及文档执行git diff --check",
+  "originalUserAttachmentsCommitted": false
+}

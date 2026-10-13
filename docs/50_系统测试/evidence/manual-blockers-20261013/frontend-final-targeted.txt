@@ -1,0 +1,13 @@
+
+> community-residence-frontend@0.1.0 test
+> vitest run --configLoader native src/views/admin/community/__tests__/HouseAttributesDialog.spec.ts src/views/admin/community/__tests__/HousingEditorLoading.spec.ts src/views/admin/resident/__tests__/ResidentProvisioning.spec.ts src/utils/__tests__/username.spec.ts src/utils/__tests__/residentImportReference.spec.ts
+
+
+ RUN  v4.1.11 D:/code/community-residence-service-platform/frontend
+
+
+ Test Files  5 passed (5)
+      Tests  25 passed (25)
+   Start at  20:52:52
+   Duration  16.43s (transform 384ms, setup 7.35s, import 412ms, tests 2.56s, environment 5.25s)
+
