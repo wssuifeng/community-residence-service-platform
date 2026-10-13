@@ -39,6 +39,18 @@ public class HousingController {
 
     private final HousingService housingService;
 
+    @Operation(summary = "查询可见房源的真实户型选项", description = "遵循列表的社区权限与占用过滤，不读取挂牌冗余户型")
+    @GetMapping("/filter-options")
+    public ApiResponse<List<String>> filterOptions(
+            @RequestParam(required = false) Long communityId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) java.math.BigDecimal minRent,
+            @RequestParam(required = false) java.math.BigDecimal maxRent,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String rentType) {
+        return ApiResponse.success(housingService.filterLayouts(communityId, status, minRent, maxRent, keyword, rentType));
+    }
+
     @Operation(summary = "创建房源", description = "同一房屋仅允许一条在架房源")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping

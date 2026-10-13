@@ -191,6 +191,25 @@ public class HousingService {
     public PageVO<HousingVO> page(long page, long size, Long communityId, String status,
                                   BigDecimal minRent, BigDecimal maxRent, String keyword,
                                   String layout, String rentType) {
+        LambdaQueryWrapper<Housing> wrapper = listingQuery(communityId, status, minRent, maxRent, keyword, layout, rentType);
+        wrapper.orderByDesc(Housing::getId);
+        Page<Housing> result = housingMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
+        /* 未回写增量按页内 id 集合 multiGet 一次取回（N2：不做逐行查询） */
+        Map<Long, Long> viewDeltas = pendingViewDeltas(result.getRecords());
+        PageVO<HousingVO> vo = PageVO.of(result.convert(h -> toVO(h, viewDeltas.get(h.getId()))));
+        if (isManager()) fillOccupancies(vo.getRecords());
+        return vo;
+    }
+
+    /** 筛选选项与公开列表共享权限、占用及筛选条件；户型只取真实房屋模型。 */
+    public List<String> filterLayouts(Long communityId, String status, BigDecimal minRent,
+                                      BigDecimal maxRent, String keyword, String rentType) {
+        return housingMapper.selectHouseLayouts(listingQuery(communityId, status, minRent, maxRent, keyword, null, rentType))
+                .stream().filter(StringUtils::hasText).distinct().sorted().toList();
+    }
+
+    private LambdaQueryWrapper<Housing> listingQuery(Long communityId, String status,
+            BigDecimal minRent, BigDecimal maxRent, String keyword, String layout, String rentType) {
         if (StringUtils.hasText(rentType) && !"RENT".equals(rentType) && !"SALE".equals(rentType)) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租售类型仅支持 RENT/SALE");
         }
@@ -199,22 +218,17 @@ public class HousingService {
                 .eq(StringUtils.hasText(status), Housing::getStatus, status)
                 .ge(minRent != null, Housing::getMonthlyRent, minRent)
                 .le(maxRent != null, Housing::getMonthlyRent, maxRent)
-                /* R53 v1.2：户型精确匹配（冗余列，权威值 house.layout）+ 租售类型 */
-                .eq(StringUtils.hasText(layout), Housing::getLayout, layout)
+                .apply(StringUtils.hasText(layout),
+                        "EXISTS (SELECT 1 FROM house hf WHERE hf.id=housing.house_id AND hf.is_deleted=0 AND hf.layout={0})", layout)
                 .eq(StringUtils.hasText(rentType), Housing::getRentType, rentType)
                 .and(StringUtils.hasText(keyword), w -> w
                         .like(Housing::getTitle, keyword)
                         .or().like(Housing::getDescription, keyword))
-                .orderByDesc(Housing::getId);
+                ;
         if (!isManager()) {
             wrapper.apply(HousingOccupancyRules.PUBLIC);
         }
-        Page<Housing> result = housingMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
-        /* 未回写增量按页内 id 集合 multiGet 一次取回（N2：不做逐行查询） */
-        Map<Long, Long> viewDeltas = pendingViewDeltas(result.getRecords());
-        PageVO<HousingVO> vo = PageVO.of(result.convert(h -> toVO(h, viewDeltas.get(h.getId()))));
-        if (isManager()) fillOccupancies(vo.getRecords());
-        return vo;
+        return wrapper;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -851,6 +865,7 @@ public class HousingService {
         vo.setCommunityName(community.getName());
         House house = houseMapper.selectById(housing.getHouseId());
         if (house != null) {
+            vo.setLayout(house.getLayout());
             Unit unit = unitMapper.selectById(house.getUnitId());
             if (unit != null) {
                 Building building = buildingMapper.selectById(unit.getBuildingId());

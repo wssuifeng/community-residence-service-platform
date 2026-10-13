@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
@@ -7,7 +7,7 @@ import { getCommunityList, getBuildingList, getUnitList } from '@/api/community'
 import { createHousing, updateHousing, updateHousingStatus, getHousingDetail } from '@/api/housing'
 import { http } from '@/utils/request'
 import type { ICommunity, IBuilding, IUnit } from '@/types/modules/community'
-import type { HousingRentType, HousingStatus } from '@/types/modules/housing'
+import type { HousingRentType } from '@/types/modules/housing'
 import { housingRentTypeLabels } from '@/types/modules/housing'
 
 /**
@@ -19,35 +19,7 @@ import { housingRentTypeLabels } from '@/types/modules/housing'
  */
 
 /* 契约：GET /communities/houses-manage → 分页房屋主线项（R62 v1.5，接口设计.md §9.15.3） */
-interface HousingBrief {
-  occupancy?: string
-  applicationId?: number | null
-  leaseId?: number | null
-  id: number
-  title: string
-  status: HousingStatus
-  monthlyRent: number
-  deposit: number | null
-  rentType: HousingRentType
-  coverImage: string | null
-}
-
-interface HouseManageItem {
-  houseId: number
-  communityId: number
-  communityName: string
-  buildingId: number | null
-  buildingName: string | null
-  unitId: number | null
-  unitName: string | null
-  houseNumber: string
-  floor: number
-  area: number | null
-  layout: string | null
-  houseStatus: string
-  /** null=未挂牌 */
-  housing: HousingBrief | null
-}
+import type { HouseManageItem } from '@/types/modules/housing'
 
 /** 房源占位插画（未挂牌或无图时使用，frontend/public 静态资产） */
 const HOUSING_PLACEHOLDER = '/housing-placeholder.png'
@@ -205,43 +177,36 @@ const rentTypeOptions: Array<{ value: HousingRentType; label: string }> = [
   { value: 'RENT', label: housingRentTypeLabels.RENT }
 ]
 
-/**
- * 打开挂牌/编辑：无房源走挂牌（标题默认「社区·楼栋单元房号·精装房源」可改）；
- * 已有房源先拉详情回显描述与图片（卡片项不含），失败以卡片摘要兜底。
- */
-async function openHousingDialog(item: HouseManageItem): Promise<void> {
-  const label = `${item.communityName} ${locationOf(item)}`
-  const brief = item.housing
-  dialogContext.value = {
-    houseId: item.houseId,
-    houseLabel: label,
-    housingId: brief?.id ?? null,
-    images: ''
-  }
-  Object.assign(form, {
-    title: brief ? brief.title : `${locationOf(item)}·精装房源`,
-    monthlyRent: brief ? brief.monthlyRent : undefined,
-    deposit: brief ? (brief.deposit ?? undefined) : undefined,
-    rentType: brief ? brief.rentType : 'RENT',
-    description: ''
-  })
-  dialogVisible.value = true
+const dialogLoading = ref(false)
+const dialogLoadError = ref('')
+const dialogTarget = ref<HouseManageItem | null>(null)
+let dialogSequence = 0
+watch(dialogVisible, value => { if (!value) dialogSequence++ })
 
-  if (brief) {
-    try {
-      const detail = await getHousingDetail(brief.id)
-      form.description = detail.description
-      /* 更新载荷须回传既有图片串（后端按整串落值），避免详情拉取后图片被清空 */
-      dialogContext.value.images = detail.images.join(',')
-    } catch {
-      /* 详情拉取失败：摘要兜底已回显关键字段 */
-    }
-  }
+/* 详情未加载时不开放编辑，避免迟到响应覆盖输入或未知图片被清空；失败须重试。 */
+async function openHousingDialog(item: HouseManageItem): Promise<void> {
+  const sequence = ++dialogSequence
+  dialogTarget.value = item
+  const brief = item.housing
+  dialogContext.value = { houseId: item.houseId, houseLabel: `${item.communityName} ${locationOf(item)}`, housingId: brief?.id ?? null, images: '' }
+  Object.assign(form, { title: brief ? brief.title : `${locationOf(item)}·精装房源`, monthlyRent: brief?.monthlyRent, deposit: brief?.deposit ?? undefined, rentType: brief?.rentType ?? 'RENT', description: '' })
+  dialogLoadError.value = ''
+  dialogLoading.value = !!brief
+  dialogVisible.value = true
+  if (!brief) return
+  try {
+    const detail = await getHousingDetail(brief.id)
+    if (sequence !== dialogSequence || !dialogVisible.value) return
+    Object.assign(form, { title: detail.title, monthlyRent: detail.monthlyRent, deposit: detail.deposit ?? undefined, rentType: detail.rentType, description: detail.description ?? '' })
+    dialogContext.value.images = detail.images.join(',')
+  } catch(error) {
+    if (sequence === dialogSequence && dialogVisible.value) dialogLoadError.value = error instanceof Error ? error.message : '房源详情加载失败，请重试，暂不能保存'
+  } finally { if (sequence === dialogSequence) dialogLoading.value = false }
 }
 
 async function handleSave(): Promise<void> {
   const context = dialogContext.value
-  if (!context) return
+  if (!context || dialogLoading.value || dialogLoadError.value || saving.value) return
   if (!form.title.trim()) {
     ElMessage.warning('请填写房源标题')
     return
@@ -291,7 +256,7 @@ async function handleToggleStatus(item: HouseManageItem): Promise<void> {
   if (!brief) return
   if (brief.status !== 'OFFLINE') {
     try {
-      await ElMessageBox.confirm(`确认下架「${brief.title}」？下架后居民端不再展示`, '下架房源', {
+      await ElMessageBox.confirm(`确认下架「${brief.title}」？下架后居民端不再展示${brief.occupancy && brief.occupancy !== 'FREE' ? '；当前房屋已被占用，下架只停止发布，不取消申请、租约或居住关系' : ''}`, '下架房源', {
         confirmButtonText: '确认下架',
         cancelButtonText: '取消',
         type: 'warning'
@@ -307,7 +272,7 @@ async function handleToggleStatus(item: HouseManageItem): Promise<void> {
   }
   try {
     await updateHousingStatus(brief.id, { status: 'AVAILABLE' })
-    ElMessage.success('房源已上架')
+    ElMessage.success(brief.occupancy && brief.occupancy !== 'FREE' ? '已恢复发布意愿；房屋仍被占用，公众不可见，不会解除占用' : '房源已上架')
     await loadItems()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '上架失败')
@@ -692,7 +657,8 @@ async function handleBatchSubmit(): Promise<void> {
       destroy-on-close
     >
       <p class="dialog-context">{{ dialogContext?.houseLabel }}</p>
-      <el-form label-width="80px">
+      <el-alert v-if="dialogLoadError" type="error" :closable="false" :title="dialogLoadError"><el-button @click="dialogTarget && openHousingDialog(dialogTarget)">重新加载房源</el-button></el-alert>
+      <el-form v-loading="dialogLoading" :disabled="dialogLoading || saving || !!dialogLoadError" label-width="80px">
         <el-form-item label="标题" required>
           <el-input v-model="form.title" maxlength="60" show-word-limit placeholder="如：精装两居 · 拎包入住" />
         </el-form-item>
@@ -718,7 +684,7 @@ async function handleBatchSubmit(): Promise<void> {
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
+        <el-button type="primary" :loading="saving" :disabled="dialogLoading || !!dialogLoadError" @click="handleSave">保存</el-button>
       </template>
     </el-dialog>
 
@@ -1104,6 +1070,8 @@ async function handleBatchSubmit(): Promise<void> {
 }
 
 .card-actions {
+  flex-wrap: wrap;
+  align-items: center;
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -1239,4 +1207,8 @@ async function handleBatchSubmit(): Promise<void> {
     grid-template-columns: 1fr;
   }
 }
+</style>
+
+<style scoped>
+.card-actions :deep(.el-button) { margin-left: 0; max-width: 100%; white-space: normal; height: auto; min-height: 28px; }
 </style>
