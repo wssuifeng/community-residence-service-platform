@@ -1,0 +1,161 @@
+{
+  "database": "community_residence_payment_config_test",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "管理空间手机号登录",
+      "passed": true
+    },
+    {
+      "name": "居民空间手机号登录",
+      "passed": true
+    },
+    {
+      "name": "中文用户名登录",
+      "passed": true
+    },
+    {
+      "name": "中文用户名重复拒绝",
+      "passed": true
+    },
+    {
+      "name": "用户名不能碰撞他人手机号",
+      "passed": true
+    },
+    {
+      "name": "真实户型选项而非冗余值",
+      "passed": true
+    },
+    {
+      "name": "真实房屋户型筛选",
+      "passed": true
+    },
+    {
+      "name": "旧冗余户型不命中",
+      "passed": true
+    },
+    {
+      "name": "详情展示源房屋户型",
+      "passed": true
+    },
+    {
+      "name": "批量跨社区整区拒绝",
+      "passed": true
+    },
+    {
+      "name": "楼层越界拒绝且不是500",
+      "passed": true
+    },
+    {
+      "name": "楼层拒绝面积无部分写入",
+      "passed": true
+    },
+    {
+      "name": "多属性保存同步真实房屋与挂牌",
+      "passed": true
+    },
+    {
+      "name": "gbk-twelve接口成功",
+      "passed": true
+    },
+    {
+      "name": "GBK十列表头与中文账号十二行成功",
+      "passed": false
+    },
+    {
+      "name": "不产生交易或退款记录",
+      "passed": true
+    }
+  ],
+  "screenshots": [],
+  "browserErrors": [],
+  "residents": [
+    328,
+    329,
+    330,
+    331
+  ],
+  "users": [
+    228
+  ],
+  "communities": [
+    145,
+    146
+  ],
+  "financialBefore": [
+    "0",
+    "0"
+  ],
+  "gbk-twelve": {
+    "fail": 9,
+    "failRows": [
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 4
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 5
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 6
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 7
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 8
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 9
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 10
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 11
+      },
+      {
+        "reason": "仅建账号时不能填写部分居住关系；请同时填写房屋、关系类型和入住日期",
+        "row": 12
+      }
+    ],
+    "success": 3,
+    "successRows": [
+      {
+        "houseId": 11354,
+        "relationId": 189,
+        "residentId": 329,
+        "row": 1,
+        "username": "导入住户_536762_1"
+      },
+      {
+        "houseId": 11355,
+        "relationId": 190,
+        "residentId": 330,
+        "row": 2,
+        "username": "导入住户_536762_2"
+      },
+      {
+        "houseId": 11356,
+        "relationId": 191,
+        "residentId": 331,
+        "row": 3,
+        "username": "导入住户_536762_3"
+      }
+    ],
+    "total": 12
+  },
+  "error": "GBK十列表头与中文账号十二行成功",
+  "cleanup": true,
+  "financialAfter": [
+    "0",
+    "0"
+  ]
+}

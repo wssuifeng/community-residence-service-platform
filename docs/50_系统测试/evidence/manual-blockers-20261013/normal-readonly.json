@@ -1,0 +1,55 @@
+{
+  "checks": [
+    {
+      "name": "正常服务已部署新契约",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "真实交易渠道继续停用",
+      "passed": true
+    },
+    {
+      "name": "正常5176房屋与房源入口可加载",
+      "passed": true
+    },
+    {
+      "name": "正常浏览器无页面初始化错误",
+      "passed": true
+    },
+    {
+      "name": "正常库只读快照查询",
+      "passed": true
+    },
+    {
+      "name": "用户已有及新增手测数据数量保持",
+      "passed": true
+    }
+  ],
+  "counts": {
+    "communities": 2,
+    "houses": 628,
+    "residents": 11,
+    "leases": 1,
+    "payments": 0,
+    "refunds": 0
+  },
+  "browserErrors": [],
+  "tradeOperations": false,
+  "userBrowserControlled": false
+}

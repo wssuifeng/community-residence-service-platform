@@ -1,0 +1,19 @@
+{
+  "sourceCommunityId": 2,
+  "referencedHouses": [
+    {
+      "houseId": 2,
+      "communityId": 2
+    },
+    {
+      "houseId": 3,
+      "communityId": 2
+    },
+    {
+      "houseId": 4,
+      "communityId": 2
+    }
+  ],
+  "wrongCommunity": [],
+  "personalFieldsCopied": false
+}

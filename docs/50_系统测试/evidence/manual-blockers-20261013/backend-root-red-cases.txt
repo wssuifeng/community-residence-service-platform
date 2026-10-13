@@ -1,0 +1,287 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.community:residence-backend >-------------------
+[INFO] Building community-residence-service-backend 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.13:prepare-agent (default) @ residence-backend ---
+[INFO] argLine set to -javaagent:C:\\Users\\17841\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.13\\org.jacoco.agent-0.8.13-runtime.jar=destfile=D:\\code\\community-residence-service-platform\\backend\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ residence-backend ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 32 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ residence-backend ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ residence-backend ---
+[INFO] skip non existing resourceDirectory D:\code\community-residence-service-platform\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ residence-backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 143 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] /D:/code/community-residence-service-platform/backend/src/test/java/com/community/residence/community/service/BuildingBatch3Test.java: ĳЩ�����ļ�ʹ�û򸲸����ѹ�ʱ�� API��
+[INFO] /D:/code/community-residence-service-platform/backend/src/test/java/com/community/residence/community/service/BuildingBatch3Test.java: �й���ϸ��Ϣ, ��ʹ�� -Xlint:deprecation ���±��롣
+[INFO] /D:/code/community-residence-service-platform/backend/src/test/java/com/community/residence/community/service/HouseLayoutServiceTest.java: ĳЩ�����ļ�ʹ����δ�����򲻰�ȫ�Ĳ�����
+[INFO] /D:/code/community-residence-service-platform/backend/src/test/java/com/community/residence/community/service/HouseLayoutServiceTest.java: �й���ϸ��Ϣ, ��ʹ�� -Xlint:unchecked ���±��롣
+[INFO] 
+[INFO] --- surefire:3.5.5:test (default-test) @ residence-backend ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.community.residence.interceptor.DataScopeJoinedHousingTest
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+java.lang.instrument.IllegalClassFormatException: Error while instrumenting net/sf/jsqlparser/parser/CCJSqlParserTokenManager with JaCoCo 0.8.13.202504020838/78d5eff.
+	at org.jacoco.agent.rt.internal_0e20598.CoverageTransformer.transform(CoverageTransformer.java:94)
+	at java.instrument/java.lang.instrument.ClassFileTransformer.transform(ClassFileTransformer.java:244)
+	at java.instrument/sun.instrument.TransformerManager.transform(TransformerManager.java:188)
+	at java.instrument/sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:541)
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1012)
+	at java.base/java.security.SecureClassLoader.defineClass(SecureClassLoader.java:150)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(BuiltinClassLoader.java:862)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(BuiltinClassLoader.java:760)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(BuiltinClassLoader.java:681)
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:639)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:520)
+	at net.sf.jsqlparser.parser.CCJSqlParser.<init>(CCJSqlParser.java:53137)
+	at net.sf.jsqlparser.parser.CCJSqlParserUtil.newParser(CCJSqlParserUtil.java:138)
+	at net.sf.jsqlparser.parser.CCJSqlParserUtil.parse(CCJSqlParserUtil.java:107)
+	at net.sf.jsqlparser.parser.CCJSqlParserUtil.parse(CCJSqlParserUtil.java:91)
+	at net.sf.jsqlparser.parser.CCJSqlParserUtil.parse(CCJSqlParserUtil.java:64)
+	at com.community.residence.interceptor.DataScopeInterceptor.rewriteSql(DataScopeInterceptor.java:81)
+	at com.community.residence.interceptor.DataScopeInterceptor.beforeQuery(DataScopeInterceptor.java:74)
+	at com.community.residence.interceptor.DataScopeJoinedHousingTest.rewrite(DataScopeJoinedHousingTest.java:22)
+	at com.community.residence.interceptor.DataScopeJoinedHousingTest.communityRootUsesQualifiedId(DataScopeJoinedHousingTest.java:35)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:701)
+	at org.junit.platform.commons.support.ReflectionSupport.invokeMethod(ReflectionSupport.java:502)
+	at org.junit.jupiter.engine.support.MethodReflectionUtils.invoke(MethodReflectionUtils.java:45)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:61)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:124)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:163)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:148)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:123)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:105)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:99)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:66)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:47)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:39)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:104)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:98)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invokeVoid(InterceptingExecutableInvoker.java:71)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$0(TestMethodTestDescriptor.java:219)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:215)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:157)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:70)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:176)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:42)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$2(NodeTestTask.java:180)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$1(NodeTestTask.java:166)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$0(NodeTestTask.java:164)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:74)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:163)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:116)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:36)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:52)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:58)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.executeEngine(EngineExecutionOrchestrator.java:246)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.failOrExecuteEngine(EngineExecutionOrchestrator.java:218)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:179)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:66)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:157)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:65)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:125)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58)
+	at org.junit.platform.launcher.core.InterceptingLauncher.lambda$execute$2(InterceptingLauncher.java:57)
+	at org.junit.platform.launcher.core.ClasspathAlignmentCheckingLauncherInterceptor.intercept(ClasspathAlignmentCheckingLauncherInterceptor.java:25)
+	at org.junit.platform.launcher.core.InterceptingLauncher.execute(InterceptingLauncher.java:56)
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:58)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.apache.maven.surefire.api.util.ReflectionUtils.invokeMethodWithArray(ReflectionUtils.java:125)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.executeWithCancellationToken(LauncherAdapter.java:68)
+	at org.apache.maven.surefire.junitplatform.LauncherAdapter.execute(LauncherAdapter.java:54)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:203)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:168)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:136)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: java.io.IOException: Error while instrumenting net/sf/jsqlparser/parser/CCJSqlParserTokenManager with JaCoCo 0.8.13.202504020838/78d5eff.
+	at org.jacoco.agent.rt.internal_0e20598.core.instr.Instrumenter.instrumentError(Instrumenter.java:161)
+	at org.jacoco.agent.rt.internal_0e20598.core.instr.Instrumenter.instrument(Instrumenter.java:111)
+	at org.jacoco.agent.rt.internal_0e20598.CoverageTransformer.transform(CoverageTransformer.java:92)
+	... 106 more
+Caused by: org.jacoco.agent.rt.internal_0e20598.asm.MethodTooLargeException: Method too large: net/sf/jsqlparser/parser/CCJSqlParserTokenManager.jjMoveNfa_0 (II)I
+	at org.jacoco.agent.rt.internal_0e20598.asm.MethodWriter.computeMethodInfoSize(MethodWriter.java:2088)
+	at org.jacoco.agent.rt.internal_0e20598.asm.ClassWriter.toByteArray(ClassWriter.java:506)
+	at org.jacoco.agent.rt.internal_0e20598.core.instr.Instrumenter.instrument(Instrumenter.java:92)
+	at org.jacoco.agent.rt.internal_0e20598.core.instr.Instrumenter.instrument(Instrumenter.java:109)
+	... 107 more
+[ERROR] Tests run: 4, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 2.780 s <<< FAILURE! -- in com.community.residence.interceptor.DataScopeJoinedHousingTest
+[ERROR] com.community.residence.interceptor.DataScopeJoinedHousingTest.communityRootUsesQualifiedId -- Time elapsed: 2.650 s <<< FAILURE!
+java.lang.AssertionError: 
+
+Expecting actual:
+  "SELECT c.id FROM community c JOIN building b ON b.community_id = c.id WHERE id IN (2)"
+to contain:
+  "c.id IN (2)" 
+	at com.community.residence.interceptor.DataScopeJoinedHousingTest.communityRootUsesQualifiedId(DataScopeJoinedHousingTest.java:36)
+
+[ERROR] com.community.residence.interceptor.DataScopeJoinedHousingTest.noBoundCommunityStaysDeniedEvenWithJoin -- Time elapsed: 0.028 s <<< FAILURE!
+java.lang.AssertionError: 
+
+Expecting actual:
+  "SELECT hh.id FROM house hh JOIN housing ON housing.house_id = hh.id WHERE community_id IN ('__NO_COMMUNITY__')"
+to contain:
+  "hh.community_id IN ('__NO_COMMUNITY__')" 
+	at com.community.residence.interceptor.DataScopeJoinedHousingTest.noBoundCommunityStaysDeniedEvenWithJoin(DataScopeJoinedHousingTest.java:40)
+
+[ERROR] com.community.residence.interceptor.DataScopeJoinedHousingTest.actualHouseHousingLockQualifiesTheMainHouse -- Time elapsed: 0.035 s <<< FAILURE!
+java.lang.AssertionError: 
+
+Expecting actual:
+  "SELECT hh.id FROM house hh JOIN housing ON housing.house_id = hh.id WHERE housing.id = ? AND hh.is_deleted = 0 AND community_id IN (2) FOR UPDATE"
+to contain:
+  ["hh.community_id IN (2)", "FOR UPDATE"]
+but could not find:
+  ["hh.community_id IN (2)"]
+ 
+	at com.community.residence.interceptor.DataScopeJoinedHousingTest.actualHouseHousingLockQualifiesTheMainHouse(DataScopeJoinedHousingTest.java:28)
+
+[ERROR] com.community.residence.interceptor.DataScopeJoinedHousingTest.noAliasJoinIsAlsoQualified -- Time elapsed: 0.006 s <<< FAILURE!
+java.lang.AssertionError: 
+
+Expecting actual:
+  "SELECT house.id FROM house JOIN housing ON housing.house_id = house.id WHERE community_id IN (2)"
+to contain:
+  "house.community_id IN (2)" 
+	at com.community.residence.interceptor.DataScopeJoinedHousingTest.noAliasJoinIsAlsoQualified(DataScopeJoinedHousingTest.java:32)
+
+[INFO] Running com.community.residence.resident.service.ResidentCsvEncodingTest
+[ERROR] Tests run: 4, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.721 s <<< FAILURE! -- in com.community.residence.resident.service.ResidentCsvEncodingTest
+[ERROR] com.community.residence.resident.service.ResidentCsvEncodingTest.unicodeExcelBomIsSupported -- Time elapsed: 0.018 s <<< ERROR!
+com.community.residence.common.exception.BusinessException: CSV��ͷ�����������ص�ǰ����ģ��
+	at com.community.residence.resident.service.ResidentService.parseCsv(ResidentService.java:334)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.util.MethodInvoker.invoke(MethodInvoker.java:275)
+	at org.springframework.test.util.ReflectionTestUtils.invokeMethod(ReflectionTestUtils.java:517)
+	at org.springframework.test.util.ReflectionTestUtils.invokeMethod(ReflectionTestUtils.java:438)
+	at com.community.residence.resident.service.ResidentCsvEncodingTest.parse(ResidentCsvEncodingTest.java:16)
+	at com.community.residence.resident.service.ResidentCsvEncodingTest.unicodeExcelBomIsSupported(ResidentCsvEncodingTest.java:19)
+
+[ERROR] com.community.residence.resident.service.ResidentCsvEncodingTest.gbkFromExcelKeepsChineseHeaderAndData -- Time elapsed: 0.012 s <<< ERROR!
+com.community.residence.common.exception.BusinessException: CSV��ͷ�����������ص�ǰ����ģ��
+	at com.community.residence.resident.service.ResidentService.parseCsv(ResidentService.java:334)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.util.MethodInvoker.invoke(MethodInvoker.java:275)
+	at org.springframework.test.util.ReflectionTestUtils.invokeMethod(ReflectionTestUtils.java:517)
+	at org.springframework.test.util.ReflectionTestUtils.invokeMethod(ReflectionTestUtils.java:438)
+	at com.community.residence.resident.service.ResidentCsvEncodingTest.parse(ResidentCsvEncodingTest.java:16)
+	at com.community.residence.resident.service.ResidentCsvEncodingTest.gbkFromExcelKeepsChineseHeaderAndData(ResidentCsvEncodingTest.java:18)
+
+[ERROR] com.community.residence.resident.service.ResidentCsvEncodingTest.properlyQuotedHeadersAreNotWrongHeaders -- Time elapsed: 0.004 s <<< ERROR!
+com.community.residence.common.exception.BusinessException: CSV��ͷ�����������ص�ǰ����ģ��
+	at com.community.residence.resident.service.ResidentService.parseCsv(ResidentService.java:334)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at org.springframework.util.MethodInvoker.invoke(MethodInvoker.java:275)
+	at org.springframework.test.util.ReflectionTestUtils.invokeMethod(ReflectionTestUtils.java:517)
+	at org.springframework.test.util.ReflectionTestUtils.invokeMethod(ReflectionTestUtils.java:438)
+	at com.community.residence.resident.service.ResidentCsvEncodingTest.parse(ResidentCsvEncodingTest.java:16)
+	at com.community.residence.resident.service.ResidentCsvEncodingTest.properlyQuotedHeadersAreNotWrongHeaders(ResidentCsvEncodingTest.java:21)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   DataScopeJoinedHousingTest.actualHouseHousingLockQualifiesTheMainHouse:28 
+Expecting actual:
+  "SELECT hh.id FROM house hh JOIN housing ON housing.house_id = hh.id WHERE housing.id = ? AND hh.is_deleted = 0 AND community_id IN (2) FOR UPDATE"
+to contain:
+  ["hh.community_id IN (2)", "FOR UPDATE"]
+but could not find:
+  ["hh.community_id IN (2)"]
+ 
+[ERROR]   DataScopeJoinedHousingTest.communityRootUsesQualifiedId:36 
+Expecting actual:
+  "SELECT c.id FROM community c JOIN building b ON b.community_id = c.id WHERE id IN (2)"
+to contain:
+  "c.id IN (2)" 
+[ERROR]   DataScopeJoinedHousingTest.noAliasJoinIsAlsoQualified:32 
+Expecting actual:
+  "SELECT house.id FROM house JOIN housing ON housing.house_id = house.id WHERE community_id IN (2)"
+to contain:
+  "house.community_id IN (2)" 
+[ERROR]   DataScopeJoinedHousingTest.noBoundCommunityStaysDeniedEvenWithJoin:40 
+Expecting actual:
+  "SELECT hh.id FROM house hh JOIN housing ON housing.house_id = hh.id WHERE community_id IN ('__NO_COMMUNITY__')"
+to contain:
+  "hh.community_id IN ('__NO_COMMUNITY__')" 
+[ERROR] Errors: 
+[ERROR]   ResidentCsvEncodingTest.gbkFromExcelKeepsChineseHeaderAndData:18->parse:16 ? Business CSV��ͷ�����������ص�ǰ����ģ��
+[ERROR]   ResidentCsvEncodingTest.properlyQuotedHeadersAreNotWrongHeaders:21->parse:16 ? Business CSV��ͷ�����������ص�ǰ����ģ��
+[ERROR]   ResidentCsvEncodingTest.unicodeExcelBomIsSupported:19->parse:16 ? Business CSV��ͷ�����������ص�ǰ����ģ��
+[INFO] 
+[ERROR] Tests run: 8, Failures: 4, Errors: 3, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  18.579 s
+[INFO] Finished at: 2026-10-13T18:22:34+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project residence-backend: There are test failures.
+[ERROR] 
+[ERROR] See D:\code\community-residence-service-platform\backend\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

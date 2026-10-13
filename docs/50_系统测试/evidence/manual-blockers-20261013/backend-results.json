@@ -1,0 +1,19 @@
+{
+  "suites": 144,
+  "tests": 996,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "coverage": {
+    "BRANCH": {
+      "missed": 1318,
+      "covered": 2577,
+      "percent": 66.16
+    },
+    "LINE": {
+      "missed": 2333,
+      "covered": 6969,
+      "percent": 74.92
+    }
+  }
+}

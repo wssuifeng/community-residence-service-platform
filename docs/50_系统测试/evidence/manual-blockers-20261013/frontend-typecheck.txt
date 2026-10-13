@@ -1,0 +1,5 @@
+
+> community-residence-frontend@0.1.0 typecheck
+> vue-tsc --noEmit
+
+src/views/admin/community/HousesWithHousingView.vue(10,32): error TS6196: 'HousingStatus' is declared but never used.
