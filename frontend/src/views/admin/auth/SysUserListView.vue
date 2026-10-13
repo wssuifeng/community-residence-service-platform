@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { isValidUsername, USERNAME_HINT } from '@/utils/username'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   createSysUser,
@@ -85,7 +86,7 @@ const bindingMap = ref<Record<number, IBoundCommunity[]>>({})
 const createRules: FormRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 30, message: '用户名长度 3-30 个字符', trigger: 'blur' }
+    { validator: (_rule, value: string, callback) => isValidUsername(value.trim()) ? callback() : callback(new Error(`用户名须为${USERNAME_HINT}`)), trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入初始密码', trigger: 'blur' },
@@ -474,7 +475,7 @@ onMounted(load)
     <el-dialog v-model="createVisible" title="创建用户" width="480px">
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="100px">
         <el-form-item label="用户名" prop="username">
-          <el-input v-model="createForm.username" placeholder="登录用户名" maxlength="30" />
+          <el-input v-model="createForm.username" :placeholder="USERNAME_HINT" maxlength="50" />
         </el-form-item>
         <el-form-item label="初始密码" prop="password">
           <el-input

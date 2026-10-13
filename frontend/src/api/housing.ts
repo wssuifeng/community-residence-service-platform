@@ -134,3 +134,13 @@ export function deleteHousingTimeslot(id: number) {
 export function listHousingTimeslots(housingId: number, query?: HousingTimeslotListQuery) {
   return http.get<IHousingTimeslot[]>(`/housings/${housingId}/timeslots`, query)
 }
+
+/** 与当前可见房源集合一致，不受分页截断的真实户型选项。 */
+export function getHousingFilterOptions(query?: Omit<HousingListQuery, 'page' | 'size' | 'layout'>) {
+  return http.get<string[]>('/housings/filter-options', query)
+}
+
+/** 真实房屋位置与ID对照，范围由后台社区权限限定。 */
+export function listHouseManage(query: { page?: number; size?: number; communityId?: number; buildingId?: number; unitId?: number; keyword?: string; listing?: string }) {
+  return http.get<PageResult<import('@/types/modules/housing').HouseManageItem>>('/communities/houses-manage', query)
+}

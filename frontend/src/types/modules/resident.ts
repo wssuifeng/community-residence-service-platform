@@ -108,7 +108,7 @@ export interface IAdminCreateResidentDTO {
   phone: string
   /** 身份证号（选填，^\d{17}[\dXx]$） */
   idCard?: string
-  /** 用户名（选填，^[a-zA-Z0-9_]+$ 4~20 字符；留空服务端按手机号生成） */
+  /** 用户名（选填，^[a-zA-Z0-9_]+$ 1～50 字符；留空服务端按手机号生成） */
   username?: string
   email?: string
   houseId?: number

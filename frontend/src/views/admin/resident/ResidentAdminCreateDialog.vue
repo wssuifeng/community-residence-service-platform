@@ -3,6 +3,7 @@
 import { reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import { isValidUsername, USERNAME_HINT } from '@/utils/username'
 import { adminCreateResident } from '@/api/resident'
 import ResidentHouseSelector from './ResidentHouseSelector.vue'
 import { loadAllPages } from '@/utils/paged'
@@ -60,17 +61,10 @@ const rules: FormRules = {
   ],
   email: [{ type: 'email', message: '邮箱格式不正确', trigger: 'blur' }],
   username: [
-    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名仅支持字母、数字、下划线', trigger: 'blur' },
-    {
-      validator: (_rule, value: string, callback) => {
-        if (value && (value.length < 4 || value.length > 20)) {
-          callback(new Error('用户名长度 4~20 字符'))
-          return
-        }
-        callback()
-      },
-      trigger: 'blur'
-    }
+    { validator: (_rule, value: string, callback) => {
+      if (value && !isValidUsername(value.trim())) callback(new Error(`用户名须为${USERNAME_HINT}`))
+      else callback()
+    }, trigger: 'blur' }
   ]
 }
 
@@ -199,9 +193,9 @@ async function copyText(text: string): Promise<void> {
         <el-input
           v-model="form.username"
           placeholder="留空按手机号生成"
-          maxlength="20"
+          maxlength="50"
         />
-        <span class="form-hint">选填，4~20 字符（字母/数字/下划线）；初始密码为手机号后 6 位</span>
+        <span class="form-hint">选填，1～50 位中文、字母、数字或下划线；初始密码为手机号后 6 位</span>
       </el-form-item>
       <el-form-item label="邮箱"><el-input v-model="form.email" placeholder="选填，与居民资料一致" maxlength="100" /></el-form-item>
       <template v-if="createRelation">

@@ -19,7 +19,7 @@ const form = reactive({ username: '', password: '' })
 
 async function handleLogin(): Promise<void> {
   if (!form.username || !form.password) {
-    ElMessage.warning('请输入用户名和密码')
+    ElMessage.warning('请输入用户名或注册手机号和密码')
     return
   }
   loading.value = true
@@ -110,7 +110,7 @@ async function handleLogin(): Promise<void> {
           <el-input
             v-model="form.username"
             class="login-input"
-            placeholder="请输入用户名"
+            placeholder="请输入用户名或注册手机号"
             autocomplete="username"
           >
             <template #prefix>

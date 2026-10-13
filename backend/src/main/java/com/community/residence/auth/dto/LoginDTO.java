@@ -9,8 +9,8 @@ import lombok.Data;
 @Schema(description = "登录请求")
 public class LoginDTO {
 
-    @Schema(description = "用户名", example = "admin")
-    @NotBlank(message = "用户名不能为空")
+    @Schema(description = "用户名或注册手机号（兼容字段username）", example = "admin")
+    @NotBlank(message = "用户名或手机号不能为空")
     private String username;
 
     @Schema(description = "密码", example = "Admin123456")

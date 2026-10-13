@@ -47,11 +47,11 @@ public class SysUserService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "SYS_USER", targetId = "#result.id", content = "'创建系统用户：' + #dto.username")
     public SysUserVO create(CreateSysUserDTO dto) {
-        checkUsernameUnique(dto.getUsername());
+        checkUsernameUnique(dto.getUsername().trim());
         checkPhoneUnique(dto.getPhone(), null);
 
         SysUser user = new SysUser();
-        user.setUsername(dto.getUsername());
+        user.setUsername(dto.getUsername().trim());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRealName(dto.getRealName());
         user.setPhone(dto.getPhone());
@@ -198,7 +198,7 @@ public class SysUserService {
 
     private void checkUsernameUnique(String username) {
         Long count = sysUserMapper.selectCount(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getUsername, username));
+                .and(w -> w.eq(SysUser::getUsername, username).or().eq(SysUser::getPhone, username)));
         if (count > 0) {
             throw new BusinessException(ErrorCode.DATA_EXISTS, "用户名已存在");
         }
@@ -206,7 +206,7 @@ public class SysUserService {
 
     private void checkPhoneUnique(String phone, Long excludeId) {
         Long count = sysUserMapper.selectCount(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getPhone, phone)
+                .and(w -> w.eq(SysUser::getPhone, phone).or().eq(SysUser::getUsername, phone))
                 .ne(excludeId != null, SysUser::getId, excludeId));
         if (count > 0) {
             throw new BusinessException(ErrorCode.DATA_EXISTS, "手机号已存在");

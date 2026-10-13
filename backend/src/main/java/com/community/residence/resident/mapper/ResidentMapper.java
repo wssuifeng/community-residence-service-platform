@@ -19,4 +19,7 @@ public interface ResidentMapper extends BaseMapper<Resident> {
     @Select("SELECT id, username, password_hash, real_name, phone, id_card, email, avatar_url, "
             + "status, created_at, updated_at FROM resident WHERE username = #{username}")
     Resident selectByUsername(@Param("username") String username);
+    /* 同身份空间用户名/手机号均可登录；最多读两条，歧义由认证层拒绝，不猜优先级。 */
+    @Select("SELECT id, username, password_hash, real_name, phone, id_card, email, avatar_url, status, created_at, updated_at FROM resident WHERE username = #{identifier} OR phone = #{identifier} LIMIT 2")
+    java.util.List<Resident> selectLoginCandidates(@Param("identifier") String identifier);
 }

@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { residentRegister } from '@/api/auth'
+import { isValidUsername, USERNAME_HINT } from '@/utils/username'
 
 /** 注册页（UI设计.md §3.2）：居民自助注册（可全局关闭，5201 由后端校验） */
 const router = useRouter()
@@ -20,8 +21,8 @@ const form = reactive({
 
 async function handleRegister(): Promise<void> {
   // 参数校验与接口设计.md 9.2.1.1 的后端校验对齐（前端先行提示）
-  if (!/^[a-zA-Z0-9_]{4,20}$/.test(form.username)) {
-    ElMessage.warning('用户名须为 4~20 位字母/数字/下划线')
+  if (!isValidUsername(form.username.trim())) {
+    ElMessage.warning(`用户名须为${USERNAME_HINT}`)
     return
   }
   if (form.password.length < 8 || form.password.length > 20) {
@@ -52,7 +53,7 @@ async function handleRegister(): Promise<void> {
   loading.value = true
   try {
     await residentRegister({
-      username: form.username,
+      username: form.username.trim(),
       password: form.password,
       realName: form.realName,
       phone: form.phone,
@@ -90,7 +91,7 @@ async function handleRegister(): Promise<void> {
         <form class="register-form" @submit.prevent="handleRegister">
           <label class="register-field">
             <span>用户名</span>
-            <el-input v-model="form.username" class="register-input" placeholder="4~20 位字母/数字/下划线" autocomplete="username" />
+            <el-input v-model="form.username" class="register-input" :placeholder="USERNAME_HINT" maxlength="50" autocomplete="username" />
           </label>
           <label class="register-field">
             <span>密码</span>
