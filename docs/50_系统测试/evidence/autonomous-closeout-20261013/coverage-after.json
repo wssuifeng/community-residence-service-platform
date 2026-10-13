@@ -1,0 +1,117 @@
+{
+  "total": {
+    "INSTRUCTION": {
+      "missed": 11857,
+      "covered": 33718
+    },
+    "BRANCH": {
+      "missed": 1310,
+      "covered": 2517
+    },
+    "LINE": {
+      "missed": 2359,
+      "covered": 6879
+    },
+    "COMPLEXITY": {
+      "missed": 1494,
+      "covered": 1734
+    },
+    "METHOD": {
+      "missed": 483,
+      "covered": 823
+    },
+    "CLASS": {
+      "missed": 69,
+      "covered": 144
+    }
+  },
+  "services": [
+    {
+      "class": "com/community/residence/feedback/service/FeedbackService",
+      "counters": {
+        "INSTRUCTION": {
+          "missed": 216,
+          "covered": 470
+        },
+        "BRANCH": {
+          "missed": 20,
+          "covered": 44
+        },
+        "LINE": {
+          "missed": 43,
+          "covered": 115
+        },
+        "COMPLEXITY": {
+          "missed": 22,
+          "covered": 28
+        },
+        "METHOD": {
+          "missed": 7,
+          "covered": 11
+        },
+        "CLASS": {
+          "missed": 0,
+          "covered": 1
+        }
+      }
+    },
+    {
+      "class": "com/community/residence/auth/service/OperationLogService",
+      "counters": {
+        "INSTRUCTION": {
+          "missed": 0,
+          "covered": 285
+        },
+        "BRANCH": {
+          "missed": 0,
+          "covered": 24
+        },
+        "LINE": {
+          "missed": 0,
+          "covered": 39
+        },
+        "COMPLEXITY": {
+          "missed": 0,
+          "covered": 20
+        },
+        "METHOD": {
+          "missed": 0,
+          "covered": 8
+        },
+        "CLASS": {
+          "missed": 0,
+          "covered": 1
+        }
+      }
+    },
+    {
+      "class": "com/community/residence/lease/service/LeaseChangeLogService",
+      "counters": {
+        "INSTRUCTION": {
+          "missed": 10,
+          "covered": 418
+        },
+        "BRANCH": {
+          "missed": 0,
+          "covered": 26
+        },
+        "LINE": {
+          "missed": 2,
+          "covered": 75
+        },
+        "COMPLEXITY": {
+          "missed": 1,
+          "covered": 26
+        },
+        "METHOD": {
+          "missed": 1,
+          "covered": 13
+        },
+        "CLASS": {
+          "missed": 0,
+          "covered": 1
+        }
+      }
+    }
+  ]
+}
