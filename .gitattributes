@@ -8,3 +8,5 @@
 
 # 本批原始日志/截图/JSON按字节封存用于SHA复验。
 /docs/50_系统测试/evidence/staff-rules-20261012/** -text
+
+/docs/50_系统测试/evidence/autonomous-closeout-20261013/** -text
