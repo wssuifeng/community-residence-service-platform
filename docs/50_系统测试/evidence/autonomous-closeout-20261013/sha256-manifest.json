@@ -133,6 +133,11 @@
       "sha256": "993e86fa2028a12023633def02483610fda5b48af8c306751f96c05d929904d7"
     },
     {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/git-delivery.json",
+      "bytes": 560,
+      "sha256": "55f4a55e89b002ae1648ce9a918a23c04c9d39e6ebb73028498dbbd524aa71b8"
+    },
+    {
       "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/jacoco-after.xml",
       "bytes": 1060333,
       "sha256": "4c3c5f2cb4d68bc9375a0d4a0efda63d1b02dc30d9676b91d33ea44a80276106"
@@ -174,8 +179,8 @@
     },
     {
       "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/verification-summary.json",
-      "bytes": 1947,
-      "sha256": "dcbd0a8c6346cb6ac4bfb6e23f1f31e580167e5fabb29a40f54fad2b58f6f2ed"
+      "bytes": 2175,
+      "sha256": "c782157b815f8c1fb83577397cea731f3722ce7cd9b64cd5c5069057295bb43f"
     }
   ]
 }

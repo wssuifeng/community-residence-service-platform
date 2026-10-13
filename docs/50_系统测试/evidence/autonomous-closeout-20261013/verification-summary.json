@@ -70,7 +70,16 @@
     "preview5182Stopped": true,
     "isolated8087and5181Stopped": true
   },
-  "git": "用户授权逐项本地提交及普通推送，操作结束另回写，不强推",
+  "git": {
+    "deliveryHeadVerified": "fd0b92dcb2b2193209698686d8b9a4a4e4eb18d0",
+    "remoteHeadVerified": "fd0b92dcb2b2193209698686d8b9a4a4e4eb18d0",
+    "aheadBehind": [
+      0,
+      0
+    ],
+    "forcePush": false,
+    "followup": "交付回写提交随后同轮普通同步，最终HEAD以终端实测为准"
+  },
   "manifest": "sha256-manifest.json",
   "security": {
     "currentWorkingContentRedacted": true,
