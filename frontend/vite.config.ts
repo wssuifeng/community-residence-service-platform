@@ -16,6 +16,22 @@ export default defineConfig(({ mode }) => {
     define: {
       global: 'globalThis'
     },
+    build: {
+      // 保留路由懒加载；按实际入口拆重依赖，不让任一图表拖入全部图表模块。
+      rolldownOptions: {
+        output: {
+          strictExecutionOrder: true,
+          codeSplitting: {
+            includeDependenciesRecursively: true,
+            groups: [
+              { name: 'vue-runtime', test: /node_modules[\\/](?:@vue|vue|pinia|vue-router)[\\/]/, priority: 30 },
+              { name: 'element-plus', test: /node_modules[\\/](?:element-plus|@element-plus)[\\/]/, priority: 20, maxSize: 500_000, entriesAware: true },
+              { name: 'charts', test: /node_modules[\\/](?:echarts|zrender)[\\/]/, priority: 10, maxSize: 500_000, entriesAware: true }
+            ]
+          }
+        }
+      }
+    },
     server: {
       port: 5173,
       proxy: {

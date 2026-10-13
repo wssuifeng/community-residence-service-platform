@@ -1,0 +1,686 @@
+{
+  "timestamp": "2026-10-13T04:38:22.948Z",
+  "entry": "assets/index-DnESX4I-.js",
+  "entryBytes": 96635,
+  "totalJsBytes": 2680254,
+  "totalJsGzipBytes": 909769,
+  "chunkCount": 124,
+  "maxChunk": {
+    "file": "assets/element-plus~index-CkP1XOXB.js",
+    "bytes": 747240,
+    "gzipBytes": 228853
+  },
+  "above500KB": [
+    {
+      "file": "assets/element-plus~index-CkP1XOXB.js",
+      "bytes": 747240,
+      "gzipBytes": 228853
+    }
+  ],
+  "initialStaticJsBytes": 1165919,
+  "initialStaticJsGzipBytes": 375571,
+  "initialFiles": [
+    {
+      "file": "assets/element-plus~index-CkP1XOXB.js",
+      "bytes": 747240,
+      "gzipBytes": 228853
+    },
+    {
+      "file": "assets/vue-runtime-DNKnYYYR.js",
+      "bytes": 111095,
+      "gzipBytes": 42323
+    },
+    {
+      "file": "assets/index-DnESX4I-.js",
+      "bytes": 96635,
+      "gzipBytes": 29406
+    },
+    {
+      "file": "assets/ui-primitives-nxEr9xtw.js",
+      "bytes": 93738,
+      "gzipBytes": 32547
+    },
+    {
+      "file": "assets/request-DAV80fbC.js",
+      "bytes": 52623,
+      "gzipBytes": 19713
+    },
+    {
+      "file": "assets/element-plus~index~AdminLayout~SystemManageView~CommunityDetailView~CommunityStructureView~~fdcl3aht-dk6MDWKL.js",
+      "bytes": 34021,
+      "gzipBytes": 13587
+    },
+    {
+      "file": "assets/ui-icons-Dh7r5WN2.js",
+      "bytes": 21058,
+      "gzipBytes": 5107
+    },
+    {
+      "file": "assets/element-plus~index~AdminLayout~SystemManageView~CommunityStructureView~FeedbackManageView~H~ipx8ns9e-C4vPaalV.js",
+      "bytes": 9509,
+      "gzipBytes": 4035
+    }
+  ],
+  "chunks": [
+    {
+      "file": "assets/element-plus~index-CkP1XOXB.js",
+      "bytes": 747240,
+      "gzipBytes": 228853
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-CjQTytrs.js",
+      "bytes": 174622,
+      "gzipBytes": 57458
+    },
+    {
+      "file": "assets/CommunityStructureView-CD02-L_b.js",
+      "bytes": 144294,
+      "gzipBytes": 38919
+    },
+    {
+      "file": "assets/vue-runtime-DNKnYYYR.js",
+      "bytes": 111095,
+      "gzipBytes": 42323
+    },
+    {
+      "file": "assets/index-DnESX4I-.js",
+      "bytes": 96635,
+      "gzipBytes": 29406
+    },
+    {
+      "file": "assets/ui-primitives-nxEr9xtw.js",
+      "bytes": 93738,
+      "gzipBytes": 32547
+    },
+    {
+      "file": "assets/HousingLeaseHubView-DUSyJphG.js",
+      "bytes": 93704,
+      "gzipBytes": 28850
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-ClKdbG-b.js",
+      "bytes": 80866,
+      "gzipBytes": 27428
+    },
+    {
+      "file": "assets/HousingLeaseHubView-BmyW8IVs.js",
+      "bytes": 79916,
+      "gzipBytes": 22497
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-C8sD_8X-.js",
+      "bytes": 72149,
+      "gzipBytes": 24545
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-D_iG7xrN.js",
+      "bytes": 66417,
+      "gzipBytes": 23498
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-DmVrgvqm.js",
+      "bytes": 58077,
+      "gzipBytes": 20924
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-qPZfNFu_.js",
+      "bytes": 55635,
+      "gzipBytes": 21280
+    },
+    {
+      "file": "assets/request-DAV80fbC.js",
+      "bytes": 52623,
+      "gzipBytes": 19713
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-B7StyqTI.js",
+      "bytes": 50321,
+      "gzipBytes": 15900
+    },
+    {
+      "file": "assets/SystemManageView-DZ50X4eu.js",
+      "bytes": 38614,
+      "gzipBytes": 11556
+    },
+    {
+      "file": "assets/element-plus~index~AdminLayout~SystemManageView~CommunityDetailView~CommunityStructureView~~fdcl3aht-dk6MDWKL.js",
+      "bytes": 34021,
+      "gzipBytes": 13587
+    },
+    {
+      "file": "assets/ResidentManageView-D2YEvQbS.js",
+      "bytes": 29117,
+      "gzipBytes": 9849
+    },
+    {
+      "file": "assets/LeaseDetailView-MopzrI3w.js",
+      "bytes": 26763,
+      "gzipBytes": 8844
+    },
+    {
+      "file": "assets/NoticeManageView-DIwZ3y0A.js",
+      "bytes": 23194,
+      "gzipBytes": 7451
+    },
+    {
+      "file": "assets/WorkOrderListView-DmElrJu5.js",
+      "bytes": 23148,
+      "gzipBytes": 8185
+    },
+    {
+      "file": "assets/ReservationManageView-BaBzFDOy.js",
+      "bytes": 21438,
+      "gzipBytes": 7495
+    },
+    {
+      "file": "assets/ui-icons-Dh7r5WN2.js",
+      "bytes": 21058,
+      "gzipBytes": 5107
+    },
+    {
+      "file": "assets/HousesWithHousingView-BvJ5TMEI.js",
+      "bytes": 20838,
+      "gzipBytes": 6802
+    },
+    {
+      "file": "assets/DashboardTabView--pxua92D.js",
+      "bytes": 20074,
+      "gzipBytes": 6781
+    },
+    {
+      "file": "assets/StaffScheduleView-Dpbj29uu.js",
+      "bytes": 15946,
+      "gzipBytes": 5431
+    },
+    {
+      "file": "assets/EChart-CNLItR8u.js",
+      "bytes": 15005,
+      "gzipBytes": 6277
+    },
+    {
+      "file": "assets/WorkOrderDetailView-BkjtSyXi.js",
+      "bytes": 14837,
+      "gzipBytes": 5349
+    },
+    {
+      "file": "assets/WorkOrderDetailView-BBzo9rFK.js",
+      "bytes": 13357,
+      "gzipBytes": 5199
+    },
+    {
+      "file": "assets/ReservationListView-CLqAZlz_.js",
+      "bytes": 12993,
+      "gzipBytes": 5023
+    },
+    {
+      "file": "assets/AgreementSignPanel-B42S_B_B.js",
+      "bytes": 12673,
+      "gzipBytes": 5057
+    },
+    {
+      "file": "assets/EvaluationManageView-CurNZcaD.js",
+      "bytes": 12670,
+      "gzipBytes": 5071
+    },
+    {
+      "file": "assets/HousingDetailView-CsEov-US.js",
+      "bytes": 12490,
+      "gzipBytes": 4545
+    },
+    {
+      "file": "assets/ReservationCreateView-B0i68eiw.js",
+      "bytes": 12378,
+      "gzipBytes": 4909
+    },
+    {
+      "file": "assets/HousingReservationView-DkdE7QrB.js",
+      "bytes": 12283,
+      "gzipBytes": 4926
+    },
+    {
+      "file": "assets/FeedbackManageView-DYVMFOwm.js",
+      "bytes": 12199,
+      "gzipBytes": 4873
+    },
+    {
+      "file": "assets/DashboardView-CW9WfYHf.js",
+      "bytes": 11192,
+      "gzipBytes": 4685
+    },
+    {
+      "file": "assets/WorkOrderDetailView-rs1HW25Y.js",
+      "bytes": 10869,
+      "gzipBytes": 4367
+    },
+    {
+      "file": "assets/StaffCapabilityView-BtU4ZSb1.js",
+      "bytes": 10444,
+      "gzipBytes": 4197
+    },
+    {
+      "file": "assets/HomeView-WDVCiWKz.js",
+      "bytes": 9822,
+      "gzipBytes": 3739
+    },
+    {
+      "file": "assets/element-plus~index~AdminLayout~SystemManageView~CommunityStructureView~FeedbackManageView~H~ipx8ns9e-C4vPaalV.js",
+      "bytes": 9509,
+      "gzipBytes": 4035
+    },
+    {
+      "file": "assets/AdminLayout-trtdptuX.js",
+      "bytes": 9310,
+      "gzipBytes": 3031
+    },
+    {
+      "file": "assets/ResourceDetailView-BfeTDnkA.js",
+      "bytes": 8998,
+      "gzipBytes": 3894
+    },
+    {
+      "file": "assets/HousingDetailView-eiPUjUVz.js",
+      "bytes": 8324,
+      "gzipBytes": 3309
+    },
+    {
+      "file": "assets/NotificationList-Ccy_QioR.js",
+      "bytes": 8292,
+      "gzipBytes": 3277
+    },
+    {
+      "file": "assets/ResidenceApplyView-CV6JGPkF.js",
+      "bytes": 8280,
+      "gzipBytes": 3551
+    },
+    {
+      "file": "assets/DepositRefundDialog-fvbDZA0-.js",
+      "bytes": 8054,
+      "gzipBytes": 3660
+    },
+    {
+      "file": "assets/HomeView-BdLUYZs-.js",
+      "bytes": 7642,
+      "gzipBytes": 2939
+    },
+    {
+      "file": "assets/ProfileView-CLK-PuhQ.js",
+      "bytes": 7258,
+      "gzipBytes": 2706
+    },
+    {
+      "file": "assets/HousingListView-BMdXftk0.js",
+      "bytes": 7071,
+      "gzipBytes": 3011
+    },
+    {
+      "file": "assets/WorkOrderCreateView-Be1P4ikm.js",
+      "bytes": 6898,
+      "gzipBytes": 3095
+    },
+    {
+      "file": "assets/HousingDetailView-Bb4l3-P1.js",
+      "bytes": 6850,
+      "gzipBytes": 2817
+    },
+    {
+      "file": "assets/ConversationListView-CQ7RD_Sk.js",
+      "bytes": 6847,
+      "gzipBytes": 3071
+    },
+    {
+      "file": "assets/FeedbackCreateView-DQ7ypOEd.js",
+      "bytes": 6623,
+      "gzipBytes": 3200
+    },
+    {
+      "file": "assets/StaffPickerDrawer-BXQpCga-.js",
+      "bytes": 6423,
+      "gzipBytes": 3264
+    },
+    {
+      "file": "assets/WorkOrderListView-BTcS556t.js",
+      "bytes": 6257,
+      "gzipBytes": 2856
+    },
+    {
+      "file": "assets/FeedbackDetailView-DTHloy3-.js",
+      "bytes": 6210,
+      "gzipBytes": 2959
+    },
+    {
+      "file": "assets/NoticeListView-3zKkE3DE.js",
+      "bytes": 6047,
+      "gzipBytes": 2729
+    },
+    {
+      "file": "assets/NoticeListView-vsUTXKbW.js",
+      "bytes": 6041,
+      "gzipBytes": 2726
+    },
+    {
+      "file": "assets/ResidentDetailView-DmIL5-ez.js",
+      "bytes": 5860,
+      "gzipBytes": 2628
+    },
+    {
+      "file": "assets/CommunityEditDialog-18pRkjyJ.js",
+      "bytes": 5857,
+      "gzipBytes": 2548
+    },
+    {
+      "file": "assets/WorkOrderListView-CoZZAT35.js",
+      "bytes": 5195,
+      "gzipBytes": 2512
+    },
+    {
+      "file": "assets/ViewingsWorkbenchView-DOCRLSBE.js",
+      "bytes": 5149,
+      "gzipBytes": 2444
+    },
+    {
+      "file": "assets/NotificationListView-ucFkL2IG.js",
+      "bytes": 4990,
+      "gzipBytes": 2384
+    },
+    {
+      "file": "assets/ResourceListView-DBH7EAjJ.js",
+      "bytes": 4598,
+      "gzipBytes": 2171
+    },
+    {
+      "file": "assets/ConversationDetailView-D8xLbzf9.js",
+      "bytes": 4431,
+      "gzipBytes": 2244
+    },
+    {
+      "file": "assets/CommunityDetailView-Z7tUAL3D.js",
+      "bytes": 4364,
+      "gzipBytes": 2074
+    },
+    {
+      "file": "assets/RegisterView-BdBWn8UY.js",
+      "bytes": 4272,
+      "gzipBytes": 1740
+    },
+    {
+      "file": "assets/ConversationChat-EcemW2sN.js",
+      "bytes": 4214,
+      "gzipBytes": 2267
+    },
+    {
+      "file": "assets/ViewingAppointmentDetailView-DGEAUV2p.js",
+      "bytes": 4180,
+      "gzipBytes": 2039
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-CerkEQqq.js",
+      "bytes": 4150,
+      "gzipBytes": 1817
+    },
+    {
+      "file": "assets/BaseUploader-BiwX2p09.js",
+      "bytes": 4087,
+      "gzipBytes": 1933
+    },
+    {
+      "file": "assets/LoginView-43U_Myli.js",
+      "bytes": 3910,
+      "gzipBytes": 1949
+    },
+    {
+      "file": "assets/NoticeDetailView-BAD26018.js",
+      "bytes": 3817,
+      "gzipBytes": 1862
+    },
+    {
+      "file": "assets/FeedbackListView-C8k2MGEQ.js",
+      "bytes": 3709,
+      "gzipBytes": 1941
+    },
+    {
+      "file": "assets/AppHeader-DqEqu4zH.js",
+      "bytes": 3657,
+      "gzipBytes": 1936
+    },
+    {
+      "file": "assets/GuestLayout-CCak4mPX.js",
+      "bytes": 3535,
+      "gzipBytes": 1704
+    },
+    {
+      "file": "assets/NoticeDetailView-BXbtyMCx.js",
+      "bytes": 3058,
+      "gzipBytes": 1508
+    },
+    {
+      "file": "assets/community-BTMcI8BQ.js",
+      "bytes": 2299,
+      "gzipBytes": 598
+    },
+    {
+      "file": "assets/ForbiddenView-C06jKnzU.js",
+      "bytes": 1734,
+      "gzipBytes": 981
+    },
+    {
+      "file": "assets/workorder-CxXFDx5C.js",
+      "bytes": 1530,
+      "gzipBytes": 436
+    },
+    {
+      "file": "assets/NotFoundView-ICntIwKj.js",
+      "bytes": 1486,
+      "gzipBytes": 858
+    },
+    {
+      "file": "assets/AdminStatCard-UPG1IUe_.js",
+      "bytes": 1471,
+      "gzipBytes": 738
+    },
+    {
+      "file": "assets/housing-DxvVFq0S.js",
+      "bytes": 1441,
+      "gzipBytes": 404
+    },
+    {
+      "file": "assets/resident-ZYhCsPdg.js",
+      "bytes": 1428,
+      "gzipBytes": 529
+    },
+    {
+      "file": "assets/charts~DashboardTabView~DashboardView-CtQDQrTn.js",
+      "bytes": 1325,
+      "gzipBytes": 554
+    },
+    {
+      "file": "assets/notificationNav-B7eyQ3s7.js",
+      "bytes": 1291,
+      "gzipBytes": 544
+    },
+    {
+      "file": "assets/agreement-CXwz9VJE.js",
+      "bytes": 1015,
+      "gzipBytes": 455
+    },
+    {
+      "file": "assets/ResidentLayout-C-TB5KIH.js",
+      "bytes": 934,
+      "gzipBytes": 546
+    },
+    {
+      "file": "assets/SearchBar-D56eN307.js",
+      "bytes": 901,
+      "gzipBytes": 600
+    },
+    {
+      "file": "assets/Pagination-BwsEQV7G.js",
+      "bytes": 876,
+      "gzipBytes": 519
+    },
+    {
+      "file": "assets/feedback-d_TrB8l3.js",
+      "bytes": 777,
+      "gzipBytes": 425
+    },
+    {
+      "file": "assets/date-5O8eIJz9.js",
+      "bytes": 746,
+      "gzipBytes": 372
+    },
+    {
+      "file": "assets/reservation-CJIv6MxG.js",
+      "bytes": 705,
+      "gzipBytes": 250
+    },
+    {
+      "file": "assets/workorder-nILwfeCx.js",
+      "bytes": 694,
+      "gzipBytes": 493
+    },
+    {
+      "file": "assets/lease-D3s5A7sC.js",
+      "bytes": 676,
+      "gzipBytes": 253
+    },
+    {
+      "file": "assets/FilterPanel-DK8iUQO9.js",
+      "bytes": 623,
+      "gzipBytes": 447
+    },
+    {
+      "file": "assets/staff-Df6gfJCS.js",
+      "bytes": 620,
+      "gzipBytes": 280
+    },
+    {
+      "file": "assets/StaffLayout-CRT-FB_3.js",
+      "bytes": 613,
+      "gzipBytes": 438
+    },
+    {
+      "file": "assets/AdminPageHeader-CfHimoFs.js",
+      "bytes": 606,
+      "gzipBytes": 380
+    },
+    {
+      "file": "assets/ImageUploader-D2VIXIVF.js",
+      "bytes": 605,
+      "gzipBytes": 386
+    },
+    {
+      "file": "assets/lease-DT7PaFek.js",
+      "bytes": 575,
+      "gzipBytes": 417
+    },
+    {
+      "file": "assets/notice-BX_jSLFM.js",
+      "bytes": 543,
+      "gzipBytes": 229
+    },
+    {
+      "file": "assets/AppLogo-ByB0yx2_.js",
+      "bytes": 530,
+      "gzipBytes": 396
+    },
+    {
+      "file": "assets/evaluation-DRu4yFou.js",
+      "bytes": 518,
+      "gzipBytes": 239
+    },
+    {
+      "file": "assets/FileUploader-CTXmnlRb.js",
+      "bytes": 469,
+      "gzipBytes": 328
+    },
+    {
+      "file": "assets/StatusTag-DFl8CSkf.js",
+      "bytes": 424,
+      "gzipBytes": 324
+    },
+    {
+      "file": "assets/conversation-CvDzKWkr.js",
+      "bytes": 423,
+      "gzipBytes": 196
+    },
+    {
+      "file": "assets/statistics-Msibld_i.js",
+      "bytes": 415,
+      "gzipBytes": 209
+    },
+    {
+      "file": "assets/leaseMoveOut-RrSK_zMS.js",
+      "bytes": 359,
+      "gzipBytes": 186
+    },
+    {
+      "file": "assets/auth-CI-2QzHd.js",
+      "bytes": 348,
+      "gzipBytes": 171
+    },
+    {
+      "file": "assets/paged-CK7HnXU5.js",
+      "bytes": 325,
+      "gzipBytes": 283
+    },
+    {
+      "file": "assets/NotificationListView-BnTgwWpZ.js",
+      "bytes": 298,
+      "gzipBytes": 231
+    },
+    {
+      "file": "assets/community-B9bJ8lK0.js",
+      "bytes": 280,
+      "gzipBytes": 274
+    },
+    {
+      "file": "assets/resident-xVcW_108.js",
+      "bytes": 263,
+      "gzipBytes": 253
+    },
+    {
+      "file": "assets/housing-DXMI2p0S.js",
+      "bytes": 256,
+      "gzipBytes": 218
+    },
+    {
+      "file": "assets/reservation-D6g4mw6s.js",
+      "bytes": 249,
+      "gzipBytes": 206
+    },
+    {
+      "file": "assets/NotificationListView-BW_gVUmd.js",
+      "bytes": 222,
+      "gzipBytes": 186
+    },
+    {
+      "file": "assets/staffResidentPresentation-5uHPULFT.js",
+      "bytes": 156,
+      "gzipBytes": 123
+    },
+    {
+      "file": "assets/upload-DJ-FKlUW.js",
+      "bytes": 152,
+      "gzipBytes": 146
+    },
+    {
+      "file": "assets/auth-B312WtNj.js",
+      "bytes": 144,
+      "gzipBytes": 149
+    },
+    {
+      "file": "assets/_plugin-vue_export-helper-BDNMzG2s.js",
+      "bytes": 84,
+      "gzipBytes": 99
+    },
+    {
+      "file": "assets/notice-cover-default-UI_ltUNW.js",
+      "bytes": 56,
+      "gzipBytes": 76
+    },
+    {
+      "file": "assets/empty-state-CjtamUAN.js",
+      "bytes": 47,
+      "gzipBytes": 67
+    }
+  ]
+}

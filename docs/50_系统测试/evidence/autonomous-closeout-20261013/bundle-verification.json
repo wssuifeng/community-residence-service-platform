@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-13",
+  "vite": "8.2.2",
+  "rolldown": "1.2.7",
+  "changedBehavior": false,
+  "dependencyUpgrades": false,
+  "strategy": "保留路由懒加载，Vue/EP/ECharts按组，entriesAware/maxSize及strictExecutionOrder，不调大告警阈值",
+  "before": {
+    "maxChunk": {
+      "file": "assets/index-DUUul4CM.js",
+      "bytes": 877323,
+      "gzipBytes": 275116
+    },
+    "chunkCount": 114,
+    "totalJsBytes": 2664313,
+    "totalJsGzipBytes": 901916,
+    "initialStaticJsBytes": 1165391,
+    "initialStaticJsGzipBytes": 378334
+  },
+  "after": {
+    "maxChunk": {
+      "file": "assets/element-plus~index-DEyth2QK.js",
+      "bytes": 180552,
+      "gzipBytes": 52307
+    },
+    "chunkCount": 142,
+    "totalJsBytes": 2850408,
+    "totalJsGzipBytes": 985389,
+    "initialStaticJsBytes": 1274020,
+    "initialStaticJsGzipBytes": 421933
+  },
+  "finalAbove500KB": [],
+  "claimBoundary": "单包/缓存边界改善，不是总传输下降；不把47字节loader当首屏、不声称P95达标。",
+  "diagnosis": "首轮EP拆分在函数初始化前调用导致依赖环；递归依赖或不限制EP大小均不足。最终按官方strictExecutionOrder保留源次序，不改组件注册策略或引实验选项。",
+  "sources": [
+    {
+      "url": "https://vite.dev/config/build-options#build-rolldownoptions",
+      "support": "2026-10-13读取官方Vite8选项，与本地8.2.2类型对齐"
+    },
+    {
+      "url": "https://rolldown.rs/reference/OutputOptions.codeSplitting",
+      "support": "本地官方rolldown1.2.7类型CodeSplittingOptions/Group"
+    },
+    {
+      "url": "https://rolldown.rs/reference/OutputOptions.strictExecutionOrder",
+      "support": "本地官方OutputOptions明确保留源执行次序及包装成本"
+    }
+  ],
+  "totalJsGzipBytesIncreasePercent": 9.26,
+  "initialStaticJsGzipBytesIncreasePercent": 11.52
+}

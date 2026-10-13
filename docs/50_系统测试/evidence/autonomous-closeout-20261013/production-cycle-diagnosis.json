@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-13T04:28:38.659Z",
+  "database": "community_residence",
+  "productionPreview": "http://127.0.0.1:5182",
+  "businessWrites": false,
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "原正常基线保留",
+      "passed": true
+    },
+    {
+      "name": "演示登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "演示登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "演示登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "程序支付渠道全部停用",
+      "passed": true
+    },
+    {
+      "name": "开发和生产代理均指向当前8084",
+      "passed": true
+    }
+  ],
+  "pageErrors": [
+    {
+      "role": "guest",
+      "message": "lt is not a function",
+      "stack": "TypeError: lt is not a function\n    at http://127.0.0.1:5182/assets/element-plus~index-DK4cRotl.js:1:11362"
+    }
+  ],
+  "failedLocalResponses": [],
+  "blockedRequests": [],
+  "before": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ],
+  "error": "guest /guest/home @1024生产加载"
+}
