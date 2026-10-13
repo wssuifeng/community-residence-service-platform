@@ -14,8 +14,8 @@ public class CreateSysUserDTO {
 
     @Schema(description = "用户名")
     @NotBlank(message = "用户名不能为空")
-    @Size(min = 4, max = 20, message = "用户名长度 4~20 字符")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "用户名仅支持字母、数字、下划线")
+    @Size(min = 1, max = 50, message = "用户名长度1～50字符")
+    @Pattern(regexp = "^[\\p{L}\\p{N}_]+$", message = "用户名支持中文、字母、数字、下划线，不支持空格或特殊符号")
     private String username;
 
     @Schema(description = "初始密码")

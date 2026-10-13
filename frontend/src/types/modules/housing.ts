@@ -244,3 +244,33 @@ export interface HousingTimeslotListQuery extends PageQuery {
   endDate?: string
   status?: HousingTimeslotStatus
 }
+
+export interface HousingBrief {
+  occupancy?: string
+  applicationId?: number | null
+  leaseId?: number | null
+  id: number
+  title: string
+  status: HousingStatus
+  monthlyRent: number
+  deposit: number | null
+  rentType: HousingRentType
+  coverImage: string | null
+}
+
+export interface HouseManageItem {
+  houseId: number
+  communityId: number
+  communityName: string
+  buildingId: number | null
+  buildingName: string | null
+  unitId: number | null
+  unitName: string | null
+  houseNumber: string
+  floor: number
+  area: number | null
+  layout: string | null
+  houseStatus: string
+  /** null=未挂牌 */
+  housing: HousingBrief | null
+}

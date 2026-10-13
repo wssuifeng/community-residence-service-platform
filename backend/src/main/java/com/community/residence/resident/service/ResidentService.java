@@ -41,7 +41,6 @@ import org.springframework.util.StringUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -76,11 +75,11 @@ public class ResidentService {
         if (!sysConfigService.isRegistrationEnabled()) {
             throw new BusinessException(ErrorCode.REGISTRATION_DISABLED);
         }
-        checkUsernameUnique(dto.getUsername());
+        checkUsernameUnique(dto.getUsername().trim());
         checkPhoneUnique(dto.getPhone(), null);
 
         Resident resident = new Resident();
-        resident.setUsername(dto.getUsername());
+        resident.setUsername(dto.getUsername().trim());
         resident.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         resident.setRealName(dto.getRealName());
         resident.setPhone(dto.getPhone());
@@ -323,12 +322,13 @@ public class ResidentService {
         if (in == null) throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV文件不能为空");
         List<String[]> rows = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                new java.io.StringReader(decodeCsv(in)))) {
             String line = reader.readLine();
             boolean first = true;
             while (line != null) {
                 if (first) {
-                    String header = line.replace("\uFEFF", "").trim();
+                    String header = java.util.Arrays.stream(splitCsvLine(line.replace("\uFEFF", "")))
+                            .map(String::trim).collect(java.util.stream.Collectors.joining(","));
                     if (!header.equals("社区ID,姓名,手机号,证件号")
                             && !header.equals("社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注")) {
                         throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV表头不符，请下载当前导入模板");
@@ -346,6 +346,32 @@ public class ResidentService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV 无数据行");
         }
         return rows;
+    }
+
+    /* CSV下载后经Excel另存常变GBK/UTF-16；严格解码失败才回退，不静默替换字段。 */
+    private String decodeCsv(InputStream in) throws IOException {
+        byte[] bytes = in.readNBytes(5 * 1024 * 1024 + 1);
+        if (bytes.length > 5 * 1024 * 1024) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV文件不能超过5MB");
+        }
+        java.nio.charset.Charset charset = StandardCharsets.UTF_8;
+        if (bytes.length >= 2 && ((bytes[0] == (byte) 0xff && bytes[1] == (byte) 0xfe)
+                || (bytes[0] == (byte) 0xfe && bytes[1] == (byte) 0xff))) {
+            charset = StandardCharsets.UTF_16;
+        }
+        try {
+            return strictDecode(bytes, charset);
+        } catch (java.nio.charset.CharacterCodingException exception) {
+            if (!charset.equals(StandardCharsets.UTF_8)) throw exception;
+            return strictDecode(bytes, java.nio.charset.Charset.forName("GB18030"));
+        }
+    }
+
+    private String strictDecode(byte[] bytes, java.nio.charset.Charset charset)
+            throws java.nio.charset.CharacterCodingException {
+        return charset.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                .decode(java.nio.ByteBuffer.wrap(bytes)).toString();
     }
 
     private String[] splitCsvLine(String line) {
@@ -388,18 +414,18 @@ public class ResidentService {
 
     private void checkUsernameUnique(String username) {
         Long count = residentMapper.selectCount(new LambdaQueryWrapper<Resident>()
-                .eq(Resident::getUsername, username));
+                .and(w -> w.eq(Resident::getUsername, username).or().eq(Resident::getPhone, username)));
         if (count > 0) {
-            throw new BusinessException(ErrorCode.DATA_EXISTS, "用户名已存在");
+            throw new BusinessException(ErrorCode.DATA_EXISTS, "用户名已存在或与已注册手机号冲突");
         }
     }
 
     private void checkPhoneUnique(String phone, Long excludeId) {
         Long count = residentMapper.selectCount(new LambdaQueryWrapper<Resident>()
-                .eq(Resident::getPhone, phone)
+                .and(w -> w.eq(Resident::getPhone, phone).or().eq(Resident::getUsername, phone))
                 .ne(excludeId != null, Resident::getId, excludeId));
         if (count > 0) {
-            throw new BusinessException(ErrorCode.DATA_EXISTS, "手机号已存在");
+            throw new BusinessException(ErrorCode.DATA_EXISTS, "手机号已存在或与用户名冲突");
         }
     }
 }

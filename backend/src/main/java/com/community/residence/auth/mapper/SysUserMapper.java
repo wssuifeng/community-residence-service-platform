@@ -26,4 +26,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     /* 与责任人绑定串行，避免绑定和改角色同时通过检查。 */
     @Select("SELECT id, username, password_hash, real_name, phone, email, avatar_url, role, status, created_at, updated_at FROM sys_user WHERE id=#{id} FOR UPDATE")
     SysUser selectByIdForUpdate(@Param("id") Long id);
+    /* 同身份空间用户名/手机号均可登录；最多读两条，歧义由认证层拒绝，不猜优先级。 */
+    @Select("SELECT id, username, password_hash, real_name, phone, email, avatar_url, role, status, created_at, updated_at FROM sys_user WHERE username = #{identifier} OR phone = #{identifier} LIMIT 2")
+    java.util.List<SysUser> selectLoginCandidates(@Param("identifier") String identifier);
 }

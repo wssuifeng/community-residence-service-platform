@@ -44,10 +44,12 @@ public class AuthService {
     /** 管理端登录：SUPER_ADMIN/ADMIN/STAFF（sys_user 表），ADMIN 加载绑定社区 */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public LoginVO adminLogin(LoginDTO dto) {
-        SysUser user = sysUserMapper.selectByUsername(dto.getUsername());
+        var candidates = sysUserMapper.selectLoginCandidates(dto.getUsername().trim());
+        if (candidates.size() != 1) throw new UnauthorizedException("用户名/手机号或密码错误");
+        SysUser user = candidates.get(0);
         /* 登录失败统一措辞（不区分账号不存在/密码错误，防账号枚举）；账号存在但被冻结时明确提示 */
         if (user == null || !passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
-            throw new UnauthorizedException("用户名或密码错误");
+            throw new UnauthorizedException("用户名/手机号或密码错误");
         }
         requireActive(user.getStatus());
 
@@ -62,9 +64,11 @@ public class AuthService {
     /** 居民端登录（resident 表），登录即视为 RESIDENT 角色 */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public LoginVO residentLogin(LoginDTO dto) {
-        Resident resident = residentMapper.selectByUsername(dto.getUsername());
+        var candidates = residentMapper.selectLoginCandidates(dto.getUsername().trim());
+        if (candidates.size() != 1) throw new UnauthorizedException("用户名/手机号或密码错误");
+        Resident resident = candidates.get(0);
         if (resident == null || !passwordEncoder.matches(dto.getPassword(), resident.getPasswordHash())) {
-            throw new UnauthorizedException("用户名或密码错误");
+            throw new UnauthorizedException("用户名/手机号或密码错误");
         }
         requireActive(resident.getStatus());
 

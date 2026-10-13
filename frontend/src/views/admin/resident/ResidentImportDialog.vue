@@ -3,11 +3,18 @@
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { UploadFile, UploadUserFile } from 'element-plus'
+import { getCommunityList } from '@/api/community'
+import { listHouseManage } from '@/api/housing'
+import { loadAllPages, StaleStructureLoad } from '@/utils/paged'
+import { sortHouseReference, houseReferenceCsv } from '@/utils/residentImportReference'
+import { houseStatusLabels } from '@/types/modules/community'
+import type { ICommunity, HouseStatus } from '@/types/modules/community'
+import type { HouseManageItem } from '@/types/modules/housing'
 import { importResidents } from '@/api/resident'
 import type { IResidentImportVO } from '@/types/modules/resident'
 
 /**
- * 后端契约：UTF-8 CSV，新模板十列含账号与具体居住关系，兼容旧四列账号模板；
+ * 后端契约：UTF-8、GB18030（Excel GBK）或带BOM UTF-16 CSV，新模板十列含账号与具体居住关系，兼容旧四列账号模板；
  * 部分成功语义——结果必须完整展示（成功行账号+初始密码可复制、失败行行号+原因）。
  * 前后端均限制单文件5MB；房屋/关系类型/入住日期须全有或全无。
  */
@@ -27,7 +34,8 @@ const result = ref<IResidentImportVO | null>(null)
 const canUpload = computed(() => selectedFile.value !== null && !uploading.value)
 
 function downloadTemplate(): void {
-  const content = `${CSV_HEADERS}\n1,张三,13800138000,,,,1,OWNER,2026-01-01,台账录入\n`
+  if (!referenceCommunity.value) { ElMessage.warning('请先选择社区，模板会填入真实社区ID'); return }
+  const content = `${CSV_HEADERS}\n${referenceCommunity.value},示例姓名,13800138000,,示例住户,,,,,\n`
   const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -35,6 +43,44 @@ function downloadTemplate(): void {
   link.download = '居民批量导入模板.csv'
   link.click()
   URL.revokeObjectURL(url)
+}
+
+const communities = ref<ICommunity[]>([])
+const referenceCommunity = ref<number>()
+const referenceRows = ref<HouseManageItem[]>([])
+const referenceLoading = ref(false)
+const referenceError = ref('')
+let referenceSequence = 0
+async function loadReference(): Promise<void> {
+  const sequence = ++referenceSequence
+  const communityId = referenceCommunity.value
+  referenceRows.value = []
+  referenceError.value = ''
+  if (!communityId) { referenceLoading.value = false; return }
+  referenceLoading.value = true
+  try {
+    const rows = await loadAllPages(q => listHouseManage({ ...q, communityId }), () => sequence === referenceSequence && visible.value)
+    referenceRows.value = sortHouseReference(rows)
+  } catch (error) {
+    if (error instanceof StaleStructureLoad || sequence !== referenceSequence) return
+    referenceError.value = error instanceof Error ? error.message : '房屋对照加载失败，请重试'
+  } finally { if (sequence === referenceSequence) referenceLoading.value = false }
+}
+function downloadReference(): void {
+  const url = URL.createObjectURL(new Blob(['\ufeff' + houseReferenceCsv(referenceRows.value)], { type: 'text/csv;charset=utf-8' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = '房屋位置与ID对照.csv'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+async function loadCommunities(): Promise<void> {
+  try {
+    communities.value = await loadAllPages(getCommunityList, () => visible.value)
+    if (communities.value.length === 1) { referenceCommunity.value = communities.value[0]!.id; await loadReference() }
+  } catch(error) {
+    if (!(error instanceof StaleStructureLoad)) referenceError.value = error instanceof Error ? error.message : '社区加载失败'
+  }
 }
 
 /* el-upload 仅作受控选择器：自行校验大小，不自动上传 */
@@ -78,7 +124,11 @@ async function copyText(text: string): Promise<void> {
 }
 
 watch(visible, (value) => {
-  if (!value) return
+  if (!value) { referenceSequence++; return }
+  referenceCommunity.value = undefined
+  referenceRows.value = []
+  referenceError.value = ''
+  void loadCommunities()
   selectedFile.value = null
   fileList.value = []
   result.value = null
@@ -95,9 +145,25 @@ watch(visible, (value) => {
     <!-- 上传段：模板下载 + 单文件选择 -->
     <div class="import-toolbar">
       <el-button text type="primary" @click="downloadTemplate">下载导入模板</el-button>
-      <span class="toolbar-hint">UTF-8 编码 CSV，表头：{{ CSV_HEADERS }}；选填项可留空</span>
+      <span class="toolbar-hint">CSV（UTF-8 / Excel GBK / 带BOM UTF-16），表头：{{ CSV_HEADERS }}；选填项可留空</span>
     </div>
-    <el-alert type="info" :closable="false" title="房屋ID、关系类型和入住日期须全有或全无；空白表示仅建账号。房屋ID不是房号，请替换示例ID；旧四列模板继续支持，仅创建账号。每行账号与关系一起成功或一起回滚，不生成租约。" />
+    <el-alert type="info" :closable="false" title="房屋ID、关系类型和入住日期须全有或全无；空白表示仅建账号。房屋ID不是房号，请从下方真实位置对照中复制ID；旧四列模板继续支持，仅创建账号。每行账号与关系一起成功或一起回滚，不生成租约。" />
+    <div class="import-reference">
+      <el-select v-model="referenceCommunity" placeholder="选择社区（名称与真实ID）" style="width: 300px; max-width: 100%" @change="loadReference">
+        <el-option v-for="community in communities" :key="community.id" :value="community.id" :label="`${community.name} · 社区ID ${community.id}`" />
+      </el-select>
+      <el-button :disabled="!referenceRows.length || referenceLoading || !!referenceError" @click="downloadReference">下载房屋位置与ID对照</el-button>
+      <el-alert v-if="referenceError" type="error" :closable="false" :title="referenceError" />
+      <p>按楼栋、单元、楼层、房号排序；ID是系统主键，不是楼层或房号，不必连续。仅空置房可直录关系；已入住同住成员另按居住规则处理。</p>
+      <el-table v-if="referenceCommunity" v-loading="referenceLoading" :data="referenceRows" size="small" max-height="220">
+        <el-table-column prop="buildingName" label="楼栋" min-width="100" />
+        <el-table-column prop="unitName" label="单元" min-width="100" />
+        <el-table-column prop="floor" label="楼层" width="70" />
+        <el-table-column prop="houseNumber" label="房号" min-width="90" />
+        <el-table-column prop="houseId" label="房屋ID" width="90" />
+        <el-table-column label="状态" min-width="100"><template #default="{ row }">{{ houseStatusLabels[row.houseStatus as HouseStatus] ?? row.houseStatus }}</template></el-table-column>
+      </el-table>
+    </div>
     <el-upload
       v-model:file-list="fileList"
       drag
@@ -253,4 +319,9 @@ watch(visible, (value) => {
   color: var(--color-text-primary);
   word-break: break-all;
 }
+</style>
+
+<style scoped>
+.import-reference { margin: 16px 0; }
+.import-reference p { color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
 </style>
