@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-13",
+  "htIds": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12"
+  ],
+  "sandboxEnvironmentCase": "SB-01",
+  "financialIds": [
+    "FT-01",
+    "FT-02",
+    "FT-03"
+  ],
+  "manualResultsStillPending": true,
+  "currentEntryMissingLinks": [],
+  "acceptedScope": [
+    "docs/50_系统测试/_中控.md",
+    "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "docs/50_系统测试/11_测试执行入口.md",
+    "docs/50_系统测试/12_用户手测清单.md",
+    "docs/50_系统测试/13_核心业务流程三端联动手测用例.md",
+    "docs/50_系统测试/18_居民CSV导入示例与复核.md",
+    "docs/50_系统测试/19_展示与统计口径确认方案.md"
+  ],
+  "userTestsNotAutomaticallyPassed": true,
+  "archiveAndFrozenDocumentsUnmodified": true,
+  "docScopeVerifiedViaGitDiff": true
+}

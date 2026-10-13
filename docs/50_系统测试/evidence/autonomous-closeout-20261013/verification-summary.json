@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-13",
+  "stage": "50步骤7/8",
+  "autonomousTasks": [
+    "风险缺口与异常组合补测",
+    "确定性历史引用修正",
+    "构建分包及生产加载复验"
+  ],
+  "backend": {
+    "tests": 964,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "newCases": 26,
+    "lineCoveragePercent": 74.46,
+    "branchCoveragePercent": 65.77,
+    "fullThresholdsClaimed": false
+  },
+  "frontend": {
+    "suites": 45,
+    "tests": 287,
+    "typecheckPassed": true,
+    "buildPassed": true,
+    "productionReadonlyChecks": 40,
+    "pageErrors": 0,
+    "consoleErrors": 0,
+    "failedLocalResponses": 0,
+    "screenshots": 3
+  },
+  "documentation": {
+    "referencesUpdated": 37,
+    "brokenLinkReportsResolved": 35,
+    "globalAuditErrorReportsRemaining": 1413,
+    "currentEntryBrokenLinks": 0,
+    "historyOriginalsRewritten": false,
+    "allRepositoryGovernancePassed": false
+  },
+  "manual": {
+    "HT": 12,
+    "SB": 1,
+    "FT": 3,
+    "userResultsFilled": false,
+    "sandboxRequestsExecutedThisBatch": false,
+    "transactionsExecuted": false,
+    "rule": "实际通过后按出口准则核对/报告评审/归档收口，失败修复回归，金融保留如实延期且不绕强制出口"
+  },
+  "normalDatabase": {
+    "before": [
+      1,
+      600,
+      9,
+      1,
+      0,
+      0
+    ],
+    "after": [
+      1,
+      600,
+      9,
+      1,
+      0,
+      0
+    ],
+    "businessWrites": false,
+    "paymentChannelsEnabled": false
+  },
+  "services": {
+    "backend": 8084,
+    "dev": 5176,
+    "preview5182Stopped": true,
+    "isolated8087and5181Stopped": true
+  },
+  "git": "用户授权逐项本地提交及普通推送，操作结束另回写，不强推",
+  "manifest": "sha256-manifest.json",
+  "security": {
+    "currentWorkingContentRedacted": true,
+    "knownInheritedRemoteHistoryExposure": true,
+    "databaseCredentialRotationNeedsUserAction": true,
+    "remoteHistoryNotRewritten": true
+  }
+}

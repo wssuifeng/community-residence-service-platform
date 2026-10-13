@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-13",
+  "basis": [
+    "30接口§9.17.1",
+    "30接口§9.10.3",
+    "30接口§9.6.3"
+  ],
+  "selected": [
+    {
+      "service": "LeaseChangeLogService",
+      "risk": "字段价款留痕/操作人身份快照；此前直接覆盖0",
+      "newCases": 14,
+      "excluded": "金融退款留痕方法不执行"
+    },
+    {
+      "service": "OperationLogService",
+      "risk": "撞号串名/删除账号/筛选参数/分页上限；此前直接覆盖0",
+      "newCases": 7,
+      "excluded": "mock不替代DataScope集成权限矩阵"
+    },
+    {
+      "service": "FeedbackService",
+      "risk": "办结/社区拒绝先于副作用，追问触达实际处理人",
+      "newCases": 5
+    }
+  ],
+  "remaining": "Agreement/Housing/Application/Reservation等仍有缺口，保留现有真实用例与风险；不盲刷门槛或声明穷尽所有组合。"
+}
