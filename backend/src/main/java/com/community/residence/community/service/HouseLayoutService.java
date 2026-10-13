@@ -36,7 +36,18 @@ public class HouseLayoutService {
     @Transactional(rollbackFor = Exception.class)
     @OperationLog(operationType = "UPDATE", targetType = "HOUSE", content = "'批量配置房屋户型'")
     public int update(BatchHouseLayoutDTO dto) {
-        List<Long> ids = dto.getHouseIds().stream().distinct().sorted().toList();
+        List<House> houses = lockSelection(dto.getHouseIds());
+        List<Long> ids = houses.stream().map(House::getId).toList();
+        String layout = dto.getLayout().trim();
+        houseMapper.update(null, new LambdaUpdateWrapper<House>()
+                .in(House::getId, ids).set(House::getLayout, layout));
+        housingMapper.update(null, new LambdaUpdateWrapper<Housing>()
+                .in(Housing::getHouseId, ids).set(Housing::getLayout, layout));
+        return ids.size();
+    }
+    /* 调用方必须已有事务；整区验证后父楼栋/房屋按ID加锁，供多属性编辑共用。 */
+    public List<House> lockSelection(List<Long> houseIds) {
+        List<Long> ids = houseIds.stream().distinct().sorted().toList();
         List<House> houses = houseMapper.selectBatchIds(ids);
         if (houses.size() != ids.size()) {
             throw new ResourceNotFoundException("所选房屋不存在或无权访问，请刷新选区");
@@ -49,18 +60,16 @@ public class HouseLayoutService {
         }
         units.stream().map(Unit::getBuildingId).distinct().sorted()
                 .forEach(buildingBoundaryService::lockBuilding);
+        java.util.ArrayList<House> locked = new java.util.ArrayList<>();
         for (Long id : ids) {
             House house = houseMapper.selectByIdForUpdate(id);
             if (house == null) {
                 throw new ResourceNotFoundException("所选房屋已删除，请刷新选区");
             }
             SecurityUtils.checkCommunityAccess(house.getCommunityId());
+            locked.add(house);
         }
-        String layout = dto.getLayout().trim();
-        houseMapper.update(null, new LambdaUpdateWrapper<House>()
-                .in(House::getId, ids).set(House::getLayout, layout));
-        housingMapper.update(null, new LambdaUpdateWrapper<Housing>()
-                .in(Housing::getHouseId, ids).set(Housing::getLayout, layout));
-        return ids.size();
+        return locked;
     }
+
 }

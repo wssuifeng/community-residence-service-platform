@@ -9,7 +9,7 @@ import CommunityEditDialog from '@/views/admin/community/CommunityEditDialog.vue
 import BuildingEditDialog from '@/views/admin/community/BuildingEditDialog.vue'
 import UnitEditDialog from '@/views/admin/community/UnitEditDialog.vue'
 import UnitBatchDialog from '@/views/admin/community/UnitBatchDialog.vue'
-import HouseLayoutDialog from '@/views/admin/community/HouseLayoutDialog.vue'
+import HouseAttributesDialog from '@/views/admin/community/HouseAttributesDialog.vue'
 import HouseEditDialog from '@/views/admin/community/HouseEditDialog.vue'
 import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
 import StructureGenerateDialog from '@/views/admin/community/StructureGenerateDialog.vue'
@@ -2469,7 +2469,7 @@ onMounted(async () => {
             <div v-if="selectedHouseCount > 0" class="selection-bar" role="toolbar" aria-label="房屋批量操作">
               <span class="selection-count">已选 {{ selectedHouseCount }} 套</span>
               <span class="selection-actions">
-                <el-button size="small" @click="openLayout">配置户型</el-button>
+                <el-button size="small" @click="openLayout">编辑房屋数据</el-button>
                 <el-button
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
                   size="small"
@@ -2535,10 +2535,10 @@ onMounted(async () => {
 
     <Teleport to="body">
       <div v-if="layoutMenu" class="layout-menu-dismiss" @click="layoutMenu = null" @contextmenu.prevent="layoutMenu = null" @keydown.esc="layoutMenu = null">
-        <button class="layout-context-menu" :style="{ left: `${layoutMenu.x}px`, top: `${layoutMenu.y}px` }" @click.stop="openLayout">配置所选 {{ selectedHouseCount }} 套房屋户型</button>
+        <button class="layout-context-menu" :style="{ left: `${layoutMenu.x}px`, top: `${layoutMenu.y}px` }" @click.stop="openLayout">编辑所选 {{ selectedHouseCount }} 套房屋数据</button>
       </div>
     </Teleport>
-    <HouseLayoutDialog v-model="houseLayoutVisible" :houses="layoutTargets" @saved="handleLayoutsSaved" />
+    <HouseAttributesDialog v-model="houseLayoutVisible" :houses="layoutTargets" @saved="handleLayoutsSaved" />
     <HouseEditDialog
       v-model="houseDialogVisible"
       :house="houseEditing"

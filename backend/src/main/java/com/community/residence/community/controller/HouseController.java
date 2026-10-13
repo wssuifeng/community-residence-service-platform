@@ -35,6 +35,15 @@ public class HouseController {
     private final HouseService houseService;
     private final com.community.residence.community.service.HouseLayoutService houseLayoutService;
 
+    private final com.community.residence.community.service.HouseAttributesService houseAttributesService;
+
+    @Operation(summary = "原子编辑所选房屋自身属性", description = "不修改结构归属、状态及居住关系；任一非法项全部回滚")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PatchMapping("/houses/attributes")
+    public ApiResponse<Integer> updateAttributes(@RequestBody @Valid com.community.residence.community.dto.BatchHouseAttributesDTO dto) {
+        return ApiResponse.success(houseAttributesService.update(dto));
+    }
+
     @Operation(summary = "创建房屋")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/houses")

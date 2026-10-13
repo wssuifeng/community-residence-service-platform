@@ -254,3 +254,18 @@ export function getResponsibleAdmins(params: { communityId?: number; page?: numb
 export function updateHouseLayouts(houseIds: number[], layout: string) {
   return http.patch<number>('/houses/layout', { houseIds, layout })
 }
+
+export interface HouseAttributesPatch {
+  houseIds: number[]
+  fields: Array<'houseNumber' | 'floor' | 'area' | 'layout' | 'orientation' | 'description'>
+  houseNumber?: string
+  floor?: number
+  area?: number
+  layout?: string
+  orientation?: string
+  description?: string
+}
+/** 明确选区与字段，后台整体校验后原子写入。 */
+export function updateHouseAttributes(data: HouseAttributesPatch) {
+  return http.patch<number>('/houses/attributes', data)
+}
