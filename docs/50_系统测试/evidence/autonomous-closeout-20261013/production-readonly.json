@@ -1,0 +1,189 @@
+{
+  "date": "2026-10-13T04:44:34.817Z",
+  "database": "community_residence",
+  "productionPreview": "http://127.0.0.1:5182",
+  "businessWrites": false,
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "原正常基线保留",
+      "passed": true
+    },
+    {
+      "name": "演示登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "演示登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "演示登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "程序支付渠道全部停用",
+      "passed": true
+    },
+    {
+      "name": "开发和生产代理均指向当前8084",
+      "passed": true
+    },
+    {
+      "name": "guest /guest/home @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "guest /guest/home @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "guest /guest/housings @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "guest /guest/housings @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/work-orders @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/work-orders @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/resources @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "resident /resident/resources @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "staff /staff/dashboard @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "staff图表真实Canvas @1024",
+      "passed": true
+    },
+    {
+      "name": "staff /staff/dashboard @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "staff图表真实Canvas @768",
+      "passed": true
+    },
+    {
+      "name": "staff /staff/viewings @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "staff /staff/viewings @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/dashboard @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "admin图表真实Canvas @1024",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/dashboard @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "admin图表真实Canvas @768",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/residents @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "EP弹窗和输入组件已加载 @1024",
+      "passed": true
+    },
+    {
+      "name": "EP弹窗取消关闭且未提交 @1024",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/residents @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "EP弹窗和输入组件已加载 @768",
+      "passed": true
+    },
+    {
+      "name": "EP弹窗取消关闭且未提交 @768",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/community @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/community @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/system?tab=logs @1024生产加载",
+      "passed": true
+    },
+    {
+      "name": "admin /admin/system?tab=logs @768生产加载",
+      "passed": true
+    },
+    {
+      "name": "没有分包初始化或页面JS异常",
+      "passed": true
+    },
+    {
+      "name": "没有组件初始化console异常",
+      "passed": true
+    },
+    {
+      "name": "没有本机资源或API失败",
+      "passed": true
+    },
+    {
+      "name": "没有触发业务写或交易端点",
+      "passed": true
+    },
+    {
+      "name": "正常库数量未改变",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "failedLocalResponses": [],
+  "blockedRequests": [],
+  "before": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ],
+  "after": [
+    1,
+    600,
+    9,
+    1,
+    0,
+    0
+  ]
+}
