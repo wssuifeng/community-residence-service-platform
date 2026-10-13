@@ -7,6 +7,11 @@ import org.apache.ibatis.annotations.Mapper;
 /** 房源数据访问 */
 @Mapper
 public interface HousingMapper extends BaseMapper<Housing> {
+    /* 外层仅挂牌主表，避免动态条件歧义；相关子查询取房屋权威户型。 */
+    @org.apache.ibatis.annotations.Select("SELECT DISTINCT (SELECT hh.layout FROM house hh WHERE hh.id=housing.house_id AND hh.is_deleted=0) AS layout FROM housing ${ew.customSqlSegment}")
+    java.util.List<String> selectHouseLayouts(@org.apache.ibatis.annotations.Param("ew")
+            com.baomidou.mybatisplus.core.conditions.Wrapper<Housing> query);
+
     /* 源金额与管理修改共享挂牌锁；房屋锁必须先于此锁。 */
     @org.apache.ibatis.annotations.Select("SELECT id,community_id,house_id,title,description,monthly_rent,deposit,rent_type,layout,images,status,view_count,publish_time,created_at,updated_at FROM housing WHERE id=#{id} FOR UPDATE")
     Housing selectByIdForUpdate(@org.apache.ibatis.annotations.Param("id") Long id);

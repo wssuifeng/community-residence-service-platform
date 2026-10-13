@@ -87,7 +87,8 @@ public class DataScopeInterceptor implements InnerInterceptor {
 
             String filterColumn = "community".equalsIgnoreCase(table.getName()) ? "id" : "community_id";
             InExpression in = new InExpression();
-            in.setLeftExpression(new Column(filterColumn));
+            String qualifier = table.getAlias() != null ? table.getAlias().getName() : table.getName();
+            in.setLeftExpression(new Column(new Table(qualifier), filterColumn));
             ParenthesedExpressionList<net.sf.jsqlparser.expression.Expression> items = new ParenthesedExpressionList<>();
             if (hasBound) {
                 for (Long id : SecurityUtils.getUser().getCommunityIds()) {

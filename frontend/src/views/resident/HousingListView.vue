@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
 import StatusTag from '@/components/common/StatusTag.vue'
-import { listHousings } from '@/api/housing'
+import { listHousings, getHousingFilterOptions } from '@/api/housing'
 import { getCommunityList } from '@/api/community'
 import type { ICommunity } from '@/types/modules/community'
 import type { IHousing, HousingRentType, HousingStatus } from '@/types/modules/housing'
@@ -30,7 +30,6 @@ const statusOptions: Array<{ label: string; value: HousingStatus | '' }> = [
   { label: '全部状态', value: '' },
   { label: housingStatusLabels.AVAILABLE, value: 'AVAILABLE' },
   { label: housingStatusLabels.RESERVED, value: 'RESERVED' },
-  { label: housingStatusLabels.RENTED, value: 'RENTED' }
 ]
 
 /** 租售类型选项：本期仅出租（R62 收敛——出售模式无售价字段与买卖流程支撑；
@@ -40,9 +39,9 @@ const rentTypeOptions: Array<{ label: string; value: HousingRentType | '' }> = [
   { label: '出租', value: 'RENT' },
 ]
 
-/** 户型选项：后端无枚举约束（house.layout 自由文本、精确匹配），选项取种子数据实际值；
- *  filterable + allow-create 支持输入列表外户型兜底（无匹配返回空集如实呈现） */
-const layoutOptions = ['2室1厅1卫', '3室2厅2卫']
+/** 后端按当前可见集合返回，不从种子或当前页猜测。 */
+const layoutOptions = ref<string[]>([])
+let loadSequence = 0
 
 /** 租金区间选项：接口支持 minRent/maxRent，档位映射两个参数（朝向接口无参数，不做对应控件） */
 const rentRangeOptions = [
@@ -67,11 +66,12 @@ function coverImage(housing: IHousing, index: number): string {
 }
 
 async function load(): Promise<void> {
+  const sequence = ++loadSequence
   loading.value = true
   try {
     /* 租金档位拆成 min/max 两个接口参数，空端表示不限 */
     const [rangeMin, rangeMax] = rentRange.value.split('-')
-    const result = await listHousings({
+    const query = {
       page: page.value,
       size: size.value,
       status: statusFilter.value === '' ? undefined : statusFilter.value,
@@ -81,13 +81,18 @@ async function load(): Promise<void> {
       maxRent: rangeMax === '' || rangeMax === undefined ? undefined : Number(rangeMax),
       rentType: rentTypeFilter.value === '' ? undefined : rentTypeFilter.value,
       layout: layoutFilter.value === '' ? undefined : layoutFilter.value
-    })
+    }
+    const { layout: _layout, page: _page, size: _size, ...optionQuery } = query
+    const [result, options] = await Promise.all([listHousings(query), getHousingFilterOptions(optionQuery)])
+    if (sequence !== loadSequence) return
+    layoutOptions.value = options
     housings.value = result.records
     total.value = result.total
   } catch (error) {
+    if (sequence !== loadSequence) return
     ElMessage.error(error instanceof Error ? error.message : '房源列表加载失败')
   } finally {
-    loading.value = false
+    if (sequence === loadSequence) loading.value = false
   }
 }
 
@@ -143,6 +148,12 @@ function handleSearch(): void {
   load()
 }
 
+/** 上游范围变化时清空旧户型，避免保留新集合不存在的值。 */
+function handleScopeChange(): void {
+  layoutFilter.value = ''
+  handleFilterChange()
+}
+
 function handleFilterChange(): void {
   page.value = 1
   load()
@@ -165,7 +176,7 @@ onMounted(() => {
   <div class="housing-list">
     <header class="list-head">
       <h1 class="list-title">在租房源</h1>
-      <p class="list-sub">共 {{ total }} 套在售 · 挑选心仪的房源，预约时间实地看房</p>
+      <p class="list-sub">共 {{ total }} 套可见房源 · 挑选心仪的房源，预约时间实地看房</p>
     </header>
 
     <!-- 筛选工具条：白卡横条铺满整行；社区/状态/租金/租售/户型/关键字有接口参数，朝向无参数不做控件 -->
@@ -174,7 +185,7 @@ onMounted(() => {
         v-model="communityFilter"
         class="filter-select"
         style="width: 210px"
-        @change="handleFilterChange"
+        @change="handleScopeChange"
       >
         <template #prefix>
           <span class="filter-select-label">社区</span>
@@ -191,7 +202,7 @@ onMounted(() => {
         v-model="statusFilter"
         class="filter-select"
         style="width: 170px"
-        @change="handleFilterChange"
+        @change="handleScopeChange"
       >
         <template #prefix>
           <span class="filter-select-label">状态</span>
@@ -208,7 +219,7 @@ onMounted(() => {
         class="filter-select"
         style="width: 190px"
         placeholder="租金区间"
-        @change="handleFilterChange"
+        @change="handleScopeChange"
       >
         <template #prefix>
           <span class="filter-select-label">租金</span>
@@ -224,7 +235,7 @@ onMounted(() => {
         v-model="rentTypeFilter"
         class="filter-select"
         style="width: 150px"
-        @change="handleFilterChange"
+        @change="handleScopeChange"
       >
         <template #prefix>
           <span class="filter-select-label">租售</span>
@@ -241,7 +252,7 @@ onMounted(() => {
         class="filter-select"
         style="width: 180px"
         filterable
-        allow-create
+
         placeholder="户型"
         @change="handleFilterChange"
       >
@@ -256,13 +267,7 @@ onMounted(() => {
           :value="layout"
         />
       </el-select>
-      <SearchBar v-model="keyword" placeholder="搜索小区 / 地址 / 标题" @search="handleSearch" />
-      <button type="button" class="filter-btn" @click="handleSearch">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-        </svg>
-        筛选
-      </button>
+      <SearchBar v-model="keyword" placeholder="搜索房源标题或描述" @search="handleSearch" />
     </div>
 
     <div v-loading="loading" class="grid">

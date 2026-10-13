@@ -77,14 +77,14 @@ class HousingFilterTest {
     }
 
     @Test
-    @DisplayName("layout 独立筛选：wrapper 含 layout = ?")
+    @DisplayName("layout 独立筛选：wrapper 引用真实 house.layout")
     void page_layoutFilter_applied() {
         mockEmptyPage();
         housingService.page(1, 10, null, null, null, null, null, "2室1厅", null);
         ArgumentCaptor<LambdaQueryWrapper<Housing>> captor =
                 ArgumentCaptor.forClass(LambdaQueryWrapper.class);
         verify(housingMapper).selectPage(any(), captor.capture());
-        assertThat(captor.getValue().getSqlSegment()).contains("layout =");
+        assertThat(captor.getValue().getSqlSegment()).contains("hf.layout=", "hf.id=housing.house_id");
     }
 
     @Test
@@ -107,8 +107,28 @@ class HousingFilterTest {
                 ArgumentCaptor.forClass(LambdaQueryWrapper.class);
         verify(housingMapper).selectPage(any(), captor.capture());
         String sql = captor.getValue().getSqlSegment();
-        assertThat(sql).contains("layout =");
+        assertThat(sql).contains("hf.layout=", "hf.id=housing.house_id");
         assertThat(sql).contains("rent_type =");
+    }
+
+    @Test
+    void optionsUsePublicAvailabilityAndTrueHouseLayout() {
+        when(housingMapper.selectHouseLayouts(any())).thenReturn(java.util.Arrays.asList("三室一厅一卫", "", null, "三室一厅一卫", "两室一厅"));
+        assertThat(housingService.filterLayouts(2L, null, null, null, null, "RENT")).hasSize(2).contains("三室一厅一卫", "两室一厅");
+        ArgumentCaptor<LambdaQueryWrapper<Housing>> captor = ArgumentCaptor.forClass(LambdaQueryWrapper.class);
+        verify(housingMapper).selectHouseLayouts(captor.capture());
+        assertThat(captor.getValue().getSqlSegment()).contains("community_id =", "residence_application", "lease_record", "residence_relation");
+    }
+
+    @Test
+    void freeTextLayoutIsBoundNotConcatenated() {
+        mockEmptyPage();
+        String value = "一室' OR 1=1 --";
+        housingService.page(1, 10, null, null, null, null, null, value, null);
+        ArgumentCaptor<LambdaQueryWrapper<Housing>> captor = ArgumentCaptor.forClass(LambdaQueryWrapper.class);
+        verify(housingMapper).selectPage(any(), captor.capture());
+        assertThat(captor.getValue().getSqlSegment()).contains("hf.layout=#{").doesNotContain(value);
+        assertThat(captor.getValue().getParamNameValuePairs()).containsValue(value);
     }
 
     @Test
