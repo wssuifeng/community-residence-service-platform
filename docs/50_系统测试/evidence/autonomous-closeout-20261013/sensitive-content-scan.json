@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-13",
+  "range": "all local leading commit blob versions relative to fetched origin/main plus planned working files",
+  "leadingCommitsBeforeFinalDocumentation": 10,
+  "textVersionsScanned": 539,
+  "rules": [
+    "private_key_material",
+    "jwt_value",
+    "provider_key",
+    "local_active_credential_literal(length>=8)"
+  ],
+  "findingsAreNotPrintedAsValues": true,
+  "coverageLimitation": "模式扫描不替代完整安全审计；演示种子密码公开是预期。本批截图已人工观察，不含密钥配置界面。",
+  "initialFindings": [
+    {
+      "object": "1b7cd9ff0cd2cd6726e3a33371320bb08f661326",
+      "rule": "local_active_credential_literal"
+    },
+    {
+      "object": "81e0aa74f74e3e86d54f80369bddeee0c9e3995e",
+      "rule": "local_active_credential_literal"
+    },
+    {
+      "object": "d30793f1a43a54a951606996f3c1efc309329799",
+      "rule": "local_active_credential_literal"
+    },
+    {
+      "object": "7c6a44c6b06b3b626320d0b398b1464069c2c5d6",
+      "rule": "local_active_credential_literal"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "rule": "local_active_credential_literal"
+    }
+  ],
+  "inheritedCredentialExposureAlreadyInFetchedRemoteBaseline": true,
+  "currentDocumentRedacted": true,
+  "newlyIntroducedSecretFindings": [],
+  "privateKeyJwtProviderKeyFindings": [],
+  "historicalExposureRemoved": false,
+  "actionNeeded": "用户更换已暴露DB密码；是否治理远端历史需另确认，不擅自强推/重写历史。",
+  "scanInterpretation": "非全历史无敏感内容。4个本地领先文档版本和当时工作副本命中的同一密码已在origin/main基线；本次最新正文清除，剩余历史暴露不得隐瞒。",
+  "finalPlannedWorkingFilesChecked": 46,
+  "finalPlannedWorkingFileCredentialHits": 0
+}

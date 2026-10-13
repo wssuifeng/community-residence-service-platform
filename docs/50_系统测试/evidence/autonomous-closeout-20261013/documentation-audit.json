@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-13",
+  "before": {
+    "errors": 1448,
+    "byCode": {
+      "acceptance-missing": 3,
+      "status-symbol-out-of-scope": 1199,
+      "broken-link": 245,
+      "dependency-mismatch": 1
+    }
+  },
+  "after": {
+    "errors": 1413,
+    "byCode": {
+      "acceptance-missing": 3,
+      "status-symbol-out-of-scope": 1199,
+      "broken-link": 210,
+      "dependency-mismatch": 1
+    }
+  },
+  "currentEntryBrokenLinks": [],
+  "remainingBrokenLinksByFolder": {
+    "30_系统设计": 14,
+    "40_开发实施": 14,
+    "50_系统测试": 171,
+    "90_全局": 1,
+    "archive": 6,
+    "superpowers": 4
+  },
+  "limitations": "冻结包/归档/历史证据原件不改；遗失截图不補造；非文件API前缀审计误报与学术/历史残项不判业务通过",
+  "fullAuditPassed": false
+}

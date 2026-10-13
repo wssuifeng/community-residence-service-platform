@@ -1,0 +1,181 @@
+{
+  "date": "2026-10-13",
+  "scope": "本批自产证据；日志/XML不清洗，派生JSON为LF",
+  "files": [
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/admin-production-768.png",
+      "bytes": 76506,
+      "sha256": "45a42acbed2b10d8c04cbf41fec5e754590b198375fef1c242ab2e19e3af807b"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/backend-focused-green.txt",
+      "bytes": 4242,
+      "sha256": "7d6c97d3903591a0da23d09c783b4684dd1a56f50ad26619458e4ba6e17d1739"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/backend-focused.txt",
+      "bytes": 12121,
+      "sha256": "d24cf8e282d8d51a663fdb6c3b38f4dcdb7d642e52442039ea643faac65f6128"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/backend-full.txt",
+      "bytes": 307377,
+      "sha256": "247ca7b6e8905d5fa3e47c21fe61677ee4cb5d906f642674cccad36a16596082"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/backend-results.json",
+      "bytes": 25558,
+      "sha256": "5df6c508f5118346b16437aee7836a0e1303cca765325f505c077fe9254b57ac"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/build-after-order.txt",
+      "bytes": 34108,
+      "sha256": "ce88b3dbe94abb4369c7289ee2f27a08e824f24b00791601e310fdde60d2c609"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/build-after-recursive.txt",
+      "bytes": 33172,
+      "sha256": "5af887dc8caa6d6412f77dff5c8b3b7d23c7e4a5628895b607d60bf3482a6b4f"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/build-after.txt",
+      "bytes": 33242,
+      "sha256": "080db9cc69282a0d73cbcc38533d5506645670ca10e5690ad47ee2653ea45e7d"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/build-before.txt",
+      "bytes": 17387,
+      "sha256": "641e5f3501d54c13e25dc65c1491992940ccc081f77abdb18f0ae9ac8380073b"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/build-final.txt",
+      "bytes": 34108,
+      "sha256": "64947e8cfd5756c39b019193382a1aef1327e7fdde566070befd93a157d031c4"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/build-safe-groups.txt",
+      "bytes": 31864,
+      "sha256": "d2625fec34a58f6fd83f372e5211356faeadb030c29ad0f37a57a67f1af795f6"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/bundle-after.json",
+      "bytes": 19923,
+      "sha256": "2733ad3d6c39c91e4b57d28dafc20daf9cc2fd9b82d129701f8edde77a4bfe4a"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/bundle-before.json",
+      "bytes": 13763,
+      "sha256": "529fe1f46503bb4f02474d20ef60f0beacf5c580782b8c197ea67efcc2d8e5cc"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/bundle-first-attempt.json",
+      "bytes": 17614,
+      "sha256": "94c6e00444cc5d2d4d7cca06113873c260885f27dc759f483b50cad77e2c62a6"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/bundle-safe-group-attempt.json",
+      "bytes": 15462,
+      "sha256": "786bcb790df73319bf7ade7e86bd62bc4f15ef0aeab55ee408379e35c2c2bb5d"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/bundle-verification.json",
+      "bytes": 1864,
+      "sha256": "f9c3e807f0da37e566737c9ff6156fbf09ce6430fe8b87b13b34c520e5379c7d"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/coverage-after.json",
+      "bytes": 2221,
+      "sha256": "3954d5cf2ca101deac33caf687c0f7137813dc8acc36f210f7e3d1e4a43b85a3"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/coverage-analysis.json",
+      "bytes": 882,
+      "sha256": "5dbb1402a2a40bf908689d41bd93cba14c96c7b83130bb3d457786fe2a387b23"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/coverage-before.json",
+      "bytes": 446473,
+      "sha256": "15fd6d8c9db458fd9e21f588fb3bdb330c3e19c6ce7522824609986f7aec5008"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/documentation-audit-after.json",
+      "bytes": 329843,
+      "sha256": "431dc4ea7c4cb5921b47ebe6de8c0d0c90bebaf2412adf420e92c123226d9bfb"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/documentation-audit-before.json",
+      "bytes": 337249,
+      "sha256": "18d70f6f703af148f10ab1c85de01e4e8ea764754863cc35b39fc277b46d8c71"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/documentation-audit.json",
+      "bytes": 810,
+      "sha256": "65506329f1cbdb8034bfa82ff9f63318612cb308ba7ded89513d013a02c76403"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/documentation-repairs.json",
+      "bytes": 9221,
+      "sha256": "e2c90a5aaab3dbb8ff30c20f9e304d3688b0be1023e14368ab0740be7ec8d126"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/documentation-verification.json",
+      "bytes": 899,
+      "sha256": "aa6cd8d5b17cf9a1f060fe3bcd96dfd88dfadc5ac413f4774bb83858a54689b5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/ep-dialog-production-768.png",
+      "bytes": 125600,
+      "sha256": "343aaf8b202fb19d3c8d55e1c02a1cfdfeaa278731bc37208ccd42323ed19ea4"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/frontend-full.txt",
+      "bytes": 345,
+      "sha256": "993e86fa2028a12023633def02483610fda5b48af8c306751f96c05d929904d7"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/jacoco-after.xml",
+      "bytes": 1060333,
+      "sha256": "4c3c5f2cb4d68bc9375a0d4a0efda63d1b02dc30d9676b91d33ea44a80276106"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/production-cycle-diagnosis.json",
+      "bytes": 1133,
+      "sha256": "d22ce9c023b9008f6ce41df4df7fefa592506320d8843c6b2ff6c23cb841160b"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/production-first-failure.json",
+      "bytes": 1007,
+      "sha256": "108b2ee8cb0fffc4c8414c2876e72a523ba5e891afb45003822de571caa5b458"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/production-readonly.json",
+      "bytes": 3921,
+      "sha256": "52b014117b825709969392f9b5c9218fe30e99af4b516d27e082d6b1e37a34d8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/production-safe-group-attempt.json",
+      "bytes": 1682,
+      "sha256": "111009258cb2145ef54b15abb3ce9968697bb6eb9587b5a7e9ac8f6ef2127961"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/sensitive-content-scan.json",
+      "bytes": 1821,
+      "sha256": "e16ce13967feae0c08163128181aacb25147e1c2e7d3d35e875d82c7d48c83f4"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/service-closure.json",
+      "bytes": 448,
+      "sha256": "5943e5b6759fd63363ea4a2f9a59ce5edb08ab841b795531443a74102db9a169"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/staff-production-768.png",
+      "bytes": 81238,
+      "sha256": "3af3085358bbcd4de4c8d2fb0c7feab7a95c42bc2d5f4b26d60277ca21cbded0"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/verification-summary.json",
+      "bytes": 1947,
+      "sha256": "dcbd0a8c6346cb6ac4bfb6e23f1f31e580167e5fabb29a40f54fad2b58f6f2ed"
+    }
+  ]
+}

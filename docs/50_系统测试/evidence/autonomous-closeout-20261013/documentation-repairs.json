@@ -1,0 +1,225 @@
+{
+  "date": "2026-10-13",
+  "scope": "当前50包与全局确定性引用；冻结包/归档/历史证据原件不改",
+  "changes": [
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`Temp/浏览器E2E验证报告.md`",
+      "target": "[浏览器级E2E原报告（已移入证据目录）](evidence/浏览器级E2E验证报告.md)",
+      "count": 1,
+      "reason": "现存报告开头明确记录2026-09-22从Temp移入，本轮只修引用"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`Temp/shots/001_DEF_confirm_400.png`",
+      "target": "原截图 Temp/shots/001_DEF_confirm_400.png（原件未入库，当前不可复核）",
+      "count": 1,
+      "reason": "git历史/工作区无原件，不冒充恢复"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`Temp/shots/003_DEF_close_400.png`",
+      "target": "原截图 Temp/shots/003_DEF_close_400.png（原件未入库，当前不可复核）",
+      "count": 1,
+      "reason": "git历史/工作区无原件，不冒充恢复"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`Temp/shots/003_F8_2_admin_pending.png`",
+      "target": "原截图 Temp/shots/003_F8_2_admin_pending.png（原件未入库，当前不可复核）",
+      "count": 2,
+      "reason": "git历史/工作区无原件，不冒充恢复"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`Temp/shots/004_F8_2_admin_detail.png`",
+      "target": "原截图 Temp/shots/004_F8_2_admin_detail.png（原件未入库，当前不可复核）",
+      "count": 1,
+      "reason": "git历史/工作区无原件，不冒充恢复"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`Temp/shots/016_F7_admin1_notifications.png`",
+      "target": "原截图 Temp/shots/016_F7_admin1_notifications.png（原件未入库，当前不可复核）",
+      "count": 1,
+      "reason": "git历史/工作区无原件，不冒充恢复"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`Temp/shots/005_F5_3_step2_payment.png`",
+      "target": "原截图 Temp/shots/005_F5_3_step2_payment.png（原件未入库，当前不可复核）",
+      "count": 1,
+      "reason": "git历史/工作区无原件，不冒充恢复"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`assets/02_核心状态机/05_入住申请状态机图.html`",
+      "target": "[入住申请状态机图](../30_系统设计/assets/02_核心状态机/05_入住申请状态机图.html)",
+      "count": 1,
+      "reason": "真实唯一目标"
+    },
+    {
+      "file": "docs\\50_系统测试\\08_缺陷跟踪与回归.md",
+      "source": "`backend/target/surefire-reports/`",
+      "target": "本机生成目录 backend/target/surefire-reports/（非持久证据，本轮不据目录重建当时89项原结果）",
+      "count": 1,
+      "reason": "生成报告不能作为历史持久证据"
+    },
+    {
+      "file": "docs\\50_系统测试\\_中控.md",
+      "source": "`Temp/批次g-通知身份空间分离-实施规格.md`",
+      "target": "历史临时规格 Temp/批次g-通知身份空间分离-实施规格.md（原件未入库，当前不可复核）",
+      "count": 1,
+      "reason": "遗失临时规格"
+    },
+    {
+      "file": "docs\\50_系统测试\\_中控.md",
+      "source": "`Temp/`",
+      "target": "历史临时目录 Temp/（非持久证据）",
+      "count": 2,
+      "reason": "失联临时目录"
+    },
+    {
+      "file": "docs\\50_系统测试\\_中控.md",
+      "source": "`05_入住申请状态机图.html`",
+      "target": "[入住申请状态机图](../30_系统设计/assets/02_核心状态机/05_入住申请状态机图.html)",
+      "count": 1,
+      "reason": "真实唯一目标"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`README.md`",
+      "target": "[README.md](../../README.md)",
+      "count": 1,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`AGENTS.md`",
+      "target": "[AGENTS.md](../../AGENTS.md)",
+      "count": 1,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`接口设计.md`",
+      "target": "[接口设计.md](../30_系统设计/接口设计.md)",
+      "count": 3,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`UI设计.md`",
+      "target": "[UI设计.md](../30_系统设计/UI设计.md)",
+      "count": 2,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`数据库设计.md`",
+      "target": "[数据库设计.md](../30_系统设计/数据库设计.md)",
+      "count": 1,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`13_核心业务流程三端联动手测用例.md`",
+      "target": "[13_核心业务流程三端联动手测用例.md](../50_系统测试/13_核心业务流程三端联动手测用例.md)",
+      "count": 1,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`功能用例_C10_用户与权限.md`",
+      "target": "[功能用例_C10_用户与权限.md](../50_系统测试/04_测试用例/功能用例_C10_用户与权限.md)",
+      "count": 1,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`backend/src/main/resources/db/migration/`",
+      "target": "[backend/src/main/resources/db/migration/](../../backend/src/main/resources/db/migration/)",
+      "count": 1,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`tools/alipay-sandbox-isolation/`",
+      "target": "[tools/alipay-sandbox-isolation/](../../tools/alipay-sandbox-isolation/)",
+      "count": 1,
+      "reason": "只修已存在且确定的目标，不改历史决策"
+    },
+    {
+      "file": "docs\\90_全局\\决策日志.md",
+      "source": "`Temp/批次g-导航合并与申请可见性-实施规格.md`",
+      "target": "历史临时规格 Temp/批次g-导航合并与申请可见性-实施规格.md（原件未入库，当前不可复核）",
+      "count": 1,
+      "reason": "遗失原件不造证据"
+    },
+    {
+      "file": "docs\\90_全局\\非开发计划内灵感留存处.md",
+      "source": "`接口设计.md`",
+      "target": "[接口设计.md](../30_系统设计/接口设计.md)",
+      "count": 1,
+      "reason": "只修引用，不实施灵感"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`src/`",
+      "target": "[前端src目录](../../frontend/src/)",
+      "count": 2,
+      "reason": "前端目录语境唯一目标"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`/api/v1/`",
+      "target": "**API前缀 /api/v1/**",
+      "count": 1,
+      "reason": "接口前缀不是项目文件"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`90_全局/论文数据/F/`",
+      "target": "历史目录 90_全局/论文数据/F/（不是当前入库产物链接）",
+      "count": 1,
+      "reason": "历史目录说明"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`论文数据/`",
+      "target": "历史目录 论文数据/（不是当前入库产物链接）",
+      "count": 1,
+      "reason": "历史目录说明"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`学校文件/`",
+      "target": "历史目录 学校文件/（不作为当前入库产物链接）",
+      "count": 1,
+      "reason": "历史资料目录，保持决策事实"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`开题报告/`",
+      "target": "历史目录 开题报告/（不作为当前入库产物链接）",
+      "count": 1,
+      "reason": "历史资料目录，保持决策事实"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`论文编写/`",
+      "target": "历史目录 论文编写/（不作为当前入库产物链接）",
+      "count": 1,
+      "reason": "历史资料目录，保持决策事实"
+    },
+    {
+      "file": "docs/90_全局/决策日志.md",
+      "source": "`维普系统操作手册/`",
+      "target": "历史目录 维普系统操作手册/（不作为当前入库产物链接）",
+      "count": 1,
+      "reason": "历史资料目录，保持决策事实"
+    }
+  ],
+  "occurrencesUpdated": 37,
+  "brokenLinkReportsResolved": 35
+}
