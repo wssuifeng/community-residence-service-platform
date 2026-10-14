@@ -53,6 +53,7 @@ class LeaseServiceTest {
     @Mock private com.community.residence.resident.mapper.ResidenceRelationMapper relationMapper;
     @Mock private com.community.residence.agreement.mapper.LeaseAgreementMapper agreementMapper;
     @Mock private com.community.residence.conversation.service.ConversationService conversationService;
+    @Mock private com.community.residence.resident.service.ResidenceDependencyService residenceDependencyService;
     @InjectMocks
     private LeaseService leaseService;
 
@@ -215,4 +216,25 @@ class LeaseServiceTest {
                     .hasMessageContaining("结束日期必须晚于开始日期");
         }
     }
+    @Test void directLeaseMoveOutCannotBypassDependentConfirmation() {
+        when(leaseMapper.update(any(LeaseRecord.class),any(com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper.class))).thenReturn(1);
+        var root = new com.community.residence.resident.entity.ResidenceRelation();
+        root.setId(99L);root.setLeaseId(activeLease.getId());
+        when(relationMapper.selectList(any())).thenReturn(java.util.List.of(root));
+        org.mockito.Mockito.doThrow(new BusinessException(ErrorCode.INVALID_PARAM,"请确认整户"))
+            .when(residenceDependencyService).endMembers(org.mockito.ArgumentMatchers.eq(99L),any(),org.mockito.ArgumentMatchers.eq(false));
+        assertThatThrownBy(()->leaseService.applyTransition(activeLease,"MOVED_OUT","迁出"))
+            .isInstanceOf(BusinessException.class).hasMessageContaining("整户");
+        verify(relationMapper,never()).updateById(any(com.community.residence.resident.entity.ResidenceRelation.class));
+    }
+    @Test void directLeaseMoveOutPassesExplicitConfirmation() {
+        when(leaseMapper.update(any(LeaseRecord.class),any(com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper.class))).thenReturn(1);
+        var root = new com.community.residence.resident.entity.ResidenceRelation();
+        root.setId(99L);root.setLeaseId(activeLease.getId());
+        when(relationMapper.selectList(any())).thenReturn(java.util.List.of(root));
+        leaseService.applyTransition(activeLease,"MOVED_OUT","迁出",true);
+        verify(residenceDependencyService).endMembers(org.mockito.ArgumentMatchers.eq(99L),any(),org.mockito.ArgumentMatchers.eq(true));
+        verify(relationMapper).updateById(root);
+    }
+
 }

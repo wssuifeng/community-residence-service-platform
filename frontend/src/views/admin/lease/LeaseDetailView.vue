@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { leaseHouseholdNotice } from '@/utils/leaseHousehold'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -517,14 +518,17 @@ async function handleReject(): Promise<void> {
 
 async function handleMoveOut(): Promise<void> {
   if (!lease.value) return
+  if (!lease.value) return
+  let notice: Awaited<ReturnType<typeof leaseHouseholdNotice>>
+  try { notice=await leaseHouseholdNotice(lease.value) } catch(error) { ElMessage.error(error instanceof Error ? error.message : '同住人员核对失败，请重试'); return }
   let remark: string
   try {
     const result = await ElMessageBox.prompt(
-      `确定办理「${lease.value.tenantName} · ${lease.value.houseLocation}」退租（搬出）？可填写备注。`,
+      `确定办理「${lease.value.tenantName} · ${lease.value.houseLocation}」退租（搬出）？可填写备注。${notice.text}`,
       '办理退租',
       {
         type: 'warning',
-        confirmButtonText: '退租',
+        confirmButtonText: notice.confirmDependents ? '确认整户退租' : '退租',
         cancelButtonText: '取消',
         inputPlaceholder: '退租备注（选填）'
       }
@@ -533,7 +537,7 @@ async function handleMoveOut(): Promise<void> {
   } catch {
     return
   }
-  await doTransition('MOVED_OUT', '已办理退租', remark)
+  await doTransition('MOVED_OUT', '已办理退租', remark, notice.confirmDependents)
 }
 
 async function handleArchive(): Promise<void> {
@@ -550,11 +554,11 @@ async function handleArchive(): Promise<void> {
   await doTransition('ARCHIVED', '租约已归档')
 }
 
-async function doTransition(target: LeaseStatus, successText: string, remark?: string): Promise<void> {
+async function doTransition(target: LeaseStatus, successText: string, remark?: string, confirmDependents?: boolean): Promise<void> {
   if (!lease.value) return
   actionLoading.value = true
   try {
-    await updateLeaseStatus(lease.value.id, { status: target, remark: remark || undefined })
+    await updateLeaseStatus(lease.value.id, { status: target, remark: remark || undefined, confirmDependents })
     ElMessage.success(successText)
     await refreshAll()
   } catch (error) {

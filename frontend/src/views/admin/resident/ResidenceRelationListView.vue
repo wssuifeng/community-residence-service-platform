@@ -4,11 +4,13 @@
  * 台账采用居民视角 9.2.3.1）+ 在住关系搬出登记（9.2.3.3）。
  * 支持由居民列表「居住关系」操作预选居民（presetResidentId）。
  */
+import ResidentCoResidenceDialog from './ResidentCoResidenceDialog.vue'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   getResidentList,
+  getResidenceDependents,
   getResidentResidenceList,
   moveOutResidenceRelation
 } from '@/api/resident'
@@ -26,6 +28,11 @@ import Pagination from '@/components/common/Pagination.vue'
 const props = defineProps<{ presetResidentId?: number }>()
 
 const relations = ref<IResidenceRelation[]>([])
+const coVisible=ref(false), coAnchor=ref<IResidenceRelation|null>(null)
+const moveOutMembers=ref<IResidenceRelation[]>([])
+const memberLoading=ref(false), memberError=ref('')
+let moveOutVersion=0
+function openCo(row:IResidenceRelation){coAnchor.value=row;coVisible.value=true}
 const loading = ref(false)
 const page = ref(1)
 const size = ref(10)
@@ -127,21 +134,26 @@ const moveOutRules: FormRules = {
   reason: [{ max: 200, message: '搬出原因不超过 200 字', trigger: 'blur' }]
 }
 
-function openMoveOut(row: IResidenceRelation): void {
+async function openMoveOut(row: IResidenceRelation): Promise<void> {
   moveOutTarget.value = row
   moveOutFormRef.value?.resetFields()
   Object.assign(moveOutForm, { moveOutDate: todayISO(), reason: '' })
   moveOutVisible.value = true
+  const version=++moveOutVersion;moveOutMembers.value=[];memberError.value='';memberLoading.value=true
+  try{const members=await getResidenceDependents(row.id);if(version===moveOutVersion&&moveOutVisible.value)moveOutMembers.value=members}
+  catch(e){if(version===moveOutVersion)memberError.value=e instanceof Error?e.message:'同住关系核对失败'}
+  finally{if(version===moveOutVersion)memberLoading.value=false}
 }
 
 async function handleMoveOut(): Promise<void> {
-  if (!moveOutTarget.value) return
+  if (!moveOutTarget.value || memberLoading.value || memberError.value) return
   const valid = await moveOutFormRef.value?.validate().catch(() => false)
   if (!valid) return
   moveOutLoading.value = true
   try {
     await moveOutResidenceRelation(moveOutTarget.value.id, {
       moveOutDate: moveOutForm.moveOutDate,
+      confirmDependents: true,
       reason: moveOutForm.reason.trim() || undefined
     })
     ElMessage.success('搬出登记成功')
@@ -223,8 +235,9 @@ onMounted(() => {
             />
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="110" fixed="right">
+        <el-table-column label="操作" width="230" fixed="right">
           <template #default="{ row }">
+            <el-button v-if="row.status==='ACTIVE' && !row.anchorRelationId && ['OWNER','TENANT'].includes(row.relationType)" text type="primary" @click="openCo(row)">登记同住人员</el-button>
             <el-button
               v-if="row.status === 'ACTIVE'"
               v-permission="['ADMIN', 'SUPER_ADMIN']"
@@ -261,6 +274,9 @@ onMounted(() => {
         :closable="false"
         class="move-out-tip"
       />
+      <el-alert v-if="memberError" :title="memberError" type="error" :closable="false" />
+      <p v-if="memberLoading">正在核对同住关系…</p>
+      <el-alert v-if="moveOutMembers.length" type="warning" :closable="false" :title="`同时结束以下 ${moveOutMembers.length} 名同住人员的居住关系：${moveOutMembers.map(m=>m.residentName).join('、')}。账号和历史保留。`" />
       <el-form ref="moveOutFormRef" :model="moveOutForm" :rules="moveOutRules" label-width="90px">
         <el-form-item label="搬出日期" prop="moveOutDate">
           <el-date-picker
@@ -284,11 +300,12 @@ onMounted(() => {
       </el-form>
       <template #footer>
         <el-button @click="moveOutVisible = false">取消</el-button>
-        <el-button type="primary" :loading="moveOutLoading" @click="handleMoveOut">
-          确认登记
+        <el-button type="primary" :loading="moveOutLoading" :disabled="memberLoading || !!memberError" @click="handleMoveOut">
+          {{ moveOutMembers.length ? '确认整户迁出' : '确认登记' }}
         </el-button>
       </template>
     </el-dialog>
+  <ResidentCoResidenceDialog v-model="coVisible" :anchor="coAnchor" @saved="load" />
   </section>
 </template>
 

@@ -13,6 +13,9 @@ import java.time.LocalDate;
 @Data
 @Schema(description = "管理员直建居住关系请求")
 public class AdminCreateRelationDTO {
+    @Schema(description="依赖的主居住关系ID；同住关系引用同房屋有效OWNER/TENANT")
+    private Long anchorRelationId;
+
 
     @Schema(description = "居民ID")
     @NotNull(message = "居民不能为空")
@@ -24,7 +27,7 @@ public class AdminCreateRelationDTO {
 
     @Schema(description = "关系类型：OWNER-业主, TENANT-租客, FAMILY-家属")
     @NotNull(message = "关系类型不能为空")
-    @Pattern(regexp = "^(OWNER|TENANT|FAMILY)$", message = "关系类型取值 OWNER/TENANT/FAMILY")
+    @Pattern(regexp = "^(OWNER|TENANT|FAMILY|CO_RESIDENT)$", message = "关系类型取值 OWNER/TENANT/FAMILY/CO_RESIDENT")
     private String relationType;
 
     @Schema(description = "入住日期")

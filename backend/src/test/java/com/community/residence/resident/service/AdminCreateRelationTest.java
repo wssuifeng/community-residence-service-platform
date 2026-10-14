@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("管理员直建居住关系回归（D-端点3）")
 class AdminCreateRelationTest {
+    @org.mockito.Mock private com.community.residence.resident.service.ResidenceDependencyService residenceDependencyService;
 
     @Mock
     private ResidenceRelationMapper relationMapper;

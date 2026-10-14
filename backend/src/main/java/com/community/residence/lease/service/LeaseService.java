@@ -67,6 +67,7 @@ public class LeaseService {
     private static final Set<String> BLOCKING_CREATE_STATUSES =
             Set.of(LeaseStatus.PENDING, LeaseStatus.TO_SIGN, LeaseStatus.ACTIVE);
 
+    private final com.community.residence.resident.service.ResidenceDependencyService residenceDependencyService;
     private final LeaseRecordMapper leaseMapper;
     private final ResidentMapper residentMapper;
     private final HouseMapper houseMapper;
@@ -224,7 +225,7 @@ public class LeaseService {
         if (current.equals(target)) {
             return;
         }
-        applyTransition(lease, target, dto.getRemark());
+        applyTransition(lease, target, dto.getRemark(), Boolean.TRUE.equals(dto.getConfirmDependents()));
         log.info("租住状态流转：leaseId={}, {} -> {}, operator={}",
                 id, current, target, SecurityUtils.getUserId());
     }
@@ -238,6 +239,11 @@ public class LeaseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void applyTransition(LeaseRecord lease, String target, String reason) {
+        applyTransition(lease,target,reason,false);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void applyTransition(LeaseRecord lease, String target, String reason, boolean confirmDependents) {
         String current = lease.getStatus();
         if (current.equals(target)) {
             return;
@@ -303,7 +309,7 @@ public class LeaseService {
             conversationService.sendSystemMessage(lease.getConversationId(), "协议已确认且首期费用支付成功，租约及正式居住关系已生效。");
         } else if (LeaseStatus.MOVED_OUT.equals(target)) {
             lockHouse(lease.getHouseId());
-            endLeaseResidence(lease);
+            endLeaseResidence(lease, confirmDependents);
             Long remaining = relationMapper.selectCount(new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
                 .eq(com.community.residence.resident.entity.ResidenceRelation::getHouseId, lease.getHouseId())
                 .isNull(com.community.residence.resident.entity.ResidenceRelation::getMoveOutDate));
@@ -326,7 +332,7 @@ public class LeaseService {
     }
 
     /* 新关系精确关联租约；旧关系只在同居民/房屋候选唯一且未关联其他租约时兼容终止。 */
-    private void endLeaseResidence(LeaseRecord lease) {
+    private void endLeaseResidence(LeaseRecord lease, boolean confirmDependents) {
         List<com.community.residence.resident.entity.ResidenceRelation> candidates = relationMapper.selectList(
                 new LambdaQueryWrapper<com.community.residence.resident.entity.ResidenceRelation>()
                         .eq(com.community.residence.resident.entity.ResidenceRelation::getResidentId, lease.getTenantId())
@@ -335,6 +341,7 @@ public class LeaseService {
         for (var relation : candidates) {
             if (!lease.getId().equals(relation.getLeaseId())
                     && !(relation.getLeaseId() == null && candidates.size() == 1)) continue;
+            residenceDependencyService.endMembers(relation.getId(), LocalDate.now(), confirmDependents);
             relation.setMoveOutDate(LocalDate.now());
             relationMapper.updateById(relation);
         }

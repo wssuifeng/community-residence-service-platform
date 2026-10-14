@@ -75,6 +75,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("居民自助退租申请（R70）")
 class LeaseMoveOutApplicationServiceTest {
+    @org.mockito.Mock private com.community.residence.resident.service.ResidenceDependencyService residenceDependencyService;
 
     private static final Long LEASE_ID = 12L;
     private static final Long RESIDENT_ID = 1L;

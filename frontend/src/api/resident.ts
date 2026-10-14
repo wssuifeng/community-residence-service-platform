@@ -55,6 +55,11 @@ export function getResidentList(params: IResidentQuery) {
   return http.get<PageResult<IResident>>('/residents', params)
 }
 
+/** 按完整用户名或手机号找到同住登记账号，不扩大居民台账范围。 */
+export function findCoResidentCandidates(houseId: number, keyword: string) {
+  return http.get<Array<Pick<IResident, 'id' | 'username' | 'realName'>>>('/residents/co-resident-candidates', { houseId, keyword })
+}
+
 /** 冻结/解冻居民账号（接口设计.md 9.2.1.9） */
 export function updateResidentStatus(id: number, data: IUpdateResidentStatusDTO) {
   return http.patch<null>(`/residents/${id}/status`, data)
@@ -70,9 +75,10 @@ export function adminCreateResident(data: IAdminCreateResidentDTO): Promise<IAdm
  * 部分成功语义。FormData 传法与 api/upload.ts 一致，axios 自动带
  * multipart/form-data 边界，勿手动设置 Content-Type）
  */
-export function importResidents(file: File): Promise<IResidentImportVO> {
+export function importResidents(file: File, communityId?: number): Promise<IResidentImportVO> {
   const formData = new FormData()
   formData.append('file', file)
+  if (communityId) formData.append('communityId', String(communityId))
   return http.post<IResidentImportVO>('/residents/import', formData)
 }
 
@@ -164,4 +170,13 @@ export function getConfigList() {
 /** 更新配置（接口设计.md 9.2.4.3） */
 export function updateConfig(key: string, data: IUpdateConfigDTO) {
   return http.put<null>(`/configs/${key}`, data)
+}
+
+/** 管理员登记同住关系，不建立租约或交易义务。 */
+export function createResidenceRelation(data: { residentId: number; houseId: number; anchorRelationId: number; relationType: 'FAMILY' | 'CO_RESIDENT'; moveInDate: string; remark?: string }) {
+  return http.post<IResidenceRelation>('/residence-relations', data)
+}
+/** 管理员确认主关系结束前查看准确依赖成员。 */
+export function getResidenceDependents(id: number) {
+  return http.get<IResidenceRelation[]>(`/residence-relations/${id}/dependents`)
 }

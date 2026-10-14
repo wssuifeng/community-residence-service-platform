@@ -76,6 +76,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class LeaseMoveOutApplicationService {
+    private final com.community.residence.resident.service.ResidenceDependencyService residenceDependencyService;
 
     /** 房源状态回收缺省值：退租后默认回到在架可租 */
     private static final String DEFAULT_HOUSING_STATUS = "AVAILABLE";
@@ -265,6 +266,7 @@ public class LeaseMoveOutApplicationService {
             for (ResidenceRelation relation : relations) {
                 if (!lease.getId().equals(relation.getLeaseId())
                         && !(relation.getLeaseId() == null && relations.size() == 1)) continue;
+                residenceDependencyService.endMembers(relation.getId(), application.getMoveOutDate(), Boolean.TRUE.equals(dto.getConfirmDependents()));
                 relation.setMoveOutDate(application.getMoveOutDate());
                 relationMapper.updateById(relation);
             }

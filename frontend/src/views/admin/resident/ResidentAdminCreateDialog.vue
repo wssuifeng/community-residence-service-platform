@@ -200,8 +200,8 @@ async function copyText(text: string): Promise<void> {
       <el-form-item label="邮箱"><el-input v-model="form.email" placeholder="选填，与居民资料一致" maxlength="100" /></el-form-item>
       <template v-if="createRelation">
         <el-divider content-position="left">居住关系</el-divider>
-        <ResidentHouseSelector v-model="form.houseId" :community-id="form.communityId" />
         <el-form-item label="关系类型"><el-select v-model="form.relationType" style="width:100%"><el-option v-for="(label, value) in relationTypeLabels" :key="value" :value="value" :label="label" /></el-select></el-form-item>
+        <ResidentHouseSelector v-model="form.houseId" :community-id="form.communityId" :allow-occupied="form.relationType === 'FAMILY' || form.relationType === 'CO_RESIDENT'" />
         <el-form-item label="入住日期"><el-date-picker v-model="form.moveInDate" type="date" value-format="YYYY-MM-DD" :disabled-date="(date: Date) => date.getTime() > Date.now()" style="width:100%" /></el-form-item>
         <el-form-item label="关系备注"><el-input v-model="form.remark" placeholder="选填，记录本次登记说明" maxlength="200" /></el-form-item>
         <p class="form-hint">此处登记居住关系，不自动创建或签署租赁协议。</p>

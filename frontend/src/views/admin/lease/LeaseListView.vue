@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { leaseHouseholdNotice } from '@/utils/leaseHousehold'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -381,14 +382,16 @@ async function handleReject(row: ILeaseRecord): Promise<void> {
 }
 
 async function handleMoveOut(row: ILeaseRecord): Promise<void> {
+  let notice: Awaited<ReturnType<typeof leaseHouseholdNotice>>
+  try { notice=await leaseHouseholdNotice(row) } catch(error) { ElMessage.error(error instanceof Error ? error.message : '同住人员核对失败，请重试'); return }
   let remark: string
   try {
     const result = await ElMessageBox.prompt(
-      `确定办理「${row.tenantName} · ${row.houseLocation}」退租（搬出）？可填写备注。`,
+      `确定办理「${row.tenantName} · ${row.houseLocation}」退租（搬出）？可填写备注。${notice.text}`,
       '办理退租',
       {
         type: 'warning',
-        confirmButtonText: '退租',
+        confirmButtonText: notice.confirmDependents ? '确认整户退租' : '退租',
         cancelButtonText: '取消',
         inputPlaceholder: '退租备注（选填）'
       }
@@ -398,7 +401,7 @@ async function handleMoveOut(row: ILeaseRecord): Promise<void> {
     return
   }
   try {
-    await updateLeaseStatus(row.id, { status: 'MOVED_OUT', remark: remark || undefined })
+    await updateLeaseStatus(row.id, { status: 'MOVED_OUT', remark: remark || undefined, confirmDependents: notice.confirmDependents })
     ElMessage.success('已办理退租')
     load()
   } catch (error) {

@@ -7,6 +7,9 @@ import Pagination from '@/components/common/Pagination.vue'
 import SearchBar from '@/components/common/SearchBar.vue'
 import FilterPanel from '@/components/common/FilterPanel.vue'
 import DepositRefundDialog from './DepositRefundDialog.vue'
+import { getHouseResidentList } from '@/api/resident'
+import { loadAllPages } from '@/utils/paged'
+import type { IHouseResident } from '@/types/modules/resident'
 import { approveMoveOutApplication, listMoveOutApplications, rejectMoveOutApplication } from '@/api/leaseMoveOut'
 import { getLease, listLeasePayments } from '@/api/lease'
 import { getCommunityList } from '@/api/community'
@@ -126,22 +129,32 @@ async function loadCommunities(): Promise<void> {
 /* ------------------------------ 审核通过（选房源回收方式） ------------------------------ */
 
 const approveVisible = ref(false)
+const approveMembers=ref<IHouseResident[]>([])
+const membersLoading=ref(false), membersError=ref('')
+let approveVersion=0
 const approveTarget = ref<IMoveOutApplication | null>(null)
 const approveHousingStatus = ref<'AVAILABLE' | 'OFFLINE'>('AVAILABLE')
 const submitting = ref(false)
 
-function openApprove(row: IMoveOutApplication): void {
+async function openApprove(row: IMoveOutApplication): Promise<void> {
   approveTarget.value = row
   approveHousingStatus.value = 'AVAILABLE'
   approveVisible.value = true
+  const version=++approveVersion;approveMembers.value=[];membersError.value='';membersLoading.value=true
+  try {
+    const rows=await loadAllPages(q=>getHouseResidentList(row.houseId,{...q,status:'ACTIVE'}),()=>version===approveVersion&&approveVisible.value)
+    const roots=rows.filter(r=>r.residentId===row.residentId&&(r.leaseId===row.leaseId||r.leaseId==null))
+    if(version===approveVersion)approveMembers.value=rows.filter(r=>r.anchorRelationId!=null&&roots.some(root=>root.id===r.anchorRelationId))
+  }catch(e){if(version===approveVersion)membersError.value=e instanceof Error?e.message:'同住人员核对失败'}
+  finally{if(version===approveVersion)membersLoading.value=false}
 }
 
 async function handleApproveSubmit(): Promise<void> {
   const target = approveTarget.value
-  if (!target) return
+  if (!target || membersLoading.value || membersError.value) return
   submitting.value = true
   try {
-    await approveMoveOutApplication(target.id, { housingStatus: approveHousingStatus.value })
+    await approveMoveOutApplication(target.id, { housingStatus: approveHousingStatus.value, confirmDependents: true })
     ElMessage.success('退租申请已通过：租约已搬出，居住关系终止，房屋置空置')
     approveVisible.value = false
     await load()
@@ -431,6 +444,9 @@ onMounted(() => {
     <!-- 通过：必须选择房源回收方式（后端联动房屋置空置 + 房源状态） -->
     <el-dialog v-model="approveVisible" title="通过退租申请" width="520px">
       <template v-if="approveTarget">
+        <p v-if="membersLoading">正在核对同住人员…</p>
+        <el-alert v-if="membersError" :title="membersError" type="error" :closable="false" />
+        <el-alert v-if="approveMembers.length" type="warning" :closable="false" :title="`同时结束以下同住人员的依赖关系：${approveMembers.map(m=>m.residentName).join('、')}。账号和历史保留。`" />
         <el-alert
           type="warning"
           :closable="false"
@@ -471,7 +487,7 @@ onMounted(() => {
 
       <template #footer>
         <el-button @click="approveVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleApproveSubmit">确认通过</el-button>
+        <el-button type="primary" :loading="submitting" :disabled="membersLoading || !!membersError" @click="handleApproveSubmit">确认退租并结束关联居住关系</el-button>
       </template>
     </el-dialog>
 

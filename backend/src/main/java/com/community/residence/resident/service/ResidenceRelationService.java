@@ -35,6 +35,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ResidenceRelationService {
+    private final ResidenceDependencyService residenceDependencyService;
 
     private final ResidenceRelationMapper relationMapper;
     private final ResidentMapper residentMapper;
@@ -97,6 +98,8 @@ public class ResidenceRelationService {
             throw new BusinessException(ErrorCode.RELATION_NOT_ACTIVE);
         }
         houseMapper.selectByIdForUpdate(relation.getHouseId());
+        relation = requireRelation(id);
+        if (relation.getMoveOutDate() != null) throw new BusinessException(ErrorCode.RELATION_NOT_ACTIVE);
         /* 精确关联本租约；旧未关联关系只有唯一候选时兼容，不能批量终止多条租约。 */
         List<LeaseRecord> activeLeases = leaseRecordMapper.selectList(
                 new LambdaQueryWrapper<LeaseRecord>()
@@ -107,6 +110,9 @@ public class ResidenceRelationService {
         if (relation.getLeaseId() == null && activeLeases.size() > 1) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "历史居住关系无法唯一关联租约，请核对具体关系");
         }
+        if (dto.getMoveOutDate() == null || relation.getMoveInDate() != null && dto.getMoveOutDate().isBefore(relation.getMoveInDate()))
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "迁出日期不能早于入住日期");
+        var endedMembers = residenceDependencyService.endMembers(relation.getId(), dto.getMoveOutDate(), Boolean.TRUE.equals(dto.getConfirmDependents()));
         relation.setMoveOutDate(dto.getMoveOutDate());
         relationMapper.updateById(relation);
         activeLeases.forEach(lease -> leaseService.applyTransition(lease, "MOVED_OUT", "居住关系迁出登记"));
@@ -154,6 +160,8 @@ public class ResidenceRelationService {
             throw new ResourceNotFoundException("房屋不存在");
         }
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
+        if (ResidenceDependencyService.isDependent(dto.getRelationType())) return registerDependent(dto, house);
+        if (dto.getAnchorRelationId() != null) throw new BusinessException(ErrorCode.INVALID_PARAM,"主居住关系不能依赖另一条关系");
         if (!HouseStatusConstant.VACANT.equals(house.getStatus())) {
             throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋非空置，不可直接登记居住关系");
         }
@@ -190,6 +198,40 @@ public class ResidenceRelationService {
                 relation.getId(), dto.getResidentId(), dto.getHouseId(),
                 SecurityUtils.getUserId(), dto.getRemark());
         return toVO(relation);
+    }
+
+    /* 同住登记必须有实际有效主关系；不以is_primary猜户主，不生成租约或支付单。 */
+    private RelationVO registerDependent(com.community.residence.resident.dto.AdminCreateRelationDTO dto, House house) {
+        if (!HouseStatusConstant.OCCUPIED.equals(house.getStatus())) throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT,"同住登记只能选择已入住且有有效主居住关系的房屋");
+        var candidates = relationMapper.selectList(new LambdaQueryWrapper<ResidenceRelation>()
+                .eq(ResidenceRelation::getHouseId,house.getId()).isNull(ResidenceRelation::getMoveOutDate)
+                .isNull(ResidenceRelation::getAnchorRelationId).in(ResidenceRelation::getRelationType,"OWNER","TENANT").last("FOR UPDATE"));
+        var roots = dto.getAnchorRelationId()==null ? candidates : candidates.stream().filter(v->dto.getAnchorRelationId().equals(v.getId())).toList();
+        if (roots.size()!=1) throw new BusinessException(ErrorCode.INVALID_PARAM,"必须明确选择本房屋唯一有效主居住关系；待签约/未付首期不能登记同住人员");
+        ResidenceRelation root=roots.get(0);
+        if (root.getResidentId().equals(dto.getResidentId())) throw new BusinessException(ErrorCode.DATA_EXISTS,"主住户本人不能重复登记为同住人员");
+        if (dto.getMoveInDate()==null || root.getMoveInDate()!=null && dto.getMoveInDate().isBefore(root.getMoveInDate())) throw new BusinessException(ErrorCode.INVALID_PARAM,"同住入住日期不能早于主居住关系生效日期");
+        if (root.getLeaseId()!=null) {
+            LeaseRecord lease=leaseRecordMapper.selectById(root.getLeaseId());
+            if(lease==null || !"ACTIVE".equals(lease.getStatus()) || !house.getId().equals(lease.getHouseId()) || !root.getResidentId().equals(lease.getTenantId()))
+                throw new BusinessException(ErrorCode.INVALID_PARAM,"主租约未正式生效，不能登记同住人员");
+        }
+        var resident=residentMapper.selectById(dto.getResidentId());
+        if (!"ACTIVE".equals(resident.getStatus())) throw new BusinessException(ErrorCode.INVALID_PARAM,"冻结账号不能新增居住关系");
+        if (relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>().eq(ResidenceRelation::getHouseId,house.getId())
+                .eq(ResidenceRelation::getResidentId,dto.getResidentId()).isNull(ResidenceRelation::getMoveOutDate))>0)
+            throw new BusinessException(ErrorCode.DATA_EXISTS,"该居民已有本房屋有效居住关系");
+        ResidenceRelation relation=new ResidenceRelation();
+        relation.setResidentId(dto.getResidentId());relation.setCommunityId(house.getCommunityId());relation.setHouseId(house.getId());
+        relation.setRelationType(dto.getRelationType());relation.setMoveInDate(dto.getMoveInDate());relation.setIsPrimary(1);
+        relation.setAnchorRelationId(root.getId());relationMapper.insert(relation);
+        return toVO(relation);
+    }
+
+    public java.util.List<RelationVO> dependents(Long relationId) {
+        ResidenceRelation root=requireRelation(relationId);
+        SecurityUtils.checkCommunityAccess(root.getCommunityId());
+        return residenceDependencyService.activeMembers(relationId).stream().map(this::toVO).toList();
     }
 
     private RelationVO toVO(ResidenceRelation relation) {

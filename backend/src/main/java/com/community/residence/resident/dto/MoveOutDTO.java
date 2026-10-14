@@ -11,6 +11,9 @@ import java.time.LocalDate;
 @Data
 @Schema(description = "办理迁出请求")
 public class MoveOutDTO {
+    @Schema(description="明确确认同步结束主关系关联的依赖居住关系")
+    private Boolean confirmDependents;
+
 
     @Schema(description = "迁出日期")
     @NotNull(message = "迁出日期不能为空")
