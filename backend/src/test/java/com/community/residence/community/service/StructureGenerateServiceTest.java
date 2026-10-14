@@ -51,6 +51,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("StructureGenerateService 结构链批量生成单元测试")
 class StructureGenerateServiceTest {
+    @org.mockito.Mock private com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
     @Mock
     private CommunityService communityService;

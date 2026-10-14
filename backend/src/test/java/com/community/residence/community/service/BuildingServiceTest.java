@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("BuildingService 单元测试")
 class BuildingServiceTest {
+    @org.mockito.Mock private com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
     @Mock
     private BuildingMapper buildingMapper;

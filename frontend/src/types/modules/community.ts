@@ -62,6 +62,7 @@ export const resourceStatusLabels: Record<ResourceStatus, string> = {
 
 /** 社区实体（接口设计.md 9.1.1.1 响应） */
 export interface ICommunity {
+  businessCode?: string
   responsibleAdminId?: number | null
   id: number
   name: string
@@ -80,6 +81,7 @@ export interface ICommunity {
 
 /** 创建社区请求（接口设计.md 9.1.1.1 请求体） */
 export interface ICreateCommunityDTO {
+  businessCode?: string
   name: string
   address: string
   responsibleAdminId?: number | null
@@ -108,6 +110,7 @@ export interface ICommunityQuery extends PageQuery {
 
 /** 楼栋实体（后端 BuildingVO：floors 字段，2026-09-08 验收对齐） */
 export interface IBuilding {
+  businessCode?: string
   id: number
   communityId: number
   communityName: string
@@ -119,6 +122,7 @@ export interface IBuilding {
 
 /** 创建/更新楼栋请求（后端 CreateBuildingDTO：floors） */
 export interface IBuildingDTO {
+  businessCode?: string
   communityId: number
   name: string
   floors: number
@@ -135,6 +139,7 @@ export interface IBuildingQuery extends PageQuery {
 /** 单元实体（后端 UnitVO：name + description，无数值楼层/户数字段；
  * buildingName 后端可空，展示一律以树/筛选上下文为准） */
 export interface IUnit {
+  businessCode?: string
   id: number
   buildingId: number
   buildingName?: string
@@ -146,6 +151,7 @@ export interface IUnit {
 
 /** 创建/更新单元请求（后端 CreateUnitDTO：buildingId + name + description） */
 export interface IUnitDTO {
+  businessCode?: string
   buildingId: number
   name: string
   description?: string

@@ -110,6 +110,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityService {
 
+    private final StructureBusinessCodeService structureBusinessCodeService;
+
     /** 自动通过路径的默认租期（月）：请求未指定时回落到此值 */
     private static final int DEFAULT_LEASE_MONTHS = 12;
 
@@ -168,7 +170,9 @@ public class CommunityService {
         Community community = new Community();
         applyDto(community, dto);
         community.setStatus(CommonStatus.ACTIVE);
+        community.setBusinessCode(structureBusinessCodeService.community(dto.getBusinessCode()));
         communityMapper.insert(community);
+        communityResponsibleService.synchronizeBinding(community.getId(), community.getResponsibleAdminId());
         communityResponsibleService.fillContacts(java.util.List.of(community));
         return CommunityVO.from(community);
     }
@@ -177,12 +181,21 @@ public class CommunityService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "COMMUNITY", targetId = "#id", content = "'更新社区：' + #dto.name")
     public CommunityVO update(Long id, CreateCommunityDTO dto) {
+        structureBusinessCodeService.lockExistingCommunity(id);
         Community community = requireCommunity(id);
         SecurityUtils.checkCommunityAccess(community.getId());
         applyDto(community, dto);
+        if (dto.getBusinessCode() != null && !dto.getBusinessCode().isBlank() && !dto.getBusinessCode().trim().equals(community.getBusinessCode())) community.setBusinessCode(structureBusinessCodeService.updateCommunity(dto.getBusinessCode(), id));
         communityMapper.updateById(community);
+        communityResponsibleService.synchronizeBinding(community.getId(), community.getResponsibleAdminId());
         communityResponsibleService.fillContacts(java.util.List.of(community));
         return CommunityVO.from(community);
+    }
+
+    /** 授权来源修改与责任人保存共用社区锁，避免互相覆盖手工授权来源。 */
+    public Community lockForAuthorization(Long id) {
+        structureBusinessCodeService.lockExistingCommunity(id);
+        return requireCommunity(id);
     }
 
     public CommunityVO getById(Long id) {

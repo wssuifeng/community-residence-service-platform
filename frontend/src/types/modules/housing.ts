@@ -259,6 +259,10 @@ export interface HousingBrief {
 }
 
 export interface HouseManageItem {
+  businessCode?: string
+  communityCode?: string
+  buildingCode?: string
+  unitCode?: string
   houseId: number
   communityId: number
   communityName: string

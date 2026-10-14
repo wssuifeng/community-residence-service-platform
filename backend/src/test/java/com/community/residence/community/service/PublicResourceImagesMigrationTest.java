@@ -66,9 +66,9 @@ class PublicResourceImagesMigrationTest {
         List<String> sqlFiles = Arrays.stream(names)
                 .filter(name -> name.endsWith(".sql"))
                 .toList();
-        assertThat(sqlFiles).hasSize(32);
+        assertThat(sqlFiles).hasSize(35);
         assertThat(sqlFiles).contains("V29__public_resource_images.sql");
-        for (int version = 1; version <= 31; version++) {
+        for (int version = 1; version <= 35; version++) {
             final int v = version;
             assertThat(sqlFiles)
                     .as("V" + v + " 脚本必须仍在位（已应用迁移不得删除 / 改名）")

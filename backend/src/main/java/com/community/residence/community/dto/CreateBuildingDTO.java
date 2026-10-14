@@ -22,6 +22,10 @@ public class CreateBuildingDTO {
     @Size(max = 50, message = "楼栋名称最多 50 字符")
     private String name;
 
+    @Schema(description = "业务编号；创建留空按本级结构分配，更新留空保留")
+    @Size(max=32)
+    private String businessCode;
+
     @Schema(description = "楼层数（总楼层，字段名为 floors 非 totalFloors）")
     @NotNull(message = "楼层数不能为空")
     @Min(value = 1, message = "楼层数最少为 1")

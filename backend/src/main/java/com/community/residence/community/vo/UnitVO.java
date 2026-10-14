@@ -26,6 +26,9 @@ public class UnitVO {
     @Schema(description = "单元名称")
     private String name;
 
+    @Schema(description = "本级业务编号，与内部主键分离")
+    private String businessCode;
+
     @Schema(description = "单元描述")
     private String description;
 
@@ -38,6 +41,7 @@ public class UnitVO {
         vo.setBuildingId(entity.getBuildingId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setName(entity.getName());
+        vo.setBusinessCode(entity.getBusinessCode());
         vo.setDescription(entity.getDescription());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;

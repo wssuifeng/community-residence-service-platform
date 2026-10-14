@@ -42,6 +42,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("社区结构第三批端点回归（D-端点1/2）")
 class BuildingBatch3Test {
+    @org.mockito.Mock private com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
     @Mock
     private BuildingMapper buildingMapper;
