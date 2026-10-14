@@ -16,4 +16,6 @@ public class BatchCommunityIdsDTO {
     @NotEmpty(message = "请至少选择一个社区")
     @Size(max = 50, message = "单次最多处理 50 个社区")
     private List<Long> ids;
+    @Schema(description="逐社区删除影响确认版本；缺失或过期的条目拒绝删除")
+    private java.util.Map<Long, String> confirmationVersions;
 }

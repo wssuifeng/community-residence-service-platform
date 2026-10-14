@@ -44,7 +44,7 @@ public class CommunityBatchService {
         List<Failure> failures = new ArrayList<>();
         for (Long id : ids) {
             try {
-                communityService.delete(id);
+                communityService.deleteConfirmed(id, dto.getConfirmationVersions() == null ? null : dto.getConfirmationVersions().get(id));
                 successIds.add(id);
             } catch (Exception e) {
                 failures.add(failure(id, e));

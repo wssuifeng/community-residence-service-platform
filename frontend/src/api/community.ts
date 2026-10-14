@@ -58,13 +58,21 @@ export function updateCommunityStatus(id: number, data: IUpdateCommunityStatusDT
 }
 
 /** 删除社区（需求 v1.1 R1/R6：仅超管，级联删除下级结构与关联业务数据；端点由 50 阶段步骤 1b 后端并行交付） */
-export function deleteCommunity(id: number) {
-  return http.delete<null>(`/communities/${id}`)
+export interface CommunityDeletionImpact {
+  communityId: number; communityName: string; houses: number; relations: number; activeRelations: number
+  leases: number; activeLeases: number; applications: number; pendingApplications: number
+  payments: number; refunds: number; deletable: boolean; blockingReason: string; confirmationVersion: string
+}
+export function getCommunityDeletionImpact(id: number) {
+  return http.get<CommunityDeletionImpact>(`/communities/${id}/deletion-impact`)
+}
+export function deleteCommunity(id: number, confirmationVersion?: string) {
+  return http.delete<null>(`/communities/${id}?confirmationVersion=${encodeURIComponent(confirmationVersion ?? '')}`)
 }
 
 /** 批量删除社区（仅超管，部分成功语义：逐社区独立事务，返回成功 ID 与失败原因） */
-export function batchDeleteCommunities(ids: number[]) {
-  return http.post<IBatchOperationResult>('/communities/batch-delete', { ids })
+export function batchDeleteCommunities(ids: number[], confirmationVersions?: Record<number,string>) {
+  return http.post<IBatchOperationResult>('/communities/batch-delete', { ids, confirmationVersions })
 }
 
 /** 批量启用/停用社区（仅超管，部分成功语义） */
