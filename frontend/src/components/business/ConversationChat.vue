@@ -37,6 +37,9 @@ const props = defineProps<{
   title?: string
 }>()
 
+const emit=defineEmits<{openAgreement:[agreementId:number]}>()
+const businessMenuVisible=ref(false)
+
 /* closed 未显式传入（undefined）时按"未关闭"处理，但无法确认状态是调用方契约缺口
    （OCR DEF-122）：dev 环境警告提示补传，避免关闭态误判为可发送 */
 if (import.meta.env.DEV && props.closed === undefined) {
@@ -62,7 +65,7 @@ let unsubscribeWs: (() => void) | null = null
 let pollTimer: ReturnType<typeof setTimeout> | null = null
 
 function isMine(message: IConversationMessage): boolean {
-  return message.senderId === userStore.user?.id
+  return message.senderRole === userStore.user?.role && message.senderId === userStore.user?.id
 }
 
 function scrollToBottom(): void {
@@ -202,6 +205,7 @@ onUnmounted(() => {
         <div class="bubble">
           <p class="bubble-meta">{{ message.senderName }} · {{ formatDateTime(message.createdAt) }}</p>
           <p class="bubble-content">{{ message.content }}</p>
+          <button v-if="message.messageType==='LEASE_AGREEMENT' && message.senderRole==='SYSTEM' && message.agreementId" type="button" class="agreement-message" @click="emit('openAgreement',message.agreementId)">租赁协议 #{{ message.agreementId }} · 查看协议快照</button>
         </div>
       </div>
     </div>
@@ -216,6 +220,7 @@ onUnmounted(() => {
       {{ closedHint ? `会话已关闭：${closedHint}` : DEFAULT_CLOSED_HINT }}
     </footer>
     <footer v-else-if="!readOnly" class="chat-input">
+      <button v-if="$slots['business-actions']" type="button" class="business-toggle" :aria-expanded="businessMenuVisible" aria-label="会话业务功能" @click="businessMenuVisible=!businessMenuVisible">＋</button>
       <input
         v-model="messageInput"
         type="text"
@@ -229,10 +234,15 @@ onUnmounted(() => {
       </button>
     </footer>
     <footer v-else class="chat-readonly">仅会话参与者可参与沟通</footer>
+    <div v-if="businessMenuVisible && !closed && !readOnly" class="business-actions"><slot name="business-actions" /></div>
   </section>
 </template>
 
 <style scoped>
+.business-toggle{width:36px;height:36px;border:1px solid var(--color-border);border-radius:50%;background:transparent;font-size:24px;flex-shrink:0;cursor:pointer}
+.business-actions{display:flex;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--color-border);background:var(--color-bg)}
+.agreement-message{display:block;margin-top:10px;padding:10px 14px;border:1px solid var(--color-primary);border-radius:8px;background:var(--color-bg);color:var(--color-primary);cursor:pointer;max-width:100%;white-space:normal}
+
 .conversation-chat {
   display: flex;
   flex-direction: column;

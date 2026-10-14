@@ -192,7 +192,7 @@ class AgreementLeaseActivationTest {
             assertThat(toSignLease.getAgreementStatus()).isEqualTo("SIGNED");
             assertThat(house.getStatus()).isEqualTo("VACANT");
             verify(changeLogService, never()).logStatus(eq(LEASE_ID), eq("TO_SIGN"), eq("ACTIVE"), anyString());
-            verify(conversationService).sendSystemMessage(eq(CONVERSATION_ID), anyString());
+            verify(conversationService).sendAgreementMessage(eq(CONVERSATION_ID), eq(AGREEMENT_ID), anyString());
             /* 身份空间断言（DEF-067）：双方确认达成触达居民，标注 createForResident */
             verify(notificationService).createForResident(eq(RESIDENT_ID), eq(3L),
                     eq("租赁协议已确认"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"),

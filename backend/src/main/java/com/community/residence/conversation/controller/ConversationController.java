@@ -34,6 +34,7 @@ import java.util.List;
 public class ConversationController {
 
     private final ConversationService conversationService;
+    private final com.community.residence.housing.service.HousingService housingService;
     private final ViewingAppointmentService viewingAppointmentService;
 
     /**
@@ -68,6 +69,22 @@ public class ConversationController {
     @GetMapping("/{id}")
     public ApiResponse<ConversationVO> getById(@PathVariable Long id) {
         return ApiResponse.success(conversationService.getById(id));
+    }
+
+    @Operation(summary="租约会话来源房源预约上下文",description="仅承租居民且为未关闭租约会话参与者，不要求公开可见")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @GetMapping("/{id}/viewing-context")
+    public ApiResponse<com.community.residence.housing.vo.HousingVO> viewingContext(@PathVariable Long id) {
+        return ApiResponse.success(housingService.privateLeaseViewingDetail(viewingAppointmentService.requireConversationViewingHousing(id,null)));
+    }
+
+    @Operation(summary="租约会话可预约时段",description="复用公开入口相同的时段与冲突计算，私有上下文不扩大公众范围")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @GetMapping("/{id}/viewing-slots")
+    public ApiResponse<java.util.List<com.community.residence.reservation.vo.AvailableSlotVO>> viewingSlots(@PathVariable Long id,
+        @org.springframework.web.bind.annotation.RequestParam @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+        @org.springframework.web.bind.annotation.RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate) {
+        return ApiResponse.success(housingService.availableSlotsForLeaseViewing(viewingAppointmentService.requireConversationViewingHousing(id,null),startDate,endDate));
     }
 
     @Operation(summary = "会话消息列表", description = "仅参与者可读，时间正序非分页；非参与者 403")

@@ -248,6 +248,7 @@ public class AgreementService {
         notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),
                 "待确认租赁协议", "您的租约（" + houseLocation + "）已生成租赁协议，请在「我的租约」中查看并确认",
                 "LEASE", "LEASE_AGREEMENT", agreement.getId());
+        conversationService.sendAgreementMessage(lease.getConversationId(), agreement.getId(), "管理方已同意并发出协议「"+agreement.getTitle()+"」，请居民查看该协议正文后决定是否同意。");
         log.info("租约协议已发起：agreementId={}, leaseId={}, templateId={}, operator={}",
                 agreement.getId(), lease.getId(), template.getId(), SecurityUtils.getUserId());
         return LeaseAgreementVO.from(agreement);
@@ -288,7 +289,7 @@ public class AgreementService {
         changeLogService.logAgreement(lease.getId(), "居民同意协议，双方确认完成",
                 agreement.getTitle() + "（" + operatorName + "）");
         notifyCounterpart(agreement, lease);
-        conversationService.sendSystemMessage(lease.getConversationId(),
+        conversationService.sendAgreementMessage(lease.getConversationId(), agreement.getId(),
                 "租赁协议双方已确认，房屋继续保留；首期费用支付成功后租约及正式居住关系才生效。");
         log.info("居民确认协议：agreementId={}, operator={}", id, operatorName);
         return LeaseAgreementVO.from(agreement);
@@ -315,6 +316,7 @@ public class AgreementService {
         agreement.setStatus("CANCELLED");
         agreement.setCancelReason(reason);
         agreementMapper.updateById(agreement);
+        conversationService.sendAgreementMessage(lease.getConversationId(),agreement.getId(),"管理方已撤回协议「"+agreement.getTitle()+"」，该快照仅供历史查看。");
         markLeaseAgreementStatus(lease, "NONE");
         changeLogService.logAgreement(lease.getId(), "撤回协议", reason);
         notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),

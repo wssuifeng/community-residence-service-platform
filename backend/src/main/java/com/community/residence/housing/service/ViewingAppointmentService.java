@@ -154,43 +154,49 @@ public class ViewingAppointmentService {
             throw new BusinessException(ErrorCode.CONVERSATION_CLOSED);
         }
         resolveHousingFromLease(conversation.getRelatedId(), dto);
-        ViewingAppointment appointment = insertAppointment(dto);
+        ViewingAppointment appointment = insertAppointment(dto, conversationId);
         appointment.setLeaseId(conversation.getRelatedId());
         /* 会话载体沿用租约群聊：只做归属回写，不新建群聊 */
         appointment.setConversationId(conversation.getId());
         appointmentMapper.updateById(appointment);
+        conversationService.sendSystemMessage(conversation.getId(),"已提交看房预约 #"+appointment.getId()+"："+appointment.getAppointmentDate()+" "+appointment.getStartTime()+"～"+appointment.getEndTime());
         return toVO(appointment);
     }
 
-    /* 会话内发起未传房源时按租约推导：优先该房屋在架挂牌（房源页语义），
-       无在架挂牌则回落到最近一条挂牌记录；均无则拒绝（无房源无法做时段校验）。
-       无论传入还是推导，房源归属租约房屋一律显式校验（DEF-118）——传他房屋的
-       housingId（或挂牌被改绑他房屋）拒绝，防租约会话沦为任意房源预约入口。 */
+    /* 按residence_application.lease_id→housing_id精确来源解析；历史只允许唯一挂牌回落。
+       不以在架/最新记录猜测来源；客户端传入值必须与该来源一致，并核对真实房屋归属。 */
     private void resolveHousingFromLease(Long leaseId, CreateViewingAppointmentDTO dto) {
         LeaseRecord lease = leaseMapper.selectById(leaseId);
         if (lease == null) {
             throw new ResourceNotFoundException("租住记录不存在");
         }
-        if (dto.getHousingId() != null) {
-            /* DEF-118（传入路径）：按 id 取出挂牌过归属校验；housing 不存在
-               交由 insertAppointment 统一 404（其本身重查校验状态） */
-            requireHousingOfLease(lease, housingMapper.selectById(dto.getHousingId()));
-            return;
+        List<Long> sourceIds = housingMapper.selectLeaseSourceHousingIds(leaseId).stream().distinct().toList();
+        if (sourceIds.size() > 1) throw new BusinessException(ErrorCode.INVALID_PARAM, "租约来源挂牌存在歧义，请联系管理方核对");
+        Long sourceId = sourceIds.isEmpty() ? null : sourceIds.get(0);
+        if (sourceId == null) {
+            List<Housing> listings = housingMapper.selectList(new LambdaQueryWrapper<Housing>().eq(Housing::getHouseId,lease.getHouseId()));
+            if(listings.size()!=1) throw new BusinessException(ErrorCode.INVALID_PARAM,"历史租约缺少唯一来源挂牌，请联系管理方核对，不自动选择最近房源");
+            sourceId=listings.get(0).getId();
         }
-        List<Housing> listings = housingMapper.selectList(new LambdaQueryWrapper<Housing>()
-                .eq(Housing::getHouseId, lease.getHouseId())
-                .orderByDesc(Housing::getId));
-        Housing resolved = listings.stream()
-                .filter(h -> "AVAILABLE".equals(h.getStatus()))
-                .findFirst()
-                .orElse(listings.isEmpty() ? null : listings.get(0));
-        if (resolved == null) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "该租约房屋尚未挂牌房源，请先联系管理方挂牌后再预约看房");
-        }
-        /* 解析路径按 lease.house_id 筛选，归属由查询口径保证；仍显式过同一校验
-           （DEF-118 纵深防御）——解析口径未来放宽时不依赖隐式前提 */
-        requireHousingOfLease(lease, resolved);
-        dto.setHousingId(resolved.getId());
+        if(dto.getHousingId()!=null && !dto.getHousingId().equals(sourceId))
+            throw new BusinessException(ErrorCode.INVALID_PARAM,"预约房源与租约来源挂牌不一致");
+        Housing source = housingMapper.selectById(sourceId);
+        if(source==null) throw new ResourceNotFoundException("租约来源挂牌不存在");
+        requireHousingOfLease(lease,source);
+        dto.setHousingId(sourceId);
+    }
+
+    /* 读取详情、读取可约时段、提交预约共用此私有守卫；不修改公众可见性。 */
+    public Housing requireConversationViewingHousing(Long conversationId, Long suppliedHousingId) {
+        requireResidentIdentity();
+        Conversation conversation=conversationService.requireLeaseGroup(conversationId);
+        if(ConversationStatus.CLOSED.equals(conversation.getStatus())) throw new BusinessException(ErrorCode.CONVERSATION_CLOSED);
+        CreateViewingAppointmentDTO dto=new CreateViewingAppointmentDTO();dto.setHousingId(suppliedHousingId);
+        resolveHousingFromLease(conversation.getRelatedId(),dto);
+        Housing housing=housingMapper.selectById(dto.getHousingId());
+        if(housingMapper.privateLeaseViewingAvailabilityCount(dto.getHousingId(),conversation.getRelatedId(),SecurityUtils.getUserId())==0)
+            throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,"当前租约来源房源不可预约：请核对承租人、租约状态、社区和挂牌是否启用");
+        return housing;
     }
 
     /* DEF-118 归属校验：housing.house_id 必须与 lease.house_id 一致（挂牌被
@@ -210,14 +216,19 @@ public class ViewingAppointmentService {
      * 会话内发起与房源页发起共用，保证两条入口的状态机与冲突口径完全一致。
      */
     private ViewingAppointment insertAppointment(CreateViewingAppointmentDTO dto) {
+        return insertAppointment(dto,null);
+    }
+
+    private ViewingAppointment insertAppointment(CreateViewingAppointmentDTO dto, Long conversationId) {
         if (dto.getHousingId() == null) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "房源不能为空");
         }
         housingMapper.lockHouseForHousing(dto.getHousingId());
         Housing housing = housingMapper.selectById(dto.getHousingId());
-        if (housing == null || housingMapper.publicAvailabilityCount(dto.getHousingId()) == 0) {
+        if (housing == null || conversationId == null && housingMapper.publicAvailabilityCount(dto.getHousingId()) == 0) {
             throw new ResourceNotFoundException("房源不存在或不可预约");
         }
+        if (conversationId != null) requireConversationViewingHousing(conversationId,dto.getHousingId());
         if (!dto.getEndTime().isAfter(dto.getStartTime())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "结束时间必须晚于开始时间");
         }
@@ -453,9 +464,11 @@ public class ViewingAppointmentService {
         appointment.setStatus("CANCELLED");
         appointment.setRemark(reason);
         appointmentMapper.updateById(appointment);
-        /* 预约取消即终止看房沟通：历史消息保留，但会话转只读，避免已取消预约继续出现可发送输入框。 */
-        if (appointment.getConversationId() != null) {
-            conversationService.closeConversation(appointment.getConversationId(), "看房预约已取消");
+        /* 子预约取消不能结束父租约会话；独立预约只按VIEWING_GROUP+预约ID关闭自己的群。 */
+        if (appointment.getLeaseId() != null && appointment.getConversationId() != null) {
+            conversationService.sendSystemMessage(appointment.getConversationId(), "看房预约 #"+appointment.getId()+" 已取消，租约群聊继续保留。");
+        } else {
+            conversationService.closeViewingGroup(appointment.getId());
         }
         String content = "看房预约 " + appointment.getAppointmentDate() + " 已取消"
                 + (reason != null ? "：" + reason : "");

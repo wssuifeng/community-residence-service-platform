@@ -141,6 +141,9 @@ class ViewingConversationDefectFixTest {
 
         lease = new LeaseRecord();
         lease.setId(LEASE_ID);
+        lease.setStatus("TO_SIGN");
+        lenient().when(housingMapper.selectLeaseSourceHousingIds(LEASE_ID)).thenReturn(List.of(2L));
+        lenient().when(housingMapper.privateLeaseViewingAvailabilityCount(anyLong(),anyLong(),anyLong())).thenReturn(1L);
         lease.setTenantId(RESIDENT_ID);
         lease.setCommunityId(1L);
         lease.setHouseId(8L);
@@ -174,12 +177,9 @@ class ViewingConversationDefectFixTest {
     @Test
     @DisplayName("进行中（ACTIVE）租约群聊内发起：CLOSED 校验不过度拦截，走完整创建链路")
     void createInConversation_activeGroup_resolvedHousing_proceeds() {
-        /* 未传 housingId → 按租约房屋 8L 推导挂牌：AVAILABLE(11L) 优先于更新的
-           非在架(12L)，推导结果回填请求并进入正常落库链路 */
+        /* 未传 housingId → 按租约房屋 8L 推导挂牌：明确申请来源11L；不按在架/更新时间挑选，推导结果回填请求并进入正常落库链路 */
         Housing available = housingOf(11L, 8L);
-        Housing offShelf = housingOf(12L, 8L);
-        offShelf.setStatus("RENTED");
-        when(housingMapper.selectList(any())).thenReturn(List.of(offShelf, available));
+        when(housingMapper.selectLeaseSourceHousingIds(LEASE_ID)).thenReturn(List.of(11L));
         when(housingMapper.selectById(11L)).thenReturn(available);
         when(timeslotMapper.selectList(any())).thenReturn(List.of(template()));
         when(appointmentMapper.selectCount(any())).thenReturn(0L);
@@ -255,7 +255,8 @@ class ViewingConversationDefectFixTest {
         /* 模拟解析查询返回非本租约房屋的挂牌（当前 eq(house_id) 口径下不可达，
            锁定纵深防御：推导结果仍须显式过归属校验，口径放宽时不依赖隐式前提） */
         Housing mistargeted = housingOf(11L, 99L);
-        when(housingMapper.selectList(any())).thenReturn(List.of(mistargeted));
+        when(housingMapper.selectLeaseSourceHousingIds(LEASE_ID)).thenReturn(List.of(11L));
+        when(housingMapper.selectById(11L)).thenReturn(mistargeted);
 
         try (MockedStatic<SecurityUtils> ignored = mockResident()) {
             assertThatThrownBy(() -> service.createInConversation(CONVERSATION_ID, validDto()))
@@ -265,6 +266,30 @@ class ViewingConversationDefectFixTest {
                     .hasMessageContaining("预约房源与租约房屋不一致");
         }
         verify(appointmentMapper, never()).insert(any(ViewingAppointment.class));
+    }
+
+    @Test
+    void ambiguousLegacySourceRejectedWithoutGuessing() {
+        when(housingMapper.selectLeaseSourceHousingIds(LEASE_ID)).thenReturn(List.of());
+        when(housingMapper.selectList(any())).thenReturn(List.of(housingOf(11L,8L),housingOf(12L,8L)));
+        try(var auth=mockResident()) {
+            assertThatThrownBy(()->service.requireConversationViewingHousing(CONVERSATION_ID,null)).isInstanceOf(BusinessException.class).hasMessageContaining("唯一来源");
+        }
+        verify(appointmentMapper,never()).insert(any(ViewingAppointment.class));
+    }
+    @Test
+    void privateContextStillRejectsUnavailableLeaseOrAnotherTenant() {
+        when(housingMapper.selectById(2L)).thenReturn(housingOf(2L,8L));
+        when(housingMapper.privateLeaseViewingAvailabilityCount(2L,LEASE_ID,RESIDENT_ID)).thenReturn(0L);
+        try(var auth=mockResident()) {
+            assertThatThrownBy(()->service.requireConversationViewingHousing(CONVERSATION_ID,null)).isInstanceOf(BusinessException.class).hasMessageContaining("当前租约来源房源不可预约");
+        }
+    }
+    @Test
+    void suppliedDifferentSourceEvenInSameHouseIsRejected() {
+        try(var auth=mockResident()) {
+            assertThatThrownBy(()->service.requireConversationViewingHousing(CONVERSATION_ID,99L)).isInstanceOf(BusinessException.class).hasMessageContaining("来源挂牌不一致");
+        }
     }
 
     /* ---- DEF-118：租约看房列表排序契约（§9.19.8） ---- */

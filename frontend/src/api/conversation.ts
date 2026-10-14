@@ -55,3 +55,13 @@ export function openDirectConversation(data: IDirectConversationDTO) {
 export function ensureLeaseGroupConversation(leaseId: number) {
   return http.post<IConversation>('/conversations/lease-groups', { leaseId })
 }
+
+export function getConversationViewingContext(id:number) {
+  return http.get<import('@/types/modules/housing').IHousing>(`/conversations/${id}/viewing-context`)
+}
+export function listConversationViewingSlots(id:number,query:import('@/types/modules/housing').AvailableViewingTimeslotQuery) {
+  return http.get<import('@/types/modules/housing').IAvailableViewingTimeslot[]>(`/conversations/${id}/viewing-slots`,query)
+}
+export function createConversationViewing(id:number,data:import('@/types/modules/conversation').ConversationViewingCreateDTO) {
+  return http.post<import('@/types/modules/housing').IViewingAppointment>(`/conversations/${id}/viewing-appointments`,data)
+}

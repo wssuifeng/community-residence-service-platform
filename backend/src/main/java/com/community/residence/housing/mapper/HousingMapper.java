@@ -19,6 +19,23 @@ public interface HousingMapper extends BaseMapper<Housing> {
     @org.apache.ibatis.annotations.Select("SELECT COUNT(*) FROM housing WHERE id=#{id} AND " + com.community.residence.housing.service.HousingOccupancyRules.PUBLIC)
     Long publicAvailabilityCount(@org.apache.ibatis.annotations.Param("id") Long id);
 
+    /* 精确来源；历史缺来源时由服务拒绝多挂牌歧义，不挑最近一条。 */
+    @org.apache.ibatis.annotations.Select("SELECT housing_id FROM residence_application WHERE lease_id=#{leaseId} AND housing_id IS NOT NULL")
+    java.util.List<Long> selectLeaseSourceHousingIds(@org.apache.ibatis.annotations.Param("leaseId") Long leaseId);
+
+    /* 仅该租约承租人的私有预约：允许自身临时占用，不允许他人的进行中租约。 */
+    @org.apache.ibatis.annotations.Select("""
+        SELECT COUNT(*) FROM housing h JOIN house hh ON hh.id=h.house_id
+        JOIN community c ON c.id=h.community_id JOIN lease_record l ON l.id=#{leaseId}
+        WHERE h.id=#{housingId} AND h.house_id=l.house_id AND h.community_id=l.community_id
+          AND h.status='AVAILABLE' AND hh.is_deleted=0 AND c.status='ACTIVE'
+          AND l.tenant_id=#{residentId} AND l.status IN ('TO_SIGN','ACTIVE')
+          AND NOT EXISTS(SELECT 1 FROM lease_record other WHERE other.house_id=l.house_id
+                         AND other.id<>l.id AND other.status IN ('PENDING','TO_SIGN','ACTIVE'))
+        """)
+    Long privateLeaseViewingAvailabilityCount(@org.apache.ibatis.annotations.Param("housingId") Long housingId,
+        @org.apache.ibatis.annotations.Param("leaseId") Long leaseId, @org.apache.ibatis.annotations.Param("residentId") Long residentId);
+
     /* 新预约与入住申请串行化同一真实房屋；不可只锁挂牌或日期槽。 */
     @org.apache.ibatis.annotations.Select("SELECT hh.id FROM house hh JOIN housing ON housing.house_id=hh.id WHERE housing.id=#{id} AND hh.is_deleted=0 FOR UPDATE")
     Long lockHouseForHousing(@org.apache.ibatis.annotations.Param("id") Long id);
@@ -30,10 +47,10 @@ public interface HousingMapper extends BaseMapper<Housing> {
     Long rentalHistoryCount(@org.apache.ibatis.annotations.Param("id") Long id);
 
     @org.apache.ibatis.annotations.Select("<script>SELECT housing.id, CASE "
-        + "WHEN housing.rent_type='SALE' THEN 'FREE' "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='ACTIVE') "
         + "OR EXISTS (SELECT 1 FROM residence_relation r WHERE r.house_id=housing.house_id AND r.move_out_date IS NULL) "
         + "OR EXISTS (SELECT 1 FROM house h WHERE h.id=housing.house_id AND h.status='OCCUPIED') THEN 'OCCUPIED' "
+        + "WHEN housing.rent_type='SALE' THEN 'FREE' "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='TO_SIGN' AND l.agreement_status='SIGNED') THEN 'WAITING_FIRST_PAYMENT' "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status IN ('PENDING','TO_SIGN')) THEN 'TO_SIGN' "
         + "WHEN EXISTS (SELECT 1 FROM residence_application a WHERE a.house_id=housing.house_id AND a.status='PENDING') THEN 'APPLYING' ELSE 'FREE' END AS occupancy, "

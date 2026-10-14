@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * 管理员绑定社区缓存（架构设计.md §3.2 权限数据存储策略）：
- * DB（sys_admin_community）为权威来源，Redis 缓存 TTL 2h 与 Access Token 同步；
+ * DB（sys_admin_community）为权威来源，Redis 缓存 TTL 2h 独立于 Access Token 有效期，过期从DB重建；
  * 绑定变更时由变更接口删除缓存并吊销令牌。
  */
 @Slf4j

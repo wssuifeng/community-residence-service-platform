@@ -52,7 +52,9 @@ export interface IConversationMessage {
   conversationId: number
   senderId: number
   senderName: string
-  senderRole: ConversationRole
+  senderRole: ConversationRole | 'SYSTEM'
+  messageType?: 'TEXT' | 'LEASE_AGREEMENT'
+  agreementId?: number | null
   content: string
   createdAt: string
 }

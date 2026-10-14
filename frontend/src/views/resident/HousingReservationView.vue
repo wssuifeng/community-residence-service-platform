@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getHousingDetail, listViewingAvailableSlots, createViewingAppointment } from '@/api/housing'
+import { getConversationViewingContext, listConversationViewingSlots, createConversationViewing } from '@/api/conversation'
 import { getMyProfile } from '@/api/resident'
 import type { IHousing, IAvailableViewingTimeslot } from '@/types/modules/housing'
 import type { IResident } from '@/types/modules/resident'
@@ -21,9 +22,12 @@ import type { IResident } from '@/types/modules/resident'
 const route = useRoute()
 const router = useRouter()
 
-const housingId = Number(route.params.id)
+const props=defineProps<{conversationId?:number}>()
+const emit=defineEmits<{created:[appointmentId:number]}>()
+const conversationId=props.conversationId
+let housingId = Number(route.params.id)
 /** 无 housingId 直达（旧书签/坏链）→ 回房源列表 */
-const invalidEntry = !Number.isInteger(housingId) || housingId <= 0
+const invalidEntry = conversationId ? !Number.isInteger(conversationId) || conversationId<=0 : !Number.isInteger(housingId) || housingId <= 0
 
 const housing = ref<IHousing | null>(null)
 const profile = ref<IResident | null>(null)
@@ -129,10 +133,10 @@ async function loadMonthSlots(): Promise<void> {
   const last = toISODate(viewYear.value, viewMonth.value, new Date(viewYear.value, viewMonth.value + 1, 0).getDate())
   monthLoading.value = true
   try {
-    const data = await listViewingAvailableSlots(housingId, {
+    const data = await (conversationId ? listConversationViewingSlots(conversationId, {
       startDate: isCurrentMonth.value ? todayISO : first,
       endDate: last
-    })
+    }) : listViewingAvailableSlots(housingId, { startDate:isCurrentMonth.value?todayISO:first,endDate:last }))
     if (seq === monthSeq) monthSlots.value = data
   } catch (error) {
     if (seq === monthSeq) {
@@ -176,10 +180,10 @@ async function openStep2(): Promise<void> {
   daySeq = seq
   dayLoading.value = true
   try {
-    const data = await listViewingAvailableSlots(housingId, {
+    const data = await (conversationId ? listConversationViewingSlots(conversationId, {
       startDate: selectedDate.value,
       endDate: selectedDate.value
-    })
+    }) : listViewingAvailableSlots(housingId, {startDate:selectedDate.value,endDate:selectedDate.value}))
     if (seq === daySeq) {
       /* 后端模板返回顺序不保证，按开始时间排序保证卡片展示稳定 */
       daySlots.value = data.sort((a, b) => a.startTime.localeCompare(b.startTime))
@@ -320,16 +324,18 @@ async function handleSubmit(): Promise<void> {
   }
   submitting.value = true
   try {
-    const created = await createViewingAppointment({
+    const payload = {
       housingId,
       appointmentDate: selectedDate.value,
       startTime: mergedStart.value,
       endTime: mergedEnd.value,
       contactPhone: form.contactPhone.trim() || undefined,
       remark: form.remark.trim() || undefined
-    })
+    }
+    const created = conversationId ? await createConversationViewing(conversationId,payload) : await createViewingAppointment(payload)
     ElMessage.success('看房预约已提交，等待管理员确认')
     /* 成功跳该预约详情页（带看会话所在）；响应异常缺 id 时回落看房 tab */
+    if(conversationId){ emit('created',created.id); return }
     router.push(
       created?.id ? `/resident/viewing-appointments/${created.id}` : '/resident/reservations?tab=viewing'
     )
@@ -347,9 +353,10 @@ onMounted(async () => {
     router.replace('/resident/housings')
     return
   }
-  void loadMonthSlots()
   try {
-    housing.value = await getHousingDetail(housingId)
+    housing.value = conversationId ? await getConversationViewingContext(conversationId) : await getHousingDetail(housingId)
+    housingId=housing.value.id
+    void loadMonthSlots()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载房源信息失败')
   }
