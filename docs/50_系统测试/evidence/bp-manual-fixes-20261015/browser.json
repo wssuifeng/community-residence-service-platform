@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-15",
+  "checks": [
+    {
+      "name": "居民群聊显示待支付不是待签约",
+      "passed": true
+    },
+    {
+      "name": "真实群聊按钮提交会话预约并保持当前会话",
+      "passed": true
+    },
+    {
+      "name": "协议业务消息渲染为可点击快照卡片",
+      "passed": true
+    },
+    {
+      "name": "点击消息在群聊内读具体协议",
+      "passed": true
+    },
+    {
+      "name": "主关系行内直接显示同住成员及账号",
+      "passed": true
+    },
+    {
+      "name": "迁出首层同时显示主账号和成员账户",
+      "passed": true
+    },
+    {
+      "name": "二次确认仍列出完整整户影响",
+      "passed": true
+    },
+    {
+      "name": "取消二次确认未改变主成员关系",
+      "passed": true
+    },
+    {
+      "name": "挂牌卡片分开显示房屋与发布及占用状态",
+      "passed": true
+    },
+    {
+      "name": "挂牌768无整页横向溢出",
+      "passed": true
+    },
+    {
+      "name": "普通管理员在群聊内打开协议面板",
+      "passed": true
+    },
+    {
+      "name": "超管UI明确有效关系及进行中租约并禁止删除",
+      "passed": true
+    },
+    {
+      "name": "浏览器pageerror为0",
+      "passed": true
+    }
+  ],
+  "pageerrors": [],
+  "transactionsExecuted": false
+}

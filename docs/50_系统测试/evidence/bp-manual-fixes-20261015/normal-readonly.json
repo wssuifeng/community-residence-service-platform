@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-15",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "前端5176仍在线",
+      "passed": true
+    },
+    {
+      "name": "正常服务契约/api/v1/communities/{id}/deletion-impact",
+      "passed": true
+    },
+    {
+      "name": "正常服务契约/api/v1/conversations/{id}/viewing-context",
+      "passed": true
+    },
+    {
+      "name": "正常服务契约/api/v1/conversations/{id}/viewing-slots",
+      "passed": true
+    },
+    {
+      "name": "迁移完整V1到V36",
+      "passed": true
+    },
+    {
+      "name": "与部署前最新正常业务计数一致",
+      "passed": true
+    },
+    {
+      "name": "协议消息两列已迁移",
+      "passed": true
+    },
+    {
+      "name": "正常新登录36h",
+      "passed": true
+    },
+    {
+      "name": "当前正常在住社区受后端保护",
+      "passed": true
+    },
+    {
+      "name": "正常交易渠道仍停用",
+      "passed": true
+    },
+    {
+      "name": "部署jar与最终测试包SHA相同",
+      "passed": true
+    }
+  ],
+  "businessCounts": [
+    1,
+    15,
+    10,
+    2,
+    0,
+    0
+  ],
+  "currentImpact": {
+    "relations": 10,
+    "activeRelations": 4,
+    "leases": 2,
+    "activeLeases": 2,
+    "deletable": false
+  }
+}
