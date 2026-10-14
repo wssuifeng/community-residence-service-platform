@@ -19,6 +19,7 @@ import {
   batchUpdateCommunityStatus,
   deleteBuilding,
   deleteCommunity,
+  getCommunityDeletionImpact,
   deleteHouse,
   deleteUnit,
   getBuildingList,
@@ -1324,23 +1325,24 @@ function runStructureAction(): void {
 
 /* ---------------- 社区删除 / 启用停用 ---------------- */
 
+function deletionSummary(i: import('@/api/community').CommunityDeletionImpact): string {
+  return `「${i.communityName}」：房屋 ${i.houses}，居住关系 ${i.relations}（有效 ${i.activeRelations}），租约 ${i.leases}（进行中 ${i.activeLeases}），申请 ${i.applications}（待审核 ${i.pendingApplications}），支付 ${i.payments}，退款 ${i.refunds}。`
+}
 async function handleCommunityDelete(community: ICommunity): Promise<void> {
   try {
-    await ElMessageBox.confirm(
-      `删除社区「${community.name}」将删除该社区全部楼栋/单元/房屋/公共资源/房源及关联业务数据，不可恢复。确定删除？`,
-      '删除社区（级联删除）',
-      { type: 'error', confirmButtonText: '确认删除', cancelButtonText: '取消' }
-    )
-  } catch {
-    return
-  }
-  try {
-    await deleteCommunity(community.id)
+    const impact = await getCommunityDeletionImpact(community.id)
+    if (!impact.deletable) {
+      await ElMessageBox.alert(`${deletionSummary(impact)} ${impact.blockingReason}`, '禁止删除社区', { type: 'error' })
+      return
+    }
+    await ElMessageBox.confirm(`${deletionSummary(impact)} 全部下级和历史业务将永久删除，账号本身保留。`, '核对删除影响', { type: 'warning', confirmButtonText: '已核对，继续', cancelButtonText: '取消' })
+    await ElMessageBox.confirm(`最终确认永久删除「${impact.communityName}」及上述历史，无法撤销？`, '第二次确认', { type: 'error', confirmButtonText: '永久删除', cancelButtonText: '取消' })
+    await deleteCommunity(community.id, impact.confirmationVersion)
     ElMessage.success('社区已删除')
     if (selectedCommunityId.value === community.id) clearDetail()
     loadCommunities()
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '删除失败')
+    if (error !== 'cancel' && error !== 'close') ElMessage.error(error instanceof Error ? error.message : '删除检查失败，未继续删除')
   }
 }
 
@@ -1496,7 +1498,14 @@ async function handleBatchDelete(): Promise<void> {
   const ids = [...batchSelection.value]
   if (ids.length === 0 || batchRunning.value) return
   if (batchOverLimit(ids)) return
+  let impacts: Awaited<ReturnType<typeof getCommunityDeletionImpact>>[]
   try {
+    impacts = await Promise.all(ids.map(getCommunityDeletionImpact))
+    if (impacts.some(i => !i.deletable)) {
+      await ElMessageBox.alert(impacts.map(i => `${deletionSummary(i)} ${i.blockingReason}`).join('\n'), '批量删除已阻止，请取消勾选受保护社区', { type:'error' })
+      return
+    }
+    await ElMessageBox.confirm(impacts.map(deletionSummary).join('\n'), '逐社区核对删除影响', { type:'warning', confirmButtonText:'已核对，继续' })
     await ElMessageBox.confirm(
       `将【级联删除】选中的 ${ids.length} 个社区${
         batchSelectedNames.value.length > 0 ? `：${batchSelectedNames.value.join('、')}` : ''
@@ -1518,7 +1527,7 @@ async function handleBatchDelete(): Promise<void> {
   }
   batchRunning.value = true
   try {
-    const result = await batchDeleteCommunities(ids)
+    const result = await batchDeleteCommunities(ids, Object.fromEntries(impacts.map(i => [i.communityId, i.confirmationVersion])))
     showBatchResult({
       successCount: result.successIds.length,
       successText: '个社区已级联删除',

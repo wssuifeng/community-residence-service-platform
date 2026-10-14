@@ -241,6 +241,13 @@ public class CommunityService {
     @com.community.residence.log.annotation.OperationLog(operationType = "DELETE", targetType = "COMMUNITY", targetId = "#id", content = "'删除社区（级联）'")
     public void delete(Long id) {
         Community community = requireCommunity(id);
+        /* 双层保护：服务内调用也不能清掉仍有效的居住链。 */
+        if (residenceRelationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
+                .eq(ResidenceRelation::getCommunityId, id).isNull(ResidenceRelation::getMoveOutDate)) > 0
+            || leaseRecordMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
+                .eq(LeaseRecord::getCommunityId, id).in(LeaseRecord::getStatus, "PENDING", "TO_SIGN", "ACTIVE")) > 0) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "社区仍有有效居住关系或进行中租约，不可删除；请先停用并处理居住关系");
+        }
         Long operatorId = SecurityUtils.getUserId();
 
         /* ---- 退租申请（V20 lease_move_out_application，R70）：同时带 lease_id / community_id /
@@ -418,6 +425,42 @@ public class CommunityService {
         /* ---- 父表收尾：community 本体 ---- */
         communityMapper.deleteById(id);
         log.info("社区级联删除完成：communityId={}, name={}, operator={}", id, community.getName(), operatorId);
+    }
+
+    /** 删除前关联摘要，仅超管入口；不删除、不猜测历史。 */
+    public com.community.residence.community.vo.CommunityDeletionImpactVO deletionImpact(Long id) {
+        var impact = communityMapper.selectDeletionImpact(id);
+        if (impact == null) throw new ResourceNotFoundException("社区不存在");
+        impact.setDeletable(impact.getActiveRelations() == 0 && impact.getActiveLeases() == 0
+                && impact.getPendingApplications() == 0 && impact.getPayments() == 0 && impact.getRefunds() == 0);
+        impact.setBlockingReason(impact.isDeletable() ? "" : "存在有效居住关系、进行中租住申请/租约或支付退款记录，不可删除；请改为停用社区");
+        String version = impact.getCommunityId() + ":" + impact.getCommunityName() + ":" + impact.getHouses()
+                + ":" + impact.getRelations() + ":" + impact.getActiveRelations() + ":" + impact.getLeases()
+                + ":" + impact.getActiveLeases() + ":" + impact.getApplications() + ":" + impact.getPendingApplications()
+                + ":" + impact.getPayments() + ":" + impact.getRefunds();
+        impact.setConfirmationVersion(org.springframework.util.DigestUtils.md5DigestAsHex(version.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        return impact;
+    }
+
+    /* 重新锁定并核对影响版本：旧客户端/缺失确认/预览后变化均不进入级联操作。 */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteConfirmed(Long id, String confirmationVersion) {
+        if (communityMapper.lockForDeletion(id) == null) throw new ResourceNotFoundException("社区不存在");
+        communityMapper.lockRelationsForDeletion(id);
+        communityMapper.lockLeasesForDeletion(id);
+        communityMapper.lockApplicationsForDeletion(id);
+        var impact = deletionImpact(id);
+        if (!impact.isDeletable()) throw new BusinessException(ErrorCode.INVALID_PARAM, impact.getBlockingReason());
+        if (confirmationVersion == null || !confirmationVersion.equals(impact.getConfirmationVersion()))
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "请重新查看删除影响并完成两次确认；关联数据已变化或未确认");
+        delete(id);
+        SysOperationLog record = new SysOperationLog();
+        record.setOperatorId(SecurityUtils.getUserId()); record.setOperatorType("ADMIN");
+        record.setCommunityId(id); record.setOperationType("DELETE"); record.setTargetType("COMMUNITY"); record.setTargetId(id);
+        record.setContent("{\"action\":\"已确认删除影响\",\"houses\":" + impact.getHouses()
+                + ",\"relations\":" + impact.getRelations() + ",\"leases\":" + impact.getLeases()
+                + ",\"applications\":" + impact.getApplications() + ",\"confirmationVersion\":\"" + impact.getConfirmationVersion() + "\"}");
+        record.setCreatedAt(LocalDateTime.now()); sysOperationLogMapper.insert(record);
     }
 
     /** 按ID取社区，不存在抛 404；供本模块与其他模块校验引用 */
