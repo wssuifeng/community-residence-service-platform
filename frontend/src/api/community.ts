@@ -257,7 +257,8 @@ export function updateHouseLayouts(houseIds: number[], layout: string) {
 
 export interface HouseAttributesPatch {
   houseIds: number[]
-  fields: Array<'houseNumber' | 'floor' | 'area' | 'layout' | 'orientation' | 'description'>
+  fields: Array<'houseNumber' | 'area' | 'layout' | 'orientation' | 'description'>
+  clearFields?: Array<'layout' | 'orientation' | 'description'>
   houseNumber?: string
   floor?: number
   area?: number

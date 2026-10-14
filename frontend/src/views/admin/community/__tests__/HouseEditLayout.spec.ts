@@ -19,11 +19,11 @@ describe('房屋户型与楼层实际表单', () => {
     expect(wrapper.findAllComponents({ name: 'ElInputNumber' })[0]!.props('max')).toBe(9)
     wrapper.unmount()
   })
-  it('编辑显示现有户型并沿用所属楼栋上限', async () => {
+  it('编辑使用字段意图面板，户型回显且楼层只读', async () => {
     const wrapper = await open({ id: 1, unitId: 1, houseNumber: '901', floor: 9, area: 80, layout: '三室一厅一卫' })
     expect(wrapper.find('template').exists()).toBe(false)
-    expect((wrapper.get('input[placeholder="如：2室1厅1卫"]').element as HTMLInputElement).value).toBe('三室一厅一卫')
-    expect(wrapper.findAllComponents({ name: 'ElInputNumber' })[0]!.props('max')).toBe(9)
+    expect((wrapper.findAllComponents({name:'ElInput'}).find(c=>c.props('modelValue')==='三室一厅一卫')!.get('input').element as HTMLInputElement).value).toBe('三室一厅一卫')
+    expect(wrapper.findAllComponents({name:'ElCheckbox'}).map(c=>c.text())).not.toContain('楼层')
     wrapper.unmount()
   })
 })

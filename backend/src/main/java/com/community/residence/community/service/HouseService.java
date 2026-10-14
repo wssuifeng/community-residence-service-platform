@@ -82,6 +82,9 @@ public class HouseService {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "房屋不允许变更所属单元");
         }
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
+        if (!java.util.Objects.equals(house.getFloor(), dto.getFloor())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "已创建房屋的楼层只读，不能通过编辑修改");
+        }
         buildingBoundaryService.validateFloor(requireUnit(house.getUnitId()), dto.getFloor());
         requireHouseNumberAvailable(house.getUnitId(), dto.getHouseNumber(), house.getId());
         applyDto(house, dto);
