@@ -43,6 +43,8 @@ const props = defineProps<{
   leaseStatus?: LeaseStatus
   /** 是否自带白卡容器（默认 true，页面直挂用）；嵌在弹窗等已有容器内时传 false */
   selfManaged?: boolean
+  readOnly?: boolean
+  requestedAgreementId?: number
 }>()
 
 const emit = defineEmits<{
@@ -56,7 +58,7 @@ const submitting = ref(false)
 /* 社区归属兜底来源（props.communityId 缺省时才请求） */
 const leaseCommunityId = ref<number | null>(null)
 const resolvedLeaseStatus = ref<LeaseStatus | null>(null)
-const canIssue = computed(() => (props.leaseStatus ?? resolvedLeaseStatus.value) === 'TO_SIGN')
+const canIssue = computed(() => !props.readOnly && (props.leaseStatus ?? resolvedLeaseStatus.value) === 'TO_SIGN')
 
 /** 当前协议 = 最新一条非已撤回协议；历史协议 = 已撤回流水 */
 const current = computed(
@@ -88,6 +90,11 @@ async function load(): Promise<void> {
   try {
     const list = await listLeaseAgreements(props.leaseId)
     if (seq !== loadSeq) return
+    if(props.requestedAgreementId){
+      const requested=list.find(item=>item.id===props.requestedAgreementId)
+      if(requested) openContent(requested)
+      else ElMessage.warning('此协议快照不在该租约的可读列表中')
+    }
     /* 后端已按倒序返回，这里再排一次以防流水顺序不稳 */
     agreements.value = [...list].sort((a, b) =>
       (b.createdAt ?? '').localeCompare(a.createdAt ?? '')
@@ -210,6 +217,7 @@ async function doConfirm(item: ILeaseAgreement): Promise<void> {
 /* ---------- 管理方：撤回 ---------- */
 
 async function handleCancel(item: ILeaseAgreement): Promise<void> {
+  if(props.readOnly) return
   let reason: string
   try {
     const result = await ElMessageBox.prompt(
@@ -248,7 +256,7 @@ const tenantConfirmed = computed(() => !!current.value?.tenantConfirmTime)
 
 /** 旧协议缺管理方留痕须撤回重发；不允许由新流程凭空补签。 */
 const legacyConsentMissing = computed(() => !!current.value && current.value.status !== 'SIGNED' && !adminConfirmed.value)
-const canAcceptContent = computed(() => !isAdmin.value && !!contentTarget.value
+const canAcceptContent = computed(() => !props.readOnly && !isAdmin.value && !!contentTarget.value
   && contentTarget.value.id === current.value?.id
   && ['PENDING', 'PARTIAL'].includes(contentTarget.value.status)
   && !!contentTarget.value.adminConfirmTime)
@@ -332,7 +340,7 @@ defineExpose({ reload: load })
         <el-button size="small" type="primary" plain @click="openContent(current)">
           {{ !isAdmin && current.status !== 'SIGNED' ? '查看协议并确认' : '查看协议正文' }}
         </el-button>
-        <el-button v-if="isAdmin && current.status !== 'SIGNED'" size="small" type="danger" plain
+        <el-button v-if="isAdmin && !readOnly && current.status !== 'SIGNED'" size="small" type="danger" plain
           :loading="submitting" @click="handleCancel(current)">撤回协议</el-button>
       </div>
       <p v-if="current.status === 'SIGNED'" class="action-hint">双方已同意。首期费用支付成功后租约才正式生效；可随时查看本协议及确认记录。</p>

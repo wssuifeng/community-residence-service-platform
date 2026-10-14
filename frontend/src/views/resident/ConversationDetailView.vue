@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import HousingReservationView from '@/views/resident/HousingReservationView.vue'
+import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConversationChat from '@/components/business/ConversationChat.vue'
@@ -8,7 +10,6 @@ import { getLease } from '@/api/lease'
 import { conversationStatusLabels, conversationTypeLabels } from '@/types/modules/conversation'
 import type { IConversation } from '@/types/modules/conversation'
 import type { ILeaseRecord } from '@/types/modules/lease'
-import { leaseStatusLabels } from '@/types/modules/lease'
 
 /**
  * 沟通会话详情（R63 v1.5 / R68 批次 f）：看房群聊 / 租约群聊 / 居民-管理员直通的独立会话页。
@@ -92,16 +93,13 @@ async function loadConversation(): Promise<void> {
  * 跳房源 Hub 并把 fromLease 作为「本次看房归属哪份租约」的上下文提示；
  * 落地由旧路径 /resident/housings 的函数式 redirect 完成（顺带保证旧链接口径在线）。
  */
-function goReserveViewing(): void {
-  const leaseId = lease.value?.id ?? conversation.value?.relatedId ?? undefined
-  router.push({
-    path: '/resident/housings',
-    query: leaseId ? { fromLease: String(leaseId) } : undefined
-  })
-}
+const viewingVisible=ref(false)
+function goReserveViewing(): void { viewingVisible.value=true }
 
 /** 查看协议：会话内直接打开签约面板（居民侧可查看正文并在线确认） */
 const agreementVisible = ref(false)
+const requestedAgreementId=ref<number|undefined>()
+function openAgreement(id?:number){requestedAgreementId.value=id;agreementVisible.value=true}
 
 /** 协议状态变化（确认/发起/撤回）后回读租约，刷新入口条的协议徽标 */
 async function refreshLease(): Promise<void> {
@@ -164,27 +162,13 @@ onMounted(async () => {
           <span class="biz-house">{{ lease.houseLocation }}</span>
           <span class="biz-meta">
             租期 {{ lease.startDate }} ~ {{ lease.endDate }} ·
-            租约状态 {{ leaseStatusLabels[lease.status] }} ·
+            租约状态 {{ leaseDisplayLabel(lease) }} ·
             {{ lease.agreementStatus === 'SIGNED' ? '协议已确认' : '协议待确认' }}
           </span>
         </template>
         <span v-else class="biz-meta">租约信息暂不可用（可能已归档或无权查看）</span>
       </div>
-      <div class="biz-actions">
-        <el-button size="small" round :disabled="!lease" @click="goReserveViewing">
-          预约看房
-        </el-button>
-
-        <el-button
-          size="small"
-          :type="lease?.agreementStatus && lease.agreementStatus !== 'NONE' ? 'primary' : 'default'"
-          round
-          :disabled="!lease"
-          @click="agreementVisible = true"
-        >
-          查看协议
-        </el-button>
-      </div>
+      <p class="biz-meta">使用聊天输入栏的“＋”打开预约与协议功能。</p>
     </div>
 
     <!-- 群聊内确认承租后的引导：管理方发起协议前无须居民额外操作 -->
@@ -193,13 +177,22 @@ onMounted(async () => {
     </p>
 
     <!-- 租约群聊的关闭态文案传租约口径（DEF-122：组件默认文案已改中性，业务语义由调用方补） -->
-    <ConversationChat :conversation-id="conversationId" :closed="chatClosed" :closed-hint="chatClosedHint" />
+    <ConversationChat :conversation-id="conversationId" :closed="chatClosed" :closed-hint="chatClosedHint" @open-agreement="openAgreement">
+      <template v-if="isLeaseGroup && lease" #business-actions>
+        <el-button :disabled="chatClosed" @click="goReserveViewing">预约本租约房源看房</el-button>
+        <el-button @click="openAgreement()">查看 / 同意协议</el-button>
+      </template>
+    </ConversationChat>
 
+    <el-dialog v-model="viewingVisible" title="在本租约群聊预约看房" width="min(960px, 94vw)" destroy-on-close>
+      <HousingReservationView v-if="viewingVisible" :conversation-id="conversationId" @created="viewingVisible=false" />
+    </el-dialog>
     <!-- 协议查看/确认（复用协议签约面板，弹窗内嵌故去掉白卡容器） -->
     <el-dialog
       v-model="agreementVisible"
       :title="`租赁协议 · ${lease?.houseLocation ?? ''}`"
-      width="640px"
+      width="min(680px, 94vw)"
+      destroy-on-close
     >
       <AgreementSignPanel
         v-if="lease"
@@ -208,6 +201,8 @@ onMounted(async () => {
         role="RESIDENT"
         :community-id="lease.communityId"
         :self-managed="false"
+        :read-only="chatClosed"
+        :requested-agreement-id="requestedAgreementId"
         @changed="refreshLease"
       />
       <el-empty v-else description="租约信息暂不可用" :image-size="70" />

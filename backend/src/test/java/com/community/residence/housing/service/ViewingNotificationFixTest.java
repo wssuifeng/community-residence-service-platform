@@ -167,7 +167,17 @@ class ViewingNotificationFixTest {
             service.cancel(1L, "时间冲突");
             verify(notificationService).createForResident(eq(5L), eq(1L), eq("看房预约已取消"),
                     anyString(), anyString(), anyString(), eq(1L));
-            verify(conversationService).closeConversation(55L, "看房预约已取消");
+            verify(conversationService).closeViewingGroup(1L);
+        }
+    }
+
+    @Test
+    void cancellingLeaseViewingDoesNotCloseParentLeaseConversation() {
+        appointment.setLeaseId(88L);appointment.setConversationId(55L);
+        try(var auth=mockResident()) {
+            service.cancel(1L,"个人日程调整");
+            verify(conversationService,never()).closeConversation(anyLong(),anyString());
+            verify(conversationService).sendSystemMessage(eq(55L),anyString());
         }
     }
 

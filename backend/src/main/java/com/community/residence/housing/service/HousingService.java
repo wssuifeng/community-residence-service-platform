@@ -350,6 +350,14 @@ public class HousingService {
         if (!isManager() && housingMapper.publicAvailabilityCount(housingId) == 0) {
             throw new ResourceNotFoundException("房源已下线或已被入住业务占用，请查看我的入住申请");
         }
+        return availableSlotsForLeaseViewing(requireHousing(housingId),startDate,endDate);
+    }
+
+    /** 供通过租约会话守卫的内部调用复用时段算法，不作为公开接口。 */
+    public List<AvailableSlotVO> availableSlotsForLeaseViewing(Housing housing, LocalDate startDate, LocalDate endDate) {
+        Long housingId=housing.getId();
+        if(startDate==null || endDate!=null && (endDate.isBefore(startDate) || java.time.temporal.ChronoUnit.DAYS.between(startDate,endDate)>62))
+            throw new BusinessException(ErrorCode.INVALID_PARAM,"时段查询日期范围不合法，单次不超过63天");
         LocalDate end = endDate != null ? endDate : startDate.plusDays(6);
         List<HousingTimeslot> templates = timeslotMapper.selectList(
                 new LambdaQueryWrapper<HousingTimeslot>()
@@ -860,6 +868,9 @@ public class HousingService {
         housing.setRentType(StringUtils.hasText(dto.getRentType()) ? dto.getRentType() : "RENT");
         housing.setImages(dto.getImages());
     }
+
+    /** 仅供已通过会话参与者/租约来源守卫的控制器使用，不计公众浏览量。 */
+    public HousingVO privateLeaseViewingDetail(Housing housing) { return toVO(housing); }
 
     private HousingVO toVO(Housing housing) {
         return toVO(housing, null);

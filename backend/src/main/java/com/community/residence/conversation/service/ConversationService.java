@@ -81,6 +81,7 @@ public class ConversationService {
     private final ConversationMapper conversationMapper;
     private final ConversationParticipantMapper participantMapper;
     private final ConversationMessageMapper messageMapper;
+    private final com.community.residence.agreement.mapper.LeaseAgreementMapper agreementMapper;
     private final ResidenceRelationMapper residenceRelationMapper;
     private final LeaseRecordMapper leaseRecordMapper;
     private final ResidentMapper residentMapper;
@@ -215,6 +216,13 @@ public class ConversationService {
             return;
         }
         closeConversation(conversation);
+    }
+
+    /** 子看房预约只能关闭自己所属的独立看房群，不能按裸会话ID关闭租约群。 */
+    @Transactional(rollbackFor=Exception.class)
+    public void closeViewingGroup(Long appointmentId) {
+        Conversation ownGroup=findTypedGroup(ConversationType.VIEWING_GROUP,appointmentId);
+        if(ownGroup!=null) closeConversation(ownGroup.getId(),"看房预约已取消");
     }
 
     /**
@@ -374,6 +382,22 @@ public class ConversationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void sendSystemMessage(Long conversationId, String content) {
+        insertSystemMessage(conversationId,content,"TEXT",null);
+    }
+
+    /* 协议事件由协议服务调用；校验同租约归属，普通发言不能伪造业务卡片。 */
+    @Transactional(rollbackFor=Exception.class)
+    public void sendAgreementMessage(Long conversationId, Long agreementId, String content) {
+        if(conversationId==null) return;
+        var conversation=conversationMapper.selectById(conversationId);
+        var agreement=agreementMapper.selectById(agreementId);
+        if(conversation==null || agreement==null || !ConversationType.LEASE_GROUP.equals(conversation.getType())
+            || !java.util.Objects.equals(conversation.getRelatedId(),agreement.getLeaseId()))
+            throw new BusinessException(ErrorCode.INVALID_PARAM,"协议消息与租约会话不匹配");
+        insertSystemMessage(conversationId,content,"LEASE_AGREEMENT",agreementId);
+    }
+
+    private void insertSystemMessage(Long conversationId, String content, String messageType, Long agreementId) {
         Conversation conversation = conversationMapper.selectById(conversationId);
         if (conversation == null || !StringUtils.hasText(content)) {
             return;
@@ -388,6 +412,8 @@ public class ConversationService {
         message.setSenderId(SYSTEM_SENDER_ID);
         message.setSenderRole(SYSTEM_SENDER_ROLE);
         message.setContent(content);
+        message.setMessageType(messageType);
+        message.setAgreementId(agreementId);
         message.setCreatedAt(LocalDateTime.now());
         messageMapper.insert(message);
 

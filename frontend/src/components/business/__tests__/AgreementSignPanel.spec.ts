@@ -98,3 +98,19 @@ describe('协议确认单一入口（DEF-168，真实组件挂载）', () => {
     expect(button('同意协议')).toBeTruthy()
   })
 })
+
+
+describe('群聊协议快照与关闭态',()=>{
+  it('点击历史消息打开指定已撤回快照，不替换为最新协议同意入口',async()=>{
+    api.list.mockResolvedValue([snapshot(),{...snapshot(),id:9,title:'历史快照',content:'历史月租2500元',status:'CANCELLED'}])
+    wrapper=mount(AgreementSignPanel,{props:{leaseId:1,communityId:1,role:'RESIDENT',requestedAgreementId:9},global:{plugins:[ElementPlus]},attachTo:document.body})
+    await flushPromises()
+    expect(document.body.textContent).toContain('历史月租2500元')
+    expect(button('同意协议')).toBeUndefined()
+  })
+  it('关闭态只能读协议，不允许同意或发出',async()=>{
+    wrapper=mount(AgreementSignPanel,{props:{leaseId:1,communityId:1,role:'RESIDENT',readOnly:true,requestedAgreementId:10},global:{plugins:[ElementPlus]},attachTo:document.body})
+    await flushPromises();expect(button('同意协议')).toBeUndefined()
+    expect(api.accept).not.toHaveBeenCalled()
+  })
+})

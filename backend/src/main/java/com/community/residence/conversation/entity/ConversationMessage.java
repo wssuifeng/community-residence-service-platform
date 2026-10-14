@@ -30,6 +30,11 @@ public class ConversationMessage {
     @Schema(description = "消息内容")
     private String content;
 
+    @Schema(description="消息类型：TEXT/LEASE_AGREEMENT；普通发送不能指定")
+    private String messageType;
+    @Schema(description="协议消息对应的协议快照ID")
+    private Long agreementId;
+
     @Schema(description = "发送时间")
     private LocalDateTime createdAt;
 }

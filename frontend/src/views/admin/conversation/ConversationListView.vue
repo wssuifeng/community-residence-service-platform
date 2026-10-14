@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
+import { getLease } from '@/api/lease'
+import type { ILeaseRecord } from '@/types/modules/lease'
+
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import ConversationChat from '@/components/business/ConversationChat.vue'
@@ -26,6 +30,18 @@ const typeFilter = ref<'' | ConversationType>('')
 const conversations = ref<IConversation[]>([])
 const loading = ref(false)
 const activeId = ref<number | null>(null)
+const agreementVisible=ref(false), leaseContext=ref<ILeaseRecord|null>(null)
+const requestedAgreementId=ref<number|undefined>()
+async function openAgreement(id?:number){
+  const conversation=activeConversation.value
+  if(conversation?.type!=='LEASE_GROUP' || !conversation.relatedId) return
+  try{
+    leaseContext.value=await getLease(conversation.relatedId)
+    if(activeConversation.value?.id!==conversation.id)return
+    requestedAgreementId.value=id;agreementVisible.value=true
+  }catch(e){ElMessage.error(e instanceof Error?e.message:'租约加载失败，未打开发送入口')}
+}
+watch(activeId,()=>{agreementVisible.value=false;leaseContext.value=null})
 
 const activeConversation = computed(
   () => conversations.value.find((item) => item.id === activeId.value) ?? null
@@ -292,10 +308,18 @@ onMounted(() => {
           :key="activeId"
           :conversation-id="activeId"
           :closed="activeClosed"
-        />
+          @open-agreement="openAgreement"
+        >
+          <template v-if="activeConversation?.type==='LEASE_GROUP'" #business-actions>
+            <el-button :disabled="activeClosed" @click="openAgreement()">发出 / 查看租赁协议</el-button>
+          </template>
+        </ConversationChat>
         <div v-else class="panel-empty card">选择左侧会话开始沟通</div>
       </div>
     </div>
+    <el-dialog v-model="agreementVisible" title="本租约群聊 · 租赁协议" width="min(680px, 94vw)" destroy-on-close>
+      <AgreementSignPanel v-if="leaseContext" :lease-id="leaseContext.id" :community-id="leaseContext.communityId" :lease-status="leaseContext.status" role="ADMIN" :self-managed="false" :read-only="activeClosed" :requested-agreement-id="requestedAgreementId" @changed="openAgreement(requestedAgreementId)" />
+    </el-dialog>
   </section>
 </template>
 

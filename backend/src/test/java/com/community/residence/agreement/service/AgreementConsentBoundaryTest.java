@@ -190,7 +190,7 @@ class AgreementConsentBoundaryTest {
             assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
             assertThat(house.getStatus()).isEqualTo("VACANT");
             verify(changeLogService, never()).logStatus(eq(LEASE_ID), eq("TO_SIGN"), eq("ACTIVE"), anyString());
-            verify(conversationService).sendSystemMessage(eq(CONVERSATION_ID), anyString());
+            verify(conversationService, org.mockito.Mockito.times(2)).sendAgreementMessage(eq(CONVERSATION_ID), eq(AGREEMENT_ID), anyString());
         }
     }
 
