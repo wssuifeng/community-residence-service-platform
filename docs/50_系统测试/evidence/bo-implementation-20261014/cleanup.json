@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-14",
+  "database": "community_residence_bo_20261014",
+  "createdFreshThisRun": true,
+  "migrations": 35,
+  "unexpectedCommunityRows": 0,
+  "paymentsAndRefunds": 0,
+  "cleanup": "own isolated services stopped; this run dedicated database removed; normal data retained"
+}

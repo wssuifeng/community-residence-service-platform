@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-14",
+  "database": "community_residence_bo_20261014",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "责任人创建自动授予且来源可追踪",
+      "passed": true
+    },
+    {
+      "name": "新责任人重新登录可读取社区",
+      "passed": true
+    },
+    {
+      "name": "普通管理员不越界",
+      "passed": true
+    },
+    {
+      "name": "固定楼层编辑拒绝",
+      "passed": true
+    },
+    {
+      "name": "未勾选字段不清空",
+      "passed": true
+    },
+    {
+      "name": "勾选空白而未声明清除拒绝",
+      "passed": true
+    },
+    {
+      "name": "明确清除生效",
+      "passed": true
+    },
+    {
+      "name": "同房号不同单元四段精确区分",
+      "passed": true
+    },
+    {
+      "name": "新CSV两成功两失败一空白跳过",
+      "passed": true
+    },
+    {
+      "name": "三段拒绝原因明确",
+      "passed": true
+    },
+    {
+      "name": "少列只拒绝该行",
+      "passed": true
+    },
+    {
+      "name": "新CSV编号精准定位非猜ID",
+      "passed": true
+    },
+    {
+      "name": "重复导入拒绝并无重复关系",
+      "passed": true
+    },
+    {
+      "name": "旧四列账号模板兼容",
+      "passed": true
+    },
+    {
+      "name": "旧十列模板兼容",
+      "passed": true
+    },
+    {
+      "name": "普通管理员精确找到未绑定注册账号",
+      "passed": true
+    },
+    {
+      "name": "精确候选不暴露手机号证件邮箱",
+      "passed": true
+    },
+    {
+      "name": "空搜索不列全库账号",
+      "passed": true
+    },
+    {
+      "name": "独立账号关联同屋主关系",
+      "passed": true
+    },
+    {
+      "name": "跨屋主关系拒绝",
+      "passed": true
+    },
+    {
+      "name": "代建成员同一事务返回关系",
+      "passed": true
+    },
+    {
+      "name": "CSV同住成功与无主关系失败逐行事务",
+      "passed": true
+    },
+    {
+      "name": "失败成员行不残留账号",
+      "passed": true
+    },
+    {
+      "name": "重复同住登记拒绝",
+      "passed": true
+    },
+    {
+      "name": "单人成员迁出保留其他关系及整户占用",
+      "passed": true
+    },
+    {
+      "name": "主关系无整户确认拒绝",
+      "passed": true
+    },
+    {
+      "name": "拒绝后主关系和成员仍有效",
+      "passed": true
+    },
+    {
+      "name": "居民不能读取其他人的关系",
+      "passed": true
+    },
+    {
+      "name": "成员不能读管理端成员名单",
+      "passed": true
+    },
+    {
+      "name": "普通管理更换责任人自动授权另一个ADMIN",
+      "passed": true
+    },
+    {
+      "name": "原责任人手工权限保留",
+      "passed": true
+    },
+    {
+      "name": "清除责任人撤掉仅责任人授权",
+      "passed": true
+    },
+    {
+      "name": "撤权旧令牌不能继续使用",
+      "passed": true
+    },
+    {
+      "name": "本批不新增租约支付退款",
+      "passed": true
+    }
+  ],
+  "before": [
+    "1",
+    "0",
+    "0"
+  ],
+  "after": [
+    "1",
+    "0",
+    "0"
+  ]
+}

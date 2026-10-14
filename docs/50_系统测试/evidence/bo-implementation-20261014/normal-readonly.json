@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-14",
+  "database": "community_residence",
+  "businessWritesExecuted": false,
+  "transactionsExecuted": false,
+  "userBrowserTouched": false,
+  "before": {
+    "date": "2026-10-14",
+    "database": "community_residence",
+    "readOnly": true,
+    "counts": [
+      2,
+      21,
+      27,
+      575,
+      11,
+      2,
+      1,
+      0,
+      0
+    ],
+    "countOrder": [
+      "communities",
+      "buildings",
+      "units",
+      "houses",
+      "residents",
+      "relations",
+      "leases",
+      "payments",
+      "refunds"
+    ],
+    "duplicateActiveHouseResidents": 0,
+    "migration": 32
+  },
+  "after": {
+    "counts": [
+      2,
+      21,
+      27,
+      575,
+      11,
+      2,
+      1,
+      0,
+      0
+    ],
+    "migration": 35
+  },
+  "checks": [
+    {
+      "name": "正常业务数据数量保持",
+      "passed": true
+    },
+    {
+      "name": "V1至V35全部成功迁移",
+      "passed": true
+    },
+    {
+      "name": "正常结构业务编号全部分配，无空编号",
+      "passed": true
+    },
+    {
+      "name": "历史关系未猜测依赖主关系",
+      "passed": true
+    },
+    {
+      "name": "正常前端5176登录页可访问",
+      "passed": true
+    },
+    {
+      "name": "新同住候选与成员契约已部署",
+      "passed": true
+    },
+    {
+      "name": "导入支持选定社区",
+      "passed": true
+    },
+    {
+      "name": "所有迁出DTO显式确认字段部署",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "正常演示登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "正常房屋列表完整四段编号",
+      "passed": true
+    },
+    {
+      "name": "支付宝微信仍停用",
+      "passed": true
+    }
+  ]
+}
