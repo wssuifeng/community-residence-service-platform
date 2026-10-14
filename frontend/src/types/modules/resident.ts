@@ -33,13 +33,14 @@ export const residenceRelationStatusLabels: Record<ResidenceRelationStatus, stri
 }
 
 /** 居住身份（后端 RelationVO.relationType，ResidenceRelation/ResidenceApplication 共用） */
-export type RelationType = 'OWNER' | 'TENANT' | 'FAMILY'
+export type RelationType = 'OWNER' | 'TENANT' | 'FAMILY' | 'CO_RESIDENT'
 
 /** 居住身份中文标签 */
 export const relationTypeLabels: Record<RelationType, string> = {
   OWNER: '业主',
   TENANT: '租客',
-  FAMILY: '家属'
+  FAMILY: '家属',
+  CO_RESIDENT: '共同居住人'
 }
 
 /* ---------------------------------- 居民账号 ---------------------------------- */
@@ -100,6 +101,8 @@ export interface IUpdateResidentStatusDTO {
 
 /** 管理员代建居民请求（后端 AdminCreateResidentDTO；初始密码服务端生成：手机号后 6 位） */
 export interface IAdminCreateResidentDTO {
+  anchorRelationId?: number | null
+  leaseId?: number | null
   /** 所属社区 ID（数据级权限锚点，ADMIN 限绑定社区） */
   communityId: number
   /** 真实姓名（≤50 字符） */
@@ -112,6 +115,7 @@ export interface IAdminCreateResidentDTO {
   username?: string
   email?: string
   houseId?: number
+  businessCode?: string
   relationType?: RelationType
   moveInDate?: string
   remark?: string
@@ -123,7 +127,8 @@ export interface IAdminCreateResidentVO {
   username: string
   initialPassword: string
   relationId?: number | null
-  houseId?: number | null
+  houseId?: number
+  businessCode?: string | null
 }
 
 /** CSV 批量导入成功行（行号从 1 计，不含表头） */
@@ -133,7 +138,8 @@ export interface IResidentImportSuccessRow {
   initialPassword: string
   residentId?: number
   relationId?: number | null
-  houseId?: number | null
+  houseId?: number
+  businessCode?: string | null
 }
 
 /** CSV 批量导入失败行 */
@@ -144,6 +150,7 @@ export interface IResidentImportFailRow {
 
 /** CSV 批量导入结果（部分成功语义：成功行生效，失败行带行号与原因） */
 export interface IResidentImportVO {
+  skipped?: number
   total: number
   success: number
   fail: number
@@ -226,6 +233,8 @@ export interface IApplicationRejectDTO {
 
 /** 居住关系实体（接口设计.md 9.2.3.1 响应，居民视角） */
 export interface IResidenceRelation {
+  anchorRelationId?: number | null
+  leaseId?: number | null
   id: number
   residentId: number
   residentName: string
@@ -246,12 +255,15 @@ export interface IResidenceRelation {
  * 并携带 relationType/houseLocation/communityId/houseId/createdAt）
  */
 export interface IHouseResident {
+  anchorRelationId?: number | null
+  leaseId?: number | null
   id: number
   residentId: number
   residentName: string
   residentPhone?: string
   communityId?: number
   houseId?: number
+  businessCode?: string
   houseLocation?: string
   relationType?: RelationType
   moveInDate: string
@@ -267,6 +279,7 @@ export interface IResidenceRelationQuery extends PageQuery {
 
 /** 办理迁出请求（接口设计.md 9.2.3.3 请求体） */
 export interface IMoveOutDTO {
+  confirmDependents?: boolean
   moveOutDate: string
   reason?: string
 }

@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("居民账号数据社区过滤修复回归（DEF-010）")
 class ResidentScopeFixTest {
+    @org.mockito.Mock private com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
     @BeforeAll
     static void initTableInfo() {

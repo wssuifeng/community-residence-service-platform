@@ -56,6 +56,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ResidentService {
+    private final com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
     private final ResidentMapper residentMapper;
     private final ResidenceRelationMapper residenceRelationMapper;
@@ -150,6 +151,21 @@ public class ResidentService {
         return PageVO.of(result.convert(ResidentVO::from));
     }
 
+    /* 同住邀请可精确匹配未绑定账号，但不开放跨社区居民台账或敏感资料。 */
+    public java.util.List<com.community.residence.resident.vo.CoResidentCandidateVO> coResidentCandidates(Long houseId, String keyword) {
+        var house=houseMapper.selectById(houseId);
+        if(house==null) throw new com.community.residence.common.exception.ResourceNotFoundException("房屋不存在");
+        SecurityUtils.checkCommunityAccess(house.getCommunityId());
+        String term=keyword==null?"":keyword.trim();
+        if(term.isEmpty()) return java.util.List.of();
+        if(!"OCCUPIED".equals(house.getStatus())) throw new BusinessException(ErrorCode.INVALID_PARAM,"请先选择有效主居住关系的房屋");
+        return residentMapper.selectList(new LambdaQueryWrapper<Resident>().eq(Resident::getStatus,"ACTIVE")
+                .and(w->w.eq(Resident::getUsername,term).or().eq(Resident::getPhone,term))).stream().map(r->{
+                    var item=new com.community.residence.resident.vo.CoResidentCandidateVO();
+                    item.setId(r.getId());item.setUsername(r.getUsername());item.setRealName(r.getRealName());return item;
+                }).toList();
+    }
+
     /** 绑定社区内在住/曾住居民 ID 集合（居民与社区的关联唯一来源是 residence_relation） */
     private List<Long> boundResidentIds(java.util.Set<Long> communityIds) {
         if (communityIds == null || communityIds.isEmpty()) {
@@ -182,22 +198,30 @@ public class ResidentService {
 
     /* 导入每行独立REQUIRES_NEW事务，成功结果必须在提交后收集；失败行不会留下账号或关系。 */
     public ResidentImportVO importCsv(InputStream in) {
+        return importCsv(in, null);
+    }
+
+    public ResidentImportVO importCsv(InputStream in, Long defaultCommunityId) {
         List<String[]> rows = parseCsv(in);
         ResidentImportVO result = new ResidentImportVO();
         List<ResidentImportVO.SuccessRow> successRows = new ArrayList<>();
         List<ResidentImportVO.FailRow> failRows = new ArrayList<>();
         TransactionTemplate transaction = new TransactionTemplate(transactionManager);
         transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        int skipped = 0;
         for (int i = 0; i < rows.size(); i++) {
             int rowNo = i + 1;
             try {
-                AdminCreateResidentDTO dto = parseResidentRow(rows.get(i));
-                AdminCreateResidentVO created = transaction.execute(status -> provisionResident(dto, "CSV_IMPORT"));
+                String[] columns = rows.get(i);
+                if (columns.length == 0) throw new IllegalArgumentException("业务编号模板必须保留九列，请检查本行逗号数量");
+                if (columns[0].startsWith("@") && java.util.Arrays.stream(columns).skip(1).allMatch(v -> v == null || v.isBlank() || "@CODE".equals(v))) { skipped++; continue; }
+                AdminCreateResidentVO created = transaction.execute(status -> provisionResident(parseResidentRow(columns, defaultCommunityId), "CSV_IMPORT"));
                 ResidentImportVO.SuccessRow row = ResidentImportVO.SuccessRow.of(rowNo,
                         created.getUsername(), created.getInitialPassword());
                 row.setResidentId(created.getResidentId());
                 row.setRelationId(created.getRelationId());
                 row.setHouseId(created.getHouseId());
+                row.setBusinessCode(created.getBusinessCode());
                 successRows.add(row);
             } catch (Exception exception) {
                 String reason = exception instanceof BusinessException ? exception.getMessage()
@@ -206,6 +230,7 @@ public class ResidentService {
             }
         }
         result.setTotal(rows.size());
+        result.setSkipped(skipped);
         result.setSuccess(successRows.size());
         result.setFail(failRows.size());
         result.setSuccessRows(successRows);
@@ -215,19 +240,27 @@ public class ResidentService {
         return result;
     }
 
-    private AdminCreateResidentDTO parseResidentRow(String[] columns) {
+    private AdminCreateResidentDTO parseResidentRow(String[] columns, Long defaultCommunityId) {
         if (columns.length < 3 || columns.length > 10) {
             throw new IllegalArgumentException("列数不符（需社区ID,姓名,手机号及可选关系字段，最多10列）");
         }
         AdminCreateResidentDTO dto = new AdminCreateResidentDTO();
-        dto.setCommunityId(Long.parseLong(columns[0].trim()));
+        com.community.residence.community.entity.House codedHouse = null;
+        if (columns[0].startsWith("@")) {
+            String code = columns[0].substring(1).trim();
+            if (!code.isEmpty()) codedHouse = structureBusinessCodeService.resolve(code);
+            Long communityId = codedHouse == null ? defaultCommunityId : codedHouse.getCommunityId();
+            if (communityId == null) throw new IllegalArgumentException("仅建账号时请在上传窗口选择社区");
+            if (defaultCommunityId != null && !defaultCommunityId.equals(communityId)) throw new IllegalArgumentException("房屋业务编号不属于上传窗口所选社区");
+            dto.setCommunityId(communityId);
+        } else dto.setCommunityId(Long.parseLong(columns[0].trim()));
         dto.setRealName(columns[1].trim());
         dto.setPhone(columns[2].trim());
         dto.setIdCard(optionalColumn(columns, 3));
         dto.setUsername(optionalColumn(columns, 4));
         dto.setEmail(optionalColumn(columns, 5));
         String houseId = optionalColumn(columns, 6);
-        dto.setHouseId(houseId == null ? null : Long.parseLong(houseId));
+        dto.setHouseId("@CODE".equals(houseId) ? (codedHouse == null ? null : codedHouse.getId()) : houseId == null ? null : Long.parseLong(houseId));
         dto.setRelationType(optionalColumn(columns, 7));
         String moveIn = optionalColumn(columns, 8);
         try {
@@ -291,6 +324,7 @@ public class ResidentService {
         if (dto.getHouseId() != null) {
             AdminCreateRelationDTO relation = new AdminCreateRelationDTO();
             relation.setResidentId(resident.getId());
+            relation.setAnchorRelationId(dto.getAnchorRelationId());
             relation.setHouseId(dto.getHouseId());
             relation.setRelationType(dto.getRelationType());
             relation.setMoveInDate(dto.getMoveInDate());
@@ -298,6 +332,7 @@ public class ResidentService {
             var saved = residenceRelationService.adminCreate(relation);
             result.setRelationId(saved.getId());
             result.setHouseId(dto.getHouseId());
+            result.setBusinessCode(structureBusinessCodeService.codeForHouse(dto.getHouseId()));
         }
         logOperation("CREATE", resident.getId(), dto.getCommunityId(),
                 "{\"source\":\"" + source + "\",\"relationId\":" + result.getRelationId() + ",\"houseId\":" + result.getHouseId() + "}");
@@ -325,17 +360,23 @@ public class ResidentService {
                 new java.io.StringReader(decodeCsv(in)))) {
             String line = reader.readLine();
             boolean first = true;
+            boolean businessHeader = false;
             while (line != null) {
                 if (first) {
                     String header = java.util.Arrays.stream(splitCsvLine(line.replace("\uFEFF", "")))
                             .map(String::trim).collect(java.util.stream.Collectors.joining(","));
-                    if (!header.equals("社区ID,姓名,手机号,证件号")
+                    businessHeader = header.equals("房屋编号,姓名,手机号,证件号,用户名,邮箱,关系类型,入住日期,备注");
+                    if (!businessHeader && !header.equals("社区ID,姓名,手机号,证件号")
                             && !header.equals("社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注")) {
                         throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV表头不符，请下载当前导入模板");
                     }
                     first = false;
                 } else if (!line.isBlank()) {
-                    rows.add(splitCsvLine(line));
+                    String[] values = splitCsvLine(line);
+                    if (businessHeader) {
+                        values = values.length != 9 ? new String[0] : new String[]{"@"+values[0],values[1],values[2],values[3],values[4],values[5],"@CODE",values[6],values[7],values[8]};
+                    }
+                    rows.add(values);
                 }
                 line = reader.readLine();
             }

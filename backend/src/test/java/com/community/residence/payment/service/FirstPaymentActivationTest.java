@@ -55,7 +55,7 @@ class FirstPaymentActivationTest {
         for (Class<?> type : new Class<?>[]{LeaseRecord.class, LeasePayment.class, ResidenceRelation.class}) {
             com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""), type);
         }
-        LeaseService leases = new LeaseService(leaseMapper, residentMapper, houseMapper, unitMapper, buildingMapper,
+        LeaseService leases = new LeaseService(new com.community.residence.resident.service.ResidenceDependencyService(relationMapper), leaseMapper, residentMapper, houseMapper, unitMapper, buildingMapper,
             communityMapper, changeLogService, payments, relationMapper, agreementMapper, conversationService);
         service = new PaymentService(payments, leaseMapper, admins, notifications, new PaymentProperties(), mock(PaymentChannelClient.class), mock(PaymentChannelClient.class));
         service.setSettlementInfrastructure(transactions, leases);

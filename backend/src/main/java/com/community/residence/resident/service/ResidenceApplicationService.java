@@ -87,6 +87,7 @@ public class ResidenceApplicationService {
     /* 提交申请：锁定房屋行后串行检查申请、租约与居住关系，避免多账号抢同一房屋或重复建租约。 */
     @Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public ApplicationVO create(CreateApplicationDTO dto) {
+        if (ResidenceDependencyService.isDependent(dto.getRelationType())) throw new BusinessException(ErrorCode.INVALID_PARAM,"家属或共同居住人须由社区管理员依有效主居住关系登记，不单独申请占用房屋");
         House house = lockHouse(dto.getHouseId());
         if (house == null) {
             throw new ResourceNotFoundException("房屋不存在");
@@ -218,6 +219,7 @@ public class ResidenceApplicationService {
     private void applyApproval(ResidenceApplication application, House house, LocalDate startDate,
                                LocalDate endDate, BigDecimal monthlyRent, BigDecimal deposit,
                                Long reviewerId, String reviewRemark) {
+        if (ResidenceDependencyService.isDependent(application.getRelationType())) throw new BusinessException(ErrorCode.INVALID_PARAM,"同住关系须通过登记同住人员入口依有效主关系建立");
         /* 居住关系：TENANT 建租住记录；OWNER/FAMILY 建关系即可（租约由 C3 独立登记） */
         ResidenceRelation relation = null;
         if (!"TENANT".equals(application.getRelationType())) {

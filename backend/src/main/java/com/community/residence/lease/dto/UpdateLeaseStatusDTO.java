@@ -22,4 +22,7 @@ public class UpdateLeaseStatusDTO {
     @Schema(description = "备注")
     @Size(max = 200, message = "备注最多 200 字符")
     private String remark;
+
+    @Schema(description="办理迁出时明确确认同步结束依赖居住关系")
+    private Boolean confirmDependents;
 }

@@ -48,7 +48,7 @@ public class ResidenceRelationController {
         return ApiResponse.success(relationService.pageByHouse(houseId, page, size, status));
     }
 
-    @Operation(summary = "管理员直建居住关系", description = "直接建立关系不走审批流；限绑定社区空置房屋（D-端点3）")
+    @Operation(summary = "管理员直建居住关系", description = "限绑定社区；OWNER/TENANT仅空置房直录；FAMILY/CO_RESIDENT依赖已入住有效主关系，不新增租约")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/residence-relations")
     public ApiResponse<RelationVO> adminCreate(@RequestBody @Valid
@@ -62,5 +62,11 @@ public class ResidenceRelationController {
     public ApiResponse<Void> moveOut(@PathVariable Long id, @RequestBody @Valid MoveOutDTO dto) {
         relationService.moveOut(id, dto);
         return ApiResponse.success();
+    }
+    @Operation(summary="查看主居住关系的在住同住人员")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
+    @GetMapping("/residence-relations/{id}/dependents")
+    public ApiResponse<java.util.List<RelationVO>> dependents(@PathVariable Long id) {
+        return ApiResponse.success(relationService.dependents(id));
     }
 }

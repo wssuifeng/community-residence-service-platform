@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest'
-import { sortHouseReference, houseReferenceCsv } from '../residentImportReference'
-const row = (houseId: number, buildingName: string, floor: number, houseNumber: string) => ({ houseId, communityId: 2, communityName:'合成社区', buildingName, unitName: '一单元', floor, houseNumber, houseStatus:'VACANT' }) as any
-describe('导入对照真实ID',()=>{
- it('按位置排序而不是自增ID',()=>expect(sortHouseReference([row(1,'10栋',1,'101'),row(77,'2栋',2,'201'),row(99,'2栋',1,'101')]).map(r=>r.houseId)).toEqual([99,77,1]))
- it('保留真实ID，文本转义逗号/引号与公式',()=>{const csv=houseReferenceCsv([row(77,'=危险',1,'101,"A"')]);expect(csv).toContain('"77"');expect(csv).toContain('"101,""A"""');expect(csv).toContain("'=危险")})
+import { describe,it,expect } from 'vitest'
+import { sortHouseReference } from '../residentImportReference'
+describe('结构业务编号查看，不导出',()=>{
+ it('按业务层级自然排序，不以数据库自增ID排序',()=>{
+ const rows=[{houseId:1,communityId:9,communityCode:'5',buildingCode:'10',unitCode:'1',houseNumber:'101'},{houseId:99,communityId:2,communityCode:'5',buildingCode:'2',unitCode:'1',houseNumber:'101'},{houseId:100,communityId:1,communityCode:'2',buildingCode:'1',unitCode:'1',houseNumber:'101'}] as any
+ expect(sortHouseReference(rows).map(r=>r.houseId)).toEqual([100,99,1])
+ })
+ it('保持原数据及内部主键，不重排主键',()=>{const rows=[{houseId:7,communityCode:'5',buildingCode:'1',unitCode:'1',houseNumber:'102'},{houseId:20,communityCode:'5',buildingCode:'1',unitCode:'1',houseNumber:'101'}] as any;expect(sortHouseReference(rows).map(r=>r.houseId)).toEqual([20,7]);expect(rows[0].houseId).toBe(7)})
 })

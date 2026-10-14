@@ -31,6 +31,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ResidentProvisioningTest {
+    @org.mockito.Mock private com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
     @Mock ResidentMapper residentMapper;
     @Mock PasswordEncoder passwordEncoder;
     @Mock TokenRevocationService tokenRevocationService;
@@ -94,4 +95,18 @@ class ResidentProvisioningTest {
         }
         verify(transactionManager).rollback(any()); verify(transactionManager).commit(any());
     }
+    @Test void malformedBusinessRowDoesNotPreventOtherRowsFromCommitting() {
+        String header="房屋编号,姓名,手机号,证件号,用户名,邮箱,关系类型,入住日期,备注\n";
+        String data=",合成居民,13900000011,,合成账户,,,,\n错误,少列\n";
+        try (MockedStatic<SecurityUtils> ignored=mockStatic(SecurityUtils.class)) {
+            var result=service.importCsv(new ByteArrayInputStream((header+data).getBytes(StandardCharsets.UTF_8)),3L);
+            assertThat(result.getTotal()).isEqualTo(2);
+            assertThat(result.getSuccess()).isEqualTo(1);
+            assertThat(result.getFail()).isEqualTo(1);
+            assertThat(result.getFailRows().get(0).getRow()).isEqualTo(2);
+            assertThat(result.getFailRows().get(0).getReason()).contains("九列");
+            verify(transactionManager,times(1)).commit(any());
+        }
+    }
+
 }

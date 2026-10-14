@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @TableName("residence_relation")
 @Schema(description = "居住关系")
 public class ResidenceRelation {
+    @Schema(description="依赖的主居住关系ID；同住关系引用同房屋有效OWNER/TENANT")
+    private Long anchorRelationId;
+
 
     @TableId(type = IdType.AUTO)
     @Schema(description = "关系ID")

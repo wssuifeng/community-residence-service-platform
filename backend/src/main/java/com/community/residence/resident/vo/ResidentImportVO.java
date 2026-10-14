@@ -12,6 +12,7 @@ public class ResidentImportVO {
 
     @Schema(description = "总行数（不含表头）")
     private int total;
+    @Schema(description="仅有模板编号、未填写居民信息的跳过行数") private int skipped;
 
     @Schema(description = "成功行数")
     private int success;
@@ -46,6 +47,7 @@ public class ResidentImportVO {
 
         @Schema(description = "本次登记关系房屋ID，空表示仅账号")
         private Long houseId;
+        @Schema(description="房屋四段业务编号") private String businessCode;
 
         public static SuccessRow of(int row, String username, String initialPassword) {
             SuccessRow r = new SuccessRow();

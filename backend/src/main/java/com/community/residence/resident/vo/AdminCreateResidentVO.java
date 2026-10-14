@@ -22,6 +22,7 @@ public class AdminCreateResidentVO {
 
     @Schema(description = "本次登记关系的房屋ID；仅账号模式为空")
     private Long houseId;
+        @Schema(description="房屋四段业务编号") private String businessCode;
 
     public static AdminCreateResidentVO of(Long residentId, String username, String initialPassword) {
         AdminCreateResidentVO vo = new AdminCreateResidentVO();

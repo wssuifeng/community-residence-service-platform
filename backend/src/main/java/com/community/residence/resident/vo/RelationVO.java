@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
 @Data
 @Schema(description = "居住关系")
 public class RelationVO {
+    @Schema(description="依赖的主居住关系ID；同住关系引用同房屋有效OWNER/TENANT")
+    private Long anchorRelationId;
+    @Schema(description="正式主租约ID，同住成员不继承") private Long leaseId;
+
 
     @Schema(description = "关系ID")
     private Long id;
@@ -51,6 +55,8 @@ public class RelationVO {
     public static RelationVO from(ResidenceRelation entity) {
         RelationVO vo = new RelationVO();
         vo.setId(entity.getId());
+        vo.setAnchorRelationId(entity.getAnchorRelationId());
+        vo.setLeaseId(entity.getLeaseId());
         vo.setResidentId(entity.getResidentId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setHouseId(entity.getHouseId());

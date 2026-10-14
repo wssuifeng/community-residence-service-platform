@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 @Schema(description = "退租申请审核通过请求")
 public class ApproveMoveOutDTO {
+    @Schema(description="明确确认同步结束主关系关联的依赖居住关系")
+    private Boolean confirmDependents;
+
 
     @Schema(description = "房源状态回收：AVAILABLE-在架可租（默认）, OFFLINE-下架")
     @Pattern(regexp = "^(AVAILABLE|OFFLINE)$", message = "房源状态只支持 AVAILABLE / OFFLINE")

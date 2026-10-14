@@ -6,7 +6,7 @@ import type { UploadFile, UploadUserFile } from 'element-plus'
 import { getCommunityList } from '@/api/community'
 import { listHouseManage } from '@/api/housing'
 import { loadAllPages, StaleStructureLoad } from '@/utils/paged'
-import { sortHouseReference, houseReferenceCsv } from '@/utils/residentImportReference'
+import { sortHouseReference } from '@/utils/residentImportReference'
 import { houseStatusLabels } from '@/types/modules/community'
 import type { ICommunity, HouseStatus } from '@/types/modules/community'
 import type { HouseManageItem } from '@/types/modules/housing'
@@ -14,7 +14,7 @@ import { importResidents } from '@/api/resident'
 import type { IResidentImportVO } from '@/types/modules/resident'
 
 /**
- * 后端契约：UTF-8、GB18030（Excel GBK）或带BOM UTF-16 CSV，新模板十列含账号与具体居住关系，兼容旧四列账号模板；
+ * 后端契约：UTF-8、GB18030（Excel GBK）或带BOM UTF-16 CSV，新模板九列含账号与具体居住关系，兼容旧四列账号模板；
  * 部分成功语义——结果必须完整展示（成功行账号+初始密码可复制、失败行行号+原因）。
  * 前后端均限制单文件5MB；房屋/关系类型/入住日期须全有或全无。
  */
@@ -23,7 +23,7 @@ const visible = defineModel<boolean>({ required: true })
 /** imported 携带导入结果，父层刷新列表与统计卡（失败行不触发也刷新，成功行已生效） */
 const emit = defineEmits<{ imported: [result: IResidentImportVO] }>()
 
-const CSV_HEADERS = '社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注'
+const CSV_HEADERS = '房屋编号,姓名,手机号,证件号,用户名,邮箱,关系类型,入住日期,备注'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 
 const fileList = ref<UploadUserFile[]>([])
@@ -34,8 +34,8 @@ const result = ref<IResidentImportVO | null>(null)
 const canUpload = computed(() => selectedFile.value !== null && !uploading.value)
 
 function downloadTemplate(): void {
-  if (!referenceCommunity.value) { ElMessage.warning('请先选择社区，模板会填入真实社区ID'); return }
-  const content = `${CSV_HEADERS}\n${referenceCommunity.value},示例姓名,13800138000,,示例住户,,,,,\n`
+  if (!referenceCommunity.value) { ElMessage.warning('请先选择操作社区'); return }
+  const content = `${CSV_HEADERS}\n,示例姓名,13800138000,,示例住户,,,,\n`
   const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -49,6 +49,7 @@ const communities = ref<ICommunity[]>([])
 const referenceCommunity = ref<number>()
 const referenceRows = ref<HouseManageItem[]>([])
 const referenceLoading = ref(false)
+const referenceVisible = ref(false)
 const referenceError = ref('')
 let referenceSequence = 0
 async function loadReference(): Promise<void> {
@@ -65,14 +66,6 @@ async function loadReference(): Promise<void> {
     if (error instanceof StaleStructureLoad || sequence !== referenceSequence) return
     referenceError.value = error instanceof Error ? error.message : '房屋对照加载失败，请重试'
   } finally { if (sequence === referenceSequence) referenceLoading.value = false }
-}
-function downloadReference(): void {
-  const url = URL.createObjectURL(new Blob(['\ufeff' + houseReferenceCsv(referenceRows.value)], { type: 'text/csv;charset=utf-8' }))
-  const link = document.createElement('a')
-  link.href = url
-  link.download = '房屋位置与ID对照.csv'
-  link.click()
-  URL.revokeObjectURL(url)
 }
 async function loadCommunities(): Promise<void> {
   try {
@@ -104,7 +97,7 @@ async function handleUpload(): Promise<void> {
   if (!file) return
   uploading.value = true
   try {
-    result.value = await importResidents(file)
+    result.value = await importResidents(file, referenceCommunity.value)
     emit('imported', result.value)
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '导入失败')
@@ -147,20 +140,23 @@ watch(visible, (value) => {
       <el-button text type="primary" @click="downloadTemplate">下载导入模板</el-button>
       <span class="toolbar-hint">CSV（UTF-8 / Excel GBK / 带BOM UTF-16），表头：{{ CSV_HEADERS }}；选填项可留空</span>
     </div>
-    <el-alert type="info" :closable="false" title="房屋ID、关系类型和入住日期须全有或全无；空白表示仅建账号。房屋ID不是房号，请从下方真实位置对照中复制ID；旧四列模板继续支持，仅创建账号。每行账号与关系一起成功或一起回滚，不生成租约。" />
+    <el-alert type="info" :closable="false" title="房屋编号必须为社区-楼栋-单元-房屋号四段；登记关系时同时填写类型与入住日期，仅建账号时三项留空。查看下方业务编号，无需填写内部ID。旧模板继续兼容，每行独立事务，不另建租约。" />
     <div class="import-reference">
-      <el-select v-model="referenceCommunity" placeholder="选择社区（名称与真实ID）" style="width: 300px; max-width: 100%" @change="loadReference">
-        <el-option v-for="community in communities" :key="community.id" :value="community.id" :label="`${community.name} · 社区ID ${community.id}`" />
+      <el-select v-model="referenceCommunity" placeholder="选择操作社区" style="width: 300px; max-width: 100%" @change="loadReference">
+        <el-option v-for="community in communities" :key="community.id" :value="community.id" :label="`${community.name} · 社区编号 ${community.businessCode ?? '未设置'}`" />
       </el-select>
-      <el-button :disabled="!referenceRows.length || referenceLoading || !!referenceError" @click="downloadReference">下载房屋位置与ID对照</el-button>
+      <el-button :disabled="!referenceRows.length || referenceLoading || !!referenceError" @click="referenceVisible = !referenceVisible">查看结构业务编号</el-button>
       <el-alert v-if="referenceError" type="error" :closable="false" :title="referenceError" />
-      <p>按楼栋、单元、楼层、房号排序；ID是系统主键，不是楼层或房号，不必连续。仅空置房可直录关系；已入住同住成员另按居住规则处理。</p>
-      <el-table v-if="referenceCommunity" v-loading="referenceLoading" :data="referenceRows" size="small" max-height="220">
+      <p>按社区、楼栋、单元、房屋编号排序；完整四段编号精准定位房屋。OWNER/TENANT仅空置房可直录，FAMILY/CO_RESIDENT须依赖已入住房屋的有效主关系。此处仅查看，不提供数据导出。</p>
+      <el-table v-if="referenceCommunity && referenceVisible" v-loading="referenceLoading" :data="referenceRows" size="small" max-height="220">
         <el-table-column prop="buildingName" label="楼栋" min-width="100" />
         <el-table-column prop="unitName" label="单元" min-width="100" />
         <el-table-column prop="floor" label="楼层" width="70" />
         <el-table-column prop="houseNumber" label="房号" min-width="90" />
-        <el-table-column prop="houseId" label="房屋ID" width="90" />
+        <el-table-column prop="communityCode" label="社区编号" min-width="90" />
+        <el-table-column prop="buildingCode" label="楼栋编号" min-width="90" />
+        <el-table-column prop="unitCode" label="单元编号" min-width="90" />
+        <el-table-column prop="businessCode" label="房屋业务编号" min-width="160" />
         <el-table-column label="状态" min-width="100"><template #default="{ row }">{{ houseStatusLabels[row.houseStatus as HouseStatus] ?? row.houseStatus }}</template></el-table-column>
       </el-table>
     </div>
@@ -183,6 +179,7 @@ watch(visible, (value) => {
     <div v-if="result" class="import-result">
       <div class="result-summary">
         <span>总计 <b>{{ result.total }}</b> 行</span>
+        <span v-if="result.skipped" class="is-muted">空白模板行跳过 {{ result.skipped }} 行</span>
         <span class="is-success">成功 {{ result.success }} 行</span>
         <span :class="result.fail > 0 ? 'is-danger' : 'is-muted'">失败 {{ result.fail }} 行</span>
       </div>
@@ -201,7 +198,7 @@ watch(visible, (value) => {
               <code class="cell-code">{{ row.initialPassword }}</code>
             </template>
           </el-table-column>
-          <el-table-column label="居住关系" min-width="200"><template #default="{ row }"><span>{{ row.relationId ? `关系 ${row.relationId} · 房屋 ${row.houseId}` : '仅建账号（无居住关系）' }}</span></template></el-table-column>
+          <el-table-column label="居住关系" min-width="200"><template #default="{ row }"><span>{{ row.relationId ? `关系已登记 · 房屋 ${row.businessCode ?? '编号待加载'}` : '仅建账号（无居住关系）' }}</span></template></el-table-column>
           <el-table-column label="" width="60">
             <template #default="{ row }">
               <el-button

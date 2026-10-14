@@ -25,7 +25,7 @@ class ResidenceRelationEngineeringTest {
     private final HouseMapper houses=mock(HouseMapper.class);
     private final LeaseRecordMapper leases=mock(LeaseRecordMapper.class);
     private final com.community.residence.lease.service.LeaseService leaseService=mock(com.community.residence.lease.service.LeaseService.class);
-    private final ResidenceRelationService service=new ResidenceRelationService(relations,mock(ResidentMapper.class),houses,mock(UnitMapper.class),mock(BuildingMapper.class),leases,leaseService,mock(ResidenceApplicationMapper.class));
+    private final ResidenceRelationService service=new ResidenceRelationService(new ResidenceDependencyService(relations), relations,mock(ResidentMapper.class),houses,mock(UnitMapper.class),mock(BuildingMapper.class),leases,leaseService,mock(ResidenceApplicationMapper.class));
     @AfterEach void clear(){SecurityUtils.clear();}
     private ResidenceRelation relation(){var r=new ResidenceRelation();r.setId(1L);r.setResidentId(7L);r.setHouseId(3L);r.setCommunityId(5L);return r;}
     private MoveOutDTO dto(){var dto=new MoveOutDTO();dto.setMoveOutDate(LocalDate.of(2026,10,11));return dto;}

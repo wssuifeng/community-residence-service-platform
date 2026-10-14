@@ -255,6 +255,7 @@ export interface ILeaseQuery extends PageQuery {
 
 /** 更新租住状态请求（状态机流转校验，LeaseService ALLOWED_TRANSITIONS） */
 export interface IUpdateLeaseStatusDTO {
+  confirmDependents?: boolean
   status: LeaseStatus
   remark?: string
 }
@@ -393,6 +394,7 @@ export interface IMoveOutApplicationQuery extends PageQuery {
 /** 退租审核通过请求（PATCH /lease-move-out-applications/{id}/approve；
  *  housingStatus 为房源回收方式，缺省由服务端按在架处理） */
 export interface IMoveOutApproveDTO {
+  confirmDependents?: boolean
   housingStatus?: 'AVAILABLE' | 'OFFLINE'
 }
 

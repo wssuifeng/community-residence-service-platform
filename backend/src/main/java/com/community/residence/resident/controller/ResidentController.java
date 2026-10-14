@@ -35,6 +35,14 @@ public class ResidentController {
 
     private final ResidentService residentService;
 
+    @Operation(summary="同住人员账号精确检索", description="限可管理的已入住房屋；按完整用户名或手机号匹配正常账号，仅返回选择字段")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
+    @GetMapping("/co-resident-candidates")
+    public ApiResponse<java.util.List<com.community.residence.resident.vo.CoResidentCandidateVO>> coResidentCandidates(
+            @RequestParam Long houseId, @RequestParam(defaultValue="") String keyword) {
+        return ApiResponse.success(residentService.coResidentCandidates(houseId,keyword));
+    }
+
     @Operation(summary = "查询个人资料", description = "居民本人")
     @PreAuthorize("hasRole('RESIDENT')")
     @GetMapping("/profile")
@@ -91,10 +99,10 @@ public class ResidentController {
         return ApiResponse.success(residentService.adminCreate(dto));
     }
 
-    @Operation(summary = "批量导入居民（CSV）", description = "R8 v1.2；UTF-8 CSV，表头支持旧四列和十列账号/居住关系模板；每行账号+关系独立事务，部分成功语义，失败行返回行号与原因")
+    @Operation(summary = "批量导入居民（CSV）", description = "R8；支持UTF-8/GB18030/带BOM UTF-16，九列四段业务编号模板，兼容旧四列和十列模板；每行账号+关系独立事务，部分成功语义，失败行返回行号与原因")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ResidentImportVO> importCsv(@RequestParam("file") MultipartFile file) {
+    public ApiResponse<ResidentImportVO> importCsv(@RequestParam("file") MultipartFile file, @RequestParam(required=false) @jakarta.validation.constraints.Positive Long communityId) {
         if (file != null && file.getSize() > 5 * 1024 * 1024) {
             throw new com.community.residence.common.exception.BusinessException(
                     com.community.residence.common.constant.ErrorCode.INVALID_PARAM, "CSV不能超过5MB，请拆分导入");
@@ -103,7 +111,7 @@ public class ResidentController {
             return ApiResponse.success(residentService.importCsv(null));
         }
         try {
-            return ApiResponse.success(residentService.importCsv(file.getInputStream()));
+            return ApiResponse.success(residentService.importCsv(file.getInputStream(), communityId));
         } catch (java.io.IOException e) {
             throw new com.community.residence.common.exception.BusinessException(
                     com.community.residence.common.constant.ErrorCode.INVALID_PARAM, "CSV 文件读取失败");

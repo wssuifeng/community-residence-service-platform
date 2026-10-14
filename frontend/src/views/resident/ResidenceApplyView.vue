@@ -46,8 +46,7 @@ const form = reactive({
 
 const relationOptions: Array<{ value: RelationType; label: string; hint: string }> = [
   { value: 'TENANT', label: relationTypeLabels.TENANT, hint: '租赁入住，审核通过后生成租约' },
-  { value: 'OWNER', label: relationTypeLabels.OWNER, hint: '房屋产权人登记（自住）' },
-  { value: 'FAMILY', label: relationTypeLabels.FAMILY, hint: '作为在住亲属登记' }
+  { value: 'OWNER', label: relationTypeLabels.OWNER, hint: '房屋产权人登记（自住）' }
 ]
 
 /** 仅可租房源可申请租住（与后端房屋状态校验同口径） */
