@@ -195,7 +195,7 @@ describe('AdminHousingLeaseHub · Tab 取值与 URL query（批次 g）', () => 
     await childTabButton(wrapper, LEASE_STAGE_TABS, '待签约')?.trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.query.stage).toBe('toSign')
-    expect(barActiveLabel(wrapper, LEASE_STAGE_TABS)).toBe('待签约')
+    expect(barActiveLabel(wrapper, LEASE_STAGE_TABS)).toBe('待签约 / 待支付')
 
     /* Hub 切走再切回 */
     await tabButton(wrapper, '房源管理')?.trigger('click')
@@ -208,7 +208,7 @@ describe('AdminHousingLeaseHub · Tab 取值与 URL query（批次 g）', () => 
 
     /* stage 未被 Hub 冲掉，且真实子视图确实回到「待签约」分组 */
     expect(router.currentRoute.value.query.stage).toBe('toSign')
-    expect(barActiveLabel(wrapper, LEASE_STAGE_TABS)).toBe('待签约')
+    expect(barActiveLabel(wrapper, LEASE_STAGE_TABS)).toBe('待签约 / 待支付')
     expect(activeTabLabel(wrapper)).toBe('租约管理')
   })
 
@@ -238,7 +238,7 @@ describe('AdminHousingLeaseHub · Tab 取值与 URL query（批次 g）', () => 
     await flushPromises()
 
     expect(router.currentRoute.value.query).toMatchObject({ tab: 'moveout', stage: 'toSign', view: 'viewings' })
-    expect(barActiveLabel(wrapper, LEASE_STAGE_TABS)).toBe('待签约')
+    expect(barActiveLabel(wrapper, LEASE_STAGE_TABS)).toBe('待签约 / 待支付')
     expect(barActiveLabel(wrapper, HOUSING_VIEW_TABS)).toBe('看房预约')
   })
 })

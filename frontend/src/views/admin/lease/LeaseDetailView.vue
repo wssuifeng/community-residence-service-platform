@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { leaseHouseholdNotice } from '@/utils/leaseHousehold'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -34,7 +35,6 @@ import {
   depositRefundStatusLabels,
   depositStatusLabels,
   leaseChangeTypeLabels,
-  leaseStatusLabels
 } from '@/types/modules/lease'
 import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
 import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
@@ -276,7 +276,7 @@ function statusTagView(row: ILeaseRecord): { label: string; type: TagType } {
   }
   const map: Record<Exclude<LeaseStatus, 'ACTIVE'>, { label: string; type: TagType }> = {
     PENDING: { label: '待审核', type: 'pending' },
-    TO_SIGN: { label: '待签约', type: 'pending' },
+    TO_SIGN: { label: leaseDisplayLabel(row), type: 'pending' },
     MOVED_OUT: { label: '已搬出', type: 'canceled' },
     ARCHIVED: { label: '已归档', type: 'canceled' },
     REJECTED: { label: '已驳回', type: 'rejected' }
@@ -493,7 +493,7 @@ const hasStatusAction = computed(
 async function handleApprove(): Promise<void> {
   if (!lease.value || lease.value.status !== 'PENDING') return
   try {
-    await ElMessageBox.confirm('审核通过后租约进入待签约；管理员发出协议，居民同意后才会生效。',
+    await ElMessageBox.confirm('审核通过后租约进入待签约；管理员发出协议，居民同意且首期费用支付成功后才会生效。',
       '租约审批通过', { type: 'info', confirmButtonText: '确认', cancelButtonText: '取消' })
   } catch { return }
   await doTransition('TO_SIGN', '已审核通过，租约进入待签约')
@@ -990,7 +990,7 @@ onMounted(fetchDetail)
             </div>
 
             <p v-if="!hasStatusAction" class="action-hint">
-              当前状态「{{ leaseStatusLabels[lease.status] }}」无需状态操作。
+              当前状态「{{ leaseDisplayLabel(lease) }}」无需状态操作。
             </p>
             <p class="action-note">
               属性变更（月租/押金/租期等）请用「租约属性 → 编辑属性」；状态流转与属性变更都会写入变更历史。

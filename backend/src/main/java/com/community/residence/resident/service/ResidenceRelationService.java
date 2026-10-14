@@ -239,6 +239,7 @@ public class ResidenceRelationService {
         var resident = residentMapper.selectById(relation.getResidentId());
         if (resident != null) {
             vo.setResidentName(resident.getRealName());
+            vo.setResidentUsername(resident.getUsername());
             vo.setResidentPhone(resident.getPhone());
         }
         House house = houseMapper.selectById(relation.getHouseId());
