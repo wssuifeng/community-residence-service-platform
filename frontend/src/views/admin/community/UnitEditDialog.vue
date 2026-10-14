@@ -35,6 +35,7 @@ type UnitForm = Omit<IUnitDTO, 'buildingId'> & { buildingId?: number }
 const form = reactive<UnitForm>({
   buildingId: undefined,
   name: '',
+  businessCode: '',
   description: ''
 })
 
@@ -62,6 +63,7 @@ async function handleFormCommunityChange(): Promise<void> {
 /* 每次打开按编辑目标/树上下文重置表单与联动 */
 watch(visible, (value) => {
   if (!value) return
+  form.businessCode = props.unit?.businessCode ?? ''
   formBuildings.value = []
   if (props.unit) {
     formCommunityId.value = props.unit.communityId
@@ -150,6 +152,7 @@ async function handleSubmit(): Promise<void> {
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="单元编号"><el-input v-model="form.businessCode" maxlength="32" placeholder="创建留空按结构分配" /></el-form-item>
       <el-form-item label="单元名称" prop="name">
         <el-input v-model="form.name" placeholder="如：1单元" maxlength="20" />
       </el-form-item>

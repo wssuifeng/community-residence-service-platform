@@ -20,6 +20,10 @@ public class CreateUnitDTO {
     @Size(max = 50, message = "单元名称最多 50 字符")
     private String name;
 
+    @Schema(description = "业务编号；创建留空按本级结构分配，更新留空保留")
+    @Size(max=32)
+    private String businessCode;
+
     @Schema(description = "单元描述")
     @Size(max = 500, message = "单元描述最多 500 字符")
     private String description;

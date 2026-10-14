@@ -25,6 +25,9 @@ public class Building {
     @Schema(description = "楼栋名称")
     private String name;
 
+    @Schema(description = "本级业务编号，与内部主键分离")
+    private String businessCode;
+
     @Schema(description = "楼层数")
     private Integer floors;
 

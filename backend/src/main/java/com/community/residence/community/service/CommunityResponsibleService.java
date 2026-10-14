@@ -26,6 +26,48 @@ public class CommunityResponsibleService {
 
     private final SysUserMapper sysUserMapper;
     private final CommunityMapper communityMapper;
+    private final com.community.residence.auth.mapper.SysAdminCommunityMapper bindingMapper;
+    private final com.community.residence.auth.service.AdminCommunityCacheService adminCommunityCacheService;
+    private final com.community.residence.auth.service.TokenRevocationService tokenRevocationService;
+
+    /* 社区保存已获得本社区行锁；只维护责任人来源，保留超管手工来源。变更有效权限才吊销令牌。 */
+    public void synchronizeBinding(Long communityId, Long responsibleId) {
+        var bindings = bindingMapper.selectList(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.community.residence.auth.entity.SysAdminCommunity>()
+                .eq(com.community.residence.auth.entity.SysAdminCommunity::getCommunityId, communityId));
+        com.community.residence.auth.entity.SysAdminCommunity target = null;
+        for (var binding : bindings) {
+            if (Objects.equals(binding.getAdminId(), responsibleId)) { target = binding; continue; }
+            if (!Integer.valueOf(1).equals(binding.getResponsibleGranted())) continue;
+            if (Integer.valueOf(1).equals(binding.getManualGranted())) {
+                binding.setResponsibleGranted(0);
+                bindingMapper.updateById(binding);
+            } else {
+                bindingMapper.deleteById(binding.getId());
+                invalidate(binding.getAdminId());
+            }
+        }
+        if (responsibleId == null) return;
+        if (target == null) {
+            target = new com.community.residence.auth.entity.SysAdminCommunity();
+            target.setAdminId(responsibleId); target.setCommunityId(communityId);
+            target.setManualGranted(0); target.setResponsibleGranted(1);
+            bindingMapper.insert(target);
+            invalidate(responsibleId);
+        } else if (!Integer.valueOf(1).equals(target.getResponsibleGranted())) {
+            target.setResponsibleGranted(1);
+            bindingMapper.updateById(target);
+        }
+    }
+
+    private void invalidate(Long adminId) {
+        tokenRevocationService.revokeAdminUser(adminId);
+        adminCommunityCacheService.evict(adminId);
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override public void afterCommit() { adminCommunityCacheService.evict(adminId); }
+            });
+        }
+    }
 
     public void validate(Long id) {
         if (id == null) {

@@ -24,6 +24,6 @@ public interface BuildingMapper extends BaseMapper<Building> {
     @Delete("DELETE FROM building WHERE id = #{id}")
     int physicalDeleteById(@Param("id") Long id);
     /* 同一楼栋的建房和层数变更按父记录串行。 */
-    @Select("SELECT id, community_id, name, floors, description, is_deleted, deleted_at, created_at, updated_at FROM building WHERE id = #{id} AND is_deleted = 0 FOR UPDATE")
+    @Select("SELECT id, community_id, name, business_code, floors, description, is_deleted, deleted_at, created_at, updated_at FROM building WHERE id = #{id} AND is_deleted = 0 FOR UPDATE")
     Building selectByIdForUpdate(@Param("id") Long id);
 }

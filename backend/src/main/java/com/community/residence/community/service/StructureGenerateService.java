@@ -45,6 +45,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class StructureGenerateService {
 
+    private final StructureBusinessCodeService structureBusinessCodeService;
+
     /** 单次上限：楼栋（防误操作打爆库） */
     static final int MAX_BUILDINGS = 60;
     /** 单次上限：单元总数 */
@@ -245,6 +247,7 @@ public class StructureGenerateService {
             /* 楼层数取生成网格的楼层数；building.floors 为 NOT NULL，仅建楼栋不建房屋时
                按最小值 1 落库（可在楼栋编辑中按实际维护） */
             building.setFloors(Math.max(1, plan.floorsPerUnit));
+            building.setBusinessCode(structureBusinessCodeService.building(community.getId(), null, building.getName(), null));
             buildingMapper.insert(building);
             buildings++;
             addPreview(vo.getPreviewBuildings(), buildingPlan.name, PREVIEW_BUILDINGS);
@@ -266,6 +269,7 @@ public class StructureGenerateService {
                 unit.setBuildingId(building.getId());
                 unit.setCommunityId(community.getId());
                 unit.setName(unitPlan.name);
+                unit.setBusinessCode(structureBusinessCodeService.unit(building.getId(), null, unit.getName(), null));
                 unitMapper.insert(unit);
                 units++;
                 addPreview(vo.getPreviewUnits(), position(buildingPlan.name, unitPlan.name), PREVIEW_UNITS);

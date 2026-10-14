@@ -23,6 +23,7 @@ const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const form = reactive<ICreateCommunityDTO>({
   name: '',
+  businessCode: '',
   address: '',
   responsibleAdminId: null,
   description: '',
@@ -59,6 +60,7 @@ watch(visible, (value) => {
     responsibleLoading.value = false
     return
   }
+  form.businessCode = props.community?.businessCode ?? ''
   form.name = props.community?.name ?? ''
   form.address = props.community?.address ?? ''
   form.responsibleAdminId = props.community?.responsibleAdminId ?? null
@@ -78,6 +80,7 @@ async function handleSubmit(): Promise<void> {
     /* 责任人以null明确解除；联系人姓名和电话不作为输入。 */
     const payload: ICreateCommunityDTO = {
       name: form.name.trim(),
+      ...(form.businessCode?.trim() ? { businessCode: form.businessCode.trim() } : {}),
       address: form.address.trim(),
       responsibleAdminId: form.responsibleAdminId ?? null,
       description: (form.description ?? '').trim() || undefined,
@@ -105,6 +108,7 @@ async function handleSubmit(): Promise<void> {
 <template>
   <el-dialog v-model="visible" :title="community ? '编辑社区' : '新建社区'" width="520px">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+      <el-form-item label="社区编号"><el-input v-model="form.businessCode" maxlength="32" placeholder="创建留空自动分配；与内部ID不同" /></el-form-item>
       <el-form-item label="社区名称" prop="name">
         <el-input v-model="form.name" placeholder="请输入社区名称" maxlength="50" />
       </el-form-item>
@@ -121,6 +125,7 @@ async function handleSubmit(): Promise<void> {
           </el-option-group>
         </el-select>
       </el-form-item>
+      <p class="form-hint">设置责任人时同步授予本社区管理权限；更换或清除只移除责任人来源，超管手工授权保留。权限发生变化后需重新登录。</p>
       <el-form-item label="联系电话"><span>{{ selectedResponsible?.phone || '未设置' }}</span></el-form-item>
       <el-form-item label="社区简介" prop="description">
         <el-input

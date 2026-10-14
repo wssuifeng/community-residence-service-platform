@@ -17,6 +17,9 @@ public class CommunityVO {
     @Schema(description = "社区名称")
     private String name;
 
+    @Schema(description = "本级业务编号，与内部主键分离")
+    private String businessCode;
+
     @Schema(description = "详细地址")
     private String address;
 
@@ -52,6 +55,7 @@ public class CommunityVO {
         vo.setId(entity.getId());
         vo.setResponsibleAdminId(entity.getResponsibleAdminId());
         vo.setName(entity.getName());
+        vo.setBusinessCode(entity.getBusinessCode());
         vo.setAddress(entity.getAddress());
         vo.setContactPhone(entity.getContactPhone());
         vo.setContactPerson(entity.getContactPerson());

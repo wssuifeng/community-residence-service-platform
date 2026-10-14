@@ -35,6 +35,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BuildingService {
 
+    private final StructureBusinessCodeService structureBusinessCodeService;
+
     private final BuildingMapper buildingMapper;
     private final UnitMapper unitMapper;
     private final HouseMapper houseMapper;
@@ -59,6 +61,7 @@ public class BuildingService {
         building.setName(dto.getName());
         building.setFloors(dto.getFloors());
         building.setDescription(dto.getDescription());
+        building.setBusinessCode(structureBusinessCodeService.building(building.getCommunityId(), dto.getBusinessCode(), building.getName(), null));
         buildingMapper.insert(building);
         return BuildingVO.from(building);
     }
@@ -76,6 +79,7 @@ public class BuildingService {
         building.setName(dto.getName());
         building.setFloors(dto.getFloors());
         building.setDescription(dto.getDescription());
+        if (dto.getBusinessCode() != null && !dto.getBusinessCode().isBlank() && !dto.getBusinessCode().trim().equals(building.getBusinessCode())) building.setBusinessCode(structureBusinessCodeService.building(building.getCommunityId(), dto.getBusinessCode(), null, id));
         buildingMapper.updateById(building);
         return BuildingVO.from(building);
     }
@@ -228,6 +232,7 @@ public class BuildingService {
                 building.setName(item.getName());
                 building.setFloors(item.getFloors());
                 building.setDescription(item.getDescription());
+                building.setBusinessCode(structureBusinessCodeService.building(building.getCommunityId(), item.getBusinessCode(), building.getName(), null));
                 buildingMapper.insert(building);
                 rows.add(BatchCreateResultVO.Row.success(i + 1, building.getId()));
                 success++;

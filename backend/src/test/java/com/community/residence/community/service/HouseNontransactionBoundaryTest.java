@@ -21,7 +21,7 @@ class HouseNontransactionBoundaryTest {
  @Mock HouseMapper houseMapper; @Mock UnitMapper unitMapper; @Mock HouseStatusHistoryMapper historyMapper;
  @Mock ResidenceRelationMapper residenceRelationMapper; @Mock BuildingBoundaryService buildingBoundaryService; @Mock HouseLayoutService houseLayoutService;
  @InjectMocks HouseService service;
- private House house(){House h=new House();h.setId(1L);h.setUnitId(2L);h.setCommunityId(3L);h.setHouseNumber("101");h.setStatus("VACANT");return h;}
+ private House house(){House h=new House();h.setId(1L);h.setUnitId(2L);h.setCommunityId(3L);h.setHouseNumber("101");h.setFloor(1);h.setStatus("VACANT");return h;}
  private CreateHouseDTO dto(){CreateHouseDTO d=new CreateHouseDTO();d.setUnitId(2L);d.setHouseNumber("101");d.setFloor(1);d.setArea(BigDecimal.valueOf(60));d.setLayout("三室一厅一卫");return d;}
  private Unit unit(){Unit u=new Unit();u.setId(2L);u.setCommunityId(3L);u.setBuildingId(4L);u.setName("真实单元");return u;}
  @Test void missingHouseAndUnitDoNotWrite(){when(houseMapper.selectById(1L)).thenReturn(null);when(unitMapper.selectById(2L)).thenReturn(null);assertThatThrownBy(()->service.requireHouse(1L)).isInstanceOf(ResourceNotFoundException.class);assertThatThrownBy(()->service.create(dto())).isInstanceOf(ResourceNotFoundException.class);verify(houseMapper,never()).insert(any(House.class));}

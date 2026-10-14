@@ -783,6 +783,8 @@ public class HousingService {
                 .in(Unit::getId, houses.stream().map(House::getUnitId).distinct().toList()))) {
             unitsById.put(unit.getId(), unit);
         }
+        Map<Long, String> buildingCodes = new HashMap<>();
+        Map<Long, String> communityCodes = new HashMap<>();
         Map<Long, String> buildingNames = new HashMap<>();
         List<Long> buildingIds = unitsById.values().stream()
                 .map(Unit::getBuildingId).filter(Objects::nonNull).distinct().toList();
@@ -790,12 +792,14 @@ public class HousingService {
             for (Building building : buildingMapper.selectList(new LambdaQueryWrapper<Building>()
                     .in(Building::getId, buildingIds))) {
                 buildingNames.put(building.getId(), building.getName());
+                buildingCodes.put(building.getId(), building.getBusinessCode());
             }
         }
         Map<Long, String> communityNames = new HashMap<>();
         for (Community community : communityMapper.selectList(new LambdaQueryWrapper<Community>()
                 .in(Community::getId, houses.stream().map(House::getCommunityId).distinct().toList()))) {
             communityNames.put(community.getId(), community.getName());
+            communityCodes.put(community.getId(), community.getBusinessCode());
         }
         Map<Long, Housing> latestHousingByHouse = new HashMap<>();
         for (Housing housing : housingMapper.selectList(new LambdaQueryWrapper<Housing>()
@@ -823,6 +827,10 @@ public class HousingService {
                 item.setBuildingId(unit.getBuildingId());
                 item.setBuildingName(buildingNames.get(unit.getBuildingId()));
             }
+            item.setCommunityCode(communityCodes.get(house.getCommunityId()));
+            item.setBuildingCode(unit == null ? null : buildingCodes.get(unit.getBuildingId()));
+            item.setUnitCode(unit == null ? null : unit.getBusinessCode());
+            item.setBusinessCode(com.community.residence.community.service.StructureBusinessCodeService.join(item.getCommunityCode(), item.getBuildingCode(), item.getUnitCode(), house.getHouseNumber()));
             item.setHouseNumber(house.getHouseNumber());
             item.setFloor(house.getFloor());
             item.setArea(house.getArea());

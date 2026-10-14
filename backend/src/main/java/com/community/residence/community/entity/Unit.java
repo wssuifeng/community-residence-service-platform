@@ -28,6 +28,9 @@ public class Unit {
     @Schema(description = "单元名称")
     private String name;
 
+    @Schema(description = "本级业务编号，与内部主键分离")
+    private String businessCode;
+
     @Schema(description = "单元描述")
     private String description;
 

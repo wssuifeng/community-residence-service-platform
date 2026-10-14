@@ -18,6 +18,10 @@ public class CreateCommunityDTO {
     @Size(max = 100, message = "社区名称最多 100 字符")
     private String name;
 
+    @Schema(description = "业务编号；创建留空按本级结构分配，更新留空保留")
+    @Size(max=32)
+    private String businessCode;
+
     @Schema(description = "详细地址")
     @NotBlank(message = "详细地址不能为空")
     @Size(max = 255, message = "详细地址最多 255 字符")

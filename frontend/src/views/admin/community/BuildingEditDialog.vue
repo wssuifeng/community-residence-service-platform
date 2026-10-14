@@ -96,6 +96,7 @@ type BuildingForm = Omit<IBuildingDTO, 'communityId'> & { communityId?: number }
 const editForm = reactive<BuildingForm>({
   communityId: undefined,
   name: '',
+  businessCode: '',
   floors: 1,
   description: ''
 })
@@ -286,6 +287,7 @@ watch(visible, (value) => {
   if (!value) return
   if (props.building) {
     editForm.communityId = props.building.communityId
+    editForm.businessCode = props.building.businessCode ?? ''
     editForm.name = props.building.name
     editForm.floors = props.building.floors
     editForm.description = props.building.description ?? ''
@@ -528,7 +530,8 @@ const hiddenBuildingCount = computed(() =>
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="楼栋名称" prop="name">
+      <el-form-item label="楼栋编号"><el-input v-model="editForm.businessCode" maxlength="32" /></el-form-item>
+        <el-form-item label="楼栋名称" prop="name">
         <el-input v-model="editForm.name" placeholder="如：1号楼" maxlength="50" />
       </el-form-item>
       <el-form-item label="总层数" prop="floors">

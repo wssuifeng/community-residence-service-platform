@@ -28,6 +28,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UnitService {
 
+    private final StructureBusinessCodeService structureBusinessCodeService;
+
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final HouseMapper houseMapper;
@@ -42,6 +44,7 @@ public class UnitService {
         unit.setCommunityId(building.getCommunityId());
         unit.setName(dto.getName());
         unit.setDescription(dto.getDescription());
+        unit.setBusinessCode(structureBusinessCodeService.unit(unit.getBuildingId(), dto.getBusinessCode(), unit.getName(), null));
         unitMapper.insert(unit);
         return UnitVO.from(unit);
     }
@@ -57,6 +60,7 @@ public class UnitService {
         SecurityUtils.checkCommunityAccess(building.getCommunityId());
         unit.setName(dto.getName());
         unit.setDescription(dto.getDescription());
+        if (dto.getBusinessCode() != null && !dto.getBusinessCode().isBlank() && !dto.getBusinessCode().trim().equals(unit.getBusinessCode())) unit.setBusinessCode(structureBusinessCodeService.unit(unit.getBuildingId(), dto.getBusinessCode(), null, id));
         unitMapper.updateById(unit);
         return UnitVO.from(unit);
     }
@@ -132,6 +136,7 @@ public class UnitService {
                 unit.setBuildingId(building.getId());
                 unit.setCommunityId(building.getCommunityId());
                 unit.setName(name);
+                unit.setBusinessCode(structureBusinessCodeService.unit(unit.getBuildingId(), null, unit.getName(), null));
                 unitMapper.insert(unit);
                 rows.add(com.community.residence.community.vo.BatchCreateResultVO.Row.success(i + 1, unit.getId()));
                 success++;

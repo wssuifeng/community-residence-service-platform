@@ -139,18 +139,26 @@ public class SysUserService {
         if (!RoleConstants.ADMIN.equals(user.getRole())) {
             throw new BusinessException(ErrorCode.BIND_ROLE_INVALID);
         }
-        Community community = communityService.requireCommunity(dto.getCommunityId());
+        Community community = communityService.lockForAuthorization(dto.getCommunityId());
 
         Long exists = adminCommunityMapper.selectCount(new LambdaQueryWrapper<SysAdminCommunity>()
                 .eq(SysAdminCommunity::getAdminId, userId)
                 .eq(SysAdminCommunity::getCommunityId, dto.getCommunityId()));
         if (exists > 0) {
-            throw new BusinessException(ErrorCode.DATA_EXISTS, "该社区已绑定");
+            SysAdminCommunity present = adminCommunityMapper.selectOne(new LambdaQueryWrapper<SysAdminCommunity>()
+                    .eq(SysAdminCommunity::getAdminId, userId).eq(SysAdminCommunity::getCommunityId, dto.getCommunityId()));
+            if (present == null || Integer.valueOf(1).equals(present.getManualGranted()))
+                throw new BusinessException(ErrorCode.DATA_EXISTS, "该社区已绑定");
+            present.setManualGranted(1);
+            adminCommunityMapper.updateById(present);
+            return new BoundCommunityVO(community.getId(), community.getName(), community.getAddress(), null);
         }
 
         SysAdminCommunity binding = new SysAdminCommunity();
         binding.setAdminId(userId);
         binding.setCommunityId(dto.getCommunityId());
+        binding.setManualGranted(1);
+        binding.setResponsibleGranted(0);
         adminCommunityMapper.insert(binding);
 
         adminCommunityCacheService.evict(userId);
@@ -167,10 +175,16 @@ public class SysUserService {
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#userId", content = "'解绑社区：' + #communityId")
     public void unbindCommunity(Long userId, Long communityId) {
         requireUser(userId);
-        communityService.requireCommunity(communityId);
-        adminCommunityMapper.delete(new LambdaQueryWrapper<SysAdminCommunity>()
-                .eq(SysAdminCommunity::getAdminId, userId)
-                .eq(SysAdminCommunity::getCommunityId, communityId));
+        communityService.lockForAuthorization(communityId);
+        SysAdminCommunity binding = adminCommunityMapper.selectOne(new LambdaQueryWrapper<SysAdminCommunity>()
+                .eq(SysAdminCommunity::getAdminId, userId).eq(SysAdminCommunity::getCommunityId, communityId));
+        if (binding != null && Integer.valueOf(1).equals(binding.getResponsibleGranted())) {
+            binding.setManualGranted(0);
+            adminCommunityMapper.updateById(binding);
+        } else {
+            adminCommunityMapper.delete(new LambdaQueryWrapper<SysAdminCommunity>()
+                    .eq(SysAdminCommunity::getAdminId, userId).eq(SysAdminCommunity::getCommunityId, communityId));
+        }
         adminCommunityCacheService.evict(userId);
         tokenRevocationService.revokeAdminUser(userId);
         log.info("管理员解绑社区：adminId={}, communityId={}, operator={}",

@@ -23,6 +23,9 @@ public class BuildingVO {
     @Schema(description = "楼栋名称")
     private String name;
 
+    @Schema(description = "本级业务编号，与内部主键分离")
+    private String businessCode;
+
     @Schema(description = "楼层数")
     private Integer floors;
 
@@ -37,6 +40,7 @@ public class BuildingVO {
         vo.setId(entity.getId());
         vo.setCommunityId(entity.getCommunityId());
         vo.setName(entity.getName());
+        vo.setBusinessCode(entity.getBusinessCode());
         vo.setFloors(entity.getFloors());
         vo.setDescription(entity.getDescription());
         vo.setCreatedAt(entity.getCreatedAt());

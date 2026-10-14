@@ -15,6 +15,10 @@ public class HouseManageItemVO {
 
     @Schema(description = "房屋ID")
     private Long houseId;
+    @Schema(description="强制四段的房屋业务编号") private String businessCode;
+    @Schema(description="社区业务编号") private String communityCode;
+    @Schema(description="楼栋业务编号") private String buildingCode;
+    @Schema(description="单元业务编号") private String unitCode;
 
     @Schema(description = "所属社区ID")
     private Long communityId;
