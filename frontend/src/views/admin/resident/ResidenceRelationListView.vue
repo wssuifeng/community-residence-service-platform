@@ -6,7 +6,7 @@
  */
 import ResidentCoResidenceDialog from './ResidentCoResidenceDialog.vue'
 import { onMounted, reactive, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   getResidentList,
@@ -33,6 +33,12 @@ const moveOutMembers=ref<IResidenceRelation[]>([])
 const memberLoading=ref(false), memberError=ref('')
 let moveOutVersion=0
 function openCo(row:IResidenceRelation){coAnchor.value=row;coVisible.value=true}
+const householdMembers = ref<Record<number,IResidenceRelation[]>>({})
+const householdErrors = ref<Record<number,string>>({})
+let loadVersion = 0
+function accountSummary(row:IResidenceRelation):string {
+  return `${row.residentName || '未填写姓名'}（用户名 ${row.residentUsername || '未提供'}，手机号 ${row.residentPhone || '未提供'}，关系 #${row.id}）`
+}
 const loading = ref(false)
 const page = ref(1)
 const size = ref(10)
@@ -50,6 +56,8 @@ function statusTagType(status: ResidenceRelationStatus): 'completed' | 'canceled
 }
 
 async function load(): Promise<void> {
+  const version = ++loadVersion
+  householdMembers.value = {}; householdErrors.value = {}
   if (!residentId.value) {
     relations.value = []
     total.value = 0
@@ -62,13 +70,19 @@ async function load(): Promise<void> {
       size: size.value,
       status: statusFilter.value || undefined
     })
+    if (version !== loadVersion) return
     relations.value = result.records
     total.value = result.total
+    await Promise.all(result.records.filter(row => row.status==='ACTIVE' && !row.anchorRelationId && ['OWNER','TENANT'].includes(row.relationType ?? '')).map(async row => {
+      try { const members = await getResidenceDependents(row.id); if(version===loadVersion) householdMembers.value[row.id] = members }
+      catch { if(version===loadVersion) householdErrors.value[row.id] = '成员加载失败，点击管理重新查询' }
+    }))
   } catch {
+    if(version!==loadVersion)return
     relations.value = []
     total.value = 0
   } finally {
-    loading.value = false
+    if(version===loadVersion)loading.value = false
   }
 }
 
@@ -149,6 +163,11 @@ async function handleMoveOut(): Promise<void> {
   if (!moveOutTarget.value || memberLoading.value || memberError.value) return
   const valid = await moveOutFormRef.value?.validate().catch(() => false)
   if (!valid) return
+  if (!moveOutTarget.value.anchorRelationId) {
+    try {
+      await ElMessageBox.confirm(`主住户：${accountSummary(moveOutTarget.value)}。房屋：${moveOutTarget.value.houseLocation}。迁出日期：${moveOutForm.moveOutDate}。${moveOutMembers.value.length ? `以下同住关系同时结束：${moveOutMembers.value.map(accountSummary).join('；')}` : '当前无有效依赖成员。'} 账号和历史记录保留。`, '第二次确认主住户迁出', { type:'warning', confirmButtonText: '确认结束整户关系', cancelButtonText:'返回核对' })
+    } catch { return }
+  }
   moveOutLoading.value = true
   try {
     await moveOutResidenceRelation(moveOutTarget.value.id, {
@@ -220,6 +239,21 @@ onMounted(() => {
         :data="relations"
       >
         <el-table-column prop="residentName" label="居民" min-width="110" show-overflow-tooltip />
+        <el-table-column label="同住人员" min-width="240">
+          <template #default="{ row }">
+            <template v-if="row.status==='ACTIVE' && !row.anchorRelationId && ['OWNER','TENANT'].includes(row.relationType)">
+              <span v-if="householdErrors[row.id]">{{ householdErrors[row.id] }}</span>
+              <span v-else-if="!householdMembers[row.id]">正在核对…</span>
+              <span v-else-if="!householdMembers[row.id]?.length">暂无同住人员</span>
+              <div v-for="member in householdMembers[row.id]" :key="member.id" class="household-member">
+                <span>{{ member.residentName }} · {{ member.residentUsername }}（{{ member.relationType==='FAMILY'?'家属':'同住人员' }}）</span>
+                <el-button text size="small" type="warning" @click="openMoveOut(member)">个人迁出</el-button>
+              </div>
+              <el-button text type="primary" @click="openCo(row)">管理 / 添加同住人员</el-button>
+            </template>
+            <span v-else>{{ row.anchorRelationId ? `依赖主关系 #${row.anchorRelationId}` : '历史关系' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="houseLocation" label="房屋" min-width="180" show-overflow-tooltip />
         <el-table-column label="入住日期" width="120">
           <template #default="{ row }">{{ formatDate(row.moveInDate) }}</template>
@@ -274,6 +308,8 @@ onMounted(() => {
         :closable="false"
         class="move-out-tip"
       />
+      <p v-if="moveOutTarget">{{ moveOutTarget.anchorRelationId ? '迁出成员' : '主关系账号' }}：{{ accountSummary(moveOutTarget) }}</p>
+      <ul v-if="moveOutMembers.length"><li v-for="member in moveOutMembers" :key="member.id">{{ accountSummary(member) }}</li></ul>
       <el-alert v-if="memberError" :title="memberError" type="error" :closable="false" />
       <p v-if="memberLoading">正在核对同住关系…</p>
       <el-alert v-if="moveOutMembers.length" type="warning" :closable="false" :title="`同时结束以下 ${moveOutMembers.length} 名同住人员的居住关系：${moveOutMembers.map(m=>m.residentName).join('、')}。账号和历史保留。`" />

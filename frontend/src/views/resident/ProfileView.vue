@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -7,7 +8,6 @@ import { getLeaseList } from '@/api/lease'
 import type { IResident, IResidenceRelation, ResidenceRelationStatus } from '@/types/modules/resident'
 import type { ILeaseRecord, LeaseStatus } from '@/types/modules/lease'
 import { residenceRelationStatusLabels } from '@/types/modules/resident'
-import { leaseStatusLabels } from '@/types/modules/lease'
 import { formatDate } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
 
@@ -202,7 +202,7 @@ onMounted(load)
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
             <StatusTag
-              :label="leaseStatusLabels[row.status as LeaseStatus]"
+              :label="leaseDisplayLabel(row)"
               :type="leaseTagType(row.status)"
             />
           </template>

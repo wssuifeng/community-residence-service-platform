@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -20,7 +21,6 @@ import {
   depositRefundStatusLabels,
   depositStatusLabels,
   leasePaymentTypeLabels,
-  leaseStatusLabels
 } from '@/types/modules/lease'
 import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
 import type {
@@ -815,7 +815,7 @@ onMounted(() => {
                 协议{{ agreementLabel(group.current) }}
               </span>
               <span class="status-pill" :data-status="group.current.status">
-                {{ group.current.status === 'TO_SIGN' && group.current.agreementStatus === 'SIGNED' ? '待首期费用' : leaseStatusLabels[group.current.status] }}
+                {{ leaseDisplayLabel(group.current) }}
               </span>
 
               <!-- 押金状态徽标（R72）：未缴/已缴/退还中/已退还/已抵扣，居民侧只读 -->
@@ -918,7 +918,7 @@ onMounted(() => {
                 <span class="history-term mono">{{ row.startDate }} ~ {{ row.endDate }}</span>
                 <span class="history-rent">月租 {{ money(row.monthlyRent) }}</span>
                 <span class="status-pill" :data-status="row.status">
-                  {{ leaseStatusLabels[row.status] }}
+                  {{ leaseDisplayLabel(row) }}
                 </span>
               </div>
             </div>
@@ -1125,7 +1125,7 @@ onMounted(() => {
           >
             <span class="switch-house">{{ row.houseLocation }}</span>
             <span class="switch-meta">
-              {{ leaseStatusLabels[row.status] }} · 押金{{ depositLabel(row) }}
+              {{ leaseDisplayLabel(row) }} · 押金{{ depositLabel(row) }}
             </span>
           </button>
         </div>

@@ -8,6 +8,7 @@ import { createHousing, updateHousing, updateHousingStatus, getHousingDetail } f
 import { http } from '@/utils/request'
 import type { ICommunity, IBuilding, IUnit } from '@/types/modules/community'
 import type { HousingRentType } from '@/types/modules/housing'
+import { houseStatusLabels } from '@/types/modules/community'
 import { housingRentTypeLabels } from '@/types/modules/housing'
 
 /**
@@ -25,7 +26,7 @@ import type { HouseManageItem } from '@/types/modules/housing'
 const HOUSING_PLACEHOLDER = '/housing-placeholder.png'
 
 const router = useRouter()
-const occupancyLabels: Record<string, string> = { FREE: '可申请', APPLYING: '申请待审核', TO_SIGN: '待签约', WAITING_FIRST_PAYMENT: '待首期费用', OCCUPIED: '已入住' }
+const occupancyLabels: Record<string, string> = { FREE: '可申请', APPLYING: '申请待审核', TO_SIGN: '待签约', WAITING_FIRST_PAYMENT: '待支付首期费用', OCCUPIED: '已入住' }
 
 
 /* ===================== 筛选 + 卡片列表 ===================== */
@@ -580,6 +581,11 @@ async function handleBatchSubmit(): Promise<void> {
         <div class="card-body">
           <h3 class="card-title">{{ locationOf(item) }}</h3>
           <p class="card-community">{{ item.communityName }}</p>
+          <p class="card-occupancy">
+            <strong>{{ `房屋：${(houseStatusLabels as Record<string,string>)[item.houseStatus] ?? item.houseStatus}` }}</strong>
+            <span v-if="item.housing"> · 挂牌：{{ item.housing.status==='AVAILABLE' ? '发布中' : '已下线' }} · {{ occupancyLabels[item.housing.occupancy ?? 'FREE'] }}</span>
+          </p>
+          <p v-if="item.housing && item.housing.occupancy!=='FREE'" class="card-community">{{ item.housing.rentType==='RENT' ? '出租挂牌不对公众展示，解除占用后按发布状态恢复。' : '出售仅提供信息展示，不表示房屋空置。' }}</p>
           <p class="card-meta">
             <span>{{ item.floor }} 层</span>
             <span>{{ item.area != null ? `${item.area} ㎡` : '-' }}</span>

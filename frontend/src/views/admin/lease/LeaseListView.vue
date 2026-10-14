@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { leaseHouseholdNotice } from '@/utils/leaseHousehold'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -252,7 +253,7 @@ const emptyText = computed(() => {
   if (hasFilter.value) return '无符合筛选条件的租约'
   return {
     active: '暂无在租租约',
-    toSign: '暂无待签约租约',
+    toSign: '暂无待签约 / 待支付租约',
     expiring: '暂无即将到期租约',
     expired: '暂无已到期租约',
     history: '暂无历史租约'
@@ -279,7 +280,7 @@ function statusTagView(row: ILeaseRecord): { label: string; type: TagType } {
   }
   const map: Record<Exclude<LeaseStatus, 'ACTIVE'>, { label: string; type: TagType }> = {
     PENDING: { label: '待审核', type: 'pending' },
-    TO_SIGN: { label: '待签约', type: 'pending' },
+    TO_SIGN: { label: leaseDisplayLabel(row), type: 'pending' },
     MOVED_OUT: { label: '已搬出', type: 'canceled' },
     ARCHIVED: { label: '已归档', type: 'canceled' },
     REJECTED: { label: '已驳回', type: 'rejected' }
@@ -349,7 +350,7 @@ async function transitionStatus(
 async function handleApprove(row: ILeaseRecord): Promise<void> {
   if (row.status !== 'PENDING') return
   try {
-    await ElMessageBox.confirm('审核通过后租约进入待签约；管理员发出协议，居民同意后才会生效。',
+    await ElMessageBox.confirm('审核通过后租约进入待签约；管理员发出协议，居民同意且首期费用支付成功后才会生效。',
       '租约审批通过', { type: 'info', confirmButtonText: '确认', cancelButtonText: '取消' })
   } catch { return }
   await transitionStatus(row, 'TO_SIGN', '已审核通过，租约进入待签约')
@@ -727,7 +728,7 @@ onMounted(() => {
         :aria-selected="activeTab === 'toSign'"
         @click="switchTab('toSign')"
       >
-        待签约
+        待签约 / 待支付
         <span v-if="toSignCount > 0" class="tab-badge is-warning">{{ toSignCount }}</span>
       </button>
       <button

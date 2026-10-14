@@ -221,11 +221,11 @@ describe('LeaseListView · 首期结清口径与入口收敛（DEF-111）', () =
     expect(buttonTexts(wrapper)).toContain('待支付首期费用')
   })
 
-  it('TO_SIGN且SIGNED显示待首期费用并开放首期入口', async () => {
+  it('TO_SIGN且SIGNED显示待支付首期费用并开放首期入口', async () => {
     mocks.state.leases = [lease({ id: 52, status: 'TO_SIGN', agreementStatus: 'SIGNED' })]
     mocks.state.payments = { 52: [] }
     const wrapper = await mountList()
-    expect(wrapper.text()).toContain('待首期费用')
+    expect(wrapper.text()).toContain('待支付首期费用')
     expect(buttonTexts(wrapper)).toContain('待支付首期费用')
     expect(wrapper.text()).toContain('支付成功后才正式入住')
   })

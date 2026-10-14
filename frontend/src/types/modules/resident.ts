@@ -238,6 +238,7 @@ export interface IResidenceRelation {
   id: number
   residentId: number
   residentName: string
+  residentUsername?: string
   residentPhone?: string
   communityId: number
   houseId: number
@@ -260,6 +261,7 @@ export interface IHouseResident {
   id: number
   residentId: number
   residentName: string
+  residentUsername?: string
   residentPhone?: string
   communityId?: number
   houseId?: number

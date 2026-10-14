@@ -25,6 +25,9 @@ public class RelationVO {
     @Schema(description = "居民姓名")
     private String residentName;
 
+    @Schema(description="居民用户名；独立账号，不表示父子账号")
+    private String residentUsername;
+
     @Schema(description = "居民手机号")
     private String residentPhone;
 
