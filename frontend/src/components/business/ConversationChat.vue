@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { listConversationMessages, sendConversationMessage } from '@/api/conversation'
+import { getLeaseAgreement } from '@/api/agreement'
+import AgreementSignPanel from './AgreementSignPanel.vue'
 import type { IConversationMessage, IConversationParticipant } from '@/types/modules/conversation'
 import { conversationRoleLabels } from '@/types/modules/conversation'
 import { subscribe, isWsConnected } from '@/utils/websocket'
@@ -55,6 +57,41 @@ const POLL_RELAXED_INTERVAL = 15000
 const POLL_FALLBACK_INTERVAL = 5000
 
 const userStore = useUserStore()
+const instance = getCurrentInstance()
+const agreementRole = computed<'ADMIN' | 'RESIDENT' | null>(() => {
+  const role = userStore.user?.role
+  if (role === 'RESIDENT') return 'RESIDENT'
+  if (role === 'ADMIN' || role === 'SUPER_ADMIN') return 'ADMIN'
+  return null
+})
+const snapshotVisible = ref(false)
+const openingSnapshot = ref(false)
+const snapshotLeaseId = ref<number | null>(null)
+const snapshotAgreementId = ref<number | undefined>()
+
+/* 主会话页已提供完整协议操作；其他嵌入入口复用精确快照的只读面板，
+   不依赖缺失的事件监听，也不让服务人员得到正文入口。权限仍由后端校验。 */
+async function openAgreementSnapshot(agreementId: number): Promise<void> {
+  if (!agreementRole.value || openingSnapshot.value) return
+  if (instance?.vnode.props?.onOpenAgreement) {
+    emit('openAgreement', agreementId)
+    return
+  }
+  const conversationId = props.conversationId
+  const role = agreementRole.value
+  openingSnapshot.value = true
+  try {
+    const agreement = await getLeaseAgreement(agreementId)
+    if (props.conversationId !== conversationId || agreementRole.value !== role) return
+    snapshotLeaseId.value = agreement.leaseId
+    snapshotAgreementId.value = agreementId
+    snapshotVisible.value = true
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '协议快照加载失败，请稍后重试')
+  } finally {
+    openingSnapshot.value = false
+  }
+}
 
 const messages = ref<IConversationMessage[]>([])
 const messageInput = ref('')
@@ -205,7 +242,12 @@ onUnmounted(() => {
         <div class="bubble">
           <p class="bubble-meta">{{ message.senderName }} · {{ formatDateTime(message.createdAt) }}</p>
           <p class="bubble-content">{{ message.content }}</p>
-          <button v-if="message.messageType==='LEASE_AGREEMENT' && message.senderRole==='SYSTEM' && message.agreementId" type="button" class="agreement-message" @click="emit('openAgreement',message.agreementId)">租赁协议 #{{ message.agreementId }} · 查看协议快照</button>
+          <template v-if="message.messageType === 'LEASE_AGREEMENT' && message.senderRole === 'SYSTEM' && message.agreementId">
+            <button v-if="agreementRole" type="button" class="agreement-message" :disabled="openingSnapshot" @click="openAgreementSnapshot(message.agreementId)">
+              租赁协议 #{{ message.agreementId }} · 查看协议快照
+            </button>
+            <p v-else class="agreement-access-hint">协议正文仅租约居民和管理方可查看</p>
+          </template>
         </div>
       </div>
     </div>
@@ -235,10 +277,21 @@ onUnmounted(() => {
     </footer>
     <footer v-else class="chat-readonly">仅会话参与者可参与沟通</footer>
     <div v-if="businessMenuVisible && !closed && !readOnly" class="business-actions"><slot name="business-actions" /></div>
+    <el-dialog v-model="snapshotVisible" title="租赁协议快照（只读）" width="min(720px, 92vw)" destroy-on-close>
+      <AgreementSignPanel
+        v-if="snapshotVisible && snapshotLeaseId && agreementRole"
+        :lease-id="snapshotLeaseId"
+        :role="agreementRole"
+        :requested-agreement-id="snapshotAgreementId"
+        :read-only="true"
+        :self-managed="false"
+      />
+    </el-dialog>
   </section>
 </template>
 
 <style scoped>
+.agreement-access-hint { margin-top: 10px; color: var(--color-text-secondary); font-size: 12px; }
 .business-toggle{width:36px;height:36px;border:1px solid var(--color-border);border-radius:50%;background:transparent;font-size:24px;flex-shrink:0;cursor:pointer}
 .business-actions{display:flex;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--color-border);background:var(--color-bg)}
 .agreement-message{display:block;margin-top:10px;padding:10px 14px;border:1px solid var(--color-primary);border-radius:8px;background:var(--color-bg);color:var(--color-primary);cursor:pointer;max-width:100%;white-space:normal}

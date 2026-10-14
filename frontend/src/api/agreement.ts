@@ -64,7 +64,7 @@ export function getLeaseAgreement(id: number) {
   return http.get<ILeaseAgreement>(`/lease-agreements/${id}`)
 }
 
-/** 确认协议（按当前身份落居民方或管理方；双方确认后协议生效并同步租约签约状态） */
+/** 同意具体协议（仅承租居民本人；同步签约状态，租约仍须首期支付成功才生效） */
 export function confirmLeaseAgreement(id: number, data: IAgreementConfirmDTO) {
   return http.post<ILeaseAgreement>(`/lease-agreements/${id}/confirm`, data)
 }
