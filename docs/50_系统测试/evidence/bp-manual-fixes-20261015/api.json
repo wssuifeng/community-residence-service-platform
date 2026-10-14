@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-15",
+  "database": "community_residence_bp_20261015",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "响应与真实JWT均36h",
+      "passed": true
+    },
+    {
+      "name": "主关系可读成员及独立账号名",
+      "passed": true
+    },
+    {
+      "name": "删除影响列出有效关系并禁止删除",
+      "passed": true
+    },
+    {
+      "name": "绕过UI直接删仍拒绝",
+      "passed": true
+    },
+    {
+      "name": "普通ADMIN不能取删除影响",
+      "passed": true
+    },
+    {
+      "name": "缺确认版本不能删除空社区",
+      "passed": true
+    },
+    {
+      "name": "正确预览确认可删除空社区",
+      "passed": true
+    },
+    {
+      "name": "审批产生真实租约和会话",
+      "passed": true
+    },
+    {
+      "name": "占用来源对公众隐藏",
+      "passed": true
+    },
+    {
+      "name": "公共时段也不泄漏占用房源",
+      "passed": true
+    },
+    {
+      "name": "私有会话上下文精确来源",
+      "passed": true
+    },
+    {
+      "name": "本人占用房源可读私有可约时段",
+      "passed": true
+    },
+    {
+      "name": "会话预约复用真实来源和会话、不创建另一群",
+      "passed": true
+    },
+    {
+      "name": "重复时段仍冲突",
+      "passed": true
+    },
+    {
+      "name": "取消子预约不会关闭父租约群聊",
+      "passed": true
+    },
+    {
+      "name": "取消后私有时段恢复且上下文仍可读",
+      "passed": true
+    },
+    {
+      "name": "非参与者不可读会话上下文",
+      "passed": true
+    },
+    {
+      "name": "发协议自动发送可信业务消息",
+      "passed": true
+    },
+    {
+      "name": "客户端伪造业务字段忽略，仍为TEXT",
+      "passed": true
+    },
+    {
+      "name": "同意协议后仍未生效、不假造付款",
+      "passed": true
+    },
+    {
+      "name": "签约业务消息保留相同快照ID",
+      "passed": true
+    },
+    {
+      "name": "挂牌管理真实派生待首期支付",
+      "passed": true
+    },
+    {
+      "name": "没有支付/退款单",
+      "passed": true
+    },
+    {
+      "name": "合法OWNER已入住房屋的SALE挂牌仍显示OCCUPIED，未伪造租客支付生效",
+      "passed": true
+    },
+    {
+      "name": "36h新令牌登出后立即失效，原独立会话未受影响",
+      "passed": true
+    }
+  ]
+}

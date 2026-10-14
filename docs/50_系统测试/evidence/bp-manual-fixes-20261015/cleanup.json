@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-15",
+  "database": "community_residence_bp_20261015",
+  "ownIsolatedDatabaseRemoved": true,
+  "portsStopped": [
+    8087,
+    5181
+  ],
+  "normalServicesPreserved": [
+    8084,
+    5176
+  ],
+  "transactionsExecuted": false,
+  "userBrowserUntouched": true
+}

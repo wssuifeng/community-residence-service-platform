@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "phase": "50 steps 7/8",
+  "backend": {
+    "tests": 1037,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "files": 52,
+    "tests": 317,
+    "failures": 0,
+    "skipped": 0
+  },
+  "coveragePercent": {
+    "BRANCH": 65.62,
+    "LINE": 75.05
+  },
+  "typecheckAndBuild": true,
+  "isolatedApiChecks": 25,
+  "browserChecks": 13,
+  "browserPageErrors": [],
+  "normalReadonlyChecks": 11,
+  "normalBusinessCounts": [
+    1,
+    15,
+    10,
+    2,
+    0,
+    0
+  ],
+  "transactionsExecuted": false,
+  "manualResultsPrefilled": false,
+  "proposalsPending": [
+    "22_房屋图片归属与上传设计.md",
+    "23_租约默认起租日期处理方案.md"
+  ],
+  "deletionAudit": {
+    "community2BackupRelations": 2,
+    "community2BackupActiveRelations": 1,
+    "community2BackupMovedOutLeases": 1,
+    "deletionTimeFullCountsKnown": false,
+    "restoredNormalDatabase": false
+  },
+  "intermediateFailures": [
+    "初次Java类型命名错误，修正编译",
+    "旧批删调用、协议消息及标签/迁移数断言更新后回归",
+    "真实浏览器发现取消子预约关闭父租约群，单测红→修复→全新隔离库回归",
+    "成员异步等待、删除按钮选择器及脚本cwd探测修正，不作业务通过证据",
+    "凌晨两条既有时钟测试先跳过，01:00后全量重跑，最终跳过0"
+  ]
+}
