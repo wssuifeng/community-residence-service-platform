@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-14",
+  "scope": "50 steps7/8 bo implementation",
+  "backend": {
+    "tests": 1026,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "testFiles": 51,
+    "tests": 312,
+    "failed": 0,
+    "typecheck": "passed",
+    "build": "passed"
+  },
+  "coverage": {
+    "INSTRUCTION": {
+      "covered": 35396,
+      "missed": 12285,
+      "percent": 74.24
+    },
+    "BRANCH": {
+      "covered": 2698,
+      "missed": 1411,
+      "percent": 65.66
+    },
+    "LINE": {
+      "covered": 7114,
+      "missed": 2372,
+      "percent": 74.99
+    },
+    "COMPLEXITY": {
+      "covered": 1828,
+      "missed": 1588,
+      "percent": 53.51
+    },
+    "METHOD": {
+      "covered": 860,
+      "missed": 493,
+      "percent": 63.56
+    },
+    "CLASS": {
+      "covered": 149,
+      "missed": 68,
+      "percent": 68.66
+    }
+  },
+  "isolatedApiChecks": 34,
+  "browserChecks": 19,
+  "normalReadonlyChecks": 14,
+  "deployedJarSha256": "d11669fd5cfb32fae6b6005a1219d1ea8335bcc749db0d358d4043b53112fdfe",
+  "deployedArtifactMatchesBuilt": true,
+  "transactionsExecuted": false,
+  "userManualResultsFilled": false,
+  "remotePushExecuted": false,
+  "notes": [
+    "FIRST payment activation gate remains unchanged.",
+    "Direct lease termination is protected by explicit dependent confirmation; validated by unit tests, not a real transaction.",
+    "V35 initial unsigned-key mismatch found and repaired only in fresh isolated database.",
+    "Playwright selector failures were test-tool issues; not recorded as passing business tests."
+  ]
+}

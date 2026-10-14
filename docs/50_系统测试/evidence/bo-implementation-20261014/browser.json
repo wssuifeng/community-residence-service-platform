@@ -1,0 +1,83 @@
+{
+  "checks": [
+    {
+      "name": "普通管理员按钮列出同住成员",
+      "passed": true
+    },
+    {
+      "name": "同住弹窗768无页面横向溢出",
+      "passed": true
+    },
+    {
+      "name": "已有独立账号同住登记真实按钮提交",
+      "passed": true
+    },
+    {
+      "name": "主住户迁出明确列出三成员",
+      "passed": true
+    },
+    {
+      "name": "整户按钮明确发送依赖确认",
+      "passed": true
+    },
+    {
+      "name": "整户真实提交通过",
+      "passed": true
+    },
+    {
+      "name": "主关系及依赖全部结束且历史保留",
+      "passed": true
+    },
+    {
+      "name": "整户结束房屋恢复空置",
+      "passed": true
+    },
+    {
+      "name": "业务编号查看正确四段且无对照数据导出",
+      "passed": true
+    },
+    {
+      "name": "查看开关再次点击隐藏编号表",
+      "passed": true
+    },
+    {
+      "name": "只下载九列空白账号示例模板",
+      "passed": true
+    },
+    {
+      "name": "多选编辑初始未勾选不能提交",
+      "passed": true
+    },
+    {
+      "name": "多选编辑没有楼层可变控件",
+      "passed": true
+    },
+    {
+      "name": "多选编辑768无页面溢出",
+      "passed": true
+    },
+    {
+      "name": "取消户型勾选后真实载荷只改描述",
+      "passed": true
+    },
+    {
+      "name": "多屋实际保存且户型保持",
+      "passed": true
+    },
+    {
+      "name": "单屋入口同样使用字段意图与只读楼层",
+      "passed": true
+    },
+    {
+      "name": "单屋入口真实保存只改选定朝向",
+      "passed": true
+    },
+    {
+      "name": "浏览器无脚本异常",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "externalOrFinancialRequestsBlocked": 0,
+  "userBrowserTouched": false
+}
