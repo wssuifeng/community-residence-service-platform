@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import HouseAttributesDialog from './HouseAttributesDialog.vue'
 import { createHouse, updateHouse } from '@/api/community'
 import type { IHouse, IHouseDTO, HouseStatus } from '@/types/modules/community'
 import { houseStatusLabels } from '@/types/modules/community'
@@ -120,9 +121,10 @@ async function handleSubmit(): Promise<void> {
 </script>
 
 <template>
-  <el-dialog
+  <HouseAttributesDialog v-if="house" v-model="visible" :houses="[house]" @saved="() => unitContext && emit('saved', unitContext.unitId)" />
+  <el-dialog v-else
     v-model="visible"
-    :title="isEdit ? `编辑房屋：${house?.houseNumber ?? ''}` : '快速添加房屋'"
+    title="快速添加房屋"
     width="480px"
   >
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">

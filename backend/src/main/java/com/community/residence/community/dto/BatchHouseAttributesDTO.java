@@ -14,9 +14,11 @@ public class BatchHouseAttributesDTO {
     @Schema(description = "所选房屋ID，最多1000套")
     @NotEmpty @Size(max=1000)
     private List<@NotNull @Positive Long> houseIds;
-    @Schema(description = "明确修改字段：houseNumber/floor/area/layout/orientation/description")
+    @Schema(description = "明确修改字段：houseNumber/area/layout/orientation/description，不支持修改楼层")
     @NotEmpty
     private Set<String> fields;
+    @Schema(description = "明确清除的所选文本字段，仅layout/orientation/description；未选字段保持原值")
+    private Set<String> clearFields;
     @Schema(description = "房号，仅单选可修改")
     @Size(max=20)
     private String houseNumber;
@@ -26,13 +28,13 @@ public class BatchHouseAttributesDTO {
     @Schema(description = "面积，平方米")
     @DecimalMin("0")
     private BigDecimal area;
-    @Schema(description = "户型，选中字段后空白表示清除")
+    @Schema(description = "户型，空白不自动清除，清除须明确指定clearFields")
     @Size(max=50)
     private String layout;
-    @Schema(description = "朝向，选中字段后空白表示清除")
+    @Schema(description = "朝向，空白不自动清除，清除须明确指定clearFields")
     @Size(max=20)
     private String orientation;
-    @Schema(description = "描述，选中字段后空白表示清除")
+    @Schema(description = "描述，空白不自动清除，清除须明确指定clearFields")
     @Size(max=1000)
     private String description;
 }
