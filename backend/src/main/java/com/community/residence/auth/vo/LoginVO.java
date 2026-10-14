@@ -15,7 +15,7 @@ public class LoginVO {
     @Schema(description = "JWT 访问令牌")
     private String token;
 
-    @Schema(description = "令牌有效期（秒）", example = "7200")
+    @Schema(description = "令牌有效期（秒）", example = "129600")
     private long expiresIn;
 
     @Schema(description = "用户摘要")
