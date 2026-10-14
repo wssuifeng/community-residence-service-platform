@@ -89,9 +89,8 @@ async function loadConversation(): Promise<void> {
 /* ------------------------------ 租约群聊业务入口（R69/R67/R64） ------------------------------ */
 
 /**
- * 预约看房：会话内不重复实现三步预约（房源页已有一套日历/时段/提交流程），
- * 跳房源 Hub 并把 fromLease 作为「本次看房归属哪份租约」的上下文提示；
- * 落地由旧路径 /resident/housings 的函数式 redirect 完成（顺带保证旧链接口径在线）。
+ * 预约看房：在原租约群内复用三步预约组件，通过私有上下文读取本人来源挂牌，
+ * 不再跳公开列表；本人的申请占用不放宽对其他居民和游客的公开门禁。
  */
 const viewingVisible=ref(false)
 function goReserveViewing(): void { viewingVisible.value=true }

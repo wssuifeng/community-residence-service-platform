@@ -8,8 +8,8 @@
     "skipped": 0
   },
   "frontend": {
-    "files": 52,
-    "tests": 317,
+    "files": 53,
+    "tests": 323,
     "failures": 0,
     "skipped": 0
   },
@@ -49,5 +49,14 @@
     "真实浏览器发现取消子预约关闭父租约群，单测红→修复→全新隔离库回归",
     "成员异步等待、删除按钮选择器及脚本cwd探测修正，不作业务通过证据",
     "凌晨两条既有时钟测试先跳过，01:00后全量重跑，最终跳过0"
-  ]
+  ],
+  "embeddedAgreementRegression": {
+    "tests": 6,
+    "initialFailures": 4,
+    "initialPassed": 2,
+    "finalPassed": 6,
+    "verification": "真实ConversationChat挂载，协议面板stub校验精确ID/只读/角色；既有AgreementSignPanel专项继续全量通过",
+    "browserChecksAdded": 0
+  },
+  "finalDeploymentAudit": "最终后端重启后再次通过11项正常只读核对及测试jar SHA对比；前端最终补修由5176 Vite更新"
 }
