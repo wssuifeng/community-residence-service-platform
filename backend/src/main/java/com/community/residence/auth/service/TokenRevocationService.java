@@ -35,8 +35,9 @@ public class TokenRevocationService {
     public static final String SCOPE_ADMIN = "A";
 
     private static final String KEY_PREFIX = "user:revoked:";
-    /** 吊销记录保留时长：与令牌最长生命周期一致（2h 后存量令牌自然过期） */
-    private static final Duration REVOKE_RETENTION = Duration.ofHours(2);
+    /** 与实际JWT配置同源，防止长令牌在吊销记录清理后重新有效。 */
+    @org.springframework.beans.factory.annotation.Value("${auth.jwt.access-ttl:36h}")
+    private Duration revokeRetention = Duration.ofHours(36);
 
     private final AuthTokenBlacklistMapper blacklistMapper;
     private final StringRedisTemplate redisTemplate;
@@ -58,13 +59,13 @@ public class TokenRevocationService {
         // 虚拟 jti：scope 前缀隔离两套账号体系，避免 userId 重叠互相误伤
         record.setJti("USER-" + scope + "-" + userId + "-" + UUID.randomUUID());
         record.setUserId(userId);
-        record.setExpireTime(LocalDateTime.now().plus(REVOKE_RETENTION));
+        record.setExpireTime(LocalDateTime.now().plus(revokeRetention));
         record.setReason("PERMISSION_CHANGE");
         blacklistMapper.insert(record);
 
         try {
             redisTemplate.opsForValue().set(KEY_PREFIX + scope + "-" + userId,
-                    String.valueOf(System.currentTimeMillis() / 1000), REVOKE_RETENTION);
+                    String.valueOf(System.currentTimeMillis() / 1000), revokeRetention);
         } catch (RedisConnectionFailureException e) {
             log.warn("Redis 不可用，用户吊销已写 DB，缓存未生效：scope={}, userId={}", scope, userId);
         }
@@ -120,7 +121,7 @@ public class TokenRevocationService {
         long epochSec = revokedTime.atZone(ZoneId.systemDefault()).toEpochSecond();
         try {
             long ttl = Duration.between(LocalDateTime.now(),
-                    revokedTime.plus(REVOKE_RETENTION)).toMillis();
+                    revokedTime.plus(revokeRetention)).toMillis();
             if (ttl > 0) {
                 redisTemplate.opsForValue().set(key, String.valueOf(epochSec), Duration.ofMillis(ttl));
             }

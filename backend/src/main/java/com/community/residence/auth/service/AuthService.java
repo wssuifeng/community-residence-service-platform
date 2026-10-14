@@ -99,7 +99,7 @@ public class AuthService {
                                  String realName, String role, Set<Long> communityIds) {
         return LoginVO.builder()
                 .token(token)
-                .expiresIn(7200)
+                .expiresIn(jwtUtil.accessTtlSeconds())
                 .user(LoginVO.UserSummary.builder()
                         .id(id).username(username).realName(realName)
                         .role(role).boundCommunities(communityIds)

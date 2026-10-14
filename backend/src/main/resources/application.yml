@@ -27,7 +27,7 @@ server:
 auth:
   jwt:
     secret: ${JWT_SECRET:dev-only-jwt-secret-0123456789abcdef-0123456789abcdef}
-    access-ttl: 2h
+    access-ttl: 36h
 
 # 文件上传本地存储目录（生产可替换为对象存储；FileUploadService 为唯一写入点）
 upload:
