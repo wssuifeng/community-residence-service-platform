@@ -19,7 +19,7 @@ public class ApproveApplicationDTO {
     private LocalDate leaseStartDate;
 
     @Schema(description = "租期结束日期")
-    @NotNull(message = "租期结束日期不能为空")
+
     private LocalDate leaseEndDate;
 
     @Schema(description = "月租金")
@@ -34,4 +34,8 @@ public class ApproveApplicationDTO {
     @Schema(description = "审核意见")
     @Size(max = 500, message = "审核意见最多 500 字符")
     private String remark;
+
+    @Schema(description="合同总月数；历史未知为空") private Integer contractMonths;
+    @Schema(description="首期支付月数，新约默认1") private Integer firstPaymentMonths;
+    @Schema(description="后续缴租周期月数，新约默认1") private Integer paymentCycleMonths;
 }

@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CoResidenceRegistrationTest {
+    @org.mockito.Mock private com.community.residence.lease.service.LeaseContractTermService termService;
  @Mock ResidenceDependencyService residenceDependencyService; @Mock ResidenceRelationMapper relationMapper;
  @Mock ResidentMapper residentMapper; @Mock HouseMapper houseMapper; @Mock UnitMapper unitMapper; @Mock BuildingMapper buildingMapper;
  @Mock LeaseRecordMapper leaseRecordMapper; @Mock LeaseService leaseService; @Mock ResidenceApplicationMapper applicationMapper;

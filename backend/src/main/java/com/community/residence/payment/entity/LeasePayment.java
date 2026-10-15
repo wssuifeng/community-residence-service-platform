@@ -54,4 +54,15 @@ public class LeasePayment {
 
     @Schema(description = "更新时间")
     private LocalDateTime updatedAt;
+
+    @Schema(description="合同段ID，新单必填") private Long termId;
+    @Schema(description="单价快照") private BigDecimal monthlyRentSnapshot;
+    @Schema(description="租金快照") private BigDecimal rentAmount;
+    @Schema(description="押金快照") private BigDecimal depositAmount;
+    @Schema(description="租金覆盖开始") private java.time.LocalDate periodStart;
+    @Schema(description="租金覆盖止日，含当天") private java.time.LocalDate periodEnd;
+    @Schema(description="渠道可支付截止") private LocalDateTime channelExpiresAt;
+    @Schema(description="本地截止，渠道截止后5分钟") private LocalDateTime expiresAt;
+    @Schema(description="结算异常，需核对") private String settlementIssue;
+    @Schema(description="异常成功结果实际渠道时间") private LocalDateTime channelSuccessAt;
 }

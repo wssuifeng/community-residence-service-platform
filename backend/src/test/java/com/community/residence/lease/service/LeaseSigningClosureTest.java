@@ -53,6 +53,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("租住签约闭环（R67/R69）")
 class LeaseSigningClosureTest {
+    @org.mockito.Mock private com.community.residence.lease.service.LeaseContractTermService termService;
 
     private static final Long LEASE_ID = 7L;
     private static final Long RESIDENT_ID = 1L;

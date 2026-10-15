@@ -45,6 +45,8 @@ vi.mock('@/api/lease', () => ({
 }))
 
 vi.mock('@/api/payment', () => ({
+  getRentQuote: async () => ({ months: 3, amount: 9000, periodStart: '2026-10-15', periodEnd: '2027-01-14' }),
+  createRentPayment: async () => mocks.createResult,
   listPaymentChannels: async () => mocks.channels,
   createFirstPayment: async (leaseId: number, dto: { channel: unknown }) => {
     mocks.createCalls.push({ leaseId, channel: dto?.channel })

@@ -59,10 +59,13 @@ class FirstPaymentActivationTest {
             communityMapper, changeLogService, payments, relationMapper, agreementMapper, conversationService);
         service = new PaymentService(payments, leaseMapper, admins, notifications, new PaymentProperties(), mock(PaymentChannelClient.class), mock(PaymentChannelClient.class));
         service.setSettlementInfrastructure(transactions, leases);
+        var terms=mock(com.community.residence.lease.service.LeaseContractTermService.class);
+        when(terms.canSettle(anyLong(),anyLong(),anyString())).thenReturn(true);
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"termService",terms);
         when(transactions.getTransaction(any())).thenAnswer(i -> new SimpleTransactionStatus());
         lease = new LeaseRecord(); lease.setId(7L); lease.setTenantId(8L); lease.setCommunityId(1L); lease.setHouseId(9L);
         lease.setStatus("TO_SIGN"); lease.setAgreementStatus("SIGNED"); lease.setStartDate(LocalDate.now()); lease.setEndDate(LocalDate.now().plusMonths(12)); lease.setMonthlyRent(new BigDecimal("3000")); lease.setDeposit(BigDecimal.ZERO);
-        payment = new LeasePayment(); payment.setId(10L); payment.setLeaseId(7L); payment.setResidentId(8L); payment.setPaymentNo("MEMORY-FIRST"); payment.setPaymentType("FIRST"); payment.setStatus("PENDING"); payment.setAmount(new BigDecimal("3000")); payment.setMonths(1);
+        payment = new LeasePayment(); payment.setId(10L); payment.setTermId(4L); payment.setDepositAmount(BigDecimal.ZERO); payment.setLeaseId(7L); payment.setResidentId(8L); payment.setPaymentNo("MEMORY-FIRST"); payment.setPaymentType("FIRST"); payment.setStatus("PENDING"); payment.setAmount(new BigDecimal("3000")); payment.setMonths(1);
         house = new House(); house.setId(9L); house.setStatus("VACANT");
         when(payments.selectById(10L)).thenReturn(payment); when(payments.selectByIdForUpdate(10L)).thenReturn(payment);
         when(leaseMapper.selectById(7L)).thenReturn(lease); when(leaseMapper.selectByIdForUpdate(7L)).thenReturn(lease);
@@ -99,6 +102,6 @@ class FirstPaymentActivationTest {
         lease.setStatus("ACTIVE"); service.settleSuccess(payment, confirmed()); verify(relationMapper, never()).insert(any(ResidenceRelation.class)); assertThat(payment.getStatus()).isEqualTo("SUCCESS");
     }
     @Test void cancelledLeaseRejectsActivation() {
-        lease.setStatus("REJECTED"); assertThatThrownBy(() -> service.settleSuccess(payment, confirmed())).isInstanceOf(com.community.residence.common.exception.BusinessException.class); verify(transactions).rollback(any()); assertThat(house.getStatus()).isEqualTo("VACANT");
+        lease.setStatus("REJECTED"); service.settleSuccess(payment, confirmed()); assertThat(payment.getSettlementIssue()).isNotBlank(); assertThat(payment.getStatus()).isEqualTo("PENDING"); assertThat(house.getStatus()).isEqualTo("VACANT");
     }
 }

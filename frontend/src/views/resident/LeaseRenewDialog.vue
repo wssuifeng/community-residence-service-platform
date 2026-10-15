@@ -5,6 +5,8 @@ import QRCode from 'qrcode'
 import {
   closePayment,
   createRenewPayment,
+  createRentPayment,
+  getRentQuote,
   getPaymentStatus,
   listPaymentChannels
 } from '@/api/payment'
@@ -17,7 +19,7 @@ import type {
 } from '@/types/modules/lease'
 
 /**
- * 续租支付弹窗（R61，v1.4）：三步流——①选月数与渠道（金额仅预览：月租×月数，
+ * 合同付款弹窗：三步流——①核对服务端报价与渠道（本次月数/金额/覆盖由合同段决定，
  * 实际金额由服务端计算，客户端不传金额，防篡改口径）→ ②渠道支付（支付宝整页表单
  * 经 Blob URL 在新窗口加载提交 / 微信 Native code_url 渲染二维码）→ ③轮询确认（3s 一次、
  * 上限 5 分钟；本地环境无公网回调，以主动查单替代）。
@@ -29,6 +31,7 @@ const props = defineProps<{
   /** 目标租约（弹窗打开期间由调用方保证非空） */
   lease: ILeaseRecord | null
   modelValue: boolean
+  purpose?: 'RENT' | 'RENEWAL'
 }>()
 
 const emit = defineEmits<{
@@ -44,7 +47,6 @@ const visible = computed({
 
 /* ------------------------------ 常量与展示映射 ------------------------------ */
 
-const MONTH_PRESETS = [1, 3, 6, 12] as const
 /** 轮询节奏：3 秒一次，累计上限 5 分钟（超时转失败态，真实结果由支付记录兜底可见） */
 const POLL_INTERVAL_MS = 3000
 const POLL_MAX_MS = 5 * 60 * 1000
@@ -63,27 +65,18 @@ function money(value: number | null | undefined): string {
 }
 
 /** 止期顺延 N 月（月末溢出回夹到目标月最后一天），仅作回读失败时的展示兜底 */
-function plusMonths(iso: string, months: number): string {
-  const date = new Date(`${iso}T00:00:00`)
-  if (Number.isNaN(date.getTime())) return iso
-  const day = date.getDate()
-  date.setDate(1)
-  date.setMonth(date.getMonth() + months)
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-  date.setDate(Math.min(day, lastDay))
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
-}
+
 
 /* ------------------------------ 流程状态 ------------------------------ */
 
 const step = ref<1 | 2 | 3>(1)
 /** 终态视图（success/failed）覆盖三步展示 */
 const result = ref<'none' | 'success' | 'failed'>('none')
-const failReason = ref<'closed' | 'abandoned' | 'timeout' | ''>('')
+const failReason = ref<'closed' | 'abandoned' | 'timeout' | 'review' | ''>('')
 
-const preset = ref<number | 'custom'>(3)
-const customMonths = ref(1)
+const quote = ref<ILeasePayment | null>(null)
+const quoteError = ref('')
+async function loadQuote(){quote.value=null;quoteError.value='';if(!props.lease)return;try{quote.value=await getRentQuote(props.lease.id,props.purpose ?? 'RENEWAL')}catch(e){quoteError.value=e instanceof Error?e.message:'报价读取失败'}}
 const channel = ref<PaymentChannel | null>(null)
 const channelOptions = ref<IPaymentChannelOption[]>([])
 const channelsLoading = ref(false)
@@ -96,13 +89,13 @@ const alipayBlocked = ref(false)
 const newEndDate = ref('')
 const qrCanvas = ref<HTMLCanvasElement | null>(null)
 
-const months = computed(() => (preset.value === 'custom' ? customMonths.value : preset.value))
-const amountPreview = computed(() =>
-  props.lease ? props.lease.monthlyRent * months.value : null
-)
+const months = computed(() => quote.value?.months ?? 1)
+const amountPreview = computed(() => quote.value?.amount ?? null)
 
 const failText = computed(() => {
   switch (failReason.value) {
+    case 'review':
+      return '收到异常付款结果，已保留记录，请联系管理方核对；租约不会自动恢复'
     case 'closed':
       return '支付单已关闭，租期未变更'
     case 'abandoned':
@@ -144,8 +137,8 @@ function pickChannel(item: IPaymentChannelOption): void {
 
 async function submitPayment(): Promise<void> {
   if (submitting.value || !props.lease) return
-  if (months.value < 1 || months.value > 36) {
-    ElMessage.warning('续租月数需在 1~36 之间')
+  if (!quote.value) {
+    ElMessage.warning(quoteError.value || '请先读取合同报价')
     return
   }
   if (!channel.value) {
@@ -155,7 +148,7 @@ async function submitPayment(): Promise<void> {
   submitting.value = true
   try {
     /* 金额服务端计算；同租约已有进行中单时幂等返回该单 */
-    const data = await createRenewPayment(props.lease.id, {
+    const data = await (props.purpose === 'RENT' ? createRentPayment : createRenewPayment)(props.lease.id, {
       months: months.value,
       channel: channel.value
     })
@@ -247,6 +240,7 @@ async function pollOnce(): Promise<void> {
     /* 重试可能已换新单，丢弃旧单迟到的响应 */
     if (payment.value?.paymentNo !== latest.paymentNo) return
     payment.value = latest
+    if(latest.settlementIssue){stopPolling();failReason.value='review';result.value='failed';return}
     if (latest.status === 'SUCCESS') {
       await settleSuccess()
     } else if (latest.status === 'CLOSED') {
@@ -269,13 +263,12 @@ async function settleSuccess(): Promise<void> {
   result.value = 'success'
   /* 新止期以服务端回读为准（后端已延展 end_date）；回读失败回落本地按月推算 */
   const leaseId = props.lease?.id
-  const paidMonths = payment.value?.months ?? months.value
   if (leaseId != null && props.lease) {
     try {
       const fresh = await getLease(leaseId)
       newEndDate.value = fresh.endDate
     } catch {
-      newEndDate.value = plusMonths(props.lease.endDate, paidMonths)
+      newEndDate.value = ''
     }
   }
   emit('success')
@@ -314,8 +307,6 @@ function resetDialog(): void {
   step.value = 1
   result.value = 'none'
   failReason.value = ''
-  preset.value = 3
-  customMonths.value = 1
   channel.value = null
   payment.value = null
   alipayBlocked.value = false
@@ -328,6 +319,7 @@ watch(
     if (open) {
       resetDialog()
       void loadChannels()
+      void loadQuote()
     } else {
       /* 关闭仅停轮询：进行中支付单保留，重开续租时幂等续接 */
       stopPolling()
@@ -341,12 +333,12 @@ onUnmounted(stopPolling)
 <template>
   <el-dialog
     v-model="visible"
-    :title="`续租 · ${lease?.houseLocation ?? ''}`"
+    :title="`${purpose==='RENT'?'合同内交租':'续租首笔租金'} · ${lease?.houseLocation ?? ''}`"
     width="480px"
     :close-on-click-modal="false"
   >
     <el-steps v-if="result === 'none'" :active="step - 1" simple class="flow-steps">
-      <el-step title="选月数渠道" />
+      <el-step title="核对报价与渠道" />
       <el-step title="支付" />
       <el-step title="确认结果" />
     </el-steps>
@@ -368,24 +360,8 @@ onUnmounted(stopPolling)
         </div>
       </dl>
 
-      <div class="field">
-        <p class="field-label">续租月数（1~36 个月）</p>
-        <div class="months-row">
-          <el-radio-group v-model="preset">
-            <el-radio-button v-for="m in MONTH_PRESETS" :key="m" :value="m">
-              {{ m }} 个月
-            </el-radio-button>
-            <el-radio-button value="custom">自定义</el-radio-button>
-          </el-radio-group>
-          <el-input-number
-            v-if="preset === 'custom'"
-            v-model="customMonths"
-            :min="1"
-            :max="36"
-            style="width: 120px"
-          />
-        </div>
-      </div>
+      <el-alert v-if="quoteError" :title="quoteError" type="error" :closable="false" />
+      <p v-else>本次{{ months }}个月，覆盖 {{ quote?.periodStart }} 至 {{ quote?.periodEnd }}。{{ purpose==='RENT'?'支付不会改变合同止期。':'仅已同意续租协议的首次支付会延长合同。' }}</p>
 
       <div class="field">
         <p class="field-label">支付渠道</p>
@@ -421,7 +397,7 @@ onUnmounted(stopPolling)
         <span class="amount-label">金额预览</span>
         <span class="amount-value">{{ money(amountPreview) }}</span>
         <span class="amount-note">
-          = {{ money(lease?.monthlyRent) }} × {{ months }} 个月，实际以支付页为准
+          服务端合同报价，金额和覆盖期以该单快照为准
         </span>
       </div>
     </div>
@@ -432,7 +408,7 @@ onUnmounted(stopPolling)
         <span class="mono">单号 {{ payment.paymentNo }}</span>
         <span>{{ paymentChannelLabels[payment.channel] }}</span>
         <span>{{ money(payment.amount) }}</span>
-        <span>续租 {{ payment.months }} 个月</span>
+        <span>租金覆盖 {{ payment.months }} 个月</span>
       </p>
 
       <template v-if="payment.channel === 'ALIPAY'">
@@ -477,9 +453,9 @@ onUnmounted(stopPolling)
             <path d="M20 6 9 17l-5-5" />
           </svg>
         </span>
-        <p class="result-title">续租成功，租期已延展</p>
+        <p class="result-title">租金支付成功，请以服务端合同期限为准</p>
         <p class="result-sub">
-          新止期 <strong class="mono">{{ newEndDate || '—' }}</strong>（{{ payment?.months ?? months }} 个月）
+          {{ purpose==='RENT'?'合同止期（不变）':'续租生效止期' }} <strong class="mono">{{ newEndDate || '—' }}</strong>；本次缴租{{ payment?.months ?? months }}个月
         </p>
         <p v-if="payment" class="result-sub mono">支付单号 {{ payment.paymentNo }}</p>
       </div>

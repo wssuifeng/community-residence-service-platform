@@ -91,6 +91,7 @@ public class WechatChannelClient implements PaymentChannelClient {
         request.setMchid(config.getMchid());
         request.setDescription(subject);
         request.setOutTradeNo(payment.getPaymentNo());
+        if(payment.getChannelExpiresAt()!=null)request.setTimeExpire(payment.getChannelExpiresAt().atOffset(java.time.ZoneOffset.ofHours(8)).format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         if (notifyUrl != null && !notifyUrl.isBlank()) {
             request.setNotifyUrl(notifyUrl);
         }

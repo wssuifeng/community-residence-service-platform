@@ -20,5 +20,8 @@ final class SettlementTestInfrastructure {
             return value != null ? value : payments.selectOne(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>());
         });
         service.setSettlementInfrastructure(manager, leaseService);
+        var terms=mock(com.community.residence.lease.service.LeaseContractTermService.class);
+        lenient().when(terms.canSettle(anyLong(),anyLong(),anyString())).thenReturn(true);
+        org.springframework.test.util.ReflectionTestUtils.setField(service,"termService",terms);
     }
 }

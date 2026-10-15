@@ -34,8 +34,8 @@ import java.util.Objects;
 public class LeaseChangeLogService {
 
     /** 参与属性 diff 的字段：contract_url 仅作附件留痕，不参与 diff 展示 */
-    private static final String[] DIFF_FIELD_NAMES = {"startDate", "endDate", "monthlyRent", "deposit", "remark"};
-    private static final String[] DIFF_FIELD_LABELS = {"租期开始日期", "租期结束日期", "月租金", "押金", "备注"};
+    private static final String[] DIFF_FIELD_NAMES = {"startDate", "endDate", "monthlyRent", "deposit", "remark", "contractMonths", "firstPaymentMonths", "paymentCycleMonths"};
+    private static final String[] DIFF_FIELD_LABELS = {"租期开始日期", "租期结束日期", "月租金", "押金", "备注", "合同总月数", "首期支付月数", "后续缴租周期月数"};
 
     private final LeaseChangeLogMapper changeLogMapper;
     private final ResidentMapper residentMapper;
@@ -89,12 +89,12 @@ public class LeaseChangeLogService {
         String[] current = {
                 str(before.getStartDate()), str(before.getEndDate()),
                 formatMoney(before.getMonthlyRent()), formatMoney(before.getDeposit()),
-                before.getRemark()
+                before.getRemark(), str(before.getContractMonths()), str(before.getFirstPaymentMonths()), str(before.getPaymentCycleMonths())
         };
         String[] target = {
                 str(after.getStartDate()), str(after.getEndDate()),
                 formatMoney(after.getMonthlyRent()), formatMoney(after.getDeposit()),
-                after.getRemark()
+                after.getRemark(), str(after.getContractMonths()), str(after.getFirstPaymentMonths()), str(after.getPaymentCycleMonths())
         };
         List<LeaseChangeLog> pending = new ArrayList<>();
         for (int i = 0; i < DIFF_FIELD_NAMES.length; i++) {
@@ -153,6 +153,10 @@ public class LeaseChangeLogService {
 
     private String formatMoney(BigDecimal value) {
         return value == null ? null : value.stripTrailingZeros().toPlainString();
+    }
+
+    private String str(Integer value) {
+        return value == null ? null : value.toString();
     }
 
     private String str(LocalDate value) {

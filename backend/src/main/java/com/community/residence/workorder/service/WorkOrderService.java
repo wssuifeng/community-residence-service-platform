@@ -144,7 +144,8 @@ public class WorkOrderService {
                         .eq(com.community.residence.resident.entity.ResidenceRelation::getResidentId, residentId)
                         .eq(com.community.residence.resident.entity.ResidenceRelation::getCommunityId,
                                 category.getCommunityId())
-                        .isNull(com.community.residence.resident.entity.ResidenceRelation::getMoveOutDate));
+                        .isNull(com.community.residence.resident.entity.ResidenceRelation::getMoveOutDate)
+                        .le(com.community.residence.resident.entity.ResidenceRelation::getMoveInDate,java.time.LocalDate.now()));
         if (activeRelation == 0) {
             throw new BusinessException(ErrorCode.FORBIDDEN,
                     "居住关系未建立或不在该社区，无法提交工单（请先完成入住申请）");

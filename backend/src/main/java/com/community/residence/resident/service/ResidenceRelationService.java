@@ -1,5 +1,7 @@
 package com.community.residence.resident.service;
 
+import java.time.LocalDate;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.community.residence.common.constant.ErrorCode;
@@ -56,7 +58,7 @@ public class ResidenceRelationService {
                 .eq(ResidenceRelation::getResidentId, residentId)
                 .orderByDesc(ResidenceRelation::getId);
         if ("ACTIVE".equals(status)) {
-            wrapper.isNull(ResidenceRelation::getMoveOutDate);
+            wrapper.isNull(ResidenceRelation::getMoveOutDate).le(ResidenceRelation::getMoveInDate,LocalDate.now());
         } else if ("MOVED_OUT".equals(status)) {
             wrapper.isNotNull(ResidenceRelation::getMoveOutDate);
         }

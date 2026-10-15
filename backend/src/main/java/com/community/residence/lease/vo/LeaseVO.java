@@ -87,6 +87,11 @@ public class LeaseVO {
         vo.setContractUrl(entity.getContractUrl());
         vo.setRemark(entity.getRemark());
         vo.setCreatedAt(entity.getCreatedAt());
+        vo.setContractMonths(entity.getContractMonths()); vo.setFirstPaymentMonths(entity.getFirstPaymentMonths());vo.setPaymentCycleMonths(entity.getPaymentCycleMonths());
         return vo;
     }
+
+    @Schema(description="合同总月数；历史未知为空") private Integer contractMonths;
+    @Schema(description="首期支付月数，新约默认1") private Integer firstPaymentMonths;
+    @Schema(description="后续缴租周期月数，新约默认1") private Integer paymentCycleMonths;
 }

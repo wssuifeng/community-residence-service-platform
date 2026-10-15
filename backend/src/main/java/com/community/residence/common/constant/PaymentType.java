@@ -7,6 +7,7 @@ package com.community.residence.common.constant;
  */
 public final class PaymentType {
 
+    public static final String RENT = "RENT";
     public static final String FIRST = "FIRST";
     public static final String RENEWAL = "RENEWAL";
 

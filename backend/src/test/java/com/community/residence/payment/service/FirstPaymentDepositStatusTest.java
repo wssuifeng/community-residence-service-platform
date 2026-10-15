@@ -104,6 +104,8 @@ class FirstPaymentDepositStatusTest {
         payment.setChannel(PaymentChannel.ALIPAY);
         payment.setMonths(1);
         payment.setAmount(new BigDecimal(amount));
+        payment.setTermId(7L);payment.setRentAmount(new BigDecimal("3000"));payment.setDepositAmount(new BigDecimal(amount).subtract(new BigDecimal("3000")));
+        payment.setPeriodStart(lease.getStartDate());payment.setPeriodEnd(lease.getStartDate().plusMonths(1).minusDays(1));
         payment.setStatus(PaymentStatus.PENDING);
         return payment;
     }
@@ -151,7 +153,7 @@ class FirstPaymentDepositStatusTest {
             assertThat(vo.getDepositAmount()).isEqualByComparingTo("6000.00");
             assertThat(vo.getRentAmount().add(vo.getDepositAmount())).isEqualByComparingTo(vo.getAmount());
             assertThat(vo.getPeriodStart()).isEqualTo(lease.getStartDate());
-            assertThat(vo.getPeriodEnd()).isEqualTo(lease.getStartDate().plusMonths(1));
+            assertThat(vo.getPeriodEnd()).isEqualTo(lease.getStartDate().plusMonths(1).minusDays(1));
             assertThat(vo.getChannelTradeNo()).isEqualTo("2026092022001");
         }
     }
@@ -183,6 +185,8 @@ class FirstPaymentDepositStatusTest {
     void renewalPayment_voCarriesPeriod() {
         LeasePayment payment = firstPayment("9000.00");
         payment.setPaymentType("RENEWAL");
+        payment.setRentAmount(new BigDecimal("9000"));payment.setDepositAmount(BigDecimal.ZERO);
+        payment.setPeriodStart(lease.getEndDate().plusDays(1));payment.setPeriodEnd(lease.getEndDate().plusDays(1).plusMonths(3).minusDays(1));
         payment.setMonths(3);
         when(paymentMapper.selectOne(any())).thenReturn(payment);
         when(paymentMapper.selectById(500L)).thenReturn(payment);
@@ -200,7 +204,7 @@ class FirstPaymentDepositStatusTest {
             assertThat(vo.getRentAmount()).isEqualByComparingTo("9000.00");
             assertThat(vo.getDepositAmount()).isEqualByComparingTo("0");
             assertThat(vo.getPeriodEnd()).isEqualTo(newEndDate);
-            assertThat(vo.getPeriodStart()).isEqualTo(newEndDate.minusMonths(3));
+            assertThat(vo.getPeriodStart()).isEqualTo(payment.getPeriodStart());
             assertThat(lease.getDepositStatus()).isEqualTo(DepositStatus.UNPAID);
         }
     }
