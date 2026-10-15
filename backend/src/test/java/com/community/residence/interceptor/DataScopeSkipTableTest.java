@@ -87,4 +87,18 @@ class DataScopeSkipTableTest {
 
         assertThat(sql).containsPattern("id IN \\((?:1, 2|2, 1)\\)");
     }
+    @Test
+    @DisplayName("父级已鉴权的新增子表没有community_id，ADMIN查询不得盲注")
+    void scopedChildTablesUseParentAuthorization() throws Exception {
+        for (String table : List.of("house_image", "lease_contract_term")) {
+            assertThat(rewriteAsCommunityAdmin(table)).as(table).doesNotContain("community_id");
+        }
+    }
+
+    @Test
+    @DisplayName("图片消息表具有community_id，仍保留数据库社区过滤")
+    void chatImageWithCommunityColumnStillFiltered() throws Exception {
+        assertThat(rewriteAsCommunityAdmin("chat_message_image")).contains("chat_message_image.community_id IN");
+    }
+
 }

@@ -51,6 +51,8 @@ public class DataScopeInterceptor implements InnerInterceptor {
             "lease_payment",
             /* 全局支付配置无社区列；管理接口由超管鉴权，运行期渠道门控内部读取。 */
             "payment_channel_config",
+            /* 子表不含社区列：相册经房屋、合同段经租约父级显式鉴权。 */
+            "house_image", "lease_contract_term",
             "conversation", "conversation_participant", "conversation_message",
             /* V18/V19：协议模板需同时可见全局模板（community_id 为空），
                租约变更历史与服务人员类别绑定表无 community_id 列，
