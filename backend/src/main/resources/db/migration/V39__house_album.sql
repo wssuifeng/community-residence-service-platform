@@ -1,0 +1,12 @@
+CREATE TABLE house_image (
+ id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+ house_id BIGINT UNSIGNED NOT NULL,
+ storage_key VARCHAR(500) NOT NULL,
+ kind VARCHAR(20) NOT NULL,
+ caption VARCHAR(200) NULL,
+ sort_order INT NOT NULL DEFAULT 0,
+ uploaded_by BIGINT UNSIGNED NOT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ KEY idx_house_image_order(house_id,sort_order,id),
+ CONSTRAINT fk_house_image_house FOREIGN KEY(house_id) REFERENCES house(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

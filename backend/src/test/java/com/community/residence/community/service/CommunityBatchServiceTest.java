@@ -49,7 +49,7 @@ class CommunityBatchServiceTest {
     void batchDelete_partialSuccess() {
         /* lenient：同一方法在批内以其他 ID 被调用，避免 strict-stubs 的参数不匹配判定 */
         lenient().doThrow(new ResourceNotFoundException("社区不存在"))
-                .when(communityService).deleteConfirmed(2L, null);
+                .when(communityService).deleteConfirmed(2L, null, null);
         when(communityService.getById(2L)).thenThrow(new ResourceNotFoundException("社区不存在"));
 
         BatchOperationResultVO vo = communityBatchService.batchDelete(idsDto(1L, 2L, 3L));
@@ -59,14 +59,14 @@ class CommunityBatchServiceTest {
         assertThat(vo.getFailures().get(0).getId()).isEqualTo(2L);
         assertThat(vo.getFailures().get(0).getName()).isNull();
         assertThat(vo.getFailures().get(0).getReason()).isEqualTo("社区不存在");
-        verify(communityService, times(3)).deleteConfirmed(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.isNull());
+        verify(communityService, times(3)).deleteConfirmed(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.isNull());
     }
 
     @Test
     @DisplayName("批量删除失败项回填社区名称：业务失败但社区仍存在时带上名称")
     void batchDelete_failureCarriesCommunityName() {
         lenient().doThrow(new BusinessException(ErrorCode.OPERATION_FAILED, "级联删除失败"))
-                .when(communityService).deleteConfirmed(2L, null);
+                .when(communityService).deleteConfirmed(2L, null, null);
         CommunityVO community = new CommunityVO();
         community.setId(2L);
         community.setName("退场社区");
@@ -87,7 +87,7 @@ class CommunityBatchServiceTest {
         BatchOperationResultVO vo = communityBatchService.batchDelete(idsDto(1L, 1L, 2L));
 
         assertThat(vo.getSuccessIds()).containsExactly(1L, 2L);
-        verify(communityService, times(2)).deleteConfirmed(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.isNull());
+        verify(communityService, times(2)).deleteConfirmed(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.isNull());
     }
 
     @Test
@@ -108,7 +108,7 @@ class CommunityBatchServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("50")
                 .hasMessageContaining("51");
-        verify(communityService, never()).deleteConfirmed(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.isNull());
+        verify(communityService, never()).deleteConfirmed(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.isNull());
     }
 
     /* ---- 批量状态变更 ---- */

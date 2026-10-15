@@ -261,6 +261,7 @@ export interface HousingBrief {
 }
 
 export interface HouseManageItem {
+  coverImage?: string | null
   businessCode?: string
   communityCode?: string
   buildingCode?: string

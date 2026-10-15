@@ -47,9 +47,10 @@ public interface HousingMapper extends BaseMapper<Housing> {
     Long rentalHistoryCount(@org.apache.ibatis.annotations.Param("id") Long id);
 
     @org.apache.ibatis.annotations.Select("<script>SELECT housing.id, CASE "
-        + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='ACTIVE') "
-        + "OR EXISTS (SELECT 1 FROM residence_relation r WHERE r.house_id=housing.house_id AND r.move_out_date IS NULL) "
+        + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='ACTIVE' AND l.start_date &lt;= CURDATE()) "
+        + "OR EXISTS (SELECT 1 FROM residence_relation r WHERE r.house_id=housing.house_id AND r.move_out_date IS NULL AND r.move_in_date &lt;= CURDATE()) "
         + "OR EXISTS (SELECT 1 FROM house h WHERE h.id=housing.house_id AND h.status='OCCUPIED') THEN 'OCCUPIED' "
+        + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='ACTIVE' AND l.start_date &gt; CURDATE()) THEN 'WAITING_MOVE_IN' "
         + "WHEN housing.rent_type='SALE' THEN 'FREE' "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='TO_SIGN' AND l.agreement_status='SIGNED') THEN 'WAITING_FIRST_PAYMENT' "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status IN ('PENDING','TO_SIGN')) THEN 'TO_SIGN' "
