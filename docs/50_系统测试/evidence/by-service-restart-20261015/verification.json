@@ -1,0 +1,111 @@
+{
+  "checkedAt": "2026-10-15T20:15:32+0800",
+  "source": "bx verified release",
+  "gitCommit": "6e87170",
+  "jar": "output\\runtime\\manual-bx-release-20261015.jar",
+  "jarSha256": "889b01cd2f1ec498178a84b97677a4f928194bed4e50af73ef1795e94e66fb7f",
+  "processes": {
+    "backend": 6476,
+    "frontend": 26808,
+    "port": 8084,
+    "frontendPort": 5176,
+    "jar": "D:\\code\\community-residence-service-platform\\output\\runtime\\manual-bx-release-20261015.jar"
+  },
+  "schemaVersion": 40,
+  "businessTables": 57,
+  "countsBefore": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 0,
+    "lease_record": 0,
+    "lease_payment": 0,
+    "lease_deposit_refund": 0
+  },
+  "countsAfter": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 0,
+    "lease_record": 0,
+    "lease_payment": 0,
+    "lease_deposit_refund": 0
+  },
+  "alipayConfiguration": {
+    "environment": "SANDBOX",
+    "configured": true,
+    "enabled": true,
+    "privateKeyConfigured": true,
+    "revision": 3
+  },
+  "checks": [
+    {
+      "name": "后端OpenAPI响应",
+      "passed": true
+    },
+    {
+      "name": "前端登录页响应",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "沙箱配置完整且启用",
+      "passed": true
+    },
+    {
+      "name": "支付配置及版本未改变",
+      "passed": true
+    },
+    {
+      "name": "居民渠道状态正确",
+      "passed": true
+    },
+    {
+      "name": "前端代理返回相同渠道状态",
+      "passed": true
+    },
+    {
+      "name": "社区管理员房屋管理接口正常",
+      "passed": true
+    },
+    {
+      "name": "社区管理员会话列表接口正常",
+      "passed": true
+    },
+    {
+      "name": "正常库V40与57业务表",
+      "passed": true
+    },
+    {
+      "name": "正常业务数量保持",
+      "passed": true
+    },
+    {
+      "name": "重启前后使用同一已验证JAR",
+      "passed": true
+    }
+  ],
+  "passed": 15,
+  "failed": 0,
+  "paymentConfigModified": false,
+  "externalTradingCalled": false,
+  "userBrowserOperated": false,
+  "userManualResultsFilled": false,
+  "alipayExternalAvailabilityVerified": false,
+  "preRestartObservedBackendFrontendHttp200": true
+}
