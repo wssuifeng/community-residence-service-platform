@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
+import NoticeBody from '@/components/business/NoticeBody.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -22,15 +24,6 @@ const nextNotice = ref<INotice | null>(null)
 const isPinned = computed(
   () => notice.value?.isPinned === 1 || notice.value?.pinned === true
 )
-
-/** 正文按空行分段，保持后端纯文本排版的阅读节奏 */
-const paragraphs = computed<string[]>(() => {
-  if (!notice.value) return []
-  return notice.value.content
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line !== '')
-})
 
 /* 上一篇/下一篇：无相邻公告接口，用列表接口取一页（后端按优先级+时间排序），
    在序列中定位当前公告取前后邻居；当前公告不在首页序列时降级为省略 */
@@ -70,6 +63,8 @@ async function load(): Promise<void> {
 }
 
 onMounted(load)
+
+useLiveRefresh(async()=>{if(!notice.value)return;const fresh=await getNotice(noticeId);notice.value=fresh;})
 </script>
 
 <template>
@@ -119,16 +114,8 @@ onMounted(load)
 
       <div class="article-divider"></div>
 
-      <!-- notice 无封面字段，统一用占位插画封面 -->
-      <div v-if="notice.images?.length" class="notice-images">
-        <el-image v-for="url in notice.images" :key="url" class="article-cover" :src="url" :alt="notice.title" :preview-src-list="notice.images" preview-teleported />
-      </div>
-
-      <div class="article-body">
-        <p v-for="(paragraph, index) in paragraphs" :key="index" class="article-paragraph">
-          {{ paragraph }}
-        </p>
-      </div>
+      <NoticeBody :body-json="notice.bodyJson" :content="notice.content" :images="notice.images" />
+      <p v-if="(notice.contentVersion??1)>1" class="revision-note">正文第{{notice.contentVersion}}版 · {{formatDateTime(notice.editedAt)}} 修订</p>
 
       <footer v-if="notice.endTime ?? notice.expireTime" class="article-expire">
         本公告有效期至 {{ formatDateTime(notice.endTime ?? notice.expireTime) }}

@@ -49,6 +49,7 @@ class NoticeReadReceiptAccessTest {
 
     @BeforeEach
     void fixture() {
+        org.mockito.Mockito.lenient().when(noticeMapper.updateLifecycle(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.anyString())).thenReturn(1);
         notice = new Notice(); notice.setId(10L); notice.setStatus("PUBLISHED");
         notice.setEndTime(LocalDateTime.now().plusDays(1)); notice.setViewCount(0);
         when(noticeMapper.selectById(10L)).thenReturn(notice);

@@ -98,8 +98,8 @@ public class NoticeController {
     @Operation(summary = "记录公告查看", description = "同一用户同一公告仅记录一次")
     @PreAuthorize("hasRole('RESIDENT')")
     @PostMapping("/{id}/view")
-    public ApiResponse<Void> recordView(@PathVariable Long id) {
-        noticeService.recordView(id);
+    public ApiResponse<Void> recordView(@PathVariable Long id,@RequestParam(required=false)Integer version) {
+        noticeService.recordView(id,version);
         return ApiResponse.success();
     }
 

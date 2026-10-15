@@ -20,6 +20,9 @@ public class NoticeViewRecordVO {
     @Schema(description = "居民姓名")
     private String residentName;
 
+    @Schema(description="该居民最后已读的正文版本")
+    private Integer contentVersion;
+
     @Schema(description = "查看时间")
     private LocalDateTime viewedAt;
 }

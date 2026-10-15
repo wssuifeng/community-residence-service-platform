@@ -46,6 +46,11 @@ public class CreateNoticeDTO {
     @Size(max = 5000, message = "公告内容最多 5000 字符")
     private String content;
 
+    @Schema(description="受限结构化正文JSON，可空兼容旧纯文本") @Size(max=100000)
+    private String bodyJson;
+    @Schema(description="编辑基于的版本，防止覆盖别人的更改")
+    private Integer expectedVersion;
+
     @Schema(description = "公告图片，仅平台上传；空数组明确移除，缺省更新时保持")
     @jakarta.validation.constraints.Size(max = 6, message = "公告最多6张图片")
     private String[] images;

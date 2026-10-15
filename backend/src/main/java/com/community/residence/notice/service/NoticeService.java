@@ -103,8 +103,8 @@ public class NoticeService {
 
         Notice notice = new Notice();
         notice.setTitle(dto.getTitle());
-        notice.setContent(dto.getContent());
-        if (dto.getImages() != null) notice.setImages(imagePolicy.normalize(dto.getImages(), notice.getImages()));
+        applyBody(notice,dto);
+        notice.setContentVersion(1);
         notice.setPublisherId(SecurityUtils.getUserId());
         notice.setStatus(NoticeStatus.DRAFT);
         notice.setPublishTime(dto.getPublishTime());
@@ -130,8 +130,10 @@ public class NoticeService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "NOTICE", targetId = "#id", content = "'更新公告：' + #dto.title")
     public NoticeVO update(Long id, CreateNoticeDTO dto) {
-        Notice notice = requireNotice(id);
+        Notice notice = dto.getExpectedVersion()==null?requireNotice(id):noticeMapper.lock(id);
+        if(notice==null)throw new ResourceNotFoundException("公告不存在");
         checkManageAccess(notice);
+        if(dto.getExpectedVersion()!=null && !dto.getExpectedVersion().equals(notice.getContentVersion()==null?1:notice.getContentVersion()))throw new BusinessException(ErrorCode.INVALID_PARAM,"公告已被他人修改，请重新读取，不覆盖当前内容");
         if (!NoticeStatus.DRAFT.equals(notice.getStatus()) && !NoticeStatus.WITHDRAWN.equals(notice.getStatus())) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "请先撤回公告，再编辑并重新发布");
         }
@@ -146,8 +148,9 @@ public class NoticeService {
         }
         notice.setTitle(dto.getTitle());
         notice.setStatus(NoticeStatus.DRAFT);
-        notice.setContent(dto.getContent());
-        if (dto.getImages() != null) notice.setImages(imagePolicy.normalize(dto.getImages(), notice.getImages()));
+        applyBody(notice,dto);
+        notice.setContentVersion((notice.getContentVersion()==null?1:notice.getContentVersion())+1);
+        notice.setEditedBy(SecurityUtils.getUserId());notice.setEditedAt(LocalDateTime.now());
         notice.setPublishTime(dto.getPublishTime());
         notice.setEndTime(resolveEndTime(dto));
         notice.setIsPinned(dto.getIsPinned() != null && dto.getIsPinned() == 1 ? 1 : 0);
@@ -167,6 +170,16 @@ public class NoticeService {
             noticeTargetMapper.insert(entity);
         }
         return toVO(notice);
+    }
+
+    private void applyBody(Notice notice,CreateNoticeDTO dto) {
+        if(dto.getBodyJson()!=null) {
+            var body=NoticeBodyPolicy.parse(dto.getBodyJson());notice.setBodyJson(body.json());notice.setContent(body.text());
+            notice.setImages(imagePolicy.normalize(body.images(),notice.getImages()));
+        } else {
+            if(notice.getBodyJson()!=null)throw new BusinessException(ErrorCode.INVALID_PARAM,"此公告已使用编辑器，请保留结构化正文，不使用旧纯文本客户端覆盖");
+            notice.setContent(dto.getContent());if(dto.getImages()!=null)notice.setImages(imagePolicy.normalize(dto.getImages(),notice.getImages()));
+        }
     }
 
     /* 失效时间解析：endTime 优先，其次前端表单字段名 expireTime（V12 接收映射），
@@ -354,7 +367,7 @@ public class NoticeService {
         notice.setStatus(NoticeStatus.PUBLISHED);
         notice.setPublishTime(publishTime);
         notice.setStartTime(publishTime);
-        noticeMapper.updateById(notice);
+        if(noticeMapper.updateLifecycle(notice,"DRAFT")!=1)throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,"公告状态已改变，请重新读取");
 
         for (Long residentId : noticeTargetResidentIds(notice.getId())) {
             notificationService.createForResident(residentId, null, "社区公告",
@@ -406,27 +419,33 @@ public class NoticeService {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "仅已发布的公告可撤回");
         }
         notice.setStatus(NoticeStatus.WITHDRAWN);
-        noticeMapper.updateById(notice);
+        if(noticeMapper.updateLifecycle(notice,"PUBLISHED")!=1)throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,"公告状态已改变，请重新读取");
         log.info("公告已撤回：noticeId={}, reason={}, operator={}", id, reason, SecurityUtils.getUserId());
     }
 
     /* 记录查看：同一用户同一公告仅一次（唯一约束兜底）；浏览计数直接累加（P2 优化 Redis） */
     @Transactional(rollbackFor = Exception.class)
-    public void recordView(Long id) {
+    public void recordView(Long id) { recordView(id,null); }
+    @Transactional(rollbackFor = Exception.class)
+    public void recordView(Long id,Integer readVersion) {
         Notice notice = requireNotice(id);
         Long userId = SecurityUtils.getUserId();
         checkResidentVisibility(notice, userId);
+        int version=readVersion==null?(notice.getContentVersion()==null?1:notice.getContentVersion()):readVersion;
+        if(version<1 || version>(notice.getContentVersion()==null?1:notice.getContentVersion()))throw new BusinessException(ErrorCode.INVALID_PARAM,"公告阅读版本无效");
+        viewRecordMapper.recordVersion(id,userId,version);
         Long exists = viewRecordMapper.selectCount(new LambdaQueryWrapper<NoticeViewRecord>()
                 .eq(NoticeViewRecord::getNoticeId, id)
                 .eq(NoticeViewRecord::getUserId, userId));
         if (exists == 0) {
             NoticeViewRecord record = new NoticeViewRecord();
             record.setNoticeId(id);
-            record.setUserId(userId);
-            viewRecordMapper.insert(record);
+            record.setUserId(userId);record.setContentVersion(version);
+            try { viewRecordMapper.insert(record); }
+            catch(org.springframework.dao.DuplicateKeyException duplicate) { viewRecordMapper.updateLatestVersion(id,userId,version);return; }
             notice.setViewCount(notice.getViewCount() == null ? 1 : notice.getViewCount() + 1);
-            noticeMapper.updateById(notice);
-        }
+            noticeMapper.incrementView(id);
+        } else viewRecordMapper.updateLatestVersion(id,userId,version);
     }
 
     /** 公告查看记录分页（ADMIN；公告归属已在入口校验） */
@@ -445,7 +464,7 @@ public class NoticeService {
                 .map(r -> new NoticeViewRecordVO(r.getUserId(),
                         residents.containsKey(r.getUserId())
                                 ? residents.get(r.getUserId()).getRealName() : null,
-                        r.getViewTime()))
+                        r.getContentVersion()==null?1:r.getContentVersion(),r.getViewTime()))
                 .toList();
         return PageVO.of(records, result.getTotal(), result.getCurrent(), result.getSize());
     }
@@ -468,7 +487,7 @@ public class NoticeService {
 
     /* 管理权限：SUPER_ADMIN 全局；ADMIN 限公告目标社区在绑定集合内（无目标的广播仅超管管理）。
        目标社区含 BUILDING 目标经归属社区解析（楼栋定向公告的管理范围与其归属社区一致） */
-    private void checkManageAccess(Notice notice) {
+    public void checkManageAccess(Notice notice) {
         if (SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
             return;
         }

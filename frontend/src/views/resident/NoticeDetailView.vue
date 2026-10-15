@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
+import NoticeBody from '@/components/business/NoticeBody.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getNotice, listNotices, recordNoticeView } from '@/api/notice'
@@ -19,11 +21,6 @@ const nextNotice = ref<INotice | null>(null)
 /* 置顶判定：isPinned 真实字段（0/1）优先，旧布尔命名留兜底（优先级是展示属性，不参与置顶） */
 const isPinned = computed(
   () => notice.value?.isPinned === 1 || notice.value?.pinned === true
-)
-
-/** 正文按空行分段展示 */
-const paragraphs = computed(() =>
-  (notice.value?.content ?? '').split(/\n+/).filter((line) => line.trim() !== '')
 )
 
 /* 上一篇/下一篇：无相邻公告接口，用列表接口取一页（后端按优先级+时间排序），
@@ -48,7 +45,7 @@ onMounted(async () => {
   try {
     notice.value = await getNotice(noticeId)
     /* 查看回执：失败不阻塞阅读（后端同一用户同一公告仅记录一次） */
-    recordNoticeView(noticeId).catch(() => undefined)
+    recordNoticeView(noticeId,notice.value?.contentVersion).catch(() => undefined)
     void loadNeighbors()
   } catch {
     notFound.value = true
@@ -56,6 +53,8 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+useLiveRefresh(async()=>{if(!notice.value)return;const oldVersion=notice.value.contentVersion;const fresh=await getNotice(noticeId);notice.value=fresh;if((oldVersion??1)!==(fresh.contentVersion??1))void recordNoticeView(noticeId,fresh.contentVersion).catch(()=>undefined)})
 </script>
 
 <template>
@@ -90,16 +89,8 @@ onMounted(async () => {
 
       <div class="article-divider"></div>
 
-      <!-- notice 无封面字段，统一用占位插画封面 -->
-      <div v-if="notice.images?.length" class="notice-images">
-        <el-image v-for="url in notice.images" :key="url" class="article-cover" :src="url" :alt="notice.title" :preview-src-list="notice.images" preview-teleported />
-      </div>
-
-      <div class="article-body">
-        <p v-for="(paragraph, index) in paragraphs" :key="index" class="article-paragraph">
-          {{ paragraph }}
-        </p>
-      </div>
+      <NoticeBody :body-json="notice.bodyJson" :content="notice.content" :images="notice.images" />
+      <p v-if="(notice.contentVersion??1)>1" class="revision-note">正文第{{notice.contentVersion}}版 · {{formatDateTime(notice.editedAt)}} 修订</p>
 
       <footer v-if="notice.endTime ?? notice.expireTime" class="article-expire">
         本公告有效期至 {{ formatDateTime(notice.endTime ?? notice.expireTime) }}

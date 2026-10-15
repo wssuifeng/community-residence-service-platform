@@ -94,6 +94,7 @@ class NoticeGuestVisibilityTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(noticeMapper.updateLifecycle(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.anyString())).thenReturn(1);
         publishedNotice = new Notice();
         publishedNotice.setId(1L);
         publishedNotice.setTitle("使用教程");

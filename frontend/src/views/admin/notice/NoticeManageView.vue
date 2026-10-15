@@ -4,12 +4,18 @@ function toLocalIso(date: Date): string {
   const pad = (value: number): string => String(value).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
-import ImageUploader from '@/components/common/ImageUploader.vue'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import NoticeBody from '@/components/business/NoticeBody.vue'
+import { legacyNoticeDocument, emptyNoticeDocument } from '@/utils/noticeDocument'
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
+const NoticeEditor=defineAsyncComponent(()=>import('@/components/business/NoticeEditor.vue'))
+import { computed, defineAsyncComponent, nextTick, onMounted, ref, watch } from 'vue'
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   createNotice,
+  reviseNotice,
+  listNoticeRevisions,
+  type NoticeRevision,
   deleteNotice,
   getNotice,
   listNoticeViewers,
@@ -134,6 +140,9 @@ const selectedId = ref<number | null>(null)
 const current = ref<INotice | null>(null)
 const detailLoading = ref(false)
 const editingId = ref<number | null>(null)
+const revisionMode=ref(false),editorBusy=ref(false),editVersion=ref(1),editorBaseline=ref('')
+const revisionHistory=ref<NoticeRevision[]>([]),historyVisible=ref(false)
+async function openHistory(){if(!current.value)return;try{revisionHistory.value=await listNoticeRevisions(current.value.id);historyVisible.value=true}catch(e){ElMessage.error(e instanceof Error?e.message:'版本记录读取失败')}}
 
 /** 右栏 URL 同步：view 清 action/id；create 写 ?action=create（任务 1 redirect 契约） */
 function syncQuery(next: PanelMode, id?: number): void {
@@ -185,6 +194,7 @@ async function loadDetail(id: number): Promise<void> {
 
 /** 选中列表项 → 右栏查看态（编辑/创建中切换时先离开并清理 URL） */
 async function select(notice: INotice): Promise<void> {
+  if(!(await mayLeaveEditor()))return
   if (mode.value !== 'view') {
     mode.value = 'view'
     editingId.value = null
@@ -194,7 +204,9 @@ async function select(notice: INotice): Promise<void> {
   await loadDetail(notice.id)
 }
 
-function enterCreate(writeUrl = true): void {
+async function enterCreate(writeUrl = true): Promise<void> {
+  if(mode.value!=='view' && !(await mayLeaveEditor()))return
+  revisionMode.value=false;editVersion.value=1
   editingId.value = null
   resetForm()
   mode.value = 'create'
@@ -206,8 +218,8 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
   formLoading.value = true
   try {
     const notice: INotice = await getNotice(id)
-    if (!['DRAFT','WITHDRAWN'].includes(notice.status)) {
-      ElMessage.warning('请先撤回公告再编辑')
+    if (!['DRAFT','WITHDRAWN','PUBLISHED'].includes(notice.status)) {
+      ElMessage.warning('当前公告不可编辑')
       mode.value = 'view'
       editingId.value = null
       syncQuery('view')
@@ -216,6 +228,8 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
     editingId.value = id
     selectedId.value = id
     mode.value = 'edit'
+    revisionMode.value=notice.status==='PUBLISHED';editVersion.value=notice.contentVersion??1
+    form.value.bodyJson=notice.bodyJson??JSON.stringify(legacyNoticeDocument(notice.content,notice.images??[]))
     form.value.title = notice.title
     form.value.content = notice.content
     form.value.images = [...(notice.images ?? [])]
@@ -262,6 +276,7 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
       }
     }
     if (writeUrl) syncQuery('edit', id)
+    editorBaseline.value=JSON.stringify({title:form.value.title,bodyJson:form.value.bodyJson})
     nextTick(() => formRef.value?.clearValidate())
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '公告加载失败')
@@ -274,7 +289,9 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
 }
 
 /** 取消编辑：有选中公告回其查看态，否则右栏空态 */
-function cancelEdit(): void {
+async function mayLeaveEditor(){if(mode.value==='view')return true;if(editorBusy.value||submitting.value||publishing.value)return false;if(editorBaseline.value===JSON.stringify({title:form.value.title,bodyJson:form.value.bodyJson}))return true;try{await ElMessageBox.confirm('正文或标题尚未保存，确认放弃本次修改？','保留编辑内容',{confirmButtonText:'放弃修改',cancelButtonText:'继续编辑',type:'warning'});return true}catch{return false}}
+async function cancelEdit(): Promise<void> {
+  if(!(await mayLeaveEditor()))return
   mode.value = 'view'
   editingId.value = null
   syncQuery('view')
@@ -422,6 +439,7 @@ async function loadBoundCommunities(): Promise<void> {
 const form = ref({
   title: '',
   content: '',
+  bodyJson: JSON.stringify(emptyNoticeDocument()),
   images: [] as string[],
   type: 'ANNOUNCEMENT' as NoticeType,
   priority: 'NORMAL' as NoticePriority,
@@ -496,6 +514,8 @@ const formRef = ref()
 function resetForm(): void {
   form.value.title = ''
   form.value.content = ''
+  form.value.bodyJson=JSON.stringify(emptyNoticeDocument())
+  editorBaseline.value=JSON.stringify({title:'',bodyJson:form.value.bodyJson})
   form.value.images = []
   form.value.type = 'ANNOUNCEMENT'
   form.value.priority = 'NORMAL'
@@ -530,6 +550,7 @@ function buildRequest(): INoticeSaveRequest {
     isPinned: form.value.isPinned ? 1 : 0,
     title: form.value.title.trim(),
     content: form.value.content.trim(),
+    bodyJson:form.value.bodyJson,expectedVersion:editVersion.value,
     images: form.value.images,
     type: form.value.type,
     priority: form.value.priority,
@@ -555,6 +576,7 @@ async function validate(): Promise<boolean> {
 /** 保存后刷新左栏并选中新项（新建翻回第 1 页：列表按发布时间倒序，新公告可见） */
 async function afterSaved(noticeId: number, created: boolean): Promise<void> {
   mode.value = 'view'
+  revisionMode.value=false
   editingId.value = null
   syncQuery('view')
   if (created) page.value = 1
@@ -564,10 +586,12 @@ async function afterSaved(noticeId: number, created: boolean): Promise<void> {
 
 /** 保存不发布（草稿） */
 async function handleSaveDraft(): Promise<void> {
+  if(editorBusy.value || submitting.value || publishing.value)return
   if (!(await validate())) return
   submitting.value = true
   try {
     const data = buildRequest()
+    if(revisionMode.value && editingId.value!==null){await reviseNotice(editingId.value,{title:data.title,bodyJson:form.value.bodyJson,expectedVersion:editVersion.value});ElMessage.success('新版公告已保存并生效，未重复群发');await afterSaved(editingId.value,false);return}
     if (mode.value === 'edit' && editingId.value !== null) {
       await updateNotice(editingId.value, data)
       ElMessage.success('草稿已保存')
@@ -586,6 +610,7 @@ async function handleSaveDraft(): Promise<void> {
 
 /** 保存并发布：先保存（新建或更新草稿），再调发布接口（publishTime 超前为定时发布） */
 async function handleSavePublish(): Promise<void> {
+  if(editorBusy.value || submitting.value || publishing.value || revisionMode.value)return
   if (!(await validate())) return
   publishing.value = true
   try {
@@ -639,10 +664,14 @@ onMounted(async () => {
     await loadDetail(notices.value[0].id)
   }
 })
+
+onBeforeRouteLeave(()=>mayLeaveEditor())
+onBeforeRouteUpdate(to=>{if(to.query.action===route.query.action&&to.query.id===route.query.id)return true;return mayLeaveEditor()})
+useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)await loadDetail(current.value.id)}})
 </script>
 
 <template>
-  <div class="admin-page">
+  <div class="admin-page" :class="{'notice-writing': mode!=='view'}">
     <AdminPageHeader title="公告管理" subtitle="面向居民的通知与公告发布管理">
       <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="enterCreate()">
         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -758,12 +787,12 @@ onMounted(async () => {
                   发布
                 </el-button>
                 <el-button
-                  v-if="['DRAFT','WITHDRAWN'].includes(current.status)"
+                  v-if="['DRAFT','WITHDRAWN','PUBLISHED'].includes(current.status)"
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
                   @click="enterEdit(current.id)"
                 >
-                  编辑
-                </el-button>
+                  {{current.status==='PUBLISHED'?'修订正文':'编辑'}}
+                </el-button><el-button v-if="current.status==='PUBLISHED'" @click="openHistory">版本记录</el-button>
                 <el-button
                   v-if="current.status === 'PUBLISHED'"
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
@@ -822,12 +851,8 @@ onMounted(async () => {
               </div>
             </dl>
 
-            <div v-if="current?.images?.length" class="notice-images"><el-image v-for="url in current.images" :key="url" :src="url" :preview-src-list="current.images" preview-teleported style="max-width:240px" /></div>
-        <div class="view-content">
-              <p v-for="(paragraph, index) in current.content.split(/\n+/).filter(Boolean)" :key="index">
-                {{ paragraph }}
-              </p>
-            </div>
+            <NoticeBody :body-json="current.bodyJson" :content="current.content" :images="current.images" />
+            <p v-if="(current.contentVersion??1)>1">正文第{{current.contentVersion}}版 · {{formatDateTime(current.editedAt)}}修订；原发布范围与时效不变。</p>
 
             <button type="button" class="viewer-entry" @click="openViewers">
               <svg class="viewer-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -843,15 +868,15 @@ onMounted(async () => {
         <template v-else-if="mode === 'create' || mode === 'edit'">
           <div v-loading="formLoading" class="edit-body">
             <header class="edit-head">
-              <h2 class="edit-title">{{ mode === 'edit' ? '编辑公告' : '发布公告' }}</h2>
+              <h2 class="edit-title">{{revisionMode?'修订公告正文':mode==='edit'?'编辑公告':'撰写公告'}}</h2>
             </header>
 
             <el-form
               ref="formRef"
               :model="form"
               :rules="rules"
-              label-width="100px"
-              class="notice-form"
+              label-position="top"
+              class="notice-form document-form"
             >
               <el-form-item label="公告标题" prop="title">
                 <el-input
@@ -862,21 +887,10 @@ onMounted(async () => {
                 />
               </el-form-item>
 
-              <el-form-item label="公告正文" prop="content">
-                <el-input
-                  v-model="form.content"
-                  type="textarea"
-                  :rows="10"
-                  maxlength="2000"
-                  show-word-limit
-                  placeholder="请输入公告正文，空行分段展示"
-                />
+              <el-form-item label="公告正文" prop="content" class="document-main">
+                <NoticeEditor v-model="form.bodyJson" :disabled="submitting||publishing||formLoading" @busy="editorBusy=$event" @summary="value=>{form.content=value.text;form.images=value.images}" />
               </el-form-item>
-                <el-form-item label="公告图片（可选）">
-                  <ImageUploader v-model="form.images" :limit="6" />
-                  <p>仅显示已上传并保存的图片；移除后保存即可清空。已发布公告须先撤回，编辑保存为草稿后再发布。</p>
-                </el-form-item>
-
+              <details v-if="!revisionMode" class="publication-settings"><summary>发布设置 · 范围、时间与优先级</summary>
               <el-form-item label="公告类型">
                 <el-select v-model="form.type" style="width: 200px">
                   <el-option
@@ -1042,12 +1056,14 @@ onMounted(async () => {
                 />
               </el-form-item>
 
+              </details>
+              <el-alert v-if="revisionMode" type="info" :closable="false" title="保存后新版正文立即生效。原发布范围、有效期及已读人数保留，不重复发送原发布通知。" />
               <el-form-item>
-                <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :loading="publishing" @click="handleSavePublish">
+                <el-button v-if="!revisionMode" v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :loading="publishing" :disabled="editorBusy||submitting||publishing" @click="handleSavePublish">
                   {{ publishButtonLabel }}
                 </el-button>
-                <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" :loading="submitting" @click="handleSaveDraft">保存不发布</el-button>
-                <el-button text @click="cancelEdit">取消</el-button>
+                <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" :type="revisionMode?'primary':'default'" :loading="submitting" :disabled="editorBusy||submitting||publishing" @click="handleSaveDraft">{{revisionMode?'保存修订并生效':'保存草稿'}}</el-button>
+                <el-button text :disabled="editorBusy||submitting||publishing" @click="cancelEdit">取消编辑</el-button>
               </el-form-item>
             </el-form>
           </div>
@@ -1059,6 +1075,8 @@ onMounted(async () => {
         </template>
       </section>
     </div>
+
+    <el-drawer v-model="historyVisible" title="公告版本记录" size="min(760px,94vw)"><el-empty v-if="!revisionHistory.length" description="尚无发布后修订；当前正文仍是原版"/><details v-for="revision in revisionHistory" :key="revision.contentVersion" class="revision-history"><summary>第{{revision.contentVersion}}版 · {{formatDateTime(revision.editedAt)}} · 编辑账号 #{{revision.editorId}}</summary><h2>{{revision.title}}</h2><NoticeBody :body-json="revision.bodyJson" :content="revision.content" :images="revision.images?.split(',').filter(Boolean)??[]"/></details></el-drawer>
 
     <!-- 查看记录抽屉（原详情页查看回执：统计 + 分页列表） -->
     <el-drawer v-model="viewerVisible" title="查看记录" size="520px">
@@ -1075,7 +1093,7 @@ onMounted(async () => {
         </div>
 
         <el-table v-loading="viewersLoading" :data="viewers" stripe>
-          <el-table-column prop="residentId" label="居民ID" width="100" />
+          <el-table-column prop="residentId" label="居民ID" width="100" /><el-table-column label="已读正文版本" width="120"><template #default="{row}">第{{row.contentVersion??1}}版</template></el-table-column>
           <el-table-column prop="residentName" label="居民姓名" min-width="160" />
           <el-table-column label="查看时间" width="200">
             <template #default="{ row }">{{ formatDateTime(row.viewedAt) }}</template>
@@ -1101,6 +1119,9 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.notice-writing .notice-master{grid-template-columns:minmax(210px,260px) minmax(0,1fr)}
+.document-form{max-width:none}.document-form :deep(.el-form-item__content){width:100%;display:block;margin-left:0!important}.document-form :deep(.el-form-item__label){font-size:13px;color:#687a93}.document-form :deep(input[placeholder="请输入公告标题"]){font-size:24px;font-weight:600;height:56px;color:#12263f}.publication-settings{border-top:1px solid #dce4ef;border-bottom:1px solid #dce4ef;padding:16px 0;margin:18px 0}.publication-settings>summary{cursor:pointer;font-size:14px;font-weight:600;color:#34465f;outline-offset:5px}.publication-settings[open]>summary{margin-bottom:18px}.revision-history{border-bottom:1px solid #dce4ef;padding:16px 0}.revision-history summary{cursor:pointer;color:#34465f}@media(max-width:1000px){.notice-writing .notice-master{grid-template-columns:1fr}.notice-writing .list-panel{display:none}}
+
 .btn-icon {
   width: 14px;
   height: 14px;

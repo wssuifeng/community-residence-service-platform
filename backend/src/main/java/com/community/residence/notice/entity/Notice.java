@@ -29,6 +29,11 @@ public class Notice {
     private String images;
 
 
+    @Schema(description="受限结构化正文JSON，旧公告为空") private String bodyJson;
+    @Schema(description="正文版本") private Integer contentVersion;
+    @Schema(description="最后编辑管理员ID") private Long editedBy;
+    @Schema(description="最后编辑时间") private LocalDateTime editedAt;
+
     @Schema(description = "发布人ID")
     private Long publisherId;
 
