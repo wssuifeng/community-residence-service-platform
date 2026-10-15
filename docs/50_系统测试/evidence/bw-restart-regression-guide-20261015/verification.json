@@ -1,0 +1,102 @@
+{
+  "checkedAt": "2026-10-15T17:51:27.724126+08:00",
+  "runtimeSourceCommit": "1766573",
+  "backendPort": 8084,
+  "frontendPort": 5176,
+  "databaseVersion": 40,
+  "businessTables": 57,
+  "checks": [
+    {
+      "name": "后端OpenAPI响应",
+      "passed": true
+    },
+    {
+      "name": "前端登录页HTTP200",
+      "passed": true
+    },
+    {
+      "name": "账号登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "账号登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "账号登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "账号登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "全部支付渠道禁用",
+      "passed": true
+    },
+    {
+      "name": "前端代理数据正确",
+      "passed": true
+    },
+    {
+      "name": "运行契约 /api/v1/houses/{houseId}/images",
+      "passed": true
+    },
+    {
+      "name": "运行契约 /api/v1/communities/{id}/deletion-impact",
+      "passed": true
+    },
+    {
+      "name": "运行契约 /api/v1/leases/{leaseId}/terms",
+      "passed": true
+    },
+    {
+      "name": "运行契约 /api/v1/statistics/todos",
+      "passed": true
+    },
+    {
+      "name": "管理社区读取",
+      "passed": true
+    },
+    {
+      "name": "游客房源读取",
+      "passed": true
+    },
+    {
+      "name": "数据库仍V40/57业务表",
+      "passed": true
+    }
+  ],
+  "passed": 15,
+  "failed": 0,
+  "channelsCalled": false,
+  "browserOperated": false,
+  "manualResultsFilled": false,
+  "businessDataReset": false,
+  "overdueUnpaidCandidates": 0,
+  "manualValidation": {
+    "file": "docs/50_系统测试/25_本轮修复定向回归手测.md",
+    "mainCases": 9,
+    "optionalCrossDayCases": 1,
+    "experienceObservations": 1,
+    "manualResultRows": 10,
+    "manualResultsBlank": true,
+    "linksChecked": 6,
+    "dateAmountQuotaExamplesPassed": true,
+    "readerReview": [
+      "普通/隐私/人员独立会话说明",
+      "服务人员社区和类别绑定前置",
+      "无图测试房屋且不清其他相册",
+      "可用协议模板前置",
+      "跨日起租自然等待可后补且不改历史",
+      "不生成交易订单"
+    ],
+    "documentationAudit": {
+      "baselineFindings": 1415,
+      "currentFindings": 1415,
+      "newFindingsIgnoringLineShifts": 0,
+      "fullAuditPassed": false,
+      "note": "保留历史审计项及通用工具与项目阶段依赖裁决差异；不为通过工具而改冻结文档"
+    }
+  }
+}
