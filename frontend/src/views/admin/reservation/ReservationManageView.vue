@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { reservationDayQuotas } from '@/utils/reservationQuota'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -36,8 +37,7 @@ import { formatDateTime } from '@/utils/date'
  * 数据决策：资源下拉聚合全部社区资源（本页无社区筛选能力，沿用任务 9 现状，
  * 重名资源以「名称（社区名）」消歧）；月范围 available-slots + reservations 一次拉取
  * （实测 44 条时段 6.2KB + 预约约 1KB，无需分周懒加载）；日格占用数取 listReservations
- * 占用态口径——后端 available-slots 的 currentBookings 仅统计与模板起止完全一致的
- * 预约，子区间预约不计数（已记报告供后端适配清单评估）；时段详情抽屉并入日详情面板。
+ * 时段额度口径——分母累加每个栅格容量，分子累加后端currentBookings，预约条数单独展示；日详情保留每段占用。
  */
 
 const route = useRoute()
@@ -341,38 +341,7 @@ async function loadMonth(): Promise<void> {
 
 /* ===================== 日格聚合：占用数/容量/待审核（占用口径见文件头） ===================== */
 
-interface DayAgg {
-  capacity: number
-  active: number
-  pending: number
-  full: boolean
-}
-
-const dayAggs = computed<Map<string, DayAgg>>(() => {
-  const map = new Map<string, DayAgg>()
-  const ensure = (iso: string): DayAgg => {
-    let agg = map.get(iso)
-    if (!agg) {
-      agg = { capacity: 0, active: 0, pending: 0, full: false }
-      map.set(iso, agg)
-    }
-    return agg
-  }
-  for (const slot of monthSlots.value) {
-    const agg = ensure(slot.date)
-    agg.capacity += slot.maxBookings
-    if (slot.status === 'FULL') agg.full = true
-  }
-  for (const row of monthReservations.value) {
-    if (row.status !== 'PENDING' && row.status !== 'RESERVED' && row.status !== 'CONFIRMED') {
-      continue
-    }
-    const agg = ensure(row.reserveDate)
-    agg.active += 1
-    if (row.status === 'PENDING') agg.pending += 1
-  }
-  return map
-})
+const dayAggs = computed(() => reservationDayQuotas(monthSlots.value, monthReservations.value))
 
 type DayTint = 'is-off' | 'is-free' | 'is-some' | 'is-full'
 
@@ -388,7 +357,7 @@ function dayTint(iso: string): DayTint {
 function dayBadgeText(iso: string): string {
   const agg = dayAggs.value.get(iso)
   if (!agg || agg.capacity === 0) return ''
-  return `${agg.active}/${agg.capacity}`
+  return `时段额度 ${agg.active}/${agg.capacity} · ${agg.reservations}条预约`
 }
 
 function dayPendingCount(iso: string): number {

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useAdminTodoStore } from '@/store/adminTodo'
 import ResidenceApplicationListView from '@/views/admin/resident/ResidenceApplicationListView.vue'
 import LeaseListView from './LeaseListView.vue'
 import HousingManageView from '@/views/admin/housing/HousingManageView.vue'
@@ -33,6 +34,7 @@ import AgreementTemplateView from './AgreementTemplateView.vue'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const todos=useAdminTodoStore()
 
 type HubTab = 'applications' | 'leases' | 'housings' | 'moveout' | 'agreements'
 
@@ -80,7 +82,7 @@ function switchTab(next: HubTab): void {
         :title="item.desc"
         @click="switchTab(item.value)"
       >
-        {{ item.label }}
+        {{ item.label }}<span v-if="(todos.counts[item.value]??0)>0" class="todo-dot" :title="`${todos.counts[item.value]}项待处理`" :aria-label="`${todos.counts[item.value]}项待处理`" />
       </button>
     </nav>
 
@@ -110,6 +112,7 @@ function switchTab(next: HubTab): void {
 </template>
 
 <style scoped>
+.todo-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc3545;margin-left:7px;vertical-align:middle}
 .tab-bar {
   display: flex;
   align-items: stretch;

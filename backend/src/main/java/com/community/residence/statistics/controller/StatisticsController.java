@@ -22,6 +22,7 @@ import java.util.Map;
 public class StatisticsController {
 
     private final StatisticsService statisticsService;
+    private final com.community.residence.statistics.service.AdminTodoService adminTodoService;
 
     @Operation(summary = "运营看板", description = "统计卡片 + 图表数据；社区管理员自动限定绑定社区")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
@@ -71,4 +72,9 @@ public class StatisticsController {
     public ApiResponse<Map<String, Object>> staffTrend(@RequestParam(defaultValue = "7") int days) {
         return ApiResponse.success(statisticsService.staffTrend(days));
     }
+    @Operation(summary = "管理员待办汇总", description = "仅可管理社区的真实待处理数量，不含交易查单")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
+    @GetMapping("/todos")
+    public ApiResponse<Map<String,Long>> todos(){return ApiResponse.success(adminTodoService.summary());}
+
 }
