@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
+import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -28,7 +30,7 @@ import { HOUSING_WEEKDAY_OPTIONS } from './housingWeekdayOptions'
 /**
  * 房源详情（管理端）：面包屑 + 图集/信息摘要白卡 + 看房时段配置 + 关联看房预约。
  * 信息展示与保存载荷均对齐后端 HousingVO/CreateHousingDTO 真实字段
- * （押金 deposit、图片逗号分隔串；接口文档的 availableDate/contactPerson 等漂移字段后端不返回）。
+ * （押金 deposit；图片只读真实房屋相册；接口文档的 availableDate/contactPerson 等漂移字段后端不返回）。
  * 「房源管理」面包屑即返回入口；?hash=#timeslots 锚定时段区（列表卡片「时段」动作落点）。
  */
 
@@ -55,15 +57,16 @@ function formatRent(value: number): string {
 
 const activeImage = ref(0)
 
-/** 图集兜底：无图房源使用官方示例图（与列表页轮换策略一致，固定第 1 张） */
+/** 图集兜底：无图房源使用明确无图空态（与列表页同源，不伪装实拍） */
 const galleryImages = computed<string[]>(() => {
   if (!housing.value) return []
-  return housing.value.images.length > 0 ? housing.value.images : ['/images/housing-sample-1.png']
+  return housing.value.images.length > 0 ? housing.value.images : [HOUSE_PHOTO_EMPTY]
 })
 
 /* ------------------------------ 信息编辑 ------------------------------ */
 
 const editable = ref(false)
+const albumVisible = ref(false)
 const saving = ref(false)
 
 const form = reactive({
@@ -71,7 +74,6 @@ const form = reactive({
   description: '',
   monthlyRent: 0,
   deposit: undefined as number | undefined,
-  imagesText: ''
 })
 
 function fillForm(source: IHousing): void {
@@ -79,13 +81,13 @@ function fillForm(source: IHousing): void {
   form.description = source.description
   form.monthlyRent = source.monthlyRent
   form.deposit = source.deposit ?? undefined
-  form.imagesText = source.images.join('\n')
 }
 
 async function loadDetail(): Promise<void> {
   loading.value = true
   try {
     housing.value = await getHousingDetail(housingId)
+    activeImage.value = 0
     fillForm(housing.value)
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载房源详情失败')
@@ -112,12 +114,7 @@ async function handleSave(): Promise<void> {
       title: form.title.trim(),
       description: form.description,
       monthlyRent: form.monthlyRent,
-      deposit: form.deposit,
-      images: form.imagesText
-        .split('\n')
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0)
-        .join(',')
+      deposit: form.deposit
     })
     ElMessage.success('房源信息已保存')
     editable.value = false
@@ -398,9 +395,7 @@ onMounted(() => {
               <el-input-number v-model="form.deposit" :min="0" :step="100" />
               <span class="form-unit">元（不填则面议）</span>
             </el-form-item>
-            <el-form-item label="图片">
-              <el-input v-model="form.imagesText" type="textarea" :rows="3" placeholder="图片地址，每行一个" />
-            </el-form-item>
+            <el-form-item label="房屋图片"><el-button @click="albumVisible = true">管理房屋相册</el-button><span>图片归属真实房屋，不在挂牌中保存副本。</span></el-form-item>
             <el-form-item label="描述">
               <el-input v-model="form.description" type="textarea" :rows="4" maxlength="1000" show-word-limit />
             </el-form-item>
@@ -502,6 +497,7 @@ onMounted(() => {
         <el-button type="primary" :loading="slotSaving" @click="handleSlotSave">保存</el-button>
       </template>
     </el-dialog>
+    <HouseImageDialog v-model="albumVisible" :house-id="housing?.houseId ?? null" @saved="loadDetail" />
   </section>
 </template>
 

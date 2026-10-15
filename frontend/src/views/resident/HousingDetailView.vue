@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -38,12 +39,12 @@ const rentTypeLabels: Record<string, string> = {
   SALE: '出售'
 }
 
-/** 图片兜底：无图房源使用官方示例图（与列表页一致，按房源 ID 固定取图） */
+/** 图片兜底：无图房源使用明确无图空态（与列表页同源，不伪装实拍） */
 const images = computed<string[]>(() => {
   if (!housing.value) return []
   return housing.value.images.length > 0
     ? housing.value.images
-    : [`/images/housing-sample-${(housingId % 3) + 1}.png`]
+    : [HOUSE_PHOTO_EMPTY]
 })
 
 const isResident = computed(() => userStore.isLoggedIn && userStore.role === 'RESIDENT')

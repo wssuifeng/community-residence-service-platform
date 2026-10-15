@@ -608,4 +608,20 @@ class ResidenceApplicationServiceTest {
             verify(applicationMapper, never()).insert(any(ResidenceApplication.class));
         }
     }
+    @Test void monthEndApprovalPreservesThirteenMonthsAndThreeMonthFirstPayment() {
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getUserId).thenReturn(2L);
+            when(applicationMapper.selectById(1L)).thenReturn(pendingApplication);
+            when(houseMapper.selectById(1L)).thenReturn(vacantHouse);
+            when(applicationMapper.update(isNull(), any())).thenReturn(1);
+            var dto = new ApproveApplicationDTO();
+            dto.setLeaseStartDate(LocalDate.of(2027, 1, 31));
+            dto.setContractMonths(13);dto.setFirstPaymentMonths(3);dto.setPaymentCycleMonths(1);dto.setMonthlyRent(BigDecimal.valueOf(3500));
+            applicationService.approve(1L,dto);
+            var lease = ArgumentCaptor.forClass(LeaseRecord.class);verify(leaseRecordMapper).insert(lease.capture());
+            assertThat(lease.getValue().getContractMonths()).isEqualTo(13);
+            assertThat(lease.getValue().getEndDate()).isEqualTo(LocalDate.of(2028,2,28));
+            assertThat(lease.getValue().getFirstPaymentMonths()).isEqualTo(3);
+        }
+    }
 }

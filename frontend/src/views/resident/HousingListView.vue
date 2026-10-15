@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import Pagination from '@/components/common/Pagination.vue'
@@ -61,8 +62,8 @@ const statusTagType: Record<HousingStatus, 'completed' | 'pending' | 'canceled'>
 }
 
 /** 图片兜底：images 为空时按列表序号取模轮换三张示例图 */
-function coverImage(housing: IHousing, index: number): string {
-  return housing.images[0] ?? `/images/housing-sample-${(index % 3) + 1}.png`
+function coverImage(housing: IHousing, _index: number): string {
+  return housing.images[0] ?? HOUSE_PHOTO_EMPTY
 }
 
 async function load(): Promise<void> {

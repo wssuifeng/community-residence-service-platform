@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -42,9 +43,9 @@ function isPinned(notice: INotice): boolean {
   return notice.isPinned === 1 || notice.pinned === true
 }
 
-/** 房源封面兜底：无图时按序号轮换官方示例图 */
-function coverImage(housing: IHousing, index: number): string {
-  return housing.images[0] ?? `/images/housing-sample-${(index % 3) + 1}.png`
+/** 房源封面兜底：无图时按序号轮换明确无图空态 */
+function coverImage(housing: IHousing, _index: number): string {
+  return housing.images[0] ?? HOUSE_PHOTO_EMPTY
 }
 
 /* Hero 搜索实装（DEF-047）：按搜索对象跳转对应列表页并透传 keyword

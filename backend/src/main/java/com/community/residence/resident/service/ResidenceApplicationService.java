@@ -141,7 +141,7 @@ public class ResidenceApplicationService {
         BigDecimal monthlyRent = application.getListedMonthlyRent() != null ? application.getListedMonthlyRent() : BigDecimal.ZERO;
         BigDecimal deposit = application.getListedDeposit();
         applyApproval(application, house, startDate, startDate.plusMonths(months).minusDays(1), monthlyRent, deposit,
-                null, "社区已开启入住申请自动通过，系统自动审批");
+                null, "社区已开启入住申请自动通过，系统自动审批", months, 1, 1);
         log.info("入住申请自动通过：applicationId={}, houseId={}, leaseMonths={}, rent={}",
                 application.getId(), house.getId(), months, monthlyRent);
     }
@@ -209,11 +209,7 @@ public class ResidenceApplicationService {
         int first=com.community.residence.lease.service.LeaseTermRules.months(dto.getFirstPaymentMonths(),1),cycle=com.community.residence.lease.service.LeaseTermRules.months(dto.getPaymentCycleMonths(),1);
         com.community.residence.lease.service.LeaseTermRules.validate(total,first,cycle);
         applyApproval(application, house, dto.getLeaseStartDate(), com.community.residence.lease.service.LeaseTermRules.end(dto.getLeaseStartDate(),total),
-                dto.getMonthlyRent(), dto.getDeposit(), SecurityUtils.getUserId(), dto.getRemark());
-        if (application.getLeaseId()!=null) {
-            LeaseRecord created=leaseRecordMapper.selectById(application.getLeaseId());
-            if(created!=null){created.setContractMonths(total);created.setFirstPaymentMonths(first);created.setPaymentCycleMonths(cycle);leaseRecordMapper.updateById(created);}
-        }
+                dto.getMonthlyRent(), dto.getDeposit(), SecurityUtils.getUserId(), dto.getRemark(), total, first, cycle);
         log.info("入住申请已通过：applicationId={}, operator={}", id, SecurityUtils.getUserId());
         return toVO(application);
     }
@@ -226,7 +222,7 @@ public class ResidenceApplicationService {
      */
     private void applyApproval(ResidenceApplication application, House house, LocalDate startDate,
                                LocalDate endDate, BigDecimal monthlyRent, BigDecimal deposit,
-                               Long reviewerId, String reviewRemark) {
+                               Long reviewerId, String reviewRemark, int total, int first, int cycle) {
         if (ResidenceDependencyService.isDependent(application.getRelationType())) throw new BusinessException(ErrorCode.INVALID_PARAM,"同住关系须通过登记同住人员入口依有效主关系建立");
         /* 居住关系：TENANT 建租住记录；OWNER/FAMILY 建关系即可（租约由 C3 独立登记） */
         ResidenceRelation relation = null;
@@ -248,9 +244,8 @@ public class ResidenceApplicationService {
             lease.setCommunityId(application.getCommunityId());
             lease.setHouseId(application.getHouseId());
             lease.setStartDate(startDate);
-            int total = (int) java.time.temporal.ChronoUnit.MONTHS.between(startDate,endDate.plusDays(1));
-            if(total<1) total=1;
-            lease.setContractMonths(total);lease.setFirstPaymentMonths(1);lease.setPaymentCycleMonths(1);
+            /* 保留已约定月数，不能从月末截短后的日期反算月份。 */
+            lease.setContractMonths(total);lease.setFirstPaymentMonths(first);lease.setPaymentCycleMonths(cycle);
             lease.setEndDate(com.community.residence.lease.service.LeaseTermRules.end(startDate,total));
             lease.setMonthlyRent(monthlyRent);
             lease.setDeposit(deposit);

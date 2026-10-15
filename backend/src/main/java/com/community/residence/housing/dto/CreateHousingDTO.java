@@ -41,7 +41,7 @@ public class CreateHousingDTO {
     @Pattern(regexp = "^(RENT|SALE)$", message = "租售类型仅支持 RENT/SALE")
     private String rentType;
 
-    @Schema(description = "房源图片（逗号分隔URL）")
+    @Schema(description = "历史兼容字段，已停写；真实图片只通过房屋相册上传维护")
     @Size(max = 1000, message = "图片URL总长最多 1000 字符")
     private String images;
 }

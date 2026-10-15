@@ -97,7 +97,9 @@ export interface HousingSaveDTO {
   description: string
   monthlyRent: number
   deposit?: number
-  images: string
+  /** 历史兼容字段，后端已停写；真实图片由房屋相册管理。 */
+  images?: string
+  rentType?: HousingRentType
 }
 
 /** 房源列表查询参数（接口设计.md 9.12.1.5；V9 增 layout/rentType，R53） */
