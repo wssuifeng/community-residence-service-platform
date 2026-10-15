@@ -1,0 +1,119 @@
+{
+  "checkedAt": "2026-10-16T00:57:31+0800",
+  "sourceCommit": "b0cc9f0",
+  "jar": "manual-ca-release-20261016.jar",
+  "jarSha256": "2a24b273d598f903aecac47e9064ad9600673dde57577b5aece1175e426067c7",
+  "schemaVersion": 42,
+  "businessTables": 60,
+  "countsBefore": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 2,
+    "lease_record": 2,
+    "lease_payment": 4,
+    "lease_deposit_refund": 0
+  },
+  "countsAfter": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 2,
+    "lease_record": 2,
+    "lease_payment": 4,
+    "lease_deposit_refund": 0
+  },
+  "alipayConfiguration": {
+    "environment": "SANDBOX",
+    "configured": true,
+    "enabled": true,
+    "privateKeyConfigured": true,
+    "revision": 3
+  },
+  "checks": [
+    {
+      "name": "旧正常后端PID和8084身份准确",
+      "passed": true
+    },
+    {
+      "name": "前端5176保持原进程，不停止",
+      "passed": true
+    },
+    {
+      "name": "发布前正常库为V40",
+      "passed": true
+    },
+    {
+      "name": "正常库私有备份完成，不入库",
+      "passed": true
+    },
+    {
+      "name": "正常后端新版OpenAPI就绪",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "演示账号可登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "沙箱配置完整且启用保持",
+      "passed": true
+    },
+    {
+      "name": "前端5176代理读取同一渠道状态",
+      "passed": true
+    },
+    {
+      "name": "管理端读取 /api/v1/communities/houses-manage",
+      "passed": true
+    },
+    {
+      "name": "管理端读取 /api/v1/notices",
+      "passed": true
+    },
+    {
+      "name": "管理端读取 /api/v1/conversations",
+      "passed": true
+    },
+    {
+      "name": "正常迁移至V42和60业务表",
+      "passed": true
+    },
+    {
+      "name": "正常业务数量保持",
+      "passed": true
+    },
+    {
+      "name": "成功及待支付订单状态金额覆盖保持",
+      "passed": true
+    },
+    {
+      "name": "渠道配置身份密钥摘要及版本保持",
+      "passed": true
+    },
+    {
+      "name": "原前端进程依旧运行",
+      "passed": true
+    }
+  ],
+  "passed": 19,
+  "failed": 0,
+  "privateBackupCreated": true,
+  "paymentConfigModified": false,
+  "externalTradingCalled": false,
+  "paymentRowsUnchanged": true,
+  "userBrowserOperated": false,
+  "frontendRestarted": false
+}

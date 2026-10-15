@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-10-16T01:01:48+08:00",
+  "backend": {
+    "tests": 1151,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "skippedCases": [
+      {
+        "suite": "com.community.residence.housing.service.HousingPastSlotFixTest",
+        "test": "create_todayEndedSlot_rejected",
+        "reason": "凌晨没有当天已结束且满足所需条件的时段，既有用例条件性跳过"
+      },
+      {
+        "suite": "com.community.residence.housing.service.HousingPastSlotFixTest",
+        "test": "availableSlots_todayEndedSlot_excluded",
+        "reason": "凌晨没有当天已结束且满足所需条件的时段，既有用例条件性跳过"
+      }
+    ]
+  },
+  "frontend": {
+    "files": 65,
+    "tests": 382,
+    "failures": 0,
+    "typecheckExit": 0,
+    "buildExit": 0
+  },
+  "backendPackageExit": 0,
+  "isolatedApiChecks": 19,
+  "isolatedBrowserChecks": 12,
+  "normalStartupChecks": 19,
+  "countsAreNotBusinessCaseTotals": true,
+  "normalRelease": {
+    "schemaVersion": 42,
+    "businessTables": 60,
+    "sourceCommit": "b0cc9f0",
+    "frontendRestarted": false,
+    "paymentsUnchanged": true,
+    "channelConfigurationUnchanged": true
+  },
+  "isolationCleanup": {
+    "database": "community_residence_ca_20261016",
+    "databaseDropped": true,
+    "backendAndFrontendStopped": true,
+    "redisFlushed": false
+  },
+  "paymentDiagnosis": {
+    "defect": "DEF-205",
+    "rootCauseConfirmed": false,
+    "remoteErrorFixed": false,
+    "userReportedNoFurtherDetails": true,
+    "existingSuccessfulAndPendingOrdersPreserved": true,
+    "observationAdded": "Server-Timing payment_app及本地SDK毫秒；不记录表单/签名/令牌/密钥"
+  },
+  "externalTradingCalled": false,
+  "userBrowserOperated": false,
+  "manualResultsPreFilled": false,
+  "pushed": false,
+  "stageClosed": false
+}

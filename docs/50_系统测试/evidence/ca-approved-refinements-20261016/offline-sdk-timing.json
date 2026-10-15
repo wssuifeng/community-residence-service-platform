@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-16T00:59:30+0800",
+  "sdk": "4.40.1006.ALL",
+  "gateway": "local discarded port 9; pageExecute only",
+  "cases": [
+    {
+      "type": "FIRST",
+      "localFormMillis": 155,
+      "formGenerated": true
+    },
+    {
+      "type": "RENT",
+      "localFormMillis": 5,
+      "formGenerated": true
+    }
+  ],
+  "realCredentialsLoaded": false,
+  "externalNetworkRequests": 0,
+  "normalApiCalled": false,
+  "remoteInvalidParameterReproduced": false,
+  "conclusion": "仅测本机合成参数表单生成耗时，不等于用户请求全耗时或支付宝收银台耗时，不证明远端错误已解决"
+}

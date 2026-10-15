@@ -1,0 +1,86 @@
+{
+  "checkedAt": "2026-10-15T16:51:56.727Z",
+  "database": "community_residence_ca_20261016",
+  "checks": [
+    {
+      "name": "源码V1～V42在全新专用库初始化",
+      "passed": true
+    },
+    {
+      "name": "单套挂牌与10个工作日看房时段同次创建",
+      "passed": true
+    },
+    {
+      "name": "单套非法自定义时段零挂牌写入",
+      "passed": true
+    },
+    {
+      "name": "工作日五天共同时间一次新增",
+      "passed": true
+    },
+    {
+      "name": "重复批次精确跳过",
+      "passed": true
+    },
+    {
+      "name": "相同但已停用的周模板不会被重启",
+      "passed": true
+    },
+    {
+      "name": "部分星期冲突整批零新增",
+      "passed": true
+    },
+    {
+      "name": "并发同资源同模板只创建一次",
+      "passed": true
+    },
+    {
+      "name": "两窗口修订同版本只有一份生效",
+      "passed": true
+    },
+    {
+      "name": "发布后修订不下线、不改时效",
+      "passed": true
+    },
+    {
+      "name": "旧新版本均保留，图片与居中结构保存",
+      "passed": true
+    },
+    {
+      "name": "非管辖管理员不能修订广播",
+      "passed": true
+    },
+    {
+      "name": "正文拒绝脚本或任意HTML节点",
+      "passed": true
+    },
+    {
+      "name": "同账号跨版本仍一人、所读版本分别留痕",
+      "passed": true
+    },
+    {
+      "name": "12个月付1个月后可报价11个月，不收二次押金",
+      "passed": true
+    },
+    {
+      "name": "上限以合同余月拒绝12个月",
+      "passed": true
+    },
+    {
+      "name": "待审申请不增加可付期限",
+      "passed": true
+    },
+    {
+      "name": "批准即延长且只延一次，余月14和跨段金额正确",
+      "passed": true
+    },
+    {
+      "name": "审批和报价不创建订单、居住关系或追加押金",
+      "passed": true
+    }
+  ],
+  "passed": 19,
+  "externalTradingCalled": false,
+  "syntheticPaymentFixture": true,
+  "normalDatabaseWritten": false
+}
