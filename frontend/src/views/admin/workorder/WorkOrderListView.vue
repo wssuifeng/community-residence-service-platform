@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -425,6 +426,8 @@ onMounted(() => {
   loadCategoryOptions()
   loadStaffOptions()
 })
+
+useLiveRefresh(() => refresh())
 </script>
 
 <template>

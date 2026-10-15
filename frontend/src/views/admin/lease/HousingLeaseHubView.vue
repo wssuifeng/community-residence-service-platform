@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import LivePanel from '@/components/common/LivePanel.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { useAdminTodoStore } from '@/store/adminTodo'
@@ -20,7 +21,7 @@ import AgreementTemplateView from './AgreementTemplateView.vue'
  * - 旧路径 /admin/leases、/admin/housings、/admin/move-out-applications、
  *   /admin/agreement-templates、/admin/residence-applications 由路由函数式 redirect
  *   透传 query 落到本页对应 Tab；`/admin/leases/:id` 是租约详情页，不经本页，不得被重定向吞掉；
- * - 子视图 v-show 保持挂载：Tab 往返不重复拉取接口，保留筛选与展开状态
+ * - 子视图 v-show 保持挂载：保留筛选与展开状态；激活时重新读取列表
  *   （协议模板面板例外：叠加角色可见性 v-if——不可见角色不挂载，避免 403 报错 toast）；
  * - 页标题由子视图各自承担（「入住申请」「租住管理」「房源管理」「退租申请」「协议模板」），
  *   本页只提供 Tab 条，不出现两层重复大标题；
@@ -86,28 +87,20 @@ function switchTab(next: HubTab): void {
       </button>
     </nav>
 
-    <!-- 子视图保持挂载：Tab 往返不重复拉取接口，保留筛选与展开状态 -->
-    <div v-show="activeTab === 'applications'" class="hub-panel">
-      <ResidenceApplicationListView />
-    </div>
-    <div v-show="activeTab === 'leases'" class="hub-panel">
-      <LeaseListView />
-    </div>
-    <div v-show="activeTab === 'housings'" class="hub-panel">
-      <HousingManageView />
-    </div>
-    <div v-show="activeTab === 'moveout'" class="hub-panel">
-      <MoveOutApplicationView />
-    </div>
+    <!-- 子视图保持挂载：保留筛选与展开状态；激活时重新读取列表 -->
+    <LivePanel :active="activeTab === 'applications'" class="hub-panel"><ResidenceApplicationListView /></LivePanel>
+    <LivePanel :active="activeTab === 'leases'" class="hub-panel"><LeaseListView /></LivePanel>
+    <LivePanel :active="activeTab === 'housings'" class="hub-panel"><HousingManageView /></LivePanel>
+    <LivePanel :active="activeTab === 'moveout'" class="hub-panel"><MoveOutApplicationView /></LivePanel>
     <!-- 协议模板面板加角色门控 v-if（OCR DEF-123）：角色不可见即不挂载——
          原纯 v-show 常挂载会随每次 Hub 访问请求协议模板接口，对无权角色触发 403 报错 toast -->
-    <div
+    <LivePanel
       v-if="visibleTabs.some((item) => item.value === 'agreements')"
-      v-show="activeTab === 'agreements'"
+      :active="activeTab === 'agreements'"
       class="hub-panel"
     >
       <AgreementTemplateView />
-    </div>
+    </LivePanel>
   </div>
 </template>
 

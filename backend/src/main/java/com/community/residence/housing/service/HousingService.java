@@ -126,6 +126,10 @@ public class HousingService {
             throw new BusinessException(ErrorCode.DATA_EXISTS, "该房屋已有在架房源");
         }
 
+        BatchGenerateHousingDTO slotOptions = new BatchGenerateHousingDTO();
+        slotOptions.setCreateTimeslots(Boolean.TRUE.equals(dto.getCreateTimeslots()));
+        slotOptions.setTimeslotMode(dto.getTimeslotMode()); slotOptions.setTimeslots(dto.getTimeslots());
+        List<TimeslotSpec> specs = resolveTimeslotSpecs(slotOptions);
         Housing housing = new Housing();
         housing.setCommunityId(house.getCommunityId());
         housing.setHouseId(house.getId());
@@ -136,6 +140,7 @@ public class HousingService {
         housing.setViewCount(0);
         housing.setPublishTime(LocalDateTime.now());
         housingMapper.insert(housing);
+        if (!specs.isEmpty()) createTimeslotRows(List.of(housing.getId()), specs);
         return toVO(housing);
     }
 
@@ -589,7 +594,15 @@ public class HousingService {
             }
             specs.add(new TimeslotSpec(item.getDayOfWeek(), item.getStartTime(), item.getEndTime()));
         }
-        return specs;
+        for (int i = 0; i < specs.size(); i++) {
+            for (int j = i + 1; j < specs.size(); j++) {
+                TimeslotSpec a = specs.get(i), b = specs.get(j);
+                if (a.dayOfWeek().equals(b.dayOfWeek()) && !a.equals(b)
+                        && a.startTime().isBefore(b.endTime()) && b.startTime().isBefore(a.endTime()))
+                    throw new BusinessException(ErrorCode.INVALID_PARAM, "自定义看房时段存在重叠");
+            }
+        }
+        return specs.stream().distinct().toList();
     }
 
     /**

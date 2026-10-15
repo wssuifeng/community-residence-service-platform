@@ -44,4 +44,13 @@ public class CreateHousingDTO {
     @Schema(description = "历史兼容字段，已停写；真实图片只通过房屋相册上传维护")
     @Size(max = 1000, message = "图片URL总长最多 1000 字符")
     private String images;
+
+    @Schema(description = "新建时同时配置看房时段，旧调用未传则不创建；更新不适用")
+    private Boolean createTimeslots;
+    @Schema(description = "DEFAULT工作日双时段或CUSTOM自定义，仅新建")
+    @Pattern(regexp = "^(DEFAULT|CUSTOM)$")
+    private String timeslotMode;
+    @Schema(description = "自定义看房周时段，仅新建")
+    @jakarta.validation.Valid
+    private java.util.List<BatchGenerateHousingDTO.TimeslotItem> timeslots;
 }

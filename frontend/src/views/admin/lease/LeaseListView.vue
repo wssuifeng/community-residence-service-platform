@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 import { contractEnd, todayLeaseISO } from '@/utils/leaseTerms'
 import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { leaseHouseholdNotice } from '@/utils/leaseHousehold'
@@ -598,6 +599,8 @@ onMounted(() => {
   load()
   loadCommunities()
 })
+
+useLiveRefresh(() => load())
 </script>
 
 <template>

@@ -1,3 +1,4 @@
+import { invalidateData } from '@/utils/dataFreshness'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { INotification, IPulledNotification } from '@/types/modules/notification'
@@ -30,6 +31,7 @@ export const useNotificationStore = defineStore('notification', () => {
     const payload = raw as WsNotificationPayload
     if (notifications.value.some((n) => n.id === payload.id || n.seq === payload.seq)) return
     const item: IPulledNotification = { ...payload, isRead: payload.isRead === 1 }
+    invalidateData()
     notifications.value.unshift(item)
     if (!item.isRead) unreadCount.value += 1
     lastSeq.value = Math.max(lastSeq.value, Number(payload.seq))
@@ -44,6 +46,7 @@ export const useNotificationStore = defineStore('notification', () => {
           notifications.value.unshift(item)
         }
       }
+      if (result.latestSeq > lastSeq.value) invalidateData()
       lastSeq.value = Math.max(lastSeq.value, result.latestSeq)
       const unread = await listUnreadNotifications()
       unreadCount.value = unread.count

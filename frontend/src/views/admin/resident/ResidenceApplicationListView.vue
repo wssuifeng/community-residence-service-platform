@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 /** 入住申请（「租住与房源」Hub 的入住申请 Tab，批次 g 由「居民」页迁入）：
  *  状态筛选 + 通过（租客只生成待签约租约）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
 import { getCommunity } from '@/api/community'
@@ -61,7 +62,9 @@ function relationLabel(relationType?: string): string {
     : '—'
 }
 
+let listEpoch = 0
 async function load(): Promise<void> {
+  const epoch = ++listEpoch
   loading.value = true
   try {
     const result = await getResidenceApplicationList({
@@ -69,13 +72,15 @@ async function load(): Promise<void> {
       size: size.value,
       status: statusFilter.value || undefined
     })
+    if (epoch !== listEpoch) return
     records.value = result.records
     total.value = result.total
   } catch {
+    if (epoch !== listEpoch) return
     records.value = []
     total.value = 0
   } finally {
-    loading.value = false
+    if (epoch === listEpoch) loading.value = false
   }
 }
 
@@ -190,6 +195,8 @@ onMounted(async () => {
     try { const target = await getResidenceApplication(id); if (route.query.tab === 'applications' && Number(route.query.applicationId) === id && target.status === 'PENDING') openApprove(target) } catch { /* 请求层统一提示。 */ }
   }
 })
+
+useLiveRefresh(() => load())
 </script>
 
 <template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 import { reservationDayQuotas } from '@/utils/reservationQuota'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -633,6 +634,8 @@ onMounted(async () => {
   await refreshData()
   monthWatchReady = true
 })
+
+useLiveRefresh(() => refreshData())
 </script>
 
 <template>

@@ -92,6 +92,9 @@ export interface IHousing {
  * - availableDate/contactPerson/contactPhone/tags 后端无对应字段，已删。
  */
 export interface HousingSaveDTO {
+  createTimeslots?: boolean
+  timeslotMode?: 'DEFAULT' | 'CUSTOM'
+  timeslots?: Array<{dayOfWeek:number;startTime:string;endTime:string}>
   houseId: number
   title: string
   description: string
