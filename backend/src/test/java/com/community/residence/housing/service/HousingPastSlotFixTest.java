@@ -60,6 +60,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("看房过去时段过滤修复回归（DEF-045）")
 class HousingPastSlotFixTest {
+    @org.mockito.Mock private com.community.residence.community.service.HouseImageService houseImageService;
 
     @Mock
     private HousingMapper housingMapper;

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HousingViewFlushTask 单元测试")
 class HousingViewFlushTaskTest {
+    @org.mockito.Mock private com.community.residence.community.service.HouseImageService houseImageService;
 
     @Mock
     private HousingMapper housingMapper;

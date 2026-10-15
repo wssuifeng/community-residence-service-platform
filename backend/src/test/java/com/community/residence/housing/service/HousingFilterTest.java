@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HousingService 筛选维度单元测试")
 class HousingFilterTest {
+    @org.mockito.Mock private com.community.residence.community.service.HouseImageService houseImageService;
 
     @Mock
     private HousingMapper housingMapper;

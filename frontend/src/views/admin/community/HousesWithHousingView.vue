@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import { getCommunityList, getBuildingList, getUnitList } from '@/api/community'
 import { createHousing, updateHousing, updateHousingStatus, getHousingDetail } from '@/api/housing'
@@ -25,8 +26,11 @@ import type { HouseManageItem } from '@/types/modules/housing'
 /** 房源占位插画（未挂牌或无图时使用，frontend/public 静态资产） */
 const HOUSING_PLACEHOLDER = '/housing-placeholder.png'
 
+const albumHouseId = ref<number | null>(null)
+const albumVisible = ref(false)
+function openAlbum(id: number) { albumHouseId.value=id; albumVisible.value=true }
 const router = useRouter()
-const occupancyLabels: Record<string, string> = { FREE: '可申请', APPLYING: '申请待审核', TO_SIGN: '待签约', WAITING_FIRST_PAYMENT: '待支付首期费用', OCCUPIED: '已入住' }
+const occupancyLabels: Record<string, string> = { WAITING_MOVE_IN: '已生效·待入住', FREE: '可申请', APPLYING: '申请待审核', TO_SIGN: '待签约', WAITING_FIRST_PAYMENT: '待支付首期费用', OCCUPIED: '已入住' }
 
 
 /* ===================== 筛选 + 卡片列表 ===================== */
@@ -136,7 +140,7 @@ function resetFilters(): void {
 
 /** 卡片图：优先房源首图，未挂牌/无图回落占位插画 */
 function coverOf(item: HouseManageItem): string {
-  const cover = item.housing?.coverImage
+  const cover = (item.coverImage ?? item.housing?.coverImage)
   return cover && cover.trim() !== '' ? cover : HOUSING_PLACEHOLDER
 }
 
@@ -565,10 +569,11 @@ async function handleBatchSubmit(): Promise<void> {
       <article v-for="item in items" :key="item.houseId" class="house-card">
         <div
           class="card-cover"
-          :class="{ 'is-placeholder': !item.housing?.coverImage }"
+          :class="{ 'is-placeholder': !(item.coverImage ?? item.housing?.coverImage) }"
           :data-variant="item.houseId % 5"
         >
           <img :src="coverOf(item)" :alt="locationOf(item)" loading="lazy" />
+          <span v-if="!item.coverImage && !item.housing?.coverImage" class="album-empty">尚未上传房屋图片</span>
           <span
             class="cover-state"
             :data-state="item.housing ? item.housing.status : 'UNLISTED'"
@@ -602,6 +607,7 @@ async function handleBatchSubmit(): Promise<void> {
         </div>
 
         <footer class="card-actions">
+          <el-button size="small" @click="openAlbum(item.houseId)">管理房屋图片</el-button>
           <el-button v-if="item.housing?.leaseId" size="small" plain
             @click="router.push(`/admin/leases/${item.housing.leaseId}`)">查看租约</el-button>
           <el-button v-else-if="item.housing?.applicationId" size="small" plain
@@ -655,6 +661,7 @@ async function handleBatchSubmit(): Promise<void> {
       />
     </div>
 
+    <HouseImageDialog v-model="albumVisible" :house-id="albumHouseId" @saved="reload" />
     <!-- 挂牌 / 编辑房源 -->
     <el-dialog
       v-model="dialogVisible"

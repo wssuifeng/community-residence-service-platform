@@ -16,6 +16,7 @@ import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)
 class HousingOccupancyBoundaryTest {
+    @org.mockito.Mock private com.community.residence.community.service.HouseImageService houseImageService;
     @Mock HousingMapper housingMapper;
     @Mock ViewingAppointmentMapper appointmentMapper;
     @InjectMocks HousingService service;

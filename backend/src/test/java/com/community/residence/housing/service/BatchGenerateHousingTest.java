@@ -49,6 +49,7 @@ import static org.mockito.Mockito.verify;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("批量挂牌细粒度（R62）")
 class BatchGenerateHousingTest {
+    @org.mockito.Mock private com.community.residence.community.service.HouseImageService houseImageService;
 
     @Mock
     private CommunityService communityService;

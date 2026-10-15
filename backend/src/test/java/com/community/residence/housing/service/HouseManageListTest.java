@@ -66,6 +66,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("房屋管理分页列表（9.15.3）")
 class HouseManageListTest {
+    @org.mockito.Mock private com.community.residence.community.service.HouseImageService houseImageService;
 
     @Mock
     private HousingMapper housingMapper;
@@ -283,6 +284,8 @@ class HouseManageListTest {
     @Test
     @DisplayName("coverImage：取 images 逗号串首个非空项（原样返回 /uploads 相对路径）")
     void pageHouseManage_coverImageFirstNonBlank() {
+        var actualImage=new com.community.residence.community.entity.HouseImage();actualImage.setStorageKey("/uploads/cover-101.png");
+        when(houseImageService.readImagesBatch(any())).thenReturn(java.util.Map.of(1000L,List.of(actualImage)));
         when(housingMapper.selectList(any())).thenReturn(List.of(
                 housing(500L, 1000L, " , /uploads/cover-101.png ,/uploads/b.png")));
 
@@ -307,6 +310,8 @@ class HouseManageListTest {
     @Test
     @DisplayName("同一房屋多条挂牌：取 id 最大者")
     void pageHouseManage_latestHousingWins() {
+        var actualImage=new com.community.residence.community.entity.HouseImage();actualImage.setStorageKey("/uploads/new.png");
+        when(houseImageService.readImagesBatch(any())).thenReturn(java.util.Map.of(1000L,List.of(actualImage)));
         when(housingMapper.selectList(any())).thenReturn(List.of(
                 housing(500L, 1000L, "/uploads/old.png"),
                 housing(900L, 1000L, "/uploads/new.png")));

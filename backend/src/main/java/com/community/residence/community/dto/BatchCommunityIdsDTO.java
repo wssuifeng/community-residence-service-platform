@@ -18,4 +18,6 @@ public class BatchCommunityIdsDTO {
     private List<Long> ids;
     @Schema(description="逐社区删除影响确认版本；缺失或过期的条目拒绝删除")
     private java.util.Map<Long, String> confirmationVersions;
+    @Schema(description="逐社区完整名称确认；缺失或不匹配拒绝删除")
+    private java.util.Map<Long, String> confirmationNames;
 }

@@ -162,6 +162,7 @@ export interface IUnitDTO {
 /** 房屋实体（2026-09-12 对齐后端 HouseVO：无 buildingName/unitNumber 字段，
  * unitName 后端可空；楼栋/单元展示名由前端以筛选/树上下文补全，见任务 3 报告） */
 export interface IHouse {
+  communityId?: number
   id: number
   unitId: number
   buildingName?: string

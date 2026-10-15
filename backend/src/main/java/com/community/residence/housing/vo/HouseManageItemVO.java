@@ -55,4 +55,5 @@ public class HouseManageItemVO {
 
     @Schema(description = "挂牌房源摘要；null=未挂牌")
     private HousingBriefVO housing;
+    @Schema(description="真实房屋相册封面，与挂牌是否存在无关") private String coverImage;
 }

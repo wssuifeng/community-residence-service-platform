@@ -99,6 +99,7 @@ public class HousingService {
         return List.copyOf(specs);
     }
 
+    private final com.community.residence.community.service.HouseImageService houseImageService;
     private final HousingMapper housingMapper;
     private final HouseMapper houseMapper;
     private final UnitMapper unitMapper;
@@ -196,7 +197,9 @@ public class HousingService {
         Page<Housing> result = housingMapper.selectPage(new Page<>(page, Math.min(size, 100)), wrapper);
         /* 未回写增量按页内 id 集合 multiGet 一次取回（N2：不做逐行查询） */
         Map<Long, Long> viewDeltas = pendingViewDeltas(result.getRecords());
-        PageVO<HousingVO> vo = PageVO.of(result.convert(h -> toVO(h, viewDeltas.get(h.getId()))));
+        var albums = houseImageService.readImagesBatch(result.getRecords().stream().map(Housing::getHouseId).distinct().toList());
+        PageVO<HousingVO> vo = PageVO.of(result.convert(h -> toVO(h, viewDeltas.get(h.getId()),
+                albums.getOrDefault(h.getHouseId(), List.of()))));
         if (isManager()) fillOccupancies(vo.getRecords());
         return vo;
     }
@@ -822,10 +825,12 @@ public class HousingService {
                 occupancyRows.put(row.getId(), row);
             }
         }
+        var albums=houseImageService.readImagesBatch(houses.stream().map(House::getId).toList());
         List<HouseManageItemVO> items = new ArrayList<>(houses.size());
         for (House house : houses) {
             HouseManageItemVO item = new HouseManageItemVO();
             item.setHouseId(house.getId());
+            item.setCoverImage(albums.getOrDefault(house.getId(),List.of()).stream().findFirst().map(com.community.residence.community.entity.HouseImage::getStorageKey).orElse(null));
             item.setCommunityId(house.getCommunityId());
             item.setCommunityName(communityNames.get(house.getCommunityId()));
             item.setUnitId(house.getUnitId());
@@ -850,6 +855,7 @@ public class HousingService {
                 var occupancy = occupancyRows.get(brief.getId());
                 brief.setOccupancy(occupancy.getOccupancy()); brief.setApplicationId(occupancy.getApplicationId()); brief.setLeaseId(occupancy.getLeaseId());
             }
+            if (brief != null) brief.setCoverImage(item.getCoverImage());
             item.setHousing(brief);
             items.add(item);
         }
@@ -878,7 +884,12 @@ public class HousingService {
 
     /** 详情/列表装配：pendingDelta 为未回写 Redis 增量（null=按 DB 值展示） */
     private HousingVO toVO(Housing housing, Long pendingDelta) {
+        return toVO(housing, pendingDelta, houseImageService.readImages(housing.getHouseId()));
+    }
+
+    private HousingVO toVO(Housing housing, Long pendingDelta, List<com.community.residence.community.entity.HouseImage> images) {
         HousingVO vo = HousingVO.from(housing);
+        vo.setImages(images.stream().map(com.community.residence.community.entity.HouseImage::getStorageKey).toArray(String[]::new));
         vo.setViewCount(effectiveViewCount(housing.getViewCount(), pendingDelta));
         var community = communityService.requireCommunity(housing.getCommunityId());
         vo.setCommunityName(community.getName());

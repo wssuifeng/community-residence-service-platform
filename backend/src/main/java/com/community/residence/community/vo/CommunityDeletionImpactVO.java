@@ -18,7 +18,7 @@ public class CommunityDeletionImpactVO {
     @Schema(description="待审核申请数") private long pendingApplications;
     @Schema(description="支付单总数") private long payments;
     @Schema(description="退款单总数") private long refunds;
-    @Schema(description="是否可删除；存在在住/进行中租住或资金记录时拒绝") private boolean deletable;
-    @Schema(description="拒绝原因") private String blockingReason;
+    @Schema(description="超管经完整影响预览和明确确认可删除；有效链不构成硬禁止") private boolean deletable;
+    @Schema(description="兼容字段；有效关联由影响数强警示") private String blockingReason;
     @Schema(description="关联摘要确认版本；变化后须重新预览") private String confirmationVersion;
 }

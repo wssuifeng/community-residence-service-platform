@@ -52,6 +52,7 @@ import static org.mockito.Mockito.verify;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("批量挂牌建立看房时段（9.15.1）")
 class BatchGenerateHousingTimeslotTest {
+    @org.mockito.Mock private com.community.residence.community.service.HouseImageService houseImageService;
 
     @Mock
     private CommunityService communityService;

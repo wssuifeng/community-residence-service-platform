@@ -111,12 +111,12 @@ public class CommunityController {
     @Operation(summary = "删除社区（级联）", description = "仅超级管理员；社区退场时其下级结构与关联业务数据一并删除（R1/R6 v1.1），前端须二次确认")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id, @RequestParam(required=false) String confirmationVersion) {
-        communityService.deleteConfirmed(id, confirmationVersion);
+    public ApiResponse<Void> delete(@PathVariable Long id, @RequestParam(required=false) String confirmationVersion, @RequestParam(required=false) String confirmationName) {
+        communityService.deleteConfirmed(id, confirmationVersion, confirmationName);
         return ApiResponse.success();
     }
 
-    @Operation(summary="查看社区删除影响",description="仅超管；真实历史和有效居住链计数，有效链或资金记录禁止删除")
+    @Operation(summary="查看社区删除影响",description="仅超管；真实历史和有效居住链计数；仅超管经名称及影响版本确认可删除")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/{id}/deletion-impact")
     public ApiResponse<com.community.residence.community.vo.CommunityDeletionImpactVO> deletionImpact(@PathVariable Long id) {

@@ -10,6 +10,7 @@ import BuildingEditDialog from '@/views/admin/community/BuildingEditDialog.vue'
 import UnitEditDialog from '@/views/admin/community/UnitEditDialog.vue'
 import UnitBatchDialog from '@/views/admin/community/UnitBatchDialog.vue'
 import HouseAttributesDialog from '@/views/admin/community/HouseAttributesDialog.vue'
+import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
 import HouseEditDialog from '@/views/admin/community/HouseEditDialog.vue'
 import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
 import StructureGenerateDialog from '@/views/admin/community/StructureGenerateDialog.vue'
@@ -744,6 +745,7 @@ function houseStatusTagType(status: HouseStatus): 'info' | 'completed' | 'pendin
 
 const houseInfoVisible = ref(false)
 const houseInfoEntry = ref<HouseEntry | null>(null)
+const albumVisible = ref(false)
 
 const houseHistory = ref<IHouseStatusHistory[]>([])
 const houseHistoryLoading = ref(false)
@@ -1331,13 +1333,9 @@ function deletionSummary(i: import('@/api/community').CommunityDeletionImpact): 
 async function handleCommunityDelete(community: ICommunity): Promise<void> {
   try {
     const impact = await getCommunityDeletionImpact(community.id)
-    if (!impact.deletable) {
-      await ElMessageBox.alert(`${deletionSummary(impact)} ${impact.blockingReason}`, '禁止删除社区', { type: 'error' })
-      return
-    }
-    await ElMessageBox.confirm(`${deletionSummary(impact)} 全部下级和历史业务将永久删除，账号本身保留。`, '核对删除影响', { type: 'warning', confirmButtonText: '已核对，继续', cancelButtonText: '取消' })
-    await ElMessageBox.confirm(`最终确认永久删除「${impact.communityName}」及上述历史，无法撤销？`, '第二次确认', { type: 'error', confirmButtonText: '永久删除', cancelButtonText: '取消' })
-    await deleteCommunity(community.id, impact.confirmationVersion)
+    await ElMessageBox.confirm(`${deletionSummary(impact)} 全部下级和业务（含有效居住关系、租约、支付退款记录）将永久删除，账号本身保留；删除不代表退租或退款，也不会自动退还资金。`, '核对删除影响', { type: 'warning', confirmButtonText: '已核对，继续', cancelButtonText: '取消' })
+    const confirmation = await ElMessageBox.prompt(`输入完整社区名称「${impact.communityName}」以确认永久删除；不可撤销。`, '最终确认', { type: 'error', confirmButtonText: '永久删除', cancelButtonText: '取消', inputValidator: value => value === impact.communityName || '社区名称不一致' })
+    await deleteCommunity(community.id, impact.confirmationVersion, confirmation.value)
     ElMessage.success('社区已删除')
     if (selectedCommunityId.value === community.id) clearDetail()
     loadCommunities()
@@ -1501,10 +1499,6 @@ async function handleBatchDelete(): Promise<void> {
   let impacts: Awaited<ReturnType<typeof getCommunityDeletionImpact>>[]
   try {
     impacts = await Promise.all(ids.map(getCommunityDeletionImpact))
-    if (impacts.some(i => !i.deletable)) {
-      await ElMessageBox.alert(impacts.map(i => `${deletionSummary(i)} ${i.blockingReason}`).join('\n'), '批量删除已阻止，请取消勾选受保护社区', { type:'error' })
-      return
-    }
     await ElMessageBox.confirm(impacts.map(deletionSummary).join('\n'), '逐社区核对删除影响', { type:'warning', confirmButtonText:'已核对，继续' })
     await ElMessageBox.confirm(
       `将【级联删除】选中的 ${ids.length} 个社区${
@@ -1517,17 +1511,18 @@ async function handleBatchDelete(): Promise<void> {
     return
   }
   try {
-    await ElMessageBox.confirm(
-      `最终确认：这 ${ids.length} 个社区及其全部下级数据将被永久删除，不可恢复、不可撤销。确定执行？`,
-      '不可恢复操作',
-      { type: 'error', confirmButtonText: '确认级联删除', cancelButtonText: '取消' }
-    )
+    for (const impact of impacts) {
+      await ElMessageBox.prompt(`输入「${impact.communityName}」确认本社区永久删除；有效关系和财务记录亦被删除，不自动退款。`, '最终逐社区确认', {
+        type: 'error', confirmButtonText: '确认名称', cancelButtonText: '取消',
+        inputValidator: value => value === impact.communityName || '社区名称不一致'
+      })
+    }
   } catch {
     return
   }
   batchRunning.value = true
   try {
-    const result = await batchDeleteCommunities(ids, Object.fromEntries(impacts.map(i => [i.communityId, i.confirmationVersion])))
+    const result = await batchDeleteCommunities(ids, Object.fromEntries(impacts.map(i => [i.communityId, i.confirmationVersion])), Object.fromEntries(impacts.map(i => [i.communityId, i.communityName])))
     showBatchResult({
       successCount: result.successIds.length,
       successText: '个社区已级联删除',
@@ -2658,8 +2653,10 @@ onMounted(async () => {
       </template>
     </el-dialog>
 
+    <HouseImageDialog v-model="albumVisible" :house-id="houseInfoEntry?.house.id ?? null" />
     <!-- 房屋信息卡（在住人员 / 租客账号 + 状态变更历史） -->
     <el-dialog v-model="houseInfoVisible" title="房屋信息" width="640px">
+      <el-button v-if="houseInfoEntry" @click="albumVisible=true">管理房屋图片</el-button>
       <el-descriptions v-if="houseInfoEntry" :column="2" border>
         <el-descriptions-item label="门牌号">{{ houseInfoEntry.house.houseNumber }}</el-descriptions-item>
         <el-descriptions-item label="状态">
