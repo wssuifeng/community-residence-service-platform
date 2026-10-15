@@ -831,7 +831,7 @@ useLiveRefresh(() => load())
                 size="small"
                 @click.stop="openRenew(row)"
               >
-                续租
+                合同与租期
               </el-button>
               <el-button
                 v-permission="['ADMIN', 'SUPER_ADMIN']"

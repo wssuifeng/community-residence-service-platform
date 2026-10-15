@@ -893,7 +893,7 @@ onMounted(fetchDetail)
                 class="action-btn"
                 @click="openRenew"
               >
-                续租
+                合同与租期
               </el-button>
               <el-button
                 v-if="canMoveOut"
@@ -1086,7 +1086,7 @@ onMounted(fetchDetail)
       </template>
     </el-drawer>
 
-    <!-- 续租经新增合同段确认与首付生效，原合同不被静默覆盖 -->
+    <!-- 租期延长经居民申请与管理方审批生效，缴租不改期限 -->
     <el-dialog v-model="termsDialogVisible" title="合同与租期" width="min(780px,94vw)"><LeaseTermsPanel v-if="lease" :lease="lease" admin /></el-dialog>
   </section>
 </template>

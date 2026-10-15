@@ -89,6 +89,7 @@ public class AlipayChannelClient implements PaymentChannelClient {
         if (notifyUrl != null && !notifyUrl.isBlank()) {
             request.setNotifyUrl(notifyUrl);
         }
+        long started=System.nanoTime();
         try {
             AlipayTradePagePayResponse response = alipayClient.pageExecute(request);
             if (!response.isSuccess()) {
@@ -100,6 +101,8 @@ public class AlipayChannelClient implements PaymentChannelClient {
         } catch (AlipayApiException e) {
             log.error("支付宝下单异常：paymentNo={}", payment.getPaymentNo(), e);
             throw new ChannelCallException("支付宝下单异常：" + e.getErrMsg(), e);
+        } finally {
+            log.info("支付宝表单本地生成耗时：purpose={}, months={}, localMillis={}",payment.getPaymentType(),payment.getMonths(),(System.nanoTime()-started)/1_000_000);
         }
     }
 
