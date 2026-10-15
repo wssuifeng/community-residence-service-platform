@@ -165,7 +165,6 @@ const dialogContext = ref<{
   houseId: number
   houseLabel: string
   housingId: number | null
-  images: string
 } | null>(null)
 
 const form = reactive({
@@ -188,12 +187,12 @@ const dialogTarget = ref<HouseManageItem | null>(null)
 let dialogSequence = 0
 watch(dialogVisible, value => { if (!value) dialogSequence++ })
 
-/* 详情未加载时不开放编辑，避免迟到响应覆盖输入或未知图片被清空；失败须重试。 */
+/* 详情未加载时不开放编辑，避免迟到响应覆盖输入；房屋图片由独立相册维护；失败须重试。 */
 async function openHousingDialog(item: HouseManageItem): Promise<void> {
   const sequence = ++dialogSequence
   dialogTarget.value = item
   const brief = item.housing
-  dialogContext.value = { houseId: item.houseId, houseLabel: `${item.communityName} ${locationOf(item)}`, housingId: brief?.id ?? null, images: '' }
+  dialogContext.value = { houseId: item.houseId, houseLabel: `${item.communityName} ${locationOf(item)}`, housingId: brief?.id ?? null }
   Object.assign(form, { title: brief ? brief.title : `${locationOf(item)}·精装房源`, monthlyRent: brief?.monthlyRent, deposit: brief?.deposit ?? undefined, rentType: brief?.rentType ?? 'RENT', description: '' })
   dialogLoadError.value = ''
   dialogLoading.value = !!brief
@@ -203,7 +202,6 @@ async function openHousingDialog(item: HouseManageItem): Promise<void> {
     const detail = await getHousingDetail(brief.id)
     if (sequence !== dialogSequence || !dialogVisible.value) return
     Object.assign(form, { title: detail.title, monthlyRent: detail.monthlyRent, deposit: detail.deposit ?? undefined, rentType: detail.rentType, description: detail.description ?? '' })
-    dialogContext.value.images = detail.images.join(',')
   } catch(error) {
     if (sequence === dialogSequence && dialogVisible.value) dialogLoadError.value = error instanceof Error ? error.message : '房源详情加载失败，请重试，暂不能保存'
   } finally { if (sequence === dialogSequence) dialogLoading.value = false }
@@ -228,7 +226,6 @@ async function handleSave(): Promise<void> {
       description: form.description,
       monthlyRent: form.monthlyRent,
       deposit: form.deposit,
-      images: context.images,
       rentType: form.rentType
     }
     if (context.housingId === null) {

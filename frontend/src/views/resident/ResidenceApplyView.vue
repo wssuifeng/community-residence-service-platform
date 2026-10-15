@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -179,7 +180,7 @@ onMounted(() => {
       <aside class="housing-summary card">
         <div class="summary-cover">
           <img
-            :src="housing.images.length > 0 ? housing.images[0] : '/housing-placeholder.png'"
+            :src="housing.images.length > 0 ? housing.images[0] : HOUSE_PHOTO_EMPTY"
             :alt="housing.title"
           />
         </div>

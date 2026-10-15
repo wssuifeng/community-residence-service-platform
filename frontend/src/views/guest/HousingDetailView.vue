@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -21,10 +22,10 @@ const loadError = ref('')
 const slots = ref<IAvailableViewingTimeslot[]>([])
 const activeImage = ref(0)
 
-/** 图片兜底：无图房源使用官方示例图（与列表页轮换策略一致，固定第 1 张） */
+/** 图片兜底：无图房源使用明确无图空态（与列表页同源，不伪装实拍） */
 const images = computed<string[]>(() => {
   if (!housing.value) return []
-  return housing.value.images.length > 0 ? housing.value.images : ['/images/housing-sample-1.png']
+  return housing.value.images.length > 0 ? housing.value.images : [HOUSE_PHOTO_EMPTY]
 })
 
 /** 多图导航（DEF-048）：首尾环绕切换；仅手动触发，本页不做自动轮播 */

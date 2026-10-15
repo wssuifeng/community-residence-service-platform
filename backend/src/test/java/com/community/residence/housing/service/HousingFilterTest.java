@@ -163,6 +163,7 @@ class HousingFilterTest {
         CreateHousingDTO dto = new CreateHousingDTO();
         dto.setHouseId(5L);
         dto.setTitle("测试房源");
+        dto.setImages("https://invalid.example/should-not-be-persisted.jpg");
         dto.setMonthlyRent(new BigDecimal("2000"));
         /* rentType 不传 → 默认 RENT */
 
@@ -172,6 +173,8 @@ class HousingFilterTest {
         verify(housingMapper).insert(captor.capture());
         assertThat(captor.getValue().getLayout()).isEqualTo("3室2厅");
         assertThat(captor.getValue().getRentType()).isEqualTo("RENT");
+        assertThat(captor.getValue().getImages()).isNull();
+        assertThat(vo.getImages()).isEmpty();
         assertThat(vo.getLayout()).isEqualTo("3室2厅");
         verify(houseMapper).selectByIdForUpdate(5L);
     }

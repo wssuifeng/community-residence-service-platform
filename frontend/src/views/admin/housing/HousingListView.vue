@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
+import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -26,7 +28,7 @@ import type { ICommunity, IBuilding, IUnit, IHouse } from '@/types/modules/commu
 /**
  * 房源列表（管理端 Tab 内容）：摄影卡片网格 + 社区/状态/关键字筛选 + 分页 + 新建/编辑对话框。
  * 上下架切换、删除、时段入口经卡片操作行；对照设计稿 09-房源管理。
- * 保存载荷对齐后端 CreateHousingDTO（images 逗号分隔串、押金字段 deposit）；
+ * 保存载荷对齐后端 CreateHousingDTO（押金字段 deposit；图片独立在房屋相册维护）；
  * 房源创建后/状态变更后 emit changed 供容器刷新统计卡。
  */
 
@@ -65,9 +67,9 @@ const loading = ref(false)
 
 const communities = ref<ICommunity[]>([])
 
-/** 图片兜底：images 为空时按列表序号取模轮换三张示例图（与游客端口径一致） */
-function coverImage(housing: IHousing, index: number): string {
-  return housing.images[0] ?? `/images/housing-sample-${(index % 3) + 1}.png`
+/** 图片兜底：images 为空时只用真实相册或明确空态，不轮换示例照片 */
+function coverImage(housing: IHousing, _index: number): string {
+  return housing.images[0] ?? HOUSE_PHOTO_EMPTY
 }
 
 /** 金额千分位（mock 价格行口径 ¥2,800/月） */
@@ -117,7 +119,7 @@ function handleReset(): void {
 }
 
 /* ------------------------------ 新建/编辑对话框 ------------------------------ */
-/* 保存载荷仅含后端 CreateHousingDTO 认可的字段：houseId/title/description/monthlyRent/deposit/images；
+/* 保存载荷仅含后端 CreateHousingDTO 认可的字段：houseId/title/description/monthlyRent/deposit；
    communityId 只作级联定位房屋的本地状态；编辑模式下后端不允许变更关联房屋，级联置为只读展示 */
 
 const dialogVisible = ref(false)
@@ -134,11 +136,10 @@ const emptyForm = (): HousingSaveDTO => ({
   description: '',
   monthlyRent: undefined as unknown as number,
   deposit: undefined,
-  images: ''
 })
 
 const form = reactive<HousingSaveDTO>(emptyForm())
-const imagesText = ref('')
+const albumVisible = ref(false)
 
 /* 级联选择：社区 → 楼栋 → 单元 → 房屋（仅新建模式） */
 const cascade = reactive({
@@ -218,21 +219,11 @@ function handleHouseChange(houseId: number | undefined): void {
   form.houseId = (houseId ?? undefined) as number
 }
 
-/** 图片串：界面一行一个 URL，载荷按后端口径以逗号分隔存储 */
-function imagesPayload(): string {
-  return imagesText.value
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .join(',')
-}
-
 function openCreate(): void {
   editingId.value = null
   editingHouse.communityName = ''
   editingHouse.houseLocation = ''
   Object.assign(form, emptyForm())
-  imagesText.value = ''
   resetCascade()
   dialogVisible.value = true
 }
@@ -247,9 +238,7 @@ function openEdit(row: IHousing): void {
     description: row.description,
     monthlyRent: row.monthlyRent,
     deposit: row.deposit ?? undefined,
-    images: ''
   })
-  imagesText.value = row.images.join('\n')
   resetCascade()
   dialogVisible.value = true
 }
@@ -274,8 +263,7 @@ async function handleSave(): Promise<void> {
       title: form.title.trim(),
       description: form.description,
       monthlyRent: form.monthlyRent,
-      deposit: form.deposit,
-      images: imagesPayload()
+      deposit: form.deposit
     }
     if (editingId.value === null) {
       await createHousing(payload)
@@ -511,14 +499,7 @@ onMounted(() => {
           <el-input-number v-model="form.deposit" :min="0" :step="100" />
           <span class="form-unit">元（不填则面议）</span>
         </el-form-item>
-        <el-form-item label="房源图片">
-          <el-input
-            v-model="imagesText"
-            type="textarea"
-            :rows="3"
-            placeholder="图片地址，每行一个（可留空使用默认示意图）"
-          />
-        </el-form-item>
+        <el-form-item label="房屋图片"><el-button :disabled="!form.houseId" @click="albumVisible = true">管理所选房屋相册</el-button><span>先选择房屋；图片直接保存到房屋，与挂牌表单分开。</span></el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="4" maxlength="1000" show-word-limit />
         </el-form-item>
@@ -528,6 +509,7 @@ onMounted(() => {
         <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
       </template>
     </el-dialog>
+    <HouseImageDialog v-model="albumVisible" :house-id="form.houseId || null" @saved="loadList" />
   </section>
 </template>
 

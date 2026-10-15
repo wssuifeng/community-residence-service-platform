@@ -872,7 +872,7 @@ public class HousingService {
         housing.setMonthlyRent(dto.getMonthlyRent());
         housing.setDeposit(dto.getDeposit());
         housing.setRentType(StringUtils.hasText(dto.getRentType()) ? dto.getRentType() : "RENT");
-        housing.setImages(dto.getImages());
+        /* 旧images仅保留历史，不再由挂牌表单写副本；所有展示只读house_image。 */
     }
 
     /** 仅供已通过会话参与者/租约来源守卫的控制器使用，不计公众浏览量。 */

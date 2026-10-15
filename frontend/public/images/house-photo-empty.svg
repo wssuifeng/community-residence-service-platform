@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="480" viewBox="0 0 720 480" role="img" aria-label="尚未上传房屋图片">
+<rect width="720" height="480" fill="#f2f4f6"/>
+<g fill="none" stroke="#9ca7b3" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M296 224v-60l64-48 64 48v60z"/><path d="M343 224v-44h34v44"/></g>
+<text x="360" y="292" text-anchor="middle" fill="#657181" font-family="Microsoft YaHei, sans-serif" font-size="26">尚未上传房屋图片</text>
+<text x="360" y="332" text-anchor="middle" fill="#8993a0" font-family="Microsoft YaHei, sans-serif" font-size="18">此处为空态，不代表房屋实拍</text>
+</svg>
