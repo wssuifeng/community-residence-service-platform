@@ -1,0 +1,63 @@
+{
+  "checkedAt": "2026-10-15T19:13:48+0800",
+  "batch": "bx",
+  "backendCleanVerify": {
+    "tests": 1109,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "files": 62,
+    "passed": 364,
+    "failed": 0,
+    "typecheck": true,
+    "build": true
+  },
+  "releasePackage": true,
+  "isolatedChecks": {
+    "passed": 39,
+    "failed": 0,
+    "records": "verification.json",
+    "viewports": [
+      "1280x900",
+      "768x720"
+    ]
+  },
+  "normalDeployment": {
+    "records": "normal-deployment.json",
+    "normalBusinessCountsUnchanged": true,
+    "sandboxConfigured": true,
+    "sandboxEnabled": true,
+    "originalKeysRetained": true,
+    "backendPort": 8084,
+    "frontendPort": 5176,
+    "schemaVersion": 40,
+    "businessTables": 57
+  },
+  "cleanup": "cleanup.json",
+  "engineeringCommits": [
+    "72cd901",
+    "7dde2f8",
+    "edab792",
+    "25c410f"
+  ],
+  "externalPaymentQueryRefundExecuted": false,
+  "userBrowserOperated": false,
+  "alipayAvailabilityVerified": false,
+  "userManualResultsFilled": false,
+  "gitPushed": false,
+  "notes": [
+    "AI暂停交易不是产品冻结；仅恢复原完整沙箱启用状态，未启用正式环境",
+    "后端1109为最终clean verify；之后仅注释/OpenAPI说明修正，重新package成功",
+    "浏览器中间定位器/动画/最小桌面视口调整不是产品回归通过证据；最终39项才为通过结果",
+    "隔离正确名称删除只针对自产合成社区；正常业务未删未恢复",
+    "自动检查数量不是完整业务链数量，也不与历史计数相加"
+  ],
+  "documentationAudit": {
+    "records": "documentation-audit.json",
+    "historicalFindings": 1415,
+    "newFindings": 0,
+    "fullAuditPassed": false
+  }
+}

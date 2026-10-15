@@ -1,0 +1,172 @@
+{
+  "checkedAt": "2026-10-15T11:10:41.770Z",
+  "database": "community_residence_bx_20261015",
+  "checks": [
+    {
+      "name": "ADMIN房屋列表相册批量查询不再500",
+      "passed": true
+    },
+    {
+      "name": "ADMIN跨社区图片读取仍拒绝",
+      "passed": true
+    },
+    {
+      "name": "ADMIN真实图片上传关联成功",
+      "passed": true
+    },
+    {
+      "name": "ADMIN相册刷新回读",
+      "passed": true
+    },
+    {
+      "name": "ADMIN可正常挂牌",
+      "passed": true
+    },
+    {
+      "name": "挂牌编辑是更新且回显真实图片",
+      "passed": true
+    },
+    {
+      "name": "挂牌后房屋管理页不再500",
+      "passed": true
+    },
+    {
+      "name": "公开房源同源读取房屋相册",
+      "passed": true
+    },
+    {
+      "name": "同屋重复挂牌为业务拒绝而非500",
+      "passed": true
+    },
+    {
+      "name": "ADMIN合同段子表无错误社区列",
+      "passed": true
+    },
+    {
+      "name": "保存配置不再等同启用且私钥不回显",
+      "passed": true
+    },
+    {
+      "name": "居民渠道状态区分已配置和停用",
+      "passed": true
+    },
+    {
+      "name": "非超管不得读取密钥配置",
+      "passed": true
+    },
+    {
+      "name": "超管启用后渠道可选且仅离线构建SDK",
+      "passed": true
+    },
+    {
+      "name": "超管可停用并保留密钥",
+      "passed": true
+    },
+    {
+      "name": "配置版本冲突仍拒绝",
+      "passed": true
+    },
+    {
+      "name": "居民排除本人但保留同号超管消息",
+      "passed": true
+    },
+    {
+      "name": "超管排除本人但保留同号居民消息",
+      "passed": true
+    },
+    {
+      "name": "管理员不把自己消息算未读",
+      "passed": true
+    },
+    {
+      "name": "已读回写后列表为0",
+      "passed": true
+    },
+    {
+      "name": "不可用未来消息ID吞掉未读",
+      "passed": true
+    },
+    {
+      "name": "六轮并发旧新已读游标不回退",
+      "passed": true
+    },
+    {
+      "name": "居民打开真实群聊自动保存已读",
+      "passed": true
+    },
+    {
+      "name": "刷新后已读不回涨",
+      "passed": true
+    },
+    {
+      "name": "本人发消息不增加本人未读",
+      "passed": true
+    },
+    {
+      "name": "对方新增消息才增加未读",
+      "passed": true
+    },
+    {
+      "name": "ADMIN图片消息元数据不再误注社区列",
+      "passed": true
+    },
+    {
+      "name": "管理员会话中心读消息后服务端0",
+      "passed": true
+    },
+    {
+      "name": "管理员刷新不复现红标",
+      "passed": true
+    },
+    {
+      "name": "页面不再写交易暂停冻结",
+      "passed": true
+    },
+    {
+      "name": "超管真实UI可启用已保存沙箱配置",
+      "passed": true
+    },
+    {
+      "name": "删除预览为六格真实影响数据",
+      "passed": true
+    },
+    {
+      "name": "取消预览不删除社区",
+      "passed": true
+    },
+    {
+      "name": "窄屏删除操作按钮均可达",
+      "passed": true
+    },
+    {
+      "name": "错误名称不执行删除",
+      "passed": true
+    },
+    {
+      "name": "正确名称删除隔离社区及其有效关系",
+      "passed": true
+    },
+    {
+      "name": "删除社区后独立居民账号保留",
+      "passed": true
+    },
+    {
+      "name": "浏览器未触发交易请求",
+      "passed": true
+    },
+    {
+      "name": "隔离库未产生支付退款",
+      "passed": true
+    }
+  ],
+  "passed": 39,
+  "failed": 0,
+  "channelsCalled": false,
+  "userBrowserOperated": false,
+  "normalDataWritten": false,
+  "notes": [
+    "只用合成密钥启用隔离沙箱，不创建支付/退款、不查单",
+    "可见页面已读、刷新、自发、对方新消息、身份碰撞与原子游标实际DB验证",
+    "删除验证含取消、错误名称、正确名称删除及账号保留，仅删除本轮隔离合成社区，不删除正常社区"
+  ]
+}

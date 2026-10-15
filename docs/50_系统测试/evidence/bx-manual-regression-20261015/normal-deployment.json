@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-10-15T19:08:57+0800",
+  "backendPort": 8084,
+  "frontendPort": 5176,
+  "backendPid": 15716,
+  "database": "community_residence",
+  "schemaVersion": "40",
+  "businessTables": 57,
+  "countsBefore": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 0,
+    "lease_record": 0,
+    "lease_payment": 0,
+    "lease_deposit_refund": 0
+  },
+  "countsAfter": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 0,
+    "lease_record": 0,
+    "lease_payment": 0,
+    "lease_deposit_refund": 0
+  },
+  "configurationBefore": {
+    "configured": true,
+    "enabled": false,
+    "privateKeyConfigured": true,
+    "environment": "SANDBOX",
+    "revision": 2
+  },
+  "configurationAfter": {
+    "configured": true,
+    "enabled": true,
+    "privateKeyConfigured": true,
+    "environment": "SANDBOX",
+    "revision": 3
+  },
+  "sandboxEnabledRestored": true,
+  "keyIdentityUnchanged": true,
+  "privateKeyReplacementSubmitted": false,
+  "channels": [
+    {
+      "channel": "ALIPAY",
+      "configured": true,
+      "enabled": true
+    },
+    {
+      "channel": "WECHAT",
+      "configured": false,
+      "enabled": false
+    }
+  ],
+  "adminHousesManageSucceeded": true,
+  "adminCommunityReadSucceeded": true,
+  "externalTradingCalled": false,
+  "userBrowserOperated": false
+}
