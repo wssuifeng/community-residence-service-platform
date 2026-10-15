@@ -4,8 +4,8 @@ import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import ElementPlus from 'element-plus'
 import ConversationChat from '../ConversationChat.vue'
 
-const api = vi.hoisted(() => ({ list: vi.fn(), send: vi.fn(), agreement: vi.fn() }))
-vi.mock('@/api/conversation', () => ({ listConversationMessages: api.list, sendConversationMessage: api.send }))
+const api = vi.hoisted(() => ({ list: vi.fn(), send: vi.fn(), agreement: vi.fn(), read: vi.fn() }))
+vi.mock('@/api/conversation', () => ({ listConversationMessages: api.list, sendConversationMessage: api.send, markConversationRead: api.read }))
 vi.mock('@/api/agreement', () => ({ getLeaseAgreement: api.agreement }))
 vi.mock('@/utils/websocket', () => ({ subscribe: vi.fn(() => vi.fn()), isWsConnected: () => false }))
 const userStore = reactive({ user: { id: 1, role: 'RESIDENT' } })
@@ -24,13 +24,19 @@ async function render(listener?: (id: number) => void) {
   return wrapper
 }
 beforeEach(() => {
+  const originalBounds = HTMLElement.prototype.getBoundingClientRect
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+    if (this.classList.contains('conversation-chat')) return { x: 0, y: 100, top: 100, left: 0, right: 600, bottom: 500, width: 600, height: 400, toJSON: () => ({}) } as DOMRect
+    return originalBounds.call(this)
+  })
+  api.read.mockResolvedValue(undefined)
   userStore.user.role = 'RESIDENT'
   api.list.mockResolvedValue([{ id: 4, conversationId: 7, senderId: 0, senderRole: 'SYSTEM',
     senderName: '系统', content: '协议已发出', messageType: 'LEASE_AGREEMENT', agreementId: 12,
     createdAt: '2026-10-15T08:00:00' }])
   api.agreement.mockResolvedValue({ id: 12, leaseId: 9 })
 })
-afterEach(() => { wrapper?.unmount(); wrapper = undefined; vi.clearAllMocks(); document.body.innerHTML = '' })
+afterEach(() => { wrapper?.unmount(); wrapper = undefined; vi.clearAllMocks(); vi.restoreAllMocks(); document.body.innerHTML = '' })
 
 describe('嵌入式群聊协议卡片入口', () => {
   it('未接父层事件的居民入口打开精确只读快照，关闭群仍可查看', async () => {
@@ -70,4 +76,48 @@ describe('嵌入式群聊协议卡片入口', () => {
     await render()
     expect(wrapper!.find('.agreement-message').exists()).toBe(false)
   })
+})
+
+
+describe('会话已读持久化', () => {
+  it('消息实际展示后调用已读接口，不能仅在列表临时清零', async () => {
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+    await render()
+    expect(api.read).toHaveBeenCalledWith(7, 4)
+    expect(wrapper!.emitted('read')).toEqual([[7, 4]])
+  })
+  it('后台页面不标已读，回到前台才确认已展示消息', async () => {
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
+    await render(); expect(api.read).not.toHaveBeenCalled()
+    visibility.mockReturnValue('visible'); document.dispatchEvent(new Event('visibilitychange')); await flushPromises()
+    expect(api.read).toHaveBeenCalledWith(7, 4)
+  })
+})
+
+
+it('已读保存失败不虚清角标；回到前台可重新确认', async () => {
+  vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+  api.read.mockRejectedValueOnce(new Error('temporary offline'))
+  await render(); expect(wrapper!.emitted('read')).toBeUndefined()
+  document.dispatchEvent(new Event('visibilitychange')); await flushPromises()
+  expect(api.read).toHaveBeenCalledTimes(2)
+  expect(wrapper!.emitted('read')).toEqual([[7, 4]])
+})
+
+it('切会话时旧已读请求不能把旧消息ID写入新会话', async () => {
+  vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+  let finish: (() => void) | undefined
+  api.read.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve }))
+  await render()
+  api.list.mockResolvedValueOnce([{ id: 8, conversationId: 8, senderId: 2, senderRole: 'ADMIN', senderName: '管理员', content: '新会话', createdAt: '2026-10-15T08:00:00' }])
+  await wrapper!.setProps({ conversationId: 8 }); await flushPromises()
+  finish?.(); await flushPromises()
+  expect(api.read.mock.calls).toEqual([[7, 4], [8, 8]])
+})
+
+
+it('文档在前台但聊天容器隐藏时不冒充已读', async () => {
+  vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ x: 0, y: 0, top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0, toJSON: () => ({}) } as DOMRect)
+  await render(); expect(api.read).not.toHaveBeenCalled()
 })

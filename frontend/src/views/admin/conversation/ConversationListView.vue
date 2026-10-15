@@ -78,7 +78,10 @@ async function load(): Promise<void> {
 /** 选中会话：进入后未读由组件轮询/后端 read 端点收口，这里刷新列表角标 */
 function selectConversation(id: number): void {
   activeId.value = id
-  const item = conversations.value.find((c) => c.id === id)
+}
+
+function handleRead(id: number): void {
+  const item = conversations.value.find((conversation) => conversation.id === id)
   if (item) item.unreadCount = 0
 }
 
@@ -304,6 +307,7 @@ onMounted(() => {
           </span>
         </div>
         <ConversationChat
+          @read="handleRead"
           v-if="activeId !== null"
           :key="activeId"
           :conversation-id="activeId"
@@ -489,6 +493,13 @@ onMounted(() => {
 
 .conv-unread {
   grid-area: unread;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 42px;
+  box-sizing: border-box;
   align-self: start;
   min-width: 18px;
   padding: 0 5px;
