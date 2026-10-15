@@ -489,7 +489,7 @@ PublicResourceListView复用ImageUploader，6张/5MB；BaseUploader逐张回写�
 
 ## 2026-10-15 bx当前恢复提示（优先于bw/bu及更早记录）
 
-- 仍50步骤7/8，定义v1.9/需求v1.21不变；正常V40/57表、8084/5176。当前JAR为output/runtime/manual-bx-release-20261015.jar，PID以bx-normal-pids.json及实际监听核对，不用旧bu/bw PID。
+- 仍50步骤7/8，定义v1.9/需求v1.21不变；正常V40/57表、8084/5176。当前JAR为output/runtime/manual-bx-release-20261015.jar，by已在用户手测前沿用同版重启8084/5176，15项启动检查通过；当前PID以by-normal-pids.json及实际监听核对，不用旧bx/bu/bw PID。
 - 用户纠正交易暂缓仅约束AI，不是产品冻结。超管配置控制enabled，configured与enabled独立；保留原密钥，原完整SANDBOX已恢复启用。未启用正式环境、未付款/查单/退款，未证明支付宝当前外部可用。
 - 未读实际可见后服务端持久化，游标原子仅前移、限定本会话，排除同身份空间本人消息。house_image/lease_contract_term由父级鉴权，不盲注community_id；chat_message_image继续原数据级过滤。
 - 删除仅优化分组风险、实际计数及按钮层级，原确认/影响版本保留。用户主动删测试数据不恢复；本轮正常业务数量均保持。
