@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-15",
+  "kind": "Proposed business-rule/date/amount examples only, not implementation or financial regression",
+  "checks": [
+    {
+      "name": "Initial 12-month term ends 2027-10-14 inclusive",
+      "passed": true
+    },
+    {
+      "name": "First 3 months cover to 2027-01-14 and total 12000 incl fixed deposit",
+      "passed": true
+    },
+    {
+      "name": "Next monthly payment covers Jan15-Feb14 and costs 3000 without deposit",
+      "passed": true
+    },
+    {
+      "name": "Ordinary rent coverage and contract end remain separate",
+      "passed": true
+    },
+    {
+      "name": "6-month renewal starts after old term and ends 2028-04-14",
+      "passed": true
+    },
+    {
+      "name": "Renewal first payment of one month is not payment for all 6 months",
+      "passed": true
+    },
+    {
+      "name": "Initial historic term retained while current cumulative coverage reaches 18 months",
+      "passed": true
+    },
+    {
+      "name": "Future renewal payment does not prove unpaid middle months paid",
+      "passed": true
+    },
+    {
+      "name": "Month-end anchor derives from original start",
+      "passed": true
+    }
+  ],
+  "transactionsExecuted": false,
+  "businessCodeChanged": false
+}
