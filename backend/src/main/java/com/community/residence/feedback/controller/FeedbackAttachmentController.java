@@ -37,4 +37,11 @@ public class FeedbackAttachmentController {
         feedbackService.deleteAttachment(id);
         return ApiResponse.success();
     }
+    @Operation(summary = "发送图片消息", description = "真实图片≤5MB；保存并向会话参与者发送，不是反馈附件")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
+    @PostMapping(value = "/api/v1/feedbacks/{id}/messages/image", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<com.community.residence.feedback.vo.MessageVO> sendImage(@PathVariable Long id, @org.springframework.web.bind.annotation.RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
+        return ApiResponse.success(feedbackService.sendImage(id,file));
+    }
+
 }

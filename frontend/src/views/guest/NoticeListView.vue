@@ -26,16 +26,9 @@ const size = ref(10)
 const keyword = ref(keywordFromQuery())
 const loading = ref(false)
 
-/** 置顶轮播背景（DEF-050 重设计）：背景实体感大图按标题语义映射（活动/安全/指南），无匹配按序号轮换 */
-const NOTICE_BG_POOLS = ['/notice_bg_activity.png', '/notice_bg_safety.png', '/notice_bg_guide.png']
+/** 置顶轮播背景（DEF-050 重设计）：仅使用后端保存的公告图片，无图不渲染封面 */
+function noticeBgOf(notice: INotice, _index: number): string | undefined { return notice.images?.[0] }
 
-function noticeBgOf(notice: INotice, index: number): string {
-  const title = notice.title
-  if (title.includes('活动')) return '/notice_bg_activity.png'
-  if (title.includes('安全') || title.includes('消防')) return '/notice_bg_safety.png'
-  if (title.includes('指南') || title.includes('提示') || title.includes('教程')) return '/notice_bg_guide.png'
-  return NOTICE_BG_POOLS[index % NOTICE_BG_POOLS.length]
-}
 
 /** 置顶判定：isPinned 真实字段（0/1）优先，旧布尔命名留兜底（优先级是展示属性，不参与置顶） */
 function isPinned(notice: INotice): boolean {
@@ -180,7 +173,7 @@ onMounted(load)
               :to="`/guest/notices/${notice.id}`"
               class="pinned-card"
             >
-              <img class="pinned-cover" :src="noticeBgOf(notice, index)" :alt="notice.title" />
+              <img v-if="noticeBgOf(notice, index)" class="pinned-cover" :src="noticeBgOf(notice, index)" :alt="notice.title" />
               <span class="pin-mark">置顶</span>
               <div class="pinned-main">
                 <div class="pinned-title-row">
@@ -230,7 +223,7 @@ onMounted(load)
             :aria-label="`查看置顶公告 ${index + 1}：${notice.title}`"
             @click="setPinned(index)"
           >
-            <img :src="noticeBgOf(notice, index)" alt="" />
+            <img v-if="noticeBgOf(notice, index)" :src="noticeBgOf(notice, index)" alt="" />
             <span class="pinned-thumb-index">{{ index + 1 }}</span>
           </button>
         </div>

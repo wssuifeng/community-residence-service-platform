@@ -4,6 +4,7 @@ function toLocalIso(date: Date): string {
   const pad = (value: number): string => String(value).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
+import ImageUploader from '@/components/common/ImageUploader.vue'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -205,8 +206,8 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
   formLoading.value = true
   try {
     const notice: INotice = await getNotice(id)
-    if (notice.status !== 'DRAFT') {
-      ElMessage.warning('仅草稿状态的公告可编辑')
+    if (!['DRAFT','WITHDRAWN'].includes(notice.status)) {
+      ElMessage.warning('请先撤回公告再编辑')
       mode.value = 'view'
       editingId.value = null
       syncQuery('view')
@@ -217,6 +218,7 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
     mode.value = 'edit'
     form.value.title = notice.title
     form.value.content = notice.content
+    form.value.images = [...(notice.images ?? [])]
     form.value.type = notice.type ?? 'ANNOUNCEMENT'
     form.value.priority = notice.priority ?? 'NORMAL'
     form.value.targetAudience = notice.targetAudience ?? 'ALL'
@@ -420,6 +422,7 @@ async function loadBoundCommunities(): Promise<void> {
 const form = ref({
   title: '',
   content: '',
+  images: [] as string[],
   type: 'ANNOUNCEMENT' as NoticeType,
   priority: 'NORMAL' as NoticePriority,
   targetAudience: 'ALL' as TargetAudience,
@@ -493,6 +496,7 @@ const formRef = ref()
 function resetForm(): void {
   form.value.title = ''
   form.value.content = ''
+  form.value.images = []
   form.value.type = 'ANNOUNCEMENT'
   form.value.priority = 'NORMAL'
   form.value.targetAudience = 'ALL'
@@ -526,6 +530,7 @@ function buildRequest(): INoticeSaveRequest {
     isPinned: form.value.isPinned ? 1 : 0,
     title: form.value.title.trim(),
     content: form.value.content.trim(),
+    images: form.value.images,
     type: form.value.type,
     priority: form.value.priority,
     targetAudience: form.value.targetAudience,
@@ -753,7 +758,7 @@ onMounted(async () => {
                   发布
                 </el-button>
                 <el-button
-                  v-if="current.status === 'DRAFT'"
+                  v-if="['DRAFT','WITHDRAWN'].includes(current.status)"
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
                   @click="enterEdit(current.id)"
                 >
@@ -768,7 +773,7 @@ onMounted(async () => {
                   下线
                 </el-button>
                 <el-button
-                  v-if="current.status === 'DRAFT' || current.status === 'WITHDRAWN'"
+                  v-if="['DRAFT','WITHDRAWN'].includes(current.status)"
                   v-permission="['ADMIN', 'SUPER_ADMIN']"
                   type="danger"
                   plain
@@ -817,7 +822,8 @@ onMounted(async () => {
               </div>
             </dl>
 
-            <div class="view-content">
+            <div v-if="current?.images?.length" class="notice-images"><el-image v-for="url in current.images" :key="url" :src="url" :preview-src-list="current.images" preview-teleported style="max-width:240px" /></div>
+        <div class="view-content">
               <p v-for="(paragraph, index) in current.content.split(/\n+/).filter(Boolean)" :key="index">
                 {{ paragraph }}
               </p>
@@ -866,6 +872,10 @@ onMounted(async () => {
                   placeholder="请输入公告正文，空行分段展示"
                 />
               </el-form-item>
+                <el-form-item label="公告图片（可选）">
+                  <ImageUploader v-model="form.images" :limit="6" />
+                  <p>仅显示已上传并保存的图片；移除后保存即可清空。已发布公告须先撤回，编辑保存为草稿后再发布。</p>
+                </el-form-item>
 
               <el-form-item label="公告类型">
                 <el-select v-model="form.type" style="width: 200px">

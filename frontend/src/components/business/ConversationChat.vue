@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, getCurrentInstance, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { listConversationMessages, sendConversationMessage } from '@/api/conversation'
 import { getLeaseAgreement } from '@/api/agreement'
 import AgreementSignPanel from './AgreementSignPanel.vue'
 import type { IConversationMessage, IConversationParticipant } from '@/types/modules/conversation'
 import { conversationRoleLabels } from '@/types/modules/conversation'
-import { subscribe, isWsConnected } from '@/utils/websocket'
-import { formatDateTime } from '@/utils/date'
+import { useChatChannel } from '@/composables/useChatChannel'
+import { sendChatImage } from '@/api/chat'
+import ChatMessageList from './ChatMessageList.vue'
+import ChatComposer from './ChatComposer.vue'
 import { useUserStore } from '@/store/user'
 
 /**
@@ -53,8 +55,6 @@ if (import.meta.env.DEV && props.closed === undefined) {
 
 const DEFAULT_CLOSED_HINT = '会话已关闭，历史消息只读留档'
 
-const POLL_RELAXED_INTERVAL = 15000
-const POLL_FALLBACK_INTERVAL = 5000
 
 const userStore = useUserStore()
 const instance = getCurrentInstance()
@@ -93,129 +93,15 @@ async function openAgreementSnapshot(agreementId: number): Promise<void> {
   }
 }
 
-const messages = ref<IConversationMessage[]>([])
-const messageInput = ref('')
-const sending = ref(false)
-const readOnly = ref(false)
-const messageListRef = ref<HTMLElement | null>(null)
-let unsubscribeWs: (() => void) | null = null
-let pollTimer: ReturnType<typeof setTimeout> | null = null
-
-function isMine(message: IConversationMessage): boolean {
-  return message.senderRole === userStore.user?.role && message.senderId === userStore.user?.id
-}
-
-function scrollToBottom(): void {
-  const container = messageListRef.value
-  if (container) container.scrollTop = container.scrollHeight
-}
-
-async function loadMessages(): Promise<void> {
-  try {
-    messages.value = await listConversationMessages(props.conversationId)
-    void nextTick(scrollToBottom)
-  } catch {
-    /* 非参与者/会话不存在：降级只读，停止轮询 */
-    readOnly.value = true
-    if (pollTimer !== null) {
-      clearTimeout(pollTimer)
-      pollTimer = null
-    }
-  }
-}
-
-async function handleSend(): Promise<void> {
-  /* 关闭态由父层传入优先拦截；后端同样拒绝（CONVERSATION_CLOSED 5604）双保险 */
-  if (props.closed) {
-    ElMessage.warning('会话已关闭，不可再发送消息')
-    return
-  }
-  const content = messageInput.value.trim()
-  if (content === '' || sending.value) return
-  sending.value = true
-  try {
-    const message = await sendConversationMessage(props.conversationId, { content })
-    messageInput.value = ''
-    /* 本端消息也会经 WS 广播回来，按 id 去重 */
-    if (!messages.value.some((item) => item.id === message.id)) {
-      messages.value.push(message)
-    }
-    void nextTick(scrollToBottom)
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '发送失败，请稍后重试')
-  } finally {
-    sending.value = false
-  }
-}
-
-/** WS 载荷归一：{type, data} 包裹为主，兼容裸 VO；形态异常丢弃走轮询兜底 */
-function extractWsMessage(raw: unknown): IConversationMessage | null {
-  const event = raw as { type?: string; data?: IConversationMessage }
-  const candidate =
-    event?.type === 'CONVERSATION_MESSAGE' && event.data
-      ? event.data
-      : event?.type === undefined && typeof (raw as IConversationMessage)?.content === 'string'
-        ? (raw as IConversationMessage)
-        : null
-  if (candidate && typeof candidate.createdAt === 'string' && typeof candidate.id === 'number') {
-    return candidate
-  }
-  return null
-}
-
-function handleWsPush(raw: unknown): void {
-  const message = extractWsMessage(raw)
-  if (message && !messages.value.some((item) => item.id === message.id)) {
-    messages.value.push(message)
-    void nextTick(scrollToBottom)
-  }
-}
-
-/* 轮询兜底：setTimeout 链按 WS 连接状态自适应选间隔；关闭态不轮询 */
-function schedulePoll(): void {
-  pollTimer = setTimeout(() => {
-    void loadMessages().finally(() => {
-      if (!readOnly.value && !props.closed) schedulePoll()
-    })
-  }, isWsConnected() ? POLL_RELAXED_INTERVAL : POLL_FALLBACK_INTERVAL)
-}
-
-onMounted(() => {
-  void loadMessages()
-  /* 关闭态：历史只读即可，无需订阅实时推送与轮询 */
-  if (props.closed) return
-  unsubscribeWs = subscribe(`/topic/conversation/${props.conversationId}`, handleWsPush)
-  if (!readOnly.value) schedulePoll()
+const { messages, text, sending, readOnly, sendText, sendImage } = useChatChannel<IConversationMessage>({
+ id:()=>props.conversationId,closed:()=>props.closed??false,load:listConversationMessages,
+ send:(id,content)=>sendConversationMessage(id,{content}),image:(id,file)=>sendChatImage('conversations',id,file),
+ topic:id=>`/topic/conversation/${id}`,eventType:'CONVERSATION_MESSAGE'
 })
-
-/* 父层异步拿到会话状态（详情接口在途）→ 状态落定后再决定是否开启实时通道 */
-watch(
-  () => props.closed,
-  (closed) => {
-    if (closed) {
-      unsubscribeWs?.()
-      unsubscribeWs = null
-      if (pollTimer !== null) {
-        clearTimeout(pollTimer)
-        pollTimer = null
-      }
-      return
-    }
-    if (unsubscribeWs === null) {
-      unsubscribeWs = subscribe(`/topic/conversation/${props.conversationId}`, handleWsPush)
-    }
-    if (pollTimer === null && !readOnly.value) schedulePoll()
-  }
-)
-
-onUnmounted(() => {
-  unsubscribeWs?.()
-  unsubscribeWs = null
-  if (pollTimer !== null) {
-    clearTimeout(pollTimer)
-    pollTimer = null
-  }
-})
+const renderedMessages=computed(()=>messages.value.map(message=>({...message,
+ senderLabel:`${message.senderName}（${conversationRoleLabels[message.senderRole as keyof typeof conversationRoleLabels]??message.senderRole}）`,
+ mine:message.senderRole===userStore.user?.role&&message.senderId===userStore.user?.id
+})))
 </script>
 
 <template>
@@ -231,52 +117,18 @@ onUnmounted(() => {
       </p>
     </header>
 
-    <div ref="messageListRef" class="message-list">
-      <div v-if="messages.length === 0" class="chat-empty">暂无消息，说点什么开始沟通</div>
-      <div
-        v-for="message in messages"
-        :key="message.id"
-        class="message-row"
-        :class="{ mine: isMine(message) }"
-      >
-        <div class="bubble">
-          <p class="bubble-meta">{{ message.senderName }} · {{ formatDateTime(message.createdAt) }}</p>
-          <p class="bubble-content">{{ message.content }}</p>
-          <template v-if="message.messageType === 'LEASE_AGREEMENT' && message.senderRole === 'SYSTEM' && message.agreementId">
-            <button v-if="agreementRole" type="button" class="agreement-message" :disabled="openingSnapshot" @click="openAgreementSnapshot(message.agreementId)">
-              租赁协议 #{{ message.agreementId }} · 查看协议快照
-            </button>
-            <p v-else class="agreement-access-hint">协议正文仅租约居民和管理方可查看</p>
-          </template>
-        </div>
-      </div>
-    </div>
-
-    <!-- 输入区三态：会话已关闭（只读留档）> 非参与者只读 > 正常输入 -->
-    <footer v-if="closed" class="chat-closed">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="5" y="11" width="14" height="9" rx="2" />
-        <path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3" />
-      </svg>
-      <!-- 传入 closedHint 时带业务口径前缀；缺省整体用中性默认文案（避免前缀重复拼接） -->
-      {{ closedHint ? `会话已关闭：${closedHint}` : DEFAULT_CLOSED_HINT }}
-    </footer>
-    <footer v-else-if="!readOnly" class="chat-input">
-      <button v-if="$slots['business-actions']" type="button" class="business-toggle" :aria-expanded="businessMenuVisible" aria-label="会话业务功能" @click="businessMenuVisible=!businessMenuVisible">＋</button>
-      <input
-        v-model="messageInput"
-        type="text"
-        class="chat-text"
-        placeholder="输入消息…"
-        maxlength="500"
-        @keyup.enter="handleSend"
-      />
-      <button type="button" class="chat-send" :disabled="sending || messageInput.trim() === ''" @click="handleSend">
-        发送
-      </button>
-    </footer>
-    <footer v-else class="chat-readonly">仅会话参与者可参与沟通</footer>
-    <div v-if="businessMenuVisible && !closed && !readOnly" class="business-actions"><slot name="business-actions" /></div>
+    <ChatMessageList :messages="renderedMessages">
+      <template #message-actions="{message}">
+        <template v-if="message.messageType==='LEASE_AGREEMENT' && message.senderRole==='SYSTEM' && message.agreementId">
+          <button v-if="agreementRole" type="button" class="agreement-message" :disabled="openingSnapshot" @click="openAgreementSnapshot(message.agreementId)">租赁协议 #{{message.agreementId}} · 查看协议快照</button>
+          <p v-else class="agreement-access-hint">协议正文仅租约居民和管理方可查看</p>
+        </template>
+      </template>
+    </ChatMessageList>
+    <ChatComposer v-model="text" :busy="sending" :closed="closed" :read-only="readOnly" :closed-hint="closedHint?`会话已关闭：${closedHint}`:DEFAULT_CLOSED_HINT" @send="sendText" @image="sendImage">
+      <template #actions><button v-if="$slots['business-actions']" type="button" class="business-toggle" :aria-expanded="businessMenuVisible" aria-label="会话业务功能" @click="businessMenuVisible=!businessMenuVisible">＋</button></template>
+    </ChatComposer>
+    <div v-if="businessMenuVisible && !closed && !readOnly" class="business-actions"><slot name="business-actions"/></div>
     <el-dialog v-model="snapshotVisible" title="租赁协议快照（只读）" width="min(720px, 92vw)" destroy-on-close>
       <AgreementSignPanel
         v-if="snapshotVisible && snapshotLeaseId && agreementRole"

@@ -21,6 +21,10 @@ public class Feedback {
     @Schema(description = "反馈人ID")
     private Long residentId;
 
+    @Schema(description = "匿名选择；历史未保存的选择为空，不按标题猜测")
+    private Boolean isAnonymous;
+
+
     @Schema(description = "所属社区ID")
     private Long communityId;
 

@@ -71,6 +71,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ConversationService {
+    private final ChatImageService chatImageService;
 
     /** 系统消息发送人角色（群聊状态变更留痕，非任何账号发言） */
     private static final String SYSTEM_SENDER_ROLE = "SYSTEM";
@@ -615,10 +616,12 @@ public class ConversationService {
      */
     public List<ConversationMessageVO> listMessages(Long conversationId) {
         requireParticipant(conversationId);
-        return messageMapper.selectList(new LambdaQueryWrapper<ConversationMessage>()
+        var rows=messageMapper.selectList(new LambdaQueryWrapper<ConversationMessage>()
                         .eq(ConversationMessage::getConversationId, conversationId)
-                        .orderByAsc(ConversationMessage::getId))
-                .stream().map(this::toMessageVO).toList();
+                        .orderByAsc(ConversationMessage::getId));
+        var ids=rows.stream().filter(m->com.community.residence.common.constant.ChatMessageType.IMAGE.equals(m.getMessageType())).map(ConversationMessage::getId).toList();
+        var images=ids.isEmpty()?java.util.Map.<Long,com.community.residence.conversation.vo.ChatImageVO>of():chatImageService.images(ChatImageService.CONVERSATION,ids);
+        return rows.stream().map(m->toMessageVO(m,images.get(m.getId()))).toList();
     }
 
     /**
@@ -629,18 +632,30 @@ public class ConversationService {
      * 全员离线不推送、推送失败不回滚，HTTP 轮询兜底）。
      */
     @Transactional(rollbackFor = Exception.class)
-    public ConversationMessageVO sendMessage(Long conversationId, SendMessageDTO dto) {
+    public ConversationMessageVO sendMessage(Long conversationId, SendMessageDTO dto) { return send(conversationId, dto, null); }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ConversationMessageVO sendImage(Long conversationId, org.springframework.web.multipart.MultipartFile file) {
+        SendMessageDTO dto = new SendMessageDTO(); dto.setContent("[图片]");
+        return send(conversationId, dto, file);
+    }
+
+    /* 仅复用已完成参与者/关闭态校验的消息流程，图片不能通过普通TEXT载荷伪造。 */
+    private ConversationMessageVO send(Long conversationId, SendMessageDTO dto, org.springframework.web.multipart.MultipartFile file) {
         Conversation conversation = requireParticipant(conversationId);
         if (ConversationStatus.CLOSED.equals(conversation.getStatus())) {
             throw new BusinessException(ErrorCode.CONVERSATION_CLOSED);
         }
+        var uploaded = file == null ? null : chatImageService.upload(file);
         ConversationMessage message = new ConversationMessage();
+        message.setMessageType(uploaded == null ? com.community.residence.common.constant.ChatMessageType.TEXT : com.community.residence.common.constant.ChatMessageType.IMAGE);
         message.setConversationId(conversationId);
         message.setSenderId(SecurityUtils.getUserId());
         message.setSenderRole(currentRole());
         message.setContent(dto.getContent());
         message.setCreatedAt(LocalDateTime.now());
         messageMapper.insert(message);
+        if (uploaded != null) chatImageService.attach(ChatImageService.CONVERSATION, message.getId(), conversation.getCommunityId(), uploaded);
 
         conversation.setLastMessage(dto.getContent());
         conversation.setLastMessageAt(message.getCreatedAt());
@@ -738,7 +753,13 @@ public class ConversationService {
     /* 发送人姓名：按 sender_role 选表（RESIDENT 取 resident.real_name，
        其余取 sys_user.real_name），消解两套自增序列撞号；SYSTEM 为系统留痕 */
     private ConversationMessageVO toMessageVO(ConversationMessage message) {
+        var image = com.community.residence.common.constant.ChatMessageType.IMAGE.equals(message.getMessageType()) ? chatImageService.image(ChatImageService.CONVERSATION, message.getId()) : null;
+        return toMessageVO(message, image);
+    }
+
+    private ConversationMessageVO toMessageVO(ConversationMessage message, com.community.residence.conversation.vo.ChatImageVO image) {
         ConversationMessageVO vo = ConversationMessageVO.from(message);
+        vo.setImage(image);
         if (SYSTEM_SENDER_ROLE.equals(message.getSenderRole())) {
             vo.setSenderName("系统");
             return vo;

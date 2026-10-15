@@ -24,6 +24,11 @@ public class Notice {
     @Schema(description = "公告内容")
     private String content;
 
+    @Schema(description = "公告上传图片URL，以逗号分隔")
+    @com.baomidou.mybatisplus.annotation.TableField(updateStrategy = com.baomidou.mybatisplus.annotation.FieldStrategy.ALWAYS)
+    private String images;
+
+
     @Schema(description = "发布人ID")
     private Long publisherId;
 

@@ -29,6 +29,14 @@ public class MessageVO {
     @Schema(description = "消息内容")
     private String content;
 
+    @Schema(description="消息类型TEXT/IMAGE")
+    private String messageType;
+
+
+    @Schema(description="图片消息内容，仅IMAGE时存在")
+    private com.community.residence.conversation.vo.ChatImageVO image;
+
+
     @Schema(description = "父消息ID")
     private Long parentId;
 
@@ -42,6 +50,7 @@ public class MessageVO {
         vo.setSenderId(entity.getSenderId());
         vo.setSenderType(entity.getSenderType());
         vo.setContent(entity.getContent());
+        vo.setMessageType(entity.getMessageType()==null ? com.community.residence.common.constant.ChatMessageType.TEXT : entity.getMessageType());
         vo.setParentId(entity.getParentId());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;

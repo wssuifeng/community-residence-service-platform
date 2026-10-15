@@ -26,6 +26,14 @@ public class ViewingMessageVO {
     @Schema(description = "消息内容")
     private String content;
 
+    @Schema(description="消息类型TEXT/IMAGE")
+    private String messageType;
+
+
+    @Schema(description="图片消息内容，仅IMAGE时存在")
+    private com.community.residence.conversation.vo.ChatImageVO image;
+
+
     @Schema(description = "发送时间")
     private LocalDateTime createdAt;
 
@@ -35,6 +43,7 @@ public class ViewingMessageVO {
         vo.setAppointmentId(entity.getAppointmentId());
         vo.setSenderId(entity.getSenderId());
         vo.setContent(entity.getContent());
+        vo.setMessageType(entity.getMessageType()==null ? com.community.residence.common.constant.ChatMessageType.TEXT : entity.getMessageType());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;
     }

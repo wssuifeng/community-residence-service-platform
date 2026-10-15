@@ -48,12 +48,13 @@ export interface IConversationParticipant {
 
 /** 会话消息（后端 ConversationMessageVO；WS /topic/conversation/{id} 同构推送） */
 export interface IConversationMessage {
+  image?: import('@/types/chat').ChatImage | null
   id: number
   conversationId: number
   senderId: number
   senderName: string
   senderRole: ConversationRole | 'SYSTEM'
-  messageType?: 'TEXT' | 'LEASE_AGREEMENT'
+  messageType?: 'TEXT' | 'IMAGE' | 'LEASE_AGREEMENT'
   agreementId?: number | null
   content: string
   createdAt: string

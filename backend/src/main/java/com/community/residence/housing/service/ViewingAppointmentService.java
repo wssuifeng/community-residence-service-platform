@@ -75,6 +75,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class ViewingAppointmentService {
+    private final com.community.residence.conversation.service.ChatImageService chatImageService;
 
     /** 占用时段的预约状态集合（冲突检测口径） */
     private static final List<String> OCCUPYING_STATUS = List.of("TO_CONFIRM", "RESERVED");
@@ -669,14 +670,27 @@ public class ViewingAppointmentService {
      * 双方均离线不推送、推送失败不回滚，前端轮询兜底）。
      */
     @Transactional(rollbackFor = Exception.class)
-    public ViewingMessageVO sendMessage(Long appointmentId, CreateViewingMessageDTO dto) {
+    public ViewingMessageVO sendMessage(Long appointmentId, CreateViewingMessageDTO dto) { return sendChatMessage(appointmentId, dto, null); }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ViewingMessageVO sendImage(Long appointmentId, org.springframework.web.multipart.MultipartFile file) {
+        CreateViewingMessageDTO dto=new CreateViewingMessageDTO();dto.setContent("[图片]");
+        return sendChatMessage(appointmentId,dto,file);
+    }
+
+    /* 兼容旧看房消息空间，只共用图片实现，不放宽带看发送权限。 */
+    private ViewingMessageVO sendChatMessage(Long appointmentId, CreateViewingMessageDTO dto, org.springframework.web.multipart.MultipartFile file) {
         ViewingAppointment appointment = requireAppointment(appointmentId);
         checkMessageSendAccess(appointment);
+        var uploaded=file==null?null:chatImageService.upload(file);
         ViewingMessage message = new ViewingMessage();
+        message.setMessageType(uploaded==null?com.community.residence.common.constant.ChatMessageType.TEXT:com.community.residence.common.constant.ChatMessageType.IMAGE);
+        message.setCreatedAt(java.time.LocalDateTime.now());
         message.setAppointmentId(appointmentId);
         message.setSenderId(SecurityUtils.getUserId());
         message.setContent(dto.getContent());
         messageMapper.insert(message);
+        if(uploaded!=null)chatImageService.attach(com.community.residence.conversation.service.ChatImageService.VIEWING,message.getId(),appointment.getCommunityId(),uploaded);
 
         ViewingMessageVO vo = toMessageVO(message, appointment);
         pushMessage(appointment, vo);
@@ -742,6 +756,7 @@ public class ViewingAppointmentService {
        （sender_id 多态引用，按预约参与者身份判别） */
     private ViewingMessageVO toMessageVO(ViewingMessage message, ViewingAppointment appointment) {
         ViewingMessageVO vo = ViewingMessageVO.from(message);
+        if(com.community.residence.common.constant.ChatMessageType.IMAGE.equals(message.getMessageType())) vo.setImage(chatImageService.image(com.community.residence.conversation.service.ChatImageService.VIEWING,message.getId()));
         Long senderId = message.getSenderId();
         if (senderId != null && senderId.equals(appointment.getUserId())) {
             Resident resident = residentMapper.selectById(senderId);

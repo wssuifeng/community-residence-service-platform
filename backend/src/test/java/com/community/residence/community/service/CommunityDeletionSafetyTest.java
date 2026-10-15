@@ -13,6 +13,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CommunityDeletionSafetyTest {
+    @org.mockito.Mock private com.community.residence.conversation.mapper.ChatMessageImageMapper chatMessageImageMapper;
     @Mock CommunityMapper mapper;
     @InjectMocks CommunityService service;
     private CommunityDeletionImpactVO impact() {

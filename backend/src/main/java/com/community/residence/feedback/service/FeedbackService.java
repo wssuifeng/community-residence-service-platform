@@ -51,6 +51,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class FeedbackService {
+    private final com.community.residence.conversation.service.ChatImageService chatImageService;
 
     /** 状态机：待受理 → 会话中 → 已办结（终态不可回退） */
     private static final Map<String, Set<String>> ALLOWED_TRANSITIONS = Map.of(
@@ -76,6 +77,7 @@ public class FeedbackService {
         feedback.setTitle(dto.getTitle());
         feedback.setContent(dto.getContent());
         feedback.setCategory(dto.getCategory());
+        feedback.setIsAnonymous(Boolean.TRUE.equals(dto.getIsAnonymous()));
         feedback.setStatus("PENDING");
         feedbackMapper.insert(feedback);
         return toVO(feedback);
@@ -146,7 +148,16 @@ public class FeedbackService {
      * 已办结的反馈不可继续会话。
      */
     @Transactional(rollbackFor = Exception.class)
-    public MessageVO sendMessage(Long feedbackId, SendMessageDTO dto) {
+    public MessageVO sendMessage(Long feedbackId, SendMessageDTO dto) { return send(feedbackId, dto, null); }
+
+    @Transactional(rollbackFor = Exception.class)
+    public MessageVO sendImage(Long feedbackId, org.springframework.web.multipart.MultipartFile file) {
+        SendMessageDTO dto = new SendMessageDTO(); dto.setContent("[图片]");
+        return send(feedbackId, dto, file);
+    }
+
+    /* 两种消息沿同一受理/关闭/鉴权/通知/推送流程，图片在消息提交前关联。 */
+    private MessageVO send(Long feedbackId, SendMessageDTO dto, org.springframework.web.multipart.MultipartFile file) {
         Feedback feedback = requireFeedback(feedbackId);
         boolean isAdminSide = !SecurityUtils.hasRole(RoleConstants.RESIDENT);
         if (isAdminSide) {
@@ -166,13 +177,17 @@ public class FeedbackService {
             feedbackMapper.updateById(feedback);
         }
 
+        var uploaded = file == null ? null : chatImageService.upload(file);
         FeedbackMessage message = new FeedbackMessage();
+        message.setMessageType(uploaded == null ? com.community.residence.common.constant.ChatMessageType.TEXT : com.community.residence.common.constant.ChatMessageType.IMAGE);
+        message.setCreatedAt(LocalDateTime.now());
         message.setFeedbackId(feedbackId);
         message.setSenderId(SecurityUtils.getUserId());
         message.setSenderType(isAdminSide ? "ADMIN" : "RESIDENT");
         message.setContent(dto.getContent());
         message.setParentId(dto.getParentId());
         messageMapper.insert(message);
+        if (uploaded != null) chatImageService.attach(com.community.residence.conversation.service.ChatImageService.FEEDBACK, message.getId(), feedback.getCommunityId(), uploaded);
 
         /* 会话消息触达对端：管理员回复通知居民；居民追问通知处理人（未受理时无处理人则跳过） */
         if (isAdminSide) {
@@ -192,12 +207,12 @@ public class FeedbackService {
                         && webSocketSessionService.isUserOnline(feedback.getHandlerId()))) {
             try {
                 messagingTemplate.convertAndSend("/topic/feedback/" + feedbackId,
-                        FeedbackPushVO.message(toVO(message, feedback.getResidentId())));
+                        FeedbackPushVO.message(toVO(message, feedback)));
             } catch (Exception e) {
                 log.warn("反馈会话 WebSocket 推送失败，由轮询兜底：feedbackId={}", feedbackId, e);
             }
         }
-        return toVO(message, feedback.getResidentId());
+        return toVO(message, feedback);
     }
 
     /**
@@ -206,11 +221,13 @@ public class FeedbackService {
     public List<MessageVO> messages(Long feedbackId, LocalDateTime since) {
         Feedback feedback = requireFeedback(feedbackId);
         checkReadAccess(feedback);
-        return messageMapper.selectList(new LambdaQueryWrapper<FeedbackMessage>()
+        var rows = messageMapper.selectList(new LambdaQueryWrapper<FeedbackMessage>()
                         .eq(FeedbackMessage::getFeedbackId, feedbackId)
                         .gt(since != null, FeedbackMessage::getCreatedAt, since)
-                        .orderByAsc(FeedbackMessage::getId))
-                .stream().map(m -> toVO(m, feedback.getResidentId())).toList();
+                        .orderByAsc(FeedbackMessage::getId));
+        var ids = rows.stream().filter(m -> com.community.residence.common.constant.ChatMessageType.IMAGE.equals(m.getMessageType())).map(FeedbackMessage::getId).toList();
+        var images = ids.isEmpty() ? java.util.Map.<Long, com.community.residence.conversation.vo.ChatImageVO>of() : chatImageService.images(com.community.residence.conversation.service.ChatImageService.FEEDBACK, ids);
+        return rows.stream().map(m -> toVO(m, feedback, images.get(m.getId()))).toList();
     }
 
     /* 附件列表：访问权限与详情同口径 */
@@ -293,9 +310,13 @@ public class FeedbackService {
 
     private FeedbackVO toVO(Feedback feedback) {
         FeedbackVO vo = FeedbackVO.from(feedback);
-        Resident resident = residentMapper.selectById(feedback.getResidentId());
-        if (resident != null) {
-            vo.setResidentName(resident.getRealName());
+        vo.setIsAnonymous(!Boolean.FALSE.equals(feedback.getIsAnonymous()));
+        if (!Boolean.FALSE.equals(feedback.getIsAnonymous())) {
+            vo.setResidentId(null);
+            vo.setResidentName("匿名居民");
+        } else {
+            Resident resident = residentMapper.selectById(feedback.getResidentId());
+            if (resident != null) vo.setResidentName(resident.getRealName());
         }
         if (feedback.getHandlerId() != null) {
             SysUser handler = sysUserMapper.selectById(feedback.getHandlerId());
@@ -306,9 +327,18 @@ public class FeedbackService {
         return vo;
     }
 
-    private MessageVO toVO(FeedbackMessage message, Long feedbackResidentId) {
+    private MessageVO toVO(FeedbackMessage message, Feedback feedback) {
+        var image = com.community.residence.common.constant.ChatMessageType.IMAGE.equals(message.getMessageType()) ? chatImageService.image(com.community.residence.conversation.service.ChatImageService.FEEDBACK, message.getId()) : null;
+        return toVO(message, feedback, image);
+    }
+
+    private MessageVO toVO(FeedbackMessage message, Feedback feedback, com.community.residence.conversation.vo.ChatImageVO image) {
         MessageVO vo = MessageVO.from(message);
-        if ("RESIDENT".equals(message.getSenderType())) {
+        vo.setImage(image);
+        if ("RESIDENT".equals(message.getSenderType()) && !Boolean.FALSE.equals(feedback.getIsAnonymous())) {
+            vo.setSenderId(null);
+            vo.setSenderName("匿名居民");
+        } else if ("RESIDENT".equals(message.getSenderType())) {
             Resident resident = residentMapper.selectById(message.getSenderId());
             if (resident != null) {
                 vo.setSenderName(resident.getRealName());

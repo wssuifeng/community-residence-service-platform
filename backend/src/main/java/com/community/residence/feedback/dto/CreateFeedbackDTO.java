@@ -30,4 +30,8 @@ public class CreateFeedbackDTO {
     @NotBlank(message = "反馈类别不能为空")
     @Pattern(regexp = "^(SUGGESTION|COMPLAINT|INQUIRY)$", message = "反馈类别不合法")
     private String category;
+
+    @Schema(description = "是否匿名；匿名姓名不向管理端或消息推送公开")
+    private Boolean isAnonymous;
+
 }

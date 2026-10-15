@@ -30,6 +30,10 @@ public class NoticeVO {
     @Schema(description = "公告内容")
     private String content;
 
+    @Schema(description = "公告上传图片列表，无图返回空列表")
+    private java.util.List<String> images;
+
+
     @Schema(description = "状态：DRAFT-草稿, PUBLISHED-已发布, WITHDRAWN-已撤回")
     private String status;
 
@@ -68,6 +72,7 @@ public class NoticeVO {
         vo.setId(entity.getId());
         vo.setTitle(entity.getTitle());
         vo.setContent(entity.getContent());
+        vo.setImages(entity.getImages() == null || entity.getImages().isBlank() ? java.util.List.of() : java.util.Arrays.asList(entity.getImages().split(",")));
         vo.setStatus(entity.getStatus());
         vo.setPublishTime(entity.getPublishTime());
         vo.setEndTime(entity.getEndTime());

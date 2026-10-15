@@ -28,8 +28,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommunityService 单元测试")
 class CommunityServiceTest {
+    @org.mockito.Mock private com.community.residence.conversation.mapper.ChatMessageImageMapper chatMessageImageMapper;
     @org.mockito.Mock private com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
+    @Mock private com.community.residence.workorder.mapper.ServiceCategoryMapper serviceCategoryMapper;
     @Mock
     private CommunityMapper communityMapper;
 

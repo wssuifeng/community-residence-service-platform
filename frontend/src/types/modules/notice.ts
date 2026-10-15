@@ -86,6 +86,7 @@ export interface INotice {
   targets: INoticeTargetItem[]
   title: string
   content: string
+  images?: string[]
   type: NoticeType
   priority: NoticePriority
   status: NoticeStatus
@@ -116,6 +117,7 @@ export interface INoticeSaveRequest {
   isPinned: number
   title: string
   content: string
+  images?: string[]
   type: NoticeType
   priority: NoticePriority
   /** ISO 8601 格式 */
