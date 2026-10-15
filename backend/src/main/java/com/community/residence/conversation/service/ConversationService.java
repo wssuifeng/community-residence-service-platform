@@ -683,9 +683,13 @@ public class ConversationService {
             /* 命中 404（会话不存在）或 403（非参与者），与读路径同口径 */
             requireParticipant(conversationId);
         }
-        if (participant != null && lastMessageId > participant.getLastReadMessageId()) {
-            participant.setLastReadMessageId(lastMessageId);
-            participantMapper.updateById(participant);
+        ConversationMessage lastMessage = lastMessageId == null ? null : messageMapper.selectById(lastMessageId);
+        if (lastMessage == null || !Objects.equals(lastMessage.getConversationId(), conversationId)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "已读消息不属于当前会话");
+        }
+        long previous = participant != null && participant.getLastReadMessageId() != null ? participant.getLastReadMessageId() : 0L;
+        if (lastMessageId > previous) {
+            participantMapper.advanceReadCursor(conversationId, ownerType, userId, lastMessageId);
         }
     }
 
@@ -784,10 +788,16 @@ public class ConversationService {
                         .eq(ConversationParticipant::getOwnerType, ownerType)
                         .eq(ConversationParticipant::getUserId, userId)
                         .last("LIMIT 1"));
-        long cursor = participant != null ? participant.getLastReadMessageId() : 0L;
+        long cursor = participant != null && participant.getLastReadMessageId() != null ? participant.getLastReadMessageId() : 0L;
         Long unread = messageMapper.selectCount(new LambdaQueryWrapper<ConversationMessage>()
                 .eq(ConversationMessage::getConversationId, conversation.getId())
-                .gt(ConversationMessage::getId, cursor));
+                .gt(ConversationMessage::getId, cursor)
+                .and(other -> {
+                    /* resident.id与sys_user.id可相同，不能只按数字ID排除本人。 */
+                    other.ne(ConversationMessage::getSenderId, userId).or();
+                    if ("RESIDENT".equals(ownerType)) other.ne(ConversationMessage::getSenderRole, RoleConstants.RESIDENT);
+                    else other.eq(ConversationMessage::getSenderRole, RoleConstants.RESIDENT);
+                }));
         vo.setUnreadCount(unread != null ? unread : 0L);
         return vo;
     }

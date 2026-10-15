@@ -82,6 +82,7 @@ class ConversationServiceTest {
         TableInfoHelper.initTableInfo(
                 new MapperBuilderAssistant(new MybatisConfiguration(), ""),
                 LeaseRecord.class);
+        TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), ConversationMessage.class);
     }
 
     @Mock
@@ -289,16 +290,13 @@ class ConversationServiceTest {
             ConversationVO vo = service.page(1, 10, null).getRecords().isEmpty()
                     ? null : null; /* page 需要会话列表桩，下面直接验证 markRead */
 
-            /* markRead：新游标 8 > 5 → 前移更新 */
+            ConversationMessage read = new ConversationMessage(); read.setId(8L); read.setConversationId(CONV_ID);
+            when(messageMapper.selectById(8L)).thenReturn(read);
+            when(messageMapper.selectById(3L)).thenReturn(read);
             service.markRead(CONV_ID, 8L);
-            ArgumentCaptor<ConversationParticipant> captor = ArgumentCaptor.forClass(ConversationParticipant.class);
-            verify(participantMapper).updateById(captor.capture());
-            assertThat(captor.getValue().getLastReadMessageId()).isEqualTo(8L);
-
-            /* 游标回退（3 < 8）：不更新 */
-            org.mockito.Mockito.clearInvocations(participantMapper);
+            verify(participantMapper).advanceReadCursor(eq(CONV_ID), anyString(), eq(RESIDENT_USER_ID), eq(8L));
             service.markRead(CONV_ID, 3L);
-            verify(participantMapper, never()).updateById(any(ConversationParticipant.class));
+            verify(participantMapper, never()).advanceReadCursor(eq(CONV_ID), anyString(), eq(RESIDENT_USER_ID), eq(3L));
         }
     }
 
@@ -584,4 +582,27 @@ class ConversationServiceTest {
         binding.setCommunityId(communityId);
         return binding;
     }
+    @Test
+    void foreignMessageCannotAdvanceReadCursor() {
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getUserId).thenReturn(RESIDENT_USER_ID);
+            when(participantMapper.selectOne(any())).thenReturn(residentParticipant);
+            ConversationMessage foreign = new ConversationMessage(); foreign.setId(100L); foreign.setConversationId(999L);
+            when(messageMapper.selectById(100L)).thenReturn(foreign);
+            assertThatThrownBy(() -> service.markRead(CONV_ID, 100L)).isInstanceOf(BusinessException.class);
+            verify(participantMapper, never()).advanceReadCursor(any(), any(), any(), any());
+        }
+    }
+
+    @Test
+    void unreadExcludesSelfWithinIdentitySpaceNotOnlyNumericId() {
+        when(participantMapper.selectOne(any())).thenReturn(residentParticipant);
+        when(messageMapper.selectCount(any())).thenReturn(0L);
+        org.springframework.test.util.ReflectionTestUtils.invokeMethod(service, "toVO", conversation, "USER", ADMIN_ID);
+        ArgumentCaptor<com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ConversationMessage>> query = ArgumentCaptor.forClass(com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper.class);
+        verify(messageMapper).selectCount(query.capture());
+        assertThat(query.getValue().getSqlSegment()).contains("sender_id <>", "OR sender_role =");
+        assertThat(query.getValue().getParamNameValuePairs().values()).contains(ADMIN_ID, "RESIDENT");
+    }
+
 }

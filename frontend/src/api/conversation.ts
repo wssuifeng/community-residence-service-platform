@@ -32,6 +32,11 @@ export function listConversationMessages(conversationId: number) {
   return http.get<IConversationMessage[]>(`/conversations/${conversationId}/messages`)
 }
 
+/** 仅确认当前会话实际展示的最后一条消息；后端游标原子前移。 */
+export function markConversationRead(conversationId: number, lastMessageId: number) {
+  return http.post<void>(`/conversations/${conversationId}/read`, { lastMessageId })
+}
+
 /** 发送会话消息（参与者可发；WS 广播给全部在线参与者） */
 export function sendConversationMessage(conversationId: number, data: IConversationMessageDTO) {
   return http.post<IConversationMessage>(`/conversations/${conversationId}/messages`, data)
