@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-15",
+  "stage": "50 steps 7/8",
+  "sourceCommits": {
+    "community": "7825ade",
+    "lease": "980fdfb",
+    "pushed": false,
+    "crossEntryAndMonthEndGuard": "bd7a4db"
+  },
+  "requirements": "v1.21",
+  "scope": [
+    "明确影响后的超管删除",
+    "house归属真实相册",
+    "合同期限/首付/周期与交租/续租及订单期限治理"
+  ],
+  "backend": {
+    "command": "mvnw.cmd clean test; mvnw.cmd package -DskipTests",
+    "tests": 1101,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "package": "passed",
+    "coverage": {
+      "branch": {
+        "covered": 2956,
+        "missed": 1660,
+        "percent": 64.04
+      },
+      "line": {
+        "covered": 7384,
+        "missed": 2508,
+        "percent": 74.65
+      }
+    }
+  },
+  "frontend": {
+    "typecheck": "passed",
+    "files": 61,
+    "tests": 355,
+    "build": "passed",
+    "warnings": "既有测试替身loading指令/Router及jsdom navigation提示保留，非失败，不称零告警"
+  },
+  "migrations": {
+    "isolatedDatabase": "bu_verify_20261015_96134ff6",
+    "flywayVersion": "40",
+    "migrations": 40,
+    "businessTables": 57,
+    "normalMigrationUnchanged": true,
+    "channelsCalled": false,
+    "isolatedDatabaseRemoved": true
+  },
+  "legacyImages": {
+    "normalMigrationVersion": "38",
+    "legacyImages": {
+      "listingRows": 15,
+      "listingRowsWithImages": 0,
+      "distinctHousesWithImages": 0
+    },
+    "normalBusinessTables": 55,
+    "legacyReferenceCounts": {
+      "localUploads": 0,
+      "externalOrUnknown": 0,
+      "totalReferences": 0
+    }
+  },
+  "security": {
+    "reviewedFiles": 135,
+    "privateKeyOrProviderKeyOrSignedJWTFindings": 0,
+    "scope": "本轮变更文本的指定模式扫描，不代表所有历史或其他克隆无秘密"
+  },
+  "intermediateRuns": [
+    {
+      "localLog": "bu-backend-tests.log",
+      "result": "diagnostic",
+      "lastSummary": {
+        "tests": 1064,
+        "failures": 24,
+        "errors": 21,
+        "skipped": 0
+      }
+    },
+    {
+      "localLog": "bu-backend-tests-r2.log",
+      "result": "diagnostic",
+      "note": "编译/构建诊断，无最终测试汇总"
+    },
+    {
+      "localLog": "bu-backend-tests-r3.log",
+      "result": "diagnostic",
+      "lastSummary": {
+        "tests": 1088,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "localLog": "bu-backend-tests-r4.log",
+      "result": "diagnostic",
+      "lastSummary": {
+        "tests": 1089,
+        "failures": 0,
+        "errors": 1,
+        "skipped": 0
+      }
+    },
+    {
+      "localLog": "bu-backend-final.log",
+      "result": "failed",
+      "note": "编译/构建诊断，无最终测试汇总"
+    },
+    {
+      "localLog": "bu-backend-release.log",
+      "result": "failed",
+      "note": "编译/构建诊断，无最终测试汇总"
+    },
+    {
+      "localLog": "bu-final-backend.log",
+      "result": "failed",
+      "lastSummary": {
+        "tests": 1100,
+        "failures": 0,
+        "errors": 2,
+        "skipped": 0
+      }
+    }
+  ],
+  "intermediateFailureNotes": [
+    "旧续租/历史费用推断断言已按采纳方案替换，不隐瞒红灯",
+    "新增依赖漏mock及审计未登录、LocalDate/Integer转换编译错误均修正",
+    "相册测试挂载与报价mock适配后通过",
+    "编辑改为租约行锁后，移除两处旧普通查询多余桩；最终clean test全绿",
+    "停写旧图片串后补正HousingSaveDTO可选兼容字段，空态替换后移除未使用index参数；类型检查重新通过"
+  ],
+  "notPerformed": [
+    "真实支付、退款、主动渠道查单、沙箱可用性检查",
+    "真实notify链路验证",
+    "正常业务库V39/V40升级与新版服务启动",
+    "浏览器操作与人工手册复验",
+    "普通工程推送"
+  ],
+  "next": [
+    "启动新版服务并应用V39/V40后再进行定向人工复验",
+    "交易恢复授权后验证渠道实际超时与迟到结果处置"
+  ],
+  "completionMeaning": "源码/基础测试完成；不声称手测或金融闭环通过、不关闭50、不启动60/70",
+  "finalSupplement": {
+    "galleryInputs": "旧管理列表/详情共用相册，无URL输入；挂牌停止写images副本",
+    "emptyImage": "8个既有房源入口共用明确无图SVG，不再轮换示例实拍",
+    "calendarMonths": "审批总月数直接传入，不从截短后的月末日期反算；13个月/首付3个月独立保留",
+    "earlierFocusedFrontend": {
+      "files": 9,
+      "tests": 35,
+      "passed": true
+    }
+  }
+}
