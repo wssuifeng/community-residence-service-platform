@@ -57,7 +57,8 @@ class PaymentServiceTest {
   when(payments.selectById(anyLong())).thenAnswer(i->order);when(payments.selectByIdForUpdate(anyLong())).thenAnswer(i->order);when(payments.selectOne(any())).thenAnswer(i->order);when(admins.selectList(any())).thenReturn(List.of());
  }
  @AfterEach void close(){security.close();}
- CreateRenewPaymentDTO dto(String channel){var d=new CreateRenewPaymentDTO();d.setChannel(channel);d.setMonths(1);return d;}
+ CreateRenewPaymentDTO dto(String channel){var d=new CreateRenewPaymentDTO();d.setChannel(channel);d.setMonths(1);d.setQuoteVersion(RentSchedule.quote(RentSchedule.build(List.of(term),List.of()),1).version());return d;}
+ CreateRenewPaymentDTO legacyDto(){var d=new CreateRenewPaymentDTO();d.setChannel("ALIPAY");d.setMonths(1);return d;}
  void first(){lease.setStatus("TO_SIGN");term.setStatus("SIGNED");}
  LeasePayment pending(String type){var p=new LeasePayment();p.setId(10L);p.setPaymentNo("TEST-ONLY");p.setLeaseId(100L);p.setResidentId(1L);p.setTermId(7L);p.setStatus("PENDING");p.setChannel("ALIPAY");p.setPaymentType(type);p.setMonths(3);p.setAmount(new BigDecimal("9000"));p.setRentAmount(new BigDecimal("9000"));p.setDepositAmount(BigDecimal.ZERO);p.setPeriodStart(term.getStartDate());p.setPeriodEnd(LeaseTermRules.end(term.getStartDate(),3));order=p;return p;}
  ChannelTradeResult success(){return new ChannelTradeResult("MOCK-TRADE",LocalDateTime.now());}
@@ -70,8 +71,10 @@ class PaymentServiceTest {
  @Test void leaseNotActiveCannotPayOrdinaryRent(){lease.setStatus("MOVED_OUT");assertThatThrownBy(()->service.createRentPayment(100L,dto("ALIPAY"))).isInstanceOf(BusinessException.class);}
  @Test void lockFailureDoesNotCreateOrder() throws Exception{when(lock.tryLock(anyLong(),any())).thenReturn(false);assertThatThrownBy(()->service.createRentPayment(100L,dto("ALIPAY"))).isInstanceOf(BusinessException.class);verify(payments,never()).insert(any(LeasePayment.class));}
  @Test void lockReleasedAfterSuccessfulCreate(){service.createRentPayment(100L,dto("ALIPAY"));verify(lock).unlock();}
- @Test void rentMonthComesFromContractNotClient(){var d=dto("ALIPAY");d.setMonths(99);var result=service.createRentPayment(100L,d);assertThat(result.getMonths()).isEqualTo(1);assertThat(result.getAmount()).isEqualByComparingTo("3000");}
- @Test void tailPeriodDoesNotOvercharge(){term.setContractMonths(1);term.setPaymentCycleMonths(3);var result=service.createRentPayment(100L,dto("ALIPAY"));assertThat(result.getMonths()).isEqualTo(1);}
+ @Test void outOfContractMonthsAreRejectedNotSilentlyChanged(){var d=dto("ALIPAY");d.setMonths(99);assertThatThrownBy(()->service.createRentPayment(100L,d)).hasMessageContaining("1至12");verify(payments,never()).insert(any(LeasePayment.class));}
+ @Test void selectedFourMonthsAreChargedExactlyWithoutDeposit(){var d=dto("ALIPAY");d.setMonths(4);d.setQuoteVersion(service.quote(100L,"RENT",4).getQuoteVersion());var result=service.createRentPayment(100L,d);assertThat(result.getMonths()).isEqualTo(4);assertThat(result.getAmount()).isEqualByComparingTo("12000");assertThat(result.getDepositAmount()).isZero();assertThat(result.getCoverageDetails()).contains("monthlyRent");}
+ @Test void missingOrChangedQuoteRejectedBeforeOrderInsert(){var d=dto("ALIPAY");d.setQuoteVersion("stale");assertThatThrownBy(()->service.createRentPayment(100L,d)).hasMessageContaining("报价已变化");verify(payments,never()).insert(any(LeasePayment.class));}
+ @Test void tailPeriodDoesNotOvercharge(){term.setContractMonths(1);term.setEndDate(term.getStartDate().plusMonths(1).minusDays(1));term.setPaymentCycleMonths(3);var result=service.createRentPayment(100L,dto("ALIPAY"));assertThat(result.getMonths()).isEqualTo(1);}
  @Test void pendingIsResumedWithoutDuplicateInsert(){var p=pending("RENT");when(payments.selectList(any())).thenReturn(List.of(p));var result=service.createRentPayment(100L,dto("ALIPAY"));assertThat(result.getPaymentNo()).isEqualTo("TEST-ONLY");verify(payments,never()).insert(any(LeasePayment.class));}
  @Test void credentialFailureKeepsRecoverablePending(){when(alipay.createPayment(any(),anyString(),any())).thenThrow(new IllegalStateException("mock transport"));var result=service.createRentPayment(100L,dto("ALIPAY"));assertThat(result.getStatus()).isEqualTo("PENDING");assertThat(result.getAlipayForm()).isNull();}
  @Test void wechatCredentialNotAlipayForm(){var result=service.createRentPayment(100L,dto("WECHAT"));assertThat(result.getQrCode()).isEqualTo("weixin://test");assertThat(result.getAlipayForm()).isNull();}
@@ -97,7 +100,7 @@ class PaymentServiceTest {
  @Test void channelFlagsReflectActualConfig(){when(wechat.enabled()).thenReturn(false);assertThat(service.channels()).extracting(v->v.isEnabled()).containsExactly(true,false);}
  @Test void renewalCannotHideAlreadyDueOriginalRent(){
   term.setStartDate(LocalDate.now().minusMonths(2));
-  assertThatThrownBy(()->service.createRenewPayment(100L,dto("ALIPAY"))).hasMessageContaining("先缴清");
+  assertThatThrownBy(()->service.createRenewPayment(100L,legacyDto())).hasMessageContaining("先缴清");
   verify(payments,never()).insert(any(LeasePayment.class));verify(alipay,never()).createPayment(any(),anyString(),any());
  }
  @Test void anomalyRecordPreventsAnotherAttemptToChargeSameCoverage(){

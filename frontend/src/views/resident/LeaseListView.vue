@@ -387,14 +387,13 @@ function isFocused(row: ILeaseRecord): boolean {
 
 const termsVisible = ref(false)
 const termsTarget = ref<ILeaseRecord | null>(null)
-const rentEntryVisible = ref(false)
 const paymentPurpose = ref<'RENT'|'RENEWAL'>('RENT')
 const renewVisible = ref(false)
 const renewTarget = ref<ILeaseRecord | null>(null)
 
 
 
-/** 合同与续租协议成功后止期延展，时间线新增一条续期条目，故明细缓存一并失效 */
+/** 合同与租期成功后止期延展，时间线新增一条续期条目，故明细缓存一并失效 */
 function handleRenewSuccessDetail(): void {
   loadLeases()
   void refreshLeasePayments(renewTarget.value?.id)
@@ -571,7 +570,7 @@ const paymentStatusLabels: Record<PaymentStatus, string> = {
 
 /**
  * 支付单类型标签：后端 V20 起返回 paymentType；
- * 存量数据缺省按「续期」展示（V20 之前仅有合同与续租协议单，该兜底口径与历史一致）。
+ * 存量数据缺省按「续期」展示（V20 之前仅有合同与租期单，该兜底口径与历史一致）。
  */
 function paymentTypeOf(row: ILeasePayment): LeasePaymentType {
   return row.paymentType ?? 'RENEWAL'
@@ -870,7 +869,7 @@ onMounted(() => {
                   @click.stop="termsTarget=group.current; termsVisible=true"
                 >
                   续租
-                </el-button><el-button v-if="group.current.status==='ACTIVE'" @click.stop="renewTarget=group.current; rentEntryVisible=true">缴纳租金</el-button>
+                </el-button><el-button v-if="group.current.status==='ACTIVE'" @click.stop="renewTarget=group.current; paymentPurpose='RENT'; renewVisible=true">缴纳租金</el-button>
                 <el-button
                   class="lease-action"
                   type="warning"
@@ -1019,7 +1018,7 @@ onMounted(() => {
                 支付记录暂不可用，请稍后刷新
               </p>
               <p v-else-if="paymentsOf(group.current).length === 0" class="payments-empty">
-                暂无支付记录：首期费用与合同与续租协议都会在此留痕
+                暂无支付记录：首期费用与合同与租期都会在此留痕
               </p>
               <ul v-else class="payments-list">
                 <li v-for="item in paymentsOf(group.current)" :key="item.paymentNo" class="payment-item">
@@ -1209,9 +1208,9 @@ onMounted(() => {
       </div>
     </template>
 
-    <!-- 合同与续租协议弹窗（三步：选月数渠道 → 支付 → 确认结果） -->
-    <el-dialog v-model="termsVisible" title="合同与续租协议" width="min(780px,94vw)"><LeaseTermsPanel v-if="termsTarget" :lease="termsTarget" /></el-dialog>
-    <el-dialog v-model="rentEntryVisible" title="缴租" width="min(780px,94vw)"><el-button @click="paymentPurpose='RENT'; renewVisible=true">支付合同内下一期租金</el-button><el-button @click="paymentPurpose='RENEWAL'; renewVisible=true">支付已同意的续租首笔租金</el-button></el-dialog>
+    <!-- 合同与租期弹窗（三步：选月数渠道 → 支付 → 确认结果） -->
+    <el-dialog v-model="termsVisible" title="合同与租期" width="min(780px,94vw)"><LeaseTermsPanel v-if="termsTarget" :lease="termsTarget" @changed="loadLeases" /></el-dialog>
+
     <LeaseRenewDialog :purpose="paymentPurpose" v-model="renewVisible" :lease="renewTarget" @success="handleRenewSuccessDetail" />
 
     <!-- 首期费用支付弹窗（R71：金额=首月租金+押金，服务端计算，与续租同款双渠道；

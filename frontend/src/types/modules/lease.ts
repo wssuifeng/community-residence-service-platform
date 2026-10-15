@@ -301,6 +301,7 @@ export interface IPaymentChannelOption {
 /** 发起续约支付请求（POST /leases/{id}/renew-payments；金额服务端按月租×月数计算，
  * 客户端不可传金额——防篡改口径） */
 export interface IRenewPaymentCreateDTO {
+  quoteVersion?: string
   months: number
   channel: PaymentChannel
 }
@@ -323,6 +324,9 @@ export interface IFirstPaymentCreateDTO {
 
 /** 支付单（后端 LeasePaymentVO；alipayForm/qrCode 按渠道二选一返回） */
 export interface ILeasePayment {
+  remainingMonths?: number
+  quoteVersion?: string
+  coverageDetails?: string | null
   channelExpiresAt?: string | null
   expiresAt?: string | null
   settlementIssue?: string | null

@@ -48,5 +48,5 @@ export function listMyPayments(params?: { page?: number; size?: number; channel?
 }
 
 /** 服务端合同报价，只读取，不创建订单或查渠道。 */
-export function getRentQuote(leaseId:number,purpose:'FIRST'|'RENT'|'RENEWAL') {return http.get<ILeasePayment>(`/leases/${leaseId}/rent-quote`,{purpose})}
+export function getRentQuote(leaseId:number,purpose:'FIRST'|'RENT'|'RENEWAL',months?:number) {return http.get<ILeasePayment>(`/leases/${leaseId}/rent-quote`,{purpose,months})}
 export function createRentPayment(leaseId:number,data:IRenewPaymentCreateDTO) {return http.post<ILeasePayment>(`/leases/${leaseId}/rent-payments`,data)}

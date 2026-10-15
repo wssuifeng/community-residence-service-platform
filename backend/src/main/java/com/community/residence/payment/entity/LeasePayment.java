@@ -55,7 +55,8 @@ public class LeasePayment {
     @Schema(description = "更新时间")
     private LocalDateTime updatedAt;
 
-    @Schema(description="合同段ID，新单必填") private Long termId;
+    @Schema(description="跨合同段覆盖与金额分段JSON快照") private String coverageDetails;
+    @Schema(description="合同段ID，新单为首个覆盖段") private Long termId;
     @Schema(description="单价快照") private BigDecimal monthlyRentSnapshot;
     @Schema(description="租金快照") private BigDecimal rentAmount;
     @Schema(description="押金快照") private BigDecimal depositAmount;
