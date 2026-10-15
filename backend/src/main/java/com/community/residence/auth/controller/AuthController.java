@@ -65,6 +65,13 @@ public class AuthController {
         return ApiResponse.success();
     }
 
+    @Operation(summary = "在线续期", description = "仅有效会话可延长36h；已登出、撤权、冻结或过期不可续期")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
+    @PostMapping("/renew")
+    public ApiResponse<LoginVO> renew(@org.springframework.web.bind.annotation.RequestHeader("Authorization") String authorization) {
+        return ApiResponse.success(authService.renew(bearerToken(authorization)));
+    }
+
     private String bearerToken(String authorization) {
         return authorization != null && authorization.startsWith("Bearer ")
                 ? authorization.substring(7)

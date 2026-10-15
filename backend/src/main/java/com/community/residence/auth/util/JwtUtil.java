@@ -57,6 +57,15 @@ public class JwtUtil {
                 .compact();
     }
 
+    /** 保留会话族、首次签发时间和权限代次，只延长有效期；失效校验由认证服务完成。 */
+    public String renewToken(Claims claims) {
+        return Jwts.builder().id(claims.getId()).subject(claims.getSubject())
+                .claim("username", extractUsername(claims)).claim("role", extractRole(claims))
+                .claim("permissionRevision", claims.get("permissionRevision"))
+                .issuedAt(claims.getIssuedAt()).expiration(new Date(System.currentTimeMillis() + accessTtl.toMillis()))
+                .signWith(key).compact();
+    }
+
     /**
      * 解析并验证令牌。
      *

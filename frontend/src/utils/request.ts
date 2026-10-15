@@ -2,6 +2,7 @@ import axios, { AxiosError } from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import type { ApiResult } from '@/types/api'
 import { getToken, clearSession } from './auth'
+import { renewVisibleSession } from './onlineRenewal'
 
 /** 业务错误：统一错误处理路径抛出，页面可 catch 后做定向提示 */
 export class ApiError extends Error {
@@ -21,7 +22,10 @@ const instance: AxiosInstance = axios.create({
   timeout: 15000
 })
 
-instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  if(!config.url?.startsWith('/auth/')) {
+    try { await renewVisibleSession() } catch { /* 网络失败仍用原有效令牌，不能因续期失败无条件登出。 */ }
+  }
   const token = getToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -42,6 +46,15 @@ instance.interceptors.response.use(
     // HTTP 层错误：401 令牌失效 → 清理会话跳登录；其余转换 ApiError
     const status = error.response?.status ?? 0
     if (status === 401) {
+      const sent = error.config?.headers?.Authorization
+      const current = getToken()
+      const retried = error.config as (InternalAxiosRequestConfig & { sessionRetried?: boolean }) | undefined
+      if(current && typeof sent === 'string' && sent !== `Bearer ${current}` && retried && !retried.sessionRetried && !retried.url?.startsWith('/auth/')) {
+        retried.sessionRetried=true
+        return instance.request(retried)
+      }
+      // 没有携带令牌的旧登录失败，也不能清除另一次成功登录的会话。
+      if(current && sent !== `Bearer ${current}`) return Promise.reject(new ApiError(401, '旧请求会话已失效', 401))
       clearSession()
       if (!location.pathname.startsWith('/auth/login')) {
         location.href = `/auth/login?redirect=${encodeURIComponent(location.pathname + location.search)}`

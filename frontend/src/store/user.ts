@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, onScopeDispose } from 'vue'
 import type { AuthUser, PersistedSession } from '@/types/user'
 import type { Role } from '@/types/api'
 import { loadSession, saveSession, clearSession } from '@/utils/auth'
@@ -7,6 +7,10 @@ import { useNotificationStore } from './notification'
 
 export const useUserStore = defineStore('user', () => {
   const session = ref<PersistedSession | null>(loadSession())
+  // 续期仅同步会话，不重新初始化通知/群聊以免中断当前操作。
+  const syncSession = () => { session.value = loadSession() }
+  window.addEventListener('crsp-session-updated', syncSession)
+  onScopeDispose(() => window.removeEventListener('crsp-session-updated', syncSession))
 
   const token = computed(() => session.value?.token ?? '')
   const user = computed<AuthUser | null>(() => session.value?.user ?? null)

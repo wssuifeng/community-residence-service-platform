@@ -77,15 +77,42 @@ public class AuthService {
                 resident.getRealName(), RoleConstants.RESIDENT, Set.of());
     }
 
-    /** 登出：当前令牌拉入黑名单（DB 双写 + Redis 缓存） */
+    /* 续期只能由仍有效、未登出/撤权的会话发起；重新读取账号状态，不接收客户端账号信息。
+       jti/iat/权限代次不轮换，避免旧请求或多标签页使同一会话的吊销出现缺口。 */
+    @Transactional(readOnly = true)
+    public LoginVO renew(String token) {
+        Claims claims = jwtUtil.parseToken(token);
+        if (claims == null || claims.getId() == null || tokenBlacklistService.isBlacklisted(claims.getId()))
+            throw new UnauthorizedException("会话已失效，请重新登录");
+        Long id = jwtUtil.extractUserId(claims);
+        String role = jwtUtil.extractRole(claims);
+        Object value = claims.get("permissionRevision");
+        if (value != null && !(value instanceof Integer || value instanceof Long))
+            throw new UnauthorizedException("会话已失效，请重新登录");
+        Long revision = value == null ? null : ((Number)value).longValue();
+        if (tokenRevocationService.isTokenRevoked(id, role, claims.getIssuedAt(), revision))
+            throw new UnauthorizedException("权限已变更，请重新登录");
+        if (RoleConstants.RESIDENT.equals(role)) {
+            Resident resident = residentMapper.selectById(id);
+            if (resident == null) throw new UnauthorizedException("会话已失效，请重新登录");
+            requireActive(resident.getStatus());
+            return buildLoginVO(jwtUtil.renewToken(claims), id, resident.getUsername(), resident.getRealName(), role, Set.of());
+        }
+        SysUser user = sysUserMapper.selectById(id);
+        if (user == null || !role.equals(user.getRole())) throw new UnauthorizedException("会话已失效，请重新登录");
+        requireActive(user.getStatus());
+        Set<Long> ids = RoleConstants.ADMIN.equals(role) ? adminCommunityCacheService.getCommunityIds(id) : Set.of();
+        return buildLoginVO(jwtUtil.renewToken(claims), id, user.getUsername(), user.getRealName(), role, ids);
+    }
+
+    /** 登出：整个续期会话族拉黑36h（DB 双写 + Redis 缓存） */
     public void logout(String token) {
         Claims claims = jwtUtil.parseToken(token);
-        if (claims == null) {
+        if (claims == null || tokenBlacklistService.isBlacklisted(claims.getId())) {
             // 令牌已过期/非法，无需拉黑，直接视为登出成功（幂等）
             return;
         }
-        LocalDateTime expireTime = LocalDateTime.ofInstant(
-                jwtUtil.extractExpiration(claims).toInstant(), ZoneId.systemDefault());
+        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(jwtUtil.accessTtlSeconds());
         tokenBlacklistService.blacklist(claims.getId(), jwtUtil.extractUserId(claims), expireTime, "LOGOUT");
     }
 
