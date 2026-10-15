@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useAdminTodoStore } from '@/store/adminTodo'
 
 /**
  * 管理端左侧边栏（frontend-beautify 重构，样式对齐 design-mockups/admin/01、02）：
@@ -13,6 +14,17 @@ import { useUserStore } from '@/store/user'
  */
 const route = useRoute()
 const userStore = useUserStore()
+const todos=useAdminTodoStore()
+let timer:ReturnType<typeof setInterval>|undefined
+onMounted(()=>{void todos.refresh();timer=setInterval(()=>{if(document.visibilityState==='visible')void todos.refresh()},30000)})
+onUnmounted(()=>{if(timer)clearInterval(timer)})
+watch(()=>route.fullPath,()=>{void todos.refresh()})
+watch(()=>userStore.user?.id,()=>{void todos.refresh()})
+function pending(path:string):number{
+ const key:Record<string,string>={'/admin/work-orders':'workOrders','/admin/feedbacks':'feedbacks','/admin/reservations':'reservations'}
+ if(path==='/admin/housing-lease')return ['applications','moveout','housings','leases'].reduce((n,k)=>n+(todos.counts[k]??0),0)
+ return todos.counts[key[path]??'']??0
+}
 
 interface MenuItem {
   path: string
@@ -148,13 +160,14 @@ function isActive(path: string): boolean {
             <path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.4 5.4l1.9 1.9M16.7 16.7l1.9 1.9M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9" />
           </svg>
         </span>
-        <span class="app-sidebar-item-label">{{ item.title }}</span>
+        <span class="app-sidebar-item-label">{{ item.title }}</span><span v-if="pending(item.path)>0" class="todo-dot" :title="`${pending(item.path)}项待处理`" :aria-label="`${pending(item.path)}项待处理`" />
       </router-link>
     </nav>
   </aside>
 </template>
 
 <style scoped>
+.todo-dot{width:8px;height:8px;flex-shrink:0;border-radius:50%;background:#ff5964;margin-left:auto}
 .app-sidebar {
   width: var(--admin-sidebar-width);
   flex-shrink: 0;
