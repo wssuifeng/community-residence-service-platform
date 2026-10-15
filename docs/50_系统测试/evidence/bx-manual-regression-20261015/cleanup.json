@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-15T19:10:59+0800",
+  "isolatedDatabase": "community_residence_bx_20261015",
+  "isolatedDatabaseDropped": true,
+  "isolatedBackendPidStopped": 16796,
+  "isolatedFrontendPidStopped": 25360,
+  "normalDatabasePreserved": true,
+  "userBrowserOperated": false
+}

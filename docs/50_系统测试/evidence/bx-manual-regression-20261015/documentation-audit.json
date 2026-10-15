@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-15T19:19:12+0800",
+  "mode": "read-only",
+  "businessAcceptance": "not_evaluated",
+  "baselineTotal": 1415,
+  "currentTotal": 1415,
+  "addedIgnoringLineShifts": [],
+  "addedCount": 0,
+  "note": "通用工具50依赖预设与本项目50验证30裁决不同，历史项不擅改。仅声明本轮差异，不声明全库审计通过。"
+}
