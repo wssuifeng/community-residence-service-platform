@@ -58,6 +58,7 @@ class NoticeServiceTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(noticeMapper.updateLifecycle(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.anyString())).thenReturn(1);
         draftNotice = new Notice();
         draftNotice.setId(1L);
         draftNotice.setTitle("T1");
@@ -159,4 +160,15 @@ class NoticeServiceTest {
     }
     @org.mockito.Mock
     private com.community.residence.community.service.CommunityResponsibleService communityResponsibleService;
+
+    @Test void receiptRecordsActuallyReadVersionWithoutIncreasingUniqueReaders() {
+        try (MockedStatic<com.community.residence.common.context.SecurityUtils> auth=mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            auth.when(com.community.residence.common.context.SecurityUtils::getUserId).thenReturn(1L);
+            publishedNotice.setContentVersion(2);when(noticeMapper.selectById(2L)).thenReturn(publishedNotice);when(viewRecordMapper.selectCount(any())).thenReturn(1L);
+            noticeService.recordView(2L,1);
+            org.mockito.Mockito.verify(viewRecordMapper).recordVersion(2L,1L,1);
+            org.mockito.Mockito.verify(viewRecordMapper).updateLatestVersion(2L,1L,1);
+            org.mockito.Mockito.verify(noticeMapper,org.mockito.Mockito.never()).incrementView(any());
+        }
+    }
 }

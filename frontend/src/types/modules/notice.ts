@@ -77,6 +77,10 @@ export interface INoticeSaveTargetItem {
  * targetAudience 后端 VO 不返回，读取仍需空值防御）
  */
 export interface INotice {
+  bodyJson?: string | null
+  contentVersion?: number
+  editedAt?: string | null
+  editedBy?: number | null
   id: number
   /** 首个社区目标 ID；全系统广播时为 null */
   communityId: number | null
@@ -109,6 +113,8 @@ export interface INotice {
 
 /** 创建/更新公告请求（CreateNoticeDTO：targets 优先，communityId 单目标写法向后兼容） */
 export interface INoticeSaveRequest {
+  bodyJson?: string
+  expectedVersion?: number
   /** 单目标旧写法；与 targets 并设时后端以 targets 为准 */
   communityId: number | null
   /** 目标范围列表（空=按 communityId 单目标/全系统广播仅超管） */
@@ -140,6 +146,7 @@ export interface INoticeQuery extends PageQuery {
 
 /** 公告查看记录（接口设计.md 9.5.1.9） */
 export interface INoticeViewer {
+  contentVersion?: number
   residentId: number
   residentName: string
   viewedAt: string

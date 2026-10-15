@@ -67,11 +67,17 @@ public class NoticeVO {
     @Schema(description = "创建时间")
     private LocalDateTime createdAt;
 
+    @Schema(description="受限正文JSON") private String bodyJson;
+    @Schema(description="正文版本") private Integer contentVersion;
+    @Schema(description="最后修订时间") private LocalDateTime editedAt;
+    @Schema(description="最后修订管理员ID") private Long editedBy;
+
     public static NoticeVO from(Notice entity) {
         NoticeVO vo = new NoticeVO();
         vo.setId(entity.getId());
         vo.setTitle(entity.getTitle());
         vo.setContent(entity.getContent());
+        vo.setBodyJson(entity.getBodyJson());vo.setContentVersion(entity.getContentVersion()==null?1:entity.getContentVersion());vo.setEditedAt(entity.getEditedAt());vo.setEditedBy(entity.getEditedBy());
         vo.setImages(entity.getImages() == null || entity.getImages().isBlank() ? java.util.List.of() : java.util.Arrays.asList(entity.getImages().split(",")));
         vo.setStatus(entity.getStatus());
         vo.setPublishTime(entity.getPublishTime());

@@ -68,6 +68,7 @@ class NoticeServiceExtraTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(noticeMapper.updateLifecycle(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.anyString())).thenReturn(1);
         published = new Notice();
         published.setId(1L);
         published.setTitle("T");
@@ -173,7 +174,6 @@ class NoticeServiceExtraTest {
             draft.setStatus(NoticeStatus.DRAFT);
             draft.setPublisherId(2L);
             when(noticeMapper.selectById(3L)).thenReturn(draft);
-            when(noticeMapper.updateById(any(Notice.class))).thenReturn(1);
             org.mockito.Mockito.lenient().when(noticeTargetMapper.selectList(any()))
                     .thenReturn(List.of());
 
@@ -191,7 +191,7 @@ class NoticeServiceExtraTest {
             when(noticeMapper.selectById(1L)).thenReturn(published);
             when(viewRecordMapper.selectCount(any())).thenReturn(0L);
             when(viewRecordMapper.insert(any(NoticeViewRecord.class))).thenReturn(1);
-            when(noticeMapper.updateById(any(Notice.class))).thenReturn(1);
+            when(noticeMapper.incrementView(any())).thenReturn(1);
 
             noticeService.recordView(1L);
 

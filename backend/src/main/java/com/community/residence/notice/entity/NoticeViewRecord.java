@@ -24,6 +24,8 @@ public class NoticeViewRecord {
     @Schema(description = "用户ID")
     private Long userId;
 
+    @Schema(description="最后已读正文版本") private Integer contentVersion;
+
     @Schema(description = "查看时间")
     private LocalDateTime viewTime;
 }

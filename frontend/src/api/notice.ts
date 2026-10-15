@@ -38,11 +38,15 @@ export function withdrawNotice(id: number, data: { reason: string }) {
 }
 
 /** 记录公告查看（同一用户同一公告仅记录一次，接口设计.md 9.5.1.8） */
-export function recordNoticeView(id: number) {
-  return http.post<null>(`/notices/${id}/view`)
+export function recordNoticeView(id: number, version?:number) {
+  return http.post<null>(`/notices/${id}/view`,undefined,{version})
 }
 
 /** 公告查看记录分页查询（接口设计.md 9.5.1.9） */
 export function listNoticeViewers(id: number, params: PageQuery) {
   return http.get<PageResult<INoticeViewer>>(`/notices/${id}/viewers`, params)
 }
+
+export function reviseNotice(id:number,data:{title:string;bodyJson:string;expectedVersion:number}) {return http.post<INotice>(`/notices/${id}/revisions`,data)}
+export interface NoticeRevision {contentVersion:number;title:string;content:string;bodyJson:string|null;images:string|null;editedAt:string;editorId:number}
+export function listNoticeRevisions(id:number) {return http.get<NoticeRevision[]>(`/notices/${id}/revisions`)}
