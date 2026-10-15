@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-15T22:17:56+0800",
+  "mode": "read-only",
+  "baselineFindings": 1415,
+  "currentFindings": 1415,
+  "addedCount": 0,
+  "addedFindings": [],
+  "fullAuditPassed": false,
+  "note": "历史项保留；工具50依赖预设不覆盖项目50验证30裁决，不为过工具改冻结纪律。"
+}
