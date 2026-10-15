@@ -1,0 +1,14 @@
+{
+  "normalMigrationVersion": "38",
+  "legacyImages": {
+    "listingRows": 15,
+    "listingRowsWithImages": 0,
+    "distinctHousesWithImages": 0
+  },
+  "normalBusinessTables": 55,
+  "legacyReferenceCounts": {
+    "localUploads": 0,
+    "externalOrUnknown": 0,
+    "totalReferences": 0
+  }
+}

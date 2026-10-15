@@ -1,0 +1,9 @@
+{
+  "isolatedDatabase": "bu_verify_20261015_96134ff6",
+  "flywayVersion": "40",
+  "migrations": 40,
+  "businessTables": 57,
+  "normalMigrationUnchanged": true,
+  "channelsCalled": false,
+  "isolatedDatabaseRemoved": true
+}
