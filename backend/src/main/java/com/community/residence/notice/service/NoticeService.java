@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class NoticeService {
+    private final com.community.residence.community.service.ResourceImagePolicy imagePolicy;
 
     /** 失效时间默认值：发布时间 + 30 天 */
     private static final long DEFAULT_VALID_DAYS = 30;
@@ -103,6 +104,7 @@ public class NoticeService {
         Notice notice = new Notice();
         notice.setTitle(dto.getTitle());
         notice.setContent(dto.getContent());
+        if (dto.getImages() != null) notice.setImages(imagePolicy.normalize(dto.getImages(), notice.getImages()));
         notice.setPublisherId(SecurityUtils.getUserId());
         notice.setStatus(NoticeStatus.DRAFT);
         notice.setPublishTime(dto.getPublishTime());
@@ -130,8 +132,8 @@ public class NoticeService {
     public NoticeVO update(Long id, CreateNoticeDTO dto) {
         Notice notice = requireNotice(id);
         checkManageAccess(notice);
-        if (!NoticeStatus.DRAFT.equals(notice.getStatus())) {
-            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "仅草稿状态的公告可修改");
+        if (!NoticeStatus.DRAFT.equals(notice.getStatus()) && !NoticeStatus.WITHDRAWN.equals(notice.getStatus())) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "请先撤回公告，再编辑并重新发布");
         }
         List<NoticeServiceTarget> targets = resolveTargets(dto);
         if (targets.isEmpty()) {
@@ -143,7 +145,9 @@ public class NoticeService {
             checkTargetAccess(target);
         }
         notice.setTitle(dto.getTitle());
+        notice.setStatus(NoticeStatus.DRAFT);
         notice.setContent(dto.getContent());
+        if (dto.getImages() != null) notice.setImages(imagePolicy.normalize(dto.getImages(), notice.getImages()));
         notice.setPublishTime(dto.getPublishTime());
         notice.setEndTime(resolveEndTime(dto));
         notice.setIsPinned(dto.getIsPinned() != null && dto.getIsPinned() == 1 ? 1 : 0);

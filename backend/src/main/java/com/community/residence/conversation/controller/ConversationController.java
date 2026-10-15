@@ -133,4 +133,11 @@ public class ConversationController {
         conversationService.markRead(id, dto.getLastMessageId());
         return ApiResponse.success();
     }
+    @Operation(summary = "发送图片消息", description = "真实图片≤5MB；保存并向会话参与者发送，不是反馈附件")
+    @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
+    @PostMapping(value = "/{id}/messages/image", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ConversationMessageVO> sendImage(@PathVariable Long id, @org.springframework.web.bind.annotation.RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
+        return ApiResponse.success(conversationService.sendImage(id,file));
+    }
+
 }

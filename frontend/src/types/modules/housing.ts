@@ -152,6 +152,8 @@ export interface IViewingAppointment {
 
 /** 带看会话消息（R59，v1.3；后端 ViewingMessageVO，会话参与者可读写） */
 export interface IViewingMessage {
+  messageType?: 'TEXT' | 'IMAGE'
+  image?: import('@/types/chat').ChatImage | null
   id: number
   appointmentId: number
   senderId: number

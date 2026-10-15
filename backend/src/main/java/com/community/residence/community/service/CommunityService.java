@@ -109,6 +109,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
+    private final com.community.residence.conversation.mapper.ChatMessageImageMapper chatMessageImageMapper;
 
     private final StructureBusinessCodeService structureBusinessCodeService;
 
@@ -172,6 +173,12 @@ public class CommunityService {
         community.setStatus(CommonStatus.ACTIVE);
         community.setBusinessCode(structureBusinessCodeService.community(dto.getBusinessCode()));
         communityMapper.insert(community);
+        int categoryOrder = 0;
+        for (var item : com.community.residence.workorder.service.DefaultServiceCategories.ITEMS) {
+            ServiceCategory category = new ServiceCategory(); category.setCommunityId(community.getId());
+            category.setName(item.name()); category.setDescription(item.description()); category.setSortOrder(++categoryOrder); category.setIsActive(1);
+            serviceCategoryMapper.insert(category);
+        }
         communityResponsibleService.synchronizeBinding(community.getId(), community.getResponsibleAdminId());
         communityResponsibleService.fillContacts(java.util.List.of(community));
         return CommunityVO.from(community);
@@ -249,6 +256,8 @@ public class CommunityService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "社区仍有有效居住关系或进行中租约，不可删除；请先停用并处理居住关系");
         }
         Long operatorId = SecurityUtils.getUserId();
+        chatMessageImageMapper.delete(new LambdaQueryWrapper<com.community.residence.conversation.entity.ChatMessageImage>()
+                .eq(com.community.residence.conversation.entity.ChatMessageImage::getCommunityId, id));
 
         /* ---- 退租申请（V20 lease_move_out_application，R70）：同时带 lease_id / community_id /
                 house_id 三个外键，必须早于租约与房屋物理删除（DEF-066 同类硬缺陷，2026-09-21 批次 f 纳入） ---- */

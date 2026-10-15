@@ -28,6 +28,7 @@ interface CategoryGroup {
 
 const categoryGroups = ref<CategoryGroup[]>([])
 const categoryLoading = ref(false)
+const categoryError = ref('')
 const submitting = ref(false)
 const images = ref<string[]>([])
 
@@ -62,7 +63,7 @@ const communityId = ref<number | null>(null)
 async function loadCommunityId(): Promise<void> {
   try {
     const profile = await getMyProfile()
-    const relations = await getResidentResidenceList(profile.id, { page: 1, size: 5 })
+    const relations = await getResidentResidenceList(profile.id, { page: 1, size: 100, status: 'ACTIVE' })
     const active = relations.records.find((item) => item.status === ('ACTIVE' as ResidenceRelationStatus))
     communityId.value = active?.communityId ?? null
     if (active && !form.address) form.address = active.houseLocation
@@ -72,6 +73,7 @@ async function loadCommunityId(): Promise<void> {
 }
 
 async function loadCategories(): Promise<void> {
+  categoryError.value = ''
   await loadCommunityId()
   if (!communityId.value) {
     ElMessage.error('未获取到所属社区信息，请重新登录后再试')
@@ -81,7 +83,7 @@ async function loadCategories(): Promise<void> {
   try {
     const tree = await getServiceCategoryTree(communityId.value as number)
     categoryGroups.value = tree.map((node: IServiceCategoryTreeNode) => {
-      if (node.children.length > 0) {
+      if (node.children?.length > 0) {
         return {
           label: node.name,
           options: node.children.map((child) => ({ value: child.id, label: child.name }))
@@ -90,7 +92,8 @@ async function loadCategories(): Promise<void> {
       return { label: node.name, options: [{ value: node.id, label: node.name }] }
     })
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '服务类别加载失败')
+    categoryError.value = error instanceof Error ? error.message : '服务类别加载失败'
+    ElMessage.error(categoryError.value)
   } finally {
     categoryLoading.value = false
   }
@@ -184,6 +187,10 @@ onMounted(() => {
 
       <el-form class="create-form" label-position="top" @submit.prevent>
         <el-form-item label="服务类别" required>
+          <p v-if="!categoryLoading && flatCategoryOptions.length === 0" class="category-empty" role="status">
+            {{ categoryError || (communityId ? '当前社区尚未配置启用的服务类别，请联系社区管理员配置后提交。' : '尚无有效居住关系，暂不能提交本社区工单。') }}
+            <el-button text @click="loadCategories">重新加载</el-button>
+          </p>
           <div v-loading="categoryLoading" class="category-cards">
             <button
               v-for="(option, index) in flatCategoryOptions"

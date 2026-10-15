@@ -27,6 +27,10 @@ public class ViewingMessage {
     @Schema(description = "消息内容")
     private String content;
 
+    @Schema(description="消息类型TEXT/IMAGE")
+    private String messageType;
+
+
     @Schema(description = "发送时间")
     private LocalDateTime createdAt;
 }

@@ -120,7 +120,9 @@ onMounted(load)
       <div class="article-divider"></div>
 
       <!-- notice 无封面字段，统一用占位插画封面 -->
-      <img class="article-cover" src="/images/notice-cover-default.png" :alt="notice.title" />
+      <div v-if="notice.images?.length" class="notice-images">
+        <el-image v-for="url in notice.images" :key="url" class="article-cover" :src="url" :alt="notice.title" :preview-src-list="notice.images" preview-teleported />
+      </div>
 
       <div class="article-body">
         <p v-for="(paragraph, index) in paragraphs" :key="index" class="article-paragraph">

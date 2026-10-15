@@ -20,6 +20,10 @@ public class FeedbackVO {
     @Schema(description = "反馈人姓名")
     private String residentName;
 
+    @Schema(description = "是否匿名；历史未保存时为空")
+    private Boolean isAnonymous;
+
+
     @Schema(description = "所属社区ID")
     private Long communityId;
 
@@ -48,6 +52,7 @@ public class FeedbackVO {
         FeedbackVO vo = new FeedbackVO();
         vo.setId(entity.getId());
         vo.setResidentId(entity.getResidentId());
+        vo.setIsAnonymous(entity.getIsAnonymous());
         vo.setCommunityId(entity.getCommunityId());
         vo.setTitle(entity.getTitle());
         vo.setContent(entity.getContent());

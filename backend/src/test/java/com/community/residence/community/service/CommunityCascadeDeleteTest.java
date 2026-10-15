@@ -118,6 +118,7 @@ import org.mockito.InOrder;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommunityService 级联删除单元测试")
 class CommunityCascadeDeleteTest {
+    @org.mockito.Mock private com.community.residence.conversation.mapper.ChatMessageImageMapper chatMessageImageMapper;
     @org.mockito.Mock private com.community.residence.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
     @Mock

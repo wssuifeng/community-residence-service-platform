@@ -46,6 +46,11 @@ public class CreateNoticeDTO {
     @Size(max = 5000, message = "公告内容最多 5000 字符")
     private String content;
 
+    @Schema(description = "公告图片，仅平台上传；空数组明确移除，缺省更新时保持")
+    @jakarta.validation.constraints.Size(max = 6, message = "公告最多6张图片")
+    private String[] images;
+
+
     @Schema(description = "发布时间（定时发布）")
     @NotNull(message = "发布时间不能为空")
     private LocalDateTime publishTime;

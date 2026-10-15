@@ -30,6 +30,10 @@ public class FeedbackMessage {
     @Schema(description = "消息内容")
     private String content;
 
+    @Schema(description="消息类型TEXT/IMAGE")
+    private String messageType;
+
+
     @Schema(description = "父消息ID（回复引用）")
     private Long parentId;
 

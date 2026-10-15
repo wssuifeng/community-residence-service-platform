@@ -57,7 +57,7 @@ class PublicResourceImagesMigrationTest {
     }
 
     @Test
-    @DisplayName("版本序列连续：V1~V36 均保持原位")
+    @DisplayName("版本序列连续：V1~V38 均保持原位")
     void migrationChainStaysContiguous() throws Exception {
         File dir = new File(getClass().getResource("/db/migration").toURI());
         String[] names = dir.list();
@@ -66,7 +66,7 @@ class PublicResourceImagesMigrationTest {
         List<String> sqlFiles = Arrays.stream(names)
                 .filter(name -> name.endsWith(".sql"))
                 .toList();
-        assertThat(sqlFiles).hasSize(36);
+        assertThat(sqlFiles).hasSize(38);
         assertThat(sqlFiles).contains("V29__public_resource_images.sql");
         for (int version = 1; version <= 36; version++) {
             final int v = version;

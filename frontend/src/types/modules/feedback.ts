@@ -45,7 +45,7 @@ export interface IFeedback {
   id: number
   /** 漂移字段：后端无反馈编号，展示侧用 `#${id}` 代替 */
   feedbackNumber?: string
-  residentId: number
+  residentId: number | null
   residentName: string
   communityId: number
   /** 漂移字段：后端 FeedbackVO 不返回 */
@@ -55,8 +55,8 @@ export interface IFeedback {
   content: string
   /** 漂移字段：后端 FeedbackVO 不返回 */
   contactPhone?: string | null
-  /** 漂移字段：后端 FeedbackVO 不返回 */
-  isAnonymous?: boolean
+  /** 匿名展示选择；旧未保存选择保守匿名 */
+  isAnonymous?: boolean | null
   status: FeedbackStatus
   handlerId: number | null
   handlerName: string | null
@@ -110,9 +110,11 @@ export interface IFeedbackAttachment {
 
 /** 反馈会话消息（接口设计.md 9.6.3.1 / 9.6.3.2 响应 data） */
 export interface IFeedbackMessage {
+  messageType?: 'TEXT' | 'IMAGE'
+  image?: import('@/types/chat').ChatImage | null
   id: number
   feedbackId: number
-  senderId: number
+  senderId: number | null
   senderType: FeedbackSenderType
   senderName: string
   content: string

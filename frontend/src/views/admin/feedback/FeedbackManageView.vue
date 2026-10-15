@@ -1,35 +1,28 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import FeedbackChat from '@/components/business/FeedbackChat.vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   closeFeedback,
   deleteFeedbackAttachment,
   getFeedbackDetail,
   listFeedbackAttachments,
-  listFeedbackMessages,
   listFeedbacks,
-  sendFeedbackMessage,
-  uploadFeedbackAttachment
 } from '@/api/feedback'
 import type {
   FeedbackCategory,
   FeedbackStatus,
-  FeedbackWsEvent,
   IFeedback,
   IFeedbackAttachment,
-  IFeedbackMessage
 } from '@/types/modules/feedback'
 import {
   feedbackCategoryLabels,
   feedbackStatusLabels
 } from '@/types/modules/feedback'
-import { formatDate, formatDateTime, formatRelative } from '@/utils/date'
-import { isWsConnected, subscribe } from '@/utils/websocket'
+import { formatDate, formatDateTime } from '@/utils/date'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import StatusTag from '@/components/common/StatusTag.vue'
 import Pagination from '@/components/common/Pagination.vue'
-import ImageUploader from '@/components/common/ImageUploader.vue'
-import FileUploader from '@/components/common/FileUploader.vue'
 
 /**
  * 反馈管理（对照设计稿 design-mockups/admin/07-反馈管理.png，主从聊天双栏）：
@@ -148,86 +141,45 @@ function shortDate(iso: string): string {
 
 const selectedId = ref<number | null>(null)
 const feedback = ref<IFeedback | null>(null)
-const messages = ref<IFeedbackMessage[]>([])
 const attachments = ref<IFeedbackAttachment[]>([])
 const conversationLoading = ref(false)
-const messageInput = ref('')
-const sending = ref(false)
 const closing = ref(false)
 
 /** 轮询兜底间隔（ms）：WS 在线降频对账 / WS 不可用维持既有 5s */
-const POLL_FALLBACK_INTERVAL = 5000
-const POLL_RELAXED_INTERVAL = 30000
-let pollTimer: ReturnType<typeof setTimeout> | null = null
-let unsubscribeWs: (() => void) | null = null
 /** 会话加载序号：快速切换会话时丢弃过期响应 */
 let conversationSeq = 0
 
-const messageListRef = ref<HTMLElement | null>(null)
 
-const imageAttachments = computed<IFeedbackAttachment[]>(() =>
-  attachments.value.filter((item) => item.fileType === 'IMAGE')
-)
-const documentAttachments = computed<IFeedbackAttachment[]>(() =>
-  attachments.value.filter((item) => item.fileType !== 'IMAGE')
-)
 
 /** 仅订阅当前选中会话主题；切换/清空选中时换订（dest 参与者鉴权由后端保证） */
-function resubscribe(): void {
-  unsubscribeWs?.()
-  unsubscribeWs = null
-  if (selectedId.value !== null) {
-    unsubscribeWs = subscribe(`/topic/feedback/${selectedId.value}`, handleWsPush)
-  }
-}
 
 /** 选中左栏项 → 右栏加载该会话（清空上一会话数据防串扰） */
 async function select(target: IFeedback): Promise<void> {
   if (selectedId.value === target.id) return
   const seq = ++conversationSeq
   feedback.value = null
-  messages.value = []
   attachments.value = []
   selectedId.value = target.id
-  resubscribe()
   conversationLoading.value = true
   try {
-    const [detail, msgs, atts] = await Promise.all([
+    const [detail, atts] = await Promise.all([
       getFeedbackDetail(target.id),
-      listFeedbackMessages(target.id),
       listFeedbackAttachments(target.id)
     ])
     if (seq !== conversationSeq) return
     feedback.value = detail
-    messages.value = msgs
     attachments.value = atts
     await nextTick()
-    scrollToBottom()
   } catch (error) {
     if (seq !== conversationSeq) return
     ElMessage.error(error instanceof Error ? error.message : '反馈加载失败')
     selectedId.value = null
     feedback.value = null
-    resubscribe()
-  } finally {
+    } finally {
     if (seq === conversationSeq) conversationLoading.value = false
   }
 }
 
-async function loadMessages(): Promise<void> {
-  const id = selectedId.value
-  if (id === null) return
-  try {
-    // 后端返回全量数组（默认时间升序），前端不再分页
-    const list = await listFeedbackMessages(id)
-    if (selectedId.value !== id) return
-    messages.value = list
-    await nextTick()
-    scrollToBottom()
-  } catch {
-    /* 轮询失败静默跳过，下一轮重试 */
-  }
-}
 
 /** 详情刷新（轮询/WS 状态事件用）：静默失败不打断当前会话 */
 async function refreshDetail(): Promise<void> {
@@ -254,60 +206,16 @@ async function loadAttachments(): Promise<void> {
   }
 }
 
-function scrollToBottom(): void {
-  const container = messageListRef.value
-  if (container) container.scrollTop = container.scrollHeight
-}
 
-async function handleSend(): Promise<void> {
-  const id = selectedId.value
-  const content = messageInput.value.trim()
-  if (id === null || !content) return
-  sending.value = true
-  try {
-    await sendFeedbackMessage(id, { content })
-    messageInput.value = ''
-    /* 发送后刷新：首条回复使 PENDING→IN_SESSION（受理）；本端消息也会经
-       WS 广播回来，按 id 去重；左栏卡状态与副题计数同步 */
-    await Promise.all([loadMessages(), refreshDetail(), load(), loadCounts()])
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '发送失败')
-  } finally {
-    sending.value = false
-  }
-}
 
 /**
  * WS 推送归一（原样迁移）：§9.6.3.3 为 {type, data} 包裹；后端若直推裸
  * FeedbackMessageVO（无 type 字段）亦兼容，最终以联调实测为准
  */
-function extractWsMessage(raw: unknown): IFeedbackMessage | null {
-  const event = raw as Partial<FeedbackWsEvent> & { content?: unknown }
-  if (event?.type === 'FEEDBACK_MESSAGE' && event.data) {
-    return event.data as IFeedbackMessage
-  }
-  if (event?.type === undefined && typeof event?.content === 'string') {
-    return raw as IFeedbackMessage
-  }
-  return null
-}
 
 /** WS 推送处理（原样迁移）：消息按 id 去重实时追加；状态事件刷新详情收口 */
-function handleWsPush(raw: unknown): void {
-  const message = extractWsMessage(raw)
-  if (message && !messages.value.some((item) => item.id === message.id)) {
-    messages.value.push(message)
-    void nextTick(scrollToBottom)
-  }
-  void refreshDetail()
-}
 
 /** 轮询兜底（原样迁移）：每轮按 WS 连接状态自适应选间隔（setTimeout 链，间隔可变） */
-function schedulePoll(): void {
-  pollTimer = setTimeout(() => {
-    void Promise.all([loadMessages(), refreshDetail()]).finally(schedulePoll)
-  }, isWsConnected() ? POLL_RELAXED_INTERVAL : POLL_FALLBACK_INTERVAL)
-}
 
 /** 办结（沿用现状：需填写办结原因并二次确认）；后端仅 IN_SESSION→CLOSED */
 async function handleClose(): Promise<void> {
@@ -358,55 +266,14 @@ async function handleDeleteAttachment(id: number): Promise<void> {
   }
 }
 
-/* ===================== 附件上传（保留清单「已办结禁增删」的「增」侧） ===================== */
-
-/* 上传入口产出通用上传 URL；附件须挂到具体反馈，回捕 URL 后转存
-   （同居民端 FE-T2-1「通用上传→URL 回捕→POST /feedbacks/{id}/attachments」模式） */
-const pendingImages = ref<string[]>([])
-const pendingFiles = ref<string[]>([])
-const attachmentUploading = ref(false)
-
-async function handleUploadChange(urls: string[], kind: 'image' | 'file'): Promise<void> {
-  const id = selectedId.value
-  if (id === null) return
-  const existing = new Set(attachments.value.map((item) => item.fileUrl))
-  const added = urls.filter((url) => !existing.has(url))
-  if (added.length === 0) return
-  attachmentUploading.value = true
-  let failed = 0
-  for (const url of added) {
-    try {
-      const blob = await (await fetch(url)).blob()
-      const fileName = url.split('/').pop() ?? 'attachment'
-      await uploadFeedbackAttachment(id, new File([blob], fileName, { type: blob.type }))
-    } catch {
-      failed += 1
-    }
-  }
-  attachmentUploading.value = false
-  if (failed > 0) ElMessage.warning(`${failed} 个附件关联失败，请重试`)
-  if (kind === 'image') pendingImages.value = []
-  else pendingFiles.value = []
-  await loadAttachments()
-}
-
 /* ===================== 初始化：首屏自动选中第一条（对照稿选中态） ===================== */
 
 onMounted(async () => {
   await load()
   void loadCounts()
   if (feedbacks.value.length > 0) await select(feedbacks.value[0])
-  schedulePoll()
 })
 
-onUnmounted(() => {
-  unsubscribeWs?.()
-  unsubscribeWs = null
-  if (pollTimer !== null) {
-    clearTimeout(pollTimer)
-    pollTimer = null
-  }
-})
 </script>
 
 <template>
@@ -531,134 +398,13 @@ onUnmounted(() => {
               </header>
 
               <!-- 消息气泡流：居民左（白底）、管理员右（品牌蓝底白字）；
-                   首条气泡为原始反馈（附件图片在气泡内画廊预览） -->
-              <div ref="messageListRef" class="chat-messages">
-                <div class="chat-row is-other">
-                  <div class="chat-bubble">
-                    <div class="bubble-sender">{{ displayName(feedback) }}（居民）</div>
-                    <div class="bubble-content">{{ feedback.content }}</div>
-                    <div
-                      v-if="imageAttachments.length > 0 || documentAttachments.length > 0"
-                      class="bubble-attachments"
-                    >
-                      <span
-                        v-for="attachment in imageAttachments"
-                        :key="attachment.id"
-                        class="bubble-attachment"
-                      >
-                        <el-image
-                          class="bubble-image"
-                          :src="attachment.fileUrl"
-                          :alt="attachment.fileName"
-                          fit="cover"
-                          :preview-src-list="imageAttachments.map((item) => item.fileUrl)"
-                          :initial-index="imageAttachments.indexOf(attachment)"
-                          preview-teleported
-                        />
-                        <button
-                          v-if="feedback.status !== 'CLOSED'"
-                          type="button"
-                          class="attachment-remove"
-                          @click="handleDeleteAttachment(attachment.id)"
-                        >
-                          删除
-                        </button>
-                      </span>
-                      <span
-                        v-for="attachment in documentAttachments"
-                        :key="attachment.id"
-                        class="bubble-file"
-                      >
-                        <a :href="attachment.fileUrl" target="_blank" rel="noopener" class="bubble-file-link">
-                          {{ attachment.fileName }}
-                        </a>
-                        <el-button
-                          v-if="feedback.status !== 'CLOSED'"
-                          link
-                          type="danger"
-                          size="small"
-                          @click="handleDeleteAttachment(attachment.id)"
-                        >
-                          删除
-                        </el-button>
-                      </span>
-                    </div>
-                    <div class="bubble-time">{{ formatDateTime(feedback.createdAt) }}</div>
-                  </div>
-                </div>
-
-                <div
-                  v-for="message in messages"
-                  :key="message.id"
-                  class="chat-row"
-                  :class="message.senderType === 'ADMIN' ? 'is-self' : 'is-other'"
-                >
-                  <div class="chat-bubble">
-                    <div class="bubble-sender">
-                      {{ message.senderName }}（{{ message.senderType === 'ADMIN' ? '管理员' : '居民' }}）
-                    </div>
-                    <div class="bubble-content">{{ message.content }}</div>
-                    <div class="bubble-time">{{ formatRelative(message.createdAt) }}</div>
-                  </div>
-                </div>
-
-                <div v-if="messages.length === 0" class="chat-empty">
-                  暂无沟通记录，回复首条消息即完成受理（状态流转为会话中）
-                </div>
-              </div>
+                   首条气泡为原始反馈，历史附件独立呈现；新图片属于各自消息 -->
+              <FeedbackChat :key="feedback.id" :feedback-id="feedback.id" :closed="feedback.status==='CLOSED'" :initial-content="feedback.content" :initial-name="feedback.residentName" :initial-date="feedback.createdAt" @changed="refreshDetail();load();loadCounts()" />
+              <section v-if="attachments.length" class="legacy-attachments"><h3>提交附件／历史附件</h3><p>旧附件不归属于某条消息；新图片请从输入区发送。</p><a v-for="item in attachments" :key="item.id" :href="item.fileUrl" target="_blank" rel="noopener"><el-image v-if="item.fileType==='IMAGE'" :src="item.fileUrl" :preview-src-list="[item.fileUrl]" preview-teleported style="width:140px;height:100px"/>{{item.fileName}}</a><el-button v-if="feedback.status!=='CLOSED'" v-for="item in attachments" :key="`delete-${item.id}`" text type="danger" @click="handleDeleteAttachment(item.id)">删除历史附件：{{item.fileName}}</el-button></section>
 
               <!-- 底部操作条：回复输入框 + 发送 + 办结（办结仅会话中，后端仅 IN_SESSION→CLOSED）；
                    已办结态只读（输入区隐藏，沿用现状规则） -->
-              <div class="composer">
-                <template v-if="feedback.status !== 'CLOSED'">
-                  <div class="composer-uploads">
-                    <ImageUploader
-                      v-model="pendingImages"
-                      :limit="5"
-                      @update:model-value="handleUploadChange($event, 'image')"
-                    />
-                    <FileUploader
-                      v-model="pendingFiles"
-                      :limit="5"
-                      @update:model-value="handleUploadChange($event, 'file')"
-                    />
-                    <span v-if="attachmentUploading" class="upload-tip">附件转存中…</span>
-                    <span v-else class="upload-tip">附件随反馈存档，已办结后不可增删</span>
-                  </div>
-                  <el-input
-                    v-model="messageInput"
-                    type="textarea"
-                    :rows="3"
-                    resize="none"
-                    placeholder="请输入回复内容…"
-                    maxlength="500"
-                    @keydown.enter.exact.prevent="handleSend"
-                  />
-                  <div class="composer-actions">
-                    <span v-if="feedback.status === 'PENDING'" class="composer-hint">
-                      首次回复即受理该反馈（状态流转为会话中）
-                    </span>
-                    <el-button
-                      type="primary"
-                      :loading="sending"
-                      :disabled="!messageInput.trim()"
-                      @click="handleSend"
-                    >
-                      发送
-                    </el-button>
-                    <el-button
-                      v-if="feedback.status === 'IN_SESSION'"
-                      type="primary"
-                      plain
-                      :loading="closing"
-                      @click="handleClose"
-                    >
-                      办结
-                    </el-button>
-                  </div>
-                </template>
-                <div v-else class="chat-closed-tip">该反馈已办结，会话已关闭</div>
-              </div>
+              <div class="composer-actions"><el-button v-if="feedback.status==='IN_SESSION'" type="primary" :loading="closing" @click="handleClose">办结反馈</el-button><p v-else-if="feedback.status==='PENDING'">首次回复即受理，可发送文字或图片。</p></div>
             </template>
           </div>
         </template>
