@@ -65,9 +65,13 @@ public class LeasePaymentVO {
     @Schema(description = "本单合同段租金覆盖止日（含），不是当前合同止期")
     private java.time.LocalDate periodEnd;
 
+    @Schema(description="当前确认期限内剩余未缴月数，仅离线报价返回") private Integer remainingMonths;
+    @Schema(description="报价版本，普通缴租下单须回传") private String quoteVersion;
+    @Schema(description="跨段金额及覆盖JSON快照") private String coverageDetails;
     public static LeasePaymentVO from(LeasePayment entity) {
         LeasePaymentVO vo = new LeasePaymentVO();
         vo.setId(entity.getId());
+        vo.setCoverageDetails(entity.getCoverageDetails());
         vo.setPaymentNo(entity.getPaymentNo());
         vo.setLeaseId(entity.getLeaseId());
         vo.setPaymentType(entity.getPaymentType());

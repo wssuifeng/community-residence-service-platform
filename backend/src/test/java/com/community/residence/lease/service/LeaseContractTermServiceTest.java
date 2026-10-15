@@ -164,8 +164,9 @@ class LeaseContractTermServiceTest {
         term.setStatus("ACTIVE");
         term.setContractMonths(6);
         term.setStartDate(LocalDate.now().minusMonths(2));
+        term.setEndDate(term.getStartDate().plusMonths(6).minusDays(1));term.setMonthlyRent(new BigDecimal("3000"));
         var p=new com.community.residence.payment.entity.LeasePayment();
-        p.setTermId(20L);
+        p.setTermId(20L);p.setStatus("SUCCESS");
         p.setMonths(1);
         p.setPeriodStart(term.getStartDate());
         p.setPeriodEnd(LeaseTermRules.end(term.getStartDate(),1));

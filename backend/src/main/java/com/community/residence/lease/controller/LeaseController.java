@@ -137,7 +137,7 @@ public class LeaseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/{id}/renew")
     public ApiResponse<LeaseVO> renew(@PathVariable Long id, @RequestBody @Valid RenewLeaseDTO dto) {
-        return ApiResponse.success(leaseService.renew(id, dto));
+        throw new com.community.residence.common.exception.BusinessException(com.community.residence.common.constant.ErrorCode.INVALID_PARAM,"请由租客提交租期延长申请，经管理方审核；此旧续租拟约入口已停用");
     }
 
     @Operation(summary = "查询租住详情", description = "居民限本人")
@@ -192,7 +192,7 @@ public class LeaseController {
     @Operation(summary="读取合同段服务端报价，不创建支付或访问渠道")
     @PreAuthorize("hasRole('RESIDENT')")
     @GetMapping("/{id}/rent-quote")
-    public ApiResponse<com.community.residence.payment.vo.LeasePaymentVO> quote(@PathVariable Long id,@RequestParam(defaultValue="RENT")String purpose){
+    public ApiResponse<com.community.residence.payment.vo.LeasePaymentVO> quote(@PathVariable Long id,@RequestParam(defaultValue="RENT")String purpose,@RequestParam(required=false)Integer months){
         if(!java.util.Set.of("FIRST","RENT","RENEWAL").contains(purpose))throw new com.community.residence.common.exception.BusinessException(com.community.residence.common.constant.ErrorCode.INVALID_PARAM,"付款用途无效");
-        return ApiResponse.success(paymentService.quote(id,purpose));}
+        return ApiResponse.success(paymentService.quote(id,purpose,months));}
 }

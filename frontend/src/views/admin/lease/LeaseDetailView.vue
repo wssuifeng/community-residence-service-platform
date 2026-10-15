@@ -579,7 +579,7 @@ async function doTransition(target: LeaseStatus, successText: string, remark?: s
 
 /* ---------- 续租 ---------- */
 
-const termsDialogVisible=ref(false)
+const termsDialogVisible=ref(route.query.panel==='terms')
 function openRenew(): void { termsDialogVisible.value=true }
 
 onMounted(fetchDetail)
@@ -1087,7 +1087,7 @@ onMounted(fetchDetail)
     </el-drawer>
 
     <!-- 续租经新增合同段确认与首付生效，原合同不被静默覆盖 -->
-    <el-dialog v-model="termsDialogVisible" title="合同与续租管理" width="min(780px,94vw)"><LeaseTermsPanel v-if="lease" :lease="lease" admin /></el-dialog>
+    <el-dialog v-model="termsDialogVisible" title="合同与租期" width="min(780px,94vw)"><LeaseTermsPanel v-if="lease" :lease="lease" admin /></el-dialog>
   </section>
 </template>
 

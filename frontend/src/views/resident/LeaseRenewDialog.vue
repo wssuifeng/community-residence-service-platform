@@ -76,7 +76,17 @@ const failReason = ref<'closed' | 'abandoned' | 'timeout' | 'review' | ''>('')
 
 const quote = ref<ILeasePayment | null>(null)
 const quoteError = ref('')
-async function loadQuote(){quote.value=null;quoteError.value='';if(!props.lease)return;try{quote.value=await getRentQuote(props.lease.id,props.purpose ?? 'RENEWAL')}catch(e){quoteError.value=e instanceof Error?e.message:'报价读取失败'}}
+const selectedMonths = ref(1)
+const quoteLoading = ref(false)
+let quoteEpoch = 0
+async function loadQuote(){
+ const epoch=++quoteEpoch;quote.value=null;quoteError.value='';quoteLoading.value=true
+ try { if(props.lease) {const result=await getRentQuote(props.lease.id,props.purpose ?? 'RENT',selectedMonths.value);if(epoch===quoteEpoch)quote.value=result} }
+ catch(e){if(epoch===quoteEpoch)quoteError.value=e instanceof Error?e.message:'报价读取失败'}
+ finally {if(epoch===quoteEpoch)quoteLoading.value=false}
+}
+const coverageParts=computed(()=>{try{return JSON.parse(quote.value?.coverageDetails??'[]') as Array<{start:string;end:string;months:number;monthlyRent:number;amount:number}>}catch{return []}})
+
 const channel = ref<PaymentChannel | null>(null)
 const channelOptions = ref<IPaymentChannelOption[]>([])
 const channelsLoading = ref(false)
@@ -137,7 +147,7 @@ function pickChannel(item: IPaymentChannelOption): void {
 /* ------------------------------ 提交支付单并分流 ------------------------------ */
 
 async function submitPayment(): Promise<void> {
-  if (submitting.value || !props.lease) return
+  if (submitting.value || quoteLoading.value || !props.lease) return
   if (!quote.value) {
     ElMessage.warning(quoteError.value || '请先读取合同报价')
     return
@@ -151,6 +161,7 @@ async function submitPayment(): Promise<void> {
     /* 金额服务端计算；同租约已有进行中单时幂等返回该单 */
     const data = await (props.purpose === 'RENT' ? createRentPayment : createRenewPayment)(props.lease.id, {
       months: months.value,
+      quoteVersion: quote.value.quoteVersion,
       channel: channel.value
     })
     payment.value = data
@@ -318,6 +329,7 @@ watch(
   () => props.modelValue,
   (open) => {
     if (open) {
+      selectedMonths.value=1
       resetDialog()
       void loadChannels()
       void loadQuote()
@@ -334,7 +346,7 @@ onUnmounted(stopPolling)
 <template>
   <el-dialog
     v-model="visible"
-    :title="`${purpose==='RENT'?'合同内交租':'续租首笔租金'} · ${lease?.houseLocation ?? ''}`"
+    :title="`${purpose==='RENEWAL'?'继续历史续租订单':'缴纳租金'} · ${lease?.houseLocation ?? ''}`"
     width="480px"
     :close-on-click-modal="false"
   >
@@ -361,9 +373,16 @@ onUnmounted(stopPolling)
         </div>
       </dl>
 
-      <el-alert v-if="quoteError" :title="quoteError" type="error" :closable="false" />
-      <p v-else>本次{{ months }}个月，覆盖 {{ quote?.periodStart }} 至 {{ quote?.periodEnd }}。{{ purpose==='RENT'?'支付不会改变合同止期。':'仅已同意续租协议的首次支付会延长合同。' }}</p>
+      <div v-loading="quoteLoading" class="months-row">
+        <label for="rent-months">本次缴纳月数</label>
+        <el-input-number id="rent-months" v-model="selectedMonths" :min="1" :max="quote?.remainingMonths ?? quote?.months ?? 1" :disabled="quoteLoading || quote?.status==='PENDING'" :precision="0" @change="loadQuote" />
+        <span v-if="quote?.remainingMonths">可选1～{{quote.remainingMonths}}个月</span>
+      </div>
+      <el-alert v-if="quote?.status==='PENDING'" type="warning" title="已有进行中支付单，继续原订单；月数、渠道和金额以该单为准，不创建第二笔。" :closable="false" />
+      <el-alert v-if="quoteError" :title="quoteError" type="error" :closable="false" /><el-button v-if="quoteError" link @click="loadQuote">重新读取报价</el-button>
+      <p v-else>本次{{ months }}个月，覆盖 {{ quote?.periodStart }} 至 {{ quote?.periodEnd }}。{{ '缴租不改变合同止期，不重复收押金。' }}</p>
 
+      <ul v-if="coverageParts.length>1" class="coverage-breakdown"><li v-for="part in coverageParts" :key="part.start">{{part.start}} 至 {{part.end}}：{{part.months}}个月 × {{money(part.monthlyRent)}} = {{money(part.amount)}}</li></ul>
       <div class="field">
         <p class="field-label">支付渠道</p>
         <div class="channel-grid">
@@ -493,7 +512,7 @@ onUnmounted(stopPolling)
             type="primary"
             round
             :loading="submitting"
-            :disabled="submitting || channelsLoading"
+            :disabled="submitting || channelsLoading || quoteLoading || !quote"
             @click="submitPayment"
           >
             去支付

@@ -31,16 +31,20 @@ public class LeaseContractTermService {
         .eq(com.community.residence.payment.entity.LeasePayment::getLeaseId,leaseId)
         .eq(com.community.residence.payment.entity.LeasePayment::getStatus,"SUCCESS")
         .orderByAsc(com.community.residence.payment.entity.LeasePayment::getPeriodStart));
-        return rows(leaseId).stream().map(t -> {
+        var all = rows(leaseId);
+        var effective = all.stream().filter(t -> "ACTIVE".equals(t.getStatus())).toList();
+        var schedule = effective.isEmpty() ? java.util.List.<RentSchedule.Month>of() : RentSchedule.build(all, successful);
+        return all.stream().map(t -> {
             var vo = new com.community.residence.lease.vo.LeaseContractTermVO();
             org.springframework.beans.BeanUtils.copyProperties(t,vo);
-            var paid=successful.stream().filter(p->Objects.equals(p.getTermId(),t.getId()) && p.getSettlementIssue()==null).toList();
-            int count=paid.stream().mapToInt(p->p.getMonths()==null?0:p.getMonths()).sum();
+            var paid=successful.stream().filter(p->p.getSettlementIssue()==null && p.getPeriodStart()!=null && p.getPeriodEnd()!=null
+                    && !p.getPeriodEnd().isBefore(t.getStartDate()) && !p.getPeriodStart().isAfter(t.getEndDate())).toList();
+            int count=(int)schedule.stream().filter(m->Objects.equals(m.termId(),t.getId())&&m.paid()).count();
             vo.setPaidMonths(count);vo.setRemainingMonths(Math.max(0,t.getContractMonths()-count));
             vo.setPaidPeriods(paid.stream().map(p->new com.community.residence.lease.vo.LeaseContractTermVO.Coverage(p.getPaymentNo(),p.getPeriodStart(),p.getPeriodEnd())).toList());
             if ("ACTIVE".equals(t.getStatus()) && count<t.getContractMonths()) {
-                vo.setNextDueDate(t.getStartDate().plusMonths(count));
-                vo.setOverdue(vo.getNextDueDate().isBefore(LocalDate.now()));
+                vo.setNextDueDate(schedule.stream().filter(m->Objects.equals(m.termId(),t.getId())&&!m.paid()).findFirst().map(RentSchedule.Month::start).orElse(null));
+                vo.setOverdue(vo.getNextDueDate()!=null && vo.getNextDueDate().isBefore(LocalDate.now()));
             }
             return vo;
         }
@@ -133,6 +137,9 @@ public class LeaseContractTermService {
         var t=terms.lock(termId);
         if(t==null||!Objects.equals(t.getLeaseId(),leaseId))throw new ResourceNotFoundException("协议不存在");
         if(!Set.of("OFFERED","SIGNED","CANCELLED").contains(t.getStatus())||!"RENEWAL".equals(t.getTermType()))throw new BusinessException(ErrorCode.INVALID_PARAM,"仅未生效续租可取消");
+        boolean pending=payments.selectList(new LambdaQueryWrapper<com.community.residence.payment.entity.LeasePayment>()
+                .eq(com.community.residence.payment.entity.LeasePayment::getTermId,termId)).stream().anyMatch(p->"PENDING".equals(p.getStatus()) && (p.getExpiresAt()==null || !p.getExpiresAt().isBefore(LocalDateTime.now())));
+        if(pending)throw new BusinessException(ErrorCode.INVALID_PARAM,"该旧方案仍有可支付或等待渠道截止缓冲的订单，请到期核对后再取消");
         if (!"CANCELLED".equals(t.getStatus())) changeLog.logAgreement(leaseId,"RENEWAL_CANCELLED","取消未生效新增段，不改变原约");
         t.setStatus("CANCELLED");
         terms.updateById(t);

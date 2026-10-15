@@ -137,7 +137,7 @@ public class PaymentService {
     }
 
     public LeasePaymentVO createRentPayment(Long leaseId, CreateRenewPaymentDTO dto) {
-        return createContractPayment(leaseId,dto.getChannel(),PaymentType.RENT);
+        return createSelectedRentPayment(leaseId,dto);
     }
 
     /** 按居民已确认合同段发起首期；只收约定首付月数与一次押金，不延长合同。 */
@@ -148,10 +148,20 @@ public class PaymentService {
         return createContractPayment(leaseId,dto.getChannel(),PaymentType.FIRST);
     }
 
-    public LeasePaymentVO quote(Long leaseId,String purpose) {
+    public LeasePaymentVO quote(Long leaseId,String purpose) { return quote(leaseId,purpose,1); }
+
+    public LeasePaymentVO quote(Long leaseId,String purpose,Integer requestedMonths) {
         LeaseRecord lease=leaseMapper.selectById(leaseId);
         if(lease==null)throw new ResourceNotFoundException("租约不存在");
         if(!Objects.equals(lease.getTenantId(),SecurityUtils.getUserId()))throw new ForbiddenException("无权读取他人租金报价");
+        if(PaymentType.RENT.equals(purpose)) {
+            if(!"ACTIVE".equals(lease.getStatus()))throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID);
+            var rows=paymentMapper.selectList(new LambdaQueryWrapper<LeasePayment>().eq(LeasePayment::getLeaseId,leaseId).orderByAsc(LeasePayment::getId));
+            var pending=rows.stream().filter(this::stillPending).findFirst();
+            if(pending.isPresent())return toVO(pending.get(),null,lease);
+            var q=rentQuote(leaseId,rows,requestedMonths==null?1:requestedMonths);
+            LeasePayment draft=rentDraft(lease,q);var vo=toVO(draft,null,lease);vo.setRemainingMonths(q.remaining());vo.setQuoteVersion(q.version());return vo;
+        }
         if(PaymentType.RENEWAL.equals(purpose)) requireNoDueRent(leaseId);
         var term=payableTerm(leaseId,purpose);int paid=0;
         for(var row:paymentMapper.selectList(new LambdaQueryWrapper<LeasePayment>().eq(LeasePayment::getTermId,term.getId()).eq(LeasePayment::getStatus,PaymentStatus.SUCCESS)))paid+=row.getMonths();
@@ -214,6 +224,7 @@ public class PaymentService {
                         if(row.getPeriodStart()==null||!row.getPeriodStart().equals(term.getStartDate().plusMonths(paid)))throw new BusinessException(ErrorCode.INVALID_PARAM,"历史租金覆盖不连续，请先核对");paid+=row.getMonths();
                     }
                 }
+                if(PaymentType.RENEWAL.equals(purpose))throw new BusinessException(ErrorCode.INVALID_PARAM,"旧续租方案不再新建首笔付款，请取消未生效方案后申请延长租期；已有进行中订单仍沿原单继续");
                 if(paid>=term.getContractMonths())throw new BusinessException(ErrorCode.INVALID_PARAM,"该合同段租金已全部缴清");
                 int months=PaymentType.RENT.equals(purpose)?Math.min(term.getPaymentCycleMonths(),term.getContractMonths()-paid):term.getFirstPaymentMonths();
                 LeasePayment created=new LeasePayment();created.setPaymentNo(generatePaymentNo(PaymentType.FIRST.equals(purpose)?FIRST_PAYMENT_NO_PREFIX:PAYMENT_NO_PREFIX));
@@ -224,6 +235,50 @@ public class PaymentService {
                 created.setChannelExpiresAt(deadline);created.setExpiresAt(deadline.plusMinutes(5));created.setStatus(PaymentStatus.PENDING);paymentMapper.insert(created);return created;
             });
         } finally {if(locked)unlockQuietly(lock);}
+        if(payment==null)throw new BusinessException(ErrorCode.PAYMENT_CREATE_FAILED);
+        return toVO(payment,credentialOf(payment));
+    }
+
+    private boolean stillPending(LeasePayment row) {
+        return PaymentStatus.PENDING.equals(row.getStatus()) && (row.getExpiresAt()==null || !row.getExpiresAt().isBefore(LocalDateTime.now()));
+    }
+    private com.community.residence.lease.service.RentSchedule.Quote rentQuote(Long leaseId,List<LeasePayment> rows,int months) {
+        if(rows.stream().anyMatch(p->p.getSettlementIssue()!=null))throw new BusinessException(ErrorCode.INVALID_PARAM,"存在到账待核对记录，请先联系管理方，勿重复支付");
+        return com.community.residence.lease.service.RentSchedule.quote(com.community.residence.lease.service.RentSchedule.build(termService.rows(leaseId),rows),months);
+    }
+    private LeasePayment rentDraft(LeaseRecord lease,com.community.residence.lease.service.RentSchedule.Quote q) {
+        LeasePayment draft=new LeasePayment();draft.setLeaseId(lease.getId());draft.setResidentId(lease.getTenantId());draft.setPaymentType(PaymentType.RENT);
+        draft.setTermId(q.slices().get(0).termId());draft.setMonths(q.months());draft.setRentAmount(q.amount());draft.setDepositAmount(BigDecimal.ZERO);draft.setAmount(q.amount());
+        draft.setMonthlyRentSnapshot(q.slices().size()==1?q.slices().get(0).monthlyRent():null);draft.setPeriodStart(q.start());draft.setPeriodEnd(q.end());
+        var snapshots=q.slices().stream().map(part->java.util.Map.of("termId",part.termId(),"start",part.start().toString(),"end",part.end().toString(),"months",part.months(),"monthlyRent",part.monthlyRent(),"amount",part.amount())).toList();
+        draft.setCoverageDetails(new tools.jackson.databind.ObjectMapper().writeValueAsString(snapshots));return draft;
+    }
+    /* 同租约锁与结算事务内重报价格；已有可支付单原样返回，不本地强关、不重复收取。 */
+    private LeasePaymentVO createSelectedRentPayment(Long leaseId,CreateRenewPaymentDTO dto) {
+        LeaseRecord reference=leaseMapper.selectById(leaseId);
+        if(reference==null)throw new ResourceNotFoundException("租约不存在");
+        if(!Objects.equals(reference.getTenantId(),SecurityUtils.getUserId()))throw new ForbiddenException("无权对他人租约付款");
+        if(!clientOf(dto.getChannel()).enabled())throw new BusinessException(ErrorCode.PAYMENT_CHANNEL_DISABLED);
+        RLock lock=redissonClient.getLock("lock:payment:contract:"+leaseId);boolean locked=false;LeasePayment payment;
+        try {
+            try{locked=lock.tryLock(5,TimeUnit.SECONDS);}catch(InterruptedException e){Thread.currentThread().interrupt();throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE);}
+            if(!locked)throw new BusinessException(ErrorCode.SERVICE_UNAVAILABLE);
+            payment=settlementTransaction.execute(status->{
+                var lease=leaseService.lockForSettlement(leaseId);
+                if(!"ACTIVE".equals(lease.getStatus()))throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID);
+                var rows=paymentMapper.selectList(new LambdaQueryWrapper<LeasePayment>().eq(LeasePayment::getLeaseId,leaseId).orderByAsc(LeasePayment::getId));
+                if(rows.stream().anyMatch(p->p.getSettlementIssue()!=null))throw new BusinessException(ErrorCode.INVALID_PARAM,"存在到账待核对记录，请联系管理方");
+                for(var row:rows)if(PaymentStatus.PENDING.equals(row.getStatus())) {
+                    if(stillPending(row))return row;
+                    row.setStatus(PaymentStatus.CLOSED);paymentMapper.updateById(row);
+                }
+                var q=rentQuote(leaseId,rows,dto.getMonths()==null?1:dto.getMonths());
+                if(!Objects.equals(q.version(),dto.getQuoteVersion()))throw new BusinessException(ErrorCode.INVALID_PARAM,"缴租报价已变化或未确认，请重新读取并核对金额/覆盖区间后支付");
+                var created=rentDraft(lease,q);created.setPaymentNo(generatePaymentNo(PAYMENT_NO_PREFIX));created.setChannel(dto.getChannel());created.setStatus(PaymentStatus.PENDING);
+                var deadline=com.community.residence.lease.service.LeaseTermRules.channelDeadline(LocalDateTime.now(),lease.getStartDate(),false);
+                created.setChannelExpiresAt(deadline);created.setExpiresAt(deadline.plusMinutes(5));paymentMapper.insert(created);return created;
+            });
+        }finally{if(locked)unlockQuietly(lock);}
         if(payment==null)throw new BusinessException(ErrorCode.PAYMENT_CREATE_FAILED);
         return toVO(payment,credentialOf(payment));
     }

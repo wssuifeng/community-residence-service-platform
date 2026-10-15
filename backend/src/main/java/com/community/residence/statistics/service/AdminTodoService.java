@@ -43,7 +43,7 @@ public class AdminTodoService {
   result.put("applications",applications.selectCount(new LambdaQueryWrapper<ResidenceApplication>().eq(ResidenceApplication::getStatus,ApplicationStatus.PENDING)));
   result.put("moveout",moveouts.selectCount(new LambdaQueryWrapper<LeaseMoveOutApplication>().eq(LeaseMoveOutApplication::getStatus,MoveOutStatus.PENDING)));
   result.put("housings",viewings.selectCount(new LambdaQueryWrapper<ViewingAppointment>().eq(ViewingAppointment::getStatus,"TO_CONFIRM")));
-  result.put("leases",leases.selectCount(new LambdaQueryWrapper<LeaseRecord>().eq(LeaseRecord::getStatus,LeaseStatus.PENDING).or(w->w.eq(LeaseRecord::getStatus,LeaseStatus.TO_SIGN).and(x->x.in(LeaseRecord::getAgreementStatus,"NONE","CANCELLED").or().isNull(LeaseRecord::getAgreementStatus)))));
+  result.put("leases",leases.selectCount(new LambdaQueryWrapper<LeaseRecord>().eq(LeaseRecord::getStatus,LeaseStatus.PENDING).or(w->w.eq(LeaseRecord::getStatus,LeaseStatus.TO_SIGN).and(x->x.in(LeaseRecord::getAgreementStatus,"NONE","CANCELLED").or().isNull(LeaseRecord::getAgreementStatus))).or().exists("SELECT 1 FROM lease_extension_application ex WHERE ex.lease_id=lease_record.id AND ex.status='PENDING'")));
   return result;
  }
 }

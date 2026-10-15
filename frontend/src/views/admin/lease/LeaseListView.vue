@@ -7,6 +7,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import LeaseExtensionInbox from '@/components/business/LeaseExtensionInbox.vue'
 import LeaseTermsPanel from '@/components/business/LeaseTermsPanel.vue'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import { createLease, getLeaseList, updateLease, updateLeaseStatus } from '@/api/lease'
@@ -605,6 +606,7 @@ useLiveRefresh(() => load())
 
 <template>
   <section class="admin-lease">
+    <LeaseExtensionInbox />
     <AdminPageHeader title="租约管理" subtitle="租约属性 · 协议确认 · 到期 · 续退租">
       <!-- 跨 Tab 直达 Hub 兄弟分区（批次 g：退租申请与协议模板已并入同一 Hub） -->
       <el-button @click="router.push({ path: '/admin/housing-lease', query: { tab: 'moveout' } })">退租申请审核</el-button>
@@ -873,7 +875,7 @@ useLiveRefresh(() => load())
       <Pagination v-model:page="page" v-model:size="size" :total="filteredRows.length" />
     </div>
 
-    <el-dialog v-model="termsVisible" title="合同与续租管理" width="min(780px,94vw)"><LeaseTermsPanel v-if="termsLease" :lease="termsLease" admin /></el-dialog>
+    <el-dialog v-model="termsVisible" title="合同与租期" width="min(780px,94vw)"><LeaseTermsPanel v-if="termsLease" :lease="termsLease" admin /></el-dialog>
     <!-- 新建/编辑：编辑态仅允许变更租期起止、月租金、押金、合同附件、备注 -->
     <el-dialog
       v-model="dialogVisible"
