@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-15",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "前端5176登录页可访问",
+      "passed": true
+    },
+    {
+      "name": "正常契约/api/v1/auth/renew",
+      "passed": true
+    },
+    {
+      "name": "正常契约/api/v1/conversations/{id}/messages/image",
+      "passed": true
+    },
+    {
+      "name": "正常契约/api/v1/feedbacks/{id}/messages/image",
+      "passed": true
+    },
+    {
+      "name": "正常契约/api/v1/statistics/todos",
+      "passed": true
+    },
+    {
+      "name": "正常迁移完整V1到V38",
+      "passed": true
+    },
+    {
+      "name": "正常社区房屋关系租约支付退款反馈公告计数保持",
+      "passed": true
+    },
+    {
+      "name": "仅空类别目录初始化0到7，用户记录不覆盖",
+      "passed": true
+    },
+    {
+      "name": "正常新登录36h",
+      "passed": true
+    },
+    {
+      "name": "支付渠道继续停用",
+      "passed": true
+    },
+    {
+      "name": "历史未存匿名选择的反馈按保守匿名返回",
+      "passed": true
+    },
+    {
+      "name": "管理待办接口可读且无支付字段",
+      "passed": true
+    },
+    {
+      "name": "原无图公告不自动插入图片",
+      "passed": true
+    },
+    {
+      "name": "部署包与已测最终后端SHA一致",
+      "passed": true
+    }
+  ],
+  "businessCounts": [
+    1,
+    15,
+    10,
+    2,
+    0,
+    0,
+    7,
+    3,
+    1
+  ]
+}

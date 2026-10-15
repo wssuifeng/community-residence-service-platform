@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-15",
+  "backend": {
+    "tests": 1055,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "jacoco": {
+    "INSTRUCTION": {
+      "missed": 12667,
+      "covered": 36554,
+      "percent": 74.27
+    },
+    "BRANCH": {
+      "missed": 1471,
+      "covered": 2792,
+      "percent": 65.49
+    },
+    "LINE": {
+      "missed": 2397,
+      "covered": 7266,
+      "percent": 75.19
+    },
+    "COMPLEXITY": {
+      "missed": 1648,
+      "covered": 1886,
+      "percent": 53.37
+    },
+    "METHOD": {
+      "missed": 504,
+      "covered": 890,
+      "percent": 63.85
+    },
+    "CLASS": {
+      "missed": 69,
+      "covered": 152,
+      "percent": 68.78
+    }
+  },
+  "frontend": {
+    "files": 57,
+    "tests": 342,
+    "failures": 0,
+    "postCleanupTargetedFiles": 3,
+    "postCleanupTargetedTests": 16,
+    "typecheck": "passed",
+    "build": "passed"
+  },
+  "checks": {
+    "api": 26,
+    "browser-extra": 11,
+    "browser": 14,
+    "normal-readonly": 14,
+    "cleanup": 1
+  },
+  "transactionsExecuted": false,
+  "stage": "50 steps 7/8, user retest not prefilled",
+  "normalService": {
+    "backendPort": 8084,
+    "frontendPort": 5176,
+    "migrationVersions": 38,
+    "businessTables": 55,
+    "beforeBusinessCounts": [
+      1,
+      15,
+      10,
+      2,
+      0,
+      0,
+      0,
+      3,
+      1
+    ],
+    "afterBusinessCounts": [
+      1,
+      15,
+      10,
+      2,
+      0,
+      0,
+      7,
+      3,
+      1
+    ]
+  },
+  "failureSummary": [
+    "Category tree was empty in normal community; initialize only wholly empty catalogs and keep custom/disabled catalogs.",
+    "Initial renewal/quota red tests lacked the implementation; corrected with targeted regressions.",
+    "Authentication renewal initially inherited permitAll; explicit authenticated rule added and actual revoked family now returns 401.",
+    "Late old-login 401 retried then cleared newer session; no auth replay and race regression pass.",
+    "Old chat selector and early axios mock caching were test harness issues, corrected without calling them business fixes.",
+    "Test harness used POST for notice publish/withdraw; OpenAPI preflight rejected them before send, corrected to PATCH.",
+    "Independent backend jar occupied Maven clean target on Windows; stopped only own isolated backend then clean package passed.",
+    "Additional browser regression exposed notice resetForm inheriting previous images; clear images on new form, 11 extra checks now pass.",
+    "Cleanup preflight initially compared CRLF lines literally and stopped before DROP; normalize line endings, verify exact isolated database and known fixture communities, then remove only BQ database.",
+    "Final source contract check found a withdrawn-notice direct-publish button although backend only permits drafts; keep withdrawn Edit action, hide direct Publish until it is saved as draft."
+  ],
+  "limits": [
+    "No payments, refunds or active trade queries.",
+    "No frozen 20/30 documents rewritten in this batch; additive contracts recorded in 50/24 pending approved upstream synchronization.",
+    "Historical feedback anonymity choice was not persisted, NULL is conservatively displayed anonymous.",
+    "Historical feedback attachments remain independently labeled; do not invent sender/time by migrating them into image messages.",
+    "Proposals 22 house images and 23 start-date defaults remain pending user approval.",
+    "Coverage figures are actual module figures, not a claim all phase exit criteria are satisfied."
+  ],
+  "cleanupEvidence": "cleanup.json",
+  "localEngineeringCommits": [
+    "e1f93a9",
+    "033ad32",
+    "6eab975"
+  ],
+  "pushed": false,
+  "backendJarSha256": "d01c2a6737cc73fb2448fe841cf1e6fe2fae4617c455d57b3faa6d017b574839"
+}

@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-15",
+  "database": "community_residence_bq_20261015",
+  "isolatedDatabaseRemoved": true,
+  "onlySeedAndBqFixtureCommunitiesVerified": true,
+  "isolatedPaymentsAndRefunds": 0,
+  "stoppedOwnProcessIds": [
+    18632,
+    23292
+  ],
+  "normalServicePortsKept": [
+    8084,
+    5176
+  ],
+  "normalDatabaseNotDeleted": true,
+  "userBrowserUntouched": true,
+  "privateFixtureFileRemoved": true,
+  "transactionsExecuted": false
+}
