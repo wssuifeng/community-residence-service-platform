@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-15",
+  "database": "community_residence_bq_20261015",
+  "transactionsExecuted": false,
+  "checks": [
+    {
+      "name": "V1到V38迁移已完成",
+      "passed": true
+    },
+    {
+      "name": "新社区自动初始化7个真实服务类别",
+      "passed": true
+    },
+    {
+      "name": "真实续期36h且保留会话族/原iat/权限代次",
+      "passed": true
+    },
+    {
+      "name": "匿名创建保存且响应不泄露姓名或账号ID",
+      "passed": true
+    },
+    {
+      "name": "管理列表匿名化",
+      "passed": true
+    },
+    {
+      "name": "居民图片生成独立IMAGE消息",
+      "passed": true
+    },
+    {
+      "name": "管理员图片生成新消息并受理反馈",
+      "passed": true
+    },
+    {
+      "name": "两端回读相同图片消息和时间线",
+      "passed": true
+    },
+    {
+      "name": "消息图片没有被塞入反馈附件列表",
+      "passed": true
+    },
+    {
+      "name": "未认证不能读取匿名反馈或发图",
+      "passed": true
+    },
+    {
+      "name": "伪图片拒绝且不新增消息",
+      "passed": true
+    },
+    {
+      "name": "通用群聊复用图片消息端点",
+      "passed": true
+    },
+    {
+      "name": "管理方可回读居民群聊图片",
+      "passed": true
+    },
+    {
+      "name": "无图公告返回真实空数组",
+      "passed": true
+    },
+    {
+      "name": "通用图片上传可用于公告",
+      "passed": true
+    },
+    {
+      "name": "公告图片保存并回读",
+      "passed": true
+    },
+    {
+      "name": "空数组真正清除公告图而非仅本地清空",
+      "passed": true
+    },
+    {
+      "name": "发布后不能直接修改",
+      "passed": true
+    },
+    {
+      "name": "撤回后可编辑成草稿并保存图片清空",
+      "passed": true
+    },
+    {
+      "name": "24段总容量2400，90分钟预约占用3段",
+      "passed": true
+    },
+    {
+      "name": "真实待办含待审预约且不含交易查单",
+      "passed": true
+    },
+    {
+      "name": "居民不能读取管理待办",
+      "passed": true
+    },
+    {
+      "name": "服务人员不能读取管理待办",
+      "passed": true
+    },
+    {
+      "name": "已办结拒绝图片上传",
+      "passed": true
+    },
+    {
+      "name": "旧同族令牌登出使续期令牌同时失效",
+      "passed": true
+    },
+    {
+      "name": "其他社区新待办不泄露给未绑定管理员，超管真实计数增加",
+      "passed": true
+    }
+  ]
+}

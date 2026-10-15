@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-15",
+  "checks": [
+    {
+      "name": "前台真实有效会话进入续期窗口自动调用续期接口",
+      "passed": true
+    },
+    {
+      "name": "浏览器续期后有效期重新延长约36h",
+      "passed": true
+    },
+    {
+      "name": "管理公告编辑回显实际存图",
+      "passed": true
+    },
+    {
+      "name": "编辑带图公告后新建不会继承上一条图片",
+      "passed": true
+    },
+    {
+      "name": "管理端移除图片后实际更新保存成功",
+      "passed": true
+    },
+    {
+      "name": "图片清空已持久化到后端",
+      "passed": true
+    },
+    {
+      "name": "管理公告选图走真实上传接口",
+      "passed": true
+    },
+    {
+      "name": "新上传公告图片保存成功",
+      "passed": true
+    },
+    {
+      "name": "新上传公告图片重新回读存在",
+      "passed": true
+    },
+    {
+      "name": "租住Hub子Tab红点与真实后端待办逐项一致",
+      "passed": true
+    },
+    {
+      "name": "补充浏览器检查无pageerror",
+      "passed": true
+    }
+  ],
+  "pageerrors": [],
+  "transactionsExecuted": false
+}

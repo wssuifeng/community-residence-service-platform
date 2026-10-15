@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-15",
+  "checks": [
+    {
+      "name": "居民工单真实服务类别可见",
+      "passed": true
+    },
+    {
+      "name": "居民页面可见管理员和自己的图片消息",
+      "passed": true
+    },
+    {
+      "name": "管理端相同图片消息可见",
+      "passed": true
+    },
+    {
+      "name": "匿名反馈详情和会话未泄露真实姓名",
+      "passed": true
+    },
+    {
+      "name": "管理端选图发送后居民实时或轮询收到新图片",
+      "passed": true
+    },
+    {
+      "name": "居民选图发送后管理员收到新图片",
+      "passed": true
+    },
+    {
+      "name": "刷新后图片消息仍完整",
+      "passed": true
+    },
+    {
+      "name": "无图片公告不出现固定封面",
+      "passed": true
+    },
+    {
+      "name": "带图公告展示实际上传文件",
+      "passed": true
+    },
+    {
+      "name": "月历同口径展示3占用额度/2400与1条预约",
+      "passed": true
+    },
+    {
+      "name": "管理侧栏真实待审预约红点可见",
+      "passed": true
+    },
+    {
+      "name": "群聊页面复用同一图片消息呈现",
+      "passed": true
+    },
+    {
+      "name": "共享聊天768无整页横向溢出",
+      "passed": true
+    },
+    {
+      "name": "浏览器无pageerror",
+      "passed": true
+    }
+  ],
+  "pageerrors": [],
+  "transactionsExecuted": false
+}
