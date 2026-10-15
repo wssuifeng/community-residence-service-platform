@@ -12,7 +12,8 @@ import { getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
  * - 编辑回填缩略图，移除后保存提交空数组；上传中禁止保存。
  * - 列表首图缩略图：有图显示首图、无图显示占位符。
  */
-vi.mock('@/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
+const batchSlots=vi.hoisted(()=>vi.fn().mockResolvedValue({createdDays:[1,2,3,4,5],skippedDays:[]}))
+vi.mock('@/api/community', async () => ({...(await import('@/test/fakeBackend')).fakeApi('community'),createTimeslotsBatch:batchSlots}))
 
 vi.mock('@/api/upload', () => ({ uploadFile: vi.fn(async (file: File) => ({ fileUrl: '/uploads/' + file.name })) }))
 
@@ -153,4 +154,17 @@ describe('管理端公共资源图片 · 表单（PublicResourceListView）', ()
     expect(buttons.find(item => item.text() === '取消')?.attributes('disabled')).toBeDefined()
   })
 
+})
+
+it('工作日一次提交共同时间，成功保留选择且不重新开启停用模板',async()=>{
+ const wrapper=await mountPage();await selectCommunity(wrapper)
+ const button=wrapper.findAll('tbody button').find(b=>b.text().includes('时段'))!
+ expect(button).toBeTruthy();await button.trigger('click');await flushPromises()
+ const presets=wrapper.findAll('button').find(b=>b.text().trim()==='工作日')!
+ await presets.trigger('click')
+ const times=wrapper.findAllComponents({name:'ElTimePicker'});times[0]!.vm.$emit('update:modelValue','09:00');times[1]!.vm.$emit('update:modelValue','12:00');await flushPromises()
+ const add=wrapper.findAll('button').find(b=>b.text().includes('添加到所选5个星期'))!
+ expect(add).toBeTruthy();await add.trigger('click');await flushPromises()
+ expect(batchSlots).toHaveBeenCalledWith(expect.any(Number),{daysOfWeek:[1,2,3,4,5],startTime:'09:00',endTime:'12:00',isAvailable:1})
+ expect(wrapper.findAll('button').some(b=>b.text().includes('添加到所选5个星期'))).toBe(true);wrapper.unmount()
 })

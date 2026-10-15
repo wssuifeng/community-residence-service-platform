@@ -278,3 +278,8 @@ export interface HouseAttributesPatch {
 export function updateHouseAttributes(data: HouseAttributesPatch) {
   return http.patch<number>('/houses/attributes', data)
 }
+
+/** 一次配置多个星期，重复跳过、部分重叠整批拒绝。 */
+export function createTimeslotsBatch(resourceId: number, data: Omit<ICreateTimeslotDTO,'dayOfWeek'> & { daysOfWeek: number[] }) {
+ return http.post<{ createdDays: number[]; skippedDays: number[] }>(`/resources/${resourceId}/timeslots/batch`,data)
+}

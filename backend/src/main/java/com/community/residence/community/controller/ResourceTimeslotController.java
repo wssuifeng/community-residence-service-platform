@@ -37,6 +37,14 @@ public class ResourceTimeslotController {
         return ApiResponse.success(timeslotService.create(resourceId, dto));
     }
 
+    @Operation(summary = "为多个星期批量配置周循环时段", description = "完全相同跳过，部分重叠整批拒绝")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/resources/{resourceId}/timeslots/batch")
+    public ApiResponse<com.community.residence.community.vo.BatchTimeslotVO> createBatch(@PathVariable Long resourceId,
+            @RequestBody @Valid com.community.residence.community.dto.BatchCreateTimeslotDTO dto) {
+        return ApiResponse.success(timeslotService.createBatch(resourceId, dto));
+    }
+
     @Operation(summary = "更新资源时段")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping("/timeslots/{id}")
