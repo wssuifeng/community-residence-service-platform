@@ -103,6 +103,15 @@ public class PublicResourceService {
         return resource;
     }
 
+    /* 时段增删改共用父资源行锁，事务结束前禁止同资源并发穿透重叠校验。 */
+    public PublicResource requireResourceLocked(Long id) {
+        PublicResource resource = resourceMapper.selectOne(new LambdaQueryWrapper<PublicResource>()
+                .eq(PublicResource::getId, id).last("FOR UPDATE"));
+        if (resource == null) throw new ResourceNotFoundException("公共资源不存在");
+        SecurityUtils.checkCommunityAccess(resource.getCommunityId());
+        return resource;
+    }
+
     private ResourceVO fillCommunityName(ResourceVO vo) {
         vo.setCommunityName(communityService.requireCommunity(vo.getCommunityId()).getName());
         return vo;

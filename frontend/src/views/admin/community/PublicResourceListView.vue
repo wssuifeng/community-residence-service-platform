@@ -4,7 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   createResource,
-  createTimeslot,
+  createTimeslotsBatch,
   deleteResource,
   deleteTimeslot,
   getCommunityList,
@@ -241,16 +241,17 @@ const timeslotSize = ref(10)
 const timeslotTotal = ref(0)
 
 const timeslotFormRef = ref<FormInstance>()
+const timeslotSaving = ref(false)
 /* 周循环模板（后端 CreateTimeSlotDTO：dayOfWeek 1-7 + 起止时间 + isAvailable） */
-const timeslotForm = reactive<ICreateTimeslotDTO>({
-  dayOfWeek: 1,
+const timeslotForm = reactive<Omit<ICreateTimeslotDTO, 'dayOfWeek'> & { daysOfWeek: number[] }>({
+  daysOfWeek: [1],
   startTime: '',
   endTime: '',
   isAvailable: 1
 })
 
 const timeslotRules: FormRules = {
-  dayOfWeek: [{ required: true, message: '请选择星期', trigger: 'change' }],
+  daysOfWeek: [{ type: 'array', required: true, min: 1, message: '请至少选择一个星期', trigger: 'change' }],
   startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
   endTime: [{ required: true, message: '请选择结束时间', trigger: 'change' }]
 }
@@ -274,7 +275,7 @@ async function loadTimeslots(): Promise<void> {
 }
 
 function resetTimeslotForm(): void {
-  timeslotForm.dayOfWeek = 1
+  timeslotForm.daysOfWeek = [1]
   timeslotForm.startTime = ''
   timeslotForm.endTime = ''
   timeslotForm.isAvailable = 1
@@ -290,15 +291,15 @@ function openTimeslot(row: IPublicResource): void {
 
 async function handleAddTimeslot(): Promise<void> {
   const valid = await timeslotFormRef.value?.validate().catch(() => false)
-  if (!valid || !timeslotResource.value) return
+  if (!valid || !timeslotResource.value || timeslotSaving.value) return
+  timeslotSaving.value = true
   try {
-    await createTimeslot(timeslotResource.value.id, { ...timeslotForm })
-    ElMessage.success('时段已添加')
-    resetTimeslotForm()
+    const result = await createTimeslotsBatch(timeslotResource.value.id, { ...timeslotForm, daysOfWeek: [...timeslotForm.daysOfWeek] })
+    ElMessage.success(`新增${result.createdDays.length}个星期时段，已存在${result.skippedDays.length}个（状态未变）`)
     loadTimeslots()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '添加时段失败')
-  }
+  } finally { timeslotSaving.value = false }
 }
 
 async function handleDeleteTimeslot(row: IResourceTimeslot): Promise<void> {
@@ -555,7 +556,10 @@ onMounted(() => {
     <el-dialog
       v-model="timeslotVisible"
       :title="timeslotResource ? `时段配置：${timeslotResource.name}` : '时段配置'"
-      width="640px"
+      width="min(720px, 94vw)"
+      :close-on-click-modal="!timeslotSaving"
+      :close-on-press-escape="!timeslotSaving"
+      :show-close="!timeslotSaving"
     >
       <el-form
         ref="timeslotFormRef"
@@ -563,16 +567,17 @@ onMounted(() => {
         :rules="timeslotRules"
         label-width="100px"
         class="timeslot-form"
+        :disabled="timeslotSaving"
       >
-        <el-form-item label="星期" prop="dayOfWeek">
-          <el-select v-model="timeslotForm.dayOfWeek" placeholder="请选择星期" style="width: 160px">
-            <el-option
-              v-for="option in DAY_OF_WEEK_OPTIONS"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            />
-          </el-select>
+        <el-form-item label="每周循环" prop="daysOfWeek">
+          <div><el-checkbox-group v-model="timeslotForm.daysOfWeek" :disabled="timeslotSaving">
+            <el-checkbox-button v-for="option in DAY_OF_WEEK_OPTIONS" :key="option.value" :value="option.value">{{ option.label }}</el-checkbox-button>
+          </el-checkbox-group><div class="weekday-presets">
+            <el-button :disabled="timeslotSaving" link @click="timeslotForm.daysOfWeek=[1,2,3,4,5]">工作日</el-button>
+            <el-button :disabled="timeslotSaving" link @click="timeslotForm.daysOfWeek=[6,7]">周末</el-button>
+            <el-button :disabled="timeslotSaving" link @click="timeslotForm.daysOfWeek=[1,2,3,4,5,6,7]">全周</el-button>
+            <el-button :disabled="timeslotSaving" link @click="timeslotForm.daysOfWeek=[]">清空</el-button>
+          </div></div>
         </el-form-item>
         <el-form-item label="时间段" prop="startTime">
           <div class="time-range">
@@ -595,7 +600,7 @@ onMounted(() => {
           <el-switch v-model="timeslotForm.isAvailable" :active-value="1" :inactive-value="0" />
         </el-form-item>
         <el-form-item>
-          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="handleAddTimeslot">添加时段</el-button>
+          <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" :loading="timeslotSaving" @click="handleAddTimeslot">添加到所选{{ timeslotForm.daysOfWeek.length }}个星期</el-button>
         </el-form-item>
       </el-form>
 
@@ -633,6 +638,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.weekday-presets{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
 .resource-form { max-height: 62vh; overflow-y: auto; padding-right: 8px; }
 .resource-images { width: 100%; min-width: 0; }
 .resource-images p { margin: 4px 0 10px; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }

@@ -32,7 +32,7 @@ public class ResourceTimeslotService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "RESOURCE_TIMESLOT", targetId = "#result.id", communityId = "#result.communityId", content = "'创建资源时段'")
     public TimeSlotVO create(Long resourceId, CreateTimeSlotDTO dto) {
-        PublicResource resource = publicResourceService.requireResource(resourceId);
+        PublicResource resource = publicResourceService.requireResourceLocked(resourceId);
         SecurityUtils.checkCommunityAccess(resource.getCommunityId());
         validateTimeRange(dto);
         checkSlotAlignment(resource, dto);
@@ -49,13 +49,52 @@ public class ResourceTimeslotService {
         return TimeSlotVO.from(timeslot);
     }
 
+    /* 同资源行锁下先预检整批，完全相同跳过（包括停用模板），任一部分重叠则零写入。 */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "CREATE", targetType = "RESOURCE_TIMESLOT", targetId = "#resourceId", content = "'批量创建周循环资源时段'")
+    public com.community.residence.community.vo.BatchTimeslotVO createBatch(Long resourceId,
+            com.community.residence.community.dto.BatchCreateTimeslotDTO dto) {
+        PublicResource resource = publicResourceService.requireResourceLocked(resourceId);
+        SecurityUtils.checkCommunityAccess(resource.getCommunityId());
+        CreateTimeSlotDTO common = new CreateTimeSlotDTO();
+        common.setStartTime(dto.getStartTime()); common.setEndTime(dto.getEndTime());
+        common.setIsAvailable(dto.getIsAvailable());
+        validateTimeRange(common); checkSlotAlignment(resource, common);
+        List<Integer> days = dto.getDaysOfWeek().stream().distinct().sorted().toList();
+        List<ResourceTimeslot> existing = timeslotMapper.selectList(new LambdaQueryWrapper<ResourceTimeslot>()
+                .eq(ResourceTimeslot::getResourceId, resourceId).in(ResourceTimeslot::getDayOfWeek, days));
+        List<Integer> created = new java.util.ArrayList<>();
+        List<Integer> skipped = new java.util.ArrayList<>();
+        for (Integer day : days) {
+            List<ResourceTimeslot> overlapping = existing.stream().filter(t -> day.equals(t.getDayOfWeek())
+                    && dto.getStartTime().isBefore(t.getEndTime()) && t.getStartTime().isBefore(dto.getEndTime())).toList();
+            boolean partial = overlapping.stream().anyMatch(t -> !dto.getStartTime().equals(t.getStartTime())
+                    || !dto.getEndTime().equals(t.getEndTime()));
+            if (partial) {
+                ResourceTimeslot conflict = overlapping.stream().filter(t -> !dto.getStartTime().equals(t.getStartTime())
+                        || !dto.getEndTime().equals(t.getEndTime())).findFirst().orElseThrow();
+                throw new BusinessException(ErrorCode.TIMESLOT_CONFLICT, "周" + day + "与已有时段"
+                        + conflict.getStartTime() + "～" + conflict.getEndTime() + "重叠，本批未新增");
+            }
+            if (overlapping.isEmpty()) created.add(day); else skipped.add(day);
+        }
+        for (Integer day : created) {
+            ResourceTimeslot row = new ResourceTimeslot();
+            row.setResourceId(resourceId); row.setCommunityId(resource.getCommunityId()); row.setDayOfWeek(day);
+            row.setStartTime(dto.getStartTime()); row.setEndTime(dto.getEndTime());
+            row.setIsAvailable(dto.getIsAvailable() == null ? 1 : dto.getIsAvailable());
+            timeslotMapper.insert(row);
+        }
+        return new com.community.residence.community.vo.BatchTimeslotVO(created, skipped);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "RESOURCE_TIMESLOT", targetId = "#id", content = "'更新资源时段'")
     public TimeSlotVO update(Long id, CreateTimeSlotDTO dto) {
         ResourceTimeslot timeslot = requireTimeslot(id);
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
         validateTimeRange(dto);
-        PublicResource resource = publicResourceService.requireResource(timeslot.getResourceId());
+        PublicResource resource = publicResourceService.requireResourceLocked(timeslot.getResourceId());
         checkSlotAlignment(resource, dto);
         checkOverlap(timeslot.getResourceId(), dto.getDayOfWeek(), dto.getStartTime(), dto.getEndTime(), id);
 
@@ -75,6 +114,7 @@ public class ResourceTimeslotService {
     public void delete(Long id) {
         ResourceTimeslot timeslot = requireTimeslot(id);
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
+        publicResourceService.requireResourceLocked(timeslot.getResourceId());
         /* R6 删除保护（DEF-015）：预约表无 timeslot_id，按资源+起止时段匹配引用；
            周循环模板按 (resource_id, day_of_week, start_time, end_time) 定位，
            存在该模板形状的占用中预约（任意日期）即拒绝删除 */
