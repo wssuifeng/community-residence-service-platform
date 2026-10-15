@@ -8,6 +8,7 @@ const SESSION_KEY = 'crsp_session'
  */
 export function saveSession(session: PersistedSession): void {
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  window.dispatchEvent(new Event('crsp-session-updated'))
 }
 
 export function loadSession(): PersistedSession | null {
@@ -33,4 +34,5 @@ export function getToken(): string | null {
 
 export function clearSession(): void {
   sessionStorage.removeItem(SESSION_KEY)
+  window.dispatchEvent(new Event('crsp-session-updated'))
 }

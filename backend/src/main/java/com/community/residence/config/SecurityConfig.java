@@ -41,6 +41,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/auth/renew").authenticated()
                         // 认证接口与接口文档公开；上传文件静态访问公开（<img> 无法携带令牌）；
                         // WebSocket 握手公开（HTTP 层无法协商 STOMP），认证在 CONNECT 帧由拦截器完成
                         .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**",
