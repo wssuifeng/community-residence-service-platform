@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -11,6 +11,7 @@ import UnitEditDialog from '@/views/admin/community/UnitEditDialog.vue'
 import UnitBatchDialog from '@/views/admin/community/UnitBatchDialog.vue'
 import HouseAttributesDialog from '@/views/admin/community/HouseAttributesDialog.vue'
 import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
+import CommunityDeletionImpactPanel from '@/components/business/CommunityDeletionImpactPanel.vue'
 import HouseEditDialog from '@/views/admin/community/HouseEditDialog.vue'
 import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
 import StructureGenerateDialog from '@/views/admin/community/StructureGenerateDialog.vue'
@@ -1327,14 +1328,13 @@ function runStructureAction(): void {
 
 /* ---------------- 社区删除 / 启用停用 ---------------- */
 
-function deletionSummary(i: import('@/api/community').CommunityDeletionImpact): string {
-  return `「${i.communityName}」：房屋 ${i.houses}，居住关系 ${i.relations}（有效 ${i.activeRelations}），租约 ${i.leases}（进行中 ${i.activeLeases}），申请 ${i.applications}（待审核 ${i.pendingApplications}），支付 ${i.payments}，退款 ${i.refunds}。`
-}
+const deletionDialog = { customClass: 'community-deletion-dialog', closeOnClickModal: false, cancelButtonText: '取消删除', cancelButtonClass: 'community-delete-cancel' }
+const finalDeletionDialog = { ...deletionDialog, confirmButtonText: '永久删除', confirmButtonClass: 'community-delete-final' }
 async function handleCommunityDelete(community: ICommunity): Promise<void> {
   try {
     const impact = await getCommunityDeletionImpact(community.id)
-    await ElMessageBox.confirm(`${deletionSummary(impact)} 全部下级和业务（含有效居住关系、租约、支付退款记录）将永久删除，账号本身保留；删除不代表退租或退款，也不会自动退还资金。`, '核对删除影响', { type: 'warning', confirmButtonText: '已核对，继续', cancelButtonText: '取消' })
-    const confirmation = await ElMessageBox.prompt(`输入完整社区名称「${impact.communityName}」以确认永久删除；不可撤销。`, '最终确认', { type: 'error', confirmButtonText: '永久删除', cancelButtonText: '取消', inputValidator: value => value === impact.communityName || '社区名称不一致' })
+    await ElMessageBox.confirm(h(CommunityDeletionImpactPanel, { impacts: [impact] }), '删除社区前请核对', { ...deletionDialog, confirmButtonText: '继续核对名称', confirmButtonClass: 'community-delete-next' })
+    const confirmation = await ElMessageBox.prompt(h('div', [h('p', '请输入完整社区名称，确认永久删除：'), h('strong', { class: 'delete-final-name' }, impact.communityName), h('p', '账号本身保留。删除不会自动退租或退款。')]), '最终删除确认', { ...finalDeletionDialog, inputPlaceholder: '输入完整社区名称', inputValidator: value => value === impact.communityName || '社区名称不一致，未执行删除' })
     await deleteCommunity(community.id, impact.confirmationVersion, confirmation.value)
     ElMessage.success('社区已删除')
     if (selectedCommunityId.value === community.id) clearDetail()
@@ -1499,13 +1499,13 @@ async function handleBatchDelete(): Promise<void> {
   let impacts: Awaited<ReturnType<typeof getCommunityDeletionImpact>>[]
   try {
     impacts = await Promise.all(ids.map(getCommunityDeletionImpact))
-    await ElMessageBox.confirm(impacts.map(deletionSummary).join('\n'), '逐社区核对删除影响', { type:'warning', confirmButtonText:'已核对，继续' })
+    await ElMessageBox.confirm(h(CommunityDeletionImpactPanel, { impacts }), '逐社区核对删除影响', { ...deletionDialog, confirmButtonText: '继续核对', confirmButtonClass: 'community-delete-next' })
     await ElMessageBox.confirm(
       `将【级联删除】选中的 ${ids.length} 个社区${
         batchSelectedNames.value.length > 0 ? `：${batchSelectedNames.value.join('、')}` : ''
       }。这会一并删除这些社区下的全部楼栋、单元、房屋、公共资源、房源及关联业务数据。`,
       '批量删除社区（级联删除）',
-      { type: 'error', confirmButtonText: '我已了解，继续', cancelButtonText: '取消' }
+      { ...deletionDialog, confirmButtonText: '继续核对名称', confirmButtonClass: 'community-delete-next' }
     )
   } catch {
     return
@@ -1513,7 +1513,7 @@ async function handleBatchDelete(): Promise<void> {
   try {
     for (const impact of impacts) {
       await ElMessageBox.prompt(`输入「${impact.communityName}」确认本社区永久删除；有效关系和财务记录亦被删除，不自动退款。`, '最终逐社区确认', {
-        type: 'error', confirmButtonText: '确认名称', cancelButtonText: '取消',
+        ...finalDeletionDialog, confirmButtonText: '确认本社区名称', inputPlaceholder: '输入完整社区名称',
         inputValidator: value => value === impact.communityName || '社区名称不一致'
       })
     }
