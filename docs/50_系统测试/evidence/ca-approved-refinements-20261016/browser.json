@@ -1,0 +1,58 @@
+{
+  "checkedAt": "2026-10-15T16:52:38.898Z",
+  "checks": [
+    {
+      "name": "公告编辑以文稿区而非旧纯文本/独立图片表单为主体",
+      "passed": true
+    },
+    {
+      "name": "即时预览保留居中/加粗/半宽真实图片",
+      "passed": true
+    },
+    {
+      "name": "768宽度编辑器无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "编辑页面显式保存后新版生效",
+      "passed": true
+    },
+    {
+      "name": "正文是结构化保存，保留原发布状态",
+      "passed": true
+    },
+    {
+      "name": "居民端使用相同结构实时读取新版正文和图片",
+      "passed": true
+    },
+    {
+      "name": "真实浏览器一次选三图，顺序串行保存到同一房屋",
+      "passed": true
+    },
+    {
+      "name": "单套挂牌显示同时配置看房和默认/自定义选择",
+      "passed": true
+    },
+    {
+      "name": "新申请到达后当前列表无需刷新浏览器即可显示",
+      "passed": true
+    },
+    {
+      "name": "Tab往返重新读取列表而非永久缓存旧状态",
+      "passed": true
+    },
+    {
+      "name": "浏览器没有未捕获脚本错误",
+      "passed": true
+    },
+    {
+      "name": "未执行交易请求和外部网络访问",
+      "passed": true
+    }
+  ],
+  "passed": 12,
+  "uncaughtErrors": [],
+  "blockedTradingRequests": 0,
+  "externalRequests": 0,
+  "userBrowserOperated": false
+}
