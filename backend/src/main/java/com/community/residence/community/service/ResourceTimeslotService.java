@@ -62,7 +62,7 @@ public class ResourceTimeslotService {
         validateTimeRange(common); checkSlotAlignment(resource, common);
         List<Integer> days = dto.getDaysOfWeek().stream().distinct().sorted().toList();
         List<ResourceTimeslot> existing = timeslotMapper.selectList(new LambdaQueryWrapper<ResourceTimeslot>()
-                .eq(ResourceTimeslot::getResourceId, resourceId).in(ResourceTimeslot::getDayOfWeek, days));
+                .eq(ResourceTimeslot::getResourceId, resourceId).in(ResourceTimeslot::getDayOfWeek, days).last("FOR UPDATE"));
         List<Integer> created = new java.util.ArrayList<>();
         List<Integer> skipped = new java.util.ArrayList<>();
         for (Integer day : days) {
@@ -95,6 +95,7 @@ public class ResourceTimeslotService {
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
         validateTimeRange(dto);
         PublicResource resource = publicResourceService.requireResourceLocked(timeslot.getResourceId());
+        timeslot = requireTimeslotCurrent(id);
         checkSlotAlignment(resource, dto);
         checkOverlap(timeslot.getResourceId(), dto.getDayOfWeek(), dto.getStartTime(), dto.getEndTime(), id);
 
@@ -115,6 +116,7 @@ public class ResourceTimeslotService {
         ResourceTimeslot timeslot = requireTimeslot(id);
         SecurityUtils.checkCommunityAccess(timeslot.getCommunityId());
         publicResourceService.requireResourceLocked(timeslot.getResourceId());
+        timeslot = requireTimeslotCurrent(id);
         /* R6 删除保护（DEF-015）：预约表无 timeslot_id，按资源+起止时段匹配引用；
            周循环模板按 (resource_id, day_of_week, start_time, end_time) 定位，
            存在该模板形状的占用中预约（任意日期）即拒绝删除 */
@@ -154,6 +156,12 @@ public class ResourceTimeslotService {
         return timeslot;
     }
 
+    private ResourceTimeslot requireTimeslotCurrent(Long id) {
+        ResourceTimeslot row = timeslotMapper.selectOne(new LambdaQueryWrapper<ResourceTimeslot>().eq(ResourceTimeslot::getId,id).last("FOR UPDATE"));
+        if(row==null)throw new ResourceNotFoundException("时段不存在或已删除");
+        return row;
+    }
+
     private void validateTimeRange(CreateTimeSlotDTO dto) {
         if (!dto.getStartTime().isBefore(dto.getEndTime())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "开始时间必须早于结束时间");
@@ -177,7 +185,7 @@ public class ResourceTimeslotService {
         List<ResourceTimeslot> existing = timeslotMapper.selectList(
                 new LambdaQueryWrapper<ResourceTimeslot>()
                         .eq(ResourceTimeslot::getResourceId, resourceId)
-                        .eq(ResourceTimeslot::getDayOfWeek, dayOfWeek));
+                        .eq(ResourceTimeslot::getDayOfWeek, dayOfWeek).last("FOR UPDATE"));
         boolean overlapped = existing.stream()
                 .anyMatch(t -> !t.getId().equals(excludeId)
                         && startTime.isBefore(t.getEndTime())

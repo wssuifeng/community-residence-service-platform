@@ -56,6 +56,7 @@ class ResourceTimeslotDeleteFixTest {
         timeslot.setEndTime(LocalTime.of(10, 0));
         timeslot.setIsAvailable(1);
         when(timeslotMapper.selectById(1L)).thenReturn(timeslot);
+        org.mockito.Mockito.lenient().when(timeslotMapper.selectOne(any())).thenReturn(timeslot);
     }
 
     @Test

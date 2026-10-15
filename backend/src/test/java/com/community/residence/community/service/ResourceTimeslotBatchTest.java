@@ -45,4 +45,14 @@ class ResourceTimeslotBatchTest {
   when(publicResourceService.requireResourceLocked(8L)).thenReturn(resource());security.when(()->SecurityUtils.checkCommunityAccess(2L)).thenThrow(new BusinessException(com.community.residence.common.constant.ErrorCode.FORBIDDEN));
   assertThatThrownBy(()->service.createBatch(8L,dto())).isInstanceOf(BusinessException.class);verifyNoInteractions(timeslotMapper);
  }}
+ @Test void updateReadsCurrentRowAfterResourceLockAndDoesNotResurrectDeletedTemplate() {try(var security=mockStatic(SecurityUtils.class)) {
+  var old=slot(1,9,12);old.setResourceId(8L);old.setCommunityId(2L);
+  when(timeslotMapper.selectById(20L)).thenReturn(old);
+  when(publicResourceService.requireResourceLocked(8L)).thenReturn(resource());
+  when(timeslotMapper.selectOne(any())).thenReturn(null);
+  var d=new com.community.residence.community.dto.CreateTimeSlotDTO();d.setDayOfWeek(1);d.setStartTime(LocalTime.of(9,0));d.setEndTime(LocalTime.of(12,0));
+  assertThatThrownBy(()->service.update(20L,d)).isInstanceOf(com.community.residence.common.exception.ResourceNotFoundException.class);
+  var order=inOrder(timeslotMapper,publicResourceService);order.verify(timeslotMapper).selectById(20L);order.verify(publicResourceService).requireResourceLocked(8L);order.verify(timeslotMapper).selectOne(any());
+  verify(timeslotMapper,never()).updateById(any(ResourceTimeslot.class));
+ }}
 }
