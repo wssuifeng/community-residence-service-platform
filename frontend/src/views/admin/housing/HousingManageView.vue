@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
@@ -93,6 +94,8 @@ async function loadStats(): Promise<void> {
 }
 
 onMounted(loadStats)
+
+useLiveRefresh(() => loadStats())
 </script>
 
 <template>

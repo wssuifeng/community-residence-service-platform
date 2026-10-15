@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 import FeedbackChat from '@/components/business/FeedbackChat.vue'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -274,6 +275,8 @@ onMounted(async () => {
   if (feedbacks.value.length > 0) await select(feedbacks.value[0])
 })
 
+
+useLiveRefresh(() => Promise.all([load(),loadCounts()]))
 </script>
 
 <template>

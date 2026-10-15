@@ -1,3 +1,4 @@
+import { invalidateData } from './dataFreshness'
 import axios, { AxiosError } from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import type { ApiResult } from '@/types/api'
@@ -40,6 +41,7 @@ instance.interceptors.response.use(
     if (result.code !== 200) {
       return Promise.reject(new ApiError(result.code, result.message, response.status))
     }
+    if (['post','put','patch','delete'].includes(response.config.method ?? '') && !response.config.url?.startsWith('/auth/')) invalidateData()
     return response
   },
   (error: AxiosError<ApiResult>) => {

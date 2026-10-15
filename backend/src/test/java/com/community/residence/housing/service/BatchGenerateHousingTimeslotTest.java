@@ -299,4 +299,33 @@ class BatchGenerateHousingTimeslotTest {
     void rentalAvailabilityFixture() {
         org.mockito.Mockito.lenient().when(housingMapper.publicAvailabilityCount(org.mockito.ArgumentMatchers.anyLong())).thenReturn(1L);
     }
+
+    @Test
+    void singleCreateReusesDefaultTemplates() {
+        try (MockedStatic<SecurityUtils> sec = mockStatic(SecurityUtils.class)) {
+            var dto = new com.community.residence.housing.dto.CreateHousingDTO();
+            dto.setHouseId(house1.getId()); dto.setTitle("单套挂牌"); dto.setMonthlyRent(new BigDecimal("1000"));
+            dto.setCreateTimeslots(true); dto.setTimeslotMode("DEFAULT");
+            org.mockito.Mockito.when(houseMapper.selectByIdForUpdate(house1.getId())).thenReturn(house1);
+            org.mockito.Mockito.when(housingMapper.selectCount(any())).thenReturn(0L);
+            org.mockito.Mockito.doAnswer(i -> {((Housing)i.getArgument(0)).setId(900L);return 1;}).when(housingMapper).insert(any(Housing.class));
+            var community=new com.community.residence.community.entity.Community();community.setName("合成社区");
+            org.mockito.Mockito.when(communityService.requireCommunity(1L)).thenReturn(community);
+            housingService.create(dto);
+            verify(timeslotMapper, times(10)).insert(any(HousingTimeslot.class));
+        }
+    }
+
+    @Test
+    void singleInvalidCustomDoesNotCreateListing() {
+        try (MockedStatic<SecurityUtils> sec = mockStatic(SecurityUtils.class)) {
+            var dto = new com.community.residence.housing.dto.CreateHousingDTO();
+            dto.setHouseId(house1.getId());dto.setTitle("单套挂牌");dto.setMonthlyRent(new BigDecimal("1000"));
+            dto.setCreateTimeslots(true);dto.setTimeslotMode("CUSTOM");dto.setTimeslots(List.of());
+            org.mockito.Mockito.when(houseMapper.selectByIdForUpdate(house1.getId())).thenReturn(house1);
+            org.mockito.Mockito.when(housingMapper.selectCount(any())).thenReturn(0L);
+            assertThatThrownBy(()->housingService.create(dto)).isInstanceOf(BusinessException.class);
+            verify(housingMapper, never()).insert(any(Housing.class));
+        }
+    }
 }

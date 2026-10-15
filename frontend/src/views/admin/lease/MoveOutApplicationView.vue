@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
@@ -291,6 +292,8 @@ onMounted(() => {
   load()
   loadCommunities()
 })
+
+useLiveRefresh(() => load())
 </script>
 
 <template>

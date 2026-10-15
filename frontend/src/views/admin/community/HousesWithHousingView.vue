@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLiveRefresh } from '@/composables/useLiveRefresh'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -174,6 +175,7 @@ const form = reactive({
   rentType: 'RENT' as HousingRentType,
   description: ''
 })
+const singleSlots=reactive({createTimeslots:true,timeslotMode:'DEFAULT' as 'DEFAULT'|'CUSTOM',timeslots:[] as Array<{dayOfWeek:number;startTime:string;endTime:string}>})
 
 /* 本期仅出租（R62 收敛）：出售模式无售价字段与买卖流程支撑，表单不再提供；
    历史 SALE 数据读侧标签仍兼容（housingRentTypeLabels 未动） */
@@ -190,6 +192,7 @@ watch(dialogVisible, value => { if (!value) dialogSequence++ })
 /* 详情未加载时不开放编辑，避免迟到响应覆盖输入；房屋图片由独立相册维护；失败须重试。 */
 async function openHousingDialog(item: HouseManageItem): Promise<void> {
   const sequence = ++dialogSequence
+  Object.assign(singleSlots,{createTimeslots:true,timeslotMode:'DEFAULT',timeslots:[]})
   dialogTarget.value = item
   const brief = item.housing
   dialogContext.value = { houseId: item.houseId, houseLabel: `${item.communityName} ${locationOf(item)}`, housingId: brief?.id ?? null }
@@ -229,7 +232,7 @@ async function handleSave(): Promise<void> {
       rentType: form.rentType
     }
     if (context.housingId === null) {
-      await createHousing(payload)
+      await createHousing({...payload,...singleSlots})
       ElMessage.success('房源已挂牌')
     } else {
       await updateHousing(context.housingId, payload)
@@ -498,6 +501,8 @@ async function handleBatchSubmit(): Promise<void> {
     batchSubmitting.value = false
   }
 }
+
+useLiveRefresh(() => loadItems())
 </script>
 
 <template>
@@ -663,7 +668,10 @@ async function handleBatchSubmit(): Promise<void> {
     <el-dialog
       v-model="dialogVisible"
       :title="dialogContext?.housingId ? '编辑房源' : '房屋挂牌'"
-      width="560px"
+      width="min(760px, 94vw)"
+      :close-on-click-modal="!saving"
+      :close-on-press-escape="!saving"
+      :show-close="!saving"
       destroy-on-close
     >
       <p class="dialog-context">{{ dialogContext?.houseLabel }}</p>
@@ -691,9 +699,23 @@ async function handleBatchSubmit(): Promise<void> {
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="4" maxlength="1000" show-word-limit />
         </el-form-item>
+        <el-form-item v-if="dialogContext?.housingId == null" label="看房时段">
+          <div><el-checkbox v-model="singleSlots.createTimeslots">同时配置可预约看房时段</el-checkbox>
+            <template v-if="singleSlots.createTimeslots">
+              <el-radio-group v-model="singleSlots.timeslotMode"><el-radio value="DEFAULT">工作日默认时段</el-radio><el-radio value="CUSTOM">自定义</el-radio></el-radio-group>
+              <p v-if="singleSlots.timeslotMode==='DEFAULT'">周一至周五 09:00～12:00、14:00～18:00</p>
+              <template v-else><div v-for="(slot,index) in singleSlots.timeslots" :key="index" class="single-timeslot-row">
+                <el-select v-model="slot.dayOfWeek" aria-label="看房星期"><el-option v-for="day in 7" :key="day" :value="day" :label="['周一','周二','周三','周四','周五','周六','周日'][day-1]" /></el-select>
+                <el-time-picker v-model="slot.startTime" value-format="HH:mm" format="HH:mm" placeholder="开始时间" />
+                <el-time-picker v-model="slot.endTime" value-format="HH:mm" format="HH:mm" placeholder="结束时间" />
+                <el-button link type="danger" @click="singleSlots.timeslots.splice(index,1)">移除</el-button>
+              </div><el-button link @click="singleSlots.timeslots.push({dayOfWeek:1,startTime:'09:00',endTime:'12:00'})">添加自定义看房时段</el-button></template>
+            </template>
+          </div>
+        </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button :disabled="saving" @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="saving" :disabled="dialogLoading || !!dialogLoadError" @click="handleSave">保存</el-button>
       </template>
     </el-dialog>
@@ -852,6 +874,7 @@ async function handleBatchSubmit(): Promise<void> {
 </template>
 
 <style scoped>
+.single-timeslot-row{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}.single-timeslot-row .el-select{width:90px}.single-timeslot-row .el-input{width:130px}
 .houses-housing {
   display: flex;
   flex-direction: column;
@@ -1220,5 +1243,6 @@ async function handleBatchSubmit(): Promise<void> {
 </style>
 
 <style scoped>
+.single-timeslot-row{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}.single-timeslot-row .el-select{width:90px}.single-timeslot-row .el-input{width:130px}
 .card-actions :deep(.el-button) { margin-left: 0; max-width: 100%; white-space: normal; height: auto; min-height: 28px; }
 </style>
