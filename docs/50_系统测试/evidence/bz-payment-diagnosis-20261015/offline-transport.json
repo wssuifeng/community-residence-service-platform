@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-15T14:03:30.103Z",
+  "sdk": "4.40.1006.ALL",
+  "passed": 4,
+  "failed": 0,
+  "cases": [
+    {
+      "type": "FIRST",
+      "revokeBlobOnLoad": false,
+      "formMethod": "POST",
+      "bizContentPresent": true,
+      "subjectPreserved": true,
+      "totalAmount": "14200.00",
+      "timeExpireFormatValid": true,
+      "alipayMethodCorrect": true
+    },
+    {
+      "type": "FIRST",
+      "revokeBlobOnLoad": true,
+      "formMethod": "POST",
+      "bizContentPresent": true,
+      "subjectPreserved": true,
+      "totalAmount": "14200.00",
+      "timeExpireFormatValid": true,
+      "alipayMethodCorrect": true
+    },
+    {
+      "type": "RENT",
+      "revokeBlobOnLoad": false,
+      "formMethod": "POST",
+      "bizContentPresent": true,
+      "subjectPreserved": true,
+      "totalAmount": "3600.00",
+      "timeExpireFormatValid": true,
+      "alipayMethodCorrect": true
+    },
+    {
+      "type": "RENT",
+      "revokeBlobOnLoad": true,
+      "formMethod": "POST",
+      "bizContentPresent": true,
+      "subjectPreserved": true,
+      "totalAmount": "3600.00",
+      "timeExpireFormatValid": true,
+      "alipayMethodCorrect": true
+    }
+  ],
+  "externalNetworkRequests": 0,
+  "normalApiCalled": false,
+  "realCredentialsLoaded": false,
+  "userBrowserOperated": false,
+  "remoteInvalidParameterReproduced": false,
+  "conclusion": "本地合成SDK表单和两种Blob处理均保留必需POST字段；无法仅据此确定远端INVALID_PARAMETER根因，需失败页请求参数或详细错误。"
+}

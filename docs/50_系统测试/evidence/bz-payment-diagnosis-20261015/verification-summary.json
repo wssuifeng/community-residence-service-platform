@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-15T22:13:22+0800",
+  "evidenceSources": [
+    "用户本轮明确报告",
+    "用户上传合同面板截图",
+    "正常数据库只读订单/租约字段",
+    "官方SDK4.40.1006.ALL合成表单及独立headless浏览器"
+  ],
+  "userReported": {
+    "sandboxFirstPaymentSucceeded": true,
+    "R03FirstPaymentAndAgreementArrangement": "用户确认无问题",
+    "R02ExistingAlbum": "用户确认无其它问题，新增单次多图要求",
+    "R06Images": "用户确认图片加载正常；未报告完整撤回/编辑/移除结果",
+    "nextRentPaymentError": "INVALID_PARAMETER / 订单信息无法识别，建议联系卖家"
+  },
+  "normalReadOnlySnapshot": {
+    "leaseRef": "lease-10",
+    "leaseStatus": "ACTIVE",
+    "startDate": "2026-10-15",
+    "endDate": "2027-10-14",
+    "contractMonths": 12,
+    "firstPaymentMonths": 1,
+    "paymentCycleMonths": 1,
+    "firstPayment": {
+      "paymentRef": "payment-2",
+      "purpose": "FIRST",
+      "status": "SUCCESS",
+      "months": 1,
+      "rentAmount": "3600.00",
+      "depositAmount": "10600.00",
+      "totalAmount": "14200.00",
+      "periodStart": "2026-10-15",
+      "periodEnd": "2026-11-14"
+    },
+    "nextRentPayment": {
+      "paymentRef": "payment-3",
+      "purpose": "RENT",
+      "status": "PENDING",
+      "months": 1,
+      "rentAmount": "3600.00",
+      "depositAmount": "0.00",
+      "totalAmount": "3600.00",
+      "periodStart": "2026-11-15",
+      "periodEnd": "2026-12-14",
+      "channelExpiresAt": "2026-10-16T20:37:20",
+      "expiresAt": "2026-10-16T20:42:20"
+    }
+  },
+  "offlineTransport": "offline-transport.json",
+  "offlineSyntheticTransportCases": 4,
+  "rootCauseConfirmed": false,
+  "paymentBugFixed": false,
+  "missingEvidence": "失败收银台的完整错误详情、实际gateway.do请求业务参数；本地查单日志不能代替失败page.pay请求",
+  "externalPaymentQueryRefundExecutedByAgent": false,
+  "realCredentialsUsedByProbe": false,
+  "normalDataWrittenByAgent": false,
+  "paymentConfigModified": false,
+  "servicesRestarted": false,
+  "userBrowserOperated": false,
+  "newDesignImplemented": false,
+  "frozenDesignModified": false,
+  "notes": [
+    "可确认这一笔沙箱首期路径可用，不能据此把后续租金/续租/退款判通过",
+    "首期和RENT在相同SDK及前端两种Blob处理下均保留POST biz_content；离线通过不等于远端入参一定正确",
+    "保留现有SUCCESS与PENDING，不以重试新单或数据库改状态规避错误",
+    "旧续租首笔逻辑确由旧23方案实现；新申请审核延长方向待本轮27方案确认"
+  ]
+}
