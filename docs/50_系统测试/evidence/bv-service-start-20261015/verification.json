@@ -1,0 +1,181 @@
+{
+  "checkedAt": "2026-10-15T17:07:21.329093+08:00",
+  "sourceCommit": "1766573",
+  "backendPort": 8084,
+  "frontendPort": 5176,
+  "migration": {
+    "before": 38,
+    "after": 40,
+    "businessTables": 57
+  },
+  "privateBackupCreated": true,
+  "accounts": [
+    {
+      "username": "superadmin",
+      "loginVerified": true
+    },
+    {
+      "username": "admin1",
+      "loginVerified": true
+    },
+    {
+      "username": "staff1",
+      "loginVerified": true
+    },
+    {
+      "username": "resident1",
+      "loginVerified": true
+    }
+  ],
+  "businessCountsBefore": {
+    "community": 1,
+    "house": 15,
+    "resident": 21,
+    "lease_record": 2,
+    "residence_application": 3,
+    "residence_relation": 10,
+    "lease_payment": 0,
+    "lease_deposit_refund": 0,
+    "housing": 15
+  },
+  "businessCountsAfter": {
+    "community": 1,
+    "house": 15,
+    "resident": 21,
+    "lease_record": 2,
+    "residence_application": 3,
+    "residence_relation": 10,
+    "lease_payment": 0,
+    "lease_deposit_refund": 0,
+    "housing": 15
+  },
+  "overdueUnpaidCandidates": {
+    "before": 2,
+    "after": 0
+  },
+  "leaseStatuses": {
+    "REJECTED": 2
+  },
+  "applicationStatuses": {
+    "REJECTED": 2,
+    "WITHDRAWN": 1
+  },
+  "channelStates": [
+    {
+      "channel": "ALIPAY",
+      "enabled": false
+    },
+    {
+      "channel": "WECHAT",
+      "enabled": false
+    }
+  ],
+  "checks": [
+    {
+      "name": "OpenAPI可读",
+      "passed": true
+    },
+    {
+      "name": "登录页HTTP200",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "支付渠道全部停用",
+      "passed": true
+    },
+    {
+      "name": "前端代理与后端数据一致",
+      "passed": true
+    },
+    {
+      "name": "新契约 /api/v1/houses/{houseId}/images",
+      "passed": true
+    },
+    {
+      "name": "新契约 /api/v1/houses/{houseId}/images/{imageId}",
+      "passed": true
+    },
+    {
+      "name": "新契约 /api/v1/communities/{id}/deletion-impact",
+      "passed": true
+    },
+    {
+      "name": "新契约 /api/v1/leases/{leaseId}/terms",
+      "passed": true
+    },
+    {
+      "name": "新契约 /api/v1/leases/{id}/rent-quote",
+      "passed": true
+    },
+    {
+      "name": "社区列表读取",
+      "passed": true
+    },
+    {
+      "name": "房屋列表读取",
+      "passed": true
+    },
+    {
+      "name": "租约列表读取",
+      "passed": true
+    },
+    {
+      "name": "删除影响只读预览",
+      "passed": true
+    },
+    {
+      "name": "房屋相册读取",
+      "passed": true
+    },
+    {
+      "name": "合同段读取",
+      "passed": true
+    },
+    {
+      "name": "游客房源读取",
+      "passed": true
+    },
+    {
+      "name": "正常库V40及57业务表",
+      "passed": true
+    },
+    {
+      "name": "既有记录总数未删除",
+      "passed": true
+    }
+  ],
+  "passed": 22,
+  "failed": 0,
+  "verificationCorrections": [
+    "初轮脚本将带timestamp完整响应比较导致误判；已按code/data核对代理",
+    "初轮脚本误以GET /houses读取列表得到405；运行OpenAPI确认实际GET /communities/houses-manage后复验，未修改业务代码"
+  ],
+  "channelsCalled": false,
+  "browserOperated": false,
+  "manualResultsFilled": false,
+  "documentationAudit": {
+    "tool": "project-docs-governance structural audit",
+    "fullAuditPassed": false,
+    "baselineFindings": 1415,
+    "currentFindings": 1415,
+    "newFindingsIgnoringLineShifts": 0,
+    "note": "全量历史规范/链接项仍存在；工具将50直接依赖限定20，与本项目明确50验证30的裁决不同，未据工具改阶段纪律。此为启动回写差异检查，不称整个文档体系通过。",
+    "correction": "本批output/db-backups目录的行内路径首轮被工具当成阶段相对链接，已改为明确仓库根目录文字后重查无新增项。"
+  }
+}
