@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-15",
+  "scope": "Published history sanitization only; no unpublished business commits pushed",
+  "tool": {
+    "name": "newren/git-filter-repo",
+    "tag": "v2.47.0",
+    "commit": "6f79afc8c90c592a3052e6cc53c2ca8907515bca",
+    "source": "Official upstream cloned over SSH after HTTPS download failed"
+  },
+  "findings": {
+    "exposedDatabasePasswordHistoricalBlobs": 74,
+    "generatedJmeterTokenFileRemoved": true,
+    "testGeneratedPrivateKeyFalsePositiveExcluded": true
+  },
+  "local": {
+    "rewrittenRefs": 9,
+    "rewrittenCommits": 231,
+    "totalCommits": 244,
+    "reachableObjectsScanned": 7223,
+    "exposedCredentialMatchesAfter": 0,
+    "signedBearerTokenMatchesAfter": 0,
+    "oldReflogsExpired": true,
+    "unreachableObjectsPruned": true,
+    "fsck": "passed",
+    "businessSourceTestsUnchanged": true,
+    "workingDraftPreserved": true,
+    "unpublishedCommitsPreserved": 21,
+    "head": "ff20f9a0e80cd7b9d08f7a3a05c61a85b4eace24"
+  },
+  "remote": {
+    "atomicPush": true,
+    "expectedOldObjectLeasePerRef": true,
+    "updatedPublishedBranches": 5,
+    "updatedPublishedTags": 1,
+    "main": "322fe5de0cb92273618423f0b21cb4609dcee863",
+    "unpublishedEngineeringCommitsPushed": 0,
+    "pullRefsObserved": 0
+  },
+  "privateBackup": {
+    "outsideRepository": true,
+    "restrictedAccess": true,
+    "containsOldSensitiveHistory": true,
+    "mustNotPublish": true
+  },
+  "notGuaranteed": [
+    "Hosting provider caches or unadvertised references cannot be proven deleted from local Git; provider support may be required.",
+    "Other clones, forks, downloaded archives and private backups are outside this rewrite.",
+    "Removing history does not revoke the exposed database credential; rotation remains necessary."
+  ],
+  "sources": [
+    "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository",
+    "https://github.com/newren/git-filter-repo/tree/v2.47.0"
+  ]
+}
