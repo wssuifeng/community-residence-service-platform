@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LeaseService 单元测试")
 class LeaseServiceTest {
+    @org.mockito.Mock private com.community.residence.lease.service.LeaseContractTermService termService;
 
     @Mock
     private LeaseRecordMapper leaseMapper;
@@ -237,4 +238,19 @@ class LeaseServiceTest {
         verify(relationMapper).updateById(root);
     }
 
+    @Test void editingLegacyLeaseDoesNotInventMonthsOrReplaceDatesWithToday() {
+        var oldStart = LocalDate.of(2025, 5, 10);
+        var oldEnd = LocalDate.of(2026, 8, 19);
+        activeLease.setStartDate(oldStart); activeLease.setEndDate(oldEnd);
+        activeLease.setContractMonths(null); activeLease.setFirstPaymentMonths(null); activeLease.setPaymentCycleMonths(null);
+        when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
+        var dto = new CreateLeaseDTO(); dto.setHouseId(1L); dto.setMonthlyRent(new BigDecimal("2000"));
+        try (var security = mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
+            leaseService.update(1L, dto);
+        }
+        assertThat(activeLease.getStartDate()).isEqualTo(oldStart);
+        assertThat(activeLease.getEndDate()).isEqualTo(oldEnd);
+        assertThat(activeLease.getContractMonths()).isNull();
+        assertThat(activeLease.getFirstPaymentMonths()).isNull();
+    }
 }

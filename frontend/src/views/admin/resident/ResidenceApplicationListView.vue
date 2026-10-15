@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /** 入住申请（「租住与房源」Hub 的入住申请 Tab，批次 g 由「居民」页迁入）：
  *  状态筛选 + 通过（租客只生成待签约租约）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
+import { getCommunity } from '@/api/community'
+import { contractEnd } from '@/utils/leaseTerms'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -94,6 +96,7 @@ const approveLoading = ref(false)
 const approveFormRef = ref<FormInstance>()
 const approveTarget = ref<IResidenceApplication | null>(null)
 const approveForm = reactive({
+  contractMonths: 12, firstPaymentMonths: 1, paymentCycleMonths: 1,
   leaseStartDate: '',
   leaseEndDate: '',
   monthlyRent: undefined as number | undefined,
@@ -101,6 +104,7 @@ const approveForm = reactive({
   remark: ''
 })
 
+watch(() => [approveForm.leaseStartDate, approveForm.contractMonths], () => { approveForm.leaseEndDate=contractEnd(approveForm.leaseStartDate,approveForm.contractMonths) })
 const approveRules: FormRules = {
   leaseStartDate: [{ required: true, message: '请选择租约开始日期', trigger: 'change' }],
   leaseEndDate: [{ required: true, message: '请选择租约结束日期', trigger: 'change' }],
@@ -112,12 +116,14 @@ function openApprove(row: IResidenceApplication): void {
   approveFormRef.value?.resetFields()
   Object.assign(approveForm, {
     leaseStartDate: todayISO(),
-    leaseEndDate: '',
+    leaseEndDate: '', contractMonths: 12, firstPaymentMonths: 1, paymentCycleMonths: 1,
     monthlyRent: row.listedMonthlyRent ?? undefined,
     depositAmount: row.housingId ? (row.listedDeposit ?? 0) : undefined,
     remark: ''
   })
+  approveForm.leaseEndDate=contractEnd(approveForm.leaseStartDate,approveForm.contractMonths)
   approveVisible.value = true
+  void getCommunity(row.communityId).then(c=>{if(approveTarget.value?.id===row.id&&approveForm.contractMonths===12)approveForm.contractMonths=c.defaultLeaseMonths??12}).catch(()=>{})
 }
 
 async function handleApprove(): Promise<void> {
@@ -127,6 +133,7 @@ async function handleApprove(): Promise<void> {
   approveLoading.value = true
   try {
     await approveResidenceApplication(approveTarget.value.id, {
+      contractMonths: approveForm.contractMonths, firstPaymentMonths: approveForm.firstPaymentMonths, paymentCycleMonths: approveForm.paymentCycleMonths,
       leaseStartDate: approveForm.leaseStartDate,
       leaseEndDate: approveForm.leaseEndDate,
       monthlyRent: approveForm.monthlyRent as number,
@@ -270,9 +277,13 @@ onMounted(async () => {
             style="width: 100%"
           />
         </el-form-item>
+        <el-form-item label="合同总月数"><el-input-number v-model="approveForm.contractMonths" :min="1" :max="1200" /></el-form-item>
+        <el-form-item label="首付月数"><el-input-number v-model="approveForm.firstPaymentMonths" :min="1" :max="approveForm.contractMonths" /></el-form-item>
+        <el-form-item label="后续缴租周期"><el-input-number v-model="approveForm.paymentCycleMonths" :min="1" :max="approveForm.contractMonths" /><span>个月</span></el-form-item>
+        <p>首期租金＋押金：{{ (approveForm.monthlyRent ?? 0) * approveForm.firstPaymentMonths + (approveForm.depositAmount ?? 0) }}元；交租不延长合同。</p>
         <el-form-item label="租约结束" prop="leaseEndDate">
           <el-date-picker
-            v-model="approveForm.leaseEndDate"
+            v-model="approveForm.leaseEndDate" disabled
             type="date"
             value-format="YYYY-MM-DD"
             placeholder="选择结束日期"

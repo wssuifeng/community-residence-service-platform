@@ -53,16 +53,16 @@ public class LeasePaymentVO {
     @Schema(description = "渠道流水号（R73：渠道返回的交易号/退款归属交易号，便于对账核对）")
     private String channelTradeNo;
 
-    @Schema(description = "金额构成·租金部分（R73：首期=月租，续期=月租×月数；服务端保证 amount = rentAmount + depositAmount）")
+    @Schema(description = "租金金额快照=约定单价×本单月数；历史缺失为空，不按当前价格反推")
     private BigDecimal rentAmount;
 
     @Schema(description = "金额构成·押金部分（R73：首期=押金，续期=0）")
     private BigDecimal depositAmount;
 
-    @Schema(description = "覆盖租期开始（R73：首期=租期开始日，续期=本轮顺延起点）")
+    @Schema(description = "本单合同段租金覆盖开始，历史未知为空")
     private java.time.LocalDate periodStart;
 
-    @Schema(description = "覆盖租期结束（R73：首期=租期开始日+1 个月，续期=顺延后止期）")
+    @Schema(description = "本单合同段租金覆盖止日（含），不是当前合同止期")
     private java.time.LocalDate periodEnd;
 
     public static LeasePaymentVO from(LeasePayment entity) {
@@ -78,6 +78,10 @@ public class LeasePaymentVO {
         vo.setCreatedAt(entity.getCreatedAt());
         vo.setPaidAt(entity.getPaidAt());
         vo.setChannelTradeNo(entity.getChannelTradeNo());
+        vo.setChannelExpiresAt(entity.getChannelExpiresAt());vo.setExpiresAt(entity.getExpiresAt());vo.setSettlementIssue(entity.getSettlementIssue());
         return vo;
     }
+ @Schema(description="渠道截止") private LocalDateTime channelExpiresAt;
+ @Schema(description="本地截止，含缓冲") private LocalDateTime expiresAt;
+ @Schema(description="结算异常待核对") private String settlementIssue;
 }

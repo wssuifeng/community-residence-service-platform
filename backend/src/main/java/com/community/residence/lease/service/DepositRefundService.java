@@ -332,10 +332,11 @@ public class DepositRefundService {
        推算法在月租事后被编辑时会得到错误押金部分（V25 已应用禁改，其回填判据同源受影响，
        两库当前无月租事后变更数据，口径兼容；V28 迁移不对账，仅决策日志留痕） */
     private BigDecimal paidDeposit(LeaseRecord lease, List<LeasePayment> paidList) {
-        if (paidList.isEmpty() || lease.getDeposit() == null) {
-            return BigDecimal.ZERO;
-        }
-        return lease.getDeposit();
+        if (paidList.isEmpty()) return BigDecimal.ZERO;
+        if (paidList.stream().allMatch(p->p.getDepositAmount()!=null))
+            return paidList.stream().map(com.community.residence.payment.entity.LeasePayment::getDepositAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
+        /* 旧单未保存快照，仍按原兼容口径读取，不写回猜测值；新单只使用实缴快照。 */
+        return lease.getDeposit()==null?BigDecimal.ZERO:lease.getDeposit();
     }
 
     /** 已成功退还金额合计（SUCCESS 单；失败/处理中不计入，故失败可重试不重复扣减） */

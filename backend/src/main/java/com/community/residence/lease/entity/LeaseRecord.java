@@ -70,4 +70,8 @@ public class LeaseRecord {
 
     @Schema(description = "更新时间")
     private LocalDateTime updatedAt;
+
+    @Schema(description="合同总月数；历史未知为空") private Integer contractMonths;
+    @Schema(description="首期支付月数，新约默认1") private Integer firstPaymentMonths;
+    @Schema(description="后续缴租周期月数，新约默认1") private Integer paymentCycleMonths;
 }

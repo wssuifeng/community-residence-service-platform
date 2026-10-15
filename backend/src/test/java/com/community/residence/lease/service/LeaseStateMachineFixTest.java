@@ -40,6 +40,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("租约状态机与归档禁改修复回归（DEF-013/017）")
 class LeaseStateMachineFixTest {
+    @org.mockito.Mock private com.community.residence.community.mapper.CommunityMapper communityMapper;
+    @org.mockito.Mock private com.community.residence.lease.service.LeaseContractTermService termService;
 
     @Mock
     private LeaseRecordMapper leaseMapper;
@@ -193,7 +195,6 @@ class LeaseStateMachineFixTest {
         activeLease.setStatus("ARCHIVED");
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
-            when(leaseMapper.selectById(1L)).thenReturn(activeLease);
             org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
 
             assertThatThrownBy(() -> leaseService.update(1L, dto()))
@@ -208,7 +209,6 @@ class LeaseStateMachineFixTest {
     void update_activeLease_ok() {
         try (MockedStatic<com.community.residence.common.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.context.SecurityUtils.class)) {
-            when(leaseMapper.selectById(1L)).thenReturn(activeLease);
             org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(1L)).thenReturn(activeLease);
             when(leaseMapper.updateById(any(LeaseRecord.class))).thenReturn(1);
             /* toVO 内部依赖：房屋名等（宽松桩） */

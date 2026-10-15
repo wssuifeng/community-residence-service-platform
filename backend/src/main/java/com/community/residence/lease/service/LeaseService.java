@@ -68,6 +68,8 @@ public class LeaseService {
             Set.of(LeaseStatus.PENDING, LeaseStatus.TO_SIGN, LeaseStatus.ACTIVE);
 
     private final com.community.residence.resident.service.ResidenceDependencyService residenceDependencyService;
+    @org.springframework.beans.factory.annotation.Autowired
+    private LeaseContractTermService termService;
     private final LeaseRecordMapper leaseMapper;
     private final ResidentMapper residentMapper;
     private final HouseMapper houseMapper;
@@ -94,7 +96,7 @@ public class LeaseService {
             throw new ResourceNotFoundException("房屋不存在");
         }
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
-        if (!dto.getEndDate().isAfter(dto.getStartDate())) {
+        if (dto.getEndDate()!=null && dto.getStartDate()!=null && !dto.getEndDate().isAfter(dto.getStartDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期必须晚于开始日期");
         }
         Long conflict = leaseMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
@@ -109,8 +111,13 @@ public class LeaseService {
         lease.setTenantId(dto.getResidentId());
         lease.setCommunityId(house.getCommunityId());
         lease.setHouseId(dto.getHouseId());
-        lease.setStartDate(dto.getStartDate());
-        lease.setEndDate(dto.getEndDate());
+        lease.setStartDate(dto.getStartDate() == null ? LocalDate.now() : dto.getStartDate());
+        var community = communityMapper.selectById(lease.getCommunityId());
+        int total = LeaseTermRules.months(dto.getContractMonths(), community==null?12:LeaseTermRules.months(community.getDefaultLeaseMonths(),12));
+        int first = LeaseTermRules.months(dto.getFirstPaymentMonths(), 1), cycle = LeaseTermRules.months(dto.getPaymentCycleMonths(), 1);
+        LeaseTermRules.validate(total, first, cycle);
+        lease.setContractMonths(total);lease.setFirstPaymentMonths(first);lease.setPaymentCycleMonths(cycle);
+        lease.setEndDate(LeaseTermRules.end(lease.getStartDate(), total));
         lease.setMonthlyRent(dto.getMonthlyRent());
         lease.setDeposit(dto.getDeposit());
         lease.setContractUrl(dto.getContractUrl());
@@ -132,8 +139,12 @@ public class LeaseService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "LEASE_RECORD", targetId = "#id", content = "'更新租住记录'")
     public LeaseVO update(Long id, CreateLeaseDTO dto) {
-        LeaseRecord lease = requireLease(id);
+        /* 与发协议共用租约行锁，避免读到旧NONE后覆盖已经发出的协议约定。 */
+        LeaseRecord lease = leaseMapper.selectByIdForUpdate(id);
+        if (lease == null) throw new ResourceNotFoundException("租住记录不存在");
         SecurityUtils.checkCommunityAccess(lease.getCommunityId());
+        if ("SIGNED".equals(lease.getAgreementStatus()) || "PARTIAL".equals(lease.getAgreementStatus()) || "PENDING".equals(lease.getAgreementStatus()))
+            throw new BusinessException(ErrorCode.INVALID_PARAM,"已发出协议的日期、价格和付款安排不可静默修改，请先撤回未完成协议或拟定续租");
         /* R16「归档后不可修改」（DEF-017）：流转端点已有状态机拦截，PUT 旁路补终态校验 */
         if ("ARCHIVED".equals(lease.getStatus())) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "已归档的租约不可修改");
@@ -141,12 +152,28 @@ public class LeaseService {
         if (!lease.getHouseId().equals(dto.getHouseId())) {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "租约不允许变更房屋");
         }
-        if (!dto.getEndDate().isAfter(dto.getStartDate())) {
+        if (dto.getEndDate()!=null && dto.getStartDate()!=null && !dto.getEndDate().isAfter(dto.getStartDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期必须晚于开始日期");
         }
         LeaseRecord snapshot = snapshot(lease);
-        lease.setStartDate(dto.getStartDate());
-        lease.setEndDate(dto.getEndDate());
+        /* 旧约没有付款安排时保留未知；只有明确录入总月数才重新形成日历月约定。 */
+        if (dto.getStartDate() != null) lease.setStartDate(dto.getStartDate());
+        Integer total = dto.getContractMonths() == null ? lease.getContractMonths() : dto.getContractMonths();
+        if (total != null) {
+            int first = LeaseTermRules.months(dto.getFirstPaymentMonths(), LeaseTermRules.months(lease.getFirstPaymentMonths(), 1));
+            int cycle = LeaseTermRules.months(dto.getPaymentCycleMonths(), LeaseTermRules.months(lease.getPaymentCycleMonths(), 1));
+            LeaseTermRules.validate(total, first, cycle);
+            lease.setContractMonths(total);
+            lease.setFirstPaymentMonths(first);
+            lease.setPaymentCycleMonths(cycle);
+            lease.setEndDate(LeaseTermRules.end(lease.getStartDate(), total));
+        } else {
+            if (dto.getFirstPaymentMonths() != null || dto.getPaymentCycleMonths() != null)
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "请先明确历史租约的合同总月数，不能推断付款安排");
+            if (dto.getEndDate() != null) lease.setEndDate(dto.getEndDate());
+            if (!lease.getEndDate().isAfter(lease.getStartDate()))
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期必须晚于开始日期");
+        }
         lease.setMonthlyRent(dto.getMonthlyRent());
         lease.setDeposit(dto.getDeposit());
         lease.setContractUrl(dto.getContractUrl());
@@ -157,8 +184,7 @@ public class LeaseService {
     }
 
     /**
-     * 续租（需求 E3：止期顺延）：仅 ACTIVE 租约可续；新止期须晚于原止期；
-     * 租金/押金/备注一并更新，状态保持 ACTIVE。
+     * 管理方拟定新增合同段；居民同意且该段首笔租金成功后才延展，不直接覆盖原价与止期。
      */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "LEASE_RECORD", targetId = "#id", content = "'续租租住记录'")
@@ -169,20 +195,10 @@ public class LeaseService {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
                     "仅已生效租约可续租，当前状态：" + lease.getStatus());
         }
-        if (!dto.getNewEndDate().isAfter(lease.getEndDate())) {
+        if (dto.getNewEndDate()!=null && !dto.getNewEndDate().isAfter(lease.getEndDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "新结束日期必须晚于原结束日期");
         }
-        LeaseRecord snapshot = snapshot(lease);
-        lease.setEndDate(dto.getNewEndDate());
-        lease.setMonthlyRent(dto.getMonthlyRent());
-        lease.setDeposit(dto.getDeposit());
-        if (StringUtils.hasText(dto.getRemark())) {
-            lease.setRemark(dto.getRemark());
-        }
-        leaseMapper.updateById(lease);
-        changeLogService.logRenew(snapshot, lease, "续租：" + dto.getNewEndDate());
-        log.info("租约已续租：leaseId={}, newEndDate={}, operator={}",
-                id, dto.getNewEndDate(), SecurityUtils.getUserId());
+        termService.propose(id, dto);
         return toVO(lease);
     }
 
@@ -305,7 +321,9 @@ public class LeaseService {
             relation.setCommunityId(lease.getCommunityId()); relation.setHouseId(lease.getHouseId());
             relation.setRelationType("TENANT"); relation.setMoveInDate(lease.getStartDate()); relation.setIsPrimary(1);
             relationMapper.insert(relation);
-            markHouseOccupied(lease.getHouseId());
+            if(lease.getStartDate()!=null&&lease.getStartDate().isAfter(LocalDate.now())){
+                House reserved=houseMapper.selectById(lease.getHouseId());reserved.setStatus(HouseStatusConstant.RESERVED);houseMapper.updateById(reserved);
+            }else markHouseOccupied(lease.getHouseId());
             conversationService.sendSystemMessage(lease.getConversationId(), "协议已确认且首期费用支付成功，租约及正式居住关系已生效。");
         } else if (LeaseStatus.MOVED_OUT.equals(target)) {
             lockHouse(lease.getHouseId());
@@ -396,6 +414,9 @@ public class LeaseService {
         copy.setMonthlyRent(lease.getMonthlyRent());
         copy.setDeposit(lease.getDeposit());
         copy.setRemark(lease.getRemark());
+        copy.setContractMonths(lease.getContractMonths());
+        copy.setFirstPaymentMonths(lease.getFirstPaymentMonths());
+        copy.setPaymentCycleMonths(lease.getPaymentCycleMonths());
         return copy;
     }
 

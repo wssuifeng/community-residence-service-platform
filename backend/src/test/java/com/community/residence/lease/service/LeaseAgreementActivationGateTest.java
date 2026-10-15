@@ -53,6 +53,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("承约门槛：本人 + 待签约（看房/群聊非门槛）")
 class LeaseAgreementActivationGateTest {
+    @org.mockito.Mock private com.community.residence.lease.service.LeaseContractTermService termService;
 
     private static final Long LEASE_ID = 9L;
     private static final Long RESIDENT_ID = 1L;

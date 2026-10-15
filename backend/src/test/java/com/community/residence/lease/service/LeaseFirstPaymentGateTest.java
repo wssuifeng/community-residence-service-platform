@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class LeaseFirstPaymentGateTest {
+    @org.mockito.Mock private com.community.residence.lease.service.LeaseContractTermService termService;
     @Mock LeaseRecordMapper leaseMapper;
     @Mock HouseMapper houseMapper;
     @Mock LeasePaymentMapper paymentMapper;

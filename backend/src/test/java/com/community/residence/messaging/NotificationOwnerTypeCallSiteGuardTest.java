@@ -104,7 +104,7 @@ class NotificationOwnerTypeCallSiteGuardTest {
         expected.put("com/community/residence/notice/service/NoticeService.java",
                 calls("notificationService.createForResident(residentId", 1));
         expected.put("com/community/residence/payment/service/PaymentService.java",
-                calls("notificationService.createForResident(current.getResidentId()", 2,
+                calls("notificationService.createForResident(current.getResidentId()", 3,
                         "notificationService.createForUser(adminId", 2));
         expected.put("com/community/residence/resident/service/ResidenceApplicationService.java",
                 calls("notificationService.createForResident(application.getResidentId()", 3));

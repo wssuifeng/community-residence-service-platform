@@ -66,6 +66,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("租赁协议与租约生效联动（R64/R66）")
 class AgreementLeaseActivationTest {
+    @org.mockito.Mock private com.community.residence.lease.service.LeaseContractTermService termService;
 
     private static final Long LEASE_ID = 8L;
     private static final Long AGREEMENT_ID = 21L;
@@ -119,6 +120,10 @@ class AgreementLeaseActivationTest {
                 communityMapper, houseMapper, unitMapper, buildingMapper, residentMapper,
                 sysAdminCommunityMapper, sysUserMapper, notificationService, changeLogService,
                 conversationMapper, conversationService, leaseService);
+        var termFixture=org.mockito.Mockito.mock(com.community.residence.lease.service.LeaseContractTermService.class);
+        org.springframework.test.util.ReflectionTestUtils.setField(agreementService,"termService",termFixture);
+        org.mockito.Mockito.lenient().when(termFixture.initial(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation->{var term=new com.community.residence.lease.entity.LeaseContractTerm();term.setContentSnapshot("已确认的合同付款安排快照");return term;});
+
 
         toSignLease = new LeaseRecord();
         toSignLease.setId(LEASE_ID);

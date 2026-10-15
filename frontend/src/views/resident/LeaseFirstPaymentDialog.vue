@@ -2,7 +2,7 @@
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
-import { closePayment, createFirstPayment, getPaymentStatus, listPaymentChannels } from '@/api/payment'
+import { getRentQuote, closePayment, createFirstPayment, getPaymentStatus, listPaymentChannels } from '@/api/payment'
 import { listLeasePayments } from '@/api/lease'
 import { ApiError } from '@/utils/request'
 import { formatDateTime } from '@/utils/date'
@@ -10,7 +10,7 @@ import type { ILeasePayment, ILeaseRecord, IPaymentChannelOption, PaymentChannel
 
 /**
  * 首期费用支付弹窗（R71/V20）：与续租支付同款渠道流程，但**不含月数选择**——
- * 首期 = 首月租金 + 押金，月数固定 1，金额一律由服务端按租约登记值计算，
+ * 首期 = 首期租金 + 押金，月数固定 1，金额一律由服务端按租约登记值计算，
  * 客户端不传金额（防篡改口径；本地预览仅供用户预期对齐）。
  *
  * 与 LeaseRenewDialog 的差异（刻意为两个独立组件，避免在 900 行的续租弹窗里
@@ -66,7 +66,7 @@ function money(value: number | null | undefined): string {
 const step = ref<1 | 2 | 3>(1)
 /** 终态视图（success/failed/paid）覆盖三步展示；paid = 打开时回查即已支付 */
 const result = ref<'none' | 'success' | 'failed' | 'paid'>('none')
-const failReason = ref<'closed' | 'abandoned' | 'timeout' | ''>('')
+const failReason = ref<'closed' | 'abandoned' | 'timeout' | 'review' | ''>('')
 
 const channel = ref<PaymentChannel | null>(null)
 const channelOptions = ref<IPaymentChannelOption[]>([])
@@ -93,12 +93,14 @@ const credentialMissing = computed(() => {
 })
 
 /** 首期金额本地预览：月租 + 押金（押金为空按 0 处理；实际金额以服务端返回单据为准） */
-const amountPreview = computed(() =>
-  props.lease ? props.lease.monthlyRent + (props.lease.deposit ?? 0) : null
-)
+const firstQuote=ref<ILeasePayment | null>(null)
+const amountPreview = computed(() => firstQuote.value?.amount ?? (props.lease ? props.lease.monthlyRent * (props.lease.firstPaymentMonths ?? 1) + (props.lease.deposit ?? 0) : null))
+
 
 const failText = computed(() => {
   switch (failReason.value) {
+    case 'review':
+      return '收到异常付款结果，已保留记录，请联系管理方核对；租约不会自动恢复'
     case 'closed':
       return '支付单已关闭，首期费用未支付'
     case 'abandoned':
@@ -279,6 +281,7 @@ async function pollOnce(): Promise<void> {
     /* 重试可能已换新单，丢弃旧单迟到的响应 */
     if (payment.value?.paymentNo !== latest.paymentNo) return
     payment.value = latest
+    if(latest.settlementIssue){stopPolling();failReason.value='review';result.value='failed';return}
     if (latest.status === 'SUCCESS') {
       await settleSuccess()
     } else if (latest.status === 'CLOSED') {
@@ -339,6 +342,7 @@ async function bootstrap(): Promise<void> {
 
   const lease = props.lease
   const channels = loadChannels()
+  if(props.lease) { try { firstQuote.value=await getRentQuote(props.lease.id,'FIRST') } catch { firstQuote.value=null } }
   if (!lease) {
     await channels
     return
@@ -523,7 +527,7 @@ onUnmounted(stopPolling)
         <span class="amount-label">首期费用</span>
         <span class="amount-value">{{ money(amountPreview) }}</span>
         <span class="amount-note">
-          = 首月租金 {{ money(lease?.monthlyRent) }} + 押金 {{ money(lease?.deposit) }}，最终以支付页为准
+          = 首期{{ lease?.firstPaymentMonths ?? 1 }}个月租金 {{ money((lease?.monthlyRent ?? 0) * (lease?.firstPaymentMonths ?? 1)) }} + 押金 {{ money(lease?.deposit) }}，最终以支付页为准
         </span>
       </div>
 
@@ -646,7 +650,7 @@ onUnmounted(stopPolling)
         </span>
         <p class="result-title">首期费用支付成功</p>
         <p class="result-sub">
-          金额 <strong>{{ money(payment?.amount) }}</strong>（首月租金 + 押金），租约状态不变
+          金额 <strong>{{ money(payment?.amount) }}</strong>（首期租金 + 押金），租约状态不变
         </p>
         <p v-if="payment" class="result-sub mono">支付单号 {{ payment.paymentNo }}</p>
       </div>
@@ -662,7 +666,7 @@ onUnmounted(stopPolling)
         </span>
         <p class="result-title">首期费用已支付完成</p>
         <p class="result-sub">
-          金额 <strong>{{ money((paidFirst ?? payment)?.amount) }}</strong>（首月租金 + 押金），租约状态不变
+          金额 <strong>{{ money((paidFirst ?? payment)?.amount) }}</strong>（首期租金 + 押金），租约状态不变
         </p>
         <p v-if="(paidFirst ?? payment)?.paidAt" class="result-sub">
           支付时间 {{ formatDateTime((paidFirst ?? payment)?.paidAt) }}

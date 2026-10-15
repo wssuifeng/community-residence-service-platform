@@ -88,6 +88,8 @@ public class AgreementService {
     private final ConversationMapper conversationMapper;
     private final ConversationService conversationService;
     private final LeaseService leaseService;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.community.residence.lease.service.LeaseContractTermService termService;
 
     /* ==================== 模板维护 ==================== */
 
@@ -231,7 +233,8 @@ public class AgreementService {
         agreement.setTitle(StringUtils.hasText(dto.getTitle())
                 ? dto.getTitle()
                 : houseLocation + " 租赁协议");
-        agreement.setContent(render(template.getContent(), lease, houseLocation));
+        var contractTerm=termService.initial(lease);
+        agreement.setContent(render(template.getContent(), lease, houseLocation) + "\n\n" + contractTerm.getContentSnapshot());
         agreement.setTemplateFileUrl(template.getFileUrl());
         agreement.setTemplateFileName(template.getFileName());
         agreement.setStatus("PARTIAL");
@@ -285,6 +288,7 @@ public class AgreementService {
         }
         agreement.setStatus("SIGNED");
         agreementMapper.updateById(agreement);
+        termService.signInitial(lease);
         markLeaseAgreementStatus(lease, "SIGNED");
         changeLogService.logAgreement(lease.getId(), "居民同意协议，双方确认完成",
                 agreement.getTitle() + "（" + operatorName + "）");
@@ -317,6 +321,7 @@ public class AgreementService {
         agreement.setCancelReason(reason);
         agreementMapper.updateById(agreement);
         conversationService.sendAgreementMessage(lease.getConversationId(),agreement.getId(),"管理方已撤回协议「"+agreement.getTitle()+"」，该快照仅供历史查看。");
+        termService.cancelInitial(lease.getId());
         markLeaseAgreementStatus(lease, "NONE");
         changeLogService.logAgreement(lease.getId(), "撤回协议", reason);
         notificationService.createForResident(lease.getTenantId(), lease.getCommunityId(),

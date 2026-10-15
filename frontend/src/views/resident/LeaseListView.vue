@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LeaseTermsPanel from '@/components/business/LeaseTermsPanel.vue'
 import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -384,15 +385,16 @@ function isFocused(row: ILeaseRecord): boolean {
 
 /* ------------------------------ 续租 / 首期支付 / 退租入口 ------------------------------ */
 
+const termsVisible = ref(false)
+const termsTarget = ref<ILeaseRecord | null>(null)
+const rentEntryVisible = ref(false)
+const paymentPurpose = ref<'RENT'|'RENEWAL'>('RENT')
 const renewVisible = ref(false)
 const renewTarget = ref<ILeaseRecord | null>(null)
 
-function openRenew(row: ILeaseRecord): void {
-  renewTarget.value = row
-  renewVisible.value = true
-}
 
-/** 续租支付成功后止期延展，时间线新增一条续期条目，故明细缓存一并失效 */
+
+/** 合同与续租协议成功后止期延展，时间线新增一条续期条目，故明细缓存一并失效 */
 function handleRenewSuccessDetail(): void {
   loadLeases()
   void refreshLeasePayments(renewTarget.value?.id)
@@ -569,7 +571,7 @@ const paymentStatusLabels: Record<PaymentStatus, string> = {
 
 /**
  * 支付单类型标签：后端 V20 起返回 paymentType；
- * 存量数据缺省按「续期」展示（V20 之前仅有续租支付单，该兜底口径与历史一致）。
+ * 存量数据缺省按「续期」展示（V20 之前仅有合同与续租协议单，该兜底口径与历史一致）。
  */
 function paymentTypeOf(row: ILeasePayment): LeasePaymentType {
   return row.paymentType ?? 'RENEWAL'
@@ -865,10 +867,10 @@ onMounted(() => {
                   class="lease-action"
                   round
                   size="small"
-                  @click.stop="openRenew(group.current)"
+                  @click.stop="termsTarget=group.current; termsVisible=true"
                 >
                   续租
-                </el-button>
+                </el-button><el-button v-if="group.current.status==='ACTIVE'" @click.stop="renewTarget=group.current; rentEntryVisible=true">缴纳租金</el-button>
                 <el-button
                   class="lease-action"
                   type="warning"
@@ -1017,10 +1019,11 @@ onMounted(() => {
                 支付记录暂不可用，请稍后刷新
               </p>
               <p v-else-if="paymentsOf(group.current).length === 0" class="payments-empty">
-                暂无支付记录：首期费用与续租支付都会在此留痕
+                暂无支付记录：首期费用与合同与续租协议都会在此留痕
               </p>
               <ul v-else class="payments-list">
                 <li v-for="item in paymentsOf(group.current)" :key="item.paymentNo" class="payment-item">
+                  <el-alert v-if="item.settlementIssue" title="收到异常渠道结果，需管理方核对；不会自动恢复租约或重复收费" type="error" :closable="false" />
                   <span class="pay-type-badge" :data-type="paymentTypeOf(item)">
                     {{ leasePaymentTypeLabels[paymentTypeOf(item)] }}
                   </span>
@@ -1206,8 +1209,10 @@ onMounted(() => {
       </div>
     </template>
 
-    <!-- 续租支付弹窗（三步：选月数渠道 → 支付 → 确认结果） -->
-    <LeaseRenewDialog v-model="renewVisible" :lease="renewTarget" @success="handleRenewSuccessDetail" />
+    <!-- 合同与续租协议弹窗（三步：选月数渠道 → 支付 → 确认结果） -->
+    <el-dialog v-model="termsVisible" title="合同与续租协议" width="min(780px,94vw)"><LeaseTermsPanel v-if="termsTarget" :lease="termsTarget" /></el-dialog>
+    <el-dialog v-model="rentEntryVisible" title="缴租" width="min(780px,94vw)"><el-button @click="paymentPurpose='RENT'; renewVisible=true">支付合同内下一期租金</el-button><el-button @click="paymentPurpose='RENEWAL'; renewVisible=true">支付已同意的续租首笔租金</el-button></el-dialog>
+    <LeaseRenewDialog :purpose="paymentPurpose" v-model="renewVisible" :lease="renewTarget" @success="handleRenewSuccessDetail" />
 
     <!-- 首期费用支付弹窗（R71：金额=首月租金+押金，服务端计算，与续租同款双渠道；
          重开时由弹窗回查既有首期单续接或明示已支付，DEF-068） -->

@@ -217,6 +217,9 @@ export interface IResidenceApplicationQuery extends PageQuery {
  * applicationId/residenceRelationId/leaseRecordId 组装结果）
  */
 export interface IApplicationApproveDTO {
+  contractMonths?:number
+  firstPaymentMonths?:number
+  paymentCycleMonths?:number
   leaseStartDate: string
   leaseEndDate: string
   monthlyRent: number

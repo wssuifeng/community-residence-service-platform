@@ -1,13 +1,15 @@
 <script setup lang="ts">
+import { contractEnd, todayLeaseISO } from '@/utils/leaseTerms'
 import { leaseDisplayLabel } from '@/utils/leaseDisplay'
 import { leaseHouseholdNotice } from '@/utils/leaseHousehold'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
+import LeaseTermsPanel from '@/components/business/LeaseTermsPanel.vue'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
-import { createLease, getLeaseList, renewLease, updateLease, updateLeaseStatus } from '@/api/lease'
-import { getCommunityList } from '@/api/community'
+import { createLease, getLeaseList, updateLease, updateLeaseStatus } from '@/api/lease'
+import { getCommunityList, getCommunity, getHouse } from '@/api/community'
 import { uploadFile } from '@/api/upload'
 import type { ILeaseRecord, LeaseStatus } from '@/types/modules/lease'
 import { leaseStatusLabels } from '@/types/modules/lease'
@@ -425,66 +427,18 @@ async function handleArchive(row: ILeaseRecord): Promise<void> {
 
 /* ---------- 续租（需求 E3：止期顺延，仅已生效租约） ---------- */
 
-const renewVisible = ref(false)
-const renewTarget = ref<ILeaseRecord | null>(null)
-const renewFormRef = ref<FormInstance>()
-const renewForm = reactive<{
-  newEndDate: string
-  monthlyRent: number | undefined
-  deposit: number | undefined
-  remark: string
-}>({ newEndDate: '', monthlyRent: undefined, deposit: undefined, remark: '' })
-
-const renewRules: FormRules = {
-  newEndDate: [
-    { required: true, message: '请选择新结束日期', trigger: 'change' },
-    {
-      validator: (_rule, value: string, callback) => {
-        if (value && renewTarget.value && value <= renewTarget.value.endDate) {
-          callback(new Error('新结束日期必须晚于原结束日期'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'change'
-    }
-  ],
-  monthlyRent: [{ required: true, message: '请输入月租金', trigger: 'blur' }],
-  deposit: [{ required: true, message: '请输入押金', trigger: 'blur' }]
-}
-
+const termsVisible = ref(false)
+const termsLease = ref<ILeaseRecord | null>(null)
 function openRenew(row: ILeaseRecord): void {
-  renewTarget.value = row
-  Object.assign(renewForm, {
-    newEndDate: '',
-    monthlyRent: row.monthlyRent,
-    deposit: row.deposit ?? undefined,
-    remark: ''
-  })
-  renewVisible.value = true
-}
-
-async function handleRenewSubmit(): Promise<void> {
-  const valid = await renewFormRef.value?.validate().catch(() => false)
-  if (!valid || !renewTarget.value) return
-  try {
-    await renewLease(renewTarget.value.id, {
-      newEndDate: renewForm.newEndDate,
-      monthlyRent: renewForm.monthlyRent!,
-      deposit: renewForm.deposit!,
-      remark: renewForm.remark.trim() || undefined
-    })
-    ElMessage.success('租约已续租，续租记录已记入变更历史')
-    renewVisible.value = false
-    load()
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '续租失败')
-  }
+  termsLease.value = row; termsVisible.value = true
 }
 
 /* ---------- 新建/编辑对话框 ---------- */
 
 interface LeaseForm {
+  contractMonths: number | undefined
+  firstPaymentMonths: number | undefined
+  paymentCycleMonths: number | undefined
   residentId: number | undefined
   houseId: number | undefined
   startDate: string
@@ -501,6 +455,7 @@ const formRef = ref<FormInstance>()
 const uploadingContract = ref(false)
 const contractInput = ref<HTMLInputElement | null>(null)
 const form = reactive<LeaseForm>({
+  contractMonths: 12, firstPaymentMonths: 1, paymentCycleMonths: 1,
   residentId: undefined,
   houseId: undefined,
   startDate: '',
@@ -514,6 +469,8 @@ const form = reactive<LeaseForm>({
 /** 编辑态可变更字段（与后端 UpdateLeaseDTO 允许变更的字段一致：登记主体不可改） */
 const isEditing = computed(() => editingId.value !== null)
 
+watch(() => form.houseId, async id => { if(!id || editingId.value!==null)return;try{const house=await getHouse(id);if(!house.communityId)return;const c=await getCommunity(house.communityId);if(form.houseId===id&&editingId.value===null&&form.contractMonths===12)form.contractMonths=c.defaultLeaseMonths??12}catch{/* 原请求错误提示保留，允许明确选择总月数。 */} })
+watch(() => [form.startDate, form.contractMonths], () => { if(form.contractMonths) form.endDate=contractEnd(form.startDate,form.contractMonths) })
 const formRules: FormRules = {
   residentId: [{ required: true, message: '请输入租客 ID', trigger: 'blur' }],
   houseId: [{ required: true, message: '请输入房屋 ID', trigger: 'blur' }],
@@ -558,13 +515,14 @@ function openCreate(): void {
   Object.assign(form, {
     residentId: undefined,
     houseId: undefined,
-    startDate: '',
+    startDate: todayLeaseISO(), contractMonths: 12, firstPaymentMonths: 1, paymentCycleMonths: 1,
     endDate: '',
     monthlyRent: undefined,
     deposit: undefined,
     contractUrl: '',
     remark: ''
   })
+  if(form.contractMonths) form.endDate=contractEnd(form.startDate,form.contractMonths)
   dialogVisible.value = true
 }
 
@@ -573,6 +531,7 @@ function openEdit(row: ILeaseRecord): void {
   Object.assign(form, {
     residentId: row.tenantId,
     houseId: row.houseId,
+    contractMonths: row.contractMonths, firstPaymentMonths: row.firstPaymentMonths, paymentCycleMonths: row.paymentCycleMonths,
     startDate: formatDate(row.startDate),
     endDate: formatDate(row.endDate),
     monthlyRent: row.monthlyRent,
@@ -612,6 +571,7 @@ async function handleSubmit(): Promise<void> {
   const payload = {
     residentId: form.residentId!,
     houseId: form.houseId!,
+    contractMonths: form.contractMonths, firstPaymentMonths: form.firstPaymentMonths, paymentCycleMonths: form.paymentCycleMonths,
     startDate: form.startDate,
     endDate: form.endDate,
     monthlyRent: form.monthlyRent!,
@@ -910,6 +870,7 @@ onMounted(() => {
       <Pagination v-model:page="page" v-model:size="size" :total="filteredRows.length" />
     </div>
 
+    <el-dialog v-model="termsVisible" title="合同与续租管理" width="min(780px,94vw)"><LeaseTermsPanel v-if="termsLease" :lease="termsLease" admin /></el-dialog>
     <!-- 新建/编辑：编辑态仅允许变更租期起止、月租金、押金、合同附件、备注 -->
     <el-dialog
       v-model="dialogVisible"
@@ -964,9 +925,14 @@ onMounted(() => {
             style="width: 100%"
           />
         </el-form-item>
+        <el-alert v-if="isEditing && !form.contractMonths" title="历史付款安排未知：留空将保留原日期；如需补录，请核对合同后明确填写三项月数。" type="warning" :closable="false" />
+        <el-form-item label="合同总月数"><el-input-number v-model="form.contractMonths" :min="1" :max="1200" /></el-form-item>
+        <el-form-item label="首付月数"><el-input-number v-model="form.firstPaymentMonths" :min="1" :max="form.contractMonths" /></el-form-item>
+        <el-form-item label="后续周期"><el-input-number v-model="form.paymentCycleMonths" :min="1" :max="form.contractMonths" /><span>个月</span></el-form-item>
+        <p v-if="form.firstPaymentMonths">首期应付 {{ (form.monthlyRent ?? 0) * form.firstPaymentMonths + (form.deposit ?? 0) }}元（含押金）；普通交租不延长租期。</p>
         <el-form-item label="租期结束" prop="endDate">
           <el-date-picker
-            v-model="form.endDate"
+            v-model="form.endDate" :disabled="!!form.contractMonths"
             type="date"
             value-format="YYYY-MM-DD"
             placeholder="选择结束日期（须晚于开始日期）"
@@ -1026,59 +992,6 @@ onMounted(() => {
       </template>
     </el-dialog>
 
-    <!-- 续租：仅已生效租约，止期顺延 -->
-    <el-dialog v-model="renewVisible" :title="`续租 · ${renewTarget ? leaseNo(renewTarget.id) : ''}`" width="480px">
-      <el-alert
-        v-if="renewTarget"
-        :title="`原租期至 ${formatDate(renewTarget.endDate)}，新结束日期必须晚于原日期。`"
-        type="info"
-        :closable="false"
-        show-icon
-        class="renew-alert"
-      />
-      <el-form ref="renewFormRef" :model="renewForm" :rules="renewRules" label-width="100px">
-        <el-form-item label="新结束日期" prop="newEndDate">
-          <el-date-picker
-            v-model="renewForm.newEndDate"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="选择新结束日期"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="月租金" prop="monthlyRent">
-          <el-input-number
-            v-model="renewForm.monthlyRent"
-            :min="0"
-            :controls="false"
-            placeholder="元/月"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="押金" prop="deposit">
-          <el-input-number
-            v-model="renewForm.deposit"
-            :min="0"
-            :controls="false"
-            placeholder="元"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input
-            v-model="renewForm.remark"
-            type="textarea"
-            :rows="2"
-            placeholder="续租说明（选填）"
-            maxlength="500"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="renewVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleRenewSubmit">确认续租</el-button>
-      </template>
-    </el-dialog>
   </section>
 </template>
 

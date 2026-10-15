@@ -81,6 +81,7 @@ public class AlipayChannelClient implements PaymentChannelClient {
         model.setTotalAmount(payment.getAmount().toPlainString());
         model.setSubject(subject);
         model.setProductCode("FAST_INSTANT_TRADE_PAY");
+        if(payment.getChannelExpiresAt()!=null)model.setTimeExpire(payment.getChannelExpiresAt().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
         request.setBizModel(model);

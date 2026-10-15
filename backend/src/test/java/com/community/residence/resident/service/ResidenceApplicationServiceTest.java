@@ -153,7 +153,7 @@ class ResidenceApplicationServiceTest {
             assertThat(lease.getMonthlyRent()).isEqualByComparingTo("2500.00");
             assertThat(lease.getDeposit()).isEqualByComparingTo("5000.00");
             assertThat(lease.getStartDate()).isEqualTo(LocalDate.now());
-            assertThat(lease.getEndDate()).isEqualTo(LocalDate.now().plusMonths(3));
+            assertThat(lease.getEndDate()).isEqualTo(LocalDate.now().plusMonths(3).minusDays(1));
 
             /* 居住关系建立、房屋**保持空置**（不再翻转 OCCUPIED）、申请落 APPROVED */
             verify(relationMapper, never()).insert(any(ResidenceRelation.class));

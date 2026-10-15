@@ -185,4 +185,14 @@ public class LeaseController {
                                                  @RequestParam(defaultValue = "30") int days) {
         return ApiResponse.success(leaseService.expiring(page, size, days));
     }
+    @Operation(summary="合同期内普通交租，不延长合同")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @PostMapping("/{id}/rent-payments")
+    public ApiResponse<com.community.residence.payment.vo.LeasePaymentVO> rentPayment(@PathVariable Long id,@RequestBody @Valid com.community.residence.payment.dto.CreateRenewPaymentDTO dto){return ApiResponse.success(paymentService.createRentPayment(id,dto));}
+    @Operation(summary="读取合同段服务端报价，不创建支付或访问渠道")
+    @PreAuthorize("hasRole('RESIDENT')")
+    @GetMapping("/{id}/rent-quote")
+    public ApiResponse<com.community.residence.payment.vo.LeasePaymentVO> quote(@PathVariable Long id,@RequestParam(defaultValue="RENT")String purpose){
+        if(!java.util.Set.of("FIRST","RENT","RENEWAL").contains(purpose))throw new com.community.residence.common.exception.BusinessException(com.community.residence.common.constant.ErrorCode.INVALID_PARAM,"付款用途无效");
+        return ApiResponse.success(paymentService.quote(id,purpose));}
 }

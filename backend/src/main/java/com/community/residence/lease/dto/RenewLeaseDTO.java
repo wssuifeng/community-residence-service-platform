@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class RenewLeaseDTO {
 
     @Schema(description = "新结束日期（须晚于原结束日期）")
-    @NotNull(message = "新结束日期不能为空")
+
     private LocalDate newEndDate;
 
     @Schema(description = "月租金")
@@ -31,4 +31,7 @@ public class RenewLeaseDTO {
     @Schema(description = "备注（续租说明）")
     @Size(max = 500, message = "备注最多 500 字符")
     private String remark;
+ @Schema(description="新增合同月数，与首付月数独立") private Integer months;
+ @Schema(description="新增段首付月数，默认1") private Integer firstPaymentMonths;
+ @Schema(description="新增段后续周期，默认1") private Integer paymentCycleMonths;
 }

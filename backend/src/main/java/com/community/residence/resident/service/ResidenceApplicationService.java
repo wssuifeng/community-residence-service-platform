@@ -140,7 +140,7 @@ public class ResidenceApplicationService {
         LocalDate startDate = LocalDate.now();
         BigDecimal monthlyRent = application.getListedMonthlyRent() != null ? application.getListedMonthlyRent() : BigDecimal.ZERO;
         BigDecimal deposit = application.getListedDeposit();
-        applyApproval(application, house, startDate, startDate.plusMonths(months), monthlyRent, deposit,
+        applyApproval(application, house, startDate, startDate.plusMonths(months).minusDays(1), monthlyRent, deposit,
                 null, "社区已开启入住申请自动通过，系统自动审批");
         log.info("入住申请自动通过：applicationId={}, houseId={}, leaseMonths={}, rent={}",
                 application.getId(), house.getId(), months, monthlyRent);
@@ -201,11 +201,19 @@ public class ResidenceApplicationService {
             throw new BusinessException(ErrorCode.APPLICATION_ALREADY_REVIEWED,
                     "申请已被处理（当前状态：" + (fresh == null ? "未知" : fresh.getStatus()) + "）");
         }
-        if (dto.getLeaseEndDate().isBefore(dto.getLeaseStartDate())) {
+        if (dto.getLeaseEndDate()!=null && dto.getLeaseEndDate().isBefore(dto.getLeaseStartDate())) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "租期结束日期不能早于开始日期");
         }
-        applyApproval(application, house, dto.getLeaseStartDate(), dto.getLeaseEndDate(),
+        var sourceCommunity=communityService.requireCommunity(application.getCommunityId());
+        int total=com.community.residence.lease.service.LeaseTermRules.months(dto.getContractMonths(),sourceCommunity==null||sourceCommunity.getDefaultLeaseMonths()==null?12:sourceCommunity.getDefaultLeaseMonths());
+        int first=com.community.residence.lease.service.LeaseTermRules.months(dto.getFirstPaymentMonths(),1),cycle=com.community.residence.lease.service.LeaseTermRules.months(dto.getPaymentCycleMonths(),1);
+        com.community.residence.lease.service.LeaseTermRules.validate(total,first,cycle);
+        applyApproval(application, house, dto.getLeaseStartDate(), com.community.residence.lease.service.LeaseTermRules.end(dto.getLeaseStartDate(),total),
                 dto.getMonthlyRent(), dto.getDeposit(), SecurityUtils.getUserId(), dto.getRemark());
+        if (application.getLeaseId()!=null) {
+            LeaseRecord created=leaseRecordMapper.selectById(application.getLeaseId());
+            if(created!=null){created.setContractMonths(total);created.setFirstPaymentMonths(first);created.setPaymentCycleMonths(cycle);leaseRecordMapper.updateById(created);}
+        }
         log.info("入住申请已通过：applicationId={}, operator={}", id, SecurityUtils.getUserId());
         return toVO(application);
     }
@@ -240,7 +248,10 @@ public class ResidenceApplicationService {
             lease.setCommunityId(application.getCommunityId());
             lease.setHouseId(application.getHouseId());
             lease.setStartDate(startDate);
-            lease.setEndDate(endDate);
+            int total = (int) java.time.temporal.ChronoUnit.MONTHS.between(startDate,endDate.plusDays(1));
+            if(total<1) total=1;
+            lease.setContractMonths(total);lease.setFirstPaymentMonths(1);lease.setPaymentCycleMonths(1);
+            lease.setEndDate(com.community.residence.lease.service.LeaseTermRules.end(startDate,total));
             lease.setMonthlyRent(monthlyRent);
             lease.setDeposit(deposit);
             lease.setStatus(LeaseStatus.TO_SIGN);

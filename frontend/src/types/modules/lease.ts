@@ -151,6 +151,9 @@ export interface ILeaseTimelineEntry {
 
 /** 租住记录（后端 LeaseVO 实测字段；无 paymentMethod/contractNumber，押金字段名为 deposit） */
 export interface ILeaseRecord {
+  contractMonths?: number
+  firstPaymentMonths?: number
+  paymentCycleMonths?: number
   id: number
   /** 租客ID */
   tenantId: number
@@ -235,6 +238,9 @@ export interface ILeaseChange {
 
 /** 创建/更新租住记录请求（后端 CreateLeaseDTO；社区归属由房屋推导，更新不允许变更房屋） */
 export interface ILeaseRecordDTO {
+  contractMonths?: number
+  firstPaymentMonths?: number
+  paymentCycleMonths?: number
   /** 租客ID */
   residentId: number
   houseId: number
@@ -262,6 +268,9 @@ export interface IUpdateLeaseStatusDTO {
 
 /** 续租请求（需求 E3：止期顺延，仅已生效租约；后端 RenewLeaseDTO） */
 export interface IRenewLeaseDTO {
+  months?: number
+  firstPaymentMonths?: number
+  paymentCycleMonths?: number
   /** 新结束日期（须晚于原结束日期） */
   newEndDate: string
   monthlyRent: number
@@ -296,10 +305,11 @@ export interface IRenewPaymentCreateDTO {
 }
 
 /** 支付单类型（V20/R71：FIRST-首期（首月租金+押金）/ RENEWAL-续期（月租×月数）） */
-export type LeasePaymentType = 'FIRST' | 'RENEWAL'
+export type LeasePaymentType = 'FIRST' | 'RENT' | 'RENEWAL'
 
 /** 支付单类型中文标签 */
 export const leasePaymentTypeLabels: Record<LeasePaymentType, string> = {
+  RENT: '合同内交租',
   FIRST: '首期',
   RENEWAL: '续期'
 }
@@ -312,6 +322,9 @@ export interface IFirstPaymentCreateDTO {
 
 /** 支付单（后端 LeasePaymentVO；alipayForm/qrCode 按渠道二选一返回） */
 export interface ILeasePayment {
+  channelExpiresAt?: string | null
+  expiresAt?: string | null
+  settlementIssue?: string | null
   paymentNo: string
   leaseId: number
   channel: PaymentChannel
