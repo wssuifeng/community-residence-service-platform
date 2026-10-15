@@ -34,7 +34,7 @@ class AlipayChannelConfigServiceTest {
         dto.setAlipayPublicKey(Base64.getEncoder().encodeToString(platform.getPublic().getEncoded()));
     }
     @AfterEach void clear() { SecurityUtils.clear(); }
-    @Test void savesAllFourFieldsEncryptedAndNeverEnablesTransactions() {
+    @Test void savesEncryptedFieldsWithoutImplicitlyEnablingChannel() {
         String secret = dto.getMerchantPrivateKey(); var response = service.save(dto);
         assertTrue(response.isConfigured()); assertTrue(response.isPrivateKeyConfigured()); assertFalse(response.isEnabled());
         assertFalse(row.getEnabled()); assertEquals(1L, response.getRevision()); assertNotEquals(secret, row.getMerchantPrivateKeyCiphertext());
@@ -90,4 +90,32 @@ class AlipayChannelConfigServiceTest {
         assertFalse(managed.enabled()); verify(config).runtimeConfig();
         assertThrows(BusinessException.class, () -> managed.queryTrade("TEST_ONLY"));
     }
+    @Test void savedEnabledFlagMustBeReportedNotHardcodedOff() {
+        service.save(dto); row.setEnabled(true);
+        assertTrue(service.get().isConfigured());
+        assertTrue(service.get().isEnabled());
+    }
+    @Test void savingKeysMustNotSilentlyDisableAnAlreadyEnabledChannel() {
+        row.setEnabled(true);
+        var result = service.save(dto);
+        assertTrue(row.getEnabled());
+        assertTrue(result.isEnabled());
+    }
+
+    @Test void superAdminCanEnableAndDisableWithoutCallingAChannel() {
+        dto.setEnabled(true);
+        assertTrue(service.save(dto).isEnabled());
+        assertNotNull(service.runtimeConfig());
+        dto.setExpectedRevision(1L); dto.setMerchantPrivateKey(""); dto.setEnabled(false);
+        assertFalse(service.save(dto).isEnabled());
+        assertTrue(service.configured());
+        assertNull(service.runtimeConfig());
+    }
+    @Test void clearingPrivateKeyAlwaysDisablesEvenWhenSwitchWasOn() {
+        dto.setEnabled(true); service.save(dto);
+        dto.setExpectedRevision(1L); dto.setMerchantPrivateKey(""); dto.setClearPrivateKey(true);
+        assertFalse(service.save(dto).isEnabled());
+        assertFalse(service.configured());
+    }
+
 }

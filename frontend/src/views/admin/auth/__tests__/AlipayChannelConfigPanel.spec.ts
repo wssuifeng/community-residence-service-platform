@@ -21,9 +21,9 @@ beforeEach(() => { api.getAlipayChannelConfig.mockReset().mockResolvedValue(empt
 afterEach(() => { wrapper?.unmount(); wrapper=undefined; vi.restoreAllMocks() })
 
 describe('支付宝独立配置表单', () => {
-  it('完整显示 APPID 与三份 Key，默认沙箱且交易停用', async () => {
+  it('完整显示 APPID 与三份 Key，默认沙箱，启用由超管开关控制', async () => {
     const w=await render(); expect(w.text()).toContain('Application Public Key'); expect(w.text()).toContain('Application Private Key'); expect(w.text()).toContain('Alipay Public Key');
-    expect(w.text()).toContain('交易停用'); expect(w.findAll('textarea')).toHaveLength(2); expect(w.get('[data-testid="alipay-merchant-private-key"]').attributes('type')).toBe('password');
+    expect(w.text()).toContain('未启用'); expect(w.findAll('textarea')).toHaveLength(2); expect(w.get('[data-testid="alipay-merchant-private-key"]').attributes('type')).toBe('password');
     expect(w.text()).toContain('不能证明平台侧');
   })
   it('加载已保存配置不回显私钥，留空保留', async () => {
@@ -37,7 +37,7 @@ describe('支付宝独立配置表单', () => {
   })
   it('只提交四项配置及版本，成功后清空敏感输入', async () => {
     const w=await render(); await fill(w); await submit(w);
-    expect(api.saveAlipayChannelConfig).toHaveBeenCalledWith({ appId:'9021000000000000', applicationPublicKey:'APP_PUBLIC_TEST', merchantPrivateKey:'PRIVATE_TEST_ONLY', alipayPublicKey:'ALIPAY_PUBLIC_TEST', environment:'SANDBOX', expectedRevision:0, clearPrivateKey:false });
+    expect(api.saveAlipayChannelConfig).toHaveBeenCalledWith({ appId:'9021000000000000', applicationPublicKey:'APP_PUBLIC_TEST', merchantPrivateKey:'PRIVATE_TEST_ONLY', alipayPublicKey:'ALIPAY_PUBLIC_TEST', environment:'SANDBOX', expectedRevision:0, clearPrivateKey:false, enabled:false });
     expect((w.get('[data-testid="alipay-merchant-private-key"]').element as HTMLInputElement).value).toBe('');
   })
   it('加载失败禁用保存并提供重试', async () => {
@@ -52,11 +52,23 @@ describe('支付宝独立配置表单', () => {
   })
   it('清除私钥须显式选择与二次确认', async () => {
     api.getAlipayChannelConfig.mockResolvedValue(saved()); vi.spyOn(ElMessageBox,'confirm').mockResolvedValue('confirm' as never); const w=await render();
-    await w.get('input[type="checkbox"]').setValue(true); await submit(w);
+    await w.get('.clear-private-key input[type="checkbox"]').setValue(true); await submit(w);
     expect(ElMessageBox.confirm).toHaveBeenCalled(); expect(api.saveAlipayChannelConfig).toHaveBeenCalledWith(expect.objectContaining({ clearPrivateKey:true,merchantPrivateKey:'' }));
   })
   it('清除确认取消时不提交', async () => {
     api.getAlipayChannelConfig.mockResolvedValue(saved()); vi.spyOn(ElMessageBox,'confirm').mockRejectedValue('cancel'); const w=await render();
-    await w.get('input[type="checkbox"]').setValue(true); await submit(w); expect(api.saveAlipayChannelConfig).not.toHaveBeenCalled();
+    await w.get('.clear-private-key input[type="checkbox"]').setValue(true); await submit(w); expect(api.saveAlipayChannelConfig).not.toHaveBeenCalled();
   })
+})
+
+
+it('已配置仍停用时显示未启用，开关与配置一起保存且不重填私钥', async () => {
+  api.getAlipayChannelConfig.mockResolvedValue(saved())
+  api.saveAlipayChannelConfig.mockResolvedValue({ ...saved(), enabled: true, revision: 2 })
+  const w = await render()
+  expect(w.text()).toContain('配置已保存'); expect(w.text()).toContain('未启用')
+  expect(w.text()).not.toContain('交易部分暂缓')
+  await w.get('[data-testid="alipay-enabled"]').trigger('click'); await submit(w)
+  expect(api.saveAlipayChannelConfig).toHaveBeenCalledWith(expect.objectContaining({ enabled: true, merchantPrivateKey: '' }))
+  expect(w.text()).toContain('已启用')
 })

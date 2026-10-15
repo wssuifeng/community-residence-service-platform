@@ -26,9 +26,9 @@ public class AlipayChannelConfigService {
 
     public AlipayChannelConfigVO get() { requireSuperAdmin(); return toVO(read()); }
 
-    /* 行锁 + 版本校验；先离线验证，再加密写入。空私钥保留，明确清除互斥，始终停用。 */
+    /* 行锁 + 版本校验；先离线验证，再加密写入。空私钥保留，明确清除互斥；启用由超管决定，保存不调用渠道。 */
     @Transactional(rollbackFor = Exception.class)
-    @OperationLog(operationType = "UPDATE", targetType = "PAYMENT_CHANNEL_CONFIG", targetId = "1", content = "'更新支付宝渠道配置（离线校验，交易停用）'")
+    @OperationLog(operationType = "UPDATE", targetType = "PAYMENT_CHANNEL_CONFIG", targetId = "1", content = "'更新支付宝渠道配置及启用状态（仅离线校验）'")
     public AlipayChannelConfigVO save(UpdateAlipayChannelConfigDTO dto) {
         requireSuperAdmin();
         PaymentChannelConfig row = configMapper.lockAlipay();
@@ -56,12 +56,12 @@ public class AlipayChannelConfigService {
         row.setAppId(dto.getAppId()); row.setEnvironment(environment.name());
         row.setApplicationPublicKey(keys.applicationPublicKey()); row.setAlipayPublicKey(keys.alipayPublicKey());
         row.setMerchantPrivateKeyCiphertext(dto.isClearPrivateKey() ? null : cipher.encrypt(keys.privateKey(), identity(environment.name(), dto.getAppId())));
-        row.setEnabled(false); row.setRevision(row.getRevision() + 1); row.setUpdatedBy(SecurityUtils.getUserId()); row.setUpdatedAt(LocalDateTime.now());
+        row.setEnabled(!dto.isClearPrivateKey() && (dto.getEnabled() != null ? dto.getEnabled() : Boolean.TRUE.equals(row.getEnabled()))); row.setRevision(row.getRevision() + 1); row.setUpdatedBy(SecurityUtils.getUserId()); row.setUpdatedAt(LocalDateTime.now());
         configMapper.updateById(row);
         return toVO(row);
     }
 
-    /** 内部客户端读取独立配置，无超管响应路径暴露明文；本批停用时不解密。 */
+    /** 内部客户端读取独立配置，无超管响应路径暴露明文；渠道停用时不解密。 */
     public RuntimeConfig runtimeConfig() {
         PaymentChannelConfig row = read();
         if (!Boolean.TRUE.equals(row.getEnabled()) || !hasText(row.getMerchantPrivateKeyCiphertext())) { return null; }
@@ -76,6 +76,9 @@ public class AlipayChannelConfigService {
         @Override public String toString() { return "RuntimeConfig[redacted]"; }
     }
 
+    /** 仅返回完整性状态，不解密或调用外部渠道。 */
+    public boolean configured() { return toVO(read()).isConfigured(); }
+
     private PaymentChannelConfig read() {
         var row = configMapper.selectOne(new LambdaQueryWrapper<PaymentChannelConfig>().eq(PaymentChannelConfig::getChannel, PaymentChannel.ALIPAY));
         if (row == null) { throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "支付配置迁移尚未应用"); }
@@ -86,7 +89,7 @@ public class AlipayChannelConfigService {
         vo.setApplicationPublicKey(row.getApplicationPublicKey()); vo.setAlipayPublicKey(row.getAlipayPublicKey());
         vo.setPrivateKeyConfigured(hasText(row.getMerchantPrivateKeyCiphertext()));
         vo.setConfigured(vo.isPrivateKeyConfigured() && hasText(row.getAppId()) && hasText(row.getApplicationPublicKey()) && hasText(row.getAlipayPublicKey()));
-        vo.setEnabled(false); vo.setRevision(row.getRevision()); vo.setUpdatedAt(row.getUpdatedAt()); return vo;
+        vo.setEnabled(vo.isConfigured() && Boolean.TRUE.equals(row.getEnabled())); vo.setRevision(row.getRevision()); vo.setUpdatedAt(row.getUpdatedAt()); return vo;
     }
     private void requireSuperAdmin() {
         if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) { throw new BusinessException(ErrorCode.FORBIDDEN); }

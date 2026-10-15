@@ -294,6 +294,7 @@ export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'CLOSED'
 /** 支付渠道可用性（GET /payment/channels 元素：凭据未配置 enabled=false 禁用明示） */
 export interface IPaymentChannelOption {
   channel: PaymentChannel
+  configured?: boolean
   enabled: boolean
 }
 

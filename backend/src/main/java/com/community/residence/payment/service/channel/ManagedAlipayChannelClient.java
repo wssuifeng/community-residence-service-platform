@@ -13,6 +13,7 @@ public class ManagedAlipayChannelClient implements PaymentChannelClient {
     private record Cached(long revision, PaymentChannelClient client) { }
     public ManagedAlipayChannelClient(AlipayChannelConfigService configService) { this.configService = configService; }
     @Override public String channel() { return PaymentChannel.ALIPAY; }
+    @Override public boolean configured() { return configService.configured(); }
     @Override public boolean enabled() { return delegate().enabled(); }
     @Override public String createPayment(LeasePayment payment, String subject, String notifyUrl) { return delegate().createPayment(payment, subject, notifyUrl); }
     @Override public ChannelTradeResult queryTrade(String paymentNo) { return delegate().queryTrade(paymentNo); }
