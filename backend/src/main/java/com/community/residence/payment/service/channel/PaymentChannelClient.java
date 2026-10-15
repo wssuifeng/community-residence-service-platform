@@ -16,6 +16,9 @@ public interface PaymentChannelClient {
     /** 渠道是否启用（凭据齐全才启用，禁用不报错不阻断） */
     boolean enabled();
 
+    /** 凭据是否完整，与管理员启用选择分开。 */
+    default boolean configured() { return enabled(); }
+
     /**
      * 发起支付：向渠道下单，返回支付凭据。
      * ALIPAY → 跳转表单 HTML（pageExecute，前端写入页面自动提交）；

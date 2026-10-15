@@ -18,6 +18,7 @@ export interface IUpdateAlipayChannelConfig {
   merchantPrivateKey: string
   alipayPublicKey: string
   environment: IAlipayChannelConfig['environment']
+  enabled: boolean
   expectedRevision: number
   clearPrivateKey: boolean
 }

@@ -120,8 +120,8 @@ public class PaymentService {
     /** 可用支付渠道（凭据门控：未配置的渠道 enabled=false 明示） */
     public List<PaymentChannelVO> channels() {
         return List.of(
-                PaymentChannelVO.of(PaymentChannel.ALIPAY, alipayChannelClient.enabled()),
-                PaymentChannelVO.of(PaymentChannel.WECHAT, wechatChannelClient.enabled()));
+                PaymentChannelVO.of(PaymentChannel.ALIPAY, alipayChannelClient.enabled(), alipayChannelClient.configured()),
+                PaymentChannelVO.of(PaymentChannel.WECHAT, wechatChannelClient.enabled(), wechatChannelClient.configured()));
     }
 
     /**

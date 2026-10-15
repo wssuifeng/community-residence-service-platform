@@ -121,7 +121,8 @@ async function loadChannels(): Promise<void> {
     /* 双渠道恒渲染两卡：接口未返回的渠道按「未配置」处理（凭据门控口径） */
     channelOptions.value = (['ALIPAY', 'WECHAT'] as PaymentChannel[]).map((item) => ({
       channel: item,
-      enabled: list.find((opt) => opt.channel === item)?.enabled ?? false
+      enabled: list.find((opt) => opt.channel === item)?.enabled ?? false,
+      configured: list.find((opt) => opt.channel === item)?.configured ?? list.find((opt) => opt.channel === item)?.enabled ?? false
     }))
     const enabledOnly = channelOptions.value.filter((opt) => opt.enabled)
     if (enabledOnly.length === 1) channel.value = enabledOnly[0].channel
@@ -570,7 +571,7 @@ onUnmounted(stopPolling)
               <span class="channel-name">{{ channelMeta[opt.channel].label }}</span>
               <span class="channel-desc">{{ channelMeta[opt.channel].desc }}</span>
             </span>
-            <span v-if="!opt.enabled" class="channel-badge">未配置</span>
+            <span v-if="!opt.enabled" class="channel-badge">{{ opt.configured ? '未启用' : '未配置' }}</span>
           </button>
         </div>
         <p v-if="!channelsLoading && channelOptions.length === 0" class="channel-empty">
@@ -841,7 +842,7 @@ onUnmounted(stopPolling)
 /* 渠道卡片：双列，选中主色描边，未配置置灰并挂角标 */
 .channel-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-sm);
 }
 
@@ -908,6 +909,9 @@ onUnmounted(stopPolling)
 }
 
 .channel-badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+  align-self: center;
   margin-left: auto;
   padding: 1px var(--spacing-xs);
   border-radius: var(--radius-pill);
@@ -1123,4 +1127,5 @@ onUnmounted(stopPolling)
   justify-content: flex-end;
   gap: var(--spacing-sm);
 }
+@media (max-width: 560px) { .channel-grid { grid-template-columns: minmax(0, 1fr); } }
 </style>

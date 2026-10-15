@@ -33,8 +33,8 @@ logging:
   level:
     com.community.residence: debug
 
-# 支付渠道凭据（dev）：默认双渠道禁用（payment.* 模板见 application.yml；
-# 支付宝在超管系统配置页维护 APPID 与三份 Key，本批保持交易停用；
+# 支付渠道凭据（dev）：未完整配置时渠道禁用（payment.* 模板见 application.yml；
+# 支付宝在超管系统配置页维护 APPID、三份 Key 与启用状态，保存仅离线校验；
 # 微信需商户号+API 证书（PAYMENT_WECHAT_* 五项），本地通常禁用）。
 # 渠道状态可启动后经 GET /api/v1/payment/channels 验证。
 # payment:

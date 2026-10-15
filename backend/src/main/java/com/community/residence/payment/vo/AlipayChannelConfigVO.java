@@ -13,7 +13,7 @@ public class AlipayChannelConfigVO {
     @Schema(description = "环境") private String environment;
     @Schema(description = "私钥已保存，不回显内容") private boolean privateKeyConfigured;
     @Schema(description = "四项配置已保存，不代表渠道已验证") private boolean configured;
-    @Schema(description = "渠道启用状态，本批固定停用") private boolean enabled;
+    @Schema(description = "超管保存的渠道启用状态，配置不完整时为false") private boolean enabled;
     @Schema(description = "配置版本") private long revision;
     @Schema(description = "更新时间") private LocalDateTime updatedAt;
 }

@@ -315,3 +315,15 @@ describe('支付宝中文签名字段编码', () => {
     }
   })
 })
+
+
+it('已配置但关闭的渠道显示未启用，不得误报未配置', async () => {
+  mocks.channels = [{ channel: 'ALIPAY', enabled: false, configured: true }, { channel: 'WECHAT', enabled: false, configured: false }]
+  const wrapper = await openDialog()
+  const cards = Array.from(document.body.querySelectorAll('.channel-card'))
+  expect(cards[0]?.textContent).toContain('未启用')
+  expect(cards[0]?.textContent).not.toContain('未配置')
+  expect(cards[1]?.textContent).toContain('未配置')
+  expect(mocks.createCalls).toHaveLength(0)
+  wrapper.unmount()
+})
