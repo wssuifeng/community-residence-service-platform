@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-15",
+  "kind": "Design example arithmetic only, not implemented payment regression",
+  "checks": [
+    {
+      "name": "today plus 30 days is Nov14, not Nov15",
+      "passed": true
+    },
+    {
+      "name": "1-month inclusive display and rent+fixed-deposit example",
+      "passed": true
+    },
+    {
+      "name": "3-month inclusive display and rent+fixed-deposit example",
+      "passed": true
+    },
+    {
+      "name": "12-month inclusive display and rent+fixed-deposit example",
+      "passed": true
+    },
+    {
+      "name": "month-end computed from original anchor avoids sequential drift",
+      "passed": true
+    },
+    {
+      "name": "leap-year February endpoint",
+      "passed": true
+    },
+    {
+      "name": "first 3 of 12 leaves 9 months rent",
+      "passed": true
+    },
+    {
+      "name": "fixed30days and calendar month are not silently mixed",
+      "passed": true
+    }
+  ],
+  "transactionsExecuted": false,
+  "businessCodeChanged": false
+}
