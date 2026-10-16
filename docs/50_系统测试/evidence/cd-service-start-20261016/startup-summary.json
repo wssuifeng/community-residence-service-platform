@@ -1,0 +1,140 @@
+{
+  "checkedAt": "2026-10-16T11:17:02+08:00",
+  "sourceCommit": "b536032",
+  "jar": "manual-cd-release-20261016.jar",
+  "jarSha256": "21cc2400012353500c5d30b209fa62e24c660220fd63f56dd21db5c5e576be10",
+  "backendPort": 8084,
+  "frontendPort": 5176,
+  "schemaVersion": 42,
+  "businessTables": 60,
+  "countsBefore": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 2,
+    "lease_record": 2,
+    "lease_payment": 4,
+    "lease_deposit_refund": 0
+  },
+  "countsAfter": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 2,
+    "lease_record": 2,
+    "lease_payment": 4,
+    "lease_deposit_refund": 0
+  },
+  "alipayConfiguration": {
+    "environment": "SANDBOX",
+    "configured": true,
+    "enabled": true,
+    "privateKeyConfigured": true,
+    "revision": 3
+  },
+  "checks": [
+    {
+      "name": "MySQL及Redis在线",
+      "passed": true
+    },
+    {
+      "name": "新服务8084及5176在线，不重启既有进程",
+      "passed": true
+    },
+    {
+      "name": "当前发布包与启动记录一致",
+      "passed": true
+    },
+    {
+      "name": "正常V42和60业务表，无新迁移",
+      "passed": true
+    },
+    {
+      "name": "前端登录入口可访问",
+      "passed": true
+    },
+    {
+      "name": "后端OpenAPI可访问",
+      "passed": true
+    },
+    {
+      "name": "新版租期延长/报价/公告修订接口存在",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "原沙箱配置完整启用，无需重填私钥",
+      "passed": true
+    },
+    {
+      "name": "5176代理读取相同渠道状态",
+      "passed": true
+    },
+    {
+      "name": "管理端列表读取 /api/v1/communities/houses-manage",
+      "passed": true
+    },
+    {
+      "name": "管理端列表读取 /api/v1/notices",
+      "passed": true
+    },
+    {
+      "name": "管理端列表读取 /api/v1/conversations",
+      "passed": true
+    },
+    {
+      "name": "当前前端组件含实际双截止 LeaseFirstPaymentDialog",
+      "passed": true
+    },
+    {
+      "name": "当前前端组件含实际双截止 LeaseRenewDialog",
+      "passed": true
+    },
+    {
+      "name": "前端日期格式精确到秒",
+      "passed": true
+    },
+    {
+      "name": "正常业务记录数量保持",
+      "passed": true
+    },
+    {
+      "name": "渠道配置及身份密钥摘要保持",
+      "passed": true
+    },
+    {
+      "name": "原成功账目保持",
+      "passed": true
+    }
+  ],
+  "passed": 22,
+  "failed": 0,
+  "paymentConfigModified": false,
+  "externalTradingCalled": false,
+  "allPaymentRowsUnchangedAtProbe": true,
+  "successfulPaymentRowsUnchanged": true,
+  "naturalScheduledTasksEnabled": true,
+  "userBrowserOperated": false,
+  "backendBuildSkipTests": true,
+  "previousCcBackendFullTests": 1156,
+  "frontendBuildIncludesTypecheck": true,
+  "releaseDeadlineClassMatchesCompiledTarget": true,
+  "backendBuildExitCode": 0,
+  "frontendBuildExitCode": 0,
+  "probeCorrection": "Initial helper expected {id} in the extension path; actual OpenAPI declares {leaseId}. Corrected the helper and reran checks without restarting services; no application defect or code change."
+}
