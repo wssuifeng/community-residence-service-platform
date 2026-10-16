@@ -283,6 +283,7 @@ onMounted(fetchDetail)
     </nav>
 
     <template v-if="order">
+      <a v-if="workOrderConversation" class="work-order-chat-link" href="#work-order-chat">进入工单沟通 ↓</a>
       <article class="status-strip" :class="`is-${toneOf(order.priority)}`">
         <span class="status-priority">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -512,7 +513,7 @@ onMounted(fetchDetail)
 
         <!-- R74 工单临时群聊：受理即建群，派单后本服务人员自动入群（未入群时不渲染）；
              终审结束后只读留档 -->
-        <article v-if="workOrderConversation" class="panel chat-panel">
+        <article v-if="workOrderConversation" id="work-order-chat" class="panel chat-panel">
           <h2 class="panel-title">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 6.5h16v9H9l-5 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
@@ -548,6 +549,7 @@ onMounted(fetchDetail)
 </template>
 
 <style scoped>
+.work-order-chat-link { display: inline-flex; margin: 0 0 16px; padding: 8px 14px; border: 1px solid var(--color-primary); border-radius: 8px; color: var(--color-primary); }
 .crumb-bar {
   display: flex;
   align-items: center;

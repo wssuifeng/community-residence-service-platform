@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import ConversationChat from '@/components/business/ConversationChat.vue'
+import { ensureWorkOrderConversation } from '@/api/workorder'
 import StaffPickerDrawer from '@/views/admin/workorder/StaffPickerDrawer.vue'
 import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, intakeWorkOrder, listWorkOrderAttachments, rejectWorkOrder } from '@/api/workorder'
 import { getConversation } from '@/api/conversation'
@@ -94,6 +95,23 @@ async function loadConversation(): Promise<void> {
   } catch {
     workOrderConversation.value = null
   }
+}
+
+const openingChat = ref(false)
+async function openWorkOrderChat(): Promise<void> {
+  if (!order.value || openingChat.value) return
+  openingChat.value = true
+  try {
+    order.value = await ensureWorkOrderConversation(orderId)
+    await loadConversation()
+    if (workOrderConversation.value) {
+      await nextTick()
+      document.getElementById('work-order-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else {
+      ElMessage.warning('工单沟通群暂不可用，请重试或联系管理员检查关联账号')
+    }
+  } catch (error) { ElMessage.error(error instanceof Error ? error.message : '沟通群暂不可用，请重试') }
+  finally { openingChat.value = false }
 }
 
 /* 紧急程度 → 状态条配色档，与 staff 端工单详情同一口径 */
@@ -193,6 +211,10 @@ onMounted(fetchDetail)
     </nav>
 
     <template v-if="order">
+      <div v-if="!['PENDING', 'REJECTED', 'CANCELLED'].includes(order.status)" class="chat-entry">
+        <el-button type="primary" plain :loading="openingChat" @click="openWorkOrderChat">进入工单沟通</el-button>
+        <span class="action-note">提交居民、处理管理员和被派服务人员共用同一群聊；历史漏建群会在此补齐。</span>
+      </div>
       <!-- 顶部状态条：调度标记 + 优先级胶囊 + 标题 + 关键元信息 + 状态标签 -->
       <article class="status-strip" :class="[`is-${toneOf(order.priority)}`, `flag-${dispatchFlag}`]">
         <span class="status-priority">
@@ -361,7 +383,7 @@ onMounted(fetchDetail)
 
         <!-- R74 工单临时群聊：受理后自动建群（居民提交人 + 受理管理员，派单后服务人员入群）；
              未受理时 conversationId 为空，整块不渲染；终审结束后只读留档 -->
-        <article v-if="workOrderConversation" class="panel chat-panel">
+        <article v-if="workOrderConversation" id="work-order-chat" class="panel chat-panel">
           <h2 class="panel-title">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 6.5h16v9H9l-5 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
@@ -385,6 +407,7 @@ onMounted(fetchDetail)
 </template>
 
 <style scoped>
+.chat-entry { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
 .crumb-bar {
   display: flex;
   align-items: center;

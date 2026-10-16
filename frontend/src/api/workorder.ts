@@ -146,3 +146,8 @@ export function deleteWorkOrderAttachment(id: number) {
 export function listWorkOrderAttachments(orderId: number) {
   return http.get<IWorkOrderAttachment[]>(`/work-orders/${orderId}/attachments`)
 }
+
+/** 已受理历史工单幂等补齐沟通群，限管辖管理员；不推进业务状态。 */
+export function ensureWorkOrderConversation(id: number) {
+  return http.post<IWorkOrder>(`/work-orders/${id}/conversation`)
+}

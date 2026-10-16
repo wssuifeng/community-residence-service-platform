@@ -288,6 +288,7 @@ onMounted(() => {
     </header>
 
     <template v-if="order">
+      <a v-if="workOrderConversation" class="work-order-chat-link" href="#work-order-chat">进入工单沟通 ↓</a>
       <!-- 异常终态：进度条不适用，改状态横幅 -->
       <el-alert
         v-if="isTerminalAbnormal"
@@ -517,7 +518,7 @@ onMounted(() => {
 
       <!-- R74 工单临时群聊：受理后自动建群（居民提交人 + 受理管理员，派单后服务人员入群）；
            未受理时 conversationId 为空，整块不渲染；终审结束后只读留档 -->
-      <article v-if="workOrderConversation" class="chat-card">
+      <article v-if="workOrderConversation" id="work-order-chat" class="chat-card">
         <h2 class="card-title">工单临时群聊</h2>
         <ConversationChat
           :conversation-id="workOrderConversation.id"
@@ -548,6 +549,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.work-order-chat-link { display: inline-flex; margin: 0 0 16px; padding: 8px 14px; border: 1px solid var(--color-primary); border-radius: 8px; color: var(--color-primary); }
 .page-header {
   display: flex;
   align-items: center;

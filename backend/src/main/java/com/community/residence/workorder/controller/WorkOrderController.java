@@ -189,6 +189,13 @@ public class WorkOrderController {
         return ApiResponse.success();
     }
 
+    @Operation(summary = "打开或恢复工单沟通群", description = "仅管辖管理方；已受理及后续状态可幂等补群，关闭工单只读，不改变工单状态")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/{id}/conversation")
+    public ApiResponse<WorkOrderVO> ensureConversation(@PathVariable Long id) {
+        return ApiResponse.success(workOrderService.ensureConversation(id));
+    }
+
     @Operation(summary = "工单处理时间线")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}/timeline")

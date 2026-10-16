@@ -6,6 +6,8 @@ import com.community.residence.common.constant.ErrorCode;
 import com.community.residence.common.constant.WorkOrderStatus;
 import com.community.residence.common.exception.BusinessException;
 import com.community.residence.conversation.service.ConversationService;
+import com.community.residence.common.context.SecurityUtils;
+import com.community.residence.auth.entity.SysUser;
 import com.community.residence.messaging.service.NotificationService;
 import com.community.residence.resident.mapper.ResidentMapper;
 import com.community.residence.workorder.dto.AssignWorkOrderDTO;
@@ -58,6 +60,9 @@ class WorkOrderServiceTest {
     private SysAdminCommunityMapper sysAdminCommunityMapper;
     @Mock
     private ConversationService conversationService;
+
+    @Mock
+    private StaffScheduleService staffScheduleService;
 
     @InjectMocks
     private WorkOrderService workOrderService;
@@ -276,4 +281,92 @@ class WorkOrderServiceTest {
                     .hasMessageContaining("服务人员不存在");
         }
     }
+
+    @Test
+    void directAssignmentCreatesCommunicationGroupBeforeJoiningStaff() {
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getUserId).thenReturn(2L);
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+            SysUser staff = new SysUser(); staff.setId(9L); staff.setRole("STAFF"); staff.setStatus("ACTIVE");
+            when(sysUserMapper.selectById(9L)).thenReturn(staff);
+            workOrderService.assign(1L, assignDto(9L));
+            var calls = org.mockito.Mockito.inOrder(conversationService);
+            calls.verify(conversationService).createWorkOrderGroup(1L, 1L, 1L, 2L, order.getOrderNo());
+            calls.verify(conversationService).joinWorkOrderGroup(1L, 9L, staff.getRealName());
+        }
+    }
+
+    @Test void restorePendingGroupIsRejectedWithoutChangingStatus() {
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(true);
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+            assertThatThrownBy(() -> workOrderService.ensureConversation(1L)).hasMessageContaining("请先受理");
+            org.mockito.Mockito.verifyNoInteractions(conversationService);
+            assertThat(order.getStatus()).isEqualTo("PENDING");
+        }
+    }
+    @Test void residentCannotRestoreOrJoinAsAdministrator() {
+        try (var security = mockStatic(SecurityUtils.class)) {
+            assertThatThrownBy(() -> workOrderService.ensureConversation(1L)).isInstanceOf(com.community.residence.common.exception.ForbiddenException.class);
+            org.mockito.Mockito.verifyNoInteractions(conversationService);
+        }
+    }
+
+    @Test
+    void restoreAssignedGroupOnlyWritesReferenceAndAddsCurrentAssignee() {
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
+            security.when(SecurityUtils::getUserId).thenReturn(2L);
+            order.setStatus(WorkOrderStatus.ASSIGNED);
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+            var group = new com.community.residence.conversation.entity.Conversation();
+            group.setId(33L); group.setStatus("ACTIVE");
+            when(conversationService.createWorkOrderGroup(1L, 1L, 1L, 2L, order.getOrderNo())).thenReturn(group);
+            var assignment = new WorkOrderAssignment(); assignment.setAssigneeId(9L);
+            when(assignmentMapper.selectOne(any())).thenReturn(assignment);
+
+            var result = workOrderService.ensureConversation(1L);
+
+            assertThat(result.getConversationId()).isEqualTo(33L);
+            assertThat(result.getStatus()).isEqualTo(WorkOrderStatus.ASSIGNED);
+            org.mockito.Mockito.verify(workOrderMapper).update(org.mockito.ArgumentMatchers.isNull(), any());
+            org.mockito.Mockito.verify(workOrderMapper, org.mockito.Mockito.never()).updateById(any(WorkOrder.class));
+            org.mockito.Mockito.verify(conversationService).joinWorkOrderGroup(1L, 9L, null);
+            org.mockito.Mockito.verify(processMapper, org.mockito.Mockito.never()).insert(
+                    org.mockito.ArgumentMatchers.any(com.community.residence.workorder.entity.WorkOrderProcess.class));
+            org.mockito.Mockito.verifyNoInteractions(notificationService);
+        }
+    }
+
+    @Test
+    void restoreClosedOrderKeepsClosedGroupReadOnly() {
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(true);
+            security.when(SecurityUtils::getUserId).thenReturn(2L);
+            order.setStatus(WorkOrderStatus.CLOSED); order.setConversationId(33L);
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+            var group = new com.community.residence.conversation.entity.Conversation();
+            group.setId(33L); group.setStatus("CLOSED");
+            when(conversationService.createWorkOrderGroup(1L, 1L, 1L, 2L, order.getOrderNo())).thenReturn(group);
+
+            assertThat(workOrderService.ensureConversation(1L).getStatus()).isEqualTo(WorkOrderStatus.CLOSED);
+            org.mockito.Mockito.verify(conversationService).closeWorkOrderGroup(1L);
+            org.mockito.Mockito.verify(conversationService, org.mockito.Mockito.never()).joinWorkOrderGroup(any(), any(), any());
+            org.mockito.Mockito.verify(workOrderMapper, org.mockito.Mockito.never()).update(org.mockito.ArgumentMatchers.<WorkOrder>any(), any());
+        }
+    }
+
+    @Test
+    void restoreGroupOutsideManagedCommunityIsForbidden() {
+        try (var security = mockStatic(SecurityUtils.class)) {
+            security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
+            security.when(() -> SecurityUtils.checkCommunityAccess(1L)).thenThrow(
+                    new com.community.residence.common.exception.ForbiddenException("无权操作未绑定社区的数据"));
+            when(workOrderMapper.selectById(1L)).thenReturn(order);
+            assertThatThrownBy(() -> workOrderService.ensureConversation(1L))
+                    .isInstanceOf(com.community.residence.common.exception.ForbiddenException.class);
+            org.mockito.Mockito.verifyNoInteractions(conversationService, assignmentMapper);
+        }
+    }
+
 }
