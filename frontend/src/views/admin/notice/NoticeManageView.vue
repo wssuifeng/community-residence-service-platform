@@ -38,8 +38,7 @@ import type {
 import {
   noticePriorityLabels,
   noticeStatusLabels,
-  noticeTypeLabels,
-  targetAudienceLabels
+  noticeTypeLabels
 } from '@/types/modules/notice'
 import { formatDate, formatDateTime } from '@/utils/date'
 import StatusTag from '@/components/common/StatusTag.vue'
@@ -918,18 +917,6 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
               <el-form-item label="置顶">
                 <el-switch v-model="form.isPinned" />
                 <span class="form-tip">开启后公告在列表中置顶展示（排序最前）</span>
-              </el-form-item>
-
-              <el-form-item label="定向范围">
-                <el-select v-model="form.targetAudience" style="width: 200px">
-                  <el-option
-                    v-for="(label, value) in targetAudienceLabels"
-                    :key="value"
-                    :label="label"
-                    :value="value"
-                  />
-                </el-select>
-                <span class="form-tip">公告面向定向范围内的全部居民</span>
               </el-form-item>
 
               <el-form-item label="发布范围">
