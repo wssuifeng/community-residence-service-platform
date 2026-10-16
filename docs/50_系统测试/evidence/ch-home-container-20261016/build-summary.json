@@ -1,0 +1,8 @@
+{
+  "command": "npm run build",
+  "typecheckPassed": true,
+  "buildPassed": true,
+  "fullTestSuiteRun": false,
+  "backendChanged": false,
+  "serviceRestarted": false
+}

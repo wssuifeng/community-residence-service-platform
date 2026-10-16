@@ -1,0 +1,991 @@
+{
+  "checkedAt": "2026-10-16T21:38:23+08:00",
+  "checks": [
+    {
+      "name": "1920-normal 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "1920-normal 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "1920-scrollbar 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "1366-normal 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "1366-scrollbar 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "1024-normal 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "1024-scrollbar 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "768-normal 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "768-normal 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "768-normal 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "768-normal 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "768-normal 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "768-normal 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "768-normal 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "768-normal 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "768-normal 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "768-normal 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "768-scrollbar 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "360-normal 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "360-normal 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "360-normal 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "360-normal 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "360-normal 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "360-normal 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "360-normal 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "360-normal 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "360-normal 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "360-normal 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 原1200px内容容器保留",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 原容器间距保留",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 通栏不含滚动条宽度",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 原高度规则保留",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 等比覆盖不拉伸",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 不靠全站横向裁切",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 长公告无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 内容区不额外嵌套缩放",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 原固定导航不被容器查询破坏",
+      "passed": true
+    },
+    {
+      "name": "360-scrollbar 返回顶部仍为原透明导航",
+      "passed": true
+    },
+    {
+      "name": "原图片资源可加载",
+      "passed": true
+    }
+  ],
+  "passed": 101,
+  "failed": 0,
+  "dimensions": [
+    {
+      "viewport": 1920,
+      "gutter": false,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1063,
+        "top": 0,
+        "right": 1920,
+        "bottom": 1063,
+        "left": 0
+      },
+      "main": {
+        "x": 360,
+        "y": 0,
+        "width": 1200,
+        "height": 843,
+        "top": 0,
+        "right": 1560,
+        "bottom": 843,
+        "left": 360
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 464,
+        "top": 0,
+        "right": 1920,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 376,
+        "y": 400,
+        "width": 1168,
+        "height": 96,
+        "top": 400,
+        "right": 1544,
+        "bottom": 496,
+        "left": 376
+      },
+      "scroll": 1920,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "visible",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 1920,
+      "gutter": true,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1905,
+        "height": 1063,
+        "top": 0,
+        "right": 1905,
+        "bottom": 1063,
+        "left": 0
+      },
+      "main": {
+        "x": 352.5,
+        "y": 0,
+        "width": 1200,
+        "height": 843,
+        "top": 0,
+        "right": 1552.5,
+        "bottom": 843,
+        "left": 352.5
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 1905,
+        "height": 464,
+        "top": 0,
+        "right": 1905,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 368.5,
+        "y": 400,
+        "width": 1168,
+        "height": 96,
+        "top": 400,
+        "right": 1536.5,
+        "bottom": 496,
+        "left": 368.5
+      },
+      "scroll": 1905,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "auto",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 1366,
+      "gutter": false,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 1063,
+        "top": 0,
+        "right": 1366,
+        "bottom": 1063,
+        "left": 0
+      },
+      "main": {
+        "x": 83,
+        "y": 0,
+        "width": 1200,
+        "height": 843,
+        "top": 0,
+        "right": 1283,
+        "bottom": 843,
+        "left": 83
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 464,
+        "top": 0,
+        "right": 1366,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 99,
+        "y": 400,
+        "width": 1168,
+        "height": 96,
+        "top": 400,
+        "right": 1267,
+        "bottom": 496,
+        "left": 99
+      },
+      "scroll": 1366,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "visible",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 1366,
+      "gutter": true,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1351,
+        "height": 1063,
+        "top": 0,
+        "right": 1351,
+        "bottom": 1063,
+        "left": 0
+      },
+      "main": {
+        "x": 75.5,
+        "y": 0,
+        "width": 1200,
+        "height": 843,
+        "top": 0,
+        "right": 1275.5,
+        "bottom": 843,
+        "left": 75.5
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 1351,
+        "height": 464,
+        "top": 0,
+        "right": 1351,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 91.5,
+        "y": 400,
+        "width": 1168,
+        "height": 96,
+        "top": 400,
+        "right": 1259.5,
+        "bottom": 496,
+        "left": 91.5
+      },
+      "scroll": 1351,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "auto",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 1024,
+      "gutter": false,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 1250.5,
+        "top": 0,
+        "right": 1024,
+        "bottom": 1250.5,
+        "left": 0
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 1030.5,
+        "top": 0,
+        "right": 1024,
+        "bottom": 1030.5,
+        "left": 0
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 464,
+        "top": 0,
+        "right": 1024,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 16,
+        "y": 400,
+        "width": 992,
+        "height": 96,
+        "top": 400,
+        "right": 1008,
+        "bottom": 496,
+        "left": 16
+      },
+      "scroll": 1024,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "visible",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 1024,
+      "gutter": true,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 1009,
+        "height": 1250.5,
+        "top": 0,
+        "right": 1009,
+        "bottom": 1250.5,
+        "left": 0
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "width": 1009,
+        "height": 1030.5,
+        "top": 0,
+        "right": 1009,
+        "bottom": 1030.5,
+        "left": 0
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 1009,
+        "height": 464,
+        "top": 0,
+        "right": 1009,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 16,
+        "y": 400,
+        "width": 977,
+        "height": 96,
+        "top": 400,
+        "right": 993,
+        "bottom": 496,
+        "left": 16
+      },
+      "scroll": 1009,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "auto",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 768,
+      "gutter": false,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 1717.5,
+        "top": 0,
+        "right": 768,
+        "bottom": 1717.5,
+        "left": 0
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 1254.5,
+        "top": 0,
+        "right": 768,
+        "bottom": 1254.5,
+        "left": 0
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 464,
+        "top": 0,
+        "right": 768,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 16,
+        "y": 400,
+        "width": 736,
+        "height": 320,
+        "top": 400,
+        "right": 752,
+        "bottom": 720,
+        "left": 16
+      },
+      "scroll": 768,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "visible",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 768,
+      "gutter": true,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 753,
+        "height": 1717.5,
+        "top": 0,
+        "right": 753,
+        "bottom": 1717.5,
+        "left": 0
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "width": 753,
+        "height": 1254.5,
+        "top": 0,
+        "right": 753,
+        "bottom": 1254.5,
+        "left": 0
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 753,
+        "height": 464,
+        "top": 0,
+        "right": 753,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 16,
+        "y": 400,
+        "width": 721,
+        "height": 320,
+        "top": 400,
+        "right": 737,
+        "bottom": 720,
+        "left": 16
+      },
+      "scroll": 753,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "auto",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 360,
+      "gutter": false,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 360,
+        "height": 1717.5,
+        "top": 0,
+        "right": 360,
+        "bottom": 1717.5,
+        "left": 0
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "width": 360,
+        "height": 1254.5,
+        "top": 0,
+        "right": 360,
+        "bottom": 1254.5,
+        "left": 0
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 360,
+        "height": 464,
+        "top": 0,
+        "right": 360,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 16,
+        "y": 400,
+        "width": 328,
+        "height": 320,
+        "top": 400,
+        "right": 344,
+        "bottom": 720,
+        "left": 16
+      },
+      "scroll": 360,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "visible",
+        "visible"
+      ]
+    },
+    {
+      "viewport": 360,
+      "gutter": true,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 345,
+        "height": 1717.5,
+        "top": 0,
+        "right": 345,
+        "bottom": 1717.5,
+        "left": 0
+      },
+      "main": {
+        "x": 0,
+        "y": 0,
+        "width": 345,
+        "height": 1254.5,
+        "top": 0,
+        "right": 345,
+        "bottom": 1254.5,
+        "left": 0
+      },
+      "hero": {
+        "x": 0,
+        "y": 0,
+        "width": 345,
+        "height": 464,
+        "top": 0,
+        "right": 345,
+        "bottom": 464,
+        "left": 0
+      },
+      "cards": {
+        "x": 16,
+        "y": 400,
+        "width": 313,
+        "height": 320,
+        "top": 400,
+        "right": 329,
+        "bottom": 720,
+        "left": 16
+      },
+      "scroll": 345,
+      "mainMax": "1200px",
+      "mainPadding": [
+        "24px",
+        "16px",
+        "16px"
+      ],
+      "imageSizing": "auto, cover",
+      "imagePosition": "0% 0%, 50% 68%",
+      "clip": [
+        "auto",
+        "visible"
+      ]
+    }
+  ],
+  "image": {
+    "width": 1536,
+    "height": 1024
+  },
+  "syntheticApiResponses": true,
+  "businessApiCalled": false,
+  "tradingCalled": false,
+  "userBrowserOperated": false
+}
