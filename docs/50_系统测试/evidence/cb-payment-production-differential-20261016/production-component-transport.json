@@ -1,0 +1,70 @@
+{
+  "checkedAt": "2026-10-16T02:42:53.456Z",
+  "sdk": "4.40.1006.ALL",
+  "cases": [
+    {
+      "case": 0,
+      "purpose": "FIRST",
+      "amount": "14200.00",
+      "subject": "租约首期费用（约定首期租金+押金）",
+      "timeExpire": "2026-10-16 00:00:00",
+      "productionComponent": "LeaseFirstPaymentDialog",
+      "productionServiceSubject": true,
+      "productionChannelClient": true,
+      "method": "POST",
+      "allRequiredFieldsPreserved": true,
+      "timestampPreserved": true,
+      "apiCallsLocallyMocked": true
+    },
+    {
+      "case": 1,
+      "purpose": "RENT",
+      "amount": "3600.00",
+      "subject": "租约租金-1个月",
+      "timeExpire": "2026-10-16 20:37:20",
+      "productionComponent": "LeaseRenewDialog",
+      "productionServiceSubject": true,
+      "productionChannelClient": true,
+      "method": "POST",
+      "allRequiredFieldsPreserved": true,
+      "timestampPreserved": true,
+      "apiCallsLocallyMocked": true
+    },
+    {
+      "case": 2,
+      "purpose": "FIRST",
+      "amount": "21000.00",
+      "subject": "租约首期费用（约定首期租金+押金）",
+      "timeExpire": "2026-10-16 00:00:00",
+      "productionComponent": "LeaseFirstPaymentDialog",
+      "productionServiceSubject": true,
+      "productionChannelClient": true,
+      "method": "POST",
+      "allRequiredFieldsPreserved": true,
+      "timestampPreserved": true,
+      "apiCallsLocallyMocked": true
+    },
+    {
+      "case": 3,
+      "purpose": "RENT",
+      "amount": "3000.00",
+      "subject": "租约租金-1个月",
+      "timeExpire": "2026-10-16 22:48:07",
+      "productionComponent": "LeaseRenewDialog",
+      "productionServiceSubject": true,
+      "productionChannelClient": true,
+      "method": "POST",
+      "allRequiredFieldsPreserved": true,
+      "timestampPreserved": true,
+      "apiCallsLocallyMocked": true
+    }
+  ],
+  "passed": 4,
+  "scriptErrors": [],
+  "externalRequests": 0,
+  "normalApiForwarded": 0,
+  "realCredentialsLoaded": false,
+  "userBrowserOperated": false,
+  "remoteInvalidParameterReproduced": false,
+  "conclusion": "实际4笔订单业务形状经生产标题/生产SDK/生产首期或租金组件提交后必需字段完整；不是远端失败请求捕获，未证明收银台错误修复"
+}

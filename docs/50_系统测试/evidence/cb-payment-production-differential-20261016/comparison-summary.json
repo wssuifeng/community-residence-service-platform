@@ -1,0 +1,87 @@
+{
+  "checkedAt": "2026-10-16T10:44:56+08:00",
+  "comparisonBaseline": "two user-confirmed successful FIRST orders versus their two unsuccessful RENT orders",
+  "readOnlyBusinessShapes": [
+    {
+      "purpose": "FIRST",
+      "status": "SUCCESS",
+      "amount": 14200.0,
+      "months": 1,
+      "rentAmount": 3600.0,
+      "depositAmount": 10600.0,
+      "createdAt": "2026-10-15 20:32:29.000000",
+      "channelExpiresAt": "2026-10-16 00:00:00.000000",
+      "paymentNoPatternValid": true
+    },
+    {
+      "purpose": "RENT",
+      "status": "PENDING",
+      "amount": 3600.0,
+      "months": 1,
+      "rentAmount": 3600.0,
+      "depositAmount": 0.0,
+      "createdAt": "2026-10-15 20:37:20.000000",
+      "channelExpiresAt": "2026-10-16 20:37:20.000000",
+      "paymentNoPatternValid": true
+    },
+    {
+      "purpose": "FIRST",
+      "status": "SUCCESS",
+      "amount": 21000.0,
+      "months": 3,
+      "rentAmount": 9000.0,
+      "depositAmount": 12000.0,
+      "createdAt": "2026-10-15 22:41:13.000000",
+      "channelExpiresAt": "2026-10-16 00:00:00.000000",
+      "paymentNoPatternValid": true
+    },
+    {
+      "purpose": "RENT",
+      "status": "PENDING",
+      "amount": 3000.0,
+      "months": 1,
+      "rentAmount": 3000.0,
+      "depositAmount": 0.0,
+      "createdAt": "2026-10-15 22:48:07.000000",
+      "channelExpiresAt": "2026-10-16 22:48:07.000000",
+      "paymentNoPatternValid": true
+    }
+  ],
+  "productionPath": [
+    "PaymentService.credentialOf",
+    "PaymentService.subjectOf",
+    "AlipayChannelClient.createPayment",
+    "SDK pageExecute",
+    "LeaseFirstPaymentDialog OR LeaseRenewDialog",
+    "browser POST intercepted at localhost port 9"
+  ],
+  "backendTargetedTests": 1,
+  "productionComponentCases": 4,
+  "commonFields": [
+    "app_id",
+    "method=alipay.trade.page.pay",
+    "sign_type=RSA2",
+    "charset=UTF-8",
+    "product_code=FAST_INSTANT_TRADE_PAY",
+    "SDK4.40.1006.ALL",
+    "POST form with biz_content"
+  ],
+  "businessDifferences": [
+    "out_trade_no prefix/value",
+    "subject",
+    "total_amount",
+    "time_expire"
+  ],
+  "historicalCodeComparison": "012f4b4 and current subjectOf/credentialOf/submission logic are equivalent; channel adapter changes only timing logging",
+  "realCredentialsLoaded": false,
+  "normalDatabaseModified": false,
+  "normalBusinessApiForwarded": false,
+  "externalTradingCalled": false,
+  "remoteErrorReproduced": false,
+  "rootCauseConfirmed": false,
+  "bugFixed": false,
+  "userBrowserOperated": false,
+  "normalServicesObservedNotListeningBeforeProbe": true,
+  "sourceChanges": "tests and diagnostics only; no application behavior changed",
+  "nextStep": "Requires explicit authorization to submit an existing unpaid order form to the sandbox checkout, without confirming payment or querying/refunding; no request for nonexistent error-page details"
+}
