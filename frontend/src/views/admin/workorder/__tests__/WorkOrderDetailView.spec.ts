@@ -20,7 +20,7 @@ import { sendConversationMessage } from '@/api/conversation'
  * 管理端工单详情（R74）：受理 → 自动建群 → 面板出现（群成员可见）→ 终审结束 → 群聊回收只读。
  * 覆盖断言②③⑤⑥。
  */
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/api/workorder', async () => ({ ...(await import('@/test/fakeBackend')).fakeApi('workorder'), ensureWorkOrderConversation: vi.fn() }))
 vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
 
 const backend = () => getFakeBackend()

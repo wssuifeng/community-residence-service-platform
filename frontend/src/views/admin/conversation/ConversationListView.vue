@@ -91,7 +91,7 @@ const typeLabels = conversationTypeLabels
    （DEF-122：原实现忽略 emit 参数，点筛选只重载不生效） */
 function handleTypeChange(value: string | number | boolean | undefined): void {
   typeFilter.value =
-    value === 'LEASE_GROUP' || value === 'VIEWING_GROUP' || value === 'DIRECT' ? value : ''
+    value === 'LEASE_GROUP' || value === 'VIEWING_GROUP' || value === 'WORK_ORDER_GROUP' || value === 'DIRECT' ? value : ''
   activeId.value = null
   load()
 }
@@ -206,7 +206,7 @@ onMounted(() => {
     <header class="page-head">
       <div>
         <h1>消息会话</h1>
-        <p class="page-head-sub">租约群聊、看房群聊与居民直通会话统一收口，点击会话即时沟通</p>
+        <p class="page-head-sub">租约群聊、看房群聊、工单群聊与居民直通会话统一收口，点击会话即时沟通</p>
       </div>
       <!-- DEF-076：管理端代居民发起直通会话（幂等） -->
       <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openDirectDialog">
@@ -262,16 +262,17 @@ onMounted(() => {
             <el-radio-button :value="''">全部</el-radio-button>
             <el-radio-button value="LEASE_GROUP">租约群聊</el-radio-button>
             <el-radio-button value="VIEWING_GROUP">看房群聊</el-radio-button>
+            <el-radio-button value="WORK_ORDER_GROUP">工单群聊</el-radio-button>
             <el-radio-button value="DIRECT">直通</el-radio-button>
           </el-radio-group>
         </div>
 
         <div v-if="conversations.length === 0 && !loading" class="conv-empty">
-          <p>暂无会话</p>
+          <p>暂无参与的会话</p>
           <!-- ③ 会话来源可解释：会话由业务动作自动建立，管理端当前没有「主动开启会话」的端点 -->
           <p class="conv-empty-hint">
-            会话由业务动作自动建立：入住申请审核通过后建立「租约群聊」，
-            工单受理后建立「工单沟通」群，居民可从「消息中心」发起与管理员的直通会话；
+            此处只显示本人参与的会话，超管也不自动读取所有群聊。会话由业务动作自动建立：入住申请审核通过后建立「租约群聊」，
+            工单受理或直接派单后建立「工单沟通」群，居民可从「消息中心」发起与管理员的直通会话；
             管理端可用右上角「发起直通会话」代居民开启（同一（社区，居民）只有一条会话）。
           </p>
         </div>

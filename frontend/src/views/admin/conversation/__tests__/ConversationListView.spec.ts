@@ -64,7 +64,7 @@ async function pickAndSubmit(wrapper: VueWrapper, communityId: number, residentI
 /** 打开弹窗后切到指定类型筛选（模拟用户先过滤列表再发起直通） */
 async function switchTypeFilter(
   wrapper: VueWrapper,
-  value: '' | 'LEASE_GROUP' | 'VIEWING_GROUP' | 'DIRECT'
+  value: '' | 'LEASE_GROUP' | 'VIEWING_GROUP' | 'WORK_ORDER_GROUP' | 'DIRECT'
 ): Promise<void> {
   const radio = wrapper.findComponent({ name: 'ElRadioGroup' })
   radio.vm.$emit('update:modelValue', value)
@@ -86,7 +86,7 @@ describe('管理端会话中心 · ③ 会话操作界面', () => {
     const wrapper = await mountCenter(router)
 
     const text = wrapper.text()
-    expect(text).toContain('暂无会话')
+    expect(text).toContain('暂无参与的会话')
     expect(text).toContain('入住申请审核通过')
     expect(text).toContain('工单受理')
     expect(text).toContain('居民可从「消息中心」发起与管理员的直通会话')
@@ -348,4 +348,15 @@ describe('管理端会话中心 · DEF-122 修复轮', () => {
       errorSpy.mockRestore()
     }
   })
+})
+
+
+it('会话中心提供工单群聊筛选，不把已支持业务链藏掉', async () => {
+ const wrapper = await mountCenter(buildRouter())
+ expect(wrapper.text()).toContain('工单群聊')
+ const button = wrapper.findAllComponents({ name: 'ElRadioButton' }).find(b => b.props('value') === 'WORK_ORDER_GROUP')
+ expect(button).toBeDefined()
+ await switchTypeFilter(wrapper, 'WORK_ORDER_GROUP')
+ expect(wrapper.findComponent({ name: 'ElRadioGroup' }).props('modelValue')).toBe('WORK_ORDER_GROUP')
+ wrapper.unmount()
 })

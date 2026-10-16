@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -228,6 +229,40 @@ public class WorkOrderService {
         return toVO(order);
     }
 
+    /* 管理端显式补齐已受理/已派单历史工单的群聊；只改会话引用，不推进工单或扩大读取权限。 */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.log.annotation.OperationLog(operationType = "UPDATE", targetType = "WORK_ORDER", targetId = "#id", content = "'打开或恢复工单沟通群'")
+    public WorkOrderVO ensureConversation(Long id) {
+        if (!SecurityUtils.hasRole(RoleConstants.ADMIN) && !SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
+            throw new ForbiddenException("仅管理方可恢复工单沟通群");
+        }
+        WorkOrder order = requireOrder(id);
+        SecurityUtils.checkCommunityAccess(order.getCommunityId());
+        if (!Set.of(WorkOrderStatus.TO_ASSIGN, WorkOrderStatus.ASSIGNED, WorkOrderStatus.ACCEPTED,
+                WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM, WorkOrderStatus.COMPLETED,
+                WorkOrderStatus.CLOSED).contains(order.getStatus())) {
+            throw new BusinessException(ErrorCode.WORK_ORDER_INVALID_TRANSITION, "请先受理工单或派单，再进入沟通群");
+        }
+        Conversation group = ensureCommunicationGroup(order);
+        WorkOrderAssignment assignment = assignmentMapper.selectOne(new LambdaQueryWrapper<WorkOrderAssignment>()
+                .eq(WorkOrderAssignment::getWorkOrderId, id).orderByDesc(WorkOrderAssignment::getId).last("LIMIT 1"));
+        if (assignment != null && group != null && !"CLOSED".equals(group.getStatus())) conversationService.joinWorkOrderGroup(id, assignment.getAssigneeId(), null);
+        if (WorkOrderStatus.CLOSED.equals(order.getStatus())) conversationService.closeWorkOrderGroup(id);
+        return toVO(order);
+    }
+
+    /* 建群以(type,related_id)唯一键幂等；只回写引用，避免恢复沟通时覆盖并发业务状态。 */
+    private Conversation ensureCommunicationGroup(WorkOrder order) {
+        Conversation group = conversationService.createWorkOrderGroup(order.getId(), order.getCommunityId(),
+                order.getResidentId(), SecurityUtils.getUserId(), order.getOrderNo());
+        if (group != null && !Objects.equals(order.getConversationId(), group.getId())) {
+            workOrderMapper.update(null, new LambdaUpdateWrapper<WorkOrder>()
+                    .eq(WorkOrder::getId, order.getId()).set(WorkOrder::getConversationId, group.getId()));
+            order.setConversationId(group.getId());
+        }
+        return group;
+    }
+
     /** 工单详情：RESIDENT 限本人；STAFF 限派给本人；ADMIN 拦截器过滤 */
     public WorkOrderVO getById(Long id) {
         WorkOrder order = requireOrder(id);
@@ -370,7 +405,8 @@ public class WorkOrderService {
 
         appendProcess(id, "ASSIGN", oldStatus, WorkOrderStatus.ASSIGNED,
                 "派单给 " + assignee.getRealName() + (dto.getRemark() != null ? "：" + dto.getRemark() : ""));
-        /* R74：被派服务人员自动入群（幂等；未经受理未建群时静默跳过） */
+        /* 直接派单也完成管理方受理意愿，不能跳过R74沟通群；改派幂等复用并让派单人入群。 */
+        ensureCommunicationGroup(order);
         conversationService.joinWorkOrderGroup(id, dto.getAssigneeId(), assignee.getRealName());
         /* 通知双向触达：服务人员接单提醒（sys_user 身份空间）+ 居民派单进度（resident 身份空间） */
         notificationService.createForUser(dto.getAssigneeId(), order.getCommunityId(), "新工单派发",
