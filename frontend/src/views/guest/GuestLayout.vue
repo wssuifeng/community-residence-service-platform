@@ -133,6 +133,12 @@ onUnmounted(() => {
   width: 100%;
 }
 
+.guest-layout.is-home .guest-main {
+  max-width: none;
+  padding: 0 0 var(--spacing-xxl);
+  min-width: 0;
+}
+
 /* 首页导航 fixed 脱离文档流（Hero 顶到视口顶部），滚动后白底 + 阴影 */
 .guest-layout.is-home :deep(.app-header) {
   position: fixed;

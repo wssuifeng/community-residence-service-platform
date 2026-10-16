@@ -259,8 +259,7 @@ onMounted(() => {
 <style scoped>
 /* Hero：全屏摄影 + 深色渐变蒙版（压暗天空保证白字可读），内容居中 */
 .hero {
-  margin-top: calc(-1 * var(--spacing-lg));
-  margin-inline: calc(50% - 50vw);
+  width: 100%;
   height: clamp(440px, 58vh, 620px);
   display: flex;
   align-items: center;
@@ -276,6 +275,8 @@ onMounted(() => {
 }
 
 .hero-inner {
+  width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -383,12 +384,20 @@ onMounted(() => {
   background: var(--color-primary-dark);
 }
 
+.service-cards,
+.split {
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  padding-inline: var(--spacing-md);
+  box-sizing: border-box;
+}
+
 /* 服务入口卡：负边距叠在 Hero 底边，需相对定位压住 Hero */
 .service-cards {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacing-md);
   margin-top: calc(-1 * var(--spacing-xxl) - var(--spacing-md));
   margin-bottom: var(--spacing-xxl);
@@ -501,6 +510,8 @@ onMounted(() => {
 
 /* 精选房源 + 社区公告不对称分栏：stretch 使公告板与房源区等高；
    minmax(0, …) 防止横向卡条的内容最小宽度撑破轨道（grid item 默认 min-width:auto） */
+.housing-panel, .notice-panel { min-width: 0; }
+
 .split {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
@@ -706,7 +717,7 @@ onMounted(() => {
 /* 响应式：中屏分栏降单列；窄屏服务卡单列（房源列宽由 auto-fit 自适应） */
 @media (max-width: 1024px) {
   .split {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
