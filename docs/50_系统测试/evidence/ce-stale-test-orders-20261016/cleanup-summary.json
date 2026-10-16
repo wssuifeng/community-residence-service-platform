@@ -1,0 +1,94 @@
+{
+  "checkedAt": "2026-10-16T13:44:33+08:00",
+  "authorization": "用户本轮要求清理昨天失败的测试订单；离线维护，不冒认站内账号操作",
+  "environment": "SANDBOX",
+  "cleanup": {
+    "ids": [
+      3,
+      5
+    ],
+    "leaseIds": [
+      10,
+      11
+    ],
+    "priorStatus": "PENDING",
+    "newStatus": "CLOSED",
+    "oldDeadlinesWereStillInFuture": true,
+    "reason": "用户明确放弃两笔历史失败沙箱测试单，不是自然过期，不是产品提前关单规则",
+    "physicalDelete": false,
+    "deadlinesRewritten": false,
+    "gatewayClosedOrQueried": false
+  },
+  "successfulPaymentsProtected": 4,
+  "allOtherPaymentRowsUnchanged": true,
+  "refundAndLeaseAndRelationChecksumsUnchanged": true,
+  "channelConfigurationUnchanged": true,
+  "privateBackupCreated": true,
+  "checks": [
+    {
+      "name": "仅在正常应用未监听时离线维护",
+      "passed": true
+    },
+    {
+      "name": "仅当前沙箱",
+      "passed": true
+    },
+    {
+      "name": "仅精确两笔旧失败测试单",
+      "passed": true
+    },
+    {
+      "name": "维护前私有备份完成",
+      "passed": true
+    },
+    {
+      "name": "仅2条状态更新",
+      "passed": true
+    },
+    {
+      "name": "订单未物理删除",
+      "passed": true
+    },
+    {
+      "name": "其他订单全字段保持2",
+      "passed": true
+    },
+    {
+      "name": "仅作废测试单3",
+      "passed": true
+    },
+    {
+      "name": "其他订单全字段保持4",
+      "passed": true
+    },
+    {
+      "name": "仅作废测试单5",
+      "passed": true
+    },
+    {
+      "name": "其他订单全字段保持6",
+      "passed": true
+    },
+    {
+      "name": "其他订单全字段保持7",
+      "passed": true
+    },
+    {
+      "name": "业务与退款表保持lease_record",
+      "passed": true
+    },
+    {
+      "name": "业务与退款表保持residence_relation",
+      "passed": true
+    },
+    {
+      "name": "业务与退款表保持lease_deposit_refund",
+      "passed": true
+    },
+    {
+      "name": "渠道完整配置摘要不变",
+      "passed": true
+    }
+  ],
+  "externalTradingCalled": false
+}

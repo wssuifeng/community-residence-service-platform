@@ -216,7 +216,7 @@ public class PaymentService {
                 for(var row:existing) {
                     if (row.getSettlementIssue() != null) throw new BusinessException(ErrorCode.INVALID_PARAM, "存在渠道到账待核对记录，请先联系管理方处理，勿重复支付");
                     if(PaymentStatus.PENDING.equals(row.getStatus())) {
-                        if(row.getExpiresAt()!=null&&row.getExpiresAt().isBefore(LocalDateTime.now())){row.setStatus(PaymentStatus.CLOSED);paymentMapper.updateById(row);}else return row;
+                        if(row.getExpiresAt()!=null&&!row.getExpiresAt().isAfter(LocalDateTime.now())){row.setStatus(PaymentStatus.CLOSED);paymentMapper.updateById(row);}else return row;
                     }
                     if(PaymentStatus.SUCCESS.equals(row.getStatus())){
                         if(PaymentType.FIRST.equals(purpose)||PaymentType.RENEWAL.equals(purpose))throw new BusinessException(ErrorCode.PAYMENT_ALREADY_EXISTS);
@@ -241,7 +241,7 @@ public class PaymentService {
     }
 
     private boolean stillPending(LeasePayment row) {
-        return PaymentStatus.PENDING.equals(row.getStatus()) && (row.getExpiresAt()==null || !row.getExpiresAt().isBefore(LocalDateTime.now()));
+        return PaymentStatus.PENDING.equals(row.getStatus()) && (row.getExpiresAt()==null || row.getExpiresAt().isAfter(LocalDateTime.now()));
     }
     private com.community.residence.lease.service.RentSchedule.Quote rentQuote(Long leaseId,List<LeasePayment> rows,int months) {
         if(rows.stream().anyMatch(p->p.getSettlementIssue()!=null))throw new BusinessException(ErrorCode.INVALID_PARAM,"存在到账待核对记录，请先联系管理方，勿重复支付");

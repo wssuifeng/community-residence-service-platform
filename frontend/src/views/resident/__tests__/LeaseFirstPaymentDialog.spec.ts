@@ -334,6 +334,7 @@ it('已配置但关闭的渠道显示未启用，不得误报未配置', async (
 
 describe('首期付款实际双截止', () => {
   it('按后端时间显示付款截止和系统订单到期，30秒不能被分钟格式吞掉', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(new Date('2026-10-16T12:00:00').getTime())
     mocks.listQueue = [[]]
     mocks.createResult = {
       ...order('PENDING', PENDING_NO),
@@ -348,5 +349,45 @@ describe('首期付款实际双截止', () => {
     expect(bodyText()).toContain('付款截止：2026-10-16 12:15:00')
     expect(bodyText()).toContain('系统订单到期：2026-10-16 12:15:30')
     wrapper.unmount()
+  })
+})
+
+
+describe('付款截止后不复用缓存支付表单', () => {
+  it.each([
+    ['首期', LeaseFirstPaymentDialog],
+    ['租金', LeaseRenewDialog]
+  ] as const)('%s：浏览器拦截后等待至渠道截止，再打开不得提交旧表单', async (_label, component) => {
+    const openedAt = Date.now()
+    const now = vi.spyOn(Date, 'now').mockReturnValue(openedAt)
+    vi.mocked(window.open).mockReturnValue(null)
+    mocks.listQueue = [[]]
+    mocks.createResult = {
+      ...order('PENDING', PENDING_NO),
+      alipayForm: ALIPAY_FORM,
+      channelExpiresAt: new Date(openedAt + 60_000).toISOString(),
+      expiresAt: new Date(openedAt + 90_000).toISOString()
+    }
+    const wrapper = mount(component, {
+      props: { modelValue: false, lease: lease() },
+      global: { plugins: [ElementPlus] },
+      attachTo: document.body
+    })
+    try {
+      await wrapper.setProps({ modelValue: true })
+      await flushPromises()
+      buttonWith('去支付')!.click()
+      await flushPromises()
+      expect(window.open).toHaveBeenCalledTimes(1)
+      expect(buttonWith('重新打开支付页')).toBeDefined()
+      now.mockReturnValue(openedAt + 60_000)
+      buttonWith('重新打开支付页')!.click()
+      await flushPromises()
+      expect(window.open).toHaveBeenCalledTimes(1)
+      expect(URL.createObjectURL).toHaveBeenCalledTimes(1)
+      expect(bodyText()).toContain('付款时间已截止')
+    } finally {
+      wrapper.unmount()
+    }
   })
 })

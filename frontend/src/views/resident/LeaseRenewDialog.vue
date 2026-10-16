@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { canOpenPaymentPage } from '@/utils/payment'
 import QRCode from 'qrcode'
 import { formatDateTimeSeconds } from '@/utils/date'
 import {
@@ -192,6 +193,10 @@ async function submitPayment(): Promise<void> {
  * 未转义标记；被拦截时置标记供手动重开。
  */
 function openAlipay(formHtml: string): void {
+  if (!canOpenPaymentPage(payment.value)) {
+    ElMessage.warning('该订单付款时间已截止或已结束，请关闭支付页后重新读取订单，不要使用旧支付链接')
+    return
+  }
   const url = URL.createObjectURL(new Blob([formHtml], { type: 'text/html;charset=utf-8' }))
   const win = window.open(url, '_blank')
   if (!win) {
