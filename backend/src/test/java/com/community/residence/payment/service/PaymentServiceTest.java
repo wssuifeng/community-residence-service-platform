@@ -138,4 +138,15 @@ class PaymentServiceTest {
   assertThat(original.getChannelExpiresAt()).isEqualTo(channel);assertThat(original.getExpiresAt()).isEqualTo(local);
   verify(payments,never()).insert(any(LeasePayment.class));
  }
+ @Test void quoteAtExactSystemDeadlineDoesNotOfferExpiredOrder() {
+  var fixed=LocalDateTime.of(2026,10,16,12,0,0);
+  var expired=pending("RENT");expired.setChannelExpiresAt(fixed.minusSeconds(30));expired.setExpiresAt(fixed);
+  when(payments.selectList(any())).thenReturn(List.of(expired));
+  try(var clock=mockStatic(LocalDateTime.class,CALLS_REAL_METHODS)) {
+   clock.when(LocalDateTime::now).thenReturn(fixed);
+   var quote=service.quote(100L,"RENT",1);
+   assertThat(quote.getPaymentNo()).isNull();assertThat(quote.getQuoteVersion()).isNotBlank();
+   verify(alipay,never()).createPayment(any(),anyString(),any());verify(alipay,never()).queryTrade(anyString());
+  }
+ }
 }

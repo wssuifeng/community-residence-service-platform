@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-16",
+  "batch": "ce",
+  "rootFindings": [
+    "旧订单ID3/5仍是旧24小时截止，按本地快照未过期；用户放弃失败沙箱测试单后仅作废这两笔，不追溯改截止",
+    "实际首期/租金组件中已缓存表单在渠道截止后仍能点击重开；离线2项失败先行，修复前window.open从1次变2次",
+    "后端quote在expiresAt相等时仍返回旧pending；固定时钟失败先行，改为与关单任务相同的半开边界"
+  ],
+  "notClaimed": "缓存和相等边界修复不是用户远端404或历史INVALID_PARAMETER的已确认根因；没有外部重放",
+  "backendPackage": {
+    "exitCode": 0,
+    "suites": 166,
+    "tests": 1157,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontendTargeted": {
+    "files": 3,
+    "tests": 19,
+    "failures": 0,
+    "exitCode": 0
+  },
+  "frontendTypecheckAndBuildExitCode": 0,
+  "liveStartup": {
+    "port": 8084,
+    "frontendPort": 5176,
+    "checksPassed": 21,
+    "schemaVersion": 42,
+    "businessTables": 60,
+    "jar": "manual-ce-release-20261016.jar",
+    "jarSha256": "419a16c2010fdc21e8e6f17e68e0ee2e43ad32adc11f4578d56f613fd257a254"
+  },
+  "cleanup": "cleanup-summary.json",
+  "manualResults": "user-regression-results.json",
+  "safety": {
+    "externalCreateOrQueryOrRefund": false,
+    "changedGatewayOrKeys": false,
+    "successfulPaymentsModified": false,
+    "refundsModified": false,
+    "databaseSchemaChanged": false,
+    "userBrowserOperated": false,
+    "push": false
+  },
+  "runtimeNote": "进入本轮时原8084/5176已无监听；没有停止用户服务。修复版已后台启动，既有定时任务正常运行。",
+  "officialDocCheck": "仅检索静态官方文档；opendocs前端页未返回可读API正文，没有依据搜索摘要改网关/签名/渠道参数，也未访问用户的带签名交易URL。",
+  "liveFrontendGuardSourceChecks": 3
+}

@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-16",
+  "source": "用户本轮明确反馈：R-01-03复测没问题；新建租约首期和租金缴纳都成功",
+  "confirmedManual": [
+    "R-01",
+    "R-02",
+    "R-03",
+    "newLeaseFirstPayment",
+    "newLeaseOrdinaryRentPayment"
+  ],
+  "localReadOnlyCorroboration": {
+    "newSuccessPaymentIds": [
+      6,
+      7
+    ],
+    "leaseId": 12,
+    "firstAmount": "8800.00",
+    "firstMonths": 1,
+    "rentAmount": "14000.00",
+    "rentMonths": 5,
+    "newDeadlinesSeconds": [
+      900,
+      930
+    ]
+  },
+  "notInferred": [
+    "leaseExtensionApproval",
+    "depositRefund",
+    "realLateSuccess",
+    "notifyCallback",
+    "allUiCases"
+  ],
+  "oldErrorBoundary": "历史两笔旧规则测试单ID3/5本地截止尚未到，用户要求放弃并清理；远端404和原INVALID_PARAMETER精确机制未本轮复现，不能归咎渠道或把缓存保护说成其已证实原因。"
+}
