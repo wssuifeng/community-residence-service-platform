@@ -1,0 +1,179 @@
+{
+  "checkedAt": "2026-10-16T16:53:52+08:00",
+  "environment": {
+    "database": "community_residence_cf_20261016",
+    "backend": 8087,
+    "frontend": 5181
+  },
+  "checks": [
+    {
+      "name": "工单补群端点已发布",
+      "passed": true
+    },
+    {
+      "name": "未受理不允许提前补群",
+      "passed": true
+    },
+    {
+      "name": "直接派单即有群，不再仅join不存在的群",
+      "passed": true
+    },
+    {
+      "name": "居民可读同一个工单群",
+      "passed": true
+    },
+    {
+      "name": "派单管理员可读同一个工单群",
+      "passed": true
+    },
+    {
+      "name": "服务人员可读同一个工单群",
+      "passed": true
+    },
+    {
+      "name": "未参与管理员不能直接读他人群",
+      "passed": true
+    },
+    {
+      "name": "三端共用消息历史",
+      "passed": true
+    },
+    {
+      "name": "会话中心工单筛选可见",
+      "passed": true
+    },
+    {
+      "name": "居民不可调用管理端恢复入口",
+      "passed": true
+    },
+    {
+      "name": "重复进入复用同一群",
+      "passed": true
+    },
+    {
+      "name": "历史已派单漏群恢复且不重置工单",
+      "passed": true
+    },
+    {
+      "name": "恢复群含居民及当前处理人",
+      "passed": true
+    },
+    {
+      "name": "关闭工单群只读不复活",
+      "passed": true
+    },
+    {
+      "name": "关闭群不能继续发消息",
+      "passed": true
+    },
+    {
+      "name": "首页1920真实长公告已渲染",
+      "passed": true
+    },
+    {
+      "name": "首页1920含滚动条无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "首页1366真实长公告已渲染",
+      "passed": true
+    },
+    {
+      "name": "首页1366含滚动条无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "首页1024真实长公告已渲染",
+      "passed": true
+    },
+    {
+      "name": "首页1024含滚动条无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "首页768真实长公告已渲染",
+      "passed": true
+    },
+    {
+      "name": "首页768含滚动条无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "首页360真实长公告已渲染",
+      "passed": true
+    },
+    {
+      "name": "首页360含滚动条无整页横溢",
+      "passed": true
+    },
+    {
+      "name": "居民工单详情顶部沟通入口",
+      "passed": true
+    },
+    {
+      "name": "铃铛完整未读数量与服务端一致",
+      "passed": true
+    },
+    {
+      "name": "已读消息不在铃铛",
+      "passed": true
+    },
+    {
+      "name": "铃铛真实可滚动",
+      "passed": true
+    },
+    {
+      "name": "最后一条未读可到达",
+      "passed": true
+    },
+    {
+      "name": "阅读后该通知移出且数量减一",
+      "passed": true
+    },
+    {
+      "name": "公告不再有ALL单值定向范围下拉",
+      "passed": true
+    },
+    {
+      "name": "真正发布范围与定向目标仍保留",
+      "passed": true
+    },
+    {
+      "name": "管理端入口可达实际共用群聊",
+      "passed": true
+    },
+    {
+      "name": "工单筛选实际选中而非回落全部",
+      "passed": true
+    },
+    {
+      "name": "工单筛选能显示该会话",
+      "passed": true
+    },
+    {
+      "name": "服务人员工单顶部群聊入口",
+      "passed": true
+    },
+    {
+      "name": "服务人员群聊定位目标唯一",
+      "passed": true
+    },
+    {
+      "name": "服务人员入口滚动到真实群聊",
+      "passed": true
+    },
+    {
+      "name": "居民群聊定位目标唯一",
+      "passed": true
+    },
+    {
+      "name": "居民入口滚动到真实群聊",
+      "passed": true
+    }
+  ],
+  "passed": 41,
+  "failed": 0,
+  "externalTradingCalled": false,
+  "userBrowserOperated": false,
+  "businessData": "all synthetic in dedicated database; normal backend was not called"
+}

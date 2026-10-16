@@ -1,0 +1,9 @@
+{
+  "command": "mvnw.cmd -q package",
+  "javaVersion": 17,
+  "suites": 166,
+  "tests": 1163,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

@@ -1,0 +1,12 @@
+{
+  "fullCommand": "npm run test",
+  "fullFiles": 67,
+  "fullTests": 396,
+  "fullFailures": 0,
+  "finalFocusedFiles": 3,
+  "finalFocusedTests": 19,
+  "finalFocusedFailures": 0,
+  "typecheck": true,
+  "productionBuild": true,
+  "note": "全量通过后仅补测试数据sourceType字面量类型；最终定向测试与含vue-tsc的生产构建再次通过。jsdom navigation警告不代表真实页面导航已测试，实际交互另由独立浏览器验证。"
+}
