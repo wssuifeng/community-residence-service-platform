@@ -21,37 +21,49 @@ type WsNotificationPayload = Omit<IPulledNotification, 'isRead'> & { isRead: num
 
 export const useNotificationStore = defineStore('notification', () => {
   const notifications = ref<NotificationListItem[]>([])
-  const unreadCount = ref(0)
   const lastSeq = ref(0)
   let pollTimer: ReturnType<typeof setInterval> | null = null
 
+  const unread = computed(() => notifications.value.filter(n => !n.isRead).sort((a, b) => Number(b.seq) - Number(a.seq)))
+  const unreadCount = computed(() => unread.value.length)
   const latest = computed(() => notifications.value.slice(0, 20))
+  let generation = 0
+  let requestVersion = 0
+  let pushVersion = 0
+  const pushedAt = new Map<number, number>()
+  const locallyRead = new Set<number>()
 
   function handlePush(raw: unknown): void {
     const payload = raw as WsNotificationPayload
-    if (notifications.value.some((n) => n.id === payload.id || n.seq === payload.seq)) return
-    const item: IPulledNotification = { ...payload, isRead: payload.isRead === 1 }
+    if (locallyRead.has(payload.id) || notifications.value.some((n) => n.id === payload.id || n.seq === payload.seq)) return
+    const item: IPulledNotification = { ...payload, isRead: payload.isRead === 1 || (payload.isRead as unknown) === true }
     invalidateData()
     notifications.value.unshift(item)
-    if (!item.isRead) unreadCount.value += 1
+    pushedAt.set(item.id, ++pushVersion)
     lastSeq.value = Math.max(lastSeq.value, Number(payload.seq))
   }
 
-  /** 拉取增量与服务端未读数（登录初始化与轮询共用；未读数以服务端口径为准） */
+  /** 拉取增量游标与完整未读快照；铃铛列表和数量从同一快照派生 */
   async function refreshBaseline(): Promise<void> {
+    const session = generation
+    const request = ++requestVersion
+    const startingPush = pushVersion
     try {
-      const result = await pullNotifications(lastSeq.value)
-      for (const item of result.notifications) {
-        if (!notifications.value.some((n) => n.id === item.id)) {
-          notifications.value.unshift(item)
-        }
-      }
+      const [result, snapshot] = await Promise.all([pullNotifications(lastSeq.value), listUnreadNotifications()])
+      if (session !== generation || request !== requestVersion) return
       if (result.latestSeq > lastSeq.value) invalidateData()
       lastSeq.value = Math.max(lastSeq.value, result.latestSeq)
-      const unread = await listUnreadNotifications()
-      unreadCount.value = unread.count
+      /* 未读列表是完整权威快照，不从最新20条推算；保留请求期间的新推送，排除本地已读。 */
+      const items = new Map<number, NotificationListItem>()
+      for (const item of snapshot.notifications) {
+        if (!locallyRead.has(item.id)) items.set(item.id, { ...item, isRead: false })
+      }
+      for (const item of notifications.value) {
+        if ((pushedAt.get(item.id) ?? 0) > startingPush && !item.isRead && !locallyRead.has(item.id)) items.set(item.id, item)
+      }
+      notifications.value = [...items.values()].sort((a, b) => Number(b.seq) - Number(a.seq))
     } catch {
-      /* 静默，轮询兜底 */
+      /* 保留上次未读结果，不把加载失败渲染成零未读；下次打开或轮询重试。 */
     }
   }
 
@@ -70,7 +82,8 @@ export const useNotificationStore = defineStore('notification', () => {
   /** 登录后初始化（user store setSession 调用）：先对齐基线再连 WS */
   function init(): void {
     void refreshBaseline()
-    connectWebSocket(handlePush)
+    const session = generation
+    connectWebSocket((raw) => { if (session === generation) handlePush(raw) })
     startPolling()
   }
 
@@ -78,27 +91,31 @@ export const useNotificationStore = defineStore('notification', () => {
   function cleanup(): void {
     disconnectWebSocket()
     stopPolling()
+    generation += 1
+    requestVersion += 1
+    pushedAt.clear()
+    locallyRead.clear()
     notifications.value = []
-    unreadCount.value = 0
     lastSeq.value = 0
   }
 
   function markLocalRead(id: number): void {
+    locallyRead.add(id)
     const item = notifications.value.find((n) => n.id === id)
     if (item && !item.isRead) {
       item.isRead = true
-      unreadCount.value = Math.max(0, unreadCount.value - 1)
     }
   }
 
   function markAllLocalRead(): void {
-    notifications.value.forEach((n) => (n.isRead = true))
-    unreadCount.value = 0
+    requestVersion += 1
+    notifications.value.forEach((n) => { locallyRead.add(n.id); n.isRead = true })
   }
 
   return {
     notifications,
     latest,
+    unread,
     unreadCount,
     lastSeq,
     init,

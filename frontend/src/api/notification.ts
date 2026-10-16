@@ -26,7 +26,7 @@ export interface UnreadNotifications {
   notifications: IUnreadNotification[]
 }
 
-/** 未读通知列表（最多返回最新 50 条，接口设计.md 9.11.1.2；
+/** 完整未读通知列表（当前后端无50条截断，接口设计.md 9.11.1.2；
  *  后端返回纯数组，此处聚合 count 供既有调用方使用） */
 export async function listUnreadNotifications(): Promise<UnreadNotifications> {
   const list = await http.get<IUnreadNotification[]>('/notifications/unread')

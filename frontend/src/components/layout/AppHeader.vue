@@ -124,6 +124,7 @@ async function handleBellItemClick(item: {
           placement="bottom-end"
           width="320"
           trigger="click"
+          @show="notificationStore.refreshBaseline"
         >
           <template #reference>
             <button type="button" class="header-bell" aria-label="通知">
@@ -139,22 +140,21 @@ async function handleBellItemClick(item: {
               </span>
             </button>
           </template>
-          <div class="bell-panel">
-            <div v-if="notificationStore.latest.length === 0" class="bell-empty">
-              暂无通知
-            </div>
-            <div
-              v-for="item in notificationStore.latest.slice(0, 5)"
+          <div class="bell-heading"><strong>未读通知</strong><span>{{ notificationStore.unreadCount }} 条</span></div>
+          <div class="bell-panel" role="region" aria-label="未读通知列表" tabindex="0">
+            <div v-if="notificationStore.unread.length === 0" class="bell-empty">暂无未读通知</div>
+            <button
+              v-for="item in notificationStore.unread"
               :key="item.id"
-              class="bell-item"
-              :class="{ 'is-unread': !item.isRead }"
-              role="button"
+              type="button"
+              class="bell-item is-unread"
               @click="handleBellItemClick(item)"
             >
-              <div class="bell-item-title">{{ item.title }}</div>
-              <div class="bell-item-content">{{ item.content }}</div>
-            </div>
+              <span class="bell-item-title">{{ item.title }}</span>
+              <span class="bell-item-content">{{ item.content }}</span>
+            </button>
           </div>
+          <router-link class="bell-all" :to="`/${userStore.role === 'RESIDENT' ? 'resident' : userStore.role === 'STAFF' ? 'staff' : 'admin'}/notifications`" @click="bellPopoverRef?.hide()">进入消息中心 →</router-link>
         </el-popover>
         <template v-if="userStore.isLoggedIn">
           <el-dropdown @command="handleCommand">
@@ -313,11 +313,17 @@ async function handleBellItemClick(item: {
   text-align: center;
 }
 
+.bell-heading { display: flex; align-items: center; justify-content: space-between; padding: 2px 4px 12px; border-bottom: 1px solid var(--color-border); }
+.bell-heading span { color: var(--color-text-secondary); font-size: 12px; }
+.bell-all { display: block; text-align: center; padding: 12px 0 0; border-top: 1px solid var(--color-border); color: var(--color-primary); }
 .bell-panel {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  max-height: 320px;
+  max-height: min(360px, 60vh);
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 8px 0;
   overflow-y: auto;
 }
 
@@ -329,6 +335,11 @@ async function handleBellItemClick(item: {
 }
 
 .bell-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  font: inherit;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -345,12 +356,14 @@ async function handleBellItemClick(item: {
 }
 
 .bell-item-title {
+  display: block;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
 
 .bell-item-content {
+  display: block;
   margin-top: 2px;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
