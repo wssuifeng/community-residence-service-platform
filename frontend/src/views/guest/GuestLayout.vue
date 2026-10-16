@@ -120,6 +120,7 @@ onUnmounted(() => {
 
 <style scoped>
 .guest-layout {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -131,12 +132,6 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: var(--spacing-lg) var(--spacing-md) var(--spacing-xxl);
   width: 100%;
-}
-
-.guest-layout.is-home .guest-main {
-  max-width: none;
-  padding: 0 0 var(--spacing-xxl);
-  min-width: 0;
 }
 
 /* 首页导航 fixed 脱离文档流（Hero 顶到视口顶部），滚动后白底 + 阴影 */

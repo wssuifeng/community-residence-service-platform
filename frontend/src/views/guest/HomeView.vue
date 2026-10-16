@@ -96,7 +96,7 @@ onMounted(() => {
 
 <template>
   <div class="home">
-    <!-- 沉浸式摄影 Hero：通栏（负 margin 冲出 1200px 容器并抵消布局上 padding） -->
+    <!-- 保留原内容容器；摄影层等比覆盖，通栏尺寸只取布局实际可用宽度。 -->
     <section class="hero">
       <div class="hero-inner">
         <h1 class="hero-title">回家，是件值得期待的事</h1>
@@ -257,9 +257,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Hero：全屏摄影 + 深色渐变蒙版（压暗天空保证白字可读），内容居中 */
+/* 保留原容器/高度/间距；cqw取布局实际宽度，不把纵向滚动条算进通栏。 */
 .hero {
-  width: 100%;
+  margin-top: calc(-1 * var(--spacing-lg));
+  margin-inline: calc(50% - 50cqw);
   height: clamp(440px, 58vh, 620px);
   display: flex;
   align-items: center;
@@ -382,14 +383,6 @@ onMounted(() => {
 
 .hero-search-btn:hover {
   background: var(--color-primary-dark);
-}
-
-.service-cards,
-.split {
-  width: min(1200px, 100%);
-  margin-inline: auto;
-  padding-inline: var(--spacing-md);
-  box-sizing: border-box;
 }
 
 /* 服务入口卡：负边距叠在 Hero 底边，需相对定位压住 Hero */
