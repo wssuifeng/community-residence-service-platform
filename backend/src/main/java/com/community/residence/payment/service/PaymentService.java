@@ -208,7 +208,6 @@ public class PaymentService {
                 LeaseRecord lease=leaseService.lockForSettlement(leaseId);
                 if(PaymentType.FIRST.equals(purpose)) {
                     if(!"TO_SIGN".equals(lease.getStatus())||!"SIGNED".equals(lease.getAgreementStatus()))throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,"请先确认协议");
-                    if(lease.getStartDate().isBefore(LocalDate.now()))throw new BusinessException(ErrorCode.LEASE_EXPIRED,"已过计划起租日且首期未付，申请将自动驳回，请重新申请");
                 } else if(!"ACTIVE".equals(lease.getStatus()))throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID);
                 if(PaymentType.RENEWAL.equals(purpose)) requireNoDueRent(leaseId);
                 var term=payableTerm(leaseId,purpose);
@@ -224,6 +223,8 @@ public class PaymentService {
                         if(row.getPeriodStart()==null||!row.getPeriodStart().equals(term.getStartDate().plusMonths(paid)))throw new BusinessException(ErrorCode.INVALID_PARAM,"历史租金覆盖不连续，请先核对");paid+=row.getMonths();
                     }
                 }
+                /* 先续接仍有效的首期单；跨零点不能截短已经授予的15分钟付款窗口。 */
+                if(PaymentType.FIRST.equals(purpose)&&lease.getStartDate().isBefore(LocalDate.now()))throw new BusinessException(ErrorCode.LEASE_EXPIRED,"已过计划起租日且首期未付，申请将自动驳回，请重新申请");
                 if(PaymentType.RENEWAL.equals(purpose))throw new BusinessException(ErrorCode.INVALID_PARAM,"旧续租方案不再新建首笔付款，请取消未生效方案后申请延长租期；已有进行中订单仍沿原单继续");
                 if(paid>=term.getContractMonths())throw new BusinessException(ErrorCode.INVALID_PARAM,"该合同段租金已全部缴清");
                 int months=PaymentType.RENT.equals(purpose)?Math.min(term.getPaymentCycleMonths(),term.getContractMonths()-paid):term.getFirstPaymentMonths();
@@ -231,8 +232,8 @@ public class PaymentService {
                 created.setLeaseId(leaseId);created.setResidentId(lease.getTenantId());created.setTermId(term.getId());created.setPaymentType(purpose);created.setChannel(channel);created.setMonths(months);
                 created.setMonthlyRentSnapshot(term.getMonthlyRent());created.setRentAmount(com.community.residence.lease.service.LeaseTermRules.rent(term.getMonthlyRent(),months));created.setDepositAmount(PaymentType.FIRST.equals(purpose)?term.getDeposit():BigDecimal.ZERO);created.setAmount(created.getRentAmount().add(created.getDepositAmount()));
                 created.setPeriodStart(term.getStartDate().plusMonths(paid));created.setPeriodEnd(term.getStartDate().plusMonths(paid+months).minusDays(1));
-                var deadline=com.community.residence.lease.service.LeaseTermRules.channelDeadline(LocalDateTime.now(),lease.getStartDate(),PaymentType.FIRST.equals(purpose));
-                created.setChannelExpiresAt(deadline);created.setExpiresAt(deadline.plusMinutes(5));created.setStatus(PaymentStatus.PENDING);paymentMapper.insert(created);return created;
+                var deadline=com.community.residence.lease.service.LeaseTermRules.channelDeadline(LocalDateTime.now());
+                created.setChannelExpiresAt(deadline);created.setExpiresAt(com.community.residence.lease.service.LeaseTermRules.localDeadline(deadline));created.setStatus(PaymentStatus.PENDING);paymentMapper.insert(created);return created;
             });
         } finally {if(locked)unlockQuietly(lock);}
         if(payment==null)throw new BusinessException(ErrorCode.PAYMENT_CREATE_FAILED);
@@ -275,8 +276,8 @@ public class PaymentService {
                 var q=rentQuote(leaseId,rows,dto.getMonths()==null?1:dto.getMonths());
                 if(!Objects.equals(q.version(),dto.getQuoteVersion()))throw new BusinessException(ErrorCode.INVALID_PARAM,"缴租报价已变化或未确认，请重新读取并核对金额/覆盖区间后支付");
                 var created=rentDraft(lease,q);created.setPaymentNo(generatePaymentNo(PAYMENT_NO_PREFIX));created.setChannel(dto.getChannel());created.setStatus(PaymentStatus.PENDING);
-                var deadline=com.community.residence.lease.service.LeaseTermRules.channelDeadline(LocalDateTime.now(),lease.getStartDate(),false);
-                created.setChannelExpiresAt(deadline);created.setExpiresAt(deadline.plusMinutes(5));paymentMapper.insert(created);return created;
+                var deadline=com.community.residence.lease.service.LeaseTermRules.channelDeadline(LocalDateTime.now());
+                created.setChannelExpiresAt(deadline);created.setExpiresAt(com.community.residence.lease.service.LeaseTermRules.localDeadline(deadline));paymentMapper.insert(created);return created;
             });
         }finally{if(locked)unlockQuietly(lock);}
         if(payment==null)throw new BusinessException(ErrorCode.PAYMENT_CREATE_FAILED);
@@ -429,7 +430,7 @@ public class PaymentService {
             return payment.getId();
         }
         if (payment.getExpiresAt()!=null && LocalDateTime.now().isBefore(payment.getExpiresAt()))
-            throw new BusinessException(ErrorCode.INVALID_PARAM,"渠道订单仍可能支付，暂不能本地关单；关闭页面会保留订单，请等待渠道截止及5分钟缓冲");
+            throw new BusinessException(ErrorCode.INVALID_PARAM,"渠道订单仍可能支付，暂不能本地关单；关闭页面会保留订单，请等待该订单显示的系统到期时间");
         payment.setStatus(PaymentStatus.CLOSED);
         paymentMapper.updateById(payment);
         log.info("支付单已关闭（居民放弃支付）：paymentNo={}, operator={}",

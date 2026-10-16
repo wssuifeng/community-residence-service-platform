@@ -19,12 +19,12 @@ public class LeasePaymentDeadlineService {
     private final ResidenceApplicationMapper applications;
     private final com.community.residence.community.mapper.HouseMapper houses;
     private final com.community.residence.resident.mapper.ResidenceRelationMapper relations;
-    /* 与结算使用相同房屋→租约→支付锁；五分钟缓冲后才处理，已付款不能被驳回。 */
+    /* 与结算使用相同房屋→租约→支付锁；按订单保存的本地截止处理（新单为渠道截止后30秒），已付款不能被驳回。 */
     @Transactional(rollbackFor=Exception.class)
     public boolean rejectUnpaid(Long leaseId,LocalDateTime now){
         var lease=leaseService.lockForSettlement(leaseId);
         if(!java.util.Set.of("PENDING","TO_SIGN").contains(lease.getStatus())||lease.getStartDate()==null||!lease.getStartDate().isBefore(now.toLocalDate()))return false;
-        if(now.isBefore(lease.getStartDate().plusDays(1).atStartOfDay().plusMinutes(5)))return false;
+        if(now.isBefore(LeaseTermRules.localDeadline(lease.getStartDate().plusDays(1).atStartOfDay())))return false;
         var orders=payments.selectList(new LambdaQueryWrapper<LeasePayment>().eq(LeasePayment::getLeaseId,leaseId).eq(LeasePayment::getPaymentType,"FIRST"));
         for(var order:orders){
             var current=payments.selectByIdForUpdate(order.getId());

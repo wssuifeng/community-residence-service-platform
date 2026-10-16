@@ -153,6 +153,10 @@ beforeEach(() => {
   mocks.createMode = 'ok'
   mocks.createResult = null
   mocks.closeCalls = []
+  mocks.channels = [
+    { channel: 'ALIPAY', enabled: true },
+    { channel: 'WECHAT', enabled: false }
+  ]
   stubAlipayWindow()
 })
 
@@ -326,4 +330,23 @@ it('已配置但关闭的渠道显示未启用，不得误报未配置', async (
   expect(cards[1]?.textContent).toContain('未配置')
   expect(mocks.createCalls).toHaveLength(0)
   wrapper.unmount()
+})
+
+describe('首期付款实际双截止', () => {
+  it('按后端时间显示付款截止和系统订单到期，30秒不能被分钟格式吞掉', async () => {
+    mocks.listQueue = [[]]
+    mocks.createResult = {
+      ...order('PENDING', PENDING_NO),
+      alipayForm: ALIPAY_FORM,
+      channelExpiresAt: '2026-10-16T12:15:00',
+      expiresAt: '2026-10-16T12:15:30'
+    }
+    const wrapper = await openDialog()
+    buttonWith('去支付')!.click()
+    await flushPromises()
+    expect(mocks.createCalls).toEqual([{ leaseId: 4, channel: 'ALIPAY' }])
+    expect(bodyText()).toContain('付款截止：2026-10-16 12:15:00')
+    expect(bodyText()).toContain('系统订单到期：2026-10-16 12:15:30')
+    wrapper.unmount()
+  })
 })

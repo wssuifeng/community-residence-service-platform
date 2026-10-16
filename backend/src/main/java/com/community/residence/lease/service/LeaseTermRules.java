@@ -22,16 +22,11 @@ public final class LeaseTermRules {
         if(price==null||price.signum()<0||months<1)throw new BusinessException(ErrorCode.INVALID_PARAM,"月租金与支付月数无效");
         return price.multiply(BigDecimal.valueOf(months));
     }
-    public static LocalDateTime channelDeadline(LocalDateTime now,LocalDate start,boolean first){
-        var deadline=now.plusHours(24);
-        if(first&&start!=null){
-            var cutoff=start.plusDays(1).atStartOfDay();
-            if(cutoff.isBefore(deadline))deadline=cutoff;
-        }
-        if(deadline.isBefore(now.plusMinutes(1)))throw new BusinessException(ErrorCode.INVALID_PARAM,"距首期付款截止不足一分钟，请勿再发起支付，申请将自动驳回");
-        return deadline;
+    /** 新订单共享15分钟渠道窗口；旧单续接读取原快照，不重新计算。 */
+    public static LocalDateTime channelDeadline(LocalDateTime createdAt){
+        return createdAt.plusMinutes(15);
     }
     public static LocalDateTime localDeadline(LocalDateTime channel){
-        return channel.plusMinutes(5);
+        return channel.plusSeconds(30);
     }
 }

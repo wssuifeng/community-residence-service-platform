@@ -78,7 +78,7 @@ class PaymentServiceTest {
  @Test void pendingIsResumedWithoutDuplicateInsert(){var p=pending("RENT");when(payments.selectList(any())).thenReturn(List.of(p));var result=service.createRentPayment(100L,dto("ALIPAY"));assertThat(result.getPaymentNo()).isEqualTo("TEST-ONLY");verify(payments,never()).insert(any(LeasePayment.class));}
  @Test void credentialFailureKeepsRecoverablePending(){when(alipay.createPayment(any(),anyString(),any())).thenThrow(new IllegalStateException("mock transport"));var result=service.createRentPayment(100L,dto("ALIPAY"));assertThat(result.getStatus()).isEqualTo("PENDING");assertThat(result.getAlipayForm()).isNull();}
  @Test void wechatCredentialNotAlipayForm(){var result=service.createRentPayment(100L,dto("WECHAT"));assertThat(result.getQrCode()).isEqualTo("weixin://test");assertThat(result.getAlipayForm()).isNull();}
- @Test void localExpiryIsFiveMinutesAfterChannelDeadline(){service.createRentPayment(100L,dto("ALIPAY"));assertThat(order.getExpiresAt()).isEqualTo(order.getChannelExpiresAt().plusMinutes(5));}
+ @Test void localExpiryIsThirtySecondsAfterChannelDeadline(){service.createRentPayment(100L,dto("ALIPAY"));assertThat(order.getExpiresAt()).isEqualTo(order.getChannelExpiresAt().plusSeconds(30));}
  @Test void quoteDoesNotCreateOrCallChannel(){var result=service.quote(100L,"RENT");assertThat(result.getAmount()).isEqualByComparingTo("3000");verify(payments,never()).insert(any(LeasePayment.class));verify(alipay,never()).createPayment(any(),anyString(),any());verify(alipay,never()).queryTrade(anyString());}
  @Test void firstSuccessActivatesOnceWithoutExtending(){first();var p=pending("FIRST");p.setDepositAmount(new BigDecimal("3000"));var end=lease.getEndDate();service.settleSuccess(p,success());assertThat(p.getStatus()).isEqualTo("SUCCESS");verify(terms).activate(7L,lease);verify(leaseService).applyTransition(eq(lease),eq("ACTIVE"),anyString());assertThat(lease.getEndDate()).isEqualTo(end);}
  @Test void duplicateSuccessNeverActivatesAgain(){var p=pending("RENEWAL");p.setStatus("SUCCESS");service.settleSuccess(p,success());verify(terms,never()).activate(anyLong(),any());}
@@ -107,5 +107,35 @@ class PaymentServiceTest {
   var p=pending("RENT");p.setSettlementIssue("REVIEW_REQUIRED");when(payments.selectList(any())).thenReturn(List.of(p));
   assertThatThrownBy(()->service.createRentPayment(100L,dto("ALIPAY"))).hasMessageContaining("待核对");
   verify(payments,never()).insert(any(LeasePayment.class));verify(alipay,never()).createPayment(any(),anyString(),any());
+ }
+ @Test void newFirstAndRentOrderDeadlinesShareFifteenMinuteRule() {
+  var fixed=LocalDateTime.of(2026,10,16,12,0,0);
+  try(var clock=mockStatic(LocalDateTime.class,CALLS_REAL_METHODS)) {
+   clock.when(LocalDateTime::now).thenReturn(fixed);
+   service.createRentPayment(100L,dto("ALIPAY"));
+   assertThat(order.getChannelExpiresAt()).isEqualTo(fixed.plusMinutes(15));
+   assertThat(order.getExpiresAt()).isEqualTo(fixed.plusMinutes(15).plusSeconds(30));
+   first();var firstDto=new CreateFirstPaymentDTO();firstDto.setChannel("ALIPAY");
+   service.createFirstPayment(100L,firstDto);
+   assertThat(order.getChannelExpiresAt()).isEqualTo(fixed.plusMinutes(15));
+   assertThat(order.getExpiresAt()).isEqualTo(fixed.plusMinutes(15).plusSeconds(30));
+  }
+ }
+ @Test void continuingExistingOrderDoesNotReplaceItsHistoricalDeadlines() {
+  var original=pending("RENT");var channel=LocalDateTime.now().plusHours(2);var local=channel.plusMinutes(5);
+  original.setChannelExpiresAt(channel);original.setExpiresAt(local);when(payments.selectList(any())).thenReturn(List.of(original));
+  service.createRentPayment(100L,dto("ALIPAY"));
+  assertThat(original.getChannelExpiresAt()).isEqualTo(channel);assertThat(original.getExpiresAt()).isEqualTo(local);
+  verify(payments,never()).insert(any(LeasePayment.class));verify(payments,never()).updateById(any(LeasePayment.class));
+ }
+ @Test void validFirstOrderCanBeResumedAfterMidnightWithoutCreatingAnotherOrder() {
+  first();lease.setStartDate(LocalDate.now().minusDays(1));
+  var original=pending("FIRST");var channel=LocalDateTime.now().plusMinutes(5);var local=channel.plusSeconds(30);
+  original.setChannelExpiresAt(channel);original.setExpiresAt(local);when(payments.selectList(any())).thenReturn(List.of(original));
+  var d=new CreateFirstPaymentDTO();d.setChannel("ALIPAY");
+  var result=service.createFirstPayment(100L,d);
+  assertThat(result.getPaymentNo()).isEqualTo(original.getPaymentNo());
+  assertThat(original.getChannelExpiresAt()).isEqualTo(channel);assertThat(original.getExpiresAt()).isEqualTo(local);
+  verify(payments,never()).insert(any(LeasePayment.class));
  }
 }

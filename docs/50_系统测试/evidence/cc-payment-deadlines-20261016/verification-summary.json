@@ -1,0 +1,95 @@
+{
+  "batch": "cc",
+  "date": "2026-10-16",
+  "stage": "50 steps 7/8",
+  "rule": {
+    "newChannelSeconds": 900,
+    "newSystemSeconds": 930,
+    "resultBufferSeconds": 30,
+    "resumeRestartsClock": false,
+    "rewriteHistoricalOrders": false,
+    "truncateExistingFirstOrderAtMidnight": false
+  },
+  "checks": {
+    "targetedBackend": [
+      {
+        "suite": "com.community.residence.lease.service.LeasePaymentDeadlineServiceTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.community.residence.lease.service.LeaseTermRulesTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.community.residence.payment.service.AlipayPaymentDifferentialTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "com.community.residence.payment.service.PaymentServiceTest",
+        "tests": 41,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "targetedBackendTotal": 61,
+    "backendPackage": {
+      "exitCode": 0,
+      "suites": 166,
+      "tests": 1156,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "frontendTargeted": {
+      "files": 2,
+      "tests": 13,
+      "failures": 0,
+      "exitCode": 0
+    },
+    "frontendTypecheckExitCode": 0,
+    "frontendBuildExitCode": 0,
+    "gitDiffCheckExitCode": 0
+  },
+  "redGreen": {
+    "backendInitialRules": "old 24-hour/midnight/5-minute behavior failed new deadlines/boundaries",
+    "backendInitialResume": "old start-date check blocked a still-valid first order after midnight",
+    "frontendInitial": "missing second-precision deadline labels failed two assertions",
+    "frontendFixtureCorrection": "reset disabled channel mock per test; prior test leaked channels into the new test; no product channel logic changed"
+  },
+  "candidate": {
+    "path": "output/runtime/manual-cc-candidate-20261016.jar",
+    "sha256": "21cc2400012353500c5d30b209fa62e24c660220fd63f56dd21db5c5e576be10",
+    "loadedByNormalBackend": false,
+    "databaseMigrationRequired": false
+  },
+  "runtime": {
+    "normalPorts": [
+      8084,
+      5176
+    ],
+    "latestProbeListening": [],
+    "servicesStartedOrStoppedByThisBatch": false,
+    "scheduledScanCronUnchanged": "0 */5 * * * *",
+    "note": "expiresAt is exact; actual state transition can wait for a later scan"
+  },
+  "safety": {
+    "externalCreatePayment": false,
+    "externalQueryTrade": false,
+    "externalRefund": false,
+    "databaseWrites": false,
+    "channelConfigurationChanges": false,
+    "userBrowserOperated": false,
+    "push": false
+  },
+  "remaining": "DEF-205 INVALID_PARAMETER is not reproduced or claimed fixed by this rule change."
+}

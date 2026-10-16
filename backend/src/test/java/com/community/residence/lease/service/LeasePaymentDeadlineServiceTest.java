@@ -24,7 +24,7 @@ class LeasePaymentDeadlineServiceTest {
     @Mock com.community.residence.resident.mapper.ResidenceRelationMapper relations;
     @InjectMocks LeasePaymentDeadlineService service;
     LeaseRecord lease;
-    LocalDateTime now=LocalDateTime.of(2026,10,16,0,5);
+    LocalDateTime now=LocalDateTime.of(2026,10,16,0,0,30);
     @BeforeAll static void metadata(){
         for(Class<?> c:List.of(LeasePayment.class,com.community.residence.resident.entity.ResidenceApplication.class))com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(),""),c);
     }
@@ -46,7 +46,7 @@ class LeasePaymentDeadlineServiceTest {
         assertThat(service.rejectUnpaid(10L,now)).isFalse();
         verifyNoInteractions(applications);
     }
-    @Test void fiveMinuteBufferIsRespected(){
+    @Test void thirtySecondBufferIsRespected(){
         assertThat(service.rejectUnpaid(10L,now.minusSeconds(1))).isFalse();
         verifyNoInteractions(applications);
     }
@@ -116,5 +116,15 @@ class LeasePaymentDeadlineServiceTest {
         when(relations.selectCount(any())).thenReturn(0L);
         service.beginResidence(10L,now);
         verifyNoInteractions(houses);
+    }
+    @Test void firstOrderCrossingMidnightKeepsItsFifteenMinuteWindowAndBuffer() {
+        var created=LocalDateTime.of(2026,10,15,23,55);
+        var p=new LeasePayment();p.setId(1L);p.setStatus("PENDING");
+        p.setChannelExpiresAt(created.plusMinutes(15));p.setExpiresAt(created.plusMinutes(15).plusSeconds(30));
+        when(payments.selectList(any())).thenReturn(List.of(p));when(payments.selectByIdForUpdate(1L)).thenReturn(p);
+        assertThat(service.rejectUnpaid(10L,created.plusMinutes(15).plusSeconds(29))).isFalse();
+        verifyNoInteractions(applications);
+        assertThat(service.rejectUnpaid(10L,created.plusMinutes(15).plusSeconds(30))).isTrue();
+        assertThat(p.getStatus()).isEqualTo("CLOSED");
     }
 }
