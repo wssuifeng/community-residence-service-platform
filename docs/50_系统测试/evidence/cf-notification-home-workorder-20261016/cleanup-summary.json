@@ -1,0 +1,12 @@
+{
+  "isolatedDatabaseDropped": "community_residence_cf_20261016",
+  "portsListening": {
+    "8084": true,
+    "5176": true,
+    "8087": false,
+    "5181": false
+  },
+  "normalDatabaseDropped": false,
+  "redisFlushed": false,
+  "userBrowserOperated": false
+}

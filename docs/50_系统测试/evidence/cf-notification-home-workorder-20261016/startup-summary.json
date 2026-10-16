@@ -1,0 +1,135 @@
+{
+  "checkedAt": "2026-10-16T16:59:17+08:00",
+  "sourceCommit": "47da6af",
+  "sourceWorktreeIncludesCfFixes": true,
+  "jar": "manual-cf-release-20261016.jar",
+  "jarSha256": "11686798d4eba0aaec5651ad20540535da906711764750dc460237f2e6b770a8",
+  "backendPort": 8084,
+  "frontendPort": 5176,
+  "schemaVersion": 42,
+  "businessTables": 60,
+  "countsBefore": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 3,
+    "lease_record": 3,
+    "lease_payment": 6,
+    "lease_deposit_refund": 0
+  },
+  "countsAfter": {
+    "community": 1,
+    "house": 16,
+    "resident": 21,
+    "residence_relation": 3,
+    "lease_record": 3,
+    "lease_payment": 6,
+    "lease_deposit_refund": 0
+  },
+  "alipayConfiguration": {
+    "environment": "SANDBOX",
+    "configured": true,
+    "enabled": true,
+    "privateKeyConfigured": true,
+    "revision": 3
+  },
+  "checks": [
+    {
+      "name": "MySQL3306及Redis6379已监听",
+      "passed": true
+    },
+    {
+      "name": "仅后端端口空闲，保留原5176前端",
+      "passed": true
+    },
+    {
+      "name": "正常库V42及60业务表，无需新迁移",
+      "passed": true
+    },
+    {
+      "name": "后端OpenAPI就绪",
+      "passed": true
+    },
+    {
+      "name": "前端登录入口就绪",
+      "passed": true
+    },
+    {
+      "name": "新版工单恢复及既有接口存在",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 superadmin",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 admin1",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 staff1",
+      "passed": true
+    },
+    {
+      "name": "演示账号登录 resident1",
+      "passed": true
+    },
+    {
+      "name": "原沙箱配置完整启用，无需重填私钥",
+      "passed": true
+    },
+    {
+      "name": "5176代理读取相同渠道状态",
+      "passed": true
+    },
+    {
+      "name": "管理端列表读取 /api/v1/communities/houses-manage",
+      "passed": true
+    },
+    {
+      "name": "管理端列表读取 /api/v1/notices",
+      "passed": true
+    },
+    {
+      "name": "管理端列表读取 /api/v1/conversations",
+      "passed": true
+    },
+    {
+      "name": "当前前端组件含实际双截止 LeaseFirstPaymentDialog",
+      "passed": true
+    },
+    {
+      "name": "当前前端组件含实际双截止 LeaseRenewDialog",
+      "passed": true
+    },
+    {
+      "name": "前端日期格式精确到秒",
+      "passed": true
+    },
+    {
+      "name": "正常业务记录数量保持",
+      "passed": true
+    },
+    {
+      "name": "渠道配置及身份密钥摘要保持",
+      "passed": true
+    },
+    {
+      "name": "原成功账目保持",
+      "passed": true
+    }
+  ],
+  "passed": 21,
+  "failed": 0,
+  "paymentConfigModified": false,
+  "externalTradingCalled": false,
+  "allPaymentRowsUnchangedAtProbe": true,
+  "successfulPaymentRowsUnchanged": true,
+  "naturalScheduledTasksEnabled": true,
+  "userBrowserOperated": false,
+  "backendBuildSkipTests": false,
+  "currentBackendFullTests": 1163,
+  "frontendBuildIncludesTypecheck": true,
+  "deployedCodeCommit": "085e49008c78028b948ec90fab6e8487f44133c6",
+  "deployedWorkOrderClassBytesMatchCurrentTarget": true
+}
