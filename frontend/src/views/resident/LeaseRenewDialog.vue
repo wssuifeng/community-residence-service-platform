@@ -2,6 +2,7 @@
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
+import { formatDateTimeSeconds } from '@/utils/date'
 import {
   closePayment,
   createRenewPayment,
@@ -429,6 +430,11 @@ onUnmounted(stopPolling)
         <span>{{ paymentChannelLabels[payment.channel] }}</span>
         <span>{{ money(payment.amount) }}</span>
         <span>租金覆盖 {{ payment.months }} 个月</span>
+      </p>
+
+      <p v-if="payment.channelExpiresAt || payment.expiresAt" class="pay-note">
+        <span v-if="payment.channelExpiresAt">付款截止：{{ formatDateTimeSeconds(payment.channelExpiresAt) }}</span><br />
+        <span v-if="payment.expiresAt">系统订单到期：{{ formatDateTimeSeconds(payment.expiresAt) }}</span>
       </p>
 
       <template v-if="payment.channel === 'ALIPAY'">

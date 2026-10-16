@@ -5,7 +5,7 @@ import QRCode from 'qrcode'
 import { getRentQuote, closePayment, createFirstPayment, getPaymentStatus, listPaymentChannels } from '@/api/payment'
 import { listLeasePayments } from '@/api/lease'
 import { ApiError } from '@/utils/request'
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime, formatDateTimeSeconds } from '@/utils/date'
 import type { ILeasePayment, ILeaseRecord, IPaymentChannelOption, PaymentChannel } from '@/types/modules/lease'
 
 /**
@@ -599,6 +599,11 @@ onUnmounted(stopPolling)
         class="resume-line"
       >
         已续接您此前未支付的首期支付单，渠道以该单为准（{{ paymentChannelLabels[payment.channel] }}）
+      </p>
+
+      <p v-if="payment.channelExpiresAt || payment.expiresAt" class="pay-note">
+        <span v-if="payment.channelExpiresAt">付款截止：{{ formatDateTimeSeconds(payment.channelExpiresAt) }}</span><br />
+        <span v-if="payment.expiresAt">系统订单到期：{{ formatDateTimeSeconds(payment.expiresAt) }}</span>
       </p>
 
       <template v-if="payment.channel === 'ALIPAY'">

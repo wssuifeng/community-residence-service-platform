@@ -15,6 +15,14 @@ export function formatDateTime(iso: string | undefined | null): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
+/** 支付双截止精确到秒，不能把结果缓冲的30秒隐藏成同一分钟。 */
+export function formatDateTimeSeconds(iso: string | undefined | null): string {
+  if (!iso) return '-'
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return iso
+  return `${formatDateTime(iso)}:${pad(date.getSeconds())}`
+}
+
 /** ISO 时间 → YYYY-MM-DD */
 export function formatDate(iso: string | undefined | null): string {
   if (!iso) return '-'

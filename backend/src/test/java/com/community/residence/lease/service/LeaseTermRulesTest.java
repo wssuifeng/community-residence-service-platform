@@ -20,22 +20,23 @@ class LeaseTermRulesTest {
         assertThat(LeaseTermRules.end(next,6)).isEqualTo("2028-04-14");
         assertThat(LeaseTermRules.end(next,1)).isEqualTo("2027-11-14");
     }
-    @Test void localClosureHasFiveMinuteChannelBuffer(){
-        var now=LocalDateTime.of(2026,10,15,12,0);
-        var channel=LeaseTermRules.channelDeadline(now,now.toLocalDate(),true);
-        assertThat(channel).isEqualTo("2026-10-16T00:00");
-        assertThat(LeaseTermRules.localDeadline(channel)).isEqualTo("2026-10-16T00:05");
+    @Test void firstAndRentChannelDeadlineIsExactlyFifteenMinutes(){
+        var now=LocalDateTime.of(2026,10,16,12,0,17);
+        assertThat(LeaseTermRules.channelDeadline(now)).isEqualTo(now.plusMinutes(15));
     }
-    @Test void nonFirstOrderHasTwentyFourHours(){
-        var now=LocalDateTime.of(2026,10,15,12,0);
-        assertThat(LeaseTermRules.channelDeadline(now,null,false)).isEqualTo(now.plusHours(24));
+    @Test void localClosureIsFifteenMinutesThirtySecondsAfterCreation(){
+        var now=LocalDateTime.of(2026,10,16,12,0,17);
+        var channel=LeaseTermRules.channelDeadline(now);
+        assertThat(LeaseTermRules.localDeadline(channel)).isEqualTo(now.plusMinutes(15).plusSeconds(30));
     }
     @Test void invalidMonthCountsRejected(){
         assertThatThrownBy(()->LeaseTermRules.validate(12,13,1)).isInstanceOf(RuntimeException.class);
         assertThatThrownBy(()->LeaseTermRules.validate(12,1,0)).isInstanceOf(RuntimeException.class);
     }
-    @Test void firstOrderTooCloseToCutoffCannotBeExtendedByChannelMinimum() {
-        var now=LocalDateTime.of(2026,10,15,23,59,30);
-        assertThatThrownBy(()->LeaseTermRules.channelDeadline(now,now.toLocalDate(),true)).hasMessageContaining("不足一分钟");
+    @Test void firstOrderNearMidnightStillHasTheFullFifteenMinutes() {
+        var now=LocalDateTime.of(2026,10,16,23,59,30);
+        var channel=LeaseTermRules.channelDeadline(now);
+        assertThat(channel).isEqualTo("2026-10-17T00:14:30");
+        assertThat(LeaseTermRules.localDeadline(channel)).isEqualTo("2026-10-17T00:15:00");
     }
 }
