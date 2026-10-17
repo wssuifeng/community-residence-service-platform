@@ -1,0 +1,1930 @@
+{
+  "created_at": "2026-10-17T11:22:44.319714+08:00",
+  "scope": "standalone deterministic design drawing only; not production tests",
+  "checks": [
+    {
+      "name": "admin/1920: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1920,
+        "body": 1080,
+        "workspace": {
+          "x": 262,
+          "y": 150,
+          "width": 1628,
+          "height": 904,
+          "top": 150,
+          "right": 1890,
+          "bottom": 1054,
+          "left": 262
+        },
+        "rail": {
+          "x": 263,
+          "y": 151,
+          "width": 76,
+          "height": 902,
+          "top": 151,
+          "right": 339,
+          "bottom": 1053,
+          "left": 263
+        },
+        "chat": {
+          "x": 673,
+          "y": 151,
+          "width": 1216,
+          "height": 902,
+          "top": 151,
+          "right": 1889,
+          "bottom": 1053,
+          "left": 673
+        },
+        "send": {
+          "x": 1780,
+          "y": 1007,
+          "width": 87,
+          "height": 31,
+          "top": 1007,
+          "right": 1867,
+          "bottom": 1038,
+          "left": 1780
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/1920: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1920: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1920: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1920: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1920,
+        "body": 1080,
+        "workspace": {
+          "x": 262,
+          "y": 150,
+          "width": 1628,
+          "height": 904,
+          "top": 150,
+          "right": 1890,
+          "bottom": 1054,
+          "left": 262
+        },
+        "rail": {
+          "x": 263,
+          "y": 151,
+          "width": 76,
+          "height": 902,
+          "top": 151,
+          "right": 339,
+          "bottom": 1053,
+          "left": 263
+        },
+        "chat": {
+          "x": 673,
+          "y": 151,
+          "width": 1216,
+          "height": 902,
+          "top": 151,
+          "right": 1889,
+          "bottom": 1053,
+          "left": 673
+        },
+        "send": {
+          "x": 1780,
+          "y": 1007,
+          "width": 87,
+          "height": 31,
+          "top": 1007,
+          "right": 1867,
+          "bottom": 1038,
+          "left": 1780
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/1440: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1440,
+        "body": 900,
+        "workspace": {
+          "x": 256,
+          "y": 144,
+          "width": 1160,
+          "height": 732,
+          "top": 144,
+          "right": 1416,
+          "bottom": 876,
+          "left": 256
+        },
+        "rail": {
+          "x": 257,
+          "y": 145,
+          "width": 76,
+          "height": 730,
+          "top": 145,
+          "right": 333,
+          "bottom": 875,
+          "left": 257
+        },
+        "chat": {
+          "x": 643,
+          "y": 145,
+          "width": 772,
+          "height": 730,
+          "top": 145,
+          "right": 1415,
+          "bottom": 875,
+          "left": 643
+        },
+        "send": {
+          "x": 1306,
+          "y": 829,
+          "width": 87,
+          "height": 31,
+          "top": 829,
+          "right": 1393,
+          "bottom": 860,
+          "left": 1306
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/1440: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1440: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1440: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1440: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1440,
+        "body": 900,
+        "workspace": {
+          "x": 256,
+          "y": 144,
+          "width": 1160,
+          "height": 732,
+          "top": 144,
+          "right": 1416,
+          "bottom": 876,
+          "left": 256
+        },
+        "rail": {
+          "x": 257,
+          "y": 145,
+          "width": 76,
+          "height": 730,
+          "top": 145,
+          "right": 333,
+          "bottom": 875,
+          "left": 257
+        },
+        "chat": {
+          "x": 643,
+          "y": 145,
+          "width": 772,
+          "height": 730,
+          "top": 145,
+          "right": 1415,
+          "bottom": 875,
+          "left": 643
+        },
+        "send": {
+          "x": 1306,
+          "y": 829,
+          "width": 87,
+          "height": 31,
+          "top": 829,
+          "right": 1393,
+          "bottom": 860,
+          "left": 1306
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/1366: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1366,
+        "body": 768,
+        "workspace": {
+          "x": 256,
+          "y": 144,
+          "width": 1086,
+          "height": 600,
+          "top": 144,
+          "right": 1342,
+          "bottom": 744,
+          "left": 256
+        },
+        "rail": {
+          "x": 257,
+          "y": 145,
+          "width": 76,
+          "height": 598,
+          "top": 145,
+          "right": 333,
+          "bottom": 743,
+          "left": 257
+        },
+        "chat": {
+          "x": 643,
+          "y": 145,
+          "width": 698,
+          "height": 598,
+          "top": 145,
+          "right": 1341,
+          "bottom": 743,
+          "left": 643
+        },
+        "send": {
+          "x": 1232,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 1319,
+          "bottom": 728,
+          "left": 1232
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/1366: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1366: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1366: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1366: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1366,
+        "body": 768,
+        "workspace": {
+          "x": 256,
+          "y": 144,
+          "width": 1086,
+          "height": 600,
+          "top": 144,
+          "right": 1342,
+          "bottom": 744,
+          "left": 256
+        },
+        "rail": {
+          "x": 257,
+          "y": 145,
+          "width": 76,
+          "height": 598,
+          "top": 145,
+          "right": 333,
+          "bottom": 743,
+          "left": 257
+        },
+        "chat": {
+          "x": 643,
+          "y": 145,
+          "width": 698,
+          "height": 598,
+          "top": 145,
+          "right": 1341,
+          "bottom": 743,
+          "left": 643
+        },
+        "send": {
+          "x": 1232,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 1319,
+          "bottom": 728,
+          "left": 1232
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/1024: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1024,
+        "body": 768,
+        "workspace": {
+          "x": 88,
+          "y": 144,
+          "width": 920,
+          "height": 600,
+          "top": 144,
+          "right": 1008,
+          "bottom": 744,
+          "left": 88
+        },
+        "rail": {
+          "x": 89,
+          "y": 145,
+          "width": 66,
+          "height": 598,
+          "top": 145,
+          "right": 155,
+          "bottom": 743,
+          "left": 89
+        },
+        "chat": {
+          "x": 435,
+          "y": 145,
+          "width": 572,
+          "height": 598,
+          "top": 145,
+          "right": 1007,
+          "bottom": 743,
+          "left": 435
+        },
+        "send": {
+          "x": 898,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 985,
+          "bottom": 728,
+          "left": 898
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/1024: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1024: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1024: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/1024: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1024,
+        "body": 768,
+        "workspace": {
+          "x": 88,
+          "y": 144,
+          "width": 920,
+          "height": 600,
+          "top": 144,
+          "right": 1008,
+          "bottom": 744,
+          "left": 88
+        },
+        "rail": {
+          "x": 89,
+          "y": 145,
+          "width": 66,
+          "height": 598,
+          "top": 145,
+          "right": 155,
+          "bottom": 743,
+          "left": 89
+        },
+        "chat": {
+          "x": 435,
+          "y": 145,
+          "width": 572,
+          "height": 598,
+          "top": 145,
+          "right": 1007,
+          "bottom": 743,
+          "left": 435
+        },
+        "send": {
+          "x": 898,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 985,
+          "bottom": 728,
+          "left": 898
+        },
+        "outer": "flex",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "admin/900: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 900,
+        "body": 768,
+        "workspace": {
+          "x": 88,
+          "y": 134,
+          "width": 796,
+          "height": 610,
+          "top": 134,
+          "right": 884,
+          "bottom": 744,
+          "left": 88
+        },
+        "rail": {
+          "x": 89,
+          "y": 135,
+          "width": 66,
+          "height": 608,
+          "top": 135,
+          "right": 155,
+          "bottom": 743,
+          "left": 89
+        },
+        "chat": {
+          "x": 155,
+          "y": 135,
+          "width": 728,
+          "height": 608,
+          "top": 135,
+          "right": 883,
+          "bottom": 743,
+          "left": 155
+        },
+        "send": {
+          "x": 774,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 861,
+          "bottom": 728,
+          "left": 774
+        },
+        "outer": "flex",
+        "list": "none"
+      }
+    },
+    {
+      "name": "admin/900: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/900: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/900: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/900: list/chat switch",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "narrow: list opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "narrow: selecting returns to chat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/768: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 768,
+        "body": 768,
+        "workspace": {
+          "x": 88,
+          "y": 134,
+          "width": 664,
+          "height": 610,
+          "top": 134,
+          "right": 752,
+          "bottom": 744,
+          "left": 88
+        },
+        "rail": {
+          "x": 89,
+          "y": 135,
+          "width": 66,
+          "height": 608,
+          "top": 135,
+          "right": 155,
+          "bottom": 743,
+          "left": 89
+        },
+        "chat": {
+          "x": 155,
+          "y": 135,
+          "width": 596,
+          "height": 608,
+          "top": 135,
+          "right": 751,
+          "bottom": 743,
+          "left": 155
+        },
+        "send": {
+          "x": 642,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 729,
+          "bottom": 728,
+          "left": 642
+        },
+        "outer": "flex",
+        "list": "none"
+      }
+    },
+    {
+      "name": "admin/768: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/768: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/768: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin/768: list/chat switch",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1920: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1920,
+        "body": 1080,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1856,
+          "height": 910,
+          "top": 146,
+          "right": 1888,
+          "bottom": 1056,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 908,
+          "top": 147,
+          "right": 109,
+          "bottom": 1055,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 1448,
+          "height": 908,
+          "top": 147,
+          "right": 1887,
+          "bottom": 1055,
+          "left": 439
+        },
+        "send": {
+          "x": 1778,
+          "y": 1009,
+          "width": 87,
+          "height": 31,
+          "top": 1009,
+          "right": 1865,
+          "bottom": 1040,
+          "left": 1778
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/1920: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1920: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1920: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1920: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1920,
+        "body": 1080,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1856,
+          "height": 910,
+          "top": 146,
+          "right": 1888,
+          "bottom": 1056,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 908,
+          "top": 147,
+          "right": 109,
+          "bottom": 1055,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 1448,
+          "height": 908,
+          "top": 147,
+          "right": 1887,
+          "bottom": 1055,
+          "left": 439
+        },
+        "send": {
+          "x": 1778,
+          "y": 1009,
+          "width": 87,
+          "height": 31,
+          "top": 1009,
+          "right": 1865,
+          "bottom": 1040,
+          "left": 1778
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/1440: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1440,
+        "body": 900,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1376,
+          "height": 730,
+          "top": 146,
+          "right": 1408,
+          "bottom": 876,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 728,
+          "top": 147,
+          "right": 109,
+          "bottom": 875,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 968,
+          "height": 728,
+          "top": 147,
+          "right": 1407,
+          "bottom": 875,
+          "left": 439
+        },
+        "send": {
+          "x": 1298,
+          "y": 829,
+          "width": 87,
+          "height": 31,
+          "top": 829,
+          "right": 1385,
+          "bottom": 860,
+          "left": 1298
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/1440: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1440: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1440: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1440: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1440,
+        "body": 900,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1376,
+          "height": 730,
+          "top": 146,
+          "right": 1408,
+          "bottom": 876,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 728,
+          "top": 147,
+          "right": 109,
+          "bottom": 875,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 968,
+          "height": 728,
+          "top": 147,
+          "right": 1407,
+          "bottom": 875,
+          "left": 439
+        },
+        "send": {
+          "x": 1298,
+          "y": 829,
+          "width": 87,
+          "height": 31,
+          "top": 829,
+          "right": 1385,
+          "bottom": 860,
+          "left": 1298
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/1366: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1366,
+        "body": 768,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1302,
+          "height": 598,
+          "top": 146,
+          "right": 1334,
+          "bottom": 744,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 596,
+          "top": 147,
+          "right": 109,
+          "bottom": 743,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 894,
+          "height": 596,
+          "top": 147,
+          "right": 1333,
+          "bottom": 743,
+          "left": 439
+        },
+        "send": {
+          "x": 1224,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 1311,
+          "bottom": 728,
+          "left": 1224
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/1366: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1366: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1366: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1366: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1366,
+        "body": 768,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1302,
+          "height": 598,
+          "top": 146,
+          "right": 1334,
+          "bottom": 744,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 596,
+          "top": 147,
+          "right": 109,
+          "bottom": 743,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 894,
+          "height": 596,
+          "top": 147,
+          "right": 1333,
+          "bottom": 743,
+          "left": 439
+        },
+        "send": {
+          "x": 1224,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 1311,
+          "bottom": 728,
+          "left": 1224
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/1024: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1024,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 984,
+          "height": 598,
+          "top": 146,
+          "right": 1004,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 382,
+          "y": 147,
+          "width": 621,
+          "height": 596,
+          "top": 147,
+          "right": 1003,
+          "bottom": 743,
+          "left": 382
+        },
+        "send": {
+          "x": 894,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 981,
+          "bottom": 728,
+          "left": 894
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/1024: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1024: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1024: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/1024: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1024,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 984,
+          "height": 598,
+          "top": 146,
+          "right": 1004,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 382,
+          "y": 147,
+          "width": 621,
+          "height": 596,
+          "top": 147,
+          "right": 1003,
+          "bottom": 743,
+          "left": 382
+        },
+        "send": {
+          "x": 894,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 981,
+          "bottom": 728,
+          "left": 894
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "resident/900: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 900,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 860,
+          "height": 598,
+          "top": 146,
+          "right": 880,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 87,
+          "y": 147,
+          "width": 792,
+          "height": 596,
+          "top": 147,
+          "right": 879,
+          "bottom": 743,
+          "left": 87
+        },
+        "send": {
+          "x": 770,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 857,
+          "bottom": 728,
+          "left": 770
+        },
+        "outer": "none",
+        "list": "none"
+      }
+    },
+    {
+      "name": "resident/900: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/900: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/900: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/900: list/chat switch",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/768: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 768,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 728,
+          "height": 598,
+          "top": 146,
+          "right": 748,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 87,
+          "y": 147,
+          "width": 660,
+          "height": 596,
+          "top": 147,
+          "right": 747,
+          "bottom": 743,
+          "left": 87
+        },
+        "send": {
+          "x": 638,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 725,
+          "bottom": 728,
+          "left": 638
+        },
+        "outer": "none",
+        "list": "none"
+      }
+    },
+    {
+      "name": "resident/768: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/768: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/768: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident/768: list/chat switch",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1920: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1920,
+        "body": 1080,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1856,
+          "height": 910,
+          "top": 146,
+          "right": 1888,
+          "bottom": 1056,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 908,
+          "top": 147,
+          "right": 109,
+          "bottom": 1055,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 1448,
+          "height": 908,
+          "top": 147,
+          "right": 1887,
+          "bottom": 1055,
+          "left": 439
+        },
+        "send": {
+          "x": 1778,
+          "y": 1009,
+          "width": 87,
+          "height": 31,
+          "top": 1009,
+          "right": 1865,
+          "bottom": 1040,
+          "left": 1778
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/1920: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1920: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1920: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1920: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1920,
+        "body": 1080,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1856,
+          "height": 910,
+          "top": 146,
+          "right": 1888,
+          "bottom": 1056,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 908,
+          "top": 147,
+          "right": 109,
+          "bottom": 1055,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 1448,
+          "height": 908,
+          "top": 147,
+          "right": 1887,
+          "bottom": 1055,
+          "left": 439
+        },
+        "send": {
+          "x": 1778,
+          "y": 1009,
+          "width": 87,
+          "height": 31,
+          "top": 1009,
+          "right": 1865,
+          "bottom": 1040,
+          "left": 1778
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/1440: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1440,
+        "body": 900,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1376,
+          "height": 730,
+          "top": 146,
+          "right": 1408,
+          "bottom": 876,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 728,
+          "top": 147,
+          "right": 109,
+          "bottom": 875,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 968,
+          "height": 728,
+          "top": 147,
+          "right": 1407,
+          "bottom": 875,
+          "left": 439
+        },
+        "send": {
+          "x": 1298,
+          "y": 829,
+          "width": 87,
+          "height": 31,
+          "top": 829,
+          "right": 1385,
+          "bottom": 860,
+          "left": 1298
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/1440: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1440: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1440: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1440: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1440,
+        "body": 900,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1376,
+          "height": 730,
+          "top": 146,
+          "right": 1408,
+          "bottom": 876,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 728,
+          "top": 147,
+          "right": 109,
+          "bottom": 875,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 968,
+          "height": 728,
+          "top": 147,
+          "right": 1407,
+          "bottom": 875,
+          "left": 439
+        },
+        "send": {
+          "x": 1298,
+          "y": 829,
+          "width": 87,
+          "height": 31,
+          "top": 829,
+          "right": 1385,
+          "bottom": 860,
+          "left": 1298
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/1366: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1366,
+        "body": 768,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1302,
+          "height": 598,
+          "top": 146,
+          "right": 1334,
+          "bottom": 744,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 596,
+          "top": 147,
+          "right": 109,
+          "bottom": 743,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 894,
+          "height": 596,
+          "top": 147,
+          "right": 1333,
+          "bottom": 743,
+          "left": 439
+        },
+        "send": {
+          "x": 1224,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 1311,
+          "bottom": 728,
+          "left": 1224
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/1366: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1366: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1366: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1366: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1366,
+        "body": 768,
+        "workspace": {
+          "x": 32,
+          "y": 146,
+          "width": 1302,
+          "height": 598,
+          "top": 146,
+          "right": 1334,
+          "bottom": 744,
+          "left": 32
+        },
+        "rail": {
+          "x": 33,
+          "y": 147,
+          "width": 76,
+          "height": 596,
+          "top": 147,
+          "right": 109,
+          "bottom": 743,
+          "left": 33
+        },
+        "chat": {
+          "x": 439,
+          "y": 147,
+          "width": 894,
+          "height": 596,
+          "top": 147,
+          "right": 1333,
+          "bottom": 743,
+          "left": 439
+        },
+        "send": {
+          "x": 1224,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 1311,
+          "bottom": 728,
+          "left": 1224
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/1024: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 1024,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 984,
+          "height": 598,
+          "top": 146,
+          "right": 1004,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 382,
+          "y": 147,
+          "width": 621,
+          "height": 596,
+          "top": 147,
+          "right": 1003,
+          "bottom": 743,
+          "left": 382
+        },
+        "send": {
+          "x": 894,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 981,
+          "bottom": 728,
+          "left": 894
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/1024: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1024: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1024: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/1024: three segments",
+      "passed": true,
+      "detail": {
+        "doc": 1024,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 984,
+          "height": 598,
+          "top": 146,
+          "right": 1004,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 382,
+          "y": 147,
+          "width": 621,
+          "height": 596,
+          "top": 147,
+          "right": 1003,
+          "bottom": 743,
+          "left": 382
+        },
+        "send": {
+          "x": 894,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 981,
+          "bottom": 728,
+          "left": 894
+        },
+        "outer": "none",
+        "list": "flex"
+      }
+    },
+    {
+      "name": "staff/900: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 900,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 860,
+          "height": 598,
+          "top": 146,
+          "right": 880,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 87,
+          "y": 147,
+          "width": 792,
+          "height": 596,
+          "top": 147,
+          "right": 879,
+          "bottom": 743,
+          "left": 87
+        },
+        "send": {
+          "x": 770,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 857,
+          "bottom": 728,
+          "left": 770
+        },
+        "outer": "none",
+        "list": "none"
+      }
+    },
+    {
+      "name": "staff/900: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/900: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/900: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/900: list/chat switch",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/768: no page overflow",
+      "passed": true,
+      "detail": {
+        "doc": 768,
+        "body": 768,
+        "workspace": {
+          "x": 20,
+          "y": 146,
+          "width": 728,
+          "height": 598,
+          "top": 146,
+          "right": 748,
+          "bottom": 744,
+          "left": 20
+        },
+        "rail": {
+          "x": 21,
+          "y": 147,
+          "width": 66,
+          "height": 596,
+          "top": 147,
+          "right": 87,
+          "bottom": 743,
+          "left": 21
+        },
+        "chat": {
+          "x": 87,
+          "y": 147,
+          "width": 660,
+          "height": 596,
+          "top": 147,
+          "right": 747,
+          "bottom": 743,
+          "left": 87
+        },
+        "send": {
+          "x": 638,
+          "y": 697,
+          "width": 87,
+          "height": 31,
+          "top": 697,
+          "right": 725,
+          "bottom": 728,
+          "left": 638
+        },
+        "outer": "none",
+        "list": "none"
+      }
+    },
+    {
+      "name": "staff/768: rail remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/768: send visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/768: outer navigation correct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff/768: list/chat switch",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "category: feedback one row",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "feedback: original anonymous identity retained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "feedback: drawer cannot reveal identity",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "feedback: cannot search hidden identity",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "search: title works",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "draft: survives switching",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "admin: agreement action only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "menu: sits above composer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "resident: agreement/viewing actions",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff: no lease/feedback/direct",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "staff: cannot create group",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "feedback: demo send preserves anonymity",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "feedback: demo send does not add own unread",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "state: anonymous feedback",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "state: closed read only",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "state: empty explanatory",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "state: retry available",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "state: retry demo recovers",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "state: offline disables send",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "state: history new message indicator",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "no script errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "no network/business requests",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "passed": 114,
+  "page_errors": [],
+  "http_requests": [],
+  "user_visual_acceptance": "not_evaluated"
+}

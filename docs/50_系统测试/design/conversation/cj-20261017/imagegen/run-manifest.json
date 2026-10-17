@@ -1,0 +1,29 @@
+{
+  "schema_version": "imagegen.run/1",
+  "status": "completed",
+  "created_at": "2026-10-17T02:58:42.817744Z",
+  "provider": "api.a6api.com",
+  "channel": "a6api",
+  "model": "gpt-image-2.5",
+  "endpoint": "https://api.a6api.com/v1/images/generations",
+  "requested": {
+    "n": 1,
+    "size": "3840x2160"
+  },
+  "prompt_sha256": "9e8a8abbc54a61d18523de24009b405b41d57d8f1f45a5226839ed4a572483d2",
+  "outputs": [
+    {
+      "path": "docs\\50_系统测试\\design\\conversation\\cj-20261017\\imagegen\\direction.png",
+      "sha256": "735d8e1322367decf917f90deca8c61721c642b307cb383b41ccaeaae2a46723",
+      "bytes": 2755067,
+      "actual_size": {
+        "width": 3840,
+        "height": 2160
+      }
+    }
+  ],
+  "credentials": {
+    "source": "skill-local-config",
+    "recorded": false
+  }
+}
