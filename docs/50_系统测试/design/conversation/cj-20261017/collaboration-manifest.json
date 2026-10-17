@@ -1,0 +1,238 @@
+{
+  "schema_version": "mockup-to-page.collaboration/2",
+  "mode": "visual-exploration",
+  "created_at": "2026-10-17T11:25:17.796112+08:00",
+  "read_skills": [
+    "mockup-to-page",
+    "brainstorming",
+    "gpt-image-2-style-library",
+    "imagegen",
+    "frontend-design",
+    "webapp-testing",
+    "git-commit"
+  ],
+  "invoked_skills": [
+    {
+      "name": "gpt-image-2-style-library",
+      "status": "completed",
+      "template": "ui-screenshot-system",
+      "examples": [
+        "case17",
+        "case2"
+      ],
+      "outputs": [
+        "imagegen/run-manifest.json"
+      ]
+    },
+    {
+      "name": "imagegen",
+      "status": "completed",
+      "script": "C:/Users/17841/.agents/skills/imagegen/scripts/gen.py",
+      "channel": "a6api",
+      "model": "gpt-image-2.5",
+      "requested_size": "3840x2160",
+      "actual_size": {
+        "width": 3840,
+        "height": 2160
+      },
+      "prompt_sha256": "9e8a8abbc54a61d18523de24009b405b41d57d8f1f45a5226839ed4a572483d2",
+      "outputs": [
+        "imagegen/direction.png",
+        "imagegen/run-manifest.json",
+        "imagegen/selection.md"
+      ]
+    },
+    {
+      "name": "frontend-design",
+      "status": "completed",
+      "outputs": [
+        "design-intent.md",
+        "design-draft.html"
+      ]
+    },
+    {
+      "name": "webapp-testing",
+      "status": "completed",
+      "outputs": [
+        "verification/capture.py",
+        "verification/summary.json"
+      ],
+      "checks": 114,
+      "scope": "isolated design only; no production coverage claimed"
+    }
+  ],
+  "skipped_skills": [
+    {
+      "name": "screenshot-to-code",
+      "reason": "Not authorized: design review only, no prototype stage."
+    }
+  ],
+  "stages": [
+    {
+      "name": "visual-direction",
+      "status": "completed"
+    },
+    {
+      "name": "deterministic-design",
+      "status": "completed"
+    },
+    {
+      "name": "design-only-verification",
+      "status": "completed",
+      "passed": 114,
+      "http_requests": 0,
+      "page_errors": 0
+    },
+    {
+      "name": "prototype",
+      "status": "not_run"
+    },
+    {
+      "name": "engineering-adaptation",
+      "status": "not_run"
+    },
+    {
+      "name": "production-test",
+      "status": "not_run"
+    }
+  ],
+  "user_visual_acceptance": "not_evaluated",
+  "production_changes": false,
+  "user_browser_accessed": false,
+  "source_screenshot_uploaded": false,
+  "parallel_agents": 0,
+  "imagegen_concurrency": 1,
+  "model_discovery": {
+    "performed": true,
+    "visible_models": [
+      "gpt-image-2.5",
+      "gpt-image-2.5-flare",
+      "gpt-image-2.5-sunburst",
+      "gpt-image-2"
+    ]
+  },
+  "visual_reference": "imagegen/direction.png",
+  "precise_reference": "design-draft.html",
+  "assets": [
+    {
+      "path": ".gitattributes",
+      "bytes": 191,
+      "sha256": "13432b8ce5eb66e5f63ce7a4cdf856f47d3ea386cab45b5d72c7a723d88b3288"
+    },
+    {
+      "path": "design-draft.html",
+      "bytes": 43174,
+      "sha256": "c56193be35329ae6e5d60bb86552d0bd2898e34d5a3f4ebf896417bacc42de5c"
+    },
+    {
+      "path": "design-intent.md",
+      "bytes": 4742,
+      "sha256": "6672834e1a767bbc1a44d0cb3cee20deb5e35d6b5583deff4347981b275df508"
+    },
+    {
+      "path": "imagegen/direction.png",
+      "bytes": 2755067,
+      "sha256": "735d8e1322367decf917f90deca8c61721c642b307cb383b41ccaeaae2a46723"
+    },
+    {
+      "path": "imagegen/run-manifest.json",
+      "bytes": 798,
+      "sha256": "8939fcdae9ca3fb939c36586a57201dce1d904ce7e7e35ac5dee794f31afbcbc"
+    },
+    {
+      "path": "imagegen/selection.md",
+      "bytes": 557,
+      "sha256": "468d3f9aca8063f64992e8e55d2bf73317721e12fe485cf9b78b5ffa498d30e2"
+    },
+    {
+      "path": "screens/admin-1440.png",
+      "bytes": 134515,
+      "sha256": "9a19ca106bf43ff7bf7b908f6dbbd9d56560ad4bf595ffe96e87e9766fda038d"
+    },
+    {
+      "path": "screens/admin-1920.png",
+      "bytes": 153015,
+      "sha256": "f6a028cd66c4a728df867d4c3866722d76c271bb9bc9f4b6029035491da37e0b"
+    },
+    {
+      "path": "screens/admin-business-menu-1440.png",
+      "bytes": 142071,
+      "sha256": "a6f44d696ce67950e35e2b0b2ce3c90f310a9490271eb73dd8179349b4a53579"
+    },
+    {
+      "path": "screens/admin-closed-1440.png",
+      "bytes": 135553,
+      "sha256": "99bdd0919a419d143ace49a12a7c4d11c96736921274c251c6ba3f7500f9fc05"
+    },
+    {
+      "path": "screens/admin-empty-1440.png",
+      "bytes": 68668,
+      "sha256": "325474b56a7037cde7e50ced58fa595ca7299f4ee7a2f64c71861ded27a47631"
+    },
+    {
+      "path": "screens/admin-error-1440.png",
+      "bytes": 70008,
+      "sha256": "6300783cd53d151c941e49c2ddbc93a478fb4d6c31816766339572a02eee8655"
+    },
+    {
+      "path": "screens/admin-feedback-1440.png",
+      "bytes": 129963,
+      "sha256": "7725f78ff221dbf349162842bcdba3da381d3489425d894cf0a5e4dee1b0a715"
+    },
+    {
+      "path": "screens/admin-history-1440.png",
+      "bytes": 138808,
+      "sha256": "87fd728a576a5b42674b4d4ffebf95409d3bc5571f8123f8f11043c640c7d3f5"
+    },
+    {
+      "path": "screens/admin-narrow-chat-900.png",
+      "bytes": 55516,
+      "sha256": "5a0d49f28e795633c2e2a92aaded9bb31de7be8aa14729247ea4e4aad70baa81"
+    },
+    {
+      "path": "screens/admin-narrow-list-900.png",
+      "bytes": 69728,
+      "sha256": "9c2082f2cb7d8c87c3e89607144307a3d40c757fea30e9c24e804d9c6933be9e"
+    },
+    {
+      "path": "screens/admin-offline-1440.png",
+      "bytes": 136795,
+      "sha256": "17a27cdc0d9ab39027045a7ddbcaa6ca094df052df0e50cb491d72b5e6622250"
+    },
+    {
+      "path": "screens/resident-1440.png",
+      "bytes": 117219,
+      "sha256": "dfedd92b524b422e3b675312a397baf45639925cafe198c70aa571177475dbd2"
+    },
+    {
+      "path": "screens/resident-1920.png",
+      "bytes": 135325,
+      "sha256": "129714101bc9b2480a3ce21ef3bf3d2989ba0ebd5876282cb9d8f36256f13ccb"
+    },
+    {
+      "path": "screens/resident-business-menu-1440.png",
+      "bytes": 130654,
+      "sha256": "6c7a61248220d84dee48d26ca326445ce710b3cb625887520881d75ebfd4f71e"
+    },
+    {
+      "path": "screens/staff-1440.png",
+      "bytes": 90883,
+      "sha256": "e740571d7d8683514991ab316dcd3cbeff893a810a76b51b8e8ce70f605c99b7"
+    },
+    {
+      "path": "screens/staff-1920.png",
+      "bytes": 95633,
+      "sha256": "dc8b65fe8abffbb4fd7b9a389ebcce714907d57eba6113c73b79e225cb73f418"
+    },
+    {
+      "path": "verification/capture.py",
+      "bytes": 7991,
+      "sha256": "2b62d628c01d2aea79e2ac0fa5826bceb6ed46471a96d48aebfc5ad564c09956"
+    },
+    {
+      "path": "verification/summary.json",
+      "bytes": 40371,
+      "sha256": "8e6a9082cbd4cdfe963fc4893b437032889e2e16c3f0e71051b15fd495076459"
+    }
+  ]
+}
