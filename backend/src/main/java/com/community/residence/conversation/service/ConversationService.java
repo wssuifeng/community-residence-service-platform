@@ -624,6 +624,20 @@ public class ConversationService {
         return rows.stream().map(m->toMessageVO(m,images.get(m.getId()))).toList();
     }
 
+    /* 历史分段与增量补拉仍先校验参与者；倒序取窗后正序展示。 */
+    public List<ConversationMessageVO> messageWindow(Long id, Long beforeId, Long afterId, int size) {
+        requireParticipant(id);
+        var query = new LambdaQueryWrapper<ConversationMessage>().eq(ConversationMessage::getConversationId,id)
+                .lt(beforeId!=null,ConversationMessage::getId,beforeId).gt(afterId!=null,ConversationMessage::getId,afterId)
+                .orderBy(afterId==null,false,ConversationMessage::getId).orderBy(afterId!=null,true,ConversationMessage::getId)
+                .last("LIMIT "+size);
+        var rows = new ArrayList<>(messageMapper.selectList(query));
+        rows.sort(java.util.Comparator.comparing(ConversationMessage::getId));
+        var ids=rows.stream().filter(m->"IMAGE".equals(m.getMessageType())).map(ConversationMessage::getId).toList();
+        var images=ids.isEmpty()?java.util.Map.<Long,com.community.residence.conversation.vo.ChatImageVO>of():chatImageService.images(ChatImageService.CONVERSATION,ids);
+        return rows.stream().map(m->toMessageVO(m,images.get(m.getId()))).toList();
+    }
+
     /**
      * 发送会话消息（R63）：仅参与者可发；**会话已关闭（R68 status=CLOSED）时停收停发**，
      * 返回 CONVERSATION_CLOSED(5604)，历史消息仍可读；落库（createdAt 显式赋值，WS 载荷

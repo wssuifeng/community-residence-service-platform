@@ -42,7 +42,7 @@ public class DataScopeInterceptor implements InnerInterceptor {
             "resident", "sys_config", "lease_reminder",
             "work_order_attachment", "work_order_process", "work_order_assignment",
             "notice", "notice_target", "notice_view_record",
-            "feedback_attachment", "feedback_message",
+            "feedback_attachment", "feedback_message", "feedback_read_cursor",
             "violation_record", "unsatisfied_followup",
             "viewing_message",
             "sys_user", "auth_token_blacklist",
