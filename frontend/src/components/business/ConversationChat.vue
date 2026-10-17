@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { listInboxMessages } from '@/api/conversationInbox'
 import { listConversationMessages, sendConversationMessage, markConversationRead } from '@/api/conversation'
 import { getLeaseAgreement } from '@/api/agreement'
 import AgreementSignPanel from './AgreementSignPanel.vue'
@@ -30,6 +31,7 @@ import { useUserStore } from '@/store/user'
  */
 
 const props = defineProps<{
+  paged?: boolean
   conversationId: number
   /** 会话是否已关闭（R68：租约归档或申请取消后关闭，停收停发只读留档） */
   closed?: boolean
@@ -41,7 +43,7 @@ const props = defineProps<{
   title?: string
 }>()
 
-const emit=defineEmits<{openAgreement:[agreementId:number];read:[conversationId:number,lastMessageId:number]}>()
+const emit=defineEmits<{changed:[];openAgreement:[agreementId:number];read:[conversationId:number,lastMessageId:number]}>()
 const businessMenuVisible=ref(false)
 
 /* closed 未显式传入（undefined）时按"未关闭"处理，但无法确认状态是调用方契约缺口
@@ -93,58 +95,45 @@ async function openAgreementSnapshot(agreementId: number): Promise<void> {
   }
 }
 
-const { messages, text, sending, readOnly, sendText, sendImage } = useChatChannel<IConversationMessage>({
+const { messages, text, sending, readOnly, sendText, sendImage, loading, error, reload, hasOlder, loadingOlder, loadOlder } = useChatChannel<IConversationMessage>({
  id:()=>props.conversationId,closed:()=>props.closed??false,load:listConversationMessages,
+ window:props.paged?(id,before,after)=>listInboxMessages<IConversationMessage>('CONVERSATION',id,before,after):undefined,
+ changed:()=>emit('changed'),
  send:(id,content)=>sendConversationMessage(id,{content}),image:(id,file)=>sendChatImage('conversations',id,file),
  topic:id=>`/topic/conversation/${id}`,eventType:'CONVERSATION_MESSAGE'
 })
-/* 只有前台已渲染的消息才推进游标；失败保留角标，后续加载可重试。 */
-const chatRoot = ref<HTMLElement>()
-let visibilityObserver: IntersectionObserver | undefined
+/* 仅消息列表实际可见的最高ID推进游标；失败不清角标，下一次可见事件重试。 */
+const visibleCursor = ref(0)
 const acknowledged = new Map<number, number>()
 const readRequests = new Set<number>()
 let readDisposed = false
-async function acknowledgeVisibleMessages(): Promise<void> {
-  if (readDisposed || document.visibilityState !== 'visible' || messages.value.length === 0) return
-  const bounds = chatRoot.value?.getBoundingClientRect()
-  if (!bounds || bounds.width <= 0 || bounds.height <= 0 || bounds.bottom <= 0 || bounds.top >= window.innerHeight || bounds.right <= 0 || bounds.left >= window.innerWidth) return
-  if (getComputedStyle(chatRoot.value!).visibility === 'hidden') return
+async function acknowledgeVisibleMessages(cursor: number): Promise<void> {
+  visibleCursor.value = cursor
   const id = props.conversationId
-  const latest = messages.value.reduce((last, message) => Math.max(last, message.id), 0)
-  if (latest <= (acknowledged.get(id) ?? 0) || readRequests.has(id)) return
+  if (readDisposed || cursor <= (acknowledged.get(id) ?? 0) || readRequests.has(id)) return
   readRequests.add(id)
-  let succeeded = false
   try {
-    await markConversationRead(id, latest)
+    await markConversationRead(id, cursor)
     if (readDisposed) return
-    acknowledged.set(id, latest)
-    succeeded = true
-    emit('read', id, latest)
-  } catch {
-    /* 不能把失败当作已读；下次HTTP加载、消息或前台切换重新确认。 */
-  } finally {
+    acknowledged.set(id, cursor)
+    if (id === props.conversationId) emit('read', id, cursor)
+  } catch { /* 未读失败保持真实状态，后续可见事件重试。 */ }
+  finally {
     readRequests.delete(id)
-    if (succeeded && id === props.conversationId && messages.value.some(message => message.id > latest)) void acknowledgeVisibleMessages()
+    if (!readDisposed && id === props.conversationId && visibleCursor.value > cursor) void acknowledgeVisibleMessages(visibleCursor.value)
   }
 }
-watch([() => props.conversationId, messages], () => { void acknowledgeVisibleMessages() }, { flush: 'post' })
-onMounted(() => {
-  document.addEventListener('visibilitychange', acknowledgeVisibleMessages)
-  if (typeof IntersectionObserver !== 'undefined' && chatRoot.value) {
-    visibilityObserver = new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting)) void acknowledgeVisibleMessages() })
-    visibilityObserver.observe(chatRoot.value)
-  }
-})
-onBeforeUnmount(() => { readDisposed = true; visibilityObserver?.disconnect(); document.removeEventListener('visibilitychange', acknowledgeVisibleMessages) })
+watch(() => props.conversationId, () => { visibleCursor.value = 0; businessMenuVisible.value = false; snapshotVisible.value = false })
+onBeforeUnmount(() => { readDisposed = true })
 
 const renderedMessages=computed(()=>messages.value.map(message=>({...message,
  senderLabel:`${message.senderName}（${conversationRoleLabels[message.senderRole as keyof typeof conversationRoleLabels]??message.senderRole}）`,
- mine:message.senderRole===userStore.user?.role&&message.senderId===userStore.user?.id
+ mine:message.senderRole!=='SYSTEM'&&(message.senderRole==='RESIDENT')===(userStore.user?.role==='RESIDENT')&&message.senderId===userStore.user?.id
 })))
 </script>
 
 <template>
-  <section ref="chatRoot" class="conversation-chat">
+  <section class="conversation-chat">
     <!-- R74：可选标题行与群成员行（未传则不渲染，既有用法渲染结果不变） -->
     <header v-if="title || (participants && participants.length > 0)" class="chat-header">
       <p v-if="title" class="chat-title">{{ title }}</p>
@@ -156,7 +145,10 @@ const renderedMessages=computed(()=>messages.value.map(message=>({...message,
       </p>
     </header>
 
-    <ChatMessageList :messages="renderedMessages">
+    <p v-if="loading" class="chat-load-state" role="status">正在加载消息…</p>
+    <p v-if="error" class="chat-load-state" role="alert">{{ error }} <button type="button" @click="reload">重试</button></p>
+    <button v-if="hasOlder" type="button" class="history-button" :disabled="loadingOlder" @click="loadOlder">{{ loadingOlder ? '加载中…' : '加载更早消息' }}</button>
+    <ChatMessageList :messages="renderedMessages" :position-key="`${userStore.user?.role}:${userStore.user?.id}:CONVERSATION:${conversationId}`" @visible="acknowledgeVisibleMessages">
       <template #message-actions="{message}">
         <template v-if="message.messageType==='LEASE_AGREEMENT' && message.senderRole==='SYSTEM' && message.agreementId">
           <button v-if="agreementRole" type="button" class="agreement-message" :disabled="openingSnapshot" @click="openAgreementSnapshot(message.agreementId)">租赁协议 #{{message.agreementId}} · 查看协议快照</button>
@@ -164,7 +156,7 @@ const renderedMessages=computed(()=>messages.value.map(message=>({...message,
         </template>
       </template>
     </ChatMessageList>
-    <ChatComposer v-model="text" :busy="sending" :closed="closed" :read-only="readOnly" :closed-hint="closedHint?`会话已关闭：${closedHint}`:DEFAULT_CLOSED_HINT" @send="sendText" @image="sendImage">
+    <ChatComposer v-model="text" :busy="sending" :closed="closed" :read-only="readOnly || loading || (!!error && !messages.length)" :closed-hint="closedHint?`会话已关闭：${closedHint}`:DEFAULT_CLOSED_HINT" @send="sendText" @image="sendImage">
       <template #actions><button v-if="$slots['business-actions']" type="button" class="business-toggle" :aria-expanded="businessMenuVisible" aria-label="会话业务功能" @click="businessMenuVisible=!businessMenuVisible">＋</button></template>
     </ChatComposer>
     <div v-if="businessMenuVisible && !closed && !readOnly" class="business-actions"><slot name="business-actions"/></div>
@@ -182,6 +174,8 @@ const renderedMessages=computed(()=>messages.value.map(message=>({...message,
 </template>
 
 <style scoped>
+.chat-load-state{padding:10px 18px;margin:0;font-size:13px;color:var(--color-text-secondary)}.history-button{border:0;background:var(--color-bg);padding:10px;color:var(--color-primary);cursor:pointer}
+
 .agreement-access-hint { margin-top: 10px; color: var(--color-text-secondary); font-size: 12px; }
 .business-toggle{width:36px;height:36px;border:1px solid var(--color-border);border-radius:50%;background:transparent;font-size:24px;flex-shrink:0;cursor:pointer}
 .business-actions{display:flex;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--color-border);background:var(--color-bg)}

@@ -5,5 +5,6 @@ import NotificationList from '@/components/business/NotificationList.vue'
 </script>
 
 <template>
+  <router-link class="conversation-link" to="/staff/conversations">进入消息会话 →</router-link>
   <NotificationList role="STAFF" />
 </template>

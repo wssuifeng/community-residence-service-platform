@@ -26,7 +26,7 @@ async function render(listener?: (id: number) => void) {
 beforeEach(() => {
   const originalBounds = HTMLElement.prototype.getBoundingClientRect
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
-    if (this.classList.contains('conversation-chat')) return { x: 0, y: 100, top: 100, left: 0, right: 600, bottom: 500, width: 600, height: 400, toJSON: () => ({}) } as DOMRect
+    if (this.classList.contains('conversation-chat') || this.classList.contains('chat-message-list') || this.classList.contains('chat-message')) return { x: 0, y: 100, top: 100, left: 0, right: 600, bottom: 500, width: 600, height: 400, toJSON: () => ({}) } as DOMRect
     return originalBounds.call(this)
   })
   api.read.mockResolvedValue(undefined)
