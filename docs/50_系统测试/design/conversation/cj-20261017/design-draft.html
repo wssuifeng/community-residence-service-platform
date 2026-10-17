@@ -9,14 +9,77 @@
 
 /* Readability pass for 1366/1440px desktop previews. */
 .nav-row{font-size:14px}.item-title{font-size:13px}.item-summary .excerpt{font-size:12px;color:#738198}.item-type{font-size:11px;color:#8794a9}.item-time{font-size:11px}.search input{font-size:12px}.list-filter button{font-size:12px}.list-footer{font-size:11px}.chat-subtitle{font-size:12px;color:#7c8ba2;flex-wrap:wrap}.message-label{font-size:11px;color:#7f8ca2}.message-label .role-tag{font-size:10px;color:#94a0b4}.bubble{font-size:14px;line-height:1.8}.date-divider,.system-message{font-size:11px;color:#8c99ad}.tool-button{font-size:11px;color:#77869d}.chat-composer textarea{font-size:14px}.composer-bottom small{font-size:10px;color:#97a3b5}.agreement-card h3{font-size:14px}.agreement-card dt,.agreement-card small,.card-action{font-size:11px}.agreement-card dd,.card-action button{font-size:12px}.business-rail button{font-size:12px}.new-marker{position:absolute;right:24px;bottom:200px;border:1px solid #dde6f5;border-radius:20px;background:white;color:#5e7dc4;padding:7px 13px;font-size:11px;box-shadow:0 2px 8px #12345c0a;z-index:3}@media(min-width:1800px){.new-marker{bottom:220px}}
-.business-menu{bottom:calc(100% - 4px)}</style></head><body>
+.business-menu{bottom:calc(100% - 4px)}/* CK sidebar preview: source frontend/src/styles/sidebar-scrollbar.css */
+/** Only the dark management sidebar; never hide scrolling across the app. */
+.app-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  scrollbar-gutter: stable;
+}
+
+.app-sidebar:hover,
+.app-sidebar:focus-within {
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+}
+
+.app-sidebar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.app-sidebar::-webkit-scrollbar-track,
+.app-sidebar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.app-sidebar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.app-sidebar:hover::-webkit-scrollbar-thumb,
+.app-sidebar:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.app-sidebar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Chromium uses the 4px pseudo-elements; Firefox retains its thin fallback. */
+@supports selector(::-webkit-scrollbar) {
+  .app-sidebar {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .app-sidebar,
+  .app-sidebar:hover,
+  .app-sidebar:focus-within {
+    scrollbar-color: auto;
+  }
+
+  .app-sidebar::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  .app-sidebar::-webkit-scrollbar-thumb {
+    background: CanvasText;
+  }
+}
+
+</style></head><body>
 <svg class="sprite" aria-hidden="true"><defs>
 <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z"/><path d="M7 9h10M7 13h7"/></symbol>
 <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7"/></symbol><symbol id="i-work" viewBox="0 0 24 24"><path d="M14 4a6 6 0 0 0-7 8L3 16a3 3 0 0 0 4 4l4-4a6 6 0 0 0 8-7l-4 4-4-4Z"/></symbol><symbol id="i-view" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4M16 3v4M4 10h16m-11 5 2 2 4-4"/></symbol><symbol id="i-feedback" viewBox="0 0 24 24"><path d="M4 4h16v13H9l-5 4Z"/><path d="M8 8h8M8 12h5"/></symbol><symbol id="i-direct" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 5"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></symbol><symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="19" cy="12" r=".8"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m3 17 6-5 4 4 3-3 5 4"/></symbol><symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6Zm8 0v6h5M9 13h7m-7 4h5"/></symbol><symbol id="i-down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol><symbol id="i-back" viewBox="0 0 24 24"><path d="m14 5-7 7 7 7"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M5 17h14l-2-3V9a5 5 0 0 0-10 0v5ZM10 21h4"/></symbol><symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol><symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></symbol><symbol id="i-sort" viewBox="0 0 24 24"><path d="M6 4v16m-3-3 3 3 3-3m3-11h9m-9 6h6m-6 6h3"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol><symbol id="i-send" viewBox="0 0 24 24"><path d="m3 3 18 9-18 9 4-9Zm4 9h14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
 </defs></svg>
 <div class="review-bar"><div><strong>会话工作区 · 设计稿</strong><span class="review-note">　仅演示布局与合成数据，不连接业务服务</span></div><div class="review-controls"><button data-role="admin">管理端</button><button data-role="resident">居民端</button><button data-role="staff">服务人员端</button><select id="state-select" aria-label="设计状态"><option value="normal">正常会话</option><option value="business">业务菜单</option><option value="feedback">匿名反馈</option><option value="closed">已关闭只读</option><option value="history">翻阅历史</option><option value="empty">暂无会话</option><option value="error">加载失败</option><option value="offline">断线重连</option></select></div></div>
 <header class="topbar"><div class="brand"><span class="brand-logo"><svg><use href="#i-home"/></svg></span><strong>社区居住服务</strong><small id="role-label"></small></div><nav class="top-nav" aria-label="站点导航" id="top-nav"></nav><div class="top-right"><span class="preview-label">设计预览 · 合成数据</span><button class="icon-button" aria-label="系统通知（设计示意）" onclick="toast('系统通知独立查看，不与聊天未读合并')"><svg><use href="#i-bell"/></svg></button><div class="user"><span class="avatar" id="user-avatar"></span><span id="user-name"></span><svg style="width:12px"><use href="#i-down"/></svg></div></div></header>
-<div class="body-shell"><aside class="outer-nav" aria-label="管理端原有导航"><div class="nav-group-label">社区管理工作台</div><nav id="outer-nav"></nav><div class="outer-footer"><svg><use href="#i-lock"/></svg><span>管理端 · 原有业务导航</span></div></aside><main class="main"><div class="page-head"><div><h1>消息会话</h1><p id="page-subtitle">租约、看房、工单、反馈与社区直通</p></div><div class="page-actions"><span>按最近活动排列</span><button class="quiet-button" id="create-conversation"><svg><use href="#i-plus"/></svg><span id="create-label" style="color:inherit">发起直通会话</span></button></div></div><section class="workspace" aria-label="统一会话工作区"><nav class="business-rail" id="business-rail" aria-label="会话业务分类"></nav><section class="conversation-panel" aria-label="会话列表"><div class="list-head"><div class="list-title"><strong id="list-category">全部会话</strong><span style="font-size:10px;color:#9ba7b9" id="list-total"></span></div><label class="search"><svg><use href="#i-search"/></svg><input id="search" placeholder="搜索会话、姓名或业务编号" aria-label="搜索会话、姓名或业务编号"></label><div class="list-filter"><div class="filter-tabs"><button class="active" data-filter="all">全部</button><button data-filter="unread">未读</button></div><span class="sort-label"><svg><use href="#i-sort"/></svg>最近活动</span></div></div><div class="conversation-list" id="conversation-list"></div><div class="list-footer">仅显示当前账号有权查看的会话</div></section><section class="chat-panel" id="chat-panel" aria-label="当前会话"></section></section></main></div><div id="toast" class="toast" hidden role="status"></div><script>
+<div class="body-shell"><aside class="outer-nav" aria-label="管理端原有导航"><div class="nav-group-label">社区管理工作台</div><nav id="outer-nav" class="app-sidebar" tabindex="0"></nav><div class="outer-footer"><svg><use href="#i-lock"/></svg><span>管理端 · 原有业务导航</span></div></aside><main class="main"><div class="page-head"><div><h1>消息会话</h1><p id="page-subtitle">租约、看房、工单、反馈与社区直通</p></div><div class="page-actions"><span>按最近活动排列</span><button class="quiet-button" id="create-conversation"><svg><use href="#i-plus"/></svg><span id="create-label" style="color:inherit">发起直通会话</span></button></div></div><section class="workspace" aria-label="统一会话工作区"><nav class="business-rail" id="business-rail" aria-label="会话业务分类"></nav><section class="conversation-panel" aria-label="会话列表"><div class="list-head"><div class="list-title"><strong id="list-category">全部会话</strong><span style="font-size:10px;color:#9ba7b9" id="list-total"></span></div><label class="search"><svg><use href="#i-search"/></svg><input id="search" placeholder="搜索会话、姓名或业务编号" aria-label="搜索会话、姓名或业务编号"></label><div class="list-filter"><div class="filter-tabs"><button class="active" data-filter="all">全部</button><button data-filter="unread">未读</button></div><span class="sort-label"><svg><use href="#i-sort"/></svg>最近活动</span></div></div><div class="conversation-list" id="conversation-list"></div><div class="list-footer">仅显示当前账号有权查看的会话</div></section><section class="chat-panel" id="chat-panel" aria-label="当前会话"></section></section></main></div><div id="toast" class="toast" hidden role="status"></div><script>
 
 'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const icon=name=>`<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

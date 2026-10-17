@@ -10,6 +10,7 @@ import { applyElementPlusDefaults } from './utils/elementPlusDefaults'
 import './styles/variables.css'
 import './styles/breakpoints.css'
 import './styles/index.css'
+import './styles/sidebar-scrollbar.css'
 
 const app = createApp(App)
 

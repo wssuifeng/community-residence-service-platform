@@ -1,0 +1,167 @@
+{
+  "created_at": "2026-10-17T11:43:50.143398+08:00",
+  "scope": "sidebar-only design checks and actual production CSS in isolated fixture, not whole application tests",
+  "checks": [
+    {
+      "name": "sidebar has overflowing content",
+      "passed": true,
+      "detail": {
+        "scrollHeight": 669,
+        "clientHeight": 551,
+        "top": 0,
+        "width": 208,
+        "track": "4px",
+        "thumb": "rgba(0, 0, 0, 0)",
+        "arrows": "none"
+      }
+    },
+    {
+      "name": "track is 4px, not native auto",
+      "passed": true,
+      "detail": {
+        "scrollHeight": 669,
+        "clientHeight": 551,
+        "top": 0,
+        "width": 208,
+        "track": "4px",
+        "thumb": "rgba(0, 0, 0, 0)",
+        "arrows": "none"
+      }
+    },
+    {
+      "name": "idle thumb is transparent",
+      "passed": true,
+      "detail": {
+        "scrollHeight": 669,
+        "clientHeight": 551,
+        "top": 0,
+        "width": 208,
+        "track": "4px",
+        "thumb": "rgba(0, 0, 0, 0)",
+        "arrows": "none"
+      }
+    },
+    {
+      "name": "native arrow buttons removed",
+      "passed": true,
+      "detail": {
+        "scrollHeight": 669,
+        "clientHeight": 551,
+        "top": 0,
+        "width": 208,
+        "track": "4px",
+        "thumb": "rgba(0, 0, 0, 0)",
+        "arrows": "none"
+      }
+    },
+    {
+      "name": "hover reveals subtle thumb",
+      "passed": true,
+      "detail": {
+        "scrollHeight": 669,
+        "clientHeight": 551,
+        "top": 0,
+        "width": 208,
+        "track": "4px",
+        "thumb": "rgba(255, 255, 255, 0.28)",
+        "arrows": "none"
+      }
+    },
+    {
+      "name": "hover does not move layout",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "wheel still scrolls",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "keyboard reaches last menu",
+      "passed": true,
+      "detail": {
+        "scrollHeight": 669,
+        "clientHeight": 551,
+        "top": 118,
+        "width": 208,
+        "track": "4px",
+        "thumb": "rgba(255, 255, 255, 0.28)",
+        "arrows": "none"
+      }
+    },
+    {
+      "name": "keyboard focus also reveals thumb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "leaving returns to transparent",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1366: no horizontal overflow",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1440: no horizontal overflow",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "1920: no horizontal overflow",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "production CSS applies to existing sidebar class",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "production links reveal focus thumb",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "high contrast has wider visible track",
+      "passed": true,
+      "detail": {
+        "scrollHeight": 1125,
+        "clientHeight": 260,
+        "top": 0,
+        "width": 232,
+        "track": "12px",
+        "thumb": "rgba(255, 255, 255, 0.28)",
+        "arrows": "none"
+      }
+    },
+    {
+      "name": "high contrast thumb remains visible",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "stylesheet loaded by production entry",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "no script errors",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "no HTTP requests",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "passed": 20,
+  "page_errors": [],
+  "http_requests": [],
+  "user_visual_acceptance": "not_evaluated",
+  "previous_cj_114": "historical; not rerun or added to this count"
+}
