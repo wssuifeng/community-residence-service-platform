@@ -1,0 +1,123 @@
+{
+  "scope": "isolated frontend, synthetic HTTP; not backend E2E",
+  "checks": [
+    {
+      "name": "lease default overview only",
+      "passed": true
+    },
+    {
+      "name": "lease no embedded chat",
+      "passed": true
+    },
+    {
+      "name": "fee failure isolated and payment snapshot retained",
+      "passed": true
+    },
+    {
+      "name": "fee retry recovers without channel query",
+      "passed": true
+    },
+    {
+      "name": "business history retained",
+      "passed": true
+    },
+    {
+      "name": "agreement and term panels retained",
+      "passed": true
+    },
+    {
+      "name": "lease exact original group",
+      "passed": true
+    },
+    {
+      "name": "lease return context retained",
+      "passed": true
+    },
+    {
+      "name": "ADMIN workorder has no embedded chat",
+      "passed": true
+    },
+    {
+      "name": "ADMIN workorder exact group",
+      "passed": true
+    },
+    {
+      "name": "ADMIN workorder return path retained",
+      "passed": true
+    },
+    {
+      "name": "ADMIN feedback original and historical attachment retained",
+      "passed": true
+    },
+    {
+      "name": "ADMIN detail read does not accept feedback",
+      "passed": true
+    },
+    {
+      "name": "ADMIN feedback no embedded chat",
+      "passed": true
+    },
+    {
+      "name": "ADMIN feedback exact source",
+      "passed": true
+    },
+    {
+      "name": "ADMIN no financial commands",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT workorder has no embedded chat",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT workorder exact group",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT workorder return path retained",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT feedback original and historical attachment retained",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT detail read does not accept feedback",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT feedback no embedded chat",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT feedback exact source",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT no financial commands",
+      "passed": true
+    },
+    {
+      "name": "STAFF workorder has no embedded chat",
+      "passed": true
+    },
+    {
+      "name": "STAFF workorder exact group",
+      "passed": true
+    },
+    {
+      "name": "STAFF workorder return path retained",
+      "passed": true
+    },
+    {
+      "name": "STAFF no financial commands",
+      "passed": true
+    },
+    {
+      "name": "detail paths no JavaScript errors",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "transactions": "none"
+}

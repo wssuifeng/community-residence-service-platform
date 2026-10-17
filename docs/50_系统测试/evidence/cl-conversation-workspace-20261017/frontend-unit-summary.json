@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-17",
+  "scope": "only shared inbox/chat engine and affected workorder/feedback/lease detail regressions",
+  "targeted": {
+    "files": 10,
+    "tests": 68,
+    "failed": 0
+  },
+  "compatibility": {
+    "file": "src/__tests__/core-flows.spec.ts",
+    "nameFilter": "CF-E6 反馈|CF-E10",
+    "passed": 2,
+    "excludedByNameFilter": 31
+  },
+  "totalPassed": 70,
+  "typecheck": "passed as part of npm run build",
+  "viteBuild": "passed",
+  "backendE2E": "not claimed",
+  "manualAcceptance": "not claimed",
+  "normalServices": "not started or replaced",
+  "financialCommands": "none"
+}

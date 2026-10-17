@@ -5,6 +5,8 @@ import com.community.residence.common.exception.*;
 import com.community.residence.common.result.PageVO;
 import com.community.residence.conversation.mapper.ConversationInboxMapper;
 import com.community.residence.conversation.vo.ConversationInboxVO;
+import com.community.residence.conversation.vo.ConversationMessageWindowVO;
+import com.community.residence.conversation.vo.ConversationMessageVO;
 import com.community.residence.feedback.mapper.FeedbackMessageMapper;
 import com.community.residence.feedback.service.FeedbackService;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +31,25 @@ public class ConversationInboxService {
   return PageVO.of(mapper.page(q,(page-1)*size,size),mapper.count(q),page,size);
  }
  /* 每个窗口均回到原来源校验；双向游标互斥以免遗漏/越界。 */
- public List<?> messages(String source,Long id,Long beforeId,Long afterId,int size){
+ public ConversationMessageWindowVO messages(String source,Long id,Long beforeId,Long afterId,int size){
   if(size<1||size>100||beforeId!=null&&beforeId<=0||afterId!=null&&afterId<0||beforeId!=null&&afterId!=null)throw invalid("历史窗口参数错误");
-  if("CONVERSATION".equals(source))return conversations.messageWindow(id,beforeId,afterId,size);
-  if("FEEDBACK".equals(source)){requireFeedbackAccess(id);return feedbacks.messageWindow(id,beforeId,afterId,size);}
-  throw invalid("未知会话来源");
+  if("CONVERSATION".equals(source)) conversations.getById(id);
+  else if("FEEDBACK".equals(source)) requireFeedbackAccess(id);
+  else throw invalid("未知会话来源");
+  Long unread = null;
+  if(beforeId==null && afterId==null){
+   String owner = SecurityUtils.hasRole("RESIDENT") ? "RESIDENT" : "USER";
+   Long cursor = mapper.readingCursor(source,id,owner,SecurityUtils.getUserId());
+   unread = mapper.firstUnread(source,id,cursor==null?0L:cursor,owner,SecurityUtils.getUserId());
+   if(unread!=null) afterId = unread-1;
+  }
+  List<?> rows = "CONVERSATION".equals(source) ? conversations.messageWindow(id,beforeId,afterId,size) : feedbacks.messageWindow(id,beforeId,afterId,size);
+  boolean older = !rows.isEmpty() && mapper.outsideWindow(source,id,messageId(rows.get(0)),true);
+  boolean newer = !rows.isEmpty() && mapper.outsideWindow(source,id,messageId(rows.get(rows.size()-1)),false);
+  return new ConversationMessageWindowVO(rows,unread!=null,unread,older,newer);
+ }
+ private Long messageId(Object row){
+  return row instanceof ConversationMessageVO message ? message.getId() : ((com.community.residence.feedback.vo.MessageVO)row).getId();
  }
  /* 原始反馈与消息游标分开确认，读操作绝不触发受理。 */
  @Transactional(rollbackFor=Exception.class)

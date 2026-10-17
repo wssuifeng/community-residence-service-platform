@@ -5,7 +5,7 @@ const readingPositions = new Map<string, number>()
 import { nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import type { ChatMessage } from '@/types/chat'
 import { formatDateTime } from '@/utils/date'
-const props = defineProps<{ messages: ChatMessage[]; emptyText?: string; positionKey?: string }>()
+const props = defineProps<{ messages: ChatMessage[]; emptyText?: string; positionKey?: string; initialAnchor?: number }>()
 const emit = defineEmits<{ visible: [lastVisibleId: number] }>()
 const container = ref<HTMLElement | null>(null), newCount = ref(0)
 let atBottom = true, initialized = false, lastEmitted = -Infinity, observer: IntersectionObserver | undefined
@@ -40,7 +40,11 @@ watch(() => props.messages, async (rows, old) => {
   if (!initialized) {
     const saved = props.positionKey ? readingPositions.get(props.positionKey) : undefined
     if (saved !== undefined) container.value.scrollTop = saved
-    else bottom()
+    else if (props.initialAnchor) {
+      const anchor = container.value.querySelector<HTMLElement>(`[data-message-id="${props.initialAnchor}"]`)
+      if (anchor) container.value.scrollTop += anchor.getBoundingClientRect().top - container.value.getBoundingClientRect().top
+      else container.value.scrollTop = 0
+    } else bottom()
     initialized = true
   } else if (prepended) container.value.scrollTop = top + container.value.scrollHeight - height
   else if (atBottom) bottom()

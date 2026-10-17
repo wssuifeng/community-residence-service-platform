@@ -3,22 +3,8 @@
   "scope": "conversation inbox and original conversation/feedback services",
   "suites": [
     {
-      "name": "com.community.residence.conversation.ConversationParticipantOwnerTypeGuardTest",
-      "tests": "2",
-      "failures": "0",
-      "errors": "0",
-      "skipped": "0"
-    },
-    {
-      "name": "com.community.residence.conversation.service.ConversationInboxDatabaseTest",
-      "tests": "1",
-      "failures": "0",
-      "errors": "0",
-      "skipped": "0"
-    },
-    {
       "name": "com.community.residence.conversation.service.ConversationInboxServiceTest",
-      "tests": "6",
+      "tests": "8",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
@@ -26,6 +12,13 @@
     {
       "name": "com.community.residence.conversation.service.ConversationInboxSqlTest",
       "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.community.residence.conversation.service.ConversationInboxDatabaseTest",
+      "tests": "1",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
@@ -43,10 +36,19 @@
       "failures": "0",
       "errors": "0",
       "skipped": "0"
+    },
+    {
+      "name": "com.community.residence.conversation.ConversationParticipantOwnerTypeGuardTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
     }
   ],
   "isolatedDatabase": "synthetic schema created and dropped by ConversationInboxDatabaseTest",
   "payments": "not invoked",
   "normalService": "not restarted",
-  "notes": "SQL parser triggers JaCoCo third-party method-size warning; final SQL/database checks explicitly use jacoco.skip=true."
+  "notes": "SQL parser triggers JaCoCo third-party method-size warning; final SQL/database checks explicitly use jacoco.skip=true.",
+  "total": 39,
+  "addedTests": 12
 }

@@ -30,6 +30,22 @@
       "passed": true
     },
     {
+      "name": "ADMIN prepend preserves reading position",
+      "passed": true
+    },
+    {
+      "name": "new message does not force bottom",
+      "passed": true
+    },
+    {
+      "name": "offscreen new message not acknowledged",
+      "passed": true
+    },
+    {
+      "name": "visible new message acknowledged",
+      "passed": true
+    },
+    {
       "name": "ADMIN feedback same-id source distinct",
       "passed": true
     },
@@ -131,6 +147,10 @@
     },
     {
       "name": "RESIDENT history prepended",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT prepend preserves reading position",
       "passed": true
     },
     {
@@ -238,6 +258,10 @@
       "passed": true
     },
     {
+      "name": "STAFF prepend preserves reading position",
+      "passed": true
+    },
+    {
       "name": "staff no feedback category",
       "passed": true
     },
@@ -295,6 +319,18 @@
     },
     {
       "name": "STAFF desktop minimum width guard",
+      "passed": true
+    },
+    {
+      "name": "first unread window starts at unread not latest",
+      "passed": true
+    },
+    {
+      "name": "initial unread reading is not forced to bottom",
+      "passed": true
+    },
+    {
+      "name": "first unread only acknowledges visible range",
       "passed": true
     },
     {

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, watch } from 'vue'
+import { computed, nextTick, onMounted, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { useConversationInbox } from '@/composables/useConversationInbox'
-import { type ConversationInboxItem, type ConversationSource } from '@/types/modules/conversationInbox'
+import { inboxKey, type ConversationInboxItem, type ConversationSource } from '@/types/modules/conversationInbox'
 import ConversationSourceNav from './ConversationSourceNav.vue'
 import ConversationInboxList from './ConversationInboxList.vue'
 import ConversationPane from './ConversationPane.vue'
@@ -16,6 +16,18 @@ const identity = computed(() => `${user.role}:${user.user?.id}`)
 const selectedId = computed(() => { const id = Number(route.params.id || route.query.id); return Number.isInteger(id) && id > 0 ? id : null })
 const source = computed<ConversationSource>(() => route.query.source === 'FEEDBACK' ? 'FEEDBACK' : 'CONVERSATION')
 const selectedKey = computed(() => selectedId.value ? `${source.value}:${selectedId.value}` : '')
+const retainedSelection = shallowRef<ConversationInboxItem | null>(null)
+watch([items, selectedKey], () => {
+ const current = items.value.find(item => inboxKey(item) === selectedKey.value)
+ if (current) retainedSelection.value = current
+ else if (retainedSelection.value && inboxKey(retainedSelection.value) !== selectedKey.value) retainedSelection.value = null
+})
+watch(identity, () => { retainedSelection.value = null })
+const displayedItems = computed(() => {
+ const current = retainedSelection.value
+ return unreadOnly.value && current && !loading.value && !error.value && !items.value.some(item => inboxKey(item) === selectedKey.value)
+  ? [{ ...current, unreadCount: 0 }, ...items.value] : items.value
+})
 const returnTo = computed(() => typeof route.query.returnTo === 'string' && route.query.returnTo.startsWith(base.value + '/') ? route.query.returnTo : '')
 function select(item: Pick<ConversationInboxItem, 'source' | 'id'>) {
  void router.replace({ path: `${base.value}/conversations`, query: { ...route.query, id: item.id, source: item.source } })
@@ -30,7 +42,7 @@ onMounted(() => void load())
   <header class="workspace-page-head"><div><h1>消息会话</h1><p>所有业务沟通，集中在此</p></div><div class="workspace-page-actions"><router-link v-if="returnTo" :to="returnTo">返回业务详情</router-link><router-link :to="`${base}/notifications`">通知</router-link><button type="button" :disabled="loading" @click="load()">刷新</button><DirectConversationLauncher @opened="opened" /></div></header>
   <div class="conversation-workspace" :class="{ 'has-selection': selectedId, 'is-admin': management }">
    <ConversationSourceNav v-model="type" :staff="user.role === 'STAFF'" />
-   <ConversationInboxList v-model:keyword="keyword" v-model:unread-only="unreadOnly" :items="items" :selected="selectedKey" :loading="loading" :error="error" :has-more="hasMore" @select="select" @more="load(true)" @retry="load()" />
+   <ConversationInboxList v-model:keyword="keyword" v-model:unread-only="unreadOnly" :items="displayedItems" :selected="selectedKey" :loading="loading" :error="error" :has-more="hasMore" @select="select" @more="load(true)" @retry="load()" />
    <ConversationPane v-if="selectedId" :key="`${identity}:${selectedKey}`" :source="source" :id="selectedId" @back="back" @changed="refreshWhenVisible" @read="refreshWhenVisible" />
    <div v-else class="workspace-empty"><span aria-hidden="true">☏</span><h2>选择一个会话</h2><p>租约、看房、工单、反馈和直通消息<br />在这里继续沟通</p><small>仅显示当前账号有权访问的会话</small></div>
   </div>

@@ -15,7 +15,7 @@ const emit = defineEmits<{ select: [item: ConversationInboxItem]; 'update:keywor
    <button v-for="item in items" :key="inboxKey(item)" class="inbox-row" type="button" :class="{ active: selected === inboxKey(item) }" :aria-pressed="selected === inboxKey(item)" @click="emit('select', item)">
     <span class="source-avatar" aria-hidden="true">{{ inboxTypeLabels[item.type].slice(0, 1) }}</span>
     <span class="row-body"><span class="row-title">{{ item.title }}</span><span class="row-location">{{ [item.communityName, item.houseCode || item.residentLabel].filter(Boolean).join(' · ') }}</span><span class="row-preview">{{ item.lastMessage || '暂无消息' }}</span></span>
-    <span class="row-side"><time>{{ formatRelative(item.activityAt) }}</time><span v-if="item.unreadCount > 0" class="unread" :aria-label="`${item.unreadCount}条未读`">{{ item.unreadCount > 99 ? '99+' : item.unreadCount }}</span><span v-else-if="item.status === 'CLOSED'" class="closed">只读</span></span>
+    <span class="row-side"><time>{{ formatRelative(item.activityAt) }}</time><span v-if="item.unreadCount > 0" class="unread" :aria-label="`${item.unreadCount}条未读`">{{ item.unreadCount > 99 ? '99+' : item.unreadCount }}</span><span v-else-if="item.status === 'CLOSED'" class="closed">只读</span><span v-else-if="unreadOnly && selected === inboxKey(item)" class="closed">已读</span></span>
    </button>
    <button v-if="hasMore" type="button" class="load-more" :disabled="loading" @click="emit('more')">{{ loading ? '加载中…' : '加载更多会话' }}</button>
   </div>

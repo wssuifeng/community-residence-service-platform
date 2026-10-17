@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-17",
+  "command": "backend/mvnw.cmd -q -DskipTests package",
+  "package": "passed",
+  "tests": "separately verified in backend-summary.json; package skips re-running them",
+  "candidate": "output/runtime/manual-cl-candidate-20261017.jar",
+  "sha256": "d6fca5e48ee4a02aeba22288f80a8016104fe41bf176394492ee1dfd0e899187",
+  "matchesTarget": true,
+  "containsV43AndMessageWindow": true,
+  "normalEnvironmentLoaded": false,
+  "normalPortsAtReadOnlyInspection": {
+    "8084": "not listening",
+    "5176": "not listening"
+  },
+  "transactions": "none"
+}

@@ -9,10 +9,10 @@ let wrapper: ReturnType<typeof mount>
 const row = (id: number) => ({ id, content: `消息${id}`, createdAt: '2026-10-17T10:00:00' })
 beforeEach(() => { vi.useFakeTimers(); user.user.id++ })
 afterEach(() => { wrapper?.unmount(); vi.useRealTimers(); vi.clearAllMocks() })
-function setup(load: (id: number, before?: number, after?: number) => Promise<ReturnType<typeof row>[]>) {
+function setup(load: (id: number, before?: number, after?: number) => Promise<ReturnType<typeof row>[]>, initialWindow?: (id: number) => Promise<import('@/api/conversationInbox').InboxMessageWindow<ReturnType<typeof row>>>) {
  const id = ref(1), closed = ref(false), send = vi.fn(async () => row(99))
  let state: ReturnType<typeof useChatChannel<ReturnType<typeof row>>>
- wrapper = mount(defineComponent({ setup() { state = useChatChannel({ id: () => id.value, closed: () => closed.value, load, window: load, send, image: send, topic: n => `/test/${n}`, eventType: 'MESSAGE' }); return {} }, template: '<div />' }))
+ wrapper = mount(defineComponent({ setup() { state = useChatChannel({ id: () => id.value, closed: () => closed.value, load, window: load, initialWindow, send, image: send, topic: n => `/test/${n}`, eventType: 'MESSAGE' }); return {} }, template: '<div />' }))
  return { id, closed, send, get state() { return state! } }
 }
 it('切换时旧窗口响应不能覆盖新会话', async () => {
@@ -41,4 +41,10 @@ it('关闭态保留历史，不调用发送或启动轮询', async () => {
 it('读取失败提供重试，不冒充空会话成功', async () => {
  const load = vi.fn().mockRejectedValueOnce(new Error('加载失败')).mockResolvedValue([row(1)]); const c = setup(load); await flushPromises()
  expect(c.state.error.value).toBe('加载失败'); await c.state.reload(); expect(c.state.error.value).toBe(''); expect(c.state.messages.value).toHaveLength(1)
+})
+
+it('首次从未读窗口开始，给消息区明确定位而不是跳到最后', async () => {
+ const load = vi.fn().mockResolvedValue([]), initial = vi.fn().mockResolvedValue({ records: [row(51),row(52)], startAtUnread: true, firstUnreadMessageId: 51, hasOlder: true, hasNewer: true })
+ const c = setup(load, initial); await flushPromises()
+ expect(initial).toHaveBeenCalledWith(1); expect(load).not.toHaveBeenCalled(); expect(c.state.initialAnchor.value).toBe(51); expect(c.state.hasOlder.value).toBe(true)
 })

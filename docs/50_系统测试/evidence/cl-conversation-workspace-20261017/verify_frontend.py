@@ -13,7 +13,7 @@ def check(name, value):
 
 class Synthetic:
     def __init__(self,role):
-        self.role=role; self.calls=[];self.read={};self.fail=False
+        self.role=role; self.calls=[];self.read={};self.fail=False;self.initial_unread=None
         self.types={101:"LEASE_GROUP",102:"VIEWING_GROUP",103:"WORK_ORDER_GROUP",104:"DIRECT"}
         self.messages={i:[dict(id=i*100+n,conversationId=i,senderId=9,senderRole="RESIDENT",senderName="演示居民",content=f"合成沟通记录 {n}",messageType="TEXT",createdAt=DATE) for n in range(1,86)] for i in self.types}
         self.messages[101][-1].update(senderId=0,senderRole="SYSTEM",senderName="系统",content="租赁协议已发出",messageType="LEASE_AGREEMENT",agreementId=71)
@@ -47,7 +47,10 @@ class Synthetic:
             source,i=match[1],int(match[2]);rows=self.messages[i] if source=="CONVERSATION" else self.fm
             before=int(q.get("beforeId",["0"])[0]);after=int(q.get("afterId",["0"])[0])
             rows=[m for m in rows if (not before or m["id"]<before) and (not after or m["id"]>after)]
-            result=rows[:40] if after else rows[-40:]
+            unread_start=self.initial_unread if source=="CONVERSATION" and i==103 and not before and not after else None
+            if unread_start:rows=[m for m in rows if m["id"]>=unread_start]
+            window=rows[:40] if after or unread_start else rows[-40:]
+            result=dict(records=window,startAtUnread=bool(unread_start),firstUnreadMessageId=unread_start,hasOlder=bool(unread_start) or len(rows)>40,hasNewer=bool(unread_start) and len(rows)>40)
         elif match:=re.fullmatch(r"/(conversations|conversation-inbox/FEEDBACK)/(\d+)/read",path):
             source="FEEDBACK" if "FEEDBACK" in path else "CONVERSATION";self.read[(source,int(match[2]))]=request.post_data_json["lastMessageId"]
         elif match:=re.fullmatch(r"/conversations/(\d+)",path):result=self.detail(int(match[1]))
@@ -97,9 +100,21 @@ async def main():
             await page.get_by_role("log").get_by_text("切换后应保留的草稿",exact=True).wait_for()
             check(role+" sent message visible",await page.get_by_role("textbox",name="消息内容").input_value()=="")
             before=await page.locator(".chat-message").count()
+            await page.locator(".chat-message-list").evaluate("el=>{el.scrollTop=0;el.dispatchEvent(new Event('scroll'))}")
+            old_height=await page.locator(".chat-message-list").evaluate("el=>el.scrollHeight")
             await page.get_by_role("button",name="加载更早消息",exact=True).click()
             await page.wait_for_timeout(150)
             check(role+" history prepended",await page.locator(".chat-message").count()>before)
+            check(role+" prepend preserves reading position",await page.locator(".chat-message-list").evaluate("(el,old)=>Math.abs(el.scrollTop-(el.scrollHeight-old))<5",old_height))
+            if role=="ADMIN":
+                await page.locator(".chat-message-list").evaluate("el=>{el.scrollTop=0;el.dispatchEvent(new Event('scroll'))}")
+                newest=dict(synthetic.messages[cid][-1],id=synthetic.messages[cid][-1]["id"]+1,content="合成远端新消息",senderId=9,senderRole="RESIDENT")
+                synthetic.messages[cid].append(newest)
+                await page.get_by_role("button",name="1 条新消息 ↓",exact=True).wait_for(timeout=18000)
+                check("new message does not force bottom",await page.locator(".chat-message-list").evaluate("el=>el.scrollTop<10"))
+                check("offscreen new message not acknowledged",synthetic.read[("CONVERSATION",cid)]<newest["id"])
+                await page.get_by_role("button",name="1 条新消息 ↓",exact=True).click();await page.wait_for_timeout(200)
+                check("visible new message acknowledged",synthetic.read[("CONVERSATION",cid)]==newest["id"])
             if role!="STAFF":
                 await page.locator(".inbox-row").filter(has_text="匿名建议").click()
                 await page.get_by_text("这里是原始反馈，不得丢失。",exact=True).wait_for()
@@ -129,6 +144,16 @@ async def main():
                 else:check(role+" desktop minimum width guard",await page.get_by_text("本系统面向桌面端使用，请使用 768px 以上宽度的设备访问。",exact=False).is_visible())
                 if width in (1920,1024,768):await page.screenshot(path=str(OUT/f"{base}-{width}.png"),full_page=True)
             await context.close()
+        context=await browser.new_context(viewport={"width":1440,"height":1000})
+        unread_data=Synthetic("ADMIN");unread_data.initial_unread=10341
+        await context.route("**/*",unread_data.handle)
+        await context.add_init_script("sessionStorage.setItem('crsp_session',JSON.stringify("+json.dumps(dict(token="synthetic-ui-only",expiresAt=4102444800000,user=dict(id=8,username="synthetic",realName="合成测试",role="ADMIN",boundCommunities=[2])))+"))")
+        page=await context.new_page();page.on("pageerror",lambda e:errors.append(str(e)))
+        await page.goto(BASE+"/admin/conversations?id=103");await page.get_by_role("log").wait_for();await page.wait_for_timeout(300)
+        check("first unread window starts at unread not latest",await page.locator(".chat-message").first.get_attribute("data-message-id")=="10341")
+        check("initial unread reading is not forced to bottom",await page.locator(".chat-message-list").evaluate("el=>el.scrollTop<30"))
+        check("first unread only acknowledges visible range",10341<=unread_data.read[("CONVERSATION",103)]<10380)
+        await page.screenshot(path=str(OUT/"unread-anchor-1440.png"),full_page=True);await context.close()
         check("no financial command",True)
         check("no JavaScript errors",not errors)
         await browser.close()

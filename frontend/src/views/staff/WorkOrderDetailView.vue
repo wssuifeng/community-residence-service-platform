@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
 import ImageUploader from '@/components/common/ImageUploader.vue'
-import ConversationChat from '@/components/business/ConversationChat.vue'
+import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
 import { getConversation } from '@/api/conversation'
 import type { IConversation } from '@/types/modules/conversation'
 import {
@@ -143,8 +143,6 @@ function focusRequestedAction(): void {
 /* R74 工单临时群聊：受理即建群（居民 + 受理管理员），派单后本服务人员自动入群；
    未受理无群、未入群（非参与者 403）均不渲染面板 */
 const workOrderConversation = ref<IConversation | null>(null)
-/** 关闭态提示（UI设计 v1.4 §R74：工单终审结束后会话资源回收） */
-const CONVERSATION_CLOSED_HINT = '工单已结束，会话资源已回收（历史可查、不可再发言）'
 
 /**
  * 取工单临时群聊：仅参与者可见（§9.21.2）——未受理（无 conversationId）、
@@ -283,7 +281,7 @@ onMounted(fetchDetail)
     </nav>
 
     <template v-if="order">
-      <a v-if="workOrderConversation" class="work-order-chat-link" href="#work-order-chat">进入工单沟通 ↓</a>
+      <ConversationEntry v-if="workOrderConversation" compact :id="workOrderConversation.id" :closed="workOrderConversation.status === 'CLOSED'" />
       <article class="status-strip" :class="`is-${toneOf(order.priority)}`">
         <span class="status-priority">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -513,21 +511,7 @@ onMounted(fetchDetail)
 
         <!-- R74 工单临时群聊：受理即建群，派单后本服务人员自动入群（未入群时不渲染）；
              终审结束后只读留档 -->
-        <article v-if="workOrderConversation" id="work-order-chat" class="panel chat-panel">
-          <h2 class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4 6.5h16v9H9l-5 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
-            </svg>
-            工单临时群聊
-          </h2>
-          <ConversationChat
-            :conversation-id="workOrderConversation.id"
-            :closed="workOrderConversation.status === 'CLOSED'"
-            :closed-hint="CONVERSATION_CLOSED_HINT"
-            :participants="workOrderConversation.participants ?? []"
-            :title="workOrderConversation.title"
-          />
-        </article>
+
       </div>
     </template>
 
