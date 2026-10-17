@@ -1,0 +1,14 @@
+{
+  "acceptedDesign": "../../design/conversation/cj-20261017/design-draft.html",
+  "implementation": "frontend/src/components/conversation/ConversationWorkspace.vue",
+  "reuse": [
+    "ConversationChat",
+    "FeedbackChat",
+    "ChatMessageList",
+    "ChatComposer",
+    "useChatChannel"
+  ],
+  "verification": "frontend-browser-summary.json",
+  "humanProductAcceptance": "not claimed",
+  "scope": "shared inbox, three role routes and source adapters; legacy detail cleanup follows"
+}
