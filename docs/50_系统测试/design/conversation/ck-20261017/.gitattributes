@@ -1,0 +1,7 @@
+# Keep byte hashes of standalone design artifacts stable on Windows checkouts.
+*.html text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.py text eol=lf
+*.png binary
+.gitattributes text eol=lf

@@ -94,10 +94,15 @@
     {
       "name": "production-test",
       "status": "not_run"
+    },
+    {
+      "name": "sidebar-style-only-adaptation",
+      "status": "completed",
+      "not_included": "unified workspace and detail cleanup"
     }
   ],
-  "user_visual_acceptance": "not_evaluated",
-  "production_changes": false,
+  "user_visual_acceptance": "accepted",
+  "production_changes": true,
   "user_browser_accessed": false,
   "source_screenshot_uploaded": false,
   "parallel_agents": 0,
@@ -121,13 +126,13 @@
     },
     {
       "path": "design-draft.html",
-      "bytes": 43174,
-      "sha256": "c56193be35329ae6e5d60bb86552d0bd2898e34d5a3f4ebf896417bacc42de5c"
+      "bytes": 44548,
+      "sha256": "92a2cdf5cfca053b8f59ce2c3995655479c4c1077d722ffb0871ed77566d7108"
     },
     {
       "path": "design-intent.md",
-      "bytes": 4742,
-      "sha256": "6672834e1a767bbc1a44d0cb3cee20deb5e35d6b5583deff4347981b275df508"
+      "bytes": 5249,
+      "sha256": "a5634a35dffa4bf25e46ea898ff9d0e127d0fa438bd26a6ada0a8323d2ebf06c"
     },
     {
       "path": "imagegen/direction.png",
@@ -141,63 +146,63 @@
     },
     {
       "path": "imagegen/selection.md",
-      "bytes": 557,
-      "sha256": "468d3f9aca8063f64992e8e55d2bf73317721e12fe485cf9b78b5ffa498d30e2"
+      "bytes": 663,
+      "sha256": "c49e4443e134f54faf4ff1c1b54f7b201f7df351fada9ea376089222dd78e3b2"
     },
     {
       "path": "screens/admin-1440.png",
-      "bytes": 134515,
-      "sha256": "9a19ca106bf43ff7bf7b908f6dbbd9d56560ad4bf595ffe96e87e9766fda038d"
+      "bytes": 134516,
+      "sha256": "a48ae717ffd4dad4ba9ae7775a8a94d6ffbb160d6aaaa78da5ce0800909bad03"
     },
     {
       "path": "screens/admin-1920.png",
-      "bytes": 153015,
-      "sha256": "f6a028cd66c4a728df867d4c3866722d76c271bb9bc9f4b6029035491da37e0b"
+      "bytes": 153016,
+      "sha256": "9d8f09a24c2221e76ada156a99e143da3dec9c6cf081adbc8a38a89022a25ee0"
     },
     {
       "path": "screens/admin-business-menu-1440.png",
-      "bytes": 142071,
-      "sha256": "a6f44d696ce67950e35e2b0b2ce3c90f310a9490271eb73dd8179349b4a53579"
+      "bytes": 145845,
+      "sha256": "0a5c16534ed7a43675aa4d33525ae6cb2bdf58d6e11dc5bd784c228afdc15ef7"
     },
     {
       "path": "screens/admin-closed-1440.png",
       "bytes": 135553,
-      "sha256": "99bdd0919a419d143ace49a12a7c4d11c96736921274c251c6ba3f7500f9fc05"
+      "sha256": "491248a10b46845a4aae7ab3803deee252881ff90708e804b59a9f8ce65d1ada"
     },
     {
       "path": "screens/admin-empty-1440.png",
       "bytes": 68668,
-      "sha256": "325474b56a7037cde7e50ced58fa595ca7299f4ee7a2f64c71861ded27a47631"
+      "sha256": "b46c1b99a692be478e2483ab5741c457fa25e186caf0088c99cdd65ccf3fbee9"
     },
     {
       "path": "screens/admin-error-1440.png",
-      "bytes": 70008,
-      "sha256": "6300783cd53d151c941e49c2ddbc93a478fb4d6c31816766339572a02eee8655"
+      "bytes": 70009,
+      "sha256": "017e3849547a7d7e21c0dbec1fe31da0a46e77bc9a6bdce8d83af7c1127293b4"
     },
     {
       "path": "screens/admin-feedback-1440.png",
-      "bytes": 129963,
-      "sha256": "7725f78ff221dbf349162842bcdba3da381d3489425d894cf0a5e4dee1b0a715"
+      "bytes": 129967,
+      "sha256": "cf5a6be2c48a0f6b1fb8cf73133e8fdf48d3ff97625f75ad9945dfb752e13cf8"
     },
     {
       "path": "screens/admin-history-1440.png",
-      "bytes": 138808,
-      "sha256": "87fd728a576a5b42674b4d4ffebf95409d3bc5571f8123f8f11043c640c7d3f5"
+      "bytes": 138812,
+      "sha256": "6641dead72b3ed6304da77bbd562278bbc85b90225ade76679e141a5d0e3fefc"
     },
     {
       "path": "screens/admin-narrow-chat-900.png",
-      "bytes": 55516,
-      "sha256": "5a0d49f28e795633c2e2a92aaded9bb31de7be8aa14729247ea4e4aad70baa81"
+      "bytes": 55517,
+      "sha256": "0275fb649ff486dee7d7c09e1feb25ca6a7d98dfe4bfb2dcce175d67bd6e100f"
     },
     {
       "path": "screens/admin-narrow-list-900.png",
-      "bytes": 69728,
-      "sha256": "9c2082f2cb7d8c87c3e89607144307a3d40c757fea30e9c24e804d9c6933be9e"
+      "bytes": 69732,
+      "sha256": "b9448abaabab011714fc06d7aca91cbe991d3ee0956842a22eee7e513f8ea5ab"
     },
     {
       "path": "screens/admin-offline-1440.png",
-      "bytes": 136795,
-      "sha256": "17a27cdc0d9ab39027045a7ddbcaa6ca094df052df0e50cb491d72b5e6622250"
+      "bytes": 136794,
+      "sha256": "cfddda8c4b97c1381262e19c3322ee18b0bd771d960da79417ee608bd1c2bcb9"
     },
     {
       "path": "screens/resident-1440.png",
@@ -234,5 +239,20 @@
       "bytes": 40371,
       "sha256": "8e6a9082cbd4cdfe963fc4893b437032889e2e16c3f0e71051b15fd495076459"
     }
-  ]
+  ],
+  "acceptance_note": "User accepted overall three-pane design on 2026-10-17, with requested scrollbar adjustment; adjustment implemented, its separate visual review not_evaluated.",
+  "production_write_paths": [
+    "frontend/src/styles/sidebar-scrollbar.css",
+    "frontend/src/main.ts"
+  ],
+  "unified_workspace_engineering": "not_run",
+  "post_acceptance_review": {
+    "date": "2026-10-17",
+    "scope": "sidebar-only correction",
+    "checks": 20,
+    "summary": "../ck-20261017/summary.json",
+    "build": "../ck-20261017/build-summary.json",
+    "visual_adjustment_review": "not_evaluated",
+    "old_114_checks": "historical; not rerun"
+  }
 }

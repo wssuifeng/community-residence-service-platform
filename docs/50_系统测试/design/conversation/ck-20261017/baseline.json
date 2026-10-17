@@ -1,0 +1,11 @@
+{
+  "scope": "standalone design sidebar",
+  "expected": "4px locally styled track",
+  "observed": {
+    "overflow": true,
+    "width": "auto",
+    "gutter": 0,
+    "thumb": "rgba(0, 0, 0, 0)"
+  },
+  "failed_before_fix": true
+}

@@ -1,0 +1,14 @@
+{
+  "created_at": "2026-10-17T11:49:23.181384+08:00",
+  "command": "npm run build",
+  "exit_code": 0,
+  "includes": "vue-tsc --noEmit && vite build",
+  "compiled_styles": [
+    {
+      "path": "frontend/dist/assets/frontend-tN5BpzWg.css",
+      "sha256": "03335a84da94e3ae7e94cae5585ec5e5a71c47f38508b9116cfcd05ed5486f9f"
+    }
+  ],
+  "normal_service_changed": false,
+  "business_tests_run": false
+}
