@@ -230,6 +230,18 @@ public class FeedbackService {
         return rows.stream().map(m -> toVO(m, feedback, images.get(m.getId()))).toList();
     }
 
+    /* 历史分段不改变受理状态；匿名与图片沿原消息投影。 */
+    public List<MessageVO> messageWindow(Long id,Long beforeId,Long afterId,int size) {
+        Feedback feedback=requireFeedback(id);checkReadAccess(feedback);
+        var query=new LambdaQueryWrapper<FeedbackMessage>().eq(FeedbackMessage::getFeedbackId,id)
+                .lt(beforeId!=null,FeedbackMessage::getId,beforeId).gt(afterId!=null,FeedbackMessage::getId,afterId)
+                .orderBy(afterId==null,false,FeedbackMessage::getId).orderBy(afterId!=null,true,FeedbackMessage::getId).last("LIMIT "+size);
+        var rows=new java.util.ArrayList<>(messageMapper.selectList(query));rows.sort(java.util.Comparator.comparing(FeedbackMessage::getId));
+        var ids=rows.stream().filter(m->"IMAGE".equals(m.getMessageType())).map(FeedbackMessage::getId).toList();
+        var images=ids.isEmpty()?java.util.Map.<Long,com.community.residence.conversation.vo.ChatImageVO>of():chatImageService.images(com.community.residence.conversation.service.ChatImageService.FEEDBACK,ids);
+        return rows.stream().map(m->toVO(m,feedback,images.get(m.getId()))).toList();
+    }
+
     /* 附件列表：访问权限与详情同口径 */
     public List<AttachmentVO> attachments(Long feedbackId) {
         Feedback feedback = requireFeedback(feedbackId);
