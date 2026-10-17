@@ -2,7 +2,7 @@ import type { RouteLocation, RouteRecordRaw } from 'vue-router'
 
 /**
  * 管理端路由（UI设计.md §3.4，前缀 /admin）：
- * 侧栏项 + 隐藏下钻详情 + 通知列表（无侧栏项）
+ * 侧栏项 + 隐藏下钻详情；消息中心与会话为独立入口
  * + 旧路径兼容 redirect（需承接旧 query 的用函数写法透传，其余保持对象/字符串写法）。
  *
  * 批次 g 导航合并：租住/房源/退租申请/协议模板四个一级项与「居民」内的入住申请审核
@@ -79,10 +79,10 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: 'leases/:id', name: 'AdminLeaseDetail', component: () => import('@/views/admin/lease/LeaseDetailView.vue'), meta: { title: '租约详情' } },
       { path: 'residents/:id', name: 'AdminResidentDetail', component: () => import('@/views/admin/resident/ResidentDetailView.vue'), meta: { title: '居民详情' } },
       { path: 'housings/:id', name: 'AdminHousingDetail', component: () => import('@/views/admin/housing/HousingDetailView.vue'), meta: { title: '房源详情' } },
-      { path: 'notifications', name: 'AdminNotifications', component: () => import('@/views/admin/notification/NotificationListView.vue'), meta: { title: '通知列表' } },
-      // R63 多方会话中心：看房群聊 + 居民直通（v1.5）
-      { path: 'conversations', name: 'AdminConversations', component: () => import('@/views/admin/conversation/ConversationListView.vue'), meta: { title: '消息会话' } },
-      { path: 'conversations/:id', name: 'AdminConversationDetail', component: () => import('@/views/admin/conversation/ConversationListView.vue'), meta: { title: '消息会话' } },
+      { path: 'notifications', name: 'AdminNotifications', component: () => import('@/views/admin/notification/NotificationListView.vue'), meta: { title: '消息中心' } },
+      // 会话：原业务来源按权限聚合，与系统通知入口分开。
+      { path: 'conversations', name: 'AdminConversations', component: () => import('@/views/admin/conversation/ConversationListView.vue'), meta: { title: '会话' } },
+      { path: 'conversations/:id', name: 'AdminConversationDetail', component: () => import('@/views/admin/conversation/ConversationListView.vue'), meta: { title: '会话' } },
 
       // ---- 旧路径兼容 redirect（零断链：既有页面/登录跳转的旧路径全部落地到新容器） ----
       { path: 'statistics/dashboard', redirect: '/admin/dashboard' },

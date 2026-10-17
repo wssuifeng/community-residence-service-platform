@@ -6,7 +6,7 @@ const navItems = [
   { label: '工作台', to: '/staff/dashboard' },
   { label: '工单列表', to: '/staff/work-orders' },
   { label: '我的带看', to: '/staff/viewings' },
-  { label: '消息', to: '/staff/conversations', activeMatch: ['/staff/conversations', '/staff/notifications'] }
+  { label: '会话', to: '/staff/conversations', activeMatch: ['/staff/conversations'] }
 ]
 </script>
 

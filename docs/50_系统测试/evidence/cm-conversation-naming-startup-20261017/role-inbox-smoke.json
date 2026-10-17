@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-17",
+  "scope": "three demo roles login and read-only inbox through normal Vite proxy; no browser, message acknowledgement or sending",
+  "results": [
+    {
+      "role": "ADMIN",
+      "account": "admin1",
+      "loginVerified": true,
+      "inboxVerified": true
+    },
+    {
+      "role": "RESIDENT",
+      "account": "resident1",
+      "loginVerified": true,
+      "inboxVerified": true
+    },
+    {
+      "role": "STAFF",
+      "account": "staff1",
+      "loginVerified": true,
+      "inboxVerified": true
+    }
+  ],
+  "financialCommands": "none",
+  "tokensAndPasswords": "not recorded",
+  "manualAcceptance": "not claimed"
+}

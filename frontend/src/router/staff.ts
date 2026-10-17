@@ -12,7 +12,7 @@ const staffRoutes: RouteRecordRaw[] = [
       { path: 'work-orders', name: 'StaffWorkOrders', component: () => import('@/views/staff/WorkOrderListView.vue'), meta: { title: '工单列表' } },
       { path: 'work-orders/:id', name: 'StaffWorkOrderDetail', component: () => import('@/views/staff/WorkOrderDetailView.vue'), meta: { title: '工单详情' } },
       { path: 'viewings', name: 'StaffViewings', component: () => import('@/views/staff/ViewingsWorkbenchView.vue'), meta: { title: '我的带看' } },
-      { path: 'conversations', name: 'StaffConversations', component: () => import('@/views/staff/ConversationListView.vue'), meta: { title: '消息会话' } },
+      { path: 'conversations', name: 'StaffConversations', component: () => import('@/views/staff/ConversationListView.vue'), meta: { title: '会话' } },
       { path: 'notifications', name: 'StaffNotifications', component: () => import('@/views/staff/NotificationListView.vue'), meta: { title: '消息中心' } }
     ]
   }

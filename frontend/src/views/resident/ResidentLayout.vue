@@ -27,7 +27,7 @@ const navItems = [
   { label: '我的工单', to: '/resident/work-orders' },
   { label: '我的反馈', to: '/resident/feedbacks' },
   { label: '公告', to: '/resident/notices' },
-  { label: '消息', to: '/resident/conversations', activeMatch: ['/resident/conversations', '/resident/notifications'] }
+  { label: '会话', to: '/resident/conversations', activeMatch: ['/resident/conversations'] }
 ]
 </script>
 

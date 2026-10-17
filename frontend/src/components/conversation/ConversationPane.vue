@@ -19,7 +19,7 @@ let disposed = false, request = 0
 const management = computed(() => user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')
 const role = computed<'ADMIN' | 'RESIDENT'>(() => management.value ? 'ADMIN' : 'RESIDENT')
 const type = computed(() => props.source === 'FEEDBACK' ? 'FEEDBACK' : conversation.value?.type)
-const title = computed(() => feedback.value?.title ?? conversation.value?.title ?? '沟通会话')
+const title = computed(() => feedback.value?.title ?? conversation.value?.title ?? '会话')
 const closed = computed(() => !!error.value || (feedback.value?.status ?? conversation.value?.status) === 'CLOSED')
 const closedLabel = computed(() => (feedback.value?.status ?? conversation.value?.status) === 'CLOSED' ? '已关闭 · 历史只读' : '进行中')
 const businessUrl = computed(() => {
