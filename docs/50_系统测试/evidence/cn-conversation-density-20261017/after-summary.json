@@ -1,0 +1,1491 @@
+{
+  "scope": "isolated frontend with synthetic HTTP; not backend E2E or manual acceptance",
+  "phase": "after",
+  "checks": [
+    {
+      "name": "ADMIN 1440x900 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440x900 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1366x768 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1280x720 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1920x1080 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1024x768 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768x720 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "ADMIN text send and reload still work",
+      "passed": true
+    },
+    {
+      "name": "ADMIN image thumbnail bounded",
+      "passed": true
+    },
+    {
+      "name": "ADMIN image preview retained",
+      "passed": true
+    },
+    {
+      "name": "ADMIN short viewport with enlarged input keeps send accessible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN enlarged input still leaves message history usable",
+      "passed": true
+    },
+    {
+      "name": "ADMIN long text and long name stay in message area",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440x900 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1366x768 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1280x720 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1920x1080 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1024x768 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768x720 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT text send and reload still work",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT image thumbnail bounded",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT image preview retained",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT short viewport with enlarged input keeps send accessible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT enlarged input still leaves message history usable",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT long text and long name stay in message area",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440x900 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1366x768 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1280x720 more message area than original",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1920x1080 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1024x768 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 no outer vertical scrollbar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 composer and send stay inside viewport",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 message area has majority of workspace height",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 single-line content bubble compact",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 full short messages visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 timestamp outside bubble on upper metadata row",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768x720 sender and timestamp form one compact group",
+      "passed": true
+    },
+    {
+      "name": "STAFF text send and reload still work",
+      "passed": true
+    },
+    {
+      "name": "STAFF image thumbnail bounded",
+      "passed": true
+    },
+    {
+      "name": "STAFF image preview retained",
+      "passed": true
+    },
+    {
+      "name": "STAFF short viewport with enlarged input keeps send accessible",
+      "passed": true
+    },
+    {
+      "name": "STAFF enlarged input still leaves message history usable",
+      "passed": true
+    },
+    {
+      "name": "STAFF long text and long name stay in message area",
+      "passed": true
+    },
+    {
+      "name": "no JavaScript errors",
+      "passed": true
+    }
+  ],
+  "metrics": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 233,
+        "bottom": 779,
+        "left": 577,
+        "right": 1423,
+        "width": 846,
+        "height": 546
+      },
+      "workspace": {
+        "top": 145,
+        "bottom": 885,
+        "left": 248,
+        "right": 1424,
+        "width": 1176,
+        "height": 740
+      },
+      "composer": {
+        "top": 779,
+        "bottom": 884,
+        "left": 577,
+        "right": 1423,
+        "width": 846,
+        "height": 105
+      },
+      "heading": {
+        "top": 146,
+        "bottom": 209,
+        "left": 577,
+        "right": 1423,
+        "width": 846,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 7,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 233,
+        "bottom": 647,
+        "left": 577,
+        "right": 1349,
+        "width": 772,
+        "height": 414
+      },
+      "workspace": {
+        "top": 145,
+        "bottom": 753,
+        "left": 248,
+        "right": 1350,
+        "width": 1102,
+        "height": 608
+      },
+      "composer": {
+        "top": 647,
+        "bottom": 752,
+        "left": 577,
+        "right": 1349,
+        "width": 772,
+        "height": 105
+      },
+      "heading": {
+        "top": 146,
+        "bottom": 209,
+        "left": 577,
+        "right": 1349,
+        "width": 772,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 233,
+        "bottom": 599,
+        "left": 549,
+        "right": 1263,
+        "width": 714,
+        "height": 366
+      },
+      "workspace": {
+        "top": 145,
+        "bottom": 705,
+        "left": 248,
+        "right": 1264,
+        "width": 1016,
+        "height": 560
+      },
+      "composer": {
+        "top": 599,
+        "bottom": 704,
+        "left": 549,
+        "right": 1263,
+        "width": 714,
+        "height": 105
+      },
+      "heading": {
+        "top": 146,
+        "bottom": 209,
+        "left": 549,
+        "right": 1263,
+        "width": 714,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 233,
+        "bottom": 959,
+        "left": 577,
+        "right": 1903,
+        "width": 1326,
+        "height": 726
+      },
+      "workspace": {
+        "top": 145,
+        "bottom": 1065,
+        "left": 248,
+        "right": 1904,
+        "width": 1656,
+        "height": 920
+      },
+      "composer": {
+        "top": 959,
+        "bottom": 1064,
+        "left": 577,
+        "right": 1903,
+        "width": 1326,
+        "height": 105
+      },
+      "heading": {
+        "top": 146,
+        "bottom": 209,
+        "left": 577,
+        "right": 1903,
+        "width": 1326,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 10,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 233,
+        "bottom": 647,
+        "left": 77,
+        "right": 1007,
+        "width": 930,
+        "height": 414
+      },
+      "workspace": {
+        "top": 145,
+        "bottom": 753,
+        "left": 16,
+        "right": 1008,
+        "width": 992,
+        "height": 608
+      },
+      "composer": {
+        "top": 647,
+        "bottom": 752,
+        "left": 77,
+        "right": 1007,
+        "width": 930,
+        "height": 105
+      },
+      "heading": {
+        "top": 146,
+        "bottom": 209,
+        "left": 77,
+        "right": 1007,
+        "width": 930,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 720
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 233,
+        "bottom": 599,
+        "left": 77,
+        "right": 751,
+        "width": 674,
+        "height": 366
+      },
+      "workspace": {
+        "top": 145,
+        "bottom": 705,
+        "left": 16,
+        "right": 752,
+        "width": 736,
+        "height": 560
+      },
+      "composer": {
+        "top": 599,
+        "bottom": 704,
+        "left": 77,
+        "right": 751,
+        "width": 674,
+        "height": 105
+      },
+      "heading": {
+        "top": 146,
+        "bottom": 209,
+        "left": 77,
+        "right": 751,
+        "width": 674,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 779,
+        "left": 357,
+        "right": 1411,
+        "width": 1054,
+        "height": 570
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 885,
+        "left": 28,
+        "right": 1412,
+        "width": 1384,
+        "height": 764
+      },
+      "composer": {
+        "top": 779,
+        "bottom": 884,
+        "left": 357,
+        "right": 1411,
+        "width": 1054,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 357,
+        "right": 1411,
+        "width": 1054,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 8,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 647,
+        "left": 356.3125,
+        "right": 1337.6875,
+        "width": 981.375,
+        "height": 438
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 753,
+        "left": 27.3125,
+        "right": 1338.6875,
+        "width": 1311.375,
+        "height": 632
+      },
+      "composer": {
+        "top": 647,
+        "bottom": 752,
+        "left": 356.3125,
+        "right": 1337.6875,
+        "width": 981.375,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 356.3125,
+        "right": 1337.6875,
+        "width": 981.375,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 6,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 599,
+        "left": 326.59375,
+        "right": 1253.40625,
+        "width": 926.8125,
+        "height": 390
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 705,
+        "left": 25.59375,
+        "right": 1254.40625,
+        "width": 1228.8125,
+        "height": 584
+      },
+      "composer": {
+        "top": 599,
+        "bottom": 704,
+        "left": 326.59375,
+        "right": 1253.40625,
+        "width": 926.8125,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 326.59375,
+        "right": 1253.40625,
+        "width": 926.8125,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 959,
+        "left": 357,
+        "right": 1891,
+        "width": 1534,
+        "height": 750
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 1065,
+        "left": 28,
+        "right": 1892,
+        "width": 1864,
+        "height": 944
+      },
+      "composer": {
+        "top": 959,
+        "bottom": 1064,
+        "left": 357,
+        "right": 1891,
+        "width": 1534,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 357,
+        "right": 1891,
+        "width": 1534,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 10,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 647,
+        "left": 81.46875,
+        "right": 1002.53125,
+        "width": 921.0625,
+        "height": 438
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 753,
+        "left": 20.46875,
+        "right": 1003.53125,
+        "width": 983.0625,
+        "height": 632
+      },
+      "composer": {
+        "top": 647,
+        "bottom": 752,
+        "left": 81.46875,
+        "right": 1002.53125,
+        "width": 921.0625,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 81.46875,
+        "right": 1002.53125,
+        "width": 921.0625,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 6,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 720
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 599,
+        "left": 76.359375,
+        "right": 751.640625,
+        "width": 675.28125,
+        "height": 390
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 705,
+        "left": 15.359375,
+        "right": 752.640625,
+        "width": 737.28125,
+        "height": 584
+      },
+      "composer": {
+        "top": 599,
+        "bottom": 704,
+        "left": 76.359375,
+        "right": 751.640625,
+        "width": 675.28125,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 76.359375,
+        "right": 751.640625,
+        "width": 675.28125,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 779,
+        "left": 357,
+        "right": 1411,
+        "width": 1054,
+        "height": 570
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 885,
+        "left": 28,
+        "right": 1412,
+        "width": 1384,
+        "height": 764
+      },
+      "composer": {
+        "top": 779,
+        "bottom": 884,
+        "left": 357,
+        "right": 1411,
+        "width": 1054,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 357,
+        "right": 1411,
+        "width": 1054,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 8,
+      "role": "STAFF"
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 647,
+        "left": 356.3125,
+        "right": 1337.6875,
+        "width": 981.375,
+        "height": 438
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 753,
+        "left": 27.3125,
+        "right": 1338.6875,
+        "width": 1311.375,
+        "height": 632
+      },
+      "composer": {
+        "top": 647,
+        "bottom": 752,
+        "left": 356.3125,
+        "right": 1337.6875,
+        "width": 981.375,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 356.3125,
+        "right": 1337.6875,
+        "width": 981.375,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 6,
+      "role": "STAFF"
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 599,
+        "left": 326.59375,
+        "right": 1253.40625,
+        "width": 926.8125,
+        "height": 390
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 705,
+        "left": 25.59375,
+        "right": 1254.40625,
+        "width": 1228.8125,
+        "height": 584
+      },
+      "composer": {
+        "top": 599,
+        "bottom": 704,
+        "left": 326.59375,
+        "right": 1253.40625,
+        "width": 926.8125,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 326.59375,
+        "right": 1253.40625,
+        "width": 926.8125,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "STAFF"
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 959,
+        "left": 357,
+        "right": 1891,
+        "width": 1534,
+        "height": 750
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 1065,
+        "left": 28,
+        "right": 1892,
+        "width": 1864,
+        "height": 944
+      },
+      "composer": {
+        "top": 959,
+        "bottom": 1064,
+        "left": 357,
+        "right": 1891,
+        "width": 1534,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 357,
+        "right": 1891,
+        "width": 1534,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 10,
+      "role": "STAFF"
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 647,
+        "left": 81.46875,
+        "right": 1002.53125,
+        "width": 921.0625,
+        "height": 438
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 753,
+        "left": 20.46875,
+        "right": 1003.53125,
+        "width": 983.0625,
+        "height": 632
+      },
+      "composer": {
+        "top": 647,
+        "bottom": 752,
+        "left": 81.46875,
+        "right": 1002.53125,
+        "width": 921.0625,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 81.46875,
+        "right": 1002.53125,
+        "width": 921.0625,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 6,
+      "role": "STAFF"
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 720
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 209,
+        "bottom": 599,
+        "left": 76.359375,
+        "right": 751.640625,
+        "width": 675.28125,
+        "height": 390
+      },
+      "workspace": {
+        "top": 121,
+        "bottom": 705,
+        "left": 15.359375,
+        "right": 752.640625,
+        "width": 737.28125,
+        "height": 584
+      },
+      "composer": {
+        "top": 599,
+        "bottom": 704,
+        "left": 76.359375,
+        "right": 751.640625,
+        "width": 675.28125,
+        "height": 105
+      },
+      "heading": {
+        "top": 122,
+        "bottom": 185,
+        "left": 76.359375,
+        "right": 751.640625,
+        "width": 675.28125,
+        "height": 63
+      },
+      "bubbleHeight": 37,
+      "rowHeight": 59,
+      "visibleMessages": 5,
+      "role": "STAFF"
+    }
+  ],
+  "errors": [],
+  "normalServices": "untouched",
+  "financialCommands": "none"
+}

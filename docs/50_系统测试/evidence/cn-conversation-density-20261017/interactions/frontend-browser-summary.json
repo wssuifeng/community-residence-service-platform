@@ -1,0 +1,348 @@
+{
+  "scope": "isolated frontend with synthetic HTTP fixtures, not backend E2E",
+  "checks": [
+    {
+      "name": "ADMIN reads visible messages",
+      "passed": true
+    },
+    {
+      "name": "ADMIN initial history bounded",
+      "passed": true
+    },
+    {
+      "name": "ADMIN no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN other conversation draft isolated",
+      "passed": true
+    },
+    {
+      "name": "ADMIN draft restored",
+      "passed": true
+    },
+    {
+      "name": "ADMIN sent message visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN history prepended",
+      "passed": true
+    },
+    {
+      "name": "ADMIN prepend preserves reading position",
+      "passed": true
+    },
+    {
+      "name": "new message does not force bottom",
+      "passed": true
+    },
+    {
+      "name": "offscreen new message not acknowledged",
+      "passed": true
+    },
+    {
+      "name": "visible new message acknowledged",
+      "passed": true
+    },
+    {
+      "name": "ADMIN feedback same-id source distinct",
+      "passed": true
+    },
+    {
+      "name": "ADMIN anonymous safe",
+      "passed": true
+    },
+    {
+      "name": "ADMIN member safe label",
+      "passed": true
+    },
+    {
+      "name": "ADMIN closed hides composer",
+      "passed": true
+    },
+    {
+      "name": "ADMIN protocol action retained",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1920 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1920 chat visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1920 chat fits",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1366 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1366 chat visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1366 chat fits",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1024 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1024 chat visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 1024 chat fits",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 768 chat visible",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 768 chat fits",
+      "passed": true
+    },
+    {
+      "name": "ADMIN width 390 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN desktop minimum width guard",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT reads visible messages",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT initial history bounded",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT other conversation draft isolated",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT draft restored",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT sent message visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT history prepended",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT prepend preserves reading position",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT feedback same-id source distinct",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT anonymous safe",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT member safe label",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT closed hides composer",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT protocol action retained",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1920 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1920 chat visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1920 chat fits",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1366 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1366 chat visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1366 chat fits",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1024 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1024 chat visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 1024 chat fits",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 768 chat visible",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 768 chat fits",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT width 390 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT desktop minimum width guard",
+      "passed": true
+    },
+    {
+      "name": "STAFF reads visible messages",
+      "passed": true
+    },
+    {
+      "name": "STAFF initial history bounded",
+      "passed": true
+    },
+    {
+      "name": "STAFF no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF other conversation draft isolated",
+      "passed": true
+    },
+    {
+      "name": "STAFF draft restored",
+      "passed": true
+    },
+    {
+      "name": "STAFF sent message visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF history prepended",
+      "passed": true
+    },
+    {
+      "name": "STAFF prepend preserves reading position",
+      "passed": true
+    },
+    {
+      "name": "staff no feedback category",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1920 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1920 chat visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1920 chat fits",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1366 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1366 chat visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1366 chat fits",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1024 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1024 chat visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 1024 chat fits",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 768 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 768 chat visible",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 768 chat fits",
+      "passed": true
+    },
+    {
+      "name": "STAFF width 390 no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF desktop minimum width guard",
+      "passed": true
+    },
+    {
+      "name": "first unread window starts at unread not latest",
+      "passed": true
+    },
+    {
+      "name": "initial unread reading is not forced to bottom",
+      "passed": true
+    },
+    {
+      "name": "first unread only acknowledges visible range",
+      "passed": true
+    },
+    {
+      "name": "no financial command",
+      "passed": true
+    },
+    {
+      "name": "no JavaScript errors",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "normalServices": "untouched",
+  "transactions": "none"
+}
