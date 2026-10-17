@@ -51,7 +51,7 @@ class ConversationInboxDatabaseTest {
      var admin=new ConversationInboxService.Scope(8L,"ADMIN","USER",Set.of(2L),null,null,false);
      var rows=mapper.page(admin,0,30);assertThat(rows).hasSize(2);assertThat(mapper.count(admin)).isEqualTo(2);
      assertThat(rows.get(0).getSource()).isEqualTo("FEEDBACK");assertThat(rows.get(0).getResidentLabel()).isEqualTo("匿名居民");
-     assertThat(rows.get(1).getUnreadCount()).isEqualTo(1);assertThat(rows.get(1).getHouseCode()).isNull();
+     assertThat(rows.get(1).getUnreadCount()).isEqualTo(1);assertThat(mapper.readingCursor("CONVERSATION",10L,"USER",8L)).isZero();assertThat(mapper.firstUnread("CONVERSATION",10L,0L,"USER",8L)).isEqualTo(2L);assertThat(mapper.outsideWindow("CONVERSATION",10L,2L,true)).isTrue();assertThat(mapper.outsideWindow("CONVERSATION",10L,2L,false)).isFalse();assertThat(rows.get(1).getHouseCode()).isNull();
      var search=new ConversationInboxService.Scope(8L,"ADMIN","USER",Set.of(2L),null,"不可泄露实名",false);assertThat(mapper.count(search)).isZero();
      mapper.advanceFeedbackRead(1L,"USER",8L,0L);var unread=new ConversationInboxService.Scope(8L,"ADMIN","USER",Set.of(2L),null,null,true);assertThat(mapper.page(unread,0,30)).hasSize(1);
      mapper.advanceFeedbackRead(1L,"USER",8L,8L);mapper.advanceFeedbackRead(1L,"USER",8L,3L);

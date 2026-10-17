@@ -62,4 +62,26 @@ public interface ConversationInboxMapper {
  ON DUPLICATE KEY UPDATE last_read_message_id=GREATEST(last_read_message_id,#{cursor}),initial_read=1
  """)
  int advanceFeedbackRead(@Param("id") Long id,@Param("ownerType") String ownerType,@Param("userId") Long userId,@Param("cursor") Long cursor);
+
+ @Select("""
+ <script><choose><when test="source == 'CONVERSATION'">
+ SELECT last_read_message_id FROM conversation_participant WHERE conversation_id=#{id} AND owner_type=#{ownerType} AND user_id=#{userId}
+ </when><otherwise>
+ SELECT COALESCE(MAX(last_read_message_id),0) FROM feedback_read_cursor WHERE feedback_id=#{id} AND owner_type=#{ownerType} AND user_id=#{userId}
+ </otherwise></choose></script>
+ """)
+ Long readingCursor(@Param("source") String source,@Param("id") Long id,@Param("ownerType") String ownerType,@Param("userId") Long userId);
+ String MESSAGE_SOURCE = """
+ <choose><when test="source == 'CONVERSATION'">conversation_message WHERE conversation_id=#{id}</when><otherwise>feedback_message WHERE feedback_id=#{id}</otherwise></choose>
+ """;
+ @Select("""
+ <script>SELECT id FROM
+ """+MESSAGE_SOURCE+"""
+ AND id &gt; #{cursor} AND NOT(sender_id=#{userId} AND
+ <choose><when test="source == 'CONVERSATION'">(CASE WHEN sender_role='RESIDENT' THEN 'RESIDENT' ELSE 'USER' END)</when><otherwise>(CASE WHEN sender_type='RESIDENT' THEN 'RESIDENT' ELSE 'USER' END)</otherwise></choose>
+ =#{ownerType}) ORDER BY id ASC LIMIT 1</script>
+ """)
+ Long firstUnread(@Param("source") String source,@Param("id") Long id,@Param("cursor") Long cursor,@Param("ownerType") String ownerType,@Param("userId") Long userId);
+ @Select("<script>SELECT EXISTS(SELECT 1 FROM "+MESSAGE_SOURCE+" AND id <choose><when test='older'>&lt;</when><otherwise>&gt;</otherwise></choose> #{bound} LIMIT 1)</script>")
+ boolean outsideWindow(@Param("source") String source,@Param("id") Long id,@Param("bound") Long bound,@Param("older") boolean older);
 }

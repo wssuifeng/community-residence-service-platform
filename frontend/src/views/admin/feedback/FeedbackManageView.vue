@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useLiveRefresh } from '@/composables/useLiveRefresh'
-import FeedbackChat from '@/components/business/FeedbackChat.vue'
+import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -140,6 +141,7 @@ function shortDate(iso: string): string {
 
 /* ===================== 右栏：会话态（组件内 state，不新增路由） ===================== */
 
+const route = useRoute(), router = useRouter()
 const selectedId = ref<number | null>(null)
 const feedback = ref<IFeedback | null>(null)
 const attachments = ref<IFeedbackAttachment[]>([])
@@ -170,6 +172,7 @@ async function select(target: IFeedback): Promise<void> {
     if (seq !== conversationSeq) return
     feedback.value = detail
     attachments.value = atts
+    if (Number(route.query.id) !== target.id) void router.replace({ query: { ...route.query, id: target.id } })
     await nextTick()
   } catch (error) {
     if (seq !== conversationSeq) return
@@ -272,11 +275,13 @@ async function handleDeleteAttachment(id: number): Promise<void> {
 onMounted(async () => {
   await load()
   void loadCounts()
-  if (feedbacks.value.length > 0) await select(feedbacks.value[0])
+  const linkedId = Number(route.query.id)
+  if (Number.isInteger(linkedId) && linkedId > 0) await select({ id: linkedId } as IFeedback)
+  else if (feedbacks.value.length > 0) await select(feedbacks.value[0])
 })
 
 
-useLiveRefresh(() => Promise.all([load(),loadCounts()]))
+useLiveRefresh(() => Promise.all([load(),loadCounts(),refreshDetail()]))
 </script>
 
 <template>
@@ -402,12 +407,13 @@ useLiveRefresh(() => Promise.all([load(),loadCounts()]))
 
               <!-- 消息气泡流：居民左（白底）、管理员右（品牌蓝底白字）；
                    首条气泡为原始反馈，历史附件独立呈现；新图片属于各自消息 -->
-              <FeedbackChat :key="feedback.id" :feedback-id="feedback.id" :closed="feedback.status==='CLOSED'" :initial-content="feedback.content" :initial-name="feedback.residentName" :initial-date="feedback.createdAt" @changed="refreshDetail();load();loadCounts()" />
-              <section v-if="attachments.length" class="legacy-attachments"><h3>提交附件／历史附件</h3><p>旧附件不归属于某条消息；新图片请从输入区发送。</p><a v-for="item in attachments" :key="item.id" :href="item.fileUrl" target="_blank" rel="noopener"><el-image v-if="item.fileType==='IMAGE'" :src="item.fileUrl" :preview-src-list="[item.fileUrl]" preview-teleported style="width:140px;height:100px"/>{{item.fileName}}</a><el-button v-if="feedback.status!=='CLOSED'" v-for="item in attachments" :key="`delete-${item.id}`" text type="danger" @click="handleDeleteAttachment(item.id)">删除历史附件：{{item.fileName}}</el-button></section>
+              <section class="feedback-original"><h3>反馈内容</h3><p>{{ feedback.content }}</p></section>
+              <ConversationEntry :id="feedback.id" source="FEEDBACK" title="反馈沟通" :closed="feedback.status === 'CLOSED'" />
+              <section v-if="attachments.length" class="legacy-attachments"><h3>提交附件／历史附件</h3><p>旧附件不归属于某条消息；新图片请到会话页发送。</p><a v-for="item in attachments" :key="item.id" :href="item.fileUrl" target="_blank" rel="noopener"><el-image v-if="item.fileType==='IMAGE'" :src="item.fileUrl" :preview-src-list="[item.fileUrl]" preview-teleported style="width:140px;height:100px"/>{{item.fileName}}</a><el-button v-if="feedback.status!=='CLOSED'" v-for="item in attachments" :key="`delete-${item.id}`" text type="danger" @click="handleDeleteAttachment(item.id)">删除历史附件：{{item.fileName}}</el-button></section>
 
               <!-- 底部操作条：回复输入框 + 发送 + 办结（办结仅会话中，后端仅 IN_SESSION→CLOSED）；
                    已办结态只读（输入区隐藏，沿用现状规则） -->
-              <div class="composer-actions"><el-button v-if="feedback.status==='IN_SESSION'" type="primary" :loading="closing" @click="handleClose">办结反馈</el-button><p v-else-if="feedback.status==='PENDING'">首次回复即受理，可发送文字或图片。</p></div>
+              <div class="composer-actions"><el-button v-if="feedback.status==='IN_SESSION'" type="primary" :loading="closing" @click="handleClose">办结反馈</el-button><p v-else-if="feedback.status==='PENDING'">进入反馈沟通发送首次回复即受理，查看详情不会自动受理。</p></div>
             </template>
           </div>
         </template>
@@ -424,6 +430,8 @@ useLiveRefresh(() => Promise.all([load(),loadCounts()]))
 </template>
 
 <style scoped>
+.feedback-original{padding:18px 24px}.feedback-original h3{font-size:14px}.feedback-original p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+
 /* ---------- 主从双栏（左 380px : 右 1fr，两栏各自白卡） ---------- */
 
 .feedback-master {

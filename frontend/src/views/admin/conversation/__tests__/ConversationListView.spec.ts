@@ -38,4 +38,13 @@ describe('三段工作区的真实入口与服务端列表', () => {
   const submit = [...document.querySelectorAll('button')].find(b => b.textContent?.trim() === '发起会话')!; submit.click(); await flushPromises()
   expect(api.direct).toHaveBeenCalledWith({ communityId: 1, residentId: 2 }); expect(router.currentRoute.value.query.id).toBe('9')
  })
+
+ it('未读筛选保留当前刚读完的会话，切换后才移走', async () => {
+  await render(); await button('未读').trigger('click'); await new Promise(r => setTimeout(r, 300)); await flushPromises()
+  await wrapper.findAll('.inbox-row')[0].trigger('click'); await flushPromises()
+  api.list.mockResolvedValue({ records: [row('FEEDBACK')], total: 1, page: 1, size: 30, pages: 1 })
+  await button('刷新').trigger('click'); await flushPromises()
+  expect(wrapper.findAll('.inbox-row')).toHaveLength(2); expect(wrapper.get('.inbox-row.active').text()).toContain('已读')
+  await wrapper.findAll('.inbox-row')[1].trigger('click'); await flushPromises(); expect(wrapper.findAll('.inbox-row')).toHaveLength(1)
+ })
 })

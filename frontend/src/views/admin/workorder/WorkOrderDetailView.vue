@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
-import ConversationChat from '@/components/business/ConversationChat.vue'
 import { ensureWorkOrderConversation } from '@/api/workorder'
 import StaffPickerDrawer from '@/views/admin/workorder/StaffPickerDrawer.vue'
 import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, intakeWorkOrder, listWorkOrderAttachments, rejectWorkOrder } from '@/api/workorder'
@@ -28,6 +27,7 @@ import { formatDateTime } from '@/utils/date'
  */
 
 const route = useRoute()
+const router = useRouter()
 
 const orderId = Number(route.params.id)
 
@@ -77,8 +77,6 @@ const hasAction = computed(
 
 /* R74 工单临时群聊：受理后由后端同事务建群并回带 conversationId；未受理则无群（不渲染面板） */
 const workOrderConversation = ref<IConversation | null>(null)
-/** 关闭态提示（UI设计 v1.4 §R74：与接口 5604 口径一致；组件内为追加文案，不改既有默认文案） */
-const CONVERSATION_CLOSED_HINT = '工单已结束，会话资源已回收（历史可查、不可再发言）'
 
 /**
  * 取工单临时群聊：仅参与者可见（§9.21.2）——非参与者 403 或会话不存在时
@@ -105,8 +103,7 @@ async function openWorkOrderChat(): Promise<void> {
     order.value = await ensureWorkOrderConversation(orderId)
     await loadConversation()
     if (workOrderConversation.value) {
-      await nextTick()
-      document.getElementById('work-order-chat')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      await router.push({ path: '/admin/conversations', query: { id: workOrderConversation.value.id, source: 'CONVERSATION', returnTo: route.fullPath } })
     } else {
       ElMessage.warning('工单沟通群暂不可用，请重试或联系管理员检查关联账号')
     }
@@ -383,21 +380,7 @@ onMounted(fetchDetail)
 
         <!-- R74 工单临时群聊：受理后自动建群（居民提交人 + 受理管理员，派单后服务人员入群）；
              未受理时 conversationId 为空，整块不渲染；终审结束后只读留档 -->
-        <article v-if="workOrderConversation" id="work-order-chat" class="panel chat-panel">
-          <h2 class="panel-title">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4 6.5h16v9H9l-5 4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
-            </svg>
-            工单临时群聊
-          </h2>
-          <ConversationChat
-            :conversation-id="workOrderConversation.id"
-            :closed="workOrderConversation.status === 'CLOSED'"
-            :closed-hint="CONVERSATION_CLOSED_HINT"
-            :participants="workOrderConversation.participants ?? []"
-            :title="workOrderConversation.title"
-          />
-        </article>
+
       </div>
     </template>
 

@@ -28,4 +28,20 @@ class ConversationInboxServiceTest {
  @Test void managementReadChecksCommunityEvenIfParentMapperIsReplaced(){login("ADMIN");FeedbackVO f=new FeedbackVO();f.setCommunityId(99L);when(feedbacks.getById(1L)).thenReturn(f);assertThatThrownBy(()->service.markFeedbackRead(1L,0L)).isInstanceOf(ForbiddenException.class);verifyNoInteractions(mapper);}
  @Test void historyRejectsTwoDirectionsAndUnknownSources(){login("RESIDENT");assertThatThrownBy(()->service.messages("FEEDBACK",1L,3L,4L,20)).isInstanceOf(BusinessException.class);assertThatThrownBy(()->service.messages("OTHER",1L,null,null,20)).isInstanceOf(BusinessException.class);}
  @Test void listPassesRoleAndBoundCommunitiesBeforePagination(){login("ADMIN");when(mapper.page(any(),eq(0L),eq(30))).thenReturn(List.of());when(mapper.count(any())).thenReturn(0L);service.page(1,30,null," 阳光 ",true);var c=ArgumentCaptor.forClass(ConversationInboxService.Scope.class);verify(mapper).page(c.capture(),eq(0L),eq(30));assertThat(c.getValue().ownerType()).isEqualTo("USER");assertThat(c.getValue().communityIds()).containsExactly(2L);assertThat(c.getValue().keyword()).isEqualTo("阳光");assertThat(c.getValue().unreadOnly()).isTrue();}
+
+ @Test void initialWindowStartsAtFirstUnreadRatherThanSkippingToLatest(){
+  login("RESIDENT");when(mapper.readingCursor("CONVERSATION",1L,"RESIDENT",8L)).thenReturn(5L);
+  when(mapper.firstUnread("CONVERSATION",1L,5L,"RESIDENT",8L)).thenReturn(12L);
+  var row=new com.community.residence.conversation.vo.ConversationMessageVO();row.setId(12L);
+  when(conversations.messageWindow(1L,null,11L,40)).thenReturn(List.of(row));
+  var window=service.messages("CONVERSATION",1L,null,null,40);
+  assertThat(window.startAtUnread()).isTrue();assertThat(window.firstUnreadMessageId()).isEqualTo(12L);
+  verify(conversations).messageWindow(1L,null,11L,40);
+ }
+ @Test void noUnreadUsesLatestWindowAndCursorPagesDoNotRelocate(){
+  login("RESIDENT");when(mapper.firstUnread("CONVERSATION",1L,0L,"RESIDENT",8L)).thenReturn(null);when(conversations.messageWindow(1L,null,null,40)).thenReturn(List.of());
+  var window=service.messages("CONVERSATION",1L,null,null,40);assertThat(window.startAtUnread()).isFalse();
+  reset(mapper);when(conversations.messageWindow(1L,10L,null,40)).thenReturn(List.of());
+  service.messages("CONVERSATION",1L,10L,null,40);verifyNoInteractions(mapper);
+ }
 }

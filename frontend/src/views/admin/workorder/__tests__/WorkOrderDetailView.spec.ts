@@ -90,7 +90,7 @@ afterEach(() => {
 })
 
 describe('管理端工单详情 · R74 受理 / 终审 / 群聊面板', () => {
-  it('受理前不渲染群聊面板；受理成功后状态转待派单、面板出现且群成员正确', async () => {
+  it('受理前不渲染群聊面板；受理成功后状态转待派单、提供原群入口且不再内嵌聊天', async () => {
     seedOrder('PENDING')
     const success = vi.spyOn(ElMessage, 'success').mockImplementation(() => ({}) as never)
     const wrapper = await mountDetail()
@@ -109,16 +109,10 @@ describe('管理端工单详情 · R74 受理 / 终审 / 群聊面板', () => {
     expect(backend().state.workOrders[0].conversationId).toBe(group.id)
     expect(success.mock.calls[0]?.[0]).toBe('工单已受理，工单沟通群已建立')
 
-    const text = wrapper.text()
-    expect(text).toContain('工单临时群聊')
-    expect(text).toContain('工单沟通·WO202609220003')
-    /* 群成员展示：居民提交人 + 受理管理员 */
-    expect(text).toContain('演示居民（居民）')
-    expect(text).toContain('社区管理员（社区管理员）')
+    expect(wrapper.text()).toContain('进入工单沟通')
+    expect(wrapper.find('.conversation-chat').exists()).toBe(false)
+    expect(group.participantRefs?.length ?? group.participantIds?.length).toBeGreaterThanOrEqual(2)
 
-    /* 群内可发言（ACTIVE 态输入区可用） */
-    const input = wrapper.find('.chat-input input, .chat-input textarea')
-    expect(input.exists()).toBe(true)
   })
 
   it('已受理的单再次受理 → 5302 文案提示，不重复建群', async () => {
@@ -166,8 +160,8 @@ describe('管理端工单详情 · R74 受理 / 终审 / 群聊面板', () => {
     expect(backend().state.conversationMessages.filter((item) => item.conversationId === groupId)).toHaveLength(1)
 
     const text = wrapper.text()
-    expect(text).toContain('工单已结束，会话资源已回收（历史可查、不可再发言）')
-    expect(text).toContain('已受理，正在安排服务人员')
+    expect(text).toContain('进入工单沟通')
+    expect(wrapper.find('.conversation-chat').exists()).toBe(false)
     /* 输入框被关闭态提示条取代（只读） */
     expect(wrapper.find('.chat-input').exists()).toBe(false)
 

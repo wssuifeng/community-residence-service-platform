@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { listInboxMessages } from '@/api/conversationInbox'
+import { listInboxWindow, listInboxMessages } from '@/api/conversationInbox'
 import { listConversationMessages, sendConversationMessage, markConversationRead } from '@/api/conversation'
 import { getLeaseAgreement } from '@/api/agreement'
 import AgreementSignPanel from './AgreementSignPanel.vue'
@@ -95,8 +95,9 @@ async function openAgreementSnapshot(agreementId: number): Promise<void> {
   }
 }
 
-const { messages, text, sending, readOnly, sendText, sendImage, loading, error, reload, hasOlder, loadingOlder, loadOlder } = useChatChannel<IConversationMessage>({
+const { messages, text, sending, readOnly, sendText, sendImage, initialAnchor, loading, error, reload, hasOlder, loadingOlder, loadOlder } = useChatChannel<IConversationMessage>({
  id:()=>props.conversationId,closed:()=>props.closed??false,load:listConversationMessages,
+ initialWindow:props.paged?id=>listInboxWindow<IConversationMessage>('CONVERSATION',id):undefined,
  window:props.paged?(id,before,after)=>listInboxMessages<IConversationMessage>('CONVERSATION',id,before,after):undefined,
  changed:()=>emit('changed'),
  send:(id,content)=>sendConversationMessage(id,{content}),image:(id,file)=>sendChatImage('conversations',id,file),
@@ -148,7 +149,7 @@ const renderedMessages=computed(()=>messages.value.map(message=>({...message,
     <p v-if="loading" class="chat-load-state" role="status">正在加载消息…</p>
     <p v-if="error" class="chat-load-state" role="alert">{{ error }} <button type="button" @click="reload">重试</button></p>
     <button v-if="hasOlder" type="button" class="history-button" :disabled="loadingOlder" @click="loadOlder">{{ loadingOlder ? '加载中…' : '加载更早消息' }}</button>
-    <ChatMessageList :messages="renderedMessages" :position-key="`${userStore.user?.role}:${userStore.user?.id}:CONVERSATION:${conversationId}`" @visible="acknowledgeVisibleMessages">
+    <ChatMessageList :initial-anchor="initialAnchor" :messages="renderedMessages" :position-key="`${userStore.user?.role}:${userStore.user?.id}:CONVERSATION:${conversationId}`" @visible="acknowledgeVisibleMessages">
       <template #message-actions="{message}">
         <template v-if="message.messageType==='LEASE_AGREEMENT' && message.senderRole==='SYSTEM' && message.agreementId">
           <button v-if="agreementRole" type="button" class="agreement-message" :disabled="openingSnapshot" @click="openAgreementSnapshot(message.agreementId)">租赁协议 #{{message.agreementId}} · 查看协议快照</button>

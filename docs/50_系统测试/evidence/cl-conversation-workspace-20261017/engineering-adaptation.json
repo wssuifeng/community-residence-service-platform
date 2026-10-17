@@ -8,7 +8,13 @@
     "ChatComposer",
     "useChatChannel"
   ],
-  "verification": "frontend-browser-summary.json",
+  "verification": [
+    "frontend-browser-summary.json",
+    "detail-browser-summary.json",
+    "backend-summary.json",
+    "frontend-unit-summary.json"
+  ],
   "humanProductAcceptance": "not claimed",
-  "scope": "shared inbox, three role routes and source adapters; legacy detail cleanup follows"
+  "scope": "shared inbox, three role routes, source adapters, three workorder/two feedback detail entries and four-section management lease detail",
+  "normalEnvironment": "candidate packaged; V43 and new backend not loaded; normal 8084/5176 not started by this batch"
 }

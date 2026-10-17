@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/components/common/StatusTag.vue'
-import ConversationChat from '@/components/business/ConversationChat.vue'
+import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
 import { getConversation } from '@/api/conversation'
 import type { IConversation } from '@/types/modules/conversation'
 import {
@@ -152,8 +152,6 @@ async function fetchDetail(): Promise<void> {
 
 /* R74 工单临时群聊：受理后由后端同事务建群并回带 conversationId；未受理则无群（不渲染面板） */
 const workOrderConversation = ref<IConversation | null>(null)
-/** 关闭态提示（UI设计 v1.4 §R74：工单终审结束后会话资源回收） */
-const CONVERSATION_CLOSED_HINT = '工单已结束，会话资源已回收（历史可查、不可再发言）'
 
 /**
  * 取工单临时群聊：仅参与者可见（§9.21.2）——非参与者 403 或会话不存在时
@@ -288,7 +286,7 @@ onMounted(() => {
     </header>
 
     <template v-if="order">
-      <a v-if="workOrderConversation" class="work-order-chat-link" href="#work-order-chat">进入工单沟通 ↓</a>
+      <ConversationEntry v-if="workOrderConversation" compact :id="workOrderConversation.id" :closed="workOrderConversation.status === 'CLOSED'" />
       <!-- 异常终态：进度条不适用，改状态横幅 -->
       <el-alert
         v-if="isTerminalAbnormal"
@@ -518,16 +516,7 @@ onMounted(() => {
 
       <!-- R74 工单临时群聊：受理后自动建群（居民提交人 + 受理管理员，派单后服务人员入群）；
            未受理时 conversationId 为空，整块不渲染；终审结束后只读留档 -->
-      <article v-if="workOrderConversation" id="work-order-chat" class="chat-card">
-        <h2 class="card-title">工单临时群聊</h2>
-        <ConversationChat
-          :conversation-id="workOrderConversation.id"
-          :closed="workOrderConversation.status === 'CLOSED'"
-          :closed-hint="CONVERSATION_CLOSED_HINT"
-          :participants="workOrderConversation.participants ?? []"
-          :title="workOrderConversation.title"
-        />
-      </article>
+
 
       <!-- 底部操作条：可用性按状态机置灰，逻辑不变 -->
       <article class="action-bar">

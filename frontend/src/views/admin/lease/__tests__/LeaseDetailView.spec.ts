@@ -114,6 +114,7 @@ function leaseOf(status: LeaseStatus, extra: Record<string, unknown> = {}): ILea
  * @param stubDepositDialog 押金退还弹窗默认打桩（既有渲染/兜底用例不受弹窗内部取数影响）；
  * 刷新链用例传 false 挂真实弹窗，以便从弹窗组件 emit success 触发父层 handleRefundSuccess。
  */
+const mounted: VueWrapper[] = []
 async function mountDetail(stubDepositDialog = true): Promise<VueWrapper> {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -136,6 +137,7 @@ async function mountDetail(stubDepositDialog = true): Promise<VueWrapper> {
     },
     attachTo: document.body
   })
+  mounted.push(wrapper)
   await flushPromises()
   return wrapper
 }
@@ -163,6 +165,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  mounted.splice(0).forEach(wrapper => wrapper.unmount())
   vi.clearAllMocks()
   document.body.innerHTML = ''
 })
@@ -193,6 +196,7 @@ describe('管理端租约详情 · 打开与失败兜底（④）', () => {
   it('变更历史失败不阻断详情渲染（修复前会整页空白）', async () => {
     api.getLeaseChanges.mockRejectedValue(new Error('变更历史服务暂不可用'))
     const wrapper = await mountDetail()
+    await wrapper.findAll('button').find(b => b.text().trim() === '业务记录')!.trigger('click'); await flushPromises()
 
     const text = wrapper.text()
     /* 主体仍在 */
@@ -206,7 +210,7 @@ describe('管理端租约详情 · 打开与失败兜底（④）', () => {
 })
 
 describe('管理端租约详情 · ③ 会话相关操作界面', () => {
-  it('租约已建群：渲染租约群聊面板（群成员 + 会话组件）与会话中心入口', async () => {
+  it('租约已建群：以精确链接进入原群，不再内嵌完整聊天', async () => {
     api.getLease.mockResolvedValue({
       id: 1,
       tenantId: 1,
@@ -228,11 +232,11 @@ describe('管理端租约详情 · ③ 会话相关操作界面', () => {
     const wrapper = await mountDetail()
 
     const text = wrapper.text()
-    expect(text).toContain('租约群聊')
-    expect(text).toContain('演示居民（居民）')
-    expect(text).toContain('社区管理员（社区管理员）')
-    expect(text).toContain('前往会话中心')
-    expect(wrapper.find('.conversation-chat').exists()).toBe(true)
+    expect(text).toContain('进入沟通')
+    const link = wrapper.get('.conversation-entry a')
+    expect(link.attributes('href')).toContain('id=9')
+    expect(link.attributes('href')).toContain('source=CONVERSATION')
+    expect(wrapper.find('.conversation-chat').exists()).toBe(false)
   })
 
   it('租约未建群：说明来源并给会话中心入口，不渲染会话组件', async () => {
@@ -240,13 +244,13 @@ describe('管理端租约详情 · ③ 会话相关操作界面', () => {
 
     const text = wrapper.text()
     expect(text).toContain('该租约尚未建立沟通群')
-    expect(text).toContain('前往会话中心')
+    expect(text).toContain('建立/进入租约沟通群')
     expect(wrapper.find('.conversation-chat').exists()).toBe(false)
   })
 })
 
 describe('管理端租约详情 · ② 补建租约沟通群（DEF-076）', () => {
-  it('无群时可一键「建立/进入租约沟通群」，成功后回写 conversation_id 并渲染会话面板', async () => {
+  it('无群时可一键「建立/进入租约沟通群」，成功后回写 conversation_id 并显示原群入口', async () => {
     /* 补建成功后后端回写 lease_record.conversation_id，重拉详情应带出会话 */
     let conversationId: number | null = null
     api.getLease.mockImplementation(async () => {
@@ -285,8 +289,8 @@ describe('管理端租约详情 · ② 补建租约沟通群（DEF-076）', () =
 
     expect(conversationApi.ensureLeaseGroupConversation).toHaveBeenCalledWith(1)
     /* 面板出现（会话组件 + 群成员由会话详情提供） */
-    expect(wrapper.find('.conversation-chat').exists()).toBe(true)
-    expect(wrapper.text()).toContain('租约沟通 · 1号楼-1单元-101')
+    expect(wrapper.find('.conversation-chat').exists()).toBe(false)
+    expect(wrapper.get('.conversation-entry a').attributes('href')).toContain('id=9')
   })
 
   it('补建失败（非绑定社区 403）时如实提示，不改变无群空态', async () => {
@@ -311,6 +315,8 @@ describe('管理端租约详情 · 押金退还成功刷新链（OCR DEF-123）'
     api.getLease.mockResolvedValue(leaseOf('MOVED_OUT'))
     /* 真实弹窗：从弹窗 emit success 触发父层 handleRefundSuccess（与真实链路同一条边） */
     const wrapper = await mountDetail(false)
+    expect(api.listDepositRefunds).not.toHaveBeenCalled()
+    await wrapper.findAll('button').find(b => b.text().trim() === '费用记录')!.trigger('click'); await flushPromises()
 
     /* 挂载基线：详情主数据 1 次 + 押金流水/支付单各 1 次（fetchDetail 内部的 fetchDeposit） */
     expect(api.getLease).toHaveBeenCalledTimes(1)
@@ -343,4 +349,27 @@ describe('管理端租约详情 · 不得绕过居民协议确认', () => {
     await flushPromises()
     expect(api.updateLeaseStatus).toHaveBeenCalledWith(1, { status: 'TO_SIGN', remark: undefined })
   })
+})
+
+
+describe('租约四分区按需读取', () => {
+ it('默认只读主详情，不自动拉费用/历史/看房，也不加载完整聊天', async () => {
+  const wrapper = await mountDetail()
+  expect(api.getLeaseChanges).not.toHaveBeenCalled(); expect(api.listDepositRefunds).not.toHaveBeenCalled(); expect(api.listLeasePayments).not.toHaveBeenCalled(); expect(api.listLeaseViewings).not.toHaveBeenCalled()
+  expect(wrapper.find('.conversation-chat').exists()).toBe(false)
+  expect(wrapper.findAll('.lease-section-nav button').map(b => b.text())).toEqual(['概览','合同与协议','费用记录','业务记录'])
+ })
+ it('费用读取失败不冒充零条成功，仍显示主体并可重试', async () => {
+  api.listDepositRefunds.mockRejectedValueOnce(new Error('费用离线'))
+  const wrapper = await mountDetail(); await wrapper.findAll('button').find(b => b.text().trim() === '费用记录')!.trigger('click'); await flushPromises()
+  expect(wrapper.text()).toContain('押金退还记录读取失败'); expect(wrapper.text()).not.toContain('尚无押金退还流水')
+  expect(wrapper.text()).toContain('1号楼-1单元-101'); expect(api.getLeaseChanges).not.toHaveBeenCalled()
+  await wrapper.findAll('button').find(b => b.text().trim() === '重试费用记录')!.trigger('click'); await flushPromises()
+  expect(wrapper.text()).not.toContain('押金退还记录读取失败')
+ })
+ it('业务记录只在进入后读取，再回概览不重复加载', async () => {
+  const wrapper = await mountDetail(); const tab = (text: string) => wrapper.findAll('.lease-section-nav button').find(b => b.text() === text)!
+  await tab('业务记录').trigger('click'); await flushPromises(); expect(api.getLeaseChanges).toHaveBeenCalledTimes(1); expect(api.listLeaseViewings).toHaveBeenCalledTimes(1)
+  await tab('概览').trigger('click'); await tab('业务记录').trigger('click'); await flushPromises(); expect(api.getLeaseChanges).toHaveBeenCalledTimes(1); expect(api.listLeasePayments).not.toHaveBeenCalled()
+ })
 })

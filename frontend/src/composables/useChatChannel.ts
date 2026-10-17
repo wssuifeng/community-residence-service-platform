@@ -1,6 +1,7 @@
 import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { subscribe, isWsConnected } from '@/utils/websocket'
+import type { InboxMessageWindow } from '@/api/conversationInbox'
 import { useUserStore } from '@/store/user'
 
 interface Message { id: number; content: string; createdAt: string }
@@ -9,6 +10,7 @@ interface Adapter<T extends Message> {
   closed: () => boolean
   load: (id: number) => Promise<T[]>
   window?: (id: number, beforeId?: number, afterId?: number) => Promise<T[]>
+  initialWindow?: (id: number) => Promise<InboxMessageWindow<T>>
   send: (id: number, content: string) => Promise<T>
   image: (id: number, file: File) => Promise<T>
   topic: (id: number) => string
@@ -24,6 +26,7 @@ export function useChatChannel<T extends Message>(adapter: Adapter<T>) {
   const identity = () => `${user.user?.role}:${user.user?.id}`
   const messages = shallowRef<T[]>([])
   const text = ref(''), sending = ref(false), readOnly = ref(false)
+  const initialAnchor = ref(0)
   const loading = ref(false), error = ref(''), loadingOlder = ref(false), hasOlder = ref(false)
   let timer: ReturnType<typeof setTimeout> | undefined, unsubscribe: (() => void) | undefined
   let seq = 0, disposed = false, key = '', loadingVersion = -1, fetchedCursor = 0
@@ -43,6 +46,13 @@ export function useChatChannel<T extends Message>(adapter: Adapter<T>) {
       if (!adapter.window) {
         const rows = await adapter.load(id)
         if (valid(version, id)) messages.value = rows
+      } else if (!fetchedCursor && !messages.value.length && adapter.initialWindow) {
+        const window = await adapter.initialWindow(id)
+        if (!valid(version, id)) return
+        initialAnchor.value = window.startAtUnread ? window.firstUnreadMessageId ?? 0 : 0
+        hasOlder.value = window.hasOlder
+        fetchedCursor = window.records.at(-1)?.id ?? 0
+        merge(window.records)
       } else {
         let cursor = fetchedCursor || undefined
         do {
@@ -95,6 +105,7 @@ export function useChatChannel<T extends Message>(adapter: Adapter<T>) {
   async function start() {
     save(); seq++; stop(); readOnly.value = false; loadingOlder.value = false; loadingVersion = -1; sending.value = false
     key = `${identity()}:${adapter.topic(adapter.id())}`
+    initialAnchor.value = 0
     const cached = channels.get(key)
     fetchedCursor = cached?.fetchedCursor ?? 0
     messages.value = (cached?.messages ?? []) as T[]; text.value = cached?.draft ?? ''; hasOlder.value = cached?.hasOlder ?? false
@@ -120,5 +131,5 @@ export function useChatChannel<T extends Message>(adapter: Adapter<T>) {
   watch(identity, () => { channels.clear(); key = ''; void start() })
   watch(adapter.closed, () => { connect(); void load() })
   onUnmounted(() => { save(); disposed = true; seq++; stop() })
-  return { messages, text, sending, readOnly, loading, error, loadingOlder, hasOlder, loadOlder, sendText: () => send(), sendImage: (file: File) => send(file), reload: load }
+  return { messages, text, sending, readOnly, initialAnchor, loading, error, loadingOlder, hasOlder, loadOlder, sendText: () => send(), sendImage: (file: File) => send(file), reload: load }
 }

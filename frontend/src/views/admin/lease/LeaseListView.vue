@@ -47,6 +47,7 @@ const TABS = ['active', 'toSign', 'expiring', 'expired', 'history'] as const
 type TabName = (typeof TABS)[number]
 
 const route = useRoute()
+const queryText = (key: string) => typeof route.query[key] === 'string' ? route.query[key] as string : ''
 const router = useRouter()
 
 /* ?stage= 深链契约（active|toSign|expiring|expired|history）：缺省回退 active，路由不设 redirect。
@@ -172,13 +173,13 @@ const agreementOptions = (
   Object.keys(leaseAgreementSignStatusLabels) as LeaseAgreementSignStatus[]
 ).map((value) => ({ value, label: leaseAgreementSignStatusLabels[value] }))
 
-const status = ref<LeaseStatus | ''>('')
+const status = ref<LeaseStatus | ''>(queryText('leaseStatus') in leaseStatusLabels ? queryText('leaseStatus') as LeaseStatus : '')
 /* 社区筛选：el-select 清空回填 undefined（非 null），故用 undefined 表示未筛选 */
-const communityId = ref<number | undefined>(undefined)
-const agreementFilter = ref<LeaseAgreementSignStatus | ''>('')
+const communityId = ref<number | undefined>(Number(queryText('leaseCommunity')) > 0 ? Number(queryText('leaseCommunity')) : undefined)
+const agreementFilter = ref<LeaseAgreementSignStatus | ''>(queryText('leaseAgreement') in leaseAgreementSignStatusLabels ? queryText('leaseAgreement') as LeaseAgreementSignStatus : '')
 /* 到期区间：按租期结束日期过滤（后端无该查询参数，客户端比对 YYYY-MM-DD 字符串） */
-const expiryRange = ref<[string, string] | null>(null)
-const keyword = ref('')
+const expiryRange = ref<[string, string] | null>(/^\d{4}-\d{2}-\d{2}$/.test(queryText('leaseExpiryFrom')) && /^\d{4}-\d{2}-\d{2}$/.test(queryText('leaseExpiryTo')) ? [queryText('leaseExpiryFrom'),queryText('leaseExpiryTo')] : null)
+const keyword = ref(queryText('leaseKeyword'))
 
 const hasFilter = computed(
   () =>
@@ -241,8 +242,8 @@ const filteredRows = computed<ILeaseRecord[]>(() => {
 
 /* ---------- 客户端分页 ---------- */
 
-const page = ref(1)
-const size = ref(10)
+const page = ref(Math.max(1, Number.parseInt(queryText('leasePage'), 10) || 1))
+const size = ref([10,20,50,100].includes(Number(queryText('leaseSize'))) ? Number(queryText('leaseSize')) : 10)
 
 const pagedRows = computed(() =>
   filteredRows.value.slice((page.value - 1) * size.value, page.value * size.value)
@@ -332,7 +333,8 @@ function rowClassName({ row }: { row: ILeaseRecord }): string {
 /* ---------- 跳转 ---------- */
 
 function goDetail(row: ILeaseRecord): void {
-  router.push(`/admin/leases/${row.id}`)
+  const returnTo = router.resolve({ path: '/admin/housing-lease', query: { ...route.query, tab: 'leases', stage: activeTab.value, leaseKeyword: keyword.value || undefined, leaseCommunity: communityId.value, leaseStatus: status.value || undefined, leaseAgreement: agreementFilter.value || undefined, leaseExpiryFrom: expiryRange.value?.[0], leaseExpiryTo: expiryRange.value?.[1], leasePage: page.value, leaseSize: size.value } }).href
+  router.push({ path: `/admin/leases/${row.id}`, query: { returnTo } })
 }
 
 /* ---------- 状态流转动作（全部二次确认，保持既有状态机口径不放宽） ---------- */
