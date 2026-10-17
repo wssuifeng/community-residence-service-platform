@@ -26,6 +26,7 @@ async function render(path = '/admin/conversations') {
 }
 const button = (text: string) => wrapper.findAll('button').find(b => b.text().trim() === text)!
 describe('三段工作区的真实入口与服务端列表', () => {
+ it('工作区标题称会话，通知入口明确称消息中心', async () => { await render(); expect(wrapper.get('h1').text()).toBe('会话'); const center = wrapper.findAll('a').find(link => link.text() === '消息中心'); expect(center?.attributes('href')).toBe('/admin/notifications'); expect(wrapper.text()).not.toContain('消息会话') })
  it('保留业务来源及真实未读，同号反馈不覆盖群聊', async () => { await render(); expect(wrapper.findAll('.inbox-row')).toHaveLength(2); expect(wrapper.findAll('.unread')).toHaveLength(2); await wrapper.findAll('.inbox-row')[1].trigger('click'); await flushPromises(); expect(router.currentRoute.value.query.source).toBe('FEEDBACK'); expect(wrapper.get('.pane').text()).toBe('FEEDBACK:1') })
  it('深链不用在第一页中猜测查找会话', async () => { await render('/admin/conversations?id=900'); expect(wrapper.get('.pane').text()).toBe('CONVERSATION:900') })
  it('分类及未读按钮提交后端筛选，不做第一页假过滤', async () => { await render(); await wrapper.findAll('.source-nav button').find(b => b.text().endsWith('反馈'))!.trigger('click'); await button('未读').trigger('click'); await new Promise(r => setTimeout(r, 300)); await flushPromises(); expect(api.list).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'FEEDBACK', unreadOnly: true })) })

@@ -63,8 +63,8 @@ const menuItems: MenuItem[] = [
   { path: '/admin/evaluations', title: '评价', icon: 'evaluation' },
   // 消息中心：ADMIN/SUPER_ADMIN 均可见（复用隐藏路由 /admin/notifications，验收第三轮 C2）
   { path: '/admin/notifications', title: '消息中心', icon: 'notification' },
-  // R63 消息会话中心：看房群聊 + 居民直通（v1.5）
-  { path: '/admin/conversations', title: '消息会话', icon: 'chat' },
+  // 会话：原业务沟通来源聚合；与消息中心的系统通知分开。
+  { path: '/admin/conversations', title: '会话', icon: 'chat' },
   { path: '/admin/system', title: '系统', icon: 'system', roles: ['SUPER_ADMIN'] }
 ]
 

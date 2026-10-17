@@ -1,0 +1,132 @@
+{
+  "date": "2026-10-17",
+  "scope": "user-authorized normal startup and read-only contract/schema checks",
+  "backendPort": 8084,
+  "frontendPort": 5176,
+  "backendCodeCommit": "6600313",
+  "schemaBefore": 42,
+  "schemaAfter": 43,
+  "businessTables": 61,
+  "checks": [
+    {
+      "name": "MySQL and Redis available",
+      "passed": true
+    },
+    {
+      "name": "normal service ports free",
+      "passed": true
+    },
+    {
+      "name": "read-only schema query",
+      "passed": true
+    },
+    {
+      "name": "verified cl backend candidate",
+      "passed": true
+    },
+    {
+      "name": "JDK17 available",
+      "passed": true
+    },
+    {
+      "name": "new service processes alive",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "new service processes alive",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "new service processes alive",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "new service processes alive",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "new service processes alive",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "new service processes alive",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "local HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "new service processes alive",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "local HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "local HTTP only",
+      "passed": true
+    },
+    {
+      "name": "local HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "real inbox and message window endpoints loaded",
+      "passed": true
+    },
+    {
+      "name": "read-only schema query",
+      "passed": true
+    },
+    {
+      "name": "read-only schema query",
+      "passed": true
+    },
+    {
+      "name": "V43 migrated and 61 business tables",
+      "passed": true
+    },
+    {
+      "name": "read-only schema query",
+      "passed": true
+    },
+    {
+      "name": "feedback read cursor exists",
+      "passed": true
+    }
+  ],
+  "financialCommands": "none",
+  "paymentConfiguration": "not read or changed by probe",
+  "userBrowser": "untouched",
+  "manualAcceptance": "not claimed"
+}

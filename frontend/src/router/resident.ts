@@ -38,8 +38,8 @@ const residentRoutes: RouteRecordRaw[] = [
       { path: 'notices/:id', name: 'ResidentNoticeDetail', component: () => import('@/views/resident/NoticeDetailView.vue'), meta: { title: '公告详情' } },
       { path: 'notifications', name: 'ResidentNotifications', component: () => import('@/views/resident/NotificationListView.vue'), meta: { title: '消息中心' } },
       /* R63 多方会话：看房群聊/租约群聊/居民-社区管理员直通的独立会话页 */
-      { path: 'conversations', name: 'ResidentConversations', component: () => import('@/views/resident/ConversationDetailView.vue'), meta: { title: '消息会话' } },
-      { path: 'conversations/:id', name: 'ResidentConversationDetail', component: () => import('@/views/resident/ConversationDetailView.vue'), meta: { title: '沟通会话' } },
+      { path: 'conversations', name: 'ResidentConversations', component: () => import('@/views/resident/ConversationDetailView.vue'), meta: { title: '会话' } },
+      { path: 'conversations/:id', name: 'ResidentConversationDetail', component: () => import('@/views/resident/ConversationDetailView.vue'), meta: { title: '会话' } },
       /* 房源子路由保持原路径：详情/预约看房/申请租住行为不变，仅列表页并入 Hub */
       { path: 'housings/:id', name: 'ResidentHousingDetail', component: () => import('@/views/resident/HousingDetailView.vue'), meta: { title: '房源详情' } },
       { path: 'housings/:id/reserve', name: 'ResidentHousingReserve', component: () => import('@/views/resident/HousingReservationView.vue'), meta: { title: '预约看房' } },

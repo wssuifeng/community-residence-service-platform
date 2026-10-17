@@ -39,7 +39,7 @@ onMounted(() => void load())
 </script>
 <template>
  <section class="conversation-page" :class="{ management }">
-  <header class="workspace-page-head"><div><h1>消息会话</h1><p>所有业务沟通，集中在此</p></div><div class="workspace-page-actions"><router-link v-if="returnTo" :to="returnTo">返回业务详情</router-link><router-link :to="`${base}/notifications`">通知</router-link><button type="button" :disabled="loading" @click="load()">刷新</button><DirectConversationLauncher @opened="opened" /></div></header>
+  <header class="workspace-page-head"><div><h1>会话</h1><p>所有业务沟通，集中在此</p></div><div class="workspace-page-actions"><router-link v-if="returnTo" :to="returnTo">返回业务详情</router-link><router-link :to="`${base}/notifications`">消息中心</router-link><button type="button" :disabled="loading" @click="load()">刷新</button><DirectConversationLauncher @opened="opened" /></div></header>
   <div class="conversation-workspace" :class="{ 'has-selection': selectedId, 'is-admin': management }">
    <ConversationSourceNav v-model="type" :staff="user.role === 'STAFF'" />
    <ConversationInboxList v-model:keyword="keyword" v-model:unread-only="unreadOnly" :items="displayedItems" :selected="selectedKey" :loading="loading" :error="error" :has-more="hasMore" @select="select" @more="load(true)" @retry="load()" />

@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-17",
+  "scope": "only conversation naming, routes, navigation and user-authorized normal startup",
+  "targetedFiles": 2,
+  "targetedTests": 15,
+  "failed": 0,
+  "typecheck": "passed in npm run build",
+  "viteBuild": "passed",
+  "initialFailure": "Management notifications route metadata still used 通知列表; aligned to 消息中心 before final passing run",
+  "normalSchemaVersion": 43,
+  "businessTables": 61,
+  "verifiedLoginAndReadOnlyInboxRoles": [
+    "ADMIN",
+    "RESIDENT",
+    "STAFF"
+  ],
+  "oldClTestsRerun": false,
+  "financialCommands": "none",
+  "messageSendingAndReadAcknowledgement": "not invoked",
+  "userBrowser": "untouched",
+  "manualConversationAcceptance": "not claimed"
+}
