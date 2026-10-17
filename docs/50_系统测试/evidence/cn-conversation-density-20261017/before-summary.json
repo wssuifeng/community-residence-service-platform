@@ -1,0 +1,411 @@
+{
+  "scope": "isolated frontend with synthetic HTTP; not backend E2E or manual acceptance",
+  "phase": "before",
+  "checks": [
+    {
+      "name": "no JavaScript errors",
+      "passed": true
+    }
+  ],
+  "metrics": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 317.5,
+        "bottom": 726,
+        "left": 623,
+        "right": 1415,
+        "width": 792,
+        "height": 408.5
+      },
+      "workspace": {
+        "top": 193,
+        "bottom": 873,
+        "left": 256,
+        "right": 1416,
+        "width": 1160,
+        "height": 680
+      },
+      "composer": {
+        "top": 726,
+        "bottom": 872,
+        "left": 623,
+        "right": 1415,
+        "width": 792,
+        "height": 146
+      },
+      "heading": {
+        "top": 194,
+        "bottom": 280.5,
+        "left": 623,
+        "right": 1415,
+        "width": 792,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 3,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 317.5,
+        "bottom": 594,
+        "left": 623,
+        "right": 1341,
+        "width": 718,
+        "height": 276.5
+      },
+      "workspace": {
+        "top": 193,
+        "bottom": 741,
+        "left": 256,
+        "right": 1342,
+        "width": 1086,
+        "height": 548
+      },
+      "composer": {
+        "top": 594,
+        "bottom": 740,
+        "left": 623,
+        "right": 1341,
+        "width": 718,
+        "height": 146
+      },
+      "heading": {
+        "top": 194,
+        "bottom": 280.5,
+        "left": 623,
+        "right": 1341,
+        "width": 718,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 2,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "pageOverflow": 1,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 317.5,
+        "bottom": 546,
+        "left": 587,
+        "right": 1255,
+        "width": 668,
+        "height": 228.5
+      },
+      "workspace": {
+        "top": 193,
+        "bottom": 693,
+        "left": 256,
+        "right": 1256,
+        "width": 1000,
+        "height": 500
+      },
+      "composer": {
+        "top": 546,
+        "bottom": 692,
+        "left": 587,
+        "right": 1255,
+        "width": 668,
+        "height": 146
+      },
+      "heading": {
+        "top": 194,
+        "bottom": 280.5,
+        "left": 587,
+        "right": 1255,
+        "width": 668,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 1,
+      "role": "ADMIN"
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageOverflow": 3,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 283.5,
+        "bottom": 708,
+        "left": 503,
+        "right": 1303,
+        "width": 800,
+        "height": 424.5
+      },
+      "workspace": {
+        "top": 159,
+        "bottom": 855,
+        "left": 136,
+        "right": 1304,
+        "width": 1168,
+        "height": 696
+      },
+      "composer": {
+        "top": 708,
+        "bottom": 854,
+        "left": 503,
+        "right": 1303,
+        "width": 800,
+        "height": 146
+      },
+      "heading": {
+        "top": 160,
+        "bottom": 246.5,
+        "left": 503,
+        "right": 1303,
+        "width": 800,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 3,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "pageOverflow": 3,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 283.5,
+        "bottom": 576,
+        "left": 466,
+        "right": 1266,
+        "width": 800,
+        "height": 292.5
+      },
+      "workspace": {
+        "top": 159,
+        "bottom": 723,
+        "left": 99,
+        "right": 1267,
+        "width": 1168,
+        "height": 564
+      },
+      "composer": {
+        "top": 576,
+        "bottom": 722,
+        "left": 466,
+        "right": 1266,
+        "width": 800,
+        "height": 146
+      },
+      "heading": {
+        "top": 160,
+        "bottom": 246.5,
+        "left": 466,
+        "right": 1266,
+        "width": 800,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 2,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "pageOverflow": 3,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 283.5,
+        "bottom": 528,
+        "left": 387,
+        "right": 1223,
+        "width": 836,
+        "height": 244.5
+      },
+      "workspace": {
+        "top": 159,
+        "bottom": 675,
+        "left": 56,
+        "right": 1224,
+        "width": 1168,
+        "height": 516
+      },
+      "composer": {
+        "top": 528,
+        "bottom": 674,
+        "left": 387,
+        "right": 1223,
+        "width": 836,
+        "height": 146
+      },
+      "heading": {
+        "top": 160,
+        "bottom": 246.5,
+        "left": 387,
+        "right": 1223,
+        "width": 836,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 2,
+      "role": "RESIDENT"
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "pageOverflow": 3,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 283.5,
+        "bottom": 708,
+        "left": 503,
+        "right": 1303,
+        "width": 800,
+        "height": 424.5
+      },
+      "workspace": {
+        "top": 159,
+        "bottom": 855,
+        "left": 136,
+        "right": 1304,
+        "width": 1168,
+        "height": 696
+      },
+      "composer": {
+        "top": 708,
+        "bottom": 854,
+        "left": 503,
+        "right": 1303,
+        "width": 800,
+        "height": 146
+      },
+      "heading": {
+        "top": 160,
+        "bottom": 246.5,
+        "left": 503,
+        "right": 1303,
+        "width": 800,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 3,
+      "role": "STAFF"
+    },
+    {
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "pageOverflow": 3,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 283.5,
+        "bottom": 576,
+        "left": 466,
+        "right": 1266,
+        "width": 800,
+        "height": 292.5
+      },
+      "workspace": {
+        "top": 159,
+        "bottom": 723,
+        "left": 99,
+        "right": 1267,
+        "width": 1168,
+        "height": 564
+      },
+      "composer": {
+        "top": 576,
+        "bottom": 722,
+        "left": 466,
+        "right": 1266,
+        "width": 800,
+        "height": 146
+      },
+      "heading": {
+        "top": 160,
+        "bottom": 246.5,
+        "left": 466,
+        "right": 1266,
+        "width": 800,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 2,
+      "role": "STAFF"
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "pageOverflow": 3,
+      "horizontalOverflow": 0,
+      "log": {
+        "top": 283.5,
+        "bottom": 528,
+        "left": 387,
+        "right": 1223,
+        "width": 836,
+        "height": 244.5
+      },
+      "workspace": {
+        "top": 159,
+        "bottom": 675,
+        "left": 56,
+        "right": 1224,
+        "width": 1168,
+        "height": 516
+      },
+      "composer": {
+        "top": 528,
+        "bottom": 674,
+        "left": 387,
+        "right": 1223,
+        "width": 836,
+        "height": 146
+      },
+      "heading": {
+        "top": 160,
+        "bottom": 246.5,
+        "left": 387,
+        "right": 1223,
+        "width": 836,
+        "height": 86.5
+      },
+      "bubbleHeight": 105,
+      "rowHeight": 105,
+      "visibleMessages": 2,
+      "role": "STAFF"
+    }
+  ],
+  "errors": [],
+  "normalServices": "untouched",
+  "financialCommands": "none"
+}

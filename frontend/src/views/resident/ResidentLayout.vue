@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import AppHeader from '@/components/layout/AppHeader.vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const conversationPage = computed(() => route.path.startsWith('/resident/conversations'))
 
 /**
  * 居民端布局：顶部导航 + 单栏内容区（UI设计.md §2.1）
@@ -34,7 +38,7 @@ const navItems = [
 <template>
   <div class="resident-layout">
     <AppHeader :items="navItems" />
-    <main class="resident-main">
+    <main class="resident-main" :class="{ 'conversation-host': conversationPage }">
       <router-view />
     </main>
   </div>
@@ -46,5 +50,14 @@ const navItems = [
   margin: 0 auto;
   padding: var(--spacing-lg) var(--spacing-md) var(--spacing-xxl);
   width: 100%;
+}
+
+.resident-main.conversation-host {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  height: calc(100dvh - 60px);
+  min-height: 0;
+  padding: 12px clamp(12px, 2vw, 28px) 16px;
 }
 </style>

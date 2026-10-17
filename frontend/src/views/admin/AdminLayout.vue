@@ -9,6 +9,7 @@ import { useResponsive } from '@/composables/useResponsive'
 
 /** 管理端布局：左侧边栏 + 顶部导航（面包屑）+ 内容区（UI设计.md §2.3） */
 const route = useRoute()
+const conversationPage = computed(() => route.path.startsWith('/admin/conversations'))
 const userStore = useUserStore()
 
 const breadcrumb = computed(() => String(route.meta.title ?? ''))
@@ -57,7 +58,7 @@ watch(isTablet, () => { sidebarOpen.value = false })
           <AppSidebar />
         </div>
       </ElDrawer>
-      <main class="admin-main">
+      <main class="admin-main" :class="{ 'conversation-host': conversationPage }">
         <div class="admin-breadcrumb" aria-label="面包屑">
           管理后台 / {{ breadcrumb }}
           <span class="admin-breadcrumb-user">{{ realName }}</span>
@@ -129,4 +130,13 @@ watch(isTablet, () => { sidebarOpen.value = false })
     padding: var(--spacing-md);
   }
 }
+
+.admin-main.conversation-host {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 60px);
+  min-height: 0;
+  padding: 12px 16px 16px;
+}
+.conversation-host .admin-breadcrumb { flex-shrink: 0; margin-bottom: 6px; line-height: 18px; }
 </style>

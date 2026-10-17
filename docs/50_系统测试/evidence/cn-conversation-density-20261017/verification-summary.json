@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-17",
+  "scope": "conversation layout and shared messages only",
+  "vitest": {
+    "existingFiles": 5,
+    "existingPassed": 38,
+    "newFiles": 1,
+    "newPassed": 4,
+    "failed": 0
+  },
+  "build": {
+    "command": "npm run build",
+    "typecheck": true,
+    "passed": true
+  },
+  "browser": {
+    "densityChecks": 172,
+    "interactionChecks": 85,
+    "jsErrors": 0,
+    "syntheticHTTP": true
+  },
+  "financialCommands": "none",
+  "manualAcceptance": "not claimed",
+  "push": false
+}

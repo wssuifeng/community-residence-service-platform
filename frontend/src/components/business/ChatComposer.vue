@@ -21,5 +21,14 @@ function select(event:Event){const input=event.target as HTMLInputElement,file=i
  </div>
 </template>
 <style scoped>
-.chat-composer{padding:14px 18px;border-top:1px solid var(--color-border,#e5e7eb);background:var(--color-surface,#fff)}.chat-tools{display:flex;gap:12px;align-items:center;margin-bottom:10px}.chat-tools button,.chat-send{padding:8px 12px;border:1px solid var(--color-border,#e5e7eb);border-radius:8px;background:transparent;color:inherit;cursor:pointer}.chat-input-row{display:flex;gap:12px;align-items:flex-end}.chat-input-row textarea{flex:1;min-width:0;resize:vertical;border:1px solid var(--color-border,#e5e7eb);border-radius:8px;padding:10px;font:inherit}.chat-send{background:var(--color-primary,#356aff);color:#fff}.chat-closed{color:var(--color-text-secondary,#667085)}button:disabled{opacity:.5;cursor:not-allowed}
+.chat-composer { flex-shrink: 0; padding: 8px 12px; border-top: 1px solid var(--color-border, #e5e7eb); background: var(--color-surface, #fff); }
+.chat-tools { display: flex; flex-wrap: wrap; gap: var(--spacing-sm, 8px); align-items: center; min-height: 28px; margin-bottom: var(--spacing-xs, 4px); }
+.chat-tools button, .chat-send { height: 28px; padding: 3px 10px; border: 1px solid var(--color-border, #e5e7eb); border-radius: var(--radius-sm, 4px); background: transparent; color: inherit; font: inherit; font-size: 12px; cursor: pointer; }
+.chat-input-row { display: flex; gap: var(--spacing-sm, 8px); align-items: flex-end; }
+.chat-input-row textarea { flex: 1; min-width: 0; min-height: 56px; max-height: 120px; resize: vertical; border: 1px solid var(--color-border, #e5e7eb); border-radius: var(--radius-md, 8px); padding: 6px 10px; font: inherit; font-size: 14px; line-height: 20px; }
+.chat-input-row textarea:focus { outline: 1px solid var(--color-primary, #356aff); outline-offset: -1px; }
+.chat-send { min-width: 56px; height: 30px; background: var(--color-primary, #356aff); color: #fff; }
+.chat-composer > p { margin: 0; padding: 6px 0; color: var(--color-text-secondary, #667085); font-size: 12px; line-height: 20px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 </style>

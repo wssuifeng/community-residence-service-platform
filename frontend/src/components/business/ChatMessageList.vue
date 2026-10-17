@@ -5,6 +5,14 @@ const readingPositions = new Map<string, number>()
 import { nextTick, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import type { ChatMessage } from '@/types/chat'
 import { formatDateTime } from '@/utils/date'
+function senderInitial(label: string): string { return Array.from(label.trim())[0] || '会' }
+function messageTime(iso: string): string {
+  const full = formatDateTime(iso)
+  if (!/^\d{4}-\d{2}-\d{2} /.test(full)) return full
+  const today = formatDateTime(new Date().toISOString())
+  if (full.slice(0, 10) === today.slice(0, 10)) return full.slice(11)
+  return full.slice(0, 4) === today.slice(0, 4) ? full.slice(5) : full
+}
 const props = defineProps<{ messages: ChatMessage[]; emptyText?: string; positionKey?: string; initialAnchor?: number }>()
 const emit = defineEmits<{ visible: [lastVisibleId: number] }>()
 const container = ref<HTMLElement | null>(null), newCount = ref(0)
@@ -68,12 +76,17 @@ onBeforeUnmount(() => { save(); observer?.disconnect(); document.removeEventList
   <div ref="container" class="chat-message-list" role="log" aria-label="消息记录" aria-live="polite" tabindex="0" @scroll="onScroll">
    <p v-if="!messages.length" class="chat-empty">{{ emptyText ?? '暂无消息，说点什么开始沟通' }}</p>
    <article v-for="message in messages" :key="message.id" :data-message-id="message.id" class="chat-message" :class="{ mine: message.mine }">
-    <div class="chat-bubble">
-     <p class="chat-sender">{{ message.senderLabel }}</p>
-     <el-image v-if="message.image" class="chat-image" :src="message.image.fileUrl" :alt="message.image.fileName" fit="contain" :preview-src-list="[message.image.fileUrl]" preview-teleported />
-     <p v-else class="chat-content">{{ message.content }}</p>
-     <slot name="message-actions" :message="message" />
-     <time class="chat-time">{{ formatDateTime(message.createdAt) }}</time>
+    <span class="chat-avatar" aria-hidden="true">{{ senderInitial(message.senderLabel) }}</span>
+    <div class="chat-message-body">
+     <header class="chat-meta">
+      <span class="chat-sender" :title="message.senderLabel">{{ message.senderLabel }}</span>
+      <time class="chat-time" :datetime="message.createdAt" :title="formatDateTime(message.createdAt)">{{ messageTime(message.createdAt) }}</time>
+     </header>
+     <div class="chat-bubble" :class="{ 'has-image': !!message.image }">
+      <el-image v-if="message.image" class="chat-image" :src="message.image.fileUrl" :alt="message.image.fileName" fit="contain" :preview-src-list="[message.image.fileUrl]" preview-teleported />
+      <p v-else class="chat-content">{{ message.content }}</p>
+      <slot name="message-actions" :message="message" />
+     </div>
     </div>
    </article>
   </div>
@@ -81,8 +94,24 @@ onBeforeUnmount(() => { save(); observer?.disconnect(); document.removeEventList
  </div>
 </template>
 <style scoped>
-.chat-scroll-shell{position:relative;display:flex;flex:1;min-height:0;flex-direction:column}.chat-message-list{display:flex;flex-direction:column;flex:1;gap:16px;min-height:240px;max-height:520px;padding:20px;overflow:auto;scrollbar-width:thin;background:var(--color-bg,#f7f8fa)}
-.chat-message{display:flex;justify-content:flex-start}.chat-message.mine{justify-content:flex-end}.chat-bubble{max-width:min(82%,560px);padding:14px 18px;border:1px solid var(--color-border,#e5e7eb);border-radius:12px;background:var(--color-surface,#fff);overflow-wrap:anywhere}
-.mine .chat-bubble{background:var(--color-primary,#356aff);color:#fff;border-color:transparent}.chat-sender,.chat-time{display:block;font-size:12px;opacity:.75;margin:0 0 8px}.chat-content{white-space:pre-wrap;margin:0}.chat-time{margin:10px 0 0;text-align:right}.chat-image{display:block;width:220px;max-width:100%;height:180px;border-radius:8px}.chat-empty{color:var(--color-text-secondary,#667085);text-align:center;padding:40px 0}.new-message-reminder{position:absolute;bottom:12px;right:20px;background:#fff;color:var(--color-primary);border:1px solid var(--color-border);border-radius:20px;padding:8px 14px;cursor:pointer;box-shadow:0 2px 10px #14264612}
-@media(max-width:768px){.chat-message-list{padding:12px}.chat-bubble{max-width:90%;padding:12px}}
+.chat-scroll-shell { position: relative; display: flex; flex: 1; min-height: 0; flex-direction: column; }
+.chat-message-list { display: flex; flex-direction: column; flex: 1; gap: 10px; min-height: 200px; max-height: 520px; padding: 14px 18px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; background: var(--color-bg, #f7f8fa); }
+.chat-message { display: flex; align-items: flex-start; gap: var(--spacing-sm, 8px); flex-shrink: 0; }
+.chat-message.mine { flex-direction: row-reverse; }
+.chat-avatar { display: grid; place-items: center; flex: 0 0 30px; height: 30px; border-radius: var(--radius-circle, 50%); color: #5c759a; background: #e4ebf5; font-size: 12px; margin-top: 1px; }
+.mine .chat-avatar { background: #e6edff; color: var(--color-primary, #356aff); }
+.chat-message-body { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs, 4px); width: max-content; min-width: 0; max-width: min(78%, 640px); }
+.mine .chat-message-body { align-items: flex-end; }
+.chat-meta { display: flex; align-items: center; gap: 8px; width: fit-content; max-width: 100%; min-width: 0; line-height: 18px; color: var(--color-text-secondary, #788598); }
+.chat-sender { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.chat-time { flex-shrink: 0; color: var(--color-text-disabled, #98a1af); font-size: 11px; white-space: nowrap; }
+.chat-bubble { width: fit-content; max-width: 100%; padding: 7px 11px; border: 1px solid #e8ecf2; border-radius: 4px 12px 12px; background: var(--color-surface, #fff); overflow-wrap: anywhere; }
+.mine .chat-bubble { background: var(--color-primary, #356aff); color: #fff; border-color: transparent; border-radius: 12px 4px 12px 12px; }
+.chat-content { white-space: pre-wrap; margin: 0; font-size: 14px; line-height: 21px; }
+.chat-bubble.has-image { padding: 0; border: 0; background: transparent; }
+.chat-image { display: block; width: 200px; max-width: 100%; height: 140px; border-radius: var(--radius-md, 8px); background: #e9edf4; }
+.chat-empty { color: var(--color-text-secondary, #667085); text-align: center; margin: auto; padding: 24px 0; }
+.new-message-reminder { position: absolute; bottom: 10px; right: 16px; background: #fff; color: var(--color-primary); border: 1px solid var(--color-border); border-radius: 20px; padding: 6px 12px; cursor: pointer; box-shadow: 0 2px 10px #14264612; font-size: 12px; }
+.new-message-reminder:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+@media (max-width: 900px) { .chat-message-list { padding: 12px; } .chat-message-body { max-width: calc(100% - 38px); } }
 </style>
