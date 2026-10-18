@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { useWorkOrderDetail } from '@/common/workorder/composables/useWorkOrderDetail'
+import WorkOrderLoadNotice from '@/common/workorder/components/WorkOrderLoadNotice.vue'
+
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/common/web/components/StatusTag.vue'
 import { ensureWorkOrderConversation } from '@/common/workorder/api/workorder'
 import StaffPickerDrawer from '@/admin/workorder/components/StaffPickerDrawer.vue'
-import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, intakeWorkOrder, listWorkOrderAttachments, rejectWorkOrder } from '@/common/workorder/api/workorder'
+import { closeWorkOrder, intakeWorkOrder, rejectWorkOrder } from '@/common/workorder/api/workorder'
 import { getConversation } from '@/common/conversation/api/conversation'
 import type { IConversation } from '@/common/conversation/types/conversation'
 import type {
   DispatchFlag,
-  IWorkOrder,
-  IWorkOrderAttachment,
-  IWorkOrderProcess,
   WorkOrderPriority,
   WorkOrderStatus
 } from '@/common/workorder/types/workorder'
@@ -29,7 +29,8 @@ import { formatDateTime } from '@/common/web/utils/date'
 const route = useRoute()
 const router = useRouter()
 
-const orderId = Number(route.params.id)
+const orderId = computed(() => Number(route.params.id))
+const { order, timeline, attachments, loading, loadError, timelineLoading, timelineError, attachmentsLoading, attachmentsError, fetchDetail, fetchTimeline, fetchAttachments } = useWorkOrderDetail(orderId, loadConversation)
 
 const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled'> = {
   PENDING: 'pending',
@@ -44,10 +45,6 @@ const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'comple
   CANCELLED: 'canceled'
 }
 
-const order = ref<IWorkOrder | null>(null)
-const timeline = ref<IWorkOrderProcess[]>([])
-const attachments = ref<IWorkOrderAttachment[]>([])
-const loading = ref(false)
 const actionLoading = ref(false)
 
 /* 派单/改派：候选抽屉与列表共用（候选、备注、提交全在组件内） */
@@ -77,22 +74,24 @@ const hasAction = computed(
 
 /* R74 工单临时群聊：受理后由后端同事务建群并回带 conversationId；未受理则无群（不渲染面板） */
 const workOrderConversation = ref<IConversation | null>(null)
+watch(order, () => { workOrderConversation.value = null })
 
 /**
  * 取工单临时群聊：仅参与者可见（§9.21.2）——非参与者 403 或会话不存在时
  * 一律不渲染面板，不把「无权查看」包装成空群聊。
  */
 async function loadConversation(): Promise<void> {
+  const target = orderId.value
+  const snapshot = order.value
   const conversationId = order.value?.conversationId
   if (!conversationId) {
     workOrderConversation.value = null
     return
   }
   try {
-    workOrderConversation.value = await getConversation(conversationId)
-  } catch {
-    workOrderConversation.value = null
-  }
+    const conversation = await getConversation(conversationId)
+    if (target === orderId.value && snapshot === order.value && order.value?.conversationId === conversationId) workOrderConversation.value = conversation
+  } catch { if (target === orderId.value) workOrderConversation.value = null }
 }
 
 const openingChat = ref(false)
@@ -100,7 +99,7 @@ async function openWorkOrderChat(): Promise<void> {
   if (!order.value || openingChat.value) return
   openingChat.value = true
   try {
-    order.value = await ensureWorkOrderConversation(orderId)
+    order.value = await ensureWorkOrderConversation(orderId.value)
     await loadConversation()
     if (workOrderConversation.value) {
       await router.push({ path: '/admin/conversations', query: { id: workOrderConversation.value.id, source: 'CONVERSATION', returnTo: route.fullPath } })
@@ -117,30 +116,11 @@ function toneOf(priority: WorkOrderPriority): 'urgent' | 'normal' | 'low' {
   return priority === 'LOW' ? 'low' : 'normal'
 }
 
-async function fetchDetail(): Promise<void> {
-  loading.value = true
-  try {
-    const [detail, processes, files] = await Promise.all([
-      getWorkOrder(orderId),
-      getWorkOrderTimeline(orderId),
-      listWorkOrderAttachments(orderId)
-    ])
-    order.value = detail
-    timeline.value = processes
-    attachments.value = files
-    await loadConversation()
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '工单详情加载失败')
-  } finally {
-    loading.value = false
-  }
-}
-
 /** R74 受理：仅待受理可受理（否则后端 5302）；成功即同事务建群并回带 conversationId */
 async function handleIntake(): Promise<void> {
   actionLoading.value = true
   try {
-    const updated = await intakeWorkOrder(orderId)
+    const updated = await intakeWorkOrder(orderId.value)
     ElMessage.success(updated?.conversationId ? '工单已受理，工单沟通群已建立' : '工单已受理')
     await fetchDetail()
   } catch (error) {
@@ -160,7 +140,7 @@ async function handleReject(): Promise<void> {
       inputValidator: (input: string) => (input.trim() ? true : '请填写驳回理由')
     })
     actionLoading.value = true
-    await rejectWorkOrder(orderId, { remark: value.trim() })
+    await rejectWorkOrder(orderId.value, { remark: value.trim() })
     ElMessage.success('工单已驳回')
     fetchDetail()
   } catch (error) {
@@ -185,7 +165,7 @@ async function handleClose(): Promise<void> {
       }
     )
     actionLoading.value = true
-    await closeWorkOrder(orderId)
+    await closeWorkOrder(orderId.value)
     ElMessage.success('工单已终审结束，沟通群已回收为只读')
     await fetchDetail()
   } catch (error) {
@@ -196,11 +176,12 @@ async function handleClose(): Promise<void> {
   }
 }
 
-onMounted(fetchDetail)
+
 </script>
 
 <template>
   <section v-loading="loading" class="admin-order-detail">
+    <WorkOrderLoadNotice :main-error="loadError" :timeline-error="timelineError" :attachments-error="attachmentsError" :timeline-loading="timelineLoading" :attachments-loading="attachmentsLoading" @retry-main="fetchDetail" @retry-timeline="fetchTimeline" @retry-attachments="fetchAttachments" />
     <nav class="crumb-bar" aria-label="面包屑">
       <router-link class="crumb-link" to="/admin/work-orders">工单管理</router-link>
       <span class="crumb-sep">/</span>

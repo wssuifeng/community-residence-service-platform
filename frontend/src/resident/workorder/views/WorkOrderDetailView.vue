@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { useWorkOrderDetail } from '@/common/workorder/composables/useWorkOrderDetail'
+import WorkOrderLoadNotice from '@/common/workorder/components/WorkOrderLoadNotice.vue'
+
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/common/web/components/StatusTag.vue'
@@ -9,16 +12,10 @@ import type { IConversation } from '@/common/conversation/types/conversation'
 import {
   cancelWorkOrder,
   confirmWorkOrder,
-  getWorkOrder,
-  getWorkOrderTimeline,
-  listWorkOrderAttachments,
   returnWorkOrder
 } from '@/common/workorder/api/workorder'
 import { getEvaluation, submitEvaluation } from '@/common/evaluation/api/evaluation'
 import type {
-  IWorkOrder,
-  IWorkOrderAttachment,
-  IWorkOrderProcess,
   WorkOrderStatus
 } from '@/common/workorder/types/workorder'
 import { workOrderStatusLabels, workOrderPriorityLabels } from '@/common/workorder/types/workorder'
@@ -30,7 +27,8 @@ import { formatDateTime, formatRelative } from '@/common/web/utils/date'
 const route = useRoute()
 const router = useRouter()
 
-const orderId = Number(route.params.id)
+const orderId = computed(() => Number(route.params.id))
+const { order, timeline, attachments, loading, loadError, timelineLoading, timelineError, attachmentsLoading, attachmentsError, fetchDetail, fetchTimeline, fetchAttachments } = useWorkOrderDetail(orderId, async () => { await loadConversation(); if (canEvaluate.value) await fetchEvaluation() })
 
 /* 工单状态 → StatusTag 语义色 */
 const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled'> = {
@@ -46,10 +44,6 @@ const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'comple
   CANCELLED: 'canceled'
 }
 
-const order = ref<IWorkOrder | null>(null)
-const timeline = ref<IWorkOrderProcess[]>([])
-const attachments = ref<IWorkOrderAttachment[]>([])
-const loading = ref(false)
 const actionLoading = ref(false)
 
 /* 评价区：已评价则展示结果，未评价展示表单（已完成或终审关闭后仍可补评） */
@@ -131,50 +125,33 @@ const steps = computed(() => {
   })
 })
 
-async function fetchDetail(): Promise<void> {
-  loading.value = true
-  try {
-    const [detail, processes, files] = await Promise.all([
-      getWorkOrder(orderId),
-      getWorkOrderTimeline(orderId),
-      listWorkOrderAttachments(orderId)
-    ])
-    order.value = detail
-    timeline.value = processes
-    attachments.value = files
-    await loadConversation()
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '工单详情加载失败')
-  } finally {
-    loading.value = false
-  }
-}
-
 /* R74 工单临时群聊：受理后由后端同事务建群并回带 conversationId；未受理则无群（不渲染面板） */
 const workOrderConversation = ref<IConversation | null>(null)
+watch(order, () => { workOrderConversation.value = null; evaluation.value = null; evaluationLoading.value = false })
 
 /**
  * 取工单临时群聊：仅参与者可见（§9.21.2）——非参与者 403 或会话不存在时
  * 一律不渲染面板。
  */
 async function loadConversation(): Promise<void> {
+  const target = orderId.value
+  const snapshot = order.value
   const conversationId = order.value?.conversationId
   if (!conversationId) {
     workOrderConversation.value = null
     return
   }
   try {
-    workOrderConversation.value = await getConversation(conversationId)
-  } catch {
-    workOrderConversation.value = null
-  }
+    const conversation = await getConversation(conversationId)
+    if (target === orderId.value && snapshot === order.value && order.value?.conversationId === conversationId) workOrderConversation.value = conversation
+  } catch { if (target === orderId.value) workOrderConversation.value = null }
 }
 
 /* 已完成或已关闭工单尝试拉取既有评价（不可重复评价） */
 async function fetchEvaluation(): Promise<void> {
   evaluationLoading.value = true
   try {
-    evaluation.value = await getEvaluation(orderId)
+    evaluation.value = await getEvaluation(orderId.value)
   } catch {
     evaluation.value = null
   } finally {
@@ -191,7 +168,7 @@ async function handleCancel(): Promise<void> {
       inputValidator: (input: string) => (input.trim() ? true : '请填写取消原因')
     })
     actionLoading.value = true
-    await cancelWorkOrder(orderId, { remark: value.trim() })
+    await cancelWorkOrder(orderId.value, { remark: value.trim() })
     ElMessage.success('工单已取消')
     fetchDetail()
   } catch (error) {
@@ -210,7 +187,7 @@ async function handleConfirm(): Promise<void> {
       cancelButtonText: '再等等'
     })
     actionLoading.value = true
-    await confirmWorkOrder(orderId)
+    await confirmWorkOrder(orderId.value)
     ElMessage.success('已确认完成，欢迎对本次服务做出评价')
     fetchDetail()
   } catch (error) {
@@ -233,7 +210,7 @@ async function handleUnsatisfied(): Promise<void> {
       inputValidator: (input: string) => (input.trim() ? true : '请填写不满意原因')
     })
     actionLoading.value = true
-    await returnWorkOrder(orderId, { remark: `居民反馈不满意：${value.trim()}` })
+    await returnWorkOrder(orderId.value, { remark: `居民反馈不满意：${value.trim()}` })
     ElMessage.success('反馈已记录，已退回服务人员重新处理，完成后可再次确认并评价')
     fetchDetail()
   } catch (error) {
@@ -252,7 +229,7 @@ async function handleSubmitEvaluation(): Promise<void> {
   }
   submittingEvaluation.value = true
   try {
-    await submitEvaluation(orderId, {
+    await submitEvaluation(orderId.value, {
       rating: form.rating as IEvaluation['rating'],
       content: form.content.trim() || undefined,
       tags: form.tags.trim() || undefined,
@@ -268,15 +245,12 @@ async function handleSubmitEvaluation(): Promise<void> {
   }
 }
 
-onMounted(() => {
-  fetchDetail().then(() => {
-    if (canEvaluate.value) fetchEvaluation()
-  })
-})
+
 </script>
 
 <template>
   <section v-loading="loading" class="work-order-detail">
+    <WorkOrderLoadNotice :main-error="loadError" :timeline-error="timelineError" :attachments-error="attachmentsError" :timeline-loading="timelineLoading" :attachments-loading="attachmentsLoading" @retry-main="fetchDetail" @retry-timeline="fetchTimeline" @retry-attachments="fetchAttachments" />
     <header class="page-header">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/resident/work-orders' }">我的工单</el-breadcrumb-item>

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { useWorkOrderDetail } from '@/common/workorder/composables/useWorkOrderDetail'
+import WorkOrderLoadNotice from '@/common/workorder/components/WorkOrderLoadNotice.vue'
+
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import StatusTag from '@/common/web/components/StatusTag.vue'
@@ -10,16 +13,10 @@ import type { IConversation } from '@/common/conversation/types/conversation'
 import {
   acceptWorkOrder,
   completeWorkOrder,
-  getWorkOrder,
-  getWorkOrderTimeline,
-  listWorkOrderAttachments,
   processWorkOrder,
   uploadWorkOrderAttachment
 } from '@/common/workorder/api/workorder'
 import type {
-  IWorkOrder,
-  IWorkOrderAttachment,
-  IWorkOrderProcess,
   WorkOrderPriority,
   WorkOrderStatus
 } from '@/common/workorder/types/workorder'
@@ -34,7 +31,8 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-const orderId = Number(route.params.id)
+const orderId = computed(() => Number(route.params.id))
+const { order, timeline, attachments, loading, loadError, timelineLoading, timelineError, attachmentsLoading, attachmentsError, fetchDetail, fetchTimeline, fetchAttachments } = useWorkOrderDetail(orderId, async () => { await loadConversation(); focusRequestedAction() })
 
 const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'completed' | 'rejected' | 'canceled'> = {
   PENDING: 'pending',
@@ -54,10 +52,6 @@ const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'comple
 const REMARK_MAX = 500
 const NOTE_MAX = 200
 
-const order = ref<IWorkOrder | null>(null)
-const timeline = ref<IWorkOrderProcess[]>([])
-const attachments = ref<IWorkOrderAttachment[]>([])
-const loading = ref(false)
 const actionLoading = ref(false)
 
 /* 操作面板输入：solution 为页面「处理结果说明」输入（处理中状态必填），remark 为可选备注，
@@ -90,45 +84,12 @@ function toneOf(priority: WorkOrderPriority): 'urgent' | 'normal' | 'low' {
  * 时间线与附件是辅助信息，任一失败都不再连带把操作面板打成空白——
  * 修复前三者同处一个 `Promise.all`，辅助接口一失败服务人员就看不到接单/处理入口。
  */
-const loadError = ref('')
-
-async function fetchDetail(): Promise<void> {
-  loading.value = true
-  loadError.value = ''
-  try {
-    order.value = await getWorkOrder(orderId)
-  } catch (error) {
-    order.value = null
-    timeline.value = []
-    attachments.value = []
-    loadError.value = error instanceof Error ? error.message : '工单详情加载失败'
-  } finally {
-    loading.value = false
-  }
-  if (!order.value) return
-  void fetchTimeline()
-  void fetchAttachments()
-  await loadConversation()
-  focusRequestedAction()
-}
 
 /** 处理时间线：独立取数并静默降级（不阻断操作面板） */
-async function fetchTimeline(): Promise<void> {
-  try {
-    timeline.value = await getWorkOrderTimeline(orderId)
-  } catch {
-    timeline.value = []
-  }
-}
+
 
 /** 工单附件：独立取数并静默降级（不阻断操作面板） */
-async function fetchAttachments(): Promise<void> {
-  try {
-    attachments.value = await listWorkOrderAttachments(orderId)
-  } catch {
-    attachments.value = []
-  }
-}
+
 
 /** 从列表页「提交处理结果」跳进来时（?action=complete）把焦点落到处理结果说明，少一次点击 */
 function focusRequestedAction(): void {
@@ -143,22 +104,24 @@ function focusRequestedAction(): void {
 /* R74 工单临时群聊：受理即建群（居民 + 受理管理员），派单后本服务人员自动入群；
    未受理无群、未入群（非参与者 403）均不渲染面板 */
 const workOrderConversation = ref<IConversation | null>(null)
+watch(order, () => { workOrderConversation.value = null })
 
 /**
  * 取工单临时群聊：仅参与者可见（§9.21.2）——未受理（无 conversationId）、
  * 未入群（403）或会话不存在时一律不渲染面板。
  */
 async function loadConversation(): Promise<void> {
+  const target = orderId.value
+  const snapshot = order.value
   const conversationId = order.value?.conversationId
   if (!conversationId) {
     workOrderConversation.value = null
     return
   }
   try {
-    workOrderConversation.value = await getConversation(conversationId)
-  } catch {
-    workOrderConversation.value = null
-  }
+    const conversation = await getConversation(conversationId)
+    if (target === orderId.value && snapshot === order.value && order.value?.conversationId === conversationId) workOrderConversation.value = conversation
+  } catch { if (target === orderId.value) workOrderConversation.value = null }
 }
 
 /* 接单：已派单状态下确认后流转至已接单（状态机 9.4.2.6；
@@ -171,7 +134,7 @@ async function handleAccept(): Promise<void> {
     })
     actionLoading.value = true
     const remark = resultForm.value.remark.trim()
-    await acceptWorkOrder(orderId, { remark: remark || `服务人员 ${userStore.user?.realName ?? ''} 已接单` })
+    await acceptWorkOrder(orderId.value, { remark: remark || `服务人员 ${userStore.user?.realName ?? ''} 已接单` })
     ElMessage.success('接单成功，请尽快开始处理')
     fetchDetail()
   } catch (error) {
@@ -191,7 +154,7 @@ async function handleProcess(): Promise<void> {
     })
     actionLoading.value = true
     const remark = resultForm.value.remark.trim()
-    await processWorkOrder(orderId, { remark: remark || '已开始处理' })
+    await processWorkOrder(orderId.value, { remark: remark || '已开始处理' })
     ElMessage.success('已开始处理')
     fetchDetail()
   } catch (error) {
@@ -209,7 +172,7 @@ async function attachImages(urls: string[]): Promise<number> {
     try {
       const blob = await (await fetch(url)).blob()
       const fileName = url.split('/').pop() ?? 'result.png'
-      await uploadWorkOrderAttachment(orderId, new File([blob], fileName, { type: blob.type || 'image/png' }))
+      await uploadWorkOrderAttachment(orderId.value, new File([blob], fileName, { type: blob.type || 'image/png' }))
     } catch {
       failed += 1
     }
@@ -240,7 +203,7 @@ async function handleSubmitResult(): Promise<void> {
   if (!payload) return
   submittingResult.value = true
   try {
-    await completeWorkOrder(orderId, payload)
+    await completeWorkOrder(orderId.value, payload)
     const failed = await attachImages(resultForm.value.images)
     if (failed > 0) ElMessage.warning(`${failed} 张结果图片关联失败`)
     ElMessage.success('处理结果已提交，等待居民确认')
@@ -264,11 +227,12 @@ function goList(): void {
   router.push('/staff/work-orders')
 }
 
-onMounted(fetchDetail)
+
 </script>
 
 <template>
   <section v-loading="loading" class="staff-order-detail">
+    <WorkOrderLoadNotice  :timeline-error="timelineError" :attachments-error="attachmentsError" :timeline-loading="timelineLoading" :attachments-loading="attachmentsLoading" @retry-main="fetchDetail" @retry-timeline="fetchTimeline" @retry-attachments="fetchAttachments" />
     <nav class="crumb-bar">
       <button type="button" class="crumb-home" aria-label="返回工单列表" @click="goList">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
