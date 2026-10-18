@@ -2,21 +2,14 @@ package com.community.residence.common.resident.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.web.result.PageVO;
-import com.community.residence.common.resident.dto.ApproveApplicationDTO;
-import com.community.residence.common.resident.dto.CreateApplicationDTO;
-import com.community.residence.common.resident.dto.RejectApplicationDTO;
 import com.community.residence.common.resident.service.ResidenceApplicationService;
 import com.community.residence.common.resident.vo.ApplicationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,13 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ResidenceApplicationController {
 
     private final ResidenceApplicationService applicationService;
-
-    @Operation(summary = "提交入住申请", description = "房屋须空置；同一房屋不可重复在审")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @PostMapping
-    public ApiResponse<ApplicationVO> create(@RequestBody @Valid CreateApplicationDTO dto) {
-        return ApiResponse.success(applicationService.create(dto));
-    }
 
     @Operation(summary = "查询申请详情", description = "居民限本人")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
@@ -51,29 +37,5 @@ public class ResidenceApplicationController {
                                                    @RequestParam(defaultValue = "20") long size,
                                                    @RequestParam(required = false) String status) {
         return ApiResponse.success(applicationService.page(page, size, status));
-    }
-
-    @Operation(summary = "审批通过",
-            description = "租客仅建立待签约租约及群聊；正式关系与房屋入住在协议完成且首期成功后建立")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PatchMapping("/{id}/approve")
-    public ApiResponse<ApplicationVO> approve(@PathVariable Long id,
-                                              @RequestBody @Valid ApproveApplicationDTO dto) {
-        return ApiResponse.success(applicationService.approve(id, dto));
-    }
-
-    @Operation(summary = "撤回入住申请", description = "仅申请人本人、仅待审核可撤回；落已撤回终态并关闭租约群聊")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @PatchMapping("/{id}/withdraw")
-    public ApiResponse<ApplicationVO> withdraw(@PathVariable Long id) {
-        return ApiResponse.success(applicationService.withdraw(id));
-    }
-
-    @Operation(summary = "审批拒绝")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PatchMapping("/{id}/reject")
-    public ApiResponse<Void> reject(@PathVariable Long id, @RequestBody @Valid RejectApplicationDTO dto) {
-        applicationService.reject(id, dto);
-        return ApiResponse.success();
     }
 }

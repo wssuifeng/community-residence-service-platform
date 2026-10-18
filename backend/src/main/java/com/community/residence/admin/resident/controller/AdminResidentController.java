@@ -1,0 +1,88 @@
+package com.community.residence.admin.resident.controller;
+
+import com.community.residence.common.web.result.ApiResponse;
+import com.community.residence.common.web.result.PageVO;
+import com.community.residence.common.resident.dto.AdminCreateResidentDTO;
+import com.community.residence.common.resident.dto.UpdateResidentStatusDTO;
+import com.community.residence.common.resident.service.ResidentService;
+import com.community.residence.common.resident.vo.AdminCreateResidentVO;
+import com.community.residence.common.resident.vo.ResidentImportVO;
+import com.community.residence.common.resident.vo.ResidentVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+/** 居民账号管理控制器：注册/资料/改密/冻结（接口设计.md 9.2.1） */
+@Tag(name = "居民账号管理", description = "居民账号与个人资料接口")
+@RestController
+@RequestMapping("/api/v1/residents")
+@RequiredArgsConstructor
+public class AdminResidentController {
+
+    private final ResidentService residentService;
+
+    @Operation(summary="同住人员账号精确检索", description="限可管理的已入住房屋；按完整用户名或手机号匹配正常账号，仅返回选择字段")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
+    @GetMapping("/co-resident-candidates")
+    public ApiResponse<java.util.List<com.community.residence.common.resident.vo.CoResidentCandidateVO>> coResidentCandidates(
+            @RequestParam Long houseId, @RequestParam(defaultValue="") String keyword) {
+        return ApiResponse.success(residentService.coResidentCandidates(houseId,keyword));
+    }
+
+    @Operation(summary = "居民列表（分页）")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @GetMapping
+    public ApiResponse<PageVO<ResidentVO>> page(@RequestParam(defaultValue = "1") long page,
+                                                @RequestParam(defaultValue = "20") long size,
+                                                @RequestParam(required = false) String status,
+                                                @RequestParam(required = false) String keyword) {
+        return ApiResponse.success(residentService.page(page, size, status, keyword));
+    }
+
+    @Operation(summary = "冻结/解冻账号", description = "冻结即时吊销全部令牌")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PatchMapping("/{id}/status")
+    public ApiResponse<Void> updateStatus(@PathVariable Long id,
+                                          @RequestBody @Valid UpdateResidentStatusDTO dto) {
+        residentService.updateStatus(id, dto);
+        return ApiResponse.success();
+    }
+
+    @Operation(summary = "代建居民账号", description = "R8 v1.2；初始密码服务端生成（手机号后 6 位）明文仅本次返回；ADMIN 限绑定社区")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/admin-create")
+    public ApiResponse<AdminCreateResidentVO> adminCreate(@RequestBody @Valid AdminCreateResidentDTO dto) {
+        return ApiResponse.success(residentService.adminCreate(dto));
+    }
+
+    @Operation(summary = "批量导入居民（CSV）", description = "R8；支持UTF-8/GB18030/带BOM UTF-16，九列四段业务编号模板，兼容旧四列和十列模板；每行账号+关系独立事务，部分成功语义，失败行返回行号与原因")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ResidentImportVO> importCsv(@RequestParam("file") MultipartFile file, @RequestParam(required=false) @jakarta.validation.constraints.Positive Long communityId) {
+        if (file != null && file.getSize() > 5 * 1024 * 1024) {
+            throw new com.community.residence.common.web.exception.BusinessException(
+                    com.community.residence.common.web.constant.ErrorCode.INVALID_PARAM, "CSV不能超过5MB，请拆分导入");
+        }
+        if (file == null || file.isEmpty()) {
+            return ApiResponse.success(residentService.importCsv(null));
+        }
+        try {
+            return ApiResponse.success(residentService.importCsv(file.getInputStream(), communityId));
+        } catch (java.io.IOException e) {
+            throw new com.community.residence.common.web.exception.BusinessException(
+                    com.community.residence.common.web.constant.ErrorCode.INVALID_PARAM, "CSV 文件读取失败");
+        }
+    }
+}
