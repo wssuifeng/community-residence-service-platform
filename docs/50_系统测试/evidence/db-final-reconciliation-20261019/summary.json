@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-19",
+  "businessBaseline": "def6f90",
+  "backendRuntimeSource": "57f26e9",
+  "newBusinessTests": 0,
+  "newFinancialCommands": 0,
+  "lastRuntimeVerificationDate": "2026-10-18",
+  "caseCount": 305,
+  "casePriority": {
+    "P1": 179,
+    "P0": 104,
+    "P2": 22
+  },
+  "casePriorityAdded": 15,
+  "caseDisposition": {
+    "历史执行证据": 156,
+    "现行定向证据": 109,
+    "人工基础确认": 8,
+    "用户弃置": 1,
+    "批准预期替代": 5,
+    "人工主路径确认": 1,
+    "量化适用性保留": 9,
+    "按30设计勘误": 2,
+    "部分执行证据": 1,
+    "执行证据缺项": 3,
+    "专项适用性保留": 10
+  },
+  "defectCount": 212,
+  "primaryHistoricalRows": 177,
+  "laterRegistrationsAdded": 35,
+  "defectSeverity": {
+    "一般": 127,
+    "严重": 55,
+    "致命": 8,
+    "轻微": 22
+  },
+  "defectSeverityAdded": 29,
+  "defectDisposition": {
+    "修复回归关闭": 158,
+    "用户弃置": 1,
+    "拒绝": 1,
+    "人工确认收口": 10,
+    "用户暂缓": 1,
+    "文档或测试资产修正": 12,
+    "批准设计替代": 4,
+    "工程回归有据，专项待评审": 18,
+    "金融异常证据保留": 1,
+    "按现行设计终结": 4,
+    "用户确认主路径": 1,
+    "工程回归关闭": 1
+  },
+  "rates": {
+    "致命": {
+      "registered": 8,
+      "repairedWithRegression": 7,
+      "repairRateOfAllRegistrations": 87.5,
+      "otherDispositions": 1,
+      "retained": 0,
+      "engineeringEvidenceAwaitingReview": 1,
+      "note": "全登记修复比例与有效产品关闭率分别列示；排除项逐条保留理由，用户接受不计为工程修复，工程回归层次不扩大为真实DB/渠道。",
+      "effectiveProductDenominator": 8,
+      "excludedWithReason": 0,
+      "acceptedByUser": 0,
+      "engineeringClosureRate": 87.5,
+      "closureIncludingUserAcceptance": 87.5
+    },
+    "严重": {
+      "registered": 55,
+      "repairedWithRegression": 42,
+      "repairRateOfAllRegistrations": 76.36,
+      "otherDispositions": 13,
+      "retained": 0,
+      "engineeringEvidenceAwaitingReview": 6,
+      "note": "全登记修复比例与有效产品关闭率分别列示；排除项逐条保留理由，用户接受不计为工程修复，工程回归层次不扩大为真实DB/渠道。",
+      "effectiveProductDenominator": 48,
+      "excludedWithReason": 7,
+      "acceptedByUser": 0,
+      "engineeringClosureRate": 87.5,
+      "closureIncludingUserAcceptance": 87.5
+    },
+    "一般": {
+      "registered": 127,
+      "repairedWithRegression": 97,
+      "repairRateOfAllRegistrations": 76.38,
+      "otherDispositions": 28,
+      "retained": 2,
+      "engineeringEvidenceAwaitingReview": 11,
+      "note": "全登记修复比例与有效产品关闭率分别列示；排除项逐条保留理由，用户接受不计为工程修复，工程回归层次不扩大为真实DB/渠道。",
+      "effectiveProductDenominator": 115,
+      "excludedWithReason": 12,
+      "acceptedByUser": 5,
+      "engineeringClosureRate": 84.35,
+      "closureIncludingUserAcceptance": 88.7
+    },
+    "轻微": {
+      "registered": 22,
+      "repairedWithRegression": 13,
+      "repairRateOfAllRegistrations": 59.09,
+      "otherDispositions": 9,
+      "retained": 0,
+      "engineeringEvidenceAwaitingReview": 0,
+      "note": "全登记修复比例与有效产品关闭率分别列示；排除项逐条保留理由，用户接受不计为工程修复，工程回归层次不扩大为真实DB/渠道。",
+      "effectiveProductDenominator": 19,
+      "excludedWithReason": 3,
+      "acceptedByUser": 6,
+      "engineeringClosureRate": 68.42,
+      "closureIncludingUserAcceptance": 100.0
+    }
+  },
+  "claimBoundary": "分布是证据归并结果，不是305项在最终源码全量新执行；保存明确缺证，不以汇总单测数代替TC分母。"
+}

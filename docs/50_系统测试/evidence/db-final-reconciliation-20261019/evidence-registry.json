@@ -1,0 +1,227 @@
+{
+  "A5": {
+    "name": "第五轮各业务套件执行",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 440
+  },
+  "D5": {
+    "name": "第五轮逐缺陷复验",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 461
+  },
+  "UI5": {
+    "name": "第五轮页面与接线复验",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 494
+  },
+  "NF5": {
+    "name": "第五轮量化性能",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 474
+  },
+  "WS1": {
+    "name": "双通道22样本及鉴权",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 125
+  },
+  "JOB": {
+    "name": "定时任务与到期提醒",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 278
+  },
+  "COLD": {
+    "name": "历史冷启动与依赖检查",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 266
+  },
+  "B3": {
+    "name": "第三批逐项专项执行",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 320
+  },
+  "CONTRACT": {
+    "name": "历史HTTP契约抽样",
+    "path": "docs/50_系统测试/07_测试执行记录.md",
+    "line": 508
+  },
+  "BE": {
+    "name": "首批非交易复核",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2225
+  },
+  "BF": {
+    "name": "权限/身份/按钮真实复验",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2285
+  },
+  "BG": {
+    "name": "结构/责任人",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2321
+  },
+  "BH1": {
+    "name": "居民录入与关系",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2343
+  },
+  "BH2": {
+    "name": "首期门禁与占用",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2374
+  },
+  "BH3": {
+    "name": "公共资源真实图片",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2360
+  },
+  "BI": {
+    "name": "四域数据权限",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2400
+  },
+  "BK": {
+    "name": "类别与CSV原现场",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2466
+  },
+  "BL": {
+    "name": "服务人员完成看房",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2500
+  },
+  "BM": {
+    "name": "非交易异常单测",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2513
+  },
+  "BN": {
+    "name": "账号/导入/挂牌修正",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2521
+  },
+  "BO": {
+    "name": "责任人/主关系/编号",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2529
+  },
+  "BP": {
+    "name": "HT01～06修正",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2544
+  },
+  "BQ": {
+    "name": "公告图片/身份/会话图片/匿名",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2565
+  },
+  "BU": {
+    "name": "删除确认/合同/相册",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2580
+  },
+  "BX": {
+    "name": "未读/子表权限/配置开关",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2592
+  },
+  "CE": {
+    "name": "金融用户主路径及订单截止",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2642
+  },
+  "CF": {
+    "name": "铃铛/首页/工单群",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2653
+  },
+  "CM": {
+    "name": "既有回归用户确认",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2669
+  },
+  "CP": {
+    "name": "三端会话基础用户确认",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2685
+  },
+  "BC": {
+    "name": "协议意愿去重",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2185
+  },
+  "BD": {
+    "name": "支付宝配置管理",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2209
+  },
+  "BJ": {
+    "name": "工单派单权限与侧栏",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2424
+  },
+  "CA": {
+    "name": "单套挂牌与列表实时刷新",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 2619
+  },
+  "MOVEOUT": {
+    "name": "退租通知与实际三端深链",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 1980
+  },
+  "RESUME": {
+    "name": "首期PENDING重开真实续接",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 1686
+  },
+  "CV": {
+    "name": "最终结构整理及离线验证",
+    "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/final-validation.json",
+    "line": 1
+  },
+  "CV3": {
+    "name": "结构轮1183项，DB专项跳过1",
+    "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/s3-validation.json",
+    "line": 1
+  },
+  "CVP": {
+    "name": "事务提交后推送验证",
+    "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/o3-validation.json",
+    "line": 1
+  },
+  "CY": {
+    "name": "顶栏与三端账号菜单",
+    "path": "docs/50_系统测试/evidence/cy-header-navigation-20261018/README.md",
+    "line": 1
+  },
+  "CZ": {
+    "name": "用户确认与最后运行事实",
+    "path": "docs/50_系统测试/evidence/cz-test-closeout-20261018/evidence-summary.json",
+    "line": 1
+  },
+  "SYSDETAIL": {
+    "name": "30设计9.10.1.5允许ADMIN读详情",
+    "path": "docs/30_系统设计/接口设计.md",
+    "line": 4739
+  },
+  "CHLEVEL": {
+    "name": "渠道分级未勾选否定测试",
+    "path": "backend/src/test/java/com/community/residence/common/messaging/service/ChannelLevelsTest.java",
+    "line": 154
+  },
+  "EVENTS": {
+    "name": "工单六类通知与身份",
+    "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "line": 1915
+  },
+  "BMTEST": {
+    "name": "964项逐套件历史单测结果",
+    "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/backend-results.json",
+    "line": 1
+  },
+  "CFTEST": {
+    "name": "后续1163项单测汇总",
+    "path": "docs/50_系统测试/evidence/cf-notification-home-workorder-20261016/backend-tests.json",
+    "line": 1
+  }
+}

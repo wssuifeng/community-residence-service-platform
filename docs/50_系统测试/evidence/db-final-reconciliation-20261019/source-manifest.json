@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-19",
+  "businessBaseline": "def6f90",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "6d81b4950ab527880bef7c1189d72419f750bbbaa520aed1b103cf6ede427780"
+    },
+    {
+      "path": "README.md",
+      "sha256": "83ee9cbe1423518ad8db64252591039d942d3f18af7092c2b9fd43ef04811583"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/messaging/service/ChannelLevelsTest.java",
+      "sha256": "7a9d3ef1550d3c220d8e64448abb196c0eab040856ca05923999fbd342bda251"
+    },
+    {
+      "path": "docs/00_总控.md",
+      "sha256": "9bb0edef336652c9632f8782640e9cc3098c380d99b4f01f3063df239be2af25"
+    },
+    {
+      "path": "docs/30_系统设计/接口设计.md",
+      "sha256": "16cff715bddabaa07d71dcf4f229e36a54df0260407f7df5621ba052304be919"
+    },
+    {
+      "path": "docs/50_系统测试/02_需求跟踪矩阵.md",
+      "sha256": "ec97230abc268b67e8315087f3b89ebed29f66b2779ecc8d0cf72349b6c49b6b"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C01_社区基础信息.md",
+      "sha256": "e599aa675e840794044e5ff3d59987736ddd396ae24f70283b1cb55ab329e159"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C02_居民与居住关系.md",
+      "sha256": "5bbc25ad8991f52c556a1a9ccf7dc356f20b295ad017a537d0749572844f8e35"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C03_租住管理.md",
+      "sha256": "1c2e8bfa3b6ec78ebee3a1850f73d2db220b945ab51e06feadbddaca990e50ae"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C04_服务申请与工单.md",
+      "sha256": "68f02c3a3c6f57784faec2e2ac616801659bfd124c3f9c2ab2d8621036983ca5"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C05_公告广播管理.md",
+      "sha256": "766ccca96f626d5e37d6f45d26105db95d5dd4c1fac9a8729011917cd980f21b"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C06_居民反馈管理.md",
+      "sha256": "733a4b34650a1acef9ad1cf65e74556f46a789f7c96b7bca1a1e9fbbe80b8a7b"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C07_公共资源预约.md",
+      "sha256": "9f1b59c565662ccfd2207791d7d973603d06daaa0e34902f061f5efbc041d7cc"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C08_服务评价.md",
+      "sha256": "5ffcbeba901755324e5e2034f6ef56ad8b6f57c9bc87ebf3a48c0f9abd4f9da7"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C09_社区运营统计.md",
+      "sha256": "9bebd943e3ffa62ec219a62c4959ef1106268daa06310523d03a54bac6ce9eef"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C10_用户与权限.md",
+      "sha256": "7b4e92da80710f9e697651ee7bfdfe2213fc47f46d5f81a4bf56495f0c00f9ad"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C11_消息与通知.md",
+      "sha256": "fbe849b2e1e646224cb52d5e82bf0debbfae2028603ca3a03ca86841e7df1dd2"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C12_房源与看房预约.md",
+      "sha256": "f0f0a498921276b2526ea90c9723ac0881bbef6c497b5fb778a06a32fadd25b1"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/非功能与专项用例.md",
+      "sha256": "02e958958b3b1a4822e39d949058223a68390e55d2d45b61dc3cfd24c86ceb76"
+    },
+    {
+      "path": "docs/50_系统测试/07_测试执行记录.md",
+      "sha256": "8e6c8d0d504e9384f7814b6ff1f1a151a2b1be52cf0e0b0aaed7cbced1fb24db"
+    },
+    {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "sha256": "9764b38ac54491a77756c8df45888516b1db4116e07c23cce74c7d1bd3aef7d7"
+    },
+    {
+      "path": "docs/50_系统测试/09_测试评估与报告.md",
+      "sha256": "900d2b165c77124a3644f020c95932a9c0e339196bdbff41cf7918828921d560"
+    },
+    {
+      "path": "docs/50_系统测试/10_测试总结与归档.md",
+      "sha256": "22b7561b4236f8f25013bbec2e5fbcf0cb11382170b4f9ed400b8a57f764f076"
+    },
+    {
+      "path": "docs/50_系统测试/11_测试执行入口.md",
+      "sha256": "f6076c3bdf5d09c3e0b434e4954c5a4e846e5444ce0c43f7a46e2cca64ecd677"
+    },
+    {
+      "path": "docs/50_系统测试/_中控.md",
+      "sha256": "0f0fe5ce2c72db8c7cf674470ad8fd4f140cbe374b4c8e595c4f4834aa597e20"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/autonomous-closeout-20261013/backend-results.json",
+      "sha256": "5df6c508f5118346b16437aee7836a0e1303cca765325f505c077fe9254b57ac"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cf-notification-home-workorder-20261016/backend-tests.json",
+      "sha256": "a0e22d93500ee8dc8f0d730664f9f4d2490b416e15797051fa2cf5e6ff332b12"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/final-validation.json",
+      "sha256": "431c8e25bce728763d8862600d3aa9926be614eaf524c1b93e36169b35bcbec8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/o3-validation.json",
+      "sha256": "7d6be3ae0006e9ccea65ed1174739198496fe6cd0cb597a708438a9822745c50"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/s3-validation.json",
+      "sha256": "ad082ab41272bf7e71370bde5ad7577a384c89f6d3dd8851ac7ea8370f53c81b"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cy-header-navigation-20261018/README.md",
+      "sha256": "947a415b32100795c8b7649a02b57559551e3b88135d4d471e71bbfc48b4023a"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cz-test-closeout-20261018/evidence-summary.json",
+      "sha256": "d7d2751a546f49db8e7f481d55f85ee2672936d669f4b35d4a6b165fe2b3552d"
+    },
+    {
+      "path": "docs/90_全局/决策日志.md",
+      "sha256": "483763e671ec3e9ceddcd819d00333163de34f1fc5e547c51fbedad12eb80f58"
+    },
+    {
+      "path": "docs/90_全局/长任务路线图.md",
+      "sha256": "9fafbb26e47f56206c2965a412c61022c5d83e48a300ecf9c7ef2afa361b570d"
+    }
+  ]
+}
