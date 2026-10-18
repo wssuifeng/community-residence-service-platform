@@ -43,5 +43,4 @@ public class FeedbackAttachmentController {
     public ApiResponse<com.community.residence.common.feedback.vo.MessageVO> sendImage(@PathVariable Long id, @org.springframework.web.bind.annotation.RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
         return ApiResponse.success(feedbackService.sendImage(id,file));
     }
-
 }
