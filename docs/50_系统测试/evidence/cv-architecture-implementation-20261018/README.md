@@ -46,6 +46,7 @@
 ## 4. 实际迁移与契约
 
 - 后端源码根目录最终只保留`admin`、`resident`、`staff`、`common`四个一级包。迁移脚本留下的旧模块`.gitkeep`占位目录已清理，并新增`PackageBoundaryTest.sourceRootContainsOnlyPortalGroups`防止残留。
+- 清理后的反向核对确认：父提交与当前提交的生产Java文件集合完全一致（530个），本次后端删除路径全部为`.gitkeep`；87个Controller、60个Mapper、824个迁移索引目标路径和包声明均核对通过。
 - `backend-ownership.csv`、`frontend-ownership.csv`是S0原规划，保留不重写。
 - `backend-final-migration.csv`核对464个来源的实际去向；`frontend-final-migration.csv`核对319个来源，只有permission Store记为删除。后者修正规划时部分测试的归类与路径，`final-migration-validation.json`记录核对。
 - `final-inventory.json`为当前源目录库存，新增查询/清理/区块不假装为原464/319文件。

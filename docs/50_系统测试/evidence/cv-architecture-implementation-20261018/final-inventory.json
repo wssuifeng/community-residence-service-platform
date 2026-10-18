@@ -25,5 +25,17 @@
     "common"
   ],
   "legacyTopLevelScaffoldsRemoved": true,
-  "backendLegacyPlaceholderFiles": 0
+  "backendLegacyPlaceholderFiles": 0,
+  "postCleanupVerification": {
+    "productionJavaSetUnchangedFromParent": true,
+    "productionJavaCount": 530,
+    "controllerCount": 87,
+    "mapperCount": 60,
+    "deletedBackendSourcePaths": 82,
+    "deletedPathsAllPlaceholders": true,
+    "migrationTargetsChecked": 824,
+    "missingMigrationTargets": 0,
+    "packagePathMismatches": 0,
+    "legacyProductionPackageReferences": 0
+  }
 }
