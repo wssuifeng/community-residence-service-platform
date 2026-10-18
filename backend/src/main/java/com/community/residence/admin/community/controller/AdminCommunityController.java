@@ -6,7 +6,7 @@ import com.community.residence.common.community.dto.BatchCommunityIdsDTO;
 import com.community.residence.common.community.dto.BatchCommunityStatusDTO;
 import com.community.residence.common.community.dto.CreateCommunityDTO;
 import com.community.residence.common.community.dto.UpdateCommunityStatusDTO;
-import com.community.residence.common.community.service.CommunityBatchService;
+import com.community.residence.admin.community.service.CommunityBatchService;
 import com.community.residence.common.community.service.CommunityService;
 import com.community.residence.common.community.vo.BatchOperationResultVO;
 import com.community.residence.common.community.vo.CommunityVO;
@@ -41,6 +41,7 @@ public class AdminCommunityController {
     private final CommunityService communityService;
     private final com.community.residence.common.community.service.CommunityResponsibleService communityResponsibleService;
     private final CommunityBatchService communityBatchService;
+    private final com.community.residence.admin.community.service.CommunityDeletionService communityDeletionService;
     private final HousingService housingService;
 
     @Operation(summary = "房屋与房源一体化树（R62）",
@@ -97,7 +98,7 @@ public class AdminCommunityController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id, @RequestParam(required=false) String confirmationVersion, @RequestParam(required=false) String confirmationName) {
-        communityService.deleteConfirmed(id, confirmationVersion, confirmationName);
+        communityDeletionService.deleteConfirmed(id, confirmationVersion, confirmationName);
         return ApiResponse.success();
     }
 
@@ -105,7 +106,7 @@ public class AdminCommunityController {
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/{id}/deletion-impact")
     public ApiResponse<com.community.residence.common.community.vo.CommunityDeletionImpactVO> deletionImpact(@PathVariable Long id) {
-        return ApiResponse.success(communityService.deletionImpact(id));
+        return ApiResponse.success(communityDeletionService.deletionImpact(id));
     }
 
     @Operation(summary = "批量删除社区（级联）",

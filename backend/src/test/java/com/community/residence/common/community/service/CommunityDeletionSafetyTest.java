@@ -16,7 +16,7 @@ class CommunityDeletionSafetyTest {
     @org.mockito.Mock private com.community.residence.common.conversation.mapper.ChatMessageImageMapper chatMessageImageMapper;
     @Mock CommunityMapper mapper;
     @Mock com.community.residence.common.auth.mapper.SysOperationLogMapper logs;
-    @InjectMocks CommunityService service;
+    @InjectMocks com.community.residence.admin.community.service.CommunityDeletionService service;
     private CommunityDeletionImpactVO impact() {
         var i=new CommunityDeletionImpactVO(); i.setCommunityId(2L);i.setCommunityName("删除安全社区");
         i.setHouses(5);i.setRelations(2);i.setLeases(1);return i;
