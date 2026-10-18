@@ -44,6 +44,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class NotificationService {
 
+    private final com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery;
+
     private static final String SEQ_KEY = "notification:seq";
 
     /** 渠道分级配置键（R51：按通知等级勾选模拟渠道，JSON 承载于 sys_config） */
@@ -115,9 +117,10 @@ public class NotificationService {
            在线判定与目的地一律带身份前缀，居民与员工不共用同一 destination（DEF-067） */
         if (webSocketSessionService.isOnline(ownerType, userId)) {
             try {
-                messagingTemplate.convertAndSendToUser(
-                        IdentityPrincipal.subjectName(ownerType, userId),
-                        "/queue/notifications", NotificationVO.from(notification));
+                String recipient = IdentityPrincipal.subjectName(ownerType, userId);
+                NotificationVO payload = NotificationVO.from(notification);
+                afterCommitDelivery.deliver(recipient + "/queue/notifications", () ->
+                        messagingTemplate.convertAndSendToUser(recipient, "/queue/notifications", payload));
             } catch (Exception e) {
                 log.warn("WebSocket 推送失败，由轮询兜底：ownerType={}, userId={}", ownerType, userId, e);
             }

@@ -58,6 +58,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("看房会话消息权限与推送回归（R59）")
 class ViewingMessageAccessTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final long APPOINTMENT_ID = 1L;
     private static final long RESIDENT_ID = 5L;

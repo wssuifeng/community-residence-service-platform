@@ -57,6 +57,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("通知身份空间分离回归（DEF-067：resident 1 / sys_user 1 撞号）")
 class NotificationIdentitySpaceRegressionTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     /** resident 1 = resident1，sys_user 1 = superadmin（两套身份空间撞号） */
     private static final Long COLLIDING_ID = 1L;
@@ -86,6 +87,8 @@ class NotificationIdentitySpaceRegressionTest {
 
     @BeforeEach
     void setUp() {
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(
+                new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), "notification-test"), Notification.class);
         table = new ArrayList<>(List.of(
                 row(17L, 101L, NotificationOwnerType.RESIDENT, COLLIDING_ID, RESIDENT_ONLY_TITLE),
                 row(18L, 102L, NotificationOwnerType.USER, COLLIDING_ID, USER_ONLY_TITLE),

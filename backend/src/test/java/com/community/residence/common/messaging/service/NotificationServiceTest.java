@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("NotificationService 单元测试")
 class NotificationServiceTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     @Mock
     private NotificationMapper notificationMapper;

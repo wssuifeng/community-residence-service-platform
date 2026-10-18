@@ -69,6 +69,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("看房预约链路缺陷修复回归（OCR DEF-110/118）")
 class ViewingConversationDefectFixTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final long CONVERSATION_ID = 55L;
     private static final long LEASE_ID = 3L;

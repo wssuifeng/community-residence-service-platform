@@ -57,6 +57,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("看房预约带看人分配回归（R59）")
 class ViewingAssignTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final String TITLE_ASSIGNEE = "您已被分配为看房带看人";
     private static final String TITLE_RESIDENT = "您的看房预约已安排带看人";

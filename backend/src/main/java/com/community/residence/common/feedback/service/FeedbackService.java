@@ -51,6 +51,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class FeedbackService {
+
+    private final com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery;
     private final com.community.residence.common.conversation.service.ChatImageService chatImageService;
 
     /** 状态机：待受理 → 会话中 → 已办结（终态不可回退） */
@@ -134,8 +136,9 @@ public class FeedbackService {
                 || (feedback.getHandlerId() != null
                         && webSocketSessionService.isUserOnline(feedback.getHandlerId()))) {
             try {
-                messagingTemplate.convertAndSend("/topic/feedback/" + id,
-                        FeedbackPushVO.status(id, "CLOSED"));
+                String destination = "/topic/feedback/" + id;
+                FeedbackPushVO payload = FeedbackPushVO.status(id, "CLOSED");
+                afterCommitDelivery.deliver(destination, () -> messagingTemplate.convertAndSend(destination, payload));
             } catch (Exception e) {
                 log.warn("反馈办结 WebSocket 推送失败，由轮询兜底：feedbackId={}", id, e);
             }
@@ -206,8 +209,9 @@ public class FeedbackService {
                 || (feedback.getHandlerId() != null
                         && webSocketSessionService.isUserOnline(feedback.getHandlerId()))) {
             try {
-                messagingTemplate.convertAndSend("/topic/feedback/" + feedbackId,
-                        FeedbackPushVO.message(toVO(message, feedback)));
+                String destination = "/topic/feedback/" + feedbackId;
+                FeedbackPushVO payload = FeedbackPushVO.message(toVO(message, feedback));
+                afterCommitDelivery.deliver(destination, () -> messagingTemplate.convertAndSend(destination, payload));
             } catch (Exception e) {
                 log.warn("反馈会话 WebSocket 推送失败，由轮询兜底：feedbackId={}", feedbackId, e);
             }

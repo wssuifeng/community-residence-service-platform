@@ -27,6 +27,7 @@ import static org.mockito.Mockito.*;
 /** DEF-161：现行§9.12.2.7要求统一计数、达到阈值冻结并吊销旧令牌。 */
 @ExtendWith(MockitoExtension.class)
 class ViewingViolationDispositionTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
     @Mock ViewingAppointmentMapper appointmentMapper;
     @Mock ResidentMapper residentMapper;
     @Mock ViolationRecordMapper violationRecordMapper;

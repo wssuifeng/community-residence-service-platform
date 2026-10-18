@@ -136,7 +136,7 @@ class LeaseSigningClosureTest {
     void listByLease_returnsAppointments() {
         ViewingAppointmentMapper appointmentMapper =
                 org.mockito.Mockito.mock(ViewingAppointmentMapper.class);
-        ViewingAppointmentService viewingService = new ViewingAppointmentService(
+        ViewingAppointmentService viewingService = new ViewingAppointmentService(new com.community.residence.common.messaging.service.AfterCommitDeliveryService(), 
                 org.mockito.Mockito.mock(com.community.residence.common.conversation.service.ChatImageService.class),
                 appointmentMapper,
                 org.mockito.Mockito.mock(com.community.residence.common.housing.mapper.ViewingMessageMapper.class),

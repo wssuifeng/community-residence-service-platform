@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-18",
+  "transactionTests": 6,
+  "domainTests": 222,
+  "skipped": 1,
+  "initialErrors": 1,
+  "initialErrorCause": "WorkOrderNotificationMatrixTest relied on another test initializing MyBatis metadata",
+  "focusedRecheck": 20,
+  "focusedFailures": 0,
+  "behavior": [
+    "before commit no send",
+    "after commit once",
+    "local rollback no send",
+    "outer rollback no send",
+    "exception rollback no send",
+    "no transaction immediate",
+    "send failure isolated from business result"
+  ],
+  "externalReference": "https://docs.spring.io/spring-framework/reference/data-access/transaction/event.html",
+  "liveDatabaseRedisChannels": "not accessed"
+}
