@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-18",
+  "planningBase": "3c2f314",
+  "checks": {
+    "localLinksIn35Through37": 34,
+    "planWorkPackages": 16,
+    "priorRecommendationsCovered": 10,
+    "sourceAnchorGroups": 8,
+    "officialReferencesReachable": 3,
+    "trackedChangesUnderDocsOnly": true,
+    "businessCodeAndFrozenPackagesUnchanged": true,
+    "controlTasksWrittenBack": 3,
+    "gitDiffCheck": true
+  },
+  "notExecuted": [
+    "Business code migration or behavior changes",
+    "Application tests or builds",
+    "Runtime or performance profiling",
+    "Service startup/shutdown",
+    "User browser operation",
+    "Database operations or cache cleanup",
+    "Payment/order/refund requests or channel configuration",
+    "Remote push"
+  ]
+}
