@@ -7,10 +7,7 @@ import WorkOrderDetailView from '../WorkOrderDetailView.vue'
 import { getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
 import type { FakeWorkOrder } from '@/test/fakeBackend'
 
-/**
- * 居民端工单详情 · R74 工单临时群聊面板：复用 `ConversationChat`（不新增页面），
- * 受理后建群即出现（成员＝居民提交人 + 受理管理员），未受理的单不渲染面板。
- */
+/** 详情保留统一会话入口；消息与只读状态由共享会话工作区呈现。 */
 vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
 vi.mock('@/api/evaluation', async () => (await import('@/test/fakeBackend')).fakeApi('evaluation'))
 vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
@@ -101,31 +98,26 @@ describe('居民端工单详情 · R74 工单临时群聊面板', () => {
     expect(wrapper.text()).toContain('厨房水龙头持续漏水')
     expect(wrapper.text()).not.toContain('工单临时群聊')
     expect(wrapper.find('.conversation-chat').exists()).toBe(false)
+    wrapper.unmount()
   })
 
-  it('受理后出现面板：群名、群成员与历史消息可见，居民可发言', async () => {
+  it('受理后显示进入会话入口并携带来源及返回路径', async () => {
     seedOrder({ withGroup: true })
     const wrapper = await mountDetail()
-
-    const text = wrapper.text()
-    expect(text).toContain('工单临时群聊')
-    expect(text).toContain('工单沟通·WO202609220003')
-    expect(text).toContain('演示居民（居民）')
-    expect(text).toContain('社区管理员（社区管理员）')
-    expect(text).toContain('已受理，正在安排服务人员')
-    /* ACTIVE 态输入区可用（居民是参与者） */
-    expect(wrapper.find('.chat-input').exists()).toBe(true)
-    expect(wrapper.find('.chat-closed').exists()).toBe(false)
+    const link = wrapper.find('.conversation-entry a')
+    expect(link.text()).toContain('进入沟通')
+    expect(link.attributes('href')).toContain('/resident/conversations?id=1&source=CONVERSATION')
+    expect(link.attributes('href')).toContain('returnTo=')
+    expect(wrapper.find('.conversation-chat').exists()).toBe(false)
+    wrapper.unmount()
   })
 
-  it('终审结束后面板只读：给出回收提示，输入区被提示条取代，历史仍可读', async () => {
+  it('已关闭工单仍可进入会话查看历史', async () => {
     seedOrder({ withGroup: true, status: 'CLOSED' })
     const wrapper = await mountDetail()
-
-    const text = wrapper.text()
-    expect(text).toContain('工单已结束，会话资源已回收（历史可查、不可再发言）')
-    expect(text).toContain('已受理，正在安排服务人员')
-    expect(wrapper.find('.chat-closed').exists()).toBe(true)
+    expect(wrapper.find('.conversation-entry a').text()).toContain('查看沟通记录')
+    expect(wrapper.find('.conversation-entry a').attributes('href')).toContain('id=1')
     expect(wrapper.find('.chat-input').exists()).toBe(false)
+    wrapper.unmount()
   })
 })

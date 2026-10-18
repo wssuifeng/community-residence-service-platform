@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * V29 迁移脚本守卫（公共资源展示图片，R75）：
  * ①唯一结构变更为 `public_resource` 增列 `images VARCHAR(1000) NULL`（位于 description 之后，
  *   与 housing.images 同口径）；②只加一列——不建表、不改数据、不触碰 V1~V28 其它表结构；
- * ③迁移版本序列按当前 V30 连续；V29 本身不建表，V30 独立配置表另有守卫。
+ * ③迁移版本序列按资源目录中的最新版本连续；V29 本身不建表，V30 独立配置表另有守卫。
  */
 @DisplayName("V29 公共资源图片脚本守卫")
 class PublicResourceImagesMigrationTest {
@@ -57,7 +57,7 @@ class PublicResourceImagesMigrationTest {
     }
 
     @Test
-    @DisplayName("版本序列连续：V1~V42 均保持原位")
+    @DisplayName("版本序列连续：V1至当前最新版本无缺号或重号")
     void migrationChainStaysContiguous() throws Exception {
         File dir = new File(getClass().getResource("/db/migration").toURI());
         String[] names = dir.list();
@@ -66,9 +66,15 @@ class PublicResourceImagesMigrationTest {
         List<String> sqlFiles = Arrays.stream(names)
                 .filter(name -> name.endsWith(".sql"))
                 .toList();
-        assertThat(sqlFiles).hasSize(42);
+        List<Integer> versions = sqlFiles.stream()
+                .map(name -> Integer.parseInt(name.substring(1, name.indexOf("__"))))
+                .sorted().toList();
+        assertThat(versions).doesNotHaveDuplicates();
+        int latest = versions.get(versions.size() - 1);
+        assertThat(latest).isGreaterThanOrEqualTo(43);
+        assertThat(sqlFiles).hasSize(latest);
         assertThat(sqlFiles).contains("V29__public_resource_images.sql");
-        for (int version = 1; version <= 42; version++) {
+        for (int version = 1; version <= latest; version++) {
             final int v = version;
             assertThat(sqlFiles)
                     .as("V" + v + " 脚本必须仍在位（已应用迁移不得删除 / 改名）")

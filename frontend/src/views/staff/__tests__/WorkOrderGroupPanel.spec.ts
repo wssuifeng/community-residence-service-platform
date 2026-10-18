@@ -9,7 +9,7 @@ import type { FakeWorkOrder } from '@/test/fakeBackend'
 import { assignWorkOrder, intakeWorkOrder } from '@/api/workorder'
 
 /**
- * 服务人员端工单详情 · R74：派单后自动入群 → 面板出现且三方齐；
+ * 服务人员端工单详情 · R74：派单后自动入群，可从详情进入统一会话；
  * **未入群（未派单）时非参与者不可见（403）→ 不渲染面板**，不把「无权」包装成空群聊。
  */
 vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
@@ -76,22 +76,21 @@ describe('服务人员端工单详情 · R74 工单临时群聊面板', () => {
     /* 群成员里没有服务人员（派单才入群） */
     const refs = backend().state.conversations.find((item) => item.id === groupId)?.participantRefs ?? []
     expect(refs.some((item) => item.role === 'STAFF')).toBe(false)
+    expect(wrapper.find('.conversation-entry').exists()).toBe(false)
+    wrapper.unmount()
   })
 
-  it('派单后服务人员自动入群：面板出现且三方成员齐（居民 + 管理员 + 服务人员）', async () => {
+  it('派单后服务人员可从工单进入统一会话并返回原单', async () => {
     seedOrder()
     await intakeWorkOrder(1)
-    /* 派给本人：入群名取自假后端的服务人员档案（api 契约只传 assigneeId） */
     await assignWorkOrder(1, { assigneeId: 1 })
-
     actAs('STAFF', 1)
     const wrapper = await mountDetail()
-
-    const text = wrapper.text()
-    expect(text).toContain('工单临时群聊')
-    expect(text).toContain('演示居民（居民）')
-    expect(text).toContain('社区管理员（社区管理员）')
-    expect(text).toContain('服务人员一号（服务人员）')
-    expect(wrapper.find('.chat-input').exists()).toBe(true)
+    const link = wrapper.find('.conversation-entry a')
+    expect(link.text()).toContain('进入沟通')
+    expect(link.attributes('href')).toContain('/staff/conversations?id=1&source=CONVERSATION')
+    expect(link.attributes('href')).toContain('returnTo=')
+    expect(wrapper.find('.conversation-chat').exists()).toBe(false)
+    wrapper.unmount()
   })
 })
