@@ -1,6 +1,5 @@
 package com.community.residence.common.lease.controller;
 import com.community.residence.common.lease.service.LeaseContractTermService;
-import com.community.residence.common.lease.entity.LeaseContractTerm;
 import com.community.residence.common.web.result.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +14,6 @@ public class LeaseContractTermController {
     @GetMapping @PreAuthorize("hasAnyRole('RESIDENT','ADMIN','SUPER_ADMIN')") @Operation(summary="合同及续租协议快照")
     public ApiResponse<List<com.community.residence.common.lease.vo.LeaseContractTermVO>> list(@PathVariable Long leaseId){
         return ApiResponse.success(service.list(leaseId));
-    }
-    @PostMapping("/{termId}/confirm") @PreAuthorize("hasRole('RESIDENT')") @Operation(summary="居民同意续租协议，未付款不延长")
-    public ApiResponse<LeaseContractTerm> confirm(@PathVariable Long leaseId,@PathVariable Long termId){
-        throw new com.community.residence.common.web.exception.BusinessException(com.community.residence.common.web.constant.ErrorCode.INVALID_PARAM,"旧续租确认入口已停用，请取消未生效旧方案后申请延长租期；已有有效订单仍可继续");
     }
     @PostMapping("/{termId}/cancel") @PreAuthorize("hasAnyRole('RESIDENT','ADMIN','SUPER_ADMIN')") @Operation(summary="取消未生效续租，不改变原合同")
     public ApiResponse<Void> cancel(@PathVariable Long leaseId,@PathVariable Long termId){
