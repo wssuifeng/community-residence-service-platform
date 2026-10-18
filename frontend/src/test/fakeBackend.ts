@@ -1162,6 +1162,19 @@ export class FakeBackend {
   }
 
   lease = {
+    /* 只为界面合成测试提供摘要；真实账期规则由后端RentSchedule专项验证。 */
+    getMyLeaseSummaries: async (params?: PageParams) => {
+      const actor=currentActor()
+      if(actor.role!=='RESIDENT') fail(CODES.FORBIDDEN,'仅居民可读取本人摘要')
+      const rows=this.state.leases.filter(lease=>lease.tenantId===actor.id).map(lease=>{
+        const first=this.state.payments.find(payment=>payment.leaseId===lease.id&&payment.paymentType==='FIRST'&&payment.status==='SUCCESS')
+        return {lease:this.leaseView(lease),summary:{displayStatus:lease.status==='TO_SIGN'&&lease.agreementStatus==='SIGNED'?'待支付首期费用':lease.status==='ACTIVE'?'在租':undefined,
+          firstPaymentSucceeded:!!first,firstPaymentPaidAmount:first?.amount,firstPaymentPaidAt:first?.paidAt,
+          paidRentMonths:first?.months??0,unpaidRentMonths:null,
+          actions:{firstPayment:{enabled:!first,reason:'首期按约定首付月数加一次押金，支付成功后才正式入住'},rentPayment:{enabled:true,reason:'合成入口状态'},extension:{enabled:true,reason:''},moveOut:{enabled:lease.status==='ACTIVE',reason:''}}}}
+      })
+      return pageOf(rows,params)
+    },
     getLeaseList: async (params?: { status?: string; keyword?: string } & PageParams) => {
       const actor = currentActor()
       let rows = this.state.leases.filter((item) =>
