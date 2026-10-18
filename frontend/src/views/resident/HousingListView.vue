@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
+import { HOUSE_PHOTO_EMPTY } from '@/common/community/utils/housePhoto'
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import Pagination from '@/components/common/Pagination.vue'
-import SearchBar from '@/components/common/SearchBar.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import { listHousings, getHousingFilterOptions } from '@/api/housing'
-import { getCommunityList } from '@/api/community'
-import type { ICommunity } from '@/types/modules/community'
-import type { IHousing, HousingRentType, HousingStatus } from '@/types/modules/housing'
-import { housingStatusLabels } from '@/types/modules/housing'
+import Pagination from '@/common/web/components/Pagination.vue'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import { listHousings, getHousingFilterOptions } from '@/common/housing/api/housing'
+import { getCommunityList } from '@/common/community/api/community'
+import type { ICommunity } from '@/common/community/types/community'
+import type { IHousing, HousingRentType, HousingStatus } from '@/common/housing/types/housing'
+import { housingStatusLabels } from '@/common/housing/types/housing'
 
 /** 房源浏览（居民端）：与游客端列表同款——筛选条 + 卡片网格 + 分页；空图按序号轮换示例图 */
 

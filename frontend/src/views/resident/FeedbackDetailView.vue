@@ -2,11 +2,11 @@
 import { onMounted,ref } from 'vue'
 import { useRoute,useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getFeedbackDetail,listFeedbackAttachments,deleteFeedbackAttachment } from '@/api/feedback'
-import type { IFeedback,IFeedbackAttachment } from '@/types/modules/feedback'
-import { feedbackCategoryLabels,feedbackStatusLabels } from '@/types/modules/feedback'
-import { formatDateTime } from '@/utils/date'
-import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
+import { getFeedbackDetail,listFeedbackAttachments,deleteFeedbackAttachment } from '@/common/feedback/api/feedback'
+import type { IFeedback,IFeedbackAttachment } from '@/common/feedback/types/feedback'
+import { feedbackCategoryLabels,feedbackStatusLabels } from '@/common/feedback/types/feedback'
+import { formatDateTime } from '@/common/web/utils/date'
+import ConversationEntry from '@/common/conversation/components/ConversationEntry.vue'
 const route=useRoute(),router=useRouter(),id=Number(route.params.id)
 const feedback=ref<IFeedback|null>(null),attachments=ref<IFeedbackAttachment[]>([]),loading=ref(true)
 async function refresh(){try{feedback.value=await getFeedbackDetail(id)}catch(error){ElMessage.error(error instanceof Error?error.message:'反馈加载失败')}}

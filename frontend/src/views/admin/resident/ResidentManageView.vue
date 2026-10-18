@@ -7,7 +7,7 @@ import ResidentListView from './ResidentListView.vue'
 import ResidenceRelationListView from './ResidenceRelationListView.vue'
 import ResidentAdminCreateDialog from './ResidentAdminCreateDialog.vue'
 import ResidentImportDialog from './ResidentImportDialog.vue'
-import { getResidenceApplicationList, getResidentList } from '@/api/resident'
+import { getResidenceApplicationList, getResidentList } from '@/common/resident/api/resident'
 
 /**
  * 居民管理容器：Tab 深链 ?tab=list|relations（批次 g：入住申请审核已迁至

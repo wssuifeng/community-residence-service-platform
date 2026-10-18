@@ -2,8 +2,8 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createCommunity, updateCommunity, getResponsibleAdmins } from '@/api/community'
-import type { ICommunity, ICreateCommunityDTO, IResponsibleAdmin } from '@/types/modules/community'
+import { createCommunity, updateCommunity, getResponsibleAdmins } from '@/common/community/api/community'
+import type { ICommunity, ICreateCommunityDTO, IResponsibleAdmin } from '@/common/community/types/community'
 
 /**
  * 社区新建/编辑对话框（任务 3 自 CommunityListView 表单逻辑收编抽取：

@@ -1,0 +1,1238 @@
+[
+  {
+    "source": "frontend/src/__tests__/api-route-contract.spec.ts",
+    "target": "frontend/src/__tests__/api-route-contract.spec.ts"
+  },
+  {
+    "source": "frontend/src/__tests__/conversation-contracts.spec.ts",
+    "target": "frontend/src/__tests__/conversation-contracts.spec.ts"
+  },
+  {
+    "source": "frontend/src/__tests__/conversation-labels.spec.ts",
+    "target": "frontend/src/__tests__/conversation-labels.spec.ts"
+  },
+  {
+    "source": "frontend/src/__tests__/core-flows.spec.ts",
+    "target": "frontend/src/__tests__/core-flows.spec.ts"
+  },
+  {
+    "source": "frontend/src/__tests__/focus-visible.spec.ts",
+    "target": "frontend/src/__tests__/focus-visible.spec.ts"
+  },
+  {
+    "source": "frontend/src/__tests__/lease-display.spec.ts",
+    "target": "frontend/src/__tests__/lease-display.spec.ts"
+  },
+  {
+    "source": "frontend/src/__tests__/workorder-api-contract.spec.ts",
+    "target": "frontend/src/__tests__/workorder-api-contract.spec.ts"
+  },
+  {
+    "source": "frontend/src/__tests__/workorder-group-chat.spec.ts",
+    "target": "frontend/src/__tests__/workorder-group-chat.spec.ts"
+  },
+  {
+    "source": "frontend/src/api/agreement.ts",
+    "target": "frontend/src/common/agreement/api/agreement.ts"
+  },
+  {
+    "source": "frontend/src/api/auth.ts",
+    "target": "frontend/src/common/auth/api/auth.ts"
+  },
+  {
+    "source": "frontend/src/api/chat.ts",
+    "target": "frontend/src/common/conversation/api/chat.ts"
+  },
+  {
+    "source": "frontend/src/api/community.ts",
+    "target": "frontend/src/common/community/api/community.ts"
+  },
+  {
+    "source": "frontend/src/api/config.ts",
+    "target": "frontend/src/common/auth/api/config.ts"
+  },
+  {
+    "source": "frontend/src/api/conversation.ts",
+    "target": "frontend/src/common/conversation/api/conversation.ts"
+  },
+  {
+    "source": "frontend/src/api/conversationInbox.ts",
+    "target": "frontend/src/common/conversation/api/conversationInbox.ts"
+  },
+  {
+    "source": "frontend/src/api/evaluation.ts",
+    "target": "frontend/src/common/evaluation/api/evaluation.ts"
+  },
+  {
+    "source": "frontend/src/api/feedback.ts",
+    "target": "frontend/src/common/feedback/api/feedback.ts"
+  },
+  {
+    "source": "frontend/src/api/houseImages.ts",
+    "target": "frontend/src/common/community/api/houseImages.ts"
+  },
+  {
+    "source": "frontend/src/api/housing.ts",
+    "target": "frontend/src/common/housing/api/housing.ts"
+  },
+  {
+    "source": "frontend/src/api/lease.ts",
+    "target": "frontend/src/common/lease/api/lease.ts"
+  },
+  {
+    "source": "frontend/src/api/leaseMoveOut.ts",
+    "target": "frontend/src/common/lease/api/leaseMoveOut.ts"
+  },
+  {
+    "source": "frontend/src/api/notice.ts",
+    "target": "frontend/src/common/notice/api/notice.ts"
+  },
+  {
+    "source": "frontend/src/api/notification.ts",
+    "target": "frontend/src/common/messaging/api/notification.ts"
+  },
+  {
+    "source": "frontend/src/api/operationlog.ts",
+    "target": "frontend/src/common/auth/api/operationlog.ts"
+  },
+  {
+    "source": "frontend/src/api/payment.ts",
+    "target": "frontend/src/common/payment/api/payment.ts"
+  },
+  {
+    "source": "frontend/src/api/paymentChannelConfig.ts",
+    "target": "frontend/src/common/payment/api/paymentChannelConfig.ts"
+  },
+  {
+    "source": "frontend/src/api/reservation.ts",
+    "target": "frontend/src/common/reservation/api/reservation.ts"
+  },
+  {
+    "source": "frontend/src/api/resident.ts",
+    "target": "frontend/src/common/resident/api/resident.ts"
+  },
+  {
+    "source": "frontend/src/api/staff.ts",
+    "target": "frontend/src/common/workorder/api/staff.ts"
+  },
+  {
+    "source": "frontend/src/api/statistics.ts",
+    "target": "frontend/src/common/statistics/api/statistics.ts"
+  },
+  {
+    "source": "frontend/src/api/sysuser.ts",
+    "target": "frontend/src/common/auth/api/sysuser.ts"
+  },
+  {
+    "source": "frontend/src/api/upload.ts",
+    "target": "frontend/src/common/upload/api/upload.ts"
+  },
+  {
+    "source": "frontend/src/api/workorder.ts",
+    "target": "frontend/src/common/workorder/api/workorder.ts"
+  },
+  {
+    "source": "frontend/src/App.vue",
+    "target": "frontend/src/App.vue"
+  },
+  {
+    "source": "frontend/src/components/business/.gitkeep",
+    "target": "frontend/src/common/messaging/components/.gitkeep"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/AgreementSignPanel.spec.ts",
+    "target": "frontend/src/common/agreement/components/__tests__/AgreementSignPanel.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/ChatMessageList.spec.ts",
+    "target": "frontend/src/common/conversation/components/__tests__/ChatMessageList.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/CommunityDeletionImpactPanel.spec.ts",
+    "target": "frontend/src/common/community/components/__tests__/CommunityDeletionImpactPanel.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/ConversationChat.spec.ts",
+    "target": "frontend/src/common/conversation/components/__tests__/ConversationChat.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/FeedbackChat.spec.ts",
+    "target": "frontend/src/common/conversation/components/__tests__/FeedbackChat.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/HouseImageDialog.spec.ts",
+    "target": "frontend/src/common/community/components/__tests__/HouseImageDialog.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/LeaseTermsPanel.spec.ts",
+    "target": "frontend/src/common/lease/components/__tests__/LeaseTermsPanel.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/__tests__/NoticeEditor.spec.ts",
+    "target": "frontend/src/common/notice/components/__tests__/NoticeEditor.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/business/AgreementSignPanel.vue",
+    "target": "frontend/src/common/agreement/components/AgreementSignPanel.vue"
+  },
+  {
+    "source": "frontend/src/components/business/AppointmentChat.vue",
+    "target": "frontend/src/common/conversation/components/AppointmentChat.vue"
+  },
+  {
+    "source": "frontend/src/components/business/ChatComposer.vue",
+    "target": "frontend/src/common/conversation/components/ChatComposer.vue"
+  },
+  {
+    "source": "frontend/src/components/business/ChatMessageList.vue",
+    "target": "frontend/src/common/conversation/components/ChatMessageList.vue"
+  },
+  {
+    "source": "frontend/src/components/business/CommunityDeletionImpactPanel.vue",
+    "target": "frontend/src/common/community/components/CommunityDeletionImpactPanel.vue"
+  },
+  {
+    "source": "frontend/src/components/business/ConversationChat.vue",
+    "target": "frontend/src/common/conversation/components/ConversationChat.vue"
+  },
+  {
+    "source": "frontend/src/components/business/FeedbackChat.vue",
+    "target": "frontend/src/common/conversation/components/FeedbackChat.vue"
+  },
+  {
+    "source": "frontend/src/components/business/HouseImageDialog.vue",
+    "target": "frontend/src/common/community/components/HouseImageDialog.vue"
+  },
+  {
+    "source": "frontend/src/components/business/LeaseExtensionInbox.vue",
+    "target": "frontend/src/common/lease/components/LeaseExtensionInbox.vue"
+  },
+  {
+    "source": "frontend/src/components/business/LeaseTermsPanel.vue",
+    "target": "frontend/src/common/lease/components/LeaseTermsPanel.vue"
+  },
+  {
+    "source": "frontend/src/components/business/LeaseTimeline.vue",
+    "target": "frontend/src/common/lease/components/LeaseTimeline.vue"
+  },
+  {
+    "source": "frontend/src/components/business/NoticeBody.vue",
+    "target": "frontend/src/common/notice/components/NoticeBody.vue"
+  },
+  {
+    "source": "frontend/src/components/business/NoticeEditor.vue",
+    "target": "frontend/src/common/notice/components/NoticeEditor.vue"
+  },
+  {
+    "source": "frontend/src/components/business/NotificationList.vue",
+    "target": "frontend/src/common/messaging/components/NotificationList.vue"
+  },
+  {
+    "source": "frontend/src/components/common/.gitkeep",
+    "target": "frontend/src/common/web/components/.gitkeep"
+  },
+  {
+    "source": "frontend/src/components/common/__tests__/BaseUploader.spec.ts",
+    "target": "frontend/src/common/upload/components/__tests__/BaseUploader.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/common/__tests__/Pagination.spec.ts",
+    "target": "frontend/src/common/web/components/__tests__/Pagination.spec.ts"
+  },
+  {
+    "source": "frontend/src/components/common/AppLogo.vue",
+    "target": "frontend/src/common/web/components/AppLogo.vue"
+  },
+  {
+    "source": "frontend/src/components/common/BaseUploader.vue",
+    "target": "frontend/src/common/upload/components/BaseUploader.vue"
+  },
+  {
+    "source": "frontend/src/components/common/EChart.vue",
+    "target": "frontend/src/common/statistics/components/EChart.vue"
+  },
+  {
+    "source": "frontend/src/components/common/FileUploader.vue",
+    "target": "frontend/src/common/upload/components/FileUploader.vue"
+  },
+  {
+    "source": "frontend/src/components/common/FilterPanel.vue",
+    "target": "frontend/src/common/web/components/FilterPanel.vue"
+  },
+  {
+    "source": "frontend/src/components/common/HorizontalScroller.vue",
+    "target": "frontend/src/common/web/components/HorizontalScroller.vue"
+  },
+  {
+    "source": "frontend/src/components/common/ImageUploader.vue",
+    "target": "frontend/src/common/upload/components/ImageUploader.vue"
+  },
+  {
+    "source": "frontend/src/components/common/LivePanel.vue",
+    "target": "frontend/src/common/web/components/LivePanel.vue"
+  },
+  {
+    "source": "frontend/src/components/common/Pagination.vue",
+    "target": "frontend/src/common/web/components/Pagination.vue"
+  },
+  {
+    "source": "frontend/src/components/common/SearchBar.vue",
+    "target": "frontend/src/common/web/components/SearchBar.vue"
+  },
+  {
+    "source": "frontend/src/components/common/StatCard.vue",
+    "target": "frontend/src/common/web/components/StatCard.vue"
+  },
+  {
+    "source": "frontend/src/components/common/StatusTag.vue",
+    "target": "frontend/src/common/web/components/StatusTag.vue"
+  },
+  {
+    "source": "frontend/src/components/conversation/ConversationBusinessActions.vue",
+    "target": "frontend/src/common/conversation/components/ConversationBusinessActions.vue"
+  },
+  {
+    "source": "frontend/src/components/conversation/ConversationEntry.vue",
+    "target": "frontend/src/common/conversation/components/ConversationEntry.vue"
+  },
+  {
+    "source": "frontend/src/components/conversation/ConversationInboxList.vue",
+    "target": "frontend/src/common/conversation/components/ConversationInboxList.vue"
+  },
+  {
+    "source": "frontend/src/components/conversation/ConversationPane.vue",
+    "target": "frontend/src/common/conversation/components/ConversationPane.vue"
+  },
+  {
+    "source": "frontend/src/components/conversation/ConversationSourceNav.vue",
+    "target": "frontend/src/common/conversation/components/ConversationSourceNav.vue"
+  },
+  {
+    "source": "frontend/src/components/conversation/ConversationWorkspace.vue",
+    "target": "frontend/src/common/conversation/components/ConversationWorkspace.vue"
+  },
+  {
+    "source": "frontend/src/components/conversation/DirectConversationLauncher.vue",
+    "target": "frontend/src/common/conversation/components/DirectConversationLauncher.vue"
+  },
+  {
+    "source": "frontend/src/components/housing/HousingReservationForm.vue",
+    "target": "frontend/src/common/housing/components/HousingReservationForm.vue"
+  },
+  {
+    "source": "frontend/src/components/layout/AppHeader.vue",
+    "target": "frontend/src/common/web/components/AppHeader.vue"
+  },
+  {
+    "source": "frontend/src/components/layout/AppSidebar.vue",
+    "target": "frontend/src/components/layout/AppSidebar.vue"
+  },
+  {
+    "source": "frontend/src/composables/__tests__/useChatChannel.spec.ts",
+    "target": "frontend/src/common/conversation/composables/__tests__/useChatChannel.spec.ts"
+  },
+  {
+    "source": "frontend/src/composables/__tests__/useConversationInbox.spec.ts",
+    "target": "frontend/src/common/conversation/composables/__tests__/useConversationInbox.spec.ts"
+  },
+  {
+    "source": "frontend/src/composables/__tests__/useLiveRefresh.spec.ts",
+    "target": "frontend/src/common/web/composables/__tests__/useLiveRefresh.spec.ts"
+  },
+  {
+    "source": "frontend/src/composables/housing/__tests__/useHousingReservation.spec.ts",
+    "target": "frontend/src/common/housing/composables/__tests__/useHousingReservation.spec.ts"
+  },
+  {
+    "source": "frontend/src/composables/housing/useHousingReservation.ts",
+    "target": "frontend/src/common/housing/composables/useHousingReservation.ts"
+  },
+  {
+    "source": "frontend/src/composables/useChatChannel.ts",
+    "target": "frontend/src/common/conversation/composables/useChatChannel.ts"
+  },
+  {
+    "source": "frontend/src/composables/useConversationInbox.ts",
+    "target": "frontend/src/common/conversation/composables/useConversationInbox.ts"
+  },
+  {
+    "source": "frontend/src/composables/useGridSelection.ts",
+    "target": "frontend/src/common/web/composables/useGridSelection.ts"
+  },
+  {
+    "source": "frontend/src/composables/useLiveRefresh.ts",
+    "target": "frontend/src/common/web/composables/useLiveRefresh.ts"
+  },
+  {
+    "source": "frontend/src/composables/useResponsive.ts",
+    "target": "frontend/src/common/web/composables/useResponsive.ts"
+  },
+  {
+    "source": "frontend/src/constants/apiCodes.ts",
+    "target": "frontend/src/common/web/constants/apiCodes.ts"
+  },
+  {
+    "source": "frontend/src/directives/index.ts",
+    "target": "frontend/src/common/web/directives/index.ts"
+  },
+  {
+    "source": "frontend/src/directives/permission.ts",
+    "target": "frontend/src/common/web/directives/permission.ts"
+  },
+  {
+    "source": "frontend/src/directives/responsive.ts",
+    "target": "frontend/src/common/web/directives/responsive.ts"
+  },
+  {
+    "source": "frontend/src/main.ts",
+    "target": "frontend/src/main.ts"
+  },
+  {
+    "source": "frontend/src/router/guest.ts",
+    "target": "frontend/src/router/guest.ts"
+  },
+  {
+    "source": "frontend/src/router/index.ts",
+    "target": "frontend/src/router/index.ts"
+  },
+  {
+    "source": "frontend/src/store/__tests__/notification.spec.ts",
+    "target": "frontend/src/common/messaging/store/__tests__/notification.spec.ts"
+  },
+  {
+    "source": "frontend/src/store/adminTodo.ts",
+    "target": "frontend/src/store/adminTodo.ts"
+  },
+  {
+    "source": "frontend/src/store/index.ts",
+    "target": "frontend/src/common/auth/store/index.ts"
+  },
+  {
+    "source": "frontend/src/store/notification.ts",
+    "target": "frontend/src/common/messaging/store/notification.ts"
+  },
+  {
+    "source": "frontend/src/store/permission.ts",
+    "target": "frontend/src/common/routing/store/permission.ts"
+  },
+  {
+    "source": "frontend/src/store/user.ts",
+    "target": "frontend/src/common/auth/store/user.ts"
+  },
+  {
+    "source": "frontend/src/styles/breakpoints.css",
+    "target": "frontend/src/common/styles/breakpoints.css"
+  },
+  {
+    "source": "frontend/src/styles/index.css",
+    "target": "frontend/src/common/styles/index.css"
+  },
+  {
+    "source": "frontend/src/styles/sidebar-scrollbar.css",
+    "target": "frontend/src/common/styles/sidebar-scrollbar.css"
+  },
+  {
+    "source": "frontend/src/styles/variables.css",
+    "target": "frontend/src/common/styles/variables.css"
+  },
+  {
+    "source": "frontend/src/test/fakeBackend.ts",
+    "target": "frontend/src/test/fakeBackend.ts"
+  },
+  {
+    "source": "frontend/src/test/setup.ts",
+    "target": "frontend/src/test/setup.ts"
+  },
+  {
+    "source": "frontend/src/types/api.ts",
+    "target": "frontend/src/common/web/types/api.ts"
+  },
+  {
+    "source": "frontend/src/types/chat.ts",
+    "target": "frontend/src/common/conversation/types/chat.ts"
+  },
+  {
+    "source": "frontend/src/types/common.ts",
+    "target": "frontend/src/common/web/types/common.ts"
+  },
+  {
+    "source": "frontend/src/types/env.d.ts",
+    "target": "frontend/src/common/web/types/env.d.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/agreement.ts",
+    "target": "frontend/src/common/agreement/types/agreement.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/auth.ts",
+    "target": "frontend/src/common/auth/types/auth.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/community.ts",
+    "target": "frontend/src/common/community/types/community.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/conversation.ts",
+    "target": "frontend/src/common/conversation/types/conversation.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/conversationInbox.ts",
+    "target": "frontend/src/common/conversation/types/conversationInbox.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/evaluation.ts",
+    "target": "frontend/src/common/evaluation/types/evaluation.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/feedback.ts",
+    "target": "frontend/src/common/feedback/types/feedback.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/housing.ts",
+    "target": "frontend/src/common/housing/types/housing.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/lease.ts",
+    "target": "frontend/src/common/lease/types/lease.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/notice.ts",
+    "target": "frontend/src/common/notice/types/notice.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/notification.ts",
+    "target": "frontend/src/common/messaging/types/notification.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/reservation.ts",
+    "target": "frontend/src/common/reservation/types/reservation.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/resident.ts",
+    "target": "frontend/src/common/resident/types/resident.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/staff.ts",
+    "target": "frontend/src/common/workorder/types/staff.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/statistics.ts",
+    "target": "frontend/src/common/statistics/types/statistics.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/upload.ts",
+    "target": "frontend/src/common/upload/types/upload.ts"
+  },
+  {
+    "source": "frontend/src/types/modules/workorder.ts",
+    "target": "frontend/src/common/workorder/types/workorder.ts"
+  },
+  {
+    "source": "frontend/src/types/user.ts",
+    "target": "frontend/src/common/auth/types/user.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/housePhoto.spec.ts",
+    "target": "frontend/src/common/community/utils/__tests__/housePhoto.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/leaseHousehold.spec.ts",
+    "target": "frontend/src/common/lease/utils/__tests__/leaseHousehold.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/leaseTerms.spec.ts",
+    "target": "frontend/src/common/lease/utils/__tests__/leaseTerms.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/notificationNav.spec.ts",
+    "target": "frontend/src/common/messaging/utils/__tests__/notificationNav.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/onlineRenewal.spec.ts",
+    "target": "frontend/src/common/auth/utils/__tests__/onlineRenewal.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/payment.spec.ts",
+    "target": "frontend/src/common/payment/utils/__tests__/payment.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/requestErrorCode.spec.ts",
+    "target": "frontend/src/common/web/utils/__tests__/requestErrorCode.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/requestSessionRace.spec.ts",
+    "target": "frontend/src/common/web/utils/__tests__/requestSessionRace.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/reservationQuota.spec.ts",
+    "target": "frontend/src/common/reservation/utils/__tests__/reservationQuota.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/residentImportReference.spec.ts",
+    "target": "frontend/src/common/resident/utils/__tests__/residentImportReference.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/staffResidentPresentation.spec.ts",
+    "target": "frontend/src/common/resident/utils/__tests__/staffResidentPresentation.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/__tests__/username.spec.ts",
+    "target": "frontend/src/common/auth/utils/__tests__/username.spec.ts"
+  },
+  {
+    "source": "frontend/src/utils/auth.ts",
+    "target": "frontend/src/common/auth/utils/auth.ts"
+  },
+  {
+    "source": "frontend/src/utils/dataFreshness.ts",
+    "target": "frontend/src/common/web/utils/dataFreshness.ts"
+  },
+  {
+    "source": "frontend/src/utils/date.ts",
+    "target": "frontend/src/common/web/utils/date.ts"
+  },
+  {
+    "source": "frontend/src/utils/elementPlusDefaults.ts",
+    "target": "frontend/src/common/web/utils/elementPlusDefaults.ts"
+  },
+  {
+    "source": "frontend/src/utils/housePhoto.ts",
+    "target": "frontend/src/common/community/utils/housePhoto.ts"
+  },
+  {
+    "source": "frontend/src/utils/leaseDisplay.ts",
+    "target": "frontend/src/common/lease/utils/leaseDisplay.ts"
+  },
+  {
+    "source": "frontend/src/utils/leaseHousehold.ts",
+    "target": "frontend/src/common/lease/utils/leaseHousehold.ts"
+  },
+  {
+    "source": "frontend/src/utils/leaseTerms.ts",
+    "target": "frontend/src/common/lease/utils/leaseTerms.ts"
+  },
+  {
+    "source": "frontend/src/utils/noticeDocument.ts",
+    "target": "frontend/src/common/notice/utils/noticeDocument.ts"
+  },
+  {
+    "source": "frontend/src/utils/notificationNav.ts",
+    "target": "frontend/src/common/messaging/utils/notificationNav.ts"
+  },
+  {
+    "source": "frontend/src/utils/onlineRenewal.ts",
+    "target": "frontend/src/common/auth/utils/onlineRenewal.ts"
+  },
+  {
+    "source": "frontend/src/utils/paged.ts",
+    "target": "frontend/src/common/web/utils/paged.ts"
+  },
+  {
+    "source": "frontend/src/utils/payment.ts",
+    "target": "frontend/src/common/payment/utils/payment.ts"
+  },
+  {
+    "source": "frontend/src/utils/permission.ts",
+    "target": "frontend/src/common/routing/utils/permission.ts"
+  },
+  {
+    "source": "frontend/src/utils/request.ts",
+    "target": "frontend/src/common/web/utils/request.ts"
+  },
+  {
+    "source": "frontend/src/utils/reservationQuota.ts",
+    "target": "frontend/src/common/reservation/utils/reservationQuota.ts"
+  },
+  {
+    "source": "frontend/src/utils/residentImportReference.ts",
+    "target": "frontend/src/common/resident/utils/residentImportReference.ts"
+  },
+  {
+    "source": "frontend/src/utils/responsive.ts",
+    "target": "frontend/src/common/web/utils/responsive.ts"
+  },
+  {
+    "source": "frontend/src/utils/staffResidentPresentation.ts",
+    "target": "frontend/src/common/resident/utils/staffResidentPresentation.ts"
+  },
+  {
+    "source": "frontend/src/utils/username.ts",
+    "target": "frontend/src/common/auth/utils/username.ts"
+  },
+  {
+    "source": "frontend/src/utils/websocket.ts",
+    "target": "frontend/src/common/messaging/utils/websocket.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/AdminLayout.spec.ts",
+    "target": "frontend/src/views/admin/AdminLayout.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/AdminLayout.vue",
+    "target": "frontend/src/views/admin/AdminLayout.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/auth/__tests__/AlipayChannelConfigPanel.spec.ts",
+    "target": "frontend/src/views/admin/auth/__tests__/AlipayChannelConfigPanel.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/auth/AlipayChannelConfigPanel.vue",
+    "target": "frontend/src/views/admin/auth/AlipayChannelConfigPanel.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/auth/GlobalConfigView.vue",
+    "target": "frontend/src/views/admin/auth/GlobalConfigView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/auth/OperationLogListView.vue",
+    "target": "frontend/src/views/admin/auth/OperationLogListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/auth/SystemManageView.vue",
+    "target": "frontend/src/views/admin/auth/SystemManageView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/auth/SysUserCommunityDrawer.vue",
+    "target": "frontend/src/views/admin/auth/SysUserCommunityDrawer.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/auth/SysUserListView.vue",
+    "target": "frontend/src/views/admin/auth/SysUserListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/__tests__/CommunityResponsible.spec.ts",
+    "target": "frontend/src/views/admin/community/__tests__/CommunityResponsible.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/__tests__/HouseAttributesDialog.spec.ts",
+    "target": "frontend/src/views/admin/community/__tests__/HouseAttributesDialog.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/__tests__/HouseEditLayout.spec.ts",
+    "target": "frontend/src/views/admin/community/__tests__/HouseEditLayout.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/__tests__/HouseLayoutDialog.spec.ts",
+    "target": "frontend/src/views/admin/community/__tests__/HouseLayoutDialog.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/__tests__/HousingEditorLoading.spec.ts",
+    "target": "frontend/src/views/admin/community/__tests__/HousingEditorLoading.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/__tests__/PublicResourceImages.spec.ts",
+    "target": "frontend/src/views/admin/community/__tests__/PublicResourceImages.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/__tests__/StructureLoading.spec.ts",
+    "target": "frontend/src/views/admin/community/__tests__/StructureLoading.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/BatchResultDialog.vue",
+    "target": "frontend/src/views/admin/community/BatchResultDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/BuildingEditDialog.vue",
+    "target": "frontend/src/views/admin/community/BuildingEditDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/CommunityDetailView.vue",
+    "target": "frontend/src/views/admin/community/CommunityDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/CommunityEditDialog.vue",
+    "target": "frontend/src/views/admin/community/CommunityEditDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/HouseAttributesDialog.vue",
+    "target": "frontend/src/views/admin/community/HouseAttributesDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/HouseBatchDialog.vue",
+    "target": "frontend/src/views/admin/community/HouseBatchDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/HouseEditDialog.vue",
+    "target": "frontend/src/views/admin/community/HouseEditDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/HouseLayoutDialog.vue",
+    "target": "frontend/src/views/admin/community/HouseLayoutDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/HousesWithHousingView.vue",
+    "target": "frontend/src/views/admin/community/HousesWithHousingView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/PublicResourceListView.vue",
+    "target": "frontend/src/views/admin/community/PublicResourceListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/structureData.ts",
+    "target": "frontend/src/views/admin/community/structureData.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/community/StructureGenerateDialog.vue",
+    "target": "frontend/src/views/admin/community/StructureGenerateDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/StructureTreePane.vue",
+    "target": "frontend/src/views/admin/community/StructureTreePane.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/UnitBatchDialog.vue",
+    "target": "frontend/src/views/admin/community/UnitBatchDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/community/UnitEditDialog.vue",
+    "target": "frontend/src/views/admin/community/UnitEditDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/conversation/__tests__/ConversationListView.spec.ts",
+    "target": "frontend/src/views/admin/conversation/__tests__/ConversationListView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/conversation/ConversationListView.vue",
+    "target": "frontend/src/views/admin/conversation/ConversationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/evaluation/__tests__/EvaluationLoadState.spec.ts",
+    "target": "frontend/src/views/admin/evaluation/__tests__/EvaluationLoadState.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/evaluation/EvaluationManageView.vue",
+    "target": "frontend/src/views/admin/evaluation/EvaluationManageView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/evaluation/FollowupDrawer.vue",
+    "target": "frontend/src/views/admin/evaluation/FollowupDrawer.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/feedback/FeedbackManageView.vue",
+    "target": "frontend/src/views/admin/feedback/FeedbackManageView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/housing/HousingDetailView.vue",
+    "target": "frontend/src/views/admin/housing/HousingDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/housing/HousingListView.vue",
+    "target": "frontend/src/views/admin/housing/HousingListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/housing/HousingManageView.vue",
+    "target": "frontend/src/views/admin/housing/HousingManageView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/housing/HousingTimeslotEntry.spec.ts",
+    "target": "frontend/src/views/admin/housing/HousingTimeslotEntry.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/housing/ViewingAppointmentListView.vue",
+    "target": "frontend/src/views/admin/housing/ViewingAppointmentListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/__tests__/AgreementTemplateView.spec.ts",
+    "target": "frontend/src/views/admin/lease/__tests__/AgreementTemplateView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/__tests__/DepositRefundDialog.spec.ts",
+    "target": "frontend/src/views/admin/lease/__tests__/DepositRefundDialog.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/__tests__/HousingLeaseHubView.spec.ts",
+    "target": "frontend/src/views/admin/lease/__tests__/HousingLeaseHubView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/__tests__/LeaseDetailView.spec.ts",
+    "target": "frontend/src/views/admin/lease/__tests__/LeaseDetailView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/__tests__/MoveOutApplicationView.spec.ts",
+    "target": "frontend/src/views/admin/lease/__tests__/MoveOutApplicationView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/AgreementTemplateView.vue",
+    "target": "frontend/src/views/admin/lease/AgreementTemplateView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/DepositRefundDialog.vue",
+    "target": "frontend/src/views/admin/lease/DepositRefundDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/detail/display.ts",
+    "target": "frontend/src/views/admin/lease/detail/display.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/detail/LeaseBusinessRecords.vue",
+    "target": "frontend/src/views/admin/lease/detail/LeaseBusinessRecords.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/detail/LeaseFeeRecords.vue",
+    "target": "frontend/src/views/admin/lease/detail/LeaseFeeRecords.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/detail/LeaseOverviewPanel.vue",
+    "target": "frontend/src/views/admin/lease/detail/LeaseOverviewPanel.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/HousingLeaseHubView.vue",
+    "target": "frontend/src/views/admin/lease/HousingLeaseHubView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/LeaseDetailView.vue",
+    "target": "frontend/src/views/admin/lease/LeaseDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/LeaseListView.vue",
+    "target": "frontend/src/views/admin/lease/LeaseListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/lease/MoveOutApplicationView.vue",
+    "target": "frontend/src/views/admin/lease/MoveOutApplicationView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/notice/NoticeManageView.vue",
+    "target": "frontend/src/views/admin/notice/NoticeManageView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/notification/NotificationListView.vue",
+    "target": "frontend/src/views/admin/notification/NotificationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/reservation/ReservationManageView.vue",
+    "target": "frontend/src/views/admin/reservation/ReservationManageView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/__tests__/CoResidenceDialog.spec.ts",
+    "target": "frontend/src/views/admin/resident/__tests__/CoResidenceDialog.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/__tests__/ResidentImportReset.spec.ts",
+    "target": "frontend/src/views/admin/resident/__tests__/ResidentImportReset.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/__tests__/ResidentProvisioning.spec.ts",
+    "target": "frontend/src/views/admin/resident/__tests__/ResidentProvisioning.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidenceApplicationListView.vue",
+    "target": "frontend/src/views/admin/resident/ResidenceApplicationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidenceRelationListView.vue",
+    "target": "frontend/src/views/admin/resident/ResidenceRelationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidentAdminCreateDialog.vue",
+    "target": "frontend/src/views/admin/resident/ResidentAdminCreateDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidentCoResidenceDialog.vue",
+    "target": "frontend/src/views/admin/resident/ResidentCoResidenceDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidentDetailView.vue",
+    "target": "frontend/src/views/admin/resident/ResidentDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidentHouseSelector.vue",
+    "target": "frontend/src/views/admin/resident/ResidentHouseSelector.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidentImportDialog.vue",
+    "target": "frontend/src/views/admin/resident/ResidentImportDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidentListView.vue",
+    "target": "frontend/src/views/admin/resident/ResidentListView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/resident/ResidentManageView.vue",
+    "target": "frontend/src/views/admin/resident/ResidentManageView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/statistics/DashboardOverview.vue",
+    "target": "frontend/src/views/admin/statistics/DashboardOverview.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/statistics/DashboardTabView.vue",
+    "target": "frontend/src/views/admin/statistics/DashboardTabView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/statistics/StatisticsView.vue",
+    "target": "frontend/src/views/admin/statistics/StatisticsView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/__tests__/WorkOrderDetailView.spec.ts",
+    "target": "frontend/src/views/admin/workorder/__tests__/WorkOrderDetailView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/__tests__/WorkOrderListView.spec.ts",
+    "target": "frontend/src/views/admin/workorder/__tests__/WorkOrderListView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/dispatch.ts",
+    "target": "frontend/src/views/admin/workorder/dispatch.ts"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/ServiceCategoryDrawer.vue",
+    "target": "frontend/src/views/admin/workorder/ServiceCategoryDrawer.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/StaffCapabilityView.vue",
+    "target": "frontend/src/views/admin/workorder/StaffCapabilityView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/StaffPickerDrawer.vue",
+    "target": "frontend/src/views/admin/workorder/StaffPickerDrawer.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/StaffScheduleView.vue",
+    "target": "frontend/src/views/admin/workorder/StaffScheduleView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/WorkOrderDetailView.vue",
+    "target": "frontend/src/views/admin/workorder/WorkOrderDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/WorkOrderDispatchCard.vue",
+    "target": "frontend/src/views/admin/workorder/WorkOrderDispatchCard.vue"
+  },
+  {
+    "source": "frontend/src/views/admin/workorder/WorkOrderListView.vue",
+    "target": "frontend/src/views/admin/workorder/WorkOrderListView.vue"
+  },
+  {
+    "source": "frontend/src/views/auth/LoginView.vue",
+    "target": "frontend/src/common/auth/views/LoginView.vue"
+  },
+  {
+    "source": "frontend/src/views/auth/RegisterView.vue",
+    "target": "frontend/src/common/auth/views/RegisterView.vue"
+  },
+  {
+    "source": "frontend/src/views/ForbiddenView.vue",
+    "target": "frontend/src/common/web/views/ForbiddenView.vue"
+  },
+  {
+    "source": "frontend/src/views/guest/__tests__/RegisteredViewingFlow.spec.ts",
+    "target": "frontend/src/common/public/views/__tests__/RegisteredViewingFlow.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/guest/GuestLayout.vue",
+    "target": "frontend/src/common/public/views/GuestLayout.vue"
+  },
+  {
+    "source": "frontend/src/views/guest/HomeView.vue",
+    "target": "frontend/src/common/public/views/HomeView.vue"
+  },
+  {
+    "source": "frontend/src/views/guest/HousingDetailView.vue",
+    "target": "frontend/src/common/public/views/HousingDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/guest/HousingListView.vue",
+    "target": "frontend/src/common/public/views/HousingListView.vue"
+  },
+  {
+    "source": "frontend/src/views/guest/NoticeDetailView.vue",
+    "target": "frontend/src/common/public/views/NoticeDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/guest/NoticeListView.vue",
+    "target": "frontend/src/common/public/views/NoticeListView.vue"
+  },
+  {
+    "source": "frontend/src/views/NotFoundView.vue",
+    "target": "frontend/src/common/web/views/NotFoundView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/HousingLeaseHubView.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/HousingLeaseHubView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/LeaseEntrypoints.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/LeaseEntrypoints.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/LeaseFirstPaymentDialog.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/LeaseFirstPaymentDialog.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/LeaseListView.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/LeaseListView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/RentMonthSelection.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/RentMonthSelection.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/ResourceImages.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/ResourceImages.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/TenancyPrerequisites.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/TenancyPrerequisites.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/WorkOrderDetailView.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/WorkOrderDetailView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/__tests__/WorkOrderGroupPanel.spec.ts",
+    "target": "frontend/src/views/resident/__tests__/WorkOrderGroupPanel.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/resident/ConversationDetailView.vue",
+    "target": "frontend/src/views/resident/ConversationDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/FeedbackCreateView.vue",
+    "target": "frontend/src/views/resident/FeedbackCreateView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/FeedbackDetailView.vue",
+    "target": "frontend/src/views/resident/FeedbackDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/FeedbackListView.vue",
+    "target": "frontend/src/views/resident/FeedbackListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/HomeView.vue",
+    "target": "frontend/src/views/resident/HomeView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/HousingDetailView.vue",
+    "target": "frontend/src/views/resident/HousingDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/HousingListView.vue",
+    "target": "frontend/src/views/resident/HousingListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/HousingReservationView.vue",
+    "target": "frontend/src/views/resident/HousingReservationView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/LeaseFirstPaymentDialog.vue",
+    "target": "frontend/src/views/resident/LeaseFirstPaymentDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/LeaseListView.vue",
+    "target": "frontend/src/views/resident/LeaseListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/LeaseMoveOutDialog.vue",
+    "target": "frontend/src/views/resident/LeaseMoveOutDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/LeaseRenewDialog.vue",
+    "target": "frontend/src/views/resident/LeaseRenewDialog.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/NoticeDetailView.vue",
+    "target": "frontend/src/views/resident/NoticeDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/NoticeListView.vue",
+    "target": "frontend/src/views/resident/NoticeListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/NotificationListView.vue",
+    "target": "frontend/src/views/resident/NotificationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ProfileView.vue",
+    "target": "frontend/src/views/resident/ProfileView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ReservationCreateView.vue",
+    "target": "frontend/src/views/resident/ReservationCreateView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ReservationListView.vue",
+    "target": "frontend/src/views/resident/ReservationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ResidenceApplicationListView.vue",
+    "target": "frontend/src/views/resident/ResidenceApplicationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ResidenceApplyView.vue",
+    "target": "frontend/src/views/resident/ResidenceApplyView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ResidentLayout.vue",
+    "target": "frontend/src/views/resident/ResidentLayout.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ResourceDetailView.vue",
+    "target": "frontend/src/views/resident/ResourceDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ResourceListView.vue",
+    "target": "frontend/src/views/resident/ResourceListView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/ViewingAppointmentDetailView.vue",
+    "target": "frontend/src/views/resident/ViewingAppointmentDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/WorkOrderCreateView.vue",
+    "target": "frontend/src/views/resident/WorkOrderCreateView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/WorkOrderDetailView.vue",
+    "target": "frontend/src/views/resident/WorkOrderDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/resident/WorkOrderListView.vue",
+    "target": "frontend/src/views/resident/WorkOrderListView.vue"
+  },
+  {
+    "source": "frontend/src/views/staff/__tests__/StaffWorkloadDashboard.spec.ts",
+    "target": "frontend/src/views/staff/__tests__/StaffWorkloadDashboard.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/staff/__tests__/ViewingsWorkbenchView.spec.ts",
+    "target": "frontend/src/views/staff/__tests__/ViewingsWorkbenchView.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/staff/__tests__/WorkOrderDispatchFlow.spec.ts",
+    "target": "frontend/src/views/staff/__tests__/WorkOrderDispatchFlow.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/staff/__tests__/WorkOrderGroupPanel.spec.ts",
+    "target": "frontend/src/views/staff/__tests__/WorkOrderGroupPanel.spec.ts"
+  },
+  {
+    "source": "frontend/src/views/staff/ConversationListView.vue",
+    "target": "frontend/src/views/staff/ConversationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/staff/DashboardView.vue",
+    "target": "frontend/src/views/staff/DashboardView.vue"
+  },
+  {
+    "source": "frontend/src/views/staff/NotificationListView.vue",
+    "target": "frontend/src/views/staff/NotificationListView.vue"
+  },
+  {
+    "source": "frontend/src/views/staff/StaffLayout.vue",
+    "target": "frontend/src/views/staff/StaffLayout.vue"
+  },
+  {
+    "source": "frontend/src/views/staff/ViewingsWorkbenchView.vue",
+    "target": "frontend/src/views/staff/ViewingsWorkbenchView.vue"
+  },
+  {
+    "source": "frontend/src/views/staff/WorkOrderDetailView.vue",
+    "target": "frontend/src/views/staff/WorkOrderDetailView.vue"
+  },
+  {
+    "source": "frontend/src/views/staff/WorkOrderListView.vue",
+    "target": "frontend/src/views/staff/WorkOrderListView.vue"
+  }
+]

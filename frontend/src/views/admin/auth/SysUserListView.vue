@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { isValidUsername, USERNAME_HINT } from '@/utils/username'
+import { isValidUsername, USERNAME_HINT } from '@/common/auth/utils/username'
 import type { FormInstance, FormRules } from 'element-plus'
 import {
   createSysUser,
@@ -10,7 +10,7 @@ import {
   updateSysUser,
   updateSysUserStatus,
   changePassword
-} from '@/api/sysuser'
+} from '@/common/auth/api/sysuser'
 import type {
   IBoundCommunity,
   ISysUser,
@@ -18,12 +18,12 @@ import type {
   UserStatus,
   ICreateSysUserDTO,
   IUpdateSysUserDTO
-} from '@/types/modules/auth'
-import { systemRoleLabels, userStatusLabels } from '@/types/modules/auth'
-import { formatDateTime } from '@/utils/date'
-import SearchBar from '@/components/common/SearchBar.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
-import Pagination from '@/components/common/Pagination.vue'
+} from '@/common/auth/types/auth'
+import { systemRoleLabels, userStatusLabels } from '@/common/auth/types/auth'
+import { formatDateTime } from '@/common/web/utils/date'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 import SysUserCommunityDrawer from './SysUserCommunityDrawer.vue'
 
 /**

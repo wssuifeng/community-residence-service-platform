@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import { getCommunityList, getBuildingList, getUnitList } from '@/api/community'
-import { createHousing, updateHousing, updateHousingStatus, getHousingDetail } from '@/api/housing'
-import { http } from '@/utils/request'
-import type { ICommunity, IBuilding, IUnit } from '@/types/modules/community'
-import type { HousingRentType } from '@/types/modules/housing'
-import { houseStatusLabels } from '@/types/modules/community'
-import { housingRentTypeLabels } from '@/types/modules/housing'
+import HouseImageDialog from '@/common/community/components/HouseImageDialog.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import { getCommunityList, getBuildingList, getUnitList } from '@/common/community/api/community'
+import { createHousing, updateHousing, updateHousingStatus, getHousingDetail } from '@/common/housing/api/housing'
+import { http } from '@/common/web/utils/request'
+import type { ICommunity, IBuilding, IUnit } from '@/common/community/types/community'
+import type { HousingRentType } from '@/common/housing/types/housing'
+import { houseStatusLabels } from '@/common/community/types/community'
+import { housingRentTypeLabels } from '@/common/housing/types/housing'
 
 /**
  * 房屋与房源一体化（R62，v1.5；2026-09-20 用户反馈改版为带图卡片 + 筛选）：
@@ -22,7 +22,7 @@ import { housingRentTypeLabels } from '@/types/modules/housing'
  */
 
 /* 契约：GET /communities/houses-manage → 分页房屋主线项（R62 v1.5，接口设计.md §9.15.3） */
-import type { HouseManageItem } from '@/types/modules/housing'
+import type { HouseManageItem } from '@/common/housing/types/housing'
 
 /** 房源占位插画（未挂牌或无图时使用，frontend/public 静态资产） */
 const HOUSING_PLACEHOLDER = '/housing-placeholder.png'

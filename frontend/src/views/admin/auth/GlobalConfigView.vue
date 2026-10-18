@@ -2,10 +2,10 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { getConfigList, updateConfig } from '@/api/resident'
-import { getChannelLevels, updateChannelLevels } from '@/api/notification'
-import type { ISysConfig } from '@/types/modules/resident'
-import type { IChannelLevels } from '@/types/modules/notification'
+import { getConfigList, updateConfig } from '@/common/resident/api/resident'
+import { getChannelLevels, updateChannelLevels } from '@/common/messaging/api/notification'
+import type { ISysConfig } from '@/common/resident/types/resident'
+import type { IChannelLevels } from '@/common/messaging/types/notification'
 import AlipayChannelConfigPanel from './AlipayChannelConfigPanel.vue'
 
 /**

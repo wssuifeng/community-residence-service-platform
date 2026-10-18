@@ -2,13 +2,13 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import SearchBar from '@/components/common/SearchBar.vue'
-import { cancelWorkOrder, listWorkOrders } from '@/api/workorder'
-import type { IWorkOrder, WorkOrderStatus } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
-import { formatRelative } from '@/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import { cancelWorkOrder, listWorkOrders } from '@/common/workorder/api/workorder'
+import type { IWorkOrder, WorkOrderStatus } from '@/common/workorder/types/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/common/workorder/types/workorder'
+import { formatRelative } from '@/common/web/utils/date'
 
 /** 我的工单（UI设计.md §4.1.2）：状态筛选 + 关键字搜索 + 卡片列表 + 分页 */
 

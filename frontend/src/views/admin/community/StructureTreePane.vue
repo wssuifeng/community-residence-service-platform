@@ -3,15 +3,15 @@ import { computed, h, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 import CommunityEditDialog from '@/views/admin/community/CommunityEditDialog.vue'
 import BuildingEditDialog from '@/views/admin/community/BuildingEditDialog.vue'
 import UnitEditDialog from '@/views/admin/community/UnitEditDialog.vue'
 import UnitBatchDialog from '@/views/admin/community/UnitBatchDialog.vue'
 import HouseAttributesDialog from '@/views/admin/community/HouseAttributesDialog.vue'
-import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
-import CommunityDeletionImpactPanel from '@/components/business/CommunityDeletionImpactPanel.vue'
+import HouseImageDialog from '@/common/community/components/HouseImageDialog.vue'
+import CommunityDeletionImpactPanel from '@/common/community/components/CommunityDeletionImpactPanel.vue'
 import HouseEditDialog from '@/views/admin/community/HouseEditDialog.vue'
 import HouseBatchDialog from '@/views/admin/community/HouseBatchDialog.vue'
 import StructureGenerateDialog from '@/views/admin/community/StructureGenerateDialog.vue'
@@ -32,7 +32,7 @@ import {
   getUnitList,
   updateCommunityStatus,
   updateHouseStatus
-} from '@/api/community'
+} from '@/common/community/api/community'
 import type {
   IBatchFailure,
   IBuilding,
@@ -40,18 +40,18 @@ import type {
   IHouse,
   IHouseStatusHistory,
   IUnit
-} from '@/types/modules/community'
-import { communityStatusLabels, houseStatusLabels } from '@/types/modules/community'
-import type { CommunityStatus, HouseStatus } from '@/types/modules/community'
-import { getDashboardStats } from '@/api/statistics'
-import type { IDashboardStats } from '@/types/modules/statistics'
+} from '@/common/community/types/community'
+import { communityStatusLabels, houseStatusLabels } from '@/common/community/types/community'
+import type { CommunityStatus, HouseStatus } from '@/common/community/types/community'
+import { getDashboardStats } from '@/common/statistics/api/statistics'
+import type { IDashboardStats } from '@/common/statistics/types/statistics'
 import { loadAllPages, mapLimited, StaleStructureLoad } from './structureData'
-import { getHouseResidentList, getResident } from '@/api/resident'
-import type { IHouseResident, IResident } from '@/types/modules/resident'
-import { relationTypeLabels, residenceRelationStatusLabels } from '@/types/modules/resident'
-import { formatDateTime } from '@/utils/date'
-import { useGridSelection } from '@/composables/useGridSelection'
-import { useUserStore } from '@/store/user'
+import { getHouseResidentList, getResident } from '@/common/resident/api/resident'
+import type { IHouseResident, IResident } from '@/common/resident/types/resident'
+import { relationTypeLabels, residenceRelationStatusLabels } from '@/common/resident/types/resident'
+import { formatDateTime } from '@/common/web/utils/date'
+import { useGridSelection } from '@/common/web/composables/useGridSelection'
+import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 社区管理主面板（2026-09-21 布局重做；2026-09-22 批次 j/k 交互与布局再修）。

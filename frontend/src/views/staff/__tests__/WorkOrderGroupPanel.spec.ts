@@ -6,15 +6,15 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import WorkOrderDetailView from '../WorkOrderDetailView.vue'
 import { actAs, getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
 import type { FakeWorkOrder } from '@/test/fakeBackend'
-import { assignWorkOrder, intakeWorkOrder } from '@/api/workorder'
+import { assignWorkOrder, intakeWorkOrder } from '@/common/workorder/api/workorder'
 
 /**
  * 服务人员端工单详情 · R74：派单后自动入群，可从详情进入统一会话；
  * **未入群（未派单）时非参与者不可见（403）→ 不渲染面板**，不把「无权」包装成空群聊。
  */
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
-vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
-vi.mock('@/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
+vi.mock('@/common/workorder/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
+vi.mock('@/common/upload/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
 
 const backend = () => getFakeBackend()
 

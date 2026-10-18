@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import { startOnlineRenewal, stopOnlineRenewal } from '@/utils/onlineRenewal'
-import { useUserStore } from '@/store/user'
-import { useNotificationStore } from '@/store/notification'
+import { startOnlineRenewal, stopOnlineRenewal } from '@/common/auth/utils/onlineRenewal'
+import { useUserStore } from '@/common/auth/store/user'
+import { useNotificationStore } from '@/common/messaging/store/notification'
 
 /* 页面刷新恢复：sessionStorage 会话不走 setSession，登录态下补通知初始化 */
 const userStore = useUserStore()

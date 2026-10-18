@@ -23,7 +23,7 @@ const listMocks = vi.hoisted(() => ({
   listViewingAppointments: async () => ({ records: [], total: 0 })
 }))
 
-vi.mock('@/api/lease', () => ({
+vi.mock('@/common/lease/api/lease', () => ({
   createLease: async () => ({}),
   getLeaseList: listMocks.getLeaseList,
   renewLease: async () => ({}),
@@ -34,11 +34,11 @@ vi.mock('@/api/lease', () => ({
   confirmTenancy: async () => ({})
 }))
 
-vi.mock('@/api/community', () => ({
+vi.mock('@/common/community/api/community', () => ({
   getCommunityList: listMocks.getCommunityList
 }))
 
-vi.mock('@/api/housing', () => ({
+vi.mock('@/common/housing/api/housing', () => ({
   listHousings: listMocks.listHousings,
   listViewingAppointments: listMocks.listViewingAppointments
 }))

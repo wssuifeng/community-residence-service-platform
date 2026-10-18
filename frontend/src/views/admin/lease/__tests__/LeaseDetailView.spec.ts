@@ -6,7 +6,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import LeaseDetailView from '../LeaseDetailView.vue'
 import DepositRefundDialog from '../DepositRefundDialog.vue'
 import { installFakeBackend } from '@/test/fakeBackend'
-import type { ILeaseRecord, LeaseStatus } from '@/types/modules/lease'
+import type { ILeaseRecord, LeaseStatus } from '@/common/lease/types/lease'
 
 /**
  * 管理端租约详情「打不开」回归（④）：
@@ -51,10 +51,10 @@ const api = vi.hoisted(() => {
   }
 })
 
-vi.mock('@/api/lease', () => api)
+vi.mock('@/common/lease/api/lease', () => api)
 
 /* ③ 租约群聊面板：会话详情与消息由假后端/桩返回（仅参与者可见的业务口径由会话模块覆盖） */
-vi.mock('@/api/conversation', () => ({
+vi.mock('@/common/conversation/api/conversation', () => ({
   getConversation: vi.fn(async (id: number) => ({
     id,
     type: 'LEASE_GROUP',
@@ -273,7 +273,7 @@ describe('管理端租约详情 · ② 补建租约沟通群（DEF-076）', () =
         createdAt: '2026-01-01T10:00:00'
       } as unknown as ILeaseRecord
     })
-    const conversationApi = await import('@/api/conversation')
+    const conversationApi = await import('@/common/conversation/api/conversation')
     vi.mocked(conversationApi.ensureLeaseGroupConversation).mockImplementation(async () => {
       conversationId = 9
       return { id: 9, type: 'LEASE_GROUP', title: '租约沟通 · 1号楼-1单元-101', status: 'ACTIVE' } as never
@@ -294,7 +294,7 @@ describe('管理端租约详情 · ② 补建租约沟通群（DEF-076）', () =
   })
 
   it('补建失败（非绑定社区 403）时如实提示，不改变无群空态', async () => {
-    const conversationApi = await import('@/api/conversation')
+    const conversationApi = await import('@/common/conversation/api/conversation')
     vi.mocked(conversationApi.ensureLeaseGroupConversation).mockRejectedValueOnce(
       new Error('无权操作未绑定社区的数据')
     )

@@ -2,13 +2,13 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import { listWorkOrders, acceptWorkOrder, processWorkOrder } from '@/api/workorder'
-import type { IWorkOrder, WorkOrderPriority, WorkOrderStatus } from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
-import { formatDateTime } from '@/utils/date'
-import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffResidentPresentation'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import { listWorkOrders, acceptWorkOrder, processWorkOrder } from '@/common/workorder/api/workorder'
+import type { IWorkOrder, WorkOrderPriority, WorkOrderStatus } from '@/common/workorder/types/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/common/workorder/types/workorder'
+import { formatDateTime } from '@/common/web/utils/date'
+import { residentDisplayName, residentInitial, residentRelationLabel } from '@/common/resident/utils/staffResidentPresentation'
 
 /** 我的工单（UI设计.md §4.2 / §3.3）：状态 Tab + 工单卡片列表（对照 design-mockups/staff/02） */
 

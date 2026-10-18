@@ -3,7 +3,7 @@ import { describe,it,expect,vi,beforeEach } from 'vitest'
 import ElementPlus from 'element-plus'
 import LeaseRenewDialog from '../LeaseRenewDialog.vue'
 const api=vi.hoisted(()=>({quote:vi.fn(),channels:vi.fn(),create:vi.fn(),close:vi.fn(),status:vi.fn()}))
-vi.mock('@/api/payment',()=>({getRentQuote:api.quote,listPaymentChannels:api.channels,createRentPayment:api.create,createRenewPayment:api.create,closePayment:api.close,getPaymentStatus:api.status}))
+vi.mock('@/common/payment/api/payment',()=>({getRentQuote:api.quote,listPaymentChannels:api.channels,createRentPayment:api.create,createRenewPayment:api.create,closePayment:api.close,getPaymentStatus:api.status}))
 const lease={id:1,status:'ACTIVE',startDate:'2026-10-15',endDate:'2027-10-14',monthlyRent:3600} as any
 beforeEach(()=>{vi.clearAllMocks();api.channels.mockResolvedValue([{channel:'ALIPAY',enabled:true}]);api.quote.mockImplementation((_id,_purpose,months)=>Promise.resolve({months,remainingMonths:11,quoteVersion:'q'+months,amount:months*3600,periodStart:'2026-11-15',periodEnd:'2027-10-14'}))})
 async function open(){const w=mount(LeaseRenewDialog,{props:{modelValue:false,lease,purpose:'RENT'},global:{plugins:[ElementPlus],stubs:{ElDialog:{props:['modelValue'],template:'<section v-if="modelValue"><slot/><slot name="footer"/></section>'}}}});await w.setProps({modelValue:true});await flushPromises();return w}

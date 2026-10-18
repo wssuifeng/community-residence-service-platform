@@ -8,9 +8,9 @@ import { getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
 import type { FakeWorkOrder } from '@/test/fakeBackend'
 
 /** 详情保留统一会话入口；消息与只读状态由共享会话工作区呈现。 */
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
-vi.mock('@/api/evaluation', async () => (await import('@/test/fakeBackend')).fakeApi('evaluation'))
-vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
+vi.mock('@/common/workorder/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/common/evaluation/api/evaluation', async () => (await import('@/test/fakeBackend')).fakeApi('evaluation'))
+vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
 
 const backend = () => getFakeBackend()
 

@@ -8,10 +8,10 @@ const httpMock = vi.hoisted(() => ({
   delete: vi.fn()
 }))
 
-vi.mock('@/utils/request', () => ({ http: httpMock }))
+vi.mock('@/common/web/utils/request', () => ({ http: httpMock }))
 
-import { getPaymentStatus, listPaymentChannels } from '@/api/payment'
-import { listViewingAvailableSlots } from '@/api/housing'
+import { getPaymentStatus, listPaymentChannels } from '@/common/payment/api/payment'
+import { listViewingAvailableSlots } from '@/common/housing/api/housing'
 
 describe('前端 API 路由契约', () => {
   beforeEach(() => {

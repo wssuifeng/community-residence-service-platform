@@ -4,8 +4,8 @@ import ElementPlus from 'element-plus'
 import { createPinia } from 'pinia'
 import DepositRefundDialog from '../DepositRefundDialog.vue'
 import { CODES, actAs, getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
-import type { IDepositRefund, ILeasePayment, ILeaseRecord } from '@/types/modules/lease'
-import { ApiError } from '@/utils/request'
+import type { IDepositRefund, ILeasePayment, ILeaseRecord } from '@/common/lease/types/lease'
+import { ApiError } from '@/common/web/utils/request'
 
 /**
  * 押金退还弹窗（R72）· 前端前置校验与幂等键口径。
@@ -18,7 +18,7 @@ import { ApiError } from '@/utils/request'
  * 押金状态全五态中文渲染、lease 为 null 时的显式错误文案。
  */
 
-vi.mock('@/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
+vi.mock('@/common/lease/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 
 const backend = () => getFakeBackend()
 

@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import SearchBar from '@/components/common/SearchBar.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
 import DepositRefundDialog from './DepositRefundDialog.vue'
-import { getHouseResidentList } from '@/api/resident'
-import { loadAllPages } from '@/utils/paged'
-import type { IHouseResident } from '@/types/modules/resident'
-import { approveMoveOutApplication, listMoveOutApplications, rejectMoveOutApplication } from '@/api/leaseMoveOut'
-import { getLease, listLeasePayments } from '@/api/lease'
-import { getCommunityList } from '@/api/community'
+import { getHouseResidentList } from '@/common/resident/api/resident'
+import { loadAllPages } from '@/common/web/utils/paged'
+import type { IHouseResident } from '@/common/resident/types/resident'
+import { approveMoveOutApplication, listMoveOutApplications, rejectMoveOutApplication } from '@/common/lease/api/leaseMoveOut'
+import { getLease, listLeasePayments } from '@/common/lease/api/lease'
+import { getCommunityList } from '@/common/community/api/community'
 import type {
   DepositStatus,
   IMoveOutApplication,
   ILeasePayment,
   ILeaseRecord,
   MoveOutApplicationStatus
-} from '@/types/modules/lease'
-import { depositStatusLabels, moveOutApplicationStatusLabels } from '@/types/modules/lease'
-import { formatDate, formatDateTime } from '@/utils/date'
+} from '@/common/lease/types/lease'
+import { depositStatusLabels, moveOutApplicationStatusLabels } from '@/common/lease/types/lease'
+import { formatDate, formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 退租申请审核（R70/V20，管理端）：居民自助退租申请的待办与审核入口。

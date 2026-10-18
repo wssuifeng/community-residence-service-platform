@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { ILeaseChange } from '@/types/modules/lease'
-import { leaseChangeTypeLabels } from '@/types/modules/lease'
-import type { IViewingAppointment } from '@/types/modules/housing'
-import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
-import StatusTag from '@/components/common/StatusTag.vue'
-import { formatDate, formatDateTime } from '@/utils/date'
+import type { ILeaseChange } from '@/common/lease/types/lease'
+import { leaseChangeTypeLabels } from '@/common/lease/types/lease'
+import type { IViewingAppointment } from '@/common/housing/types/housing'
+import { viewingAppointmentStatusLabels } from '@/common/housing/types/housing'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import { formatDate, formatDateTime } from '@/common/web/utils/date'
 import { CHANGE_TONE, changeDescription, valueText, operatorText } from './display'
 defineProps<{ changes: ILeaseChange[]; viewings: IViewingAppointment[]; changesError: string; viewingsError: string; loading: boolean }>()
 const emit = defineEmits<{ retryChanges: []; retryViewings: [] }>()

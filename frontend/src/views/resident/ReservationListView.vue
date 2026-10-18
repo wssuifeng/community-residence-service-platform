@@ -2,14 +2,14 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import Pagination from '@/components/common/Pagination.vue'
-import { listReservations, cancelReservation } from '@/api/reservation'
-import { getResource } from '@/api/community'
-import { listViewingAppointments } from '@/api/housing'
-import type { IResourceReservation, ReservationStatus } from '@/types/modules/reservation'
-import { reservationStatusLabels } from '@/types/modules/reservation'
-import type { IViewingAppointment } from '@/types/modules/housing'
-import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
+import Pagination from '@/common/web/components/Pagination.vue'
+import { listReservations, cancelReservation } from '@/common/reservation/api/reservation'
+import { getResource } from '@/common/community/api/community'
+import { listViewingAppointments } from '@/common/housing/api/housing'
+import type { IResourceReservation, ReservationStatus } from '@/common/reservation/types/reservation'
+import { reservationStatusLabels } from '@/common/reservation/types/reservation'
+import type { IViewingAppointment } from '@/common/housing/types/housing'
+import { viewingAppointmentStatusLabels } from '@/common/housing/types/housing'
 
 /**
  * 我的预约（DEF-058 tab 合并）：「资源预约｜看房预约」双 tab。

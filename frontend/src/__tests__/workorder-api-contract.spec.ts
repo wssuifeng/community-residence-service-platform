@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { completeWorkOrder, returnWorkOrder } from '@/api/workorder'
+import { completeWorkOrder, returnWorkOrder } from '@/common/workorder/api/workorder'
 
 /**
- * 工单动作端点契约（`frontend/src/api/workorder.ts`）：
+ * 工单动作端点契约（`frontend/src/common/workorder/api/workorder.ts`）：
  * ① 居民「不满意退回」必须打专用端点 `PATCH /work-orders/{id}/return`（R22），
  *    而不是借用「确认完成」——借用会把工单推进到已完成，居民失去返工机会；
  * ② 完成处理的请求体按后端 `WorkOrderActionDTO` 收口为 `remark`（不再冗余携带 `solution`）。
@@ -15,7 +15,7 @@ const httpMock = vi.hoisted(() => ({
   delete: vi.fn()
 }))
 
-vi.mock('@/utils/request', () => ({ http: httpMock }))
+vi.mock('@/common/web/utils/request', () => ({ http: httpMock }))
 
 beforeEach(() => {
   httpMock.patch.mockReset()

@@ -2,13 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
-import { getCommunityList } from '@/api/community'
-import { listStaffCapabilities } from '@/api/staff'
-import { batchSaveStaffSchedules, clearStaffSchedules, deleteStaffSchedule, listStaffSchedules } from '@/api/staff'
-import type { ICommunity } from '@/types/modules/community'
-import type { IStaffCapability, IStaffSchedule, ShiftType } from '@/types/modules/staff'
-import { SHIFT_TYPE_OPTIONS, shiftTypeColors, shiftTypeDefaults, shiftTypeLabels } from '@/types/modules/staff'
-import { useUserStore } from '@/store/user'
+import { getCommunityList } from '@/common/community/api/community'
+import { listStaffCapabilities } from '@/common/workorder/api/staff'
+import { batchSaveStaffSchedules, clearStaffSchedules, deleteStaffSchedule, listStaffSchedules } from '@/common/workorder/api/staff'
+import type { ICommunity } from '@/common/community/types/community'
+import type { IStaffCapability, IStaffSchedule, ShiftType } from '@/common/workorder/types/staff'
+import { SHIFT_TYPE_OPTIONS, shiftTypeColors, shiftTypeDefaults, shiftTypeLabels } from '@/common/workorder/types/staff'
+import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 人员排班（V19，C4 物业自身排班管理）：

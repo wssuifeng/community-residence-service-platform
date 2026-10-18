@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { updateHouseAttributes } from '@/api/community'
-import type { HouseAttributesPatch } from '@/api/community'
-import type { IHouse } from '@/types/modules/community'
+import { updateHouseAttributes } from '@/common/community/api/community'
+import type { HouseAttributesPatch } from '@/common/community/api/community'
+import type { IHouse } from '@/common/community/types/community'
 const props = defineProps<{ houses: IHouse[] }>()
 const visible = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ saved: [unitIds: number[]] }>()

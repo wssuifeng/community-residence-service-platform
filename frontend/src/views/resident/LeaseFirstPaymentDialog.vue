@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { canOpenPaymentPage } from '@/utils/payment'
+import { canOpenPaymentPage } from '@/common/payment/utils/payment'
 import QRCode from 'qrcode'
-import { getRentQuote, closePayment, createFirstPayment, getPaymentStatus, listPaymentChannels } from '@/api/payment'
-import { listLeasePayments } from '@/api/lease'
-import { ApiError } from '@/utils/request'
-import { formatDateTime, formatDateTimeSeconds } from '@/utils/date'
-import type { ILeasePayment, ILeaseRecord, IPaymentChannelOption, PaymentChannel } from '@/types/modules/lease'
+import { getRentQuote, closePayment, createFirstPayment, getPaymentStatus, listPaymentChannels } from '@/common/payment/api/payment'
+import { listLeasePayments } from '@/common/lease/api/lease'
+import { ApiError } from '@/common/web/utils/request'
+import { formatDateTime, formatDateTimeSeconds } from '@/common/web/utils/date'
+import type { ILeasePayment, ILeaseRecord, IPaymentChannelOption, PaymentChannel } from '@/common/lease/types/lease'
 
 /**
  * 首期费用支付弹窗（R71/V20）：与续租支付同款渠道流程，但**不含月数选择**——

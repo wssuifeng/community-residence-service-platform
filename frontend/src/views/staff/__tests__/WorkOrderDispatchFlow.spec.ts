@@ -6,7 +6,7 @@ import { createMemoryHistory, createRouter, type Router } from 'vue-router'
 import WorkOrderListView from '../WorkOrderListView.vue'
 import WorkOrderDetailView from '../WorkOrderDetailView.vue'
 import { actAs, getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
-import { assignWorkOrder, intakeWorkOrder } from '@/api/workorder'
+import { assignWorkOrder, intakeWorkOrder } from '@/common/workorder/api/workorder'
 
 /**
  * 服务人员端派单链路（⑤）：管理端派单后，服务人员端必须能**在列表上直接**走完
@@ -14,9 +14,9 @@ import { assignWorkOrder, intakeWorkOrder } from '@/api/workorder'
  * 已接单/处理中一律显示「查看」，等于点不动），并且详情页的接单/开始处理/提交结果
  * 入口按状态可见、辅助接口失败也不影响操作面板。
  */
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
-vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
-vi.mock('@/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
+vi.mock('@/common/workorder/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
+vi.mock('@/common/upload/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
 
 const backend = () => getFakeBackend()
 

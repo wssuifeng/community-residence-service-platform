@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import SearchBar from '@/components/common/SearchBar.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
 import ServiceCategoryDrawer from '@/views/admin/workorder/ServiceCategoryDrawer.vue'
 import WorkOrderDispatchCard from '@/views/admin/workorder/WorkOrderDispatchCard.vue'
 import StaffPickerDrawer from '@/views/admin/workorder/StaffPickerDrawer.vue'
-import { closeWorkOrder, getServiceCategoryTree, intakeWorkOrder, listAssignableStaff, listWorkOrders } from '@/api/workorder'
-import { getCommunityList } from '@/api/community'
-import { getWorkOrderStats } from '@/api/statistics'
+import { closeWorkOrder, getServiceCategoryTree, intakeWorkOrder, listAssignableStaff, listWorkOrders } from '@/common/workorder/api/workorder'
+import { getCommunityList } from '@/common/community/api/community'
+import { getWorkOrderStats } from '@/common/statistics/api/statistics'
 import type {
   DispatchFlag,
   IStaffOption,
@@ -21,14 +21,14 @@ import type {
   WorkOrderPriority,
   WorkOrderSort,
   WorkOrderStatus
-} from '@/types/modules/workorder'
+} from '@/common/workorder/types/workorder'
 import {
   dispatchFlagColors,
   dispatchFlagLabels,
   workOrderPriorityLabels,
   workOrderStatusLabels
-} from '@/types/modules/workorder'
-import type { ICommunity } from '@/types/modules/community'
+} from '@/common/workorder/types/workorder'
+import type { ICommunity } from '@/common/community/types/community'
 import type { IDispatchStage } from './dispatch'
 import {
   DISPATCH_STAGES,
@@ -40,8 +40,8 @@ import {
   isReassignOrder,
   stageKeyOfStatus
 } from './dispatch'
-import { formatDateTime } from '@/utils/date'
-import { useUserStore } from '@/store/user'
+import { formatDateTime } from '@/common/web/utils/date'
+import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 工单调度工作台（UI设计.md §3.4 / 对照 design-mockups/admin/03 重做）。

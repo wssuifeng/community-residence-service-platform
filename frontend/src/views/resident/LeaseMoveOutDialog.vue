@@ -2,8 +2,8 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createMoveOutApplication } from '@/api/leaseMoveOut'
-import type { ILeaseRecord } from '@/types/modules/lease'
+import { createMoveOutApplication } from '@/common/lease/api/leaseMoveOut'
+import type { ILeaseRecord } from '@/common/lease/types/lease'
 
 /**
  * 申请退租弹窗（R70/V20）：居民对**本人已生效租约**发起自助退租，

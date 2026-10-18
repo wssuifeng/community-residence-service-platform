@@ -15,10 +15,10 @@ import type { FakeResource } from '@/test/fakeBackend'
  * - 列表与预约卡多图取首图；详情多图为主图 + 缩略图切换（参照房源详情画廊写法）；
  * - 契约：`public_resource.images` 逗号分隔存储、接口返回 `string[]`，无图为空数组 `[]`（不是 null）。
  */
-vi.mock('@/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
-vi.mock('@/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
-vi.mock('@/api/reservation', async () => (await import('@/test/fakeBackend')).fakeApi('reservation'))
-vi.mock('@/api/housing', async () => (await import('@/test/fakeBackend')).fakeApi('housing'))
+vi.mock('@/common/community/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
+vi.mock('@/common/resident/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
+vi.mock('@/common/reservation/api/reservation', async () => (await import('@/test/fakeBackend')).fakeApi('reservation'))
+vi.mock('@/common/housing/api/housing', async () => (await import('@/test/fakeBackend')).fakeApi('housing'))
 
 const backend = () => getFakeBackend()
 

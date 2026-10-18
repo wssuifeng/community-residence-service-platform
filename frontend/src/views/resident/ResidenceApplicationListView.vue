@@ -2,13 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import Pagination from '@/components/common/Pagination.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import { getResidenceApplicationList, withdrawResidenceApplication } from '@/api/resident'
-import { openDirectConversation } from '@/api/conversation'
-import type { IResidenceApplication, ResidenceApplicationStatus } from '@/types/modules/resident'
-import { relationTypeLabels, residenceApplicationStatusLabels } from '@/types/modules/resident'
-import { formatDateTime } from '@/utils/date'
+import Pagination from '@/common/web/components/Pagination.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import { getResidenceApplicationList, withdrawResidenceApplication } from '@/common/resident/api/resident'
+import { openDirectConversation } from '@/common/conversation/api/conversation'
+import type { IResidenceApplication, ResidenceApplicationStatus } from '@/common/resident/types/resident'
+import { relationTypeLabels, residenceApplicationStatusLabels } from '@/common/resident/types/resident'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 我的入住申请（批次 g，修复「申请提交后两端都看不到」的居民侧）：

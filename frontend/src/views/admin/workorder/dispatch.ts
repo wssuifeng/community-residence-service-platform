@@ -3,7 +3,7 @@
  * 契约层（types/modules/workorder.ts、api/workorder.ts）已冻结，此处只放「阶段分组 + 展示
  * 格式化 + 客户端排序」，供看板、列表表格与详情头部复用，避免同一口径在多处各写一份。
  */
-import type { IWorkOrder, WorkOrderPriority, WorkOrderSort, WorkOrderStatus } from '@/types/modules/workorder'
+import type { IWorkOrder, WorkOrderPriority, WorkOrderSort, WorkOrderStatus } from '@/common/workorder/types/workorder'
 
 /** 调度看板阶段列（列顺序即工单处置推进顺序） */
 export interface IDispatchStage {

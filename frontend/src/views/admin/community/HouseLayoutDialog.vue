@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { updateHouseLayouts } from '@/api/community'
-import type { IHouse } from '@/types/modules/community'
+import { updateHouseLayouts } from '@/common/community/api/community'
+import type { IHouse } from '@/common/community/types/community'
 const props = defineProps<{ houses: IHouse[] }>()
 const visible = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ saved: [unitIds: number[]] }>()

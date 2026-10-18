@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { contractEnd } from '@/utils/leaseTerms'
-import LeaseTermsPanel from '@/components/business/LeaseTermsPanel.vue'
-import { leaseDisplayLabel } from '@/utils/leaseDisplay'
-import { leaseHouseholdNotice } from '@/utils/leaseHousehold'
+import { contractEnd } from '@/common/lease/utils/leaseTerms'
+import LeaseTermsPanel from '@/common/lease/components/LeaseTermsPanel.vue'
+import { leaseDisplayLabel } from '@/common/lease/utils/leaseDisplay'
+import { leaseHouseholdNotice } from '@/common/lease/utils/leaseHousehold'
 import { computed, onMounted, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
-import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import AgreementSignPanel from '@/common/agreement/components/AgreementSignPanel.vue'
+import ConversationEntry from '@/common/conversation/components/ConversationEntry.vue'
 import LeaseOverviewPanel from './detail/LeaseOverviewPanel.vue'
 import LeaseFeeRecords from './detail/LeaseFeeRecords.vue'
 import LeaseBusinessRecords from './detail/LeaseBusinessRecords.vue'
 import { leaseNo } from './detail/display'
 import DepositRefundDialog from './DepositRefundDialog.vue'
-import { getConversation, ensureLeaseGroupConversation, openDirectConversation } from '@/api/conversation'
-import type { IConversation } from '@/types/modules/conversation'
+import { getConversation, ensureLeaseGroupConversation, openDirectConversation } from '@/common/conversation/api/conversation'
+import type { IConversation } from '@/common/conversation/types/conversation'
 import {
   getLease,
   getLeaseChanges,
@@ -25,7 +25,7 @@ import {
   listLeaseViewings,
   updateLease,
   updateLeaseStatus
-} from '@/api/lease'
+} from '@/common/lease/api/lease'
 import type {
   DepositStatus,
   IDepositRefund,
@@ -33,14 +33,14 @@ import type {
   ILeasePayment,
   ILeaseRecord,
   LeaseStatus
-} from '@/types/modules/lease'
+} from '@/common/lease/types/lease'
 import {
   depositStatusLabels,
-} from '@/types/modules/lease'
-import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
-import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
-import type { IViewingAppointment } from '@/types/modules/housing'
-import { formatDate } from '@/utils/date'
+} from '@/common/lease/types/lease'
+import type { LeaseAgreementSignStatus } from '@/common/agreement/types/agreement'
+import { leaseAgreementSignStatusLabels } from '@/common/agreement/types/agreement'
+import type { IViewingAppointment } from '@/common/housing/types/housing'
+import { formatDate } from '@/common/web/utils/date'
 
 /**
  * 租约详情（管理端下钻页，沿用工单详情「面包屑 + 状态条 + 分区面板」范式）：

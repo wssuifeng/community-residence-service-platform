@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { assignWorkOrder, listAssignableStaff } from '@/api/workorder'
-import type { IStaffOption, IWorkOrder } from '@/types/modules/workorder'
-import { staffRecommendLevelLabels } from '@/types/modules/workorder'
+import { assignWorkOrder, listAssignableStaff } from '@/common/workorder/api/workorder'
+import type { IStaffOption, IWorkOrder } from '@/common/workorder/types/workorder'
+import { staffRecommendLevelLabels } from '@/common/workorder/types/workorder'
 import { isReassignOrder } from './dispatch'
 
 /**

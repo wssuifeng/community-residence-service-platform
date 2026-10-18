@@ -1,11 +1,11 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
-import ConversationChat from '@/components/business/ConversationChat.vue'
-import { getConversation } from '@/api/conversation'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
+import ConversationChat from '@/common/conversation/components/ConversationChat.vue'
+import { getConversation } from '@/common/conversation/api/conversation'
 import {
   listViewingAppointments,
   confirmViewingAppointment,
@@ -14,12 +14,12 @@ import {
   violateViewingAppointment,
   assignViewingAppointment,
   listAssignableAssignees
-} from '@/api/housing'
-import type { IViewingAppointment, ViewingAppointmentStatus } from '@/types/modules/housing'
-import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
-import type { SystemRole } from '@/types/modules/auth'
-import { systemRoleLabels } from '@/types/modules/auth'
-import { formatDateTime } from '@/utils/date'
+} from '@/common/housing/api/housing'
+import type { IViewingAppointment, ViewingAppointmentStatus } from '@/common/housing/types/housing'
+import { viewingAppointmentStatusLabels } from '@/common/housing/types/housing'
+import type { SystemRole } from '@/common/auth/types/auth'
+import { systemRoleLabels } from '@/common/auth/types/auth'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 看房预约管理（管理端 Tab 内容）：筛选 + TO_CONFIRM 确认/拒绝 + RESERVED 完成/违约处置

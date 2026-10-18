@@ -6,10 +6,10 @@ import ElementPlus from 'element-plus'
 import DashboardView from '../DashboardView.vue'
 
 const mocks = vi.hoisted(() => ({ workload: vi.fn(), orders: vi.fn(), notices: vi.fn() }))
-vi.mock('@/api/statistics', () => ({ getStaffWorkloadStats: mocks.workload }))
-vi.mock('@/api/workorder', () => ({ listWorkOrders: mocks.orders }))
-vi.mock('@/api/notification', () => ({ listNotifications: mocks.notices }))
-vi.mock('@/components/common/EChart.vue', () => ({ default: { name: 'EChartStub', props: ['option', 'height'], template: '<div data-testid="chart" />' } }))
+vi.mock('@/common/statistics/api/statistics', () => ({ getStaffWorkloadStats: mocks.workload }))
+vi.mock('@/common/workorder/api/workorder', () => ({ listWorkOrders: mocks.orders }))
+vi.mock('@/common/messaging/api/notification', () => ({ listNotifications: mocks.notices }))
+vi.mock('@/common/statistics/components/EChart.vue', () => ({ default: { name: 'EChartStub', props: ['option', 'height'], template: '<div data-testid="chart" />' } }))
 
 const stats = { days: 7, startDate: '2026-10-06', endDate: '2026-10-12', assignedTrend: { '2026-10-12': 4 }, submittedTrend: { '2026-10-12': 3 }, todayAssigned: 4, todaySubmitted: 3, totalSubmitted: 3 }
 async function open() {

@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import ElementPlus from 'element-plus'
-import type { ILeasePayment, ILeaseRecord } from '@/types/modules/lease'
-import { ApiError } from '@/utils/request'
+import type { ILeasePayment, ILeaseRecord } from '@/common/lease/types/lease'
+import { ApiError } from '@/common/web/utils/request'
 import LeaseFirstPaymentDialog from '../LeaseFirstPaymentDialog.vue'
 import LeaseRenewDialog from '../LeaseRenewDialog.vue'
 
@@ -34,7 +34,7 @@ const mocks = vi.hoisted(() => ({
   ] as unknown[]
 }))
 
-vi.mock('@/api/lease', () => ({
+vi.mock('@/common/lease/api/lease', () => ({
   listLeasePayments: async () => {
     if (mocks.listThrows) throw new Error('网络异常')
     const index = Math.min(mocks.listCalls, mocks.listQueue.length - 1)
@@ -44,7 +44,7 @@ vi.mock('@/api/lease', () => ({
   }
 }))
 
-vi.mock('@/api/payment', () => ({
+vi.mock('@/common/payment/api/payment', () => ({
   getRentQuote: async () => ({ months: 3, amount: 9000, periodStart: '2026-10-15', periodEnd: '2027-01-14' }),
   createRentPayment: async () => mocks.createResult,
   listPaymentChannels: async () => mocks.channels,

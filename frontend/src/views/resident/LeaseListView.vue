@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import LeaseTermsPanel from '@/components/business/LeaseTermsPanel.vue'
-import { leaseDisplayLabel } from '@/utils/leaseDisplay'
+import LeaseTermsPanel from '@/common/lease/components/LeaseTermsPanel.vue'
+import { leaseDisplayLabel } from '@/common/lease/utils/leaseDisplay'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import Pagination from '@/components/common/Pagination.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 import LeaseRenewDialog from './LeaseRenewDialog.vue'
 import LeaseFirstPaymentDialog from './LeaseFirstPaymentDialog.vue'
 import LeaseMoveOutDialog from './LeaseMoveOutDialog.vue'
-import AgreementSignPanel from '@/components/business/AgreementSignPanel.vue'
-import LeaseTimeline from '@/components/business/LeaseTimeline.vue'
+import AgreementSignPanel from '@/common/agreement/components/AgreementSignPanel.vue'
+import LeaseTimeline from '@/common/lease/components/LeaseTimeline.vue'
 import {
   getLeaseChanges,
   getLeaseList,
   listDepositRefunds,
   listLeasePayments
-} from '@/api/lease'
-import { formatDateTime } from '@/utils/date'
+} from '@/common/lease/api/lease'
+import { formatDateTime } from '@/common/web/utils/date'
 
 import {
   depositRefundStatusLabels,
   depositStatusLabels,
   leasePaymentTypeLabels,
-} from '@/types/modules/lease'
-import { leaseAgreementSignStatusLabels } from '@/types/modules/agreement'
+} from '@/common/lease/types/lease'
+import { leaseAgreementSignStatusLabels } from '@/common/agreement/types/agreement'
 import type {
   DepositStatus,
   IDepositRefund,
@@ -33,8 +33,8 @@ import type {
   LeasePaymentType,
   PaymentChannel,
   PaymentStatus
-} from '@/types/modules/lease'
-import type { LeaseAgreementSignStatus } from '@/types/modules/agreement'
+} from '@/common/lease/types/lease'
+import type { LeaseAgreementSignStatus } from '@/common/agreement/types/agreement'
 
 /**
  * 我的租约（R61 v1.4 / R66~R71 批次 f / R72~R73 批次 h）：租住签约闭环的居民侧主入口。

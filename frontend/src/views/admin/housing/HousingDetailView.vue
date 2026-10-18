@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
-import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
+import HouseImageDialog from '@/common/community/components/HouseImageDialog.vue'
+import { HOUSE_PHOTO_EMPTY } from '@/common/community/utils/housePhoto'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
 import {
   getHousingDetail,
   updateHousing,
@@ -14,7 +14,7 @@ import {
   updateHousingTimeslot,
   deleteHousingTimeslot,
   listViewingAppointments
-} from '@/api/housing'
+} from '@/common/housing/api/housing'
 import type {
   IHousing,
   IHousingTimeslot,
@@ -22,9 +22,9 @@ import type {
   HousingStatus,
   HousingTimeslotSaveDTO,
   ViewingAppointmentStatus
-} from '@/types/modules/housing'
-import { housingStatusLabels, viewingAppointmentStatusLabels } from '@/types/modules/housing'
-import { formatDateTime } from '@/utils/date'
+} from '@/common/housing/types/housing'
+import { housingStatusLabels, viewingAppointmentStatusLabels } from '@/common/housing/types/housing'
+import { formatDateTime } from '@/common/web/utils/date'
 import { HOUSING_WEEKDAY_OPTIONS } from './housingWeekdayOptions'
 
 /**

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getCommunityList } from '@/api/community'
+import { getCommunityList } from '@/common/community/api/community'
 import {
   createServiceCategory,
   deleteServiceCategory,
   getServiceCategory,
   getServiceCategoryTree,
   updateServiceCategory
-} from '@/api/workorder'
-import type { ICommunity } from '@/types/modules/community'
-import type { IServiceCategory, IServiceCategoryTreeNode } from '@/types/modules/workorder'
-import { useUserStore } from '@/store/user'
+} from '@/common/workorder/api/workorder'
+import type { ICommunity } from '@/common/community/types/community'
+import type { IServiceCategory, IServiceCategoryTreeNode } from '@/common/workorder/types/workorder'
+import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 服务类别抽屉（原 /admin/service-categories 独立页收编，对照 design-mockups/admin/03 任务 4）：

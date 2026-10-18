@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import EChart, { type ChartOption } from '@/components/common/EChart.vue'
-import StatCard from '@/components/common/StatCard.vue'
-import { getWorkOrderStats, getResidentStats, getResourceStats } from '@/api/statistics'
-import { workOrderStatusLabels } from '@/types/modules/workorder'
-import { residentStatusLabels } from '@/types/modules/resident'
-import { reservationStatusLabels } from '@/types/modules/reservation'
-import type { IWorkOrderStats, IResidentStats, IResourceStats } from '@/types/modules/statistics'
+import EChart, { type ChartOption } from '@/common/statistics/components/EChart.vue'
+import StatCard from '@/common/web/components/StatCard.vue'
+import { getWorkOrderStats, getResidentStats, getResourceStats } from '@/common/statistics/api/statistics'
+import { workOrderStatusLabels } from '@/common/workorder/types/workorder'
+import { residentStatusLabels } from '@/common/resident/types/resident'
+import { reservationStatusLabels } from '@/common/reservation/types/reservation'
+import type { IWorkOrderStats, IResidentStats, IResourceStats } from '@/common/statistics/types/statistics'
 
 /**
  * 详细统计：工单 / 居民 / 资源预约三维度 Tab 合并页。

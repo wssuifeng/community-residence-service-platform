@@ -8,7 +8,7 @@ import residentRoutes from '@/router/resident'
 import staffRoutes from '@/router/staff'
 import adminRoutes from '@/router/admin'
 
-vi.mock('@/store/user', () => ({ useUserStore: () => ({ role: 'ADMIN', user: { id: 1 } }) }))
+vi.mock('@/common/auth/store/user', () => ({ useUserStore: () => ({ role: 'ADMIN', user: { id: 1 } }) }))
 vi.mock('@/store/adminTodo', () => ({ useAdminTodoStore: () => ({ counts: {}, refresh: vi.fn().mockResolvedValue(undefined) }) }))
 vi.mock('vue-router', async importOriginal => ({
   ...await importOriginal<typeof import('vue-router')>(),

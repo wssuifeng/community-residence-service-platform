@@ -1,9 +1,9 @@
 import { mount, flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import EvaluationManageView from '../EvaluationManageView.vue'
-import { getEvaluationStatistics, listEvaluationFollowups, listEvaluations, listUnsatisfiedEvaluations } from '@/api/evaluation'
+import { getEvaluationStatistics, listEvaluationFollowups, listEvaluations, listUnsatisfiedEvaluations } from '@/common/evaluation/api/evaluation'
 vi.mock('vue-router', () => ({ useRoute: () => ({ query: {} }), useRouter: () => ({ replace: vi.fn(), push: vi.fn() }) }))
-vi.mock('@/api/evaluation', () => ({ getEvaluationStatistics: vi.fn(), listEvaluationFollowups: vi.fn(), listEvaluations: vi.fn(), listUnsatisfiedEvaluations: vi.fn() }))
+vi.mock('@/common/evaluation/api/evaluation', () => ({ getEvaluationStatistics: vi.fn(), listEvaluationFollowups: vi.fn(), listEvaluations: vi.fn(), listUnsatisfiedEvaluations: vi.fn() }))
 vi.mock('element-plus', () => ({ ElMessage: { error: vi.fn() } }))
 const empty = { records: [], total: 0, page: 1, size: 10, pages: 0 }
 const entry = { id: 1, workOrderId: 2, workOrderNo: 'WO2', residentName: '真实居民', rating: 2, isSatisfied: 0, content: '评价内容', createdAt: '2026-10-01' }

@@ -2,8 +2,8 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createHouse, getBuildingList, getHouseList, getUnitList } from '@/api/community'
-import type { IBuilding, ICommunity, IHouse, IUnit } from '@/types/modules/community'
+import { createHouse, getBuildingList, getHouseList, getUnitList } from '@/common/community/api/community'
+import type { IBuilding, ICommunity, IHouse, IUnit } from '@/common/community/types/community'
 import { SKIP_SYNTAX_HINT, planHouseRows } from '@/views/admin/community/structureBatch'
 import type { GenerateRow } from '@/views/admin/community/structureBatch'
 

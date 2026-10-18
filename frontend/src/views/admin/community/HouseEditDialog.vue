@@ -3,9 +3,9 @@ import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import HouseAttributesDialog from './HouseAttributesDialog.vue'
-import { createHouse, updateHouse } from '@/api/community'
-import type { IHouse, IHouseDTO, HouseStatus } from '@/types/modules/community'
-import { houseStatusLabels } from '@/types/modules/community'
+import { createHouse, updateHouse } from '@/common/community/api/community'
+import type { IHouse, IHouseDTO, HouseStatus } from '@/common/community/types/community'
+import { houseStatusLabels } from '@/common/community/types/community'
 
 /**
  * 房屋新建/编辑小对话框（第三轮 C4，结构总览网格便捷操作用）：

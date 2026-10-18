@@ -2,15 +2,15 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import ImageUploader from '@/components/common/ImageUploader.vue'
-import { getMyProfile, getResidentResidenceList } from '@/api/resident'
-import { getServiceCategoryTree, submitWorkOrder, uploadWorkOrderAttachment } from '@/api/workorder'
+import ImageUploader from '@/common/upload/components/ImageUploader.vue'
+import { getMyProfile, getResidentResidenceList } from '@/common/resident/api/resident'
+import { getServiceCategoryTree, submitWorkOrder, uploadWorkOrderAttachment } from '@/common/workorder/api/workorder'
 import type {
   IServiceCategoryTreeNode,
   WorkOrderPriority
-} from '@/types/modules/workorder'
-import { workOrderPriorityLabels } from '@/types/modules/workorder'
-import type { ResidenceRelationStatus } from '@/types/modules/resident'
+} from '@/common/workorder/types/workorder'
+import { workOrderPriorityLabels } from '@/common/workorder/types/workorder'
+import type { ResidenceRelationStatus } from '@/common/resident/types/resident'
 
 /** 提交工单（UI设计.md §3.1 / 4.1.2）：类别选择 + 描述 + 紧急程度 + 图片上传 */
 

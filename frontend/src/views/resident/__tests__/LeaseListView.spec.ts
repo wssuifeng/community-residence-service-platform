@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import ElementPlus from 'element-plus'
 import { createMemoryHistory, createRouter, type Router } from 'vue-router'
-import type { ILeasePayment, ILeaseRecord } from '@/types/modules/lease'
+import type { ILeasePayment, ILeaseRecord } from '@/common/lease/types/lease'
 import LeaseListView from '../LeaseListView.vue'
 import residentRoutes from '@/router/resident'
 
@@ -25,7 +25,7 @@ const mocks = vi.hoisted(() => ({
   }
 }))
 
-vi.mock('@/api/lease', () => ({
+vi.mock('@/common/lease/api/lease', () => ({
   getLeaseList: async () => ({
     records: mocks.state.leases,
     total: mocks.state.leases.length
@@ -41,7 +41,7 @@ vi.mock('@/api/lease', () => ({
   getLease: async () => mocks.state.leases[0]
 }))
 
-vi.mock('@/api/payment', () => ({
+vi.mock('@/common/payment/api/payment', () => ({
   listMyPayments: async () => ({ records: [], total: 0 }),
   createFirstPayment: async () => ({}),
   createRenewPayment: async () => ({}),

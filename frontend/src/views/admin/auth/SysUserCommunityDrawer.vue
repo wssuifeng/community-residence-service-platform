@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getSysUser, getUserCommunities, bindCommunity, unbindCommunity } from '@/api/sysuser'
-import { getCommunityList } from '@/api/community'
-import type { ICommunity } from '@/types/modules/community'
-import type { ISysUser, IUserCommunityBinding } from '@/types/modules/auth'
-import { systemRoleLabels, userStatusLabels } from '@/types/modules/auth'
-import { formatDateTime } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
+import { getSysUser, getUserCommunities, bindCommunity, unbindCommunity } from '@/common/auth/api/sysuser'
+import { getCommunityList } from '@/common/community/api/community'
+import type { ICommunity } from '@/common/community/types/community'
+import type { ISysUser, IUserCommunityBinding } from '@/common/auth/types/auth'
+import { systemRoleLabels, userStatusLabels } from '@/common/auth/types/auth'
+import { formatDateTime } from '@/common/web/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
 
 /**
  * 社区绑定抽屉（原 /admin/sys-users/:id/communities 独立页收编，对照 design-mockups/admin/11 任务 12）：

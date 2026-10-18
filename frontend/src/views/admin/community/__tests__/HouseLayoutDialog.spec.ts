@@ -2,8 +2,8 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import ElementPlus from 'element-plus'
 import HouseLayoutDialog from '../HouseLayoutDialog.vue'
-import { updateHouseLayouts } from '@/api/community'
-vi.mock('@/api/community', () => ({ updateHouseLayouts: vi.fn() }))
+import { updateHouseLayouts } from '@/common/community/api/community'
+vi.mock('@/common/community/api/community', () => ({ updateHouseLayouts: vi.fn() }))
 const houses = [{ id: 1, unitId: 10, houseNumber: '101', layout: '两室一厅' }, { id: 2, unitId: 11, houseNumber: '201', layout: '三室一厅一卫' }] as any
 async function open() {
  const wrapper = mount(HouseLayoutDialog, { props: { modelValue: false, houses }, global: { plugins: [ElementPlus], stubs: { ElDialog: { template: '<div><slot /><slot name="footer" /></div>' } } } })

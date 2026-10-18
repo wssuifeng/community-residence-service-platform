@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getCommunityList, getResourceList, getTimeslotList } from '@/api/community'
-import { getMyResidenceRelations } from '@/api/resident'
-import type { ICommunity, IPublicResource, ResourceType } from '@/types/modules/community'
-import { resourceTypeLabels } from '@/types/modules/community'
+import { getCommunityList, getResourceList, getTimeslotList } from '@/common/community/api/community'
+import { getMyResidenceRelations } from '@/common/resident/api/resident'
+import type { ICommunity, IPublicResource, ResourceType } from '@/common/community/types/community'
+import { resourceTypeLabels } from '@/common/community/types/community'
 
 /**
  * 公共资源列表（居民端三段预约流第一段）：

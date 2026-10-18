@@ -2,10 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
-import { getConversation } from '@/api/conversation'
-import type { IConversation } from '@/types/modules/conversation'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import ConversationEntry from '@/common/conversation/components/ConversationEntry.vue'
+import { getConversation } from '@/common/conversation/api/conversation'
+import type { IConversation } from '@/common/conversation/types/conversation'
 import {
   cancelWorkOrder,
   confirmWorkOrder,
@@ -13,17 +13,17 @@ import {
   getWorkOrderTimeline,
   listWorkOrderAttachments,
   returnWorkOrder
-} from '@/api/workorder'
-import { getEvaluation, submitEvaluation } from '@/api/evaluation'
+} from '@/common/workorder/api/workorder'
+import { getEvaluation, submitEvaluation } from '@/common/evaluation/api/evaluation'
 import type {
   IWorkOrder,
   IWorkOrderAttachment,
   IWorkOrderProcess,
   WorkOrderStatus
-} from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
-import type { IEvaluation } from '@/types/modules/evaluation'
-import { formatDateTime, formatRelative } from '@/utils/date'
+} from '@/common/workorder/types/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/common/workorder/types/workorder'
+import type { IEvaluation } from '@/common/evaluation/types/evaluation'
+import { formatDateTime, formatRelative } from '@/common/web/utils/date'
 
 /** 工单详情（UI设计.md §4.1.3）：信息卡片 + 处理时间线 + 状态流转操作 + 评价 */
 

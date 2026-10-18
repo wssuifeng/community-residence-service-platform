@@ -10,20 +10,20 @@ import HousesWithHousingView from '../community/HousesWithHousingView.vue'
 const mocks = vi.hoisted(() => ({
   role: 'ADMIN', detail: vi.fn(), timeslots: vi.fn(), housings: vi.fn(), houses: vi.fn()
 }))
-vi.mock('@/api/housing', () => ({
+vi.mock('@/common/housing/api/housing', () => ({
   getHousingDetail: mocks.detail, listHousingTimeslots: mocks.timeslots, listHousings: mocks.housings,
   listViewingAppointments: async () => ({ records: [], total: 0 }),
   createHousing: vi.fn(), updateHousing: vi.fn(), deleteHousing: vi.fn(),
   updateHousingStatus: vi.fn(), createHousingTimeslot: vi.fn(),
   updateHousingTimeslot: vi.fn(), deleteHousingTimeslot: vi.fn()
 }))
-vi.mock('@/api/community', () => ({
+vi.mock('@/common/community/api/community', () => ({
   getCommunityList: async () => ({ records: [], total: 0 }),
   getBuildingList: async () => ({ records: [], total: 0 }),
   getUnitList: async () => ({ records: [], total: 0 }),
   getHouseList: async () => ({ records: [], total: 0 })
 }))
-vi.mock('@/utils/request', () => ({ http: { get: mocks.houses } }))
+vi.mock('@/common/web/utils/request', () => ({ http: { get: mocks.houses } }))
 
 const housing = {
   id: 7, houseId: 42, communityId: 1, communityName: '测试社区', houseLocation: '1号楼101',

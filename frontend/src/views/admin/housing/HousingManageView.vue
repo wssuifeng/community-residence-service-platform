@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
@@ -7,7 +7,7 @@ import AdminStatCard from '@/components/admin/AdminStatCard.vue'
 import HousesWithHousingView from '@/views/admin/community/HousesWithHousingView.vue'
 import HousingListView from './HousingListView.vue'
 import ViewingAppointmentListView from './ViewingAppointmentListView.vue'
-import { listHousings, listViewingAppointments } from '@/api/housing'
+import { listHousings, listViewingAppointments } from '@/common/housing/api/housing'
 
 /**
  * 房源管理（「租住与房源」Hub 的房源管理子视图，批次 g）：页内三分区

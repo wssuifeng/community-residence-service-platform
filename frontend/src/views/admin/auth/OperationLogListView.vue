@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getOperationLogList, getOperationLogDetail } from '@/api/operationlog'
-import type { IOperationLog, IOperationLogDetail } from '@/types/modules/auth'
-import { formatDateTime } from '@/utils/date'
-import SearchBar from '@/components/common/SearchBar.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
-import Pagination from '@/components/common/Pagination.vue'
+import { getOperationLogList, getOperationLogDetail } from '@/common/auth/api/operationlog'
+import type { IOperationLog, IOperationLogDetail } from '@/common/auth/types/auth'
+import { formatDateTime } from '@/common/web/utils/date'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 
 /** 操作日志：多维筛选 + 分页列表 + 行点击详情（含 requestParams JSON 展示） */
 

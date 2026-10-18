@@ -2,11 +2,11 @@
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import ImageUploader from '@/components/common/ImageUploader.vue'
-import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
-import { getConversation } from '@/api/conversation'
-import type { IConversation } from '@/types/modules/conversation'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import ImageUploader from '@/common/upload/components/ImageUploader.vue'
+import ConversationEntry from '@/common/conversation/components/ConversationEntry.vue'
+import { getConversation } from '@/common/conversation/api/conversation'
+import type { IConversation } from '@/common/conversation/types/conversation'
 import {
   acceptWorkOrder,
   completeWorkOrder,
@@ -15,18 +15,18 @@ import {
   listWorkOrderAttachments,
   processWorkOrder,
   uploadWorkOrderAttachment
-} from '@/api/workorder'
+} from '@/common/workorder/api/workorder'
 import type {
   IWorkOrder,
   IWorkOrderAttachment,
   IWorkOrderProcess,
   WorkOrderPriority,
   WorkOrderStatus
-} from '@/types/modules/workorder'
-import { workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
-import { formatDateTime } from '@/utils/date'
-import { residentDisplayName, residentInitial, residentRelationLabel } from '@/utils/staffResidentPresentation'
-import { useUserStore } from '@/store/user'
+} from '@/common/workorder/types/workorder'
+import { workOrderStatusLabels, workOrderPriorityLabels } from '@/common/workorder/types/workorder'
+import { formatDateTime } from '@/common/web/utils/date'
+import { residentDisplayName, residentInitial, residentRelationLabel } from '@/common/resident/utils/staffResidentPresentation'
+import { useUserStore } from '@/common/auth/store/user'
 
 /** 工单详情（UI设计.md §4.2.2）：面包屑 + 状态条 + 工单信息 / 处理时间线 / 操作面板（对照 design-mockups/staff/03） */
 

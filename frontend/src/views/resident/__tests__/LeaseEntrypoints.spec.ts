@@ -14,12 +14,12 @@ import type { FakeLease } from '@/test/fakeBackend'
  *    无群不渲染；「入住申请入口」已通过项同样能进会话（有群进群、无群走居民侧直通会话）。
  * ② 支付租金/押金——租约展开区把「首期费用」拆成月租金/押金两行明示，并给出可点击的支付入口。
  */
-vi.mock('@/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
-vi.mock('@/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
-vi.mock('@/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
-vi.mock('@/api/payment', async () => (await import('@/test/fakeBackend')).fakeApi('payment'))
-vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
-vi.mock('@/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
+vi.mock('@/common/lease/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
+vi.mock('@/common/resident/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
+vi.mock('@/common/agreement/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
+vi.mock('@/common/payment/api/payment', async () => (await import('@/test/fakeBackend')).fakeApi('payment'))
+vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
+vi.mock('@/common/upload/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
 
 const backend = () => getFakeBackend()
 
@@ -319,7 +319,7 @@ describe('居民端入住申请 · 租约/会话入口（V26 强关联 lease_id�
   })
 
   it('假后端对齐 V26：审批通过时写死 lease_id，VO 直接取该列', async () => {
-    const residentApi = await import('@/api/resident')
+    const residentApi = await import('@/common/resident/api/resident')
     backend().state.residenceApplications.push({
       id: 1,
       residentId: 1,

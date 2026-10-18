@@ -11,17 +11,17 @@ const mocks = vi.hoisted(() => ({
   getConversation: vi.fn()
 }))
 
-vi.mock('@/api/housing', () => ({
+vi.mock('@/common/housing/api/housing', () => ({
   listViewingAppointments: mocks.listViewingAppointments,
   completeViewingAppointment: mocks.completeViewingAppointment,
   violateViewingAppointment: mocks.violateViewingAppointment
 }))
 
-vi.mock('@/api/conversation', () => ({
+vi.mock('@/common/conversation/api/conversation', () => ({
   getConversation: mocks.getConversation
 }))
 
-vi.mock('@/components/business/ConversationChat.vue', () => ({
+vi.mock('@/common/conversation/components/ConversationChat.vue', () => ({
   default: defineComponent({
     name: 'ConversationChat',
     props: { conversationId: { type: Number, required: true }, closed: Boolean },
@@ -29,7 +29,7 @@ vi.mock('@/components/business/ConversationChat.vue', () => ({
   })
 }))
 
-vi.mock('@/components/business/AppointmentChat.vue', () => ({
+vi.mock('@/common/conversation/components/AppointmentChat.vue', () => ({
   default: defineComponent({
     name: 'AppointmentChat',
     props: { appointmentId: { type: Number, required: true } },

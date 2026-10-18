@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import HousingReservationForm from '@/components/housing/HousingReservationForm.vue'
+import HousingReservationForm from '@/common/housing/components/HousingReservationForm.vue'
 const route = useRoute(), router = useRouter()
 const housingId = computed(() => Number(route.params.id))
 function created(id?: number) { void router.push(id ? '/resident/viewing-appointments/' + id : '/resident/reservations?tab=viewing') }

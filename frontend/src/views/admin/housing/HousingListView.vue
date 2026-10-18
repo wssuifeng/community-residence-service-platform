@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import HouseImageDialog from '@/components/business/HouseImageDialog.vue'
-import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
+import HouseImageDialog from '@/common/community/components/HouseImageDialog.vue'
+import { HOUSE_PHOTO_EMPTY } from '@/common/community/utils/housePhoto'
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import SearchBar from '@/components/common/SearchBar.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
 import {
   listHousings,
   createHousing,
   updateHousing,
   updateHousingStatus,
   deleteHousing
-} from '@/api/housing'
+} from '@/common/housing/api/housing'
 import {
   getCommunityList,
   getBuildingList,
   getUnitList,
   getHouseList
-} from '@/api/community'
-import type { IHousing, HousingStatus, HousingSaveDTO } from '@/types/modules/housing'
-import { housingStatusLabels } from '@/types/modules/housing'
-import type { ICommunity, IBuilding, IUnit, IHouse } from '@/types/modules/community'
+} from '@/common/community/api/community'
+import type { IHousing, HousingStatus, HousingSaveDTO } from '@/common/housing/types/housing'
+import { housingStatusLabels } from '@/common/housing/types/housing'
+import type { ICommunity, IBuilding, IUnit, IHouse } from '@/common/community/types/community'
 
 /**
  * 房源列表（管理端 Tab 内容）：摄影卡片网格 + 社区/状态/关键字筛选 + 分页 + 新建/编辑对话框。

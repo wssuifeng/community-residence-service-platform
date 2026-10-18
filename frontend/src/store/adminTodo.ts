@@ -1,8 +1,8 @@
-import { invalidateData } from '@/utils/dataFreshness'
+import { invalidateData } from '@/common/web/utils/dataFreshness'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { http } from '@/utils/request'
-import { loadSession } from '@/utils/auth'
+import { http } from '@/common/web/utils/request'
+import { loadSession } from '@/common/auth/utils/auth'
 export const useAdminTodoStore=defineStore('adminTodo',()=>{
  const counts=ref<Record<string,number>>({});let inflight:Promise<void>|null=null
  async function refresh(){if(inflight)return inflight;const session=loadSession();if(!session||!['ADMIN','SUPER_ADMIN'].includes(session.user.role)){counts.value={};return}

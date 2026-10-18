@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { findCoResidentCandidates, getResidenceDependents, createResidenceRelation, adminCreateResident } from '@/api/resident'
-import type { IResidenceRelation, IResident, IAdminCreateResidentVO } from '@/types/modules/resident'
-import { todayISO } from '@/utils/date'
+import { findCoResidentCandidates, getResidenceDependents, createResidenceRelation, adminCreateResident } from '@/common/resident/api/resident'
+import type { IResidenceRelation, IResident, IAdminCreateResidentVO } from '@/common/resident/types/resident'
+import { todayISO } from '@/common/web/utils/date'
 const props = defineProps<{ anchor: IResidenceRelation | null }>()
 const visible = defineModel<boolean>({ required: true })
 const emit = defineEmits<{ saved: [] }>()

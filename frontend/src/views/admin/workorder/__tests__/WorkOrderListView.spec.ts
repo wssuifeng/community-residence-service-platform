@@ -12,9 +12,9 @@ import type { FakeWorkOrder } from '@/test/fakeBackend'
  * `COMPLETED` 行可见，且两个动作都按 ADMIN / SUPER_ADMIN 角色收口（v-permission）；
  * 受理失败（状态已变）按 ApiError 文案提示，不静默。
  */
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
-vi.mock('@/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
-vi.mock('@/api/statistics', async () => (await import('@/test/fakeBackend')).fakeApi('statistics'))
+vi.mock('@/common/workorder/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/common/community/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
+vi.mock('@/common/statistics/api/statistics', async () => (await import('@/test/fakeBackend')).fakeApi('statistics'))
 
 const backend = () => getFakeBackend()
 

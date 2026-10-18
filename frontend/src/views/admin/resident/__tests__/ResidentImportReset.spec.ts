@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import ElementPlus from 'element-plus'
 import { describe, expect, it, vi } from 'vitest'
 import ResidentImportDialog from '../ResidentImportDialog.vue'
-vi.mock('@/api/resident', () => ({ importResidents: vi.fn() }))
+vi.mock('@/common/resident/api/resident', () => ({ importResidents: vi.fn() }))
 describe('居民CSV重新打开状态', () => {
  it('重新打开同步清空组件文件列表，允许再次选择同一文件', async () => {
   const w=mount(ResidentImportDialog,{props:{modelValue:true},global:{plugins:[ElementPlus],stubs:{ElDialog:{template:'<div><slot /><slot name="footer" /></div>'}}}})

@@ -1,4 +1,4 @@
-import { ApiError } from '@/utils/request'
+import { ApiError } from '@/common/web/utils/request'
 
 /**
  * 内存版「假后端」——**模拟 E2E** 的测试基建（不连真后端、不发网络请求）。

@@ -1,5 +1,5 @@
-import type { ILeaseChange, LeaseChangeType, LeaseChangeOperatorType } from '@/types/modules/lease'
-import { leaseChangeTypeLabels } from '@/types/modules/lease'
+import type { ILeaseChange, LeaseChangeType, LeaseChangeOperatorType } from '@/common/lease/types/lease'
+import { leaseChangeTypeLabels } from '@/common/lease/types/lease'
 /** 变更类型 → 标签配色：属性变更中性、续租蓝、状态流转紫、协议签约绿、押金退还青、登记蓝灰 */
 export const CHANGE_TONE: Record<LeaseChangeType, string> = {
   CREATE: 'is-neutral',

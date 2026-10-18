@@ -2,8 +2,8 @@
 import { reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { createUnit, getBuildingList, updateUnit } from '@/api/community'
-import type { IBuilding, ICommunity, IUnit, IUnitDTO } from '@/types/modules/community'
+import { createUnit, getBuildingList, updateUnit } from '@/common/community/api/community'
+import type { IBuilding, ICommunity, IUnit, IUnitDTO } from '@/common/community/types/community'
 
 /**
  * 单元新建/编辑对话框（任务 3 自 UnitListView 表单逻辑收编抽取，

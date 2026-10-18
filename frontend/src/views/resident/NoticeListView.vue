@@ -2,11 +2,11 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import Pagination from '@/components/common/Pagination.vue'
-import SearchBar from '@/components/common/SearchBar.vue'
-import { listNotices } from '@/api/notice'
-import type { INotice } from '@/types/modules/notice'
-import { formatDate } from '@/utils/date'
+import Pagination from '@/common/web/components/Pagination.vue'
+import SearchBar from '@/common/web/components/SearchBar.vue'
+import { listNotices } from '@/common/notice/api/notice'
+import type { INotice } from '@/common/notice/types/notice'
+import { formatDate } from '@/common/web/utils/date'
 
 /** 居民端公告列表：同步游客端 v5 定稿设计（衬线页头 + 置顶轮播 + 日期块期刊列表）；
     数据层维持居民登录态 listNotices 分页/搜索与关键词 URL 回写，详情跳转走居民端路由 */

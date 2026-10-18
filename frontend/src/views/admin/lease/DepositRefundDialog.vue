@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { createDepositRefund, listDepositRefunds } from '@/api/lease'
-import type { DepositRefundStatus, IDepositRefund, ILeasePayment, ILeaseRecord } from '@/types/modules/lease'
-import { depositRefundStatusLabels, depositStatusLabels } from '@/types/modules/lease'
-import { formatDateTime } from '@/utils/date'
+import { createDepositRefund, listDepositRefunds } from '@/common/lease/api/lease'
+import type { DepositRefundStatus, IDepositRefund, ILeasePayment, ILeaseRecord } from '@/common/lease/types/lease'
+import { depositRefundStatusLabels, depositStatusLabels } from '@/common/lease/types/lease'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 发起押金退还弹窗（R72，管理端专属；接口设计 §9.20.1）。
