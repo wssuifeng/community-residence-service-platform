@@ -37,7 +37,7 @@ const residentRoutes: RouteRecordRaw[] = [
       { path: 'reservations/create', name: 'ResidentReservationCreate', component: () => import('@/resident/reservation/views/ReservationCreateView.vue'), meta: { title: '创建预约' } },
       { path: 'notices', name: 'ResidentNotices', component: () => import('@/resident/notice/views/NoticeListView.vue'), meta: { title: residentPageTitle("/resident/notices") } },
       { path: 'notices/:id', name: 'ResidentNoticeDetail', component: () => import('@/resident/notice/views/NoticeDetailView.vue'), meta: { title: '公告详情' } },
-      { path: 'notifications', name: 'ResidentNotifications', component: () => import('@/resident/messaging/views/NotificationListView.vue'), meta: { title: '消息中心' } },
+      { path: 'notifications', name: 'ResidentNotifications', component: () => import('@/resident/messaging/views/NotificationListView.vue'), meta: { title: residentPageTitle("/resident/notifications") } },
       /* R63 多方会话：看房群聊/租约群聊/居民-社区管理员直通的独立会话页 */
       { path: 'conversations', name: 'ResidentConversations', component: () => import('@/resident/conversation/views/ConversationDetailView.vue'), meta: { title: residentPageTitle("/resident/conversations") } },
       { path: 'conversations/:id', name: 'ResidentConversationDetail', component: () => import('@/resident/conversation/views/ConversationDetailView.vue'), meta: { title: '会话' } },

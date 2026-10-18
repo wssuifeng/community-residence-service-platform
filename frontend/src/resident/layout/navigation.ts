@@ -50,6 +50,11 @@ export const navItems: NavItem[] = [
       "/resident/conversations"
     ],
     "pageTitle": "会话"
+  },
+  {
+    "label": "消息中心",
+    "to": "/resident/notifications",
+    "pageTitle": "消息中心"
   }
 ]
 

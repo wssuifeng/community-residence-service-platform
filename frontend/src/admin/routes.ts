@@ -51,6 +51,7 @@ const adminRoutes: RouteRecordRaw[] = [
     component: () => import('@/admin/layout/views/AdminLayout.vue'),
     meta: { roles: ['ADMIN', 'SUPER_ADMIN'] },
     children: [
+      { path: 'profile', name: 'AdminProfile', component: () => import('@/common/auth/views/SystemProfileView.vue'), meta: { title: '个人中心' } },
       { path: '', redirect: '/admin/dashboard' },
 
       // ---- 主路由（侧栏项；/admin/system 不加 roles：操作日志对 ADMIN 开放，

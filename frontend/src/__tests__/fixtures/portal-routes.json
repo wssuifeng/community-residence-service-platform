@@ -9,6 +9,13 @@
     },
     "children": [
       {
+        "path": "profile",
+        "name": "AdminProfile",
+        "meta": {
+          "title": "个人中心"
+        }
+      },
+      {
         "path": "",
         "redirect": "/admin/dashboard"
       },
@@ -670,6 +677,13 @@
       ]
     },
     "children": [
+      {
+        "path": "profile",
+        "name": "StaffProfile",
+        "meta": {
+          "title": "个人中心"
+        }
+      },
       {
         "path": "",
         "redirect": "/staff/dashboard"

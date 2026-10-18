@@ -38,6 +38,9 @@ const roleLabels: Record<string, string> = {
 
 const realName = computed(() => userStore.user?.realName ?? '未登录')
 const roleLabel = computed(() => roleLabels[userStore.role] ?? '')
+const portalBase = computed(() => userStore.role === 'RESIDENT' ? '/resident' : userStore.role === 'STAFF' ? '/staff' : '/admin')
+const profilePath = computed(() => `${portalBase.value}/profile`)
+const homePath = computed(() => userStore.role === 'RESIDENT' ? '/resident/home' : `${portalBase.value}/dashboard`)
 
 async function handleLogout(): Promise<void> {
   try {
@@ -58,7 +61,11 @@ async function handleLogout(): Promise<void> {
 }
 
 function handleCommand(command: string): void {
-  if (command === 'logout') {
+  if (command === 'profile') {
+    void router.push(profilePath.value)
+  } else if (command === 'home') {
+    void router.push(homePath.value)
+  } else if (command === 'logout') {
     void handleLogout()
   }
 }
@@ -157,15 +164,17 @@ async function handleBellItemClick(item: {
           <router-link class="bell-all" :to="`/${userStore.role === 'RESIDENT' ? 'resident' : userStore.role === 'STAFF' ? 'staff' : 'admin'}/notifications`" @click="bellPopoverRef?.hide()">进入消息中心 →</router-link>
         </el-popover>
         <template v-if="userStore.isLoggedIn">
-          <el-dropdown @command="handleCommand">
-            <span class="app-header-user-trigger">
+          <el-dropdown trigger="click" @command="handleCommand">
+            <button type="button" class="app-header-user-trigger" aria-label="个人菜单">
               <!-- 用户无头像字段，统一用首字圆形占位头像（主色底白字） -->
               <span class="app-header-avatar">{{ realName.slice(0, 1) }}</span>
               <span class="app-header-user-name">{{ realName }}（{{ roleLabel }}）</span>
-            </span>
+            </button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                <el-dropdown-item command="home">返回首页</el-dropdown-item>
+                <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -214,10 +223,19 @@ async function handleBellItemClick(item: {
   display: flex;
   gap: var(--spacing-md);
   flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.app-header-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .app-header-nav-item {
   color: var(--color-text-secondary);
+  flex-shrink: 0;
+  white-space: nowrap;
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
 }
@@ -232,6 +250,7 @@ async function handleBellItemClick(item: {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-shrink: 0;
   /* 兜底右对齐：nav 缺席或被压缩时用户集群仍贴容器右缘 */
   margin-left: auto;
 }
@@ -240,8 +259,18 @@ async function handleBellItemClick(item: {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
-  cursor: pointer;
+  border: 0;
+  padding: 0;
+  background: transparent;
   color: var(--color-text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.app-header-user-trigger:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .app-header-avatar {
@@ -370,24 +399,6 @@ async function handleBellItemClick(item: {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* 窄屏（<1200px，平板与手机）：导航项总宽超出可用空间时横向滚动兜底
-   （居民端导航增至 8 项），项保持单行不收缩，避免挤压换行 */
-@media (max-width: 1199px) {
-  .app-header-nav {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .app-header-nav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .app-header-nav-item {
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
 }
 </style>
 

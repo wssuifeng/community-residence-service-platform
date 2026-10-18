@@ -8,6 +8,7 @@ const staffRoutes: RouteRecordRaw[] = [
     component: () => import('@/staff/layout/views/StaffLayout.vue'),
     meta: { roles: ['STAFF'] },
     children: [
+      { path: 'profile', name: 'StaffProfile', component: () => import('@/common/auth/views/SystemProfileView.vue'), meta: { title: '个人中心' } },
       { path: '', redirect: '/staff/dashboard' },
       { path: 'dashboard', name: 'StaffDashboard', component: () => import('@/staff/workbench/views/DashboardView.vue'), meta: { title: staffPageTitle("/staff/dashboard") } },
       { path: 'work-orders', name: 'StaffWorkOrders', component: () => import('@/staff/workorder/views/WorkOrderListView.vue'), meta: { title: staffPageTitle("/staff/work-orders") } },
