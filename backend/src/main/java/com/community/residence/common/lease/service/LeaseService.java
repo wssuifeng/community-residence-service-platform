@@ -435,6 +435,30 @@ public class LeaseService {
         }
     }
 
+    /** 为同页列表批量装配名称和位置；不为每条租约分别读取四层结构。 */
+    public List<LeaseVO> batchViews(List<LeaseRecord> rows) {
+        if (rows.isEmpty()) return List.of();
+        var residents = residentMapper.selectByIds(rows.stream().map(LeaseRecord::getTenantId).distinct().toList()).stream().collect(java.util.stream.Collectors.toMap(Resident::getId, r -> r));
+        var houses = houseMapper.selectByIds(rows.stream().map(LeaseRecord::getHouseId).distinct().toList()).stream().collect(java.util.stream.Collectors.toMap(House::getId, h -> h));
+        var units = houses.isEmpty() ? Map.<Long,Unit>of() : unitMapper.selectByIds(houses.values().stream().map(House::getUnitId).distinct().toList()).stream().collect(java.util.stream.Collectors.toMap(Unit::getId, u -> u));
+        var buildings = units.isEmpty() ? Map.<Long,Building>of() : buildingMapper.selectByIds(units.values().stream().map(Unit::getBuildingId).distinct().toList()).stream().collect(java.util.stream.Collectors.toMap(Building::getId, b -> b));
+        var communities = communityMapper.selectByIds(rows.stream().map(LeaseRecord::getCommunityId).distinct().toList()).stream().collect(java.util.stream.Collectors.toMap(com.community.residence.common.community.entity.Community::getId, c -> c));
+        return rows.stream().map(row -> {
+            var vo = LeaseVO.from(row);
+            var tenant = residents.get(row.getTenantId()); if (tenant != null) vo.setTenantName(tenant.getRealName());
+            var house = houses.get(row.getHouseId());
+            var unit = house == null ? null : units.get(house.getUnitId());
+            var building = unit == null ? null : buildings.get(unit.getBuildingId());
+            if (unit != null) vo.setHouseLocation((building == null ? "" : building.getName()) + unit.getName() + house.getHouseNumber());
+            var community = communities.get(row.getCommunityId()); if (community != null) vo.setCommunityName(community.getName());
+            if ("ACTIVE".equals(row.getStatus()) && row.getEndDate() != null) {
+                if (row.getEndDate().isBefore(LocalDate.now())) vo.setExpiryFlag("EXPIRED");
+                else if (!row.getEndDate().isAfter(LocalDate.now().plusDays(EXPIRING_WINDOW_DAYS))) vo.setExpiryFlag("EXPIRING");
+            }
+            return vo;
+        }).toList();
+    }
+
     private LeaseVO toVO(LeaseRecord lease) {
         LeaseVO vo = LeaseVO.from(lease);
         Resident tenant = residentMapper.selectById(lease.getTenantId());

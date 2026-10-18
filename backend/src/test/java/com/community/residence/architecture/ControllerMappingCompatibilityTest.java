@@ -58,9 +58,9 @@ class ControllerMappingCompatibilityTest {
         List<String> expected = Files.readAllLines(BASELINE);
         assertThat(rows).containsAll(expected);
         var additions = new TreeSet<>(rows); additions.removeAll(expected);
-        assertThat(additions).hasSize(1);
-        assertThat(additions.first()).startsWith("{GET [/api/v1/staff/workbench/summary]}")
-                .contains("hasRole('STAFF')");
+        assertThat(additions).hasSize(2);
+        assertThat(additions.stream().filter(row -> row.startsWith("{GET [/api/v1/staff/workbench/summary]}"))).singleElement().asString().contains("hasRole('STAFF')");
+        assertThat(additions.stream().filter(row -> row.startsWith("{GET [/api/v1/leases/my-summaries]}"))).singleElement().asString().contains("hasRole('RESIDENT')");
         assertThat(registry.getHandlerMethods()).hasSize(rows.size());
     }
 
