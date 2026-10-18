@@ -1,0 +1,2538 @@
+[
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/controller/AgreementTemplateController.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/controller/AgreementTemplateController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/controller/LeaseAgreementController.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/controller/LeaseAgreementController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/dto/AgreementConfirmDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/dto/AgreementConfirmDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/dto/AgreementTemplateDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/dto/AgreementTemplateDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/dto/CreateAgreementDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/dto/CreateAgreementDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/entity/AgreementTemplate.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/entity/AgreementTemplate.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/entity/LeaseAgreement.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/entity/LeaseAgreement.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/mapper/AgreementTemplateMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/mapper/AgreementTemplateMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/mapper/LeaseAgreementMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/mapper/LeaseAgreementMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/service/AgreementService.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/service/AgreementService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/vo/AgreementTemplateVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/vo/AgreementTemplateVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/agreement/vo/LeaseAgreementVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/agreement/vo/LeaseAgreementVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/controller/AuthController.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/controller/AuthController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/controller/OperationLogController.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/controller/OperationLogController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/controller/SysUserController.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/controller/SysUserController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/dto/BindCommunityDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/dto/BindCommunityDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/dto/ChangePasswordDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/dto/ChangePasswordDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/dto/CreateSysUserDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/dto/CreateSysUserDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/dto/LoginDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/dto/LoginDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/dto/UpdateSysUserDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/dto/UpdateSysUserDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/dto/UpdateSysUserStatusDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/dto/UpdateSysUserStatusDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/entity/AuthTokenBlacklist.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/entity/AuthTokenBlacklist.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/entity/SysAdminCommunity.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/entity/SysAdminCommunity.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/entity/SysOperationLog.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/entity/SysOperationLog.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/entity/SysUser.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/entity/SysUser.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/mapper/AuthTokenBlacklistMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/mapper/AuthTokenBlacklistMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/mapper/SysAdminCommunityMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/mapper/SysAdminCommunityMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/mapper/SysOperationLogMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/mapper/SysOperationLogMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/mapper/SysUserMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/mapper/SysUserMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/service/AdminCommunityCacheService.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/service/AdminCommunityCacheService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/service/AuthService.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/service/AuthService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/service/OperationLogService.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/service/OperationLogService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/service/SysUserService.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/service/SysUserService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/service/TokenBlacklistService.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/service/TokenBlacklistService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/service/TokenRevocationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/service/TokenRevocationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/util/JwtUtil.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/util/JwtUtil.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/vo/BoundCommunityVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/vo/BoundCommunityVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/vo/LoginVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/vo/LoginVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/vo/OperationLogVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/vo/OperationLogVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/auth/vo/SysUserVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/vo/SysUserVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/ApplicationStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/constant/ApplicationStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/ChatMessageType.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/constant/ChatMessageType.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/CommonStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/constant/CommonStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/ConversationStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/constant/ConversationStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/ConversationType.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/constant/ConversationType.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/DepositRefundStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/constant/DepositRefundStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/DepositStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/constant/DepositStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/DispatchFlag.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/constant/DispatchFlag.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/ErrorCode.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/constant/ErrorCode.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/HouseStatusConstant.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/constant/HouseStatusConstant.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/LeaseStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/constant/LeaseStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/MoveOutStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/constant/MoveOutStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/NoticeStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/constant/NoticeStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/NotificationOwnerType.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/constant/NotificationOwnerType.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/PaymentChannel.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/constant/PaymentChannel.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/PaymentEnvironment.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/constant/PaymentEnvironment.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/PaymentStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/constant/PaymentStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/PaymentType.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/constant/PaymentType.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/ReservationStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/constant/ReservationStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/RoleConstants.java",
+    "target": "backend/src/main/java/com/community/residence/common/security/constant/RoleConstants.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/ShiftType.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/constant/ShiftType.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/WorkOrderPriority.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/constant/WorkOrderPriority.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/WorkOrderProcessAction.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/constant/WorkOrderProcessAction.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/constant/WorkOrderStatus.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/constant/WorkOrderStatus.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/context/IdentityPrincipal.java",
+    "target": "backend/src/main/java/com/community/residence/common/security/context/IdentityPrincipal.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/context/SecurityUtils.java",
+    "target": "backend/src/main/java/com/community/residence/common/security/context/SecurityUtils.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/context/UserContext.java",
+    "target": "backend/src/main/java/com/community/residence/common/security/context/UserContext.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/controller/UploadController.java",
+    "target": "backend/src/main/java/com/community/residence/common/upload/controller/UploadController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/exception/BusinessException.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/exception/BusinessException.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/exception/ForbiddenException.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/exception/ForbiddenException.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/exception/GlobalExceptionHandler.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/exception/GlobalExceptionHandler.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/exception/ResourceNotFoundException.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/exception/ResourceNotFoundException.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/exception/UnauthorizedException.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/exception/UnauthorizedException.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/result/ApiResponse.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/result/ApiResponse.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/result/PageVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/web/result/PageVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/service/FileUploadService.java",
+    "target": "backend/src/main/java/com/community/residence/common/upload/service/FileUploadService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/BuildingController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/BuildingController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/CommunityController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/CommunityController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/HouseController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/HouseController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/HouseImageController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/HouseImageController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/PublicResourceController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/PublicResourceController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/ResourceTimeslotController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/ResourceTimeslotController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/StructureGenerateController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/StructureGenerateController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/controller/UnitController.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/controller/UnitController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchCommunityIdsDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchCommunityIdsDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchCommunityStatusDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchCommunityStatusDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchCreateBuildingsDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchCreateBuildingsDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchCreateHousesDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchCreateHousesDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchCreateTimeslotDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchCreateTimeslotDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchCreateUnitsDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchCreateUnitsDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchHouseAttributesDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchHouseAttributesDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/BatchHouseLayoutDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/BatchHouseLayoutDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/CreateBuildingDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/CreateBuildingDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/CreateCommunityDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/CreateCommunityDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/CreateHouseDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/CreateHouseDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/CreateResourceDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/CreateResourceDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/CreateTimeSlotDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/CreateTimeSlotDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/CreateUnitDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/CreateUnitDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/StructureBatchGenerateDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/StructureBatchGenerateDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/UpdateCommunityStatusDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/UpdateCommunityStatusDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/dto/UpdateHouseStatusDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/dto/UpdateHouseStatusDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/Building.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/Building.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/Community.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/Community.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/House.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/House.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/HouseImage.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/HouseImage.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/HouseStatusHistory.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/HouseStatusHistory.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/PublicResource.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/PublicResource.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/ResourceTimeslot.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/ResourceTimeslot.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/entity/Unit.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/entity/Unit.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/BuildingMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/BuildingMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/CommunityMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/CommunityMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/HouseImageMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/HouseImageMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/HouseMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/HouseMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/HouseStatusHistoryMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/HouseStatusHistoryMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/PublicResourceMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/PublicResourceMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/ResourceTimeslotMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/ResourceTimeslotMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/StructureBusinessCodeMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/StructureBusinessCodeMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/mapper/UnitMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/mapper/UnitMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/BuildingBoundaryService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/BuildingBoundaryService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/BuildingService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/BuildingService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/CommunityBatchService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/CommunityBatchService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/CommunityResponsibleService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/CommunityResponsibleService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/CommunityService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/CommunityService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/HouseAttributesService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/HouseAttributesService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/HouseImageService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/HouseImageService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/HouseLayoutService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/HouseLayoutService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/HouseNumberSkipParser.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/HouseNumberSkipParser.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/HouseService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/HouseService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/PublicResourceService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/PublicResourceService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/ResourceImagePolicy.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/ResourceImagePolicy.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/ResourceTimeslotService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/ResourceTimeslotService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/RowValidator.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/RowValidator.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/StructureBusinessCodeService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/StructureBusinessCodeService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/StructureGenerateService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/StructureGenerateService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/service/UnitService.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/service/UnitService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/BatchCreateResultVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/BatchCreateResultVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/BatchOperationResultVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/BatchOperationResultVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/BatchTimeslotVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/BatchTimeslotVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/BuildingVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/BuildingVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/CommunityDeletionImpactVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/CommunityDeletionImpactVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/CommunityVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/CommunityVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/HouseStatusHistoryVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/HouseStatusHistoryVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/HouseVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/HouseVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/ResourceVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/ResourceVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/ResponsibleAdminVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/ResponsibleAdminVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/StructureBatchGenerateResultVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/StructureBatchGenerateResultVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/TimeSlotVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/TimeSlotVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/community/vo/UnitVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/community/vo/UnitVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/AppointmentSubscriptionInterceptor.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/AppointmentSubscriptionInterceptor.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/ConversationSubscriptionInterceptor.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/ConversationSubscriptionInterceptor.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/FeedbackSubscriptionInterceptor.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/FeedbackSubscriptionInterceptor.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/MybatisPlusConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/MybatisPlusConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/RedisConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/RedisConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/ScheduleConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/ScheduleConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/SecurityConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/SecurityConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/UploadWebConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/UploadWebConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/WebSocketAuthInterceptor.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/WebSocketAuthInterceptor.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/config/WebSocketConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/config/WebSocketConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/controller/ConversationController.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/controller/ConversationController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/controller/ConversationInboxController.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/controller/ConversationInboxController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/dto/EnsureLeaseGroupDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/dto/EnsureLeaseGroupDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/dto/MarkReadDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/dto/MarkReadDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/dto/OpenDirectDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/dto/OpenDirectDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/dto/SendMessageDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/dto/SendMessageDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/entity/ChatMessageImage.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/entity/ChatMessageImage.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/entity/Conversation.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/entity/Conversation.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/entity/ConversationMessage.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/entity/ConversationMessage.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/entity/ConversationParticipant.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/entity/ConversationParticipant.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/mapper/ChatMessageImageMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/mapper/ChatMessageImageMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/mapper/ConversationInboxMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/mapper/ConversationInboxMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/mapper/ConversationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/mapper/ConversationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/mapper/ConversationMessageMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/mapper/ConversationMessageMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/mapper/ConversationParticipantMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/mapper/ConversationParticipantMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/service/ChatImageService.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/service/ChatImageService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/service/ConversationInboxService.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/service/ConversationInboxService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/service/ConversationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/service/ConversationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/vo/ChatImageVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/vo/ChatImageVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/vo/ConversationInboxVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/vo/ConversationInboxVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/vo/ConversationMessageVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/vo/ConversationMessageVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/vo/ConversationMessageWindowVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/vo/ConversationMessageWindowVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/vo/ConversationParticipantVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/vo/ConversationParticipantVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/vo/ConversationPushVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/vo/ConversationPushVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/conversation/vo/ConversationVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/conversation/vo/ConversationVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/controller/EvaluationController.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/controller/EvaluationController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/dto/CreateEvaluationDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/dto/CreateEvaluationDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/dto/CreateFollowUpDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/dto/CreateFollowUpDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/entity/UnsatisfiedFollowup.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/entity/UnsatisfiedFollowup.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/entity/WorkOrderEvaluation.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/entity/WorkOrderEvaluation.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/mapper/UnsatisfiedFollowupMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/mapper/UnsatisfiedFollowupMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/mapper/WorkOrderEvaluationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/mapper/WorkOrderEvaluationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/service/EvaluationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/service/EvaluationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/vo/EvaluationVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/vo/EvaluationVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/evaluation/vo/FollowUpVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/evaluation/vo/FollowUpVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/controller/FeedbackAttachmentController.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/controller/FeedbackAttachmentController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/controller/FeedbackController.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/controller/FeedbackController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/dto/CloseFeedbackDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/dto/CloseFeedbackDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/dto/CreateFeedbackDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/dto/CreateFeedbackDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/dto/SendMessageDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/dto/SendMessageDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/entity/Feedback.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/entity/Feedback.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/entity/FeedbackAttachment.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/entity/FeedbackAttachment.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/entity/FeedbackMessage.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/entity/FeedbackMessage.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/mapper/FeedbackAttachmentMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/mapper/FeedbackAttachmentMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/mapper/FeedbackMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/mapper/FeedbackMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/mapper/FeedbackMessageMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/mapper/FeedbackMessageMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/service/FeedbackService.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/service/FeedbackService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/vo/AttachmentVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/vo/AttachmentVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/vo/FeedbackPushVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/vo/FeedbackPushVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/vo/FeedbackVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/vo/FeedbackVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/feedback/vo/MessageVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/feedback/vo/MessageVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/filter/JwtAuthenticationFilter.java",
+    "target": "backend/src/main/java/com/community/residence/common/security/filter/JwtAuthenticationFilter.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/filter/PaymentRequestTimingFilter.java",
+    "target": "backend/src/main/java/com/community/residence/common/security/filter/PaymentRequestTimingFilter.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/controller/HousingController.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/controller/HousingController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/controller/HousingTimeslotController.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/controller/HousingTimeslotController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/controller/ViewingAppointmentController.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/controller/ViewingAppointmentController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/dto/AssignViewingDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/dto/AssignViewingDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/dto/BatchGenerateHousingDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/dto/BatchGenerateHousingDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/dto/CreateHousingDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/dto/CreateHousingDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/dto/CreateHousingTimeslotDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/dto/CreateHousingTimeslotDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/dto/CreateViewingAppointmentDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/dto/CreateViewingAppointmentDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/dto/CreateViewingMessageDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/dto/CreateViewingMessageDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/dto/UpdateHousingStatusDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/dto/UpdateHousingStatusDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/entity/Housing.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/entity/Housing.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/entity/HousingTimeslot.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/entity/HousingTimeslot.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/entity/ViewingAppointment.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/entity/ViewingAppointment.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/entity/ViewingMessage.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/entity/ViewingMessage.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/mapper/HousingMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/mapper/HousingMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/mapper/HousingTimeslotMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/mapper/HousingTimeslotMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/mapper/ViewingAppointmentMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/mapper/ViewingAppointmentMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/mapper/ViewingMessageMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/mapper/ViewingMessageMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/service/HousingOccupancyRules.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/service/HousingOccupancyRules.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/service/HousingService.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/service/HousingService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/service/ViewingAppointmentService.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/service/ViewingAppointmentService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/AssigneeOptionVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/AssigneeOptionVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/BatchGenerateResultVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/BatchGenerateResultVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/BuildingHousingTreeVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/BuildingHousingTreeVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/HouseHousingTreeVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/HouseHousingTreeVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/HouseManageItemVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/HouseManageItemVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/HousingBriefVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/HousingBriefVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/HousingOccupancyVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/HousingOccupancyVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/HousingSummaryVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/HousingSummaryVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/HousingVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/HousingVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/UnitHousingTreeVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/UnitHousingTreeVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/ViewingAppointmentVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/ViewingAppointmentVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/ViewingMessageVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/ViewingMessageVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/housing/vo/ViewingPushVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/housing/vo/ViewingPushVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/interceptor/DataScopeInterceptor.java",
+    "target": "backend/src/main/java/com/community/residence/common/security/interceptor/DataScopeInterceptor.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/controller/LeaseContractTermController.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseContractTermController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/controller/LeaseController.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/controller/LeaseExtensionController.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseExtensionController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/controller/LeaseExtensionInboxController.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseExtensionInboxController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/controller/LeaseMoveOutApplicationController.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseMoveOutApplicationController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/ApproveMoveOutDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/ApproveMoveOutDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/CreateDepositRefundDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/CreateDepositRefundDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/CreateLeaseDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/CreateLeaseDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/CreateMoveOutApplicationDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/CreateMoveOutApplicationDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/LeaseExtensionDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/LeaseExtensionDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/RejectMoveOutDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/RejectMoveOutDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/RenewLeaseDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/RenewLeaseDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/ReviewLeaseExtensionDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/ReviewLeaseExtensionDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/dto/UpdateLeaseStatusDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/dto/UpdateLeaseStatusDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/entity/LeaseChangeLog.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/entity/LeaseChangeLog.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/entity/LeaseContractTerm.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/entity/LeaseContractTerm.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/entity/LeaseDepositRefund.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/entity/LeaseDepositRefund.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/entity/LeaseExtensionApplication.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/entity/LeaseExtensionApplication.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/entity/LeaseMoveOutApplication.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/entity/LeaseMoveOutApplication.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/entity/LeaseRecord.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/entity/LeaseRecord.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/entity/LeaseReminder.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/entity/LeaseReminder.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/mapper/LeaseChangeLogMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseChangeLogMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/mapper/LeaseContractTermMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseContractTermMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/mapper/LeaseDepositRefundMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseDepositRefundMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/mapper/LeaseExtensionApplicationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseExtensionApplicationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/mapper/LeaseMoveOutApplicationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseMoveOutApplicationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/mapper/LeaseRecordMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseRecordMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/mapper/LeaseReminderMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseReminderMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/DepositRefundService.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/DepositRefundService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/LeaseChangeLogService.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/LeaseChangeLogService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/LeaseContractTermService.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/LeaseContractTermService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/LeaseExtensionService.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/LeaseExtensionService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/LeaseMoveOutApplicationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/LeasePaymentDeadlineService.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/LeasePaymentDeadlineService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/LeaseService.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/LeaseService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/LeaseTermRules.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/LeaseTermRules.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/service/RentSchedule.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/service/RentSchedule.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/vo/DepositRefundVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/vo/DepositRefundVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/vo/LeaseChangeVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/vo/LeaseChangeVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/vo/LeaseContractTermVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/vo/LeaseContractTermVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/vo/LeaseMoveOutApplicationVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/vo/LeaseMoveOutApplicationVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/lease/vo/LeaseVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/lease/vo/LeaseVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/log/annotation/OperationLog.java",
+    "target": "backend/src/main/java/com/community/residence/common/log/annotation/OperationLog.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/log/aspect/OperationLogAspect.java",
+    "target": "backend/src/main/java/com/community/residence/common/log/aspect/OperationLogAspect.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/log/aspect/SafeOperationParameters.java",
+    "target": "backend/src/main/java/com/community/residence/common/log/aspect/SafeOperationParameters.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/log/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/log/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/controller/NotificationController.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/controller/NotificationController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/dto/ChannelLevelsDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/dto/ChannelLevelsDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/entity/Notification.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/entity/Notification.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/entity/NotificationChannelLog.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/entity/NotificationChannelLog.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/mapper/NotificationChannelLogMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/mapper/NotificationChannelLogMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/mapper/NotificationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/mapper/NotificationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/service/NotificationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/service/NotificationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/service/WebSocketSessionService.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/service/WebSocketSessionService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/vo/NotificationVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/vo/NotificationVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/messaging/WebSocketEventListener.java",
+    "target": "backend/src/main/java/com/community/residence/common/messaging/WebSocketEventListener.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/controller/NoticeController.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/controller/NoticeController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/controller/NoticeRevisionController.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/controller/NoticeRevisionController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/dto/CreateNoticeDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/dto/CreateNoticeDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/dto/PublishNoticeDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/dto/PublishNoticeDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/dto/ReviseNoticeDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/dto/ReviseNoticeDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/dto/WithdrawNoticeDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/dto/WithdrawNoticeDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/entity/Notice.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/entity/Notice.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/entity/NoticeRevision.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/entity/NoticeRevision.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/entity/NoticeTarget.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/entity/NoticeTarget.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/entity/NoticeViewRecord.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/entity/NoticeViewRecord.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/mapper/NoticeMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/mapper/NoticeMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/mapper/NoticeRevisionMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/mapper/NoticeRevisionMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/mapper/NoticeTargetMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/mapper/NoticeTargetMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/mapper/NoticeViewRecordMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/mapper/NoticeViewRecordMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/service/NoticeBodyPolicy.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/service/NoticeBodyPolicy.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/service/NoticeRevisionService.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/service/NoticeRevisionService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/service/NoticeService.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/service/NoticeService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/vo/NoticeViewRecordVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/vo/NoticeViewRecordVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/notice/vo/NoticeVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/notice/vo/NoticeVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/config/AlipayKeyValidator.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/config/AlipayKeyValidator.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/config/PaymentConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/config/PaymentConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/config/PaymentProperties.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/config/PaymentProperties.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/config/PaymentSecretCipher.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/config/PaymentSecretCipher.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/controller/PaymentChannelConfigController.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/controller/PaymentChannelConfigController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/controller/PaymentController.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/controller/PaymentController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/dto/CreateFirstPaymentDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/dto/CreateFirstPaymentDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/dto/CreateRenewPaymentDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/dto/CreateRenewPaymentDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/dto/UpdateAlipayChannelConfigDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/dto/UpdateAlipayChannelConfigDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/entity/LeasePayment.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/entity/LeasePayment.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/entity/PaymentChannelConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/entity/PaymentChannelConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/mapper/LeasePaymentMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/mapper/LeasePaymentMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/mapper/PaymentChannelConfigMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/mapper/PaymentChannelConfigMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/AlipayChannelConfigService.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/AlipayChannelConfigService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/AlipayChannelClient.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/AlipayChannelClient.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/ChannelCallException.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/ChannelCallException.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/ChannelRefundResult.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/ChannelRefundResult.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/ChannelTradeResult.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/ChannelTradeResult.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/DisabledChannelClient.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/DisabledChannelClient.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/ManagedAlipayChannelClient.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/ManagedAlipayChannelClient.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/PaymentChannelClient.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/PaymentChannelClient.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/channel/WechatChannelClient.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/channel/WechatChannelClient.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/service/PaymentService.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/service/PaymentService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/vo/AlipayChannelConfigVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/vo/AlipayChannelConfigVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/vo/LeasePaymentVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/vo/LeasePaymentVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/payment/vo/PaymentChannelVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/payment/vo/PaymentChannelVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/controller/ReservationController.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/controller/ReservationController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/dto/CreateReservationDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/dto/CreateReservationDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/dto/ReservationActionDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/dto/ReservationActionDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/entity/ResourceReservation.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/entity/ResourceReservation.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/entity/ViolationRecord.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/entity/ViolationRecord.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/mapper/ResourceReservationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/mapper/ResourceReservationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/mapper/ViolationRecordMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/mapper/ViolationRecordMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/service/ReservationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/service/ReservationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/service/SlotGrids.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/service/SlotGrids.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/service/TimeslotCoverage.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/service/TimeslotCoverage.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/vo/AvailableSlotVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/vo/AvailableSlotVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/reservation/vo/ReservationVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/reservation/vo/ReservationVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/controller/ConfigController.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/controller/ConfigController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/controller/ResidenceApplicationController.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/controller/ResidenceApplicationController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/controller/ResidenceRelationController.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/controller/ResidenceRelationController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/controller/ResidentController.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/controller/ResidentController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/AdminCreateRelationDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/AdminCreateRelationDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/AdminCreateResidentDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/AdminCreateResidentDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/ApproveApplicationDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/ApproveApplicationDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/CreateApplicationDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/CreateApplicationDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/MoveOutDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/MoveOutDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/RegisterResidentDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/RegisterResidentDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/RejectApplicationDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/RejectApplicationDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/UpdateConfigDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/dto/UpdateConfigDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/UpdateProfileDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/UpdateProfileDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/dto/UpdateResidentStatusDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/dto/UpdateResidentStatusDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/entity/ResidenceApplication.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/entity/ResidenceApplication.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/entity/ResidenceRelation.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/entity/ResidenceRelation.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/entity/Resident.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/entity/Resident.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/entity/SysConfig.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/entity/SysConfig.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/mapper/ResidenceApplicationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/mapper/ResidenceApplicationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/mapper/ResidenceRelationMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/mapper/ResidenceRelationMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/mapper/ResidentMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/mapper/ResidentMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/mapper/SysConfigMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/mapper/SysConfigMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/service/ResidenceApplicationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/service/ResidenceApplicationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/service/ResidenceDependencyService.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/service/ResidenceDependencyService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/service/ResidenceRelationService.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/service/ResidenceRelationService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/service/ResidentService.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/service/ResidentService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/service/SysConfigService.java",
+    "target": "backend/src/main/java/com/community/residence/common/auth/service/SysConfigService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/vo/AdminCreateResidentVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/vo/AdminCreateResidentVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/vo/ApplicationVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/vo/ApplicationVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/vo/CoResidentCandidateVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/vo/CoResidentCandidateVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/vo/RelationVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/vo/RelationVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/vo/ResidentImportVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/vo/ResidentImportVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/resident/vo/ResidentVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/resident/vo/ResidentVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/entity/SysTaskLog.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/entity/SysTaskLog.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/mapper/SysTaskLogMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/mapper/SysTaskLogMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/service/TaskLogService.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/service/TaskLogService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/task/HousingViewFlushTask.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/task/HousingViewFlushTask.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/task/LeaseExpiryReminderTask.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/task/LeaseExpiryReminderTask.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/task/LeasePaymentDeadlineTask.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/task/LeasePaymentDeadlineTask.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/task/LeaseStatusTask.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/task/LeaseStatusTask.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/task/LogRetentionCleanTask.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/task/LogRetentionCleanTask.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/schedule/task/NoticeAutoOfflineTask.java",
+    "target": "backend/src/main/java/com/community/residence/common/schedule/task/NoticeAutoOfflineTask.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/statistics/controller/StatisticsController.java",
+    "target": "backend/src/main/java/com/community/residence/common/statistics/controller/StatisticsController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/statistics/entity/StatisticsSnapshot.java",
+    "target": "backend/src/main/java/com/community/residence/common/statistics/entity/StatisticsSnapshot.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/statistics/mapper/StatisticsSnapshotMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/statistics/mapper/StatisticsSnapshotMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/statistics/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/statistics/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/statistics/service/AdminTodoService.java",
+    "target": "backend/src/main/java/com/community/residence/common/statistics/service/AdminTodoService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/statistics/service/StatisticsService.java",
+    "target": "backend/src/main/java/com/community/residence/common/statistics/service/StatisticsService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/controller/ServiceCategoryController.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/controller/ServiceCategoryController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/controller/StaffCapabilityController.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/controller/StaffCapabilityController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/controller/StaffScheduleController.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/controller/StaffScheduleController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/controller/WorkOrderAttachmentController.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/controller/WorkOrderAttachmentController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/controller/WorkOrderController.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/controller/WorkOrderController.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/AssignWorkOrderDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/AssignWorkOrderDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/BatchSaveScheduleDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/BatchSaveScheduleDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/ClearScheduleDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/ClearScheduleDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/CreateCategoryDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/CreateCategoryDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/CreateWorkOrderDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/CreateWorkOrderDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/SaveStaffCapabilityDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/SaveStaffCapabilityDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/WorkOrderActionDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/WorkOrderActionDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/dto/WorkOrderRemarkDTO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/dto/WorkOrderRemarkDTO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/ServiceCategory.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/ServiceCategory.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/StaffCommunity.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/StaffCommunity.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/StaffSchedule.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/StaffSchedule.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/StaffServiceCategory.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/StaffServiceCategory.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/WorkOrder.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/WorkOrder.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/WorkOrderAssignment.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/WorkOrderAssignment.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/WorkOrderAttachment.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/WorkOrderAttachment.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/entity/WorkOrderProcess.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/entity/WorkOrderProcess.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/ServiceCategoryMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/ServiceCategoryMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/StaffCommunityMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/StaffCommunityMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/StaffScheduleMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/StaffScheduleMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/StaffServiceCategoryMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/StaffServiceCategoryMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/WorkOrderAssignmentMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/WorkOrderAssignmentMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/WorkOrderAttachmentMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/WorkOrderAttachmentMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/WorkOrderMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/WorkOrderMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/mapper/WorkOrderProcessMapper.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/mapper/WorkOrderProcessMapper.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/package-info.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/package-info.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/service/DefaultServiceCategories.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/service/DefaultServiceCategories.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/service/ServiceCategoryService.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/service/ServiceCategoryService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/service/StaffCapabilityService.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/service/StaffCapabilityService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/service/StaffScheduleService.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/service/StaffScheduleService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/service/WorkOrderService.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/service/WorkOrderService.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/AttachmentVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/AttachmentVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/BatchSaveScheduleResultVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/BatchSaveScheduleResultVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/CategoryVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/CategoryVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/ProcessRecordVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/ProcessRecordVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/StaffCandidateVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/StaffCandidateVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/StaffCapabilityVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/StaffCapabilityVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/StaffOptionVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/StaffOptionVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/StaffScheduleVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/StaffScheduleVO.java"
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/workorder/vo/WorkOrderVO.java",
+    "target": "backend/src/main/java/com/community/residence/common/workorder/vo/WorkOrderVO.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/agreement/service/AgreementConsentBoundaryTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/agreement/service/AgreementConsentBoundaryTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/agreement/service/AgreementIssueAcceptanceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/agreement/service/AgreementIssueAcceptanceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/agreement/service/AgreementLeaseActivationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/agreement/service/AgreementLeaseActivationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/JwtLifetimeTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/JwtLifetimeTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/service/LoginIdentifierTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/service/LoginIdentifierTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/service/OnlineRenewalTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/service/OnlineRenewalTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/service/OperationLogContractTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/service/OperationLogContractTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/service/OperationLogCoverageTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/service/OperationLogCoverageTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/service/TokenRevisionBoundaryTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/service/TokenRevisionBoundaryTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/service/TokenRevisionFilterTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/service/TokenRevisionFilterTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/auth/service/TokenRevocationFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/auth/service/TokenRevocationFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/common/exception/FrameworkRequestErrorMappingTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/web/exception/FrameworkRequestErrorMappingTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/common/exception/MaxUploadSizeHandlerFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/web/exception/MaxUploadSizeHandlerFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/common/service/FileUploadImageValidationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/upload/service/FileUploadImageValidationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/BuildingBatch3Test.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/BuildingBatch3Test.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/BuildingBoundaryServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/BuildingBoundaryServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/BuildingServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/BuildingServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/CommunityBatchServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/CommunityBatchServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/CommunityCascadeDeleteTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/CommunityCascadeDeleteTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/CommunityDeletionSafetyTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/CommunityDeletionSafetyTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/CommunityResponsibleBindingTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/CommunityResponsibleBindingTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/CommunityResponsibleServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/CommunityResponsibleServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/CommunityServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/CommunityServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/CommunityStructureContractTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/CommunityStructureContractTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/HouseAttributesServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/HouseAttributesServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/HouseImageServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/HouseImageServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/HouseLayoutServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/HouseLayoutServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/HouseNontransactionBoundaryTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/HouseNontransactionBoundaryTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/HouseNumberSkipParserTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/HouseNumberSkipParserTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/HouseServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/HouseServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/PublicResourceImagePolicyTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/PublicResourceImagePolicyTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/PublicResourceImagesMigrationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/PublicResourceImagesMigrationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/PublicResourceImagesTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/PublicResourceImagesTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/ResourceTimeslotBatchTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/ResourceTimeslotBatchTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/ResourceTimeslotDeleteFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/ResourceTimeslotDeleteFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/StructureBusinessCodeServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/StructureBusinessCodeServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/community/service/StructureGenerateServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/community/service/StructureGenerateServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/config/ConversationSubscriptionInterceptorTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/config/ConversationSubscriptionInterceptorTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/config/FeedbackSubscriptionInterceptorTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/config/FeedbackSubscriptionInterceptorTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/config/WebSocketAuthInterceptorTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/config/WebSocketAuthInterceptorTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/ConversationParticipantOwnerTypeGuardTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/ConversationParticipantOwnerTypeGuardTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationDirectAdminInitiatedTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationDirectAdminInitiatedTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationInboxDatabaseTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationInboxDatabaseTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationInboxServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationInboxServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationInboxSqlTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationInboxSqlTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationLeaseGroupEnsureTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationLeaseGroupEnsureTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationParticipantIdentitySpaceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationParticipantIdentitySpaceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/conversation/service/ConversationServiceWorkOrderGroupTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationServiceWorkOrderGroupTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/evaluation/service/EvaluationBatch3FixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/evaluation/service/EvaluationBatch3FixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/evaluation/service/EvaluationReadAccessTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/evaluation/service/EvaluationReadAccessTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/evaluation/service/EvaluationServiceExtraTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/evaluation/service/EvaluationServiceExtraTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/evaluation/service/EvaluationServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/evaluation/service/EvaluationServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/feedback/service/FeedbackAttachmentTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/feedback/service/FeedbackAttachmentTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/feedback/service/FeedbackBatch3FixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/feedback/service/FeedbackBatch3FixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/feedback/service/FeedbackConversationBoundaryTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/feedback/service/FeedbackConversationBoundaryTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/feedback/service/FeedbackPrivacyAndImageTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/feedback/service/FeedbackPrivacyAndImageTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/feedback/service/FeedbackPushTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/feedback/service/FeedbackPushTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/feedback/service/FeedbackServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/feedback/service/FeedbackServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/filter/PaymentRequestTimingFilterTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/security/filter/PaymentRequestTimingFilterTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/mapper/ViewingLeaseLinkGuardTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/mapper/ViewingLeaseLinkGuardTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/BatchGenerateHousingTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/BatchGenerateHousingTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/BatchGenerateHousingTimeslotTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/BatchGenerateHousingTimeslotTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/HouseManageListTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/HouseManageListTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/HousingAvailableSlotsTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/HousingAvailableSlotsTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/HousingFilterTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/HousingFilterTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/HousingOccupancyBoundaryTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/HousingOccupancyBoundaryTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/HousingPastSlotFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/HousingPastSlotFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/HousingViewCountTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/HousingViewCountTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingAppointmentConflictFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingAppointmentConflictFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingAppointmentRegistrationOnlyTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingAppointmentRegistrationOnlyTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingAssignTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingAssignTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingContinuousLimitTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingContinuousLimitTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingConversationDefectFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingConversationDefectFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingMessageAccessTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingMessageAccessTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingNotificationFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingNotificationFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingScheduleConflictTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingScheduleConflictTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingSlotCoverageTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingSlotCoverageTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/housing/service/ViewingViolationDispositionTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/housing/service/ViewingViolationDispositionTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/interceptor/DataScopeJoinedHousingTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/security/interceptor/DataScopeJoinedHousingTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/interceptor/DataScopeSkipTableTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/security/interceptor/DataScopeSkipTableTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/DepositBackfillMigrationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/DepositBackfillMigrationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/DepositRefundServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/DepositRefundServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseAgreementActivationGateTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseAgreementActivationGateTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseChangeLogCoverageTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseChangeLogCoverageTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseContractTermServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseContractTermServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseExtensionServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseExtensionServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseFirstPaymentGateTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseFirstPaymentGateTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseMoveOutApplicationServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeasePaymentDeadlineServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeasePaymentDeadlineServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseSigningClosureTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseSigningClosureTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseStateMachineFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseStateMachineFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/LeaseTermRulesTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/LeaseTermRulesTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/lease/service/RentScheduleTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/lease/service/RentScheduleTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/log/aspect/OperationLogAspectTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/log/aspect/OperationLogAspectTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/log/aspect/OperationLogRequestCaptureTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/log/aspect/OperationLogRequestCaptureTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/messaging/NotificationOwnerTypeCallSiteGuardTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/messaging/NotificationOwnerTypeCallSiteGuardTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/messaging/service/ChannelLevelsTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/messaging/service/ChannelLevelsTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/messaging/service/NotificationIdentitySpaceRegressionTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/messaging/service/NotificationIdentitySpaceRegressionTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/messaging/service/NotificationServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/messaging/service/NotificationServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/messaging/service/WebSocketSessionCountTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/messaging/service/WebSocketSessionCountTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeAutoOfflineTaskTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeAutoOfflineTaskTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeBatch3FixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeBatch3FixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeBodyPolicyTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeBodyPolicyTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeDataScopeFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeDataScopeFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeGuestVisibilityTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeGuestVisibilityTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeImagesTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeImagesTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeReadReceiptAccessTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeReadReceiptAccessTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeRevisionServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeRevisionServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeServiceDeleteTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeServiceDeleteTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeServiceExtraTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeServiceExtraTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/notice/service/NoticeTargetPinTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/notice/service/NoticeTargetPinTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/config/AlipayConfigurationSecurityTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/config/AlipayConfigurationSecurityTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/config/PaymentChannelConfigMigrationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/config/PaymentChannelConfigMigrationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/service/AlipayChannelConfigServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/service/AlipayChannelConfigServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/service/AlipayPaymentDifferentialTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/service/AlipayPaymentDifferentialTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/service/FirstPaymentActivationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/service/FirstPaymentActivationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/service/FirstPaymentDepositStatusTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/service/FirstPaymentDepositStatusTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/service/PaymentServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/service/PaymentServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/payment/service/SettlementTestInfrastructure.java",
+    "target": "backend/src/test/java/com/community/residence/common/payment/service/SettlementTestInfrastructure.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/JdkSynchronizedRLock.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/JdkSynchronizedRLock.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationConflictFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationConflictFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationContactFallbackTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationContactFallbackTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationContinuousLimitTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationContinuousLimitTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationDateWindowFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationDateWindowFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationSameDayFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationSameDayFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationScheduleConflictTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationScheduleConflictTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationServiceExtraTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationServiceExtraTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/ReservationServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/ReservationServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/reservation/service/SlotGridFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/reservation/service/SlotGridFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/AdminCreateRelationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/AdminCreateRelationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ChineseUsernameContractTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ChineseUsernameContractTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/CoResidenceRegistrationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/CoResidenceRegistrationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/CoResidentCandidateTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/CoResidentCandidateTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidenceApplicationLeaseIdMigrationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceApplicationLeaseIdMigrationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidenceApplicationLeaseLinkTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceApplicationLeaseLinkTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidenceApplicationServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceApplicationServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidenceApplicationVORelationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceApplicationVORelationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidenceDependencyServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceDependencyServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidenceRelationEngineeringTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceRelationEngineeringTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidentAdminCreateTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidentAdminCreateTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidentCsvEncodingTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidentCsvEncodingTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidentProvisioningTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidentProvisioningTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidentScopeFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidentScopeFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/ResidentServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/ResidentServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/resident/service/SysConfigValueValidationTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/resident/service/SysConfigValueValidationTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/schedule/task/HousingViewFlushTaskTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/schedule/task/HousingViewFlushTaskTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/schedule/task/LeaseExpiryReminderTaskTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/schedule/task/LeaseExpiryReminderTaskTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/schedule/task/LogRetentionCleanTaskTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/schedule/task/LogRetentionCleanTaskTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/statistics/service/AdminTodoServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/statistics/service/AdminTodoServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/statistics/service/EvaluationAggregationFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/statistics/service/EvaluationAggregationFixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/statistics/service/NontransactionStatisticsCoverageTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/statistics/service/NontransactionStatisticsCoverageTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/statistics/service/StaffWorkloadEventRegressionTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/statistics/service/StaffWorkloadEventRegressionTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/controller/WorkOrderActionBodyOptionalTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/controller/WorkOrderActionBodyOptionalTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/ServiceCategoryActiveFilterTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/ServiceCategoryActiveFilterTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/StaffCapabilityServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/StaffCapabilityServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/StaffScheduleServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/StaffScheduleServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderAttachmentAccessTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderAttachmentAccessTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderBatch2FixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderBatch2FixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderBatch3FixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderBatch3FixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderCloseIdempotencyTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderCloseIdempotencyTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderCurrentAssignmentPageTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderCurrentAssignmentPageTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderDispatchTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderDispatchTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderNotificationMatrixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderNotificationMatrixTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderR74IntakeTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderR74IntakeTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderServiceExtraTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderServiceExtraTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderServiceTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderServiceTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderStaffDispatchChainTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderStaffDispatchChainTest.java"
+  },
+  {
+    "source": "backend/src/test/java/com/community/residence/workorder/service/WorkOrderStateMachineFixTest.java",
+    "target": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderStateMachineFixTest.java"
+  }
+]

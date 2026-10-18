@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-18",
+  "productionBodiesEquivalent": 464,
+  "httpMappingsPreserved": 264,
+  "suite": {
+    "total": 1176,
+    "skippedDatabaseTests": 1,
+    "firstRunFailures": 3,
+    "reason": "Source path allowlists still used pre-migration paths",
+    "focusedRerunCases": 4,
+    "focusedRerunFailures": 0
+  },
+  "limitation": "No coverage percentage claimed; JDK25 instrumentation warning observed. No application service or database started."
+}

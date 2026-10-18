@@ -1,0 +1,240 @@
+package com.community.residence.common.agreement.service;
+
+import com.community.residence.common.agreement.dto.AgreementConfirmDTO;
+import com.community.residence.common.agreement.dto.CreateAgreementDTO;
+import com.community.residence.common.agreement.entity.AgreementTemplate;
+import com.community.residence.common.agreement.entity.LeaseAgreement;
+import com.community.residence.common.agreement.mapper.AgreementTemplateMapper;
+import com.community.residence.common.agreement.mapper.LeaseAgreementMapper;
+import com.community.residence.common.auth.entity.SysAdminCommunity;
+import com.community.residence.common.auth.entity.SysUser;
+import com.community.residence.common.auth.mapper.SysAdminCommunityMapper;
+import com.community.residence.common.auth.mapper.SysUserMapper;
+import com.community.residence.common.web.constant.ErrorCode;
+import com.community.residence.common.security.constant.RoleConstants;
+import com.community.residence.common.security.context.SecurityUtils;
+import com.community.residence.common.web.exception.BusinessException;
+import com.community.residence.common.community.entity.House;
+import com.community.residence.common.community.mapper.BuildingMapper;
+import com.community.residence.common.community.mapper.CommunityMapper;
+import com.community.residence.common.community.mapper.HouseMapper;
+import com.community.residence.common.community.mapper.UnitMapper;
+import com.community.residence.common.conversation.entity.Conversation;
+import com.community.residence.common.conversation.mapper.ConversationMapper;
+import com.community.residence.common.conversation.service.ConversationService;
+import com.community.residence.common.lease.entity.LeaseRecord;
+import com.community.residence.common.lease.mapper.LeaseRecordMapper;
+import com.community.residence.common.lease.service.LeaseChangeLogService;
+import com.community.residence.common.lease.service.LeaseService;
+import com.community.residence.common.messaging.service.NotificationService;
+import com.community.residence.common.resident.entity.Resident;
+import com.community.residence.common.resident.mapper.ResidentMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * 协议签署与租约生效联动回归（R64 + R66 v1.8）：
+ * ① 发起前置校验 tenant_confirm_at 非空（否则 5601）；
+ * ② 双方确认达成 SIGNED 联动租约 TO_SIGN → ACTIVE + 房屋置已入住 +
+ *    lease_change_log(STATUS) + 租约群聊系统消息；
+ * ③ 首期费用支付成功后才生效时重复联动幂等；④ 越界状态拒绝生效。
+ */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@DisplayName("租赁协议与租约生效联动（R64/R66）")
+class AgreementLeaseActivationTest {
+    @org.mockito.Mock private com.community.residence.common.lease.service.LeaseContractTermService termService;
+
+    private static final Long LEASE_ID = 8L;
+    private static final Long AGREEMENT_ID = 21L;
+    private static final Long RESIDENT_ID = 1L;
+    private static final Long ADMIN_ID = 2L;
+    private static final Long CONVERSATION_ID = 66L;
+
+    @Mock
+    private AgreementTemplateMapper templateMapper;
+    @Mock
+    private LeaseAgreementMapper agreementMapper;
+    @Mock
+    private LeaseRecordMapper leaseMapper;
+    @Mock
+    private CommunityMapper communityMapper;
+    @Mock
+    private HouseMapper houseMapper;
+    @Mock
+    private UnitMapper unitMapper;
+    @Mock
+    private BuildingMapper buildingMapper;
+    @Mock
+    private ResidentMapper residentMapper;
+    @Mock
+    private SysAdminCommunityMapper sysAdminCommunityMapper;
+    @Mock
+    private SysUserMapper sysUserMapper;
+    @Mock
+    private NotificationService notificationService;
+    @Mock
+    private LeaseChangeLogService changeLogService;
+    @Mock
+    private ConversationMapper conversationMapper;
+    @Mock
+    private ConversationService conversationService;
+
+    @InjectMocks
+    private LeaseService leaseService;
+
+    /* DEF-115：协议生效委托 LeaseService 统一流转内核，@InjectMocks 无法跨对象注入
+       真实依赖链，手工构造把真实内核接上（本文件 mock 已覆盖 LeaseService 全部构造参数） */
+    private AgreementService agreementService;
+
+    private LeaseRecord toSignLease;
+    private LeaseAgreement pendingAgreement;
+    private House house;
+
+    @BeforeEach
+    void setUp() {
+        agreementService = new AgreementService(templateMapper, agreementMapper, leaseMapper,
+                communityMapper, houseMapper, unitMapper, buildingMapper, residentMapper,
+                sysAdminCommunityMapper, sysUserMapper, notificationService, changeLogService,
+                conversationMapper, conversationService, leaseService);
+        var termFixture=org.mockito.Mockito.mock(com.community.residence.common.lease.service.LeaseContractTermService.class);
+        org.springframework.test.util.ReflectionTestUtils.setField(agreementService,"termService",termFixture);
+        org.mockito.Mockito.lenient().when(termFixture.initial(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation->{var term=new com.community.residence.common.lease.entity.LeaseContractTerm();term.setContentSnapshot("已确认的合同付款安排快照");return term;});
+
+
+        toSignLease = new LeaseRecord();
+        toSignLease.setId(LEASE_ID);
+        toSignLease.setTenantId(RESIDENT_ID);
+        toSignLease.setCommunityId(3L);
+        toSignLease.setHouseId(5L);
+        toSignLease.setStatus("TO_SIGN");
+        toSignLease.setStartDate(LocalDate.now());
+        toSignLease.setEndDate(LocalDate.now().plusMonths(12));
+        toSignLease.setConversationId(CONVERSATION_ID);
+
+        pendingAgreement = new LeaseAgreement();
+        pendingAgreement.setId(AGREEMENT_ID);
+        pendingAgreement.setLeaseId(LEASE_ID);
+        pendingAgreement.setCommunityId(3L);
+        pendingAgreement.setTenantId(RESIDENT_ID);
+        pendingAgreement.setTitle("演示社区1栋101 租赁协议");
+        pendingAgreement.setStatus("PARTIAL");
+        /* 管理方已确认，待居民确认即达成 SIGNED */
+        pendingAgreement.setAdminConfirmTime(LocalDateTime.now().minusMinutes(5));
+        pendingAgreement.setAdminConfirmName("王管理");
+
+        house = new House();
+        house.setId(5L);
+        house.setCommunityId(3L);
+        house.setStatus("VACANT");
+
+        when(leaseMapper.selectById(LEASE_ID)).thenReturn(toSignLease);
+        when(leaseMapper.selectByIdForUpdate(LEASE_ID)).thenReturn(toSignLease);
+        when(agreementMapper.selectById(AGREEMENT_ID)).thenReturn(pendingAgreement);
+        when(agreementMapper.selectByIdForUpdate(AGREEMENT_ID)).thenReturn(pendingAgreement);
+        when(houseMapper.selectById(5L)).thenReturn(house);
+        /* 统一内核条件更新（DEF-115）：正常流转返回 1 行 */
+        when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
+        Resident resident = new Resident();
+        resident.setRealName("张居民");
+        when(residentMapper.selectById(RESIDENT_ID)).thenReturn(resident);
+    }
+
+    @Test
+    @DisplayName("双方确认达成 SIGNED：联动租约生效 + 房屋置已入住 + 状态留痕 + 群聊系统消息")
+    void confirm_bothSides_activatesLease() {
+        SysAdminCommunity binding = new SysAdminCommunity();
+        binding.setAdminId(ADMIN_ID);
+        binding.setCommunityId(3L);
+        SysUser admin = new SysUser();
+        admin.setId(ADMIN_ID);
+        admin.setRole(RoleConstants.ADMIN);
+        admin.setStatus("ACTIVE");
+        when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of(binding));
+        when(sysUserMapper.selectList(any())).thenReturn(List.of(admin));
+
+        Conversation conversation = new Conversation();
+        conversation.setId(CONVERSATION_ID);
+        conversation.setType("LEASE_GROUP");
+        conversation.setRelatedId(LEASE_ID);
+        conversation.setStatus("ACTIVE");
+        when(conversationMapper.selectById(CONVERSATION_ID)).thenReturn(conversation);
+        when(conversationMapper.selectOne(any())).thenReturn(conversation);
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
+            mocked.when(() -> SecurityUtils.hasRole(com.community.residence.common.security.constant.RoleConstants.RESIDENT))
+                    .thenReturn(true);
+
+            AgreementConfirmDTO dto = new AgreementConfirmDTO();
+            var vo = agreementService.confirm(AGREEMENT_ID, dto);
+
+            assertThat(vo.getStatus()).isEqualTo("SIGNED");
+            assertThat(toSignLease.getStatus()).isEqualTo("TO_SIGN");
+            assertThat(toSignLease.getAgreementStatus()).isEqualTo("SIGNED");
+            assertThat(house.getStatus()).isEqualTo("VACANT");
+            verify(changeLogService, never()).logStatus(eq(LEASE_ID), eq("TO_SIGN"), eq("ACTIVE"), anyString());
+            verify(conversationService).sendAgreementMessage(eq(CONVERSATION_ID), eq(AGREEMENT_ID), anyString());
+            /* 身份空间断言（DEF-067）：双方确认达成触达居民，标注 createForResident */
+            verify(notificationService).createForResident(eq(RESIDENT_ID), eq(3L),
+                    eq("租赁协议已确认"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"),
+                    eq(AGREEMENT_ID));
+            verify(notificationService).createForUser(eq(ADMIN_ID), eq(3L),
+                    eq("租赁协议已确认"), anyString(), eq("LEASE"), eq("LEASE_AGREEMENT"),
+                    eq(AGREEMENT_ID));
+        }
+    }
+
+    @Test
+    @DisplayName("生效联动幂等：租约已 ACTIVE 时不再流转、不重复写房态")
+    void confirm_bothSidesAlreadyActive_noRepeatActivation() {
+        toSignLease.setStatus("ACTIVE");
+        pendingAgreement.setStatus("SIGNED");
+
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
+            mocked.when(() -> SecurityUtils.hasRole(com.community.residence.common.security.constant.RoleConstants.RESIDENT))
+                    .thenReturn(true);
+
+            AgreementConfirmDTO dto = new AgreementConfirmDTO();
+            agreementService.confirm(AGREEMENT_ID, dto);
+
+            verify(changeLogService, never()).logStatus(anyLong(), anyString(), anyString(), anyString());
+            verify(houseMapper, never()).updateById(any(House.class));
+        }
+    }
+
+    private AgreementTemplate defaultTemplate() {
+        AgreementTemplate template = new AgreementTemplate();
+        template.setId(1L);
+        template.setName("标准租赁协议");
+        template.setContent("甲方：{{社区名称}}，房屋：{{房屋位置}}，月租：{{月租金}}");
+        template.setIsDefault(1);
+        template.setStatus("ACTIVE");
+        template.setCommunityId(3L);
+        return template;
+    }
+}

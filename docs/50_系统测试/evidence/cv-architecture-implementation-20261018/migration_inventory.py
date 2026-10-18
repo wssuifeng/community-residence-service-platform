@@ -30,13 +30,13 @@ def members(s):
  raise ValueError('Unbalanced class')
 def methods(s):
  head,parts,tail=members(s)
- class_auth=re.search(r'@PreAuthorize\(([^\n]*)\)',head)
+ class_auth=re.search(r'@(?:org\.springframework\.security\.access\.prepost\.)?PreAuthorize\(([^\n]*)\)',head)
  result=[]
  for part in parts:
-  if not re.search(r'@(?:Get|Post|Put|Patch|Delete|Request)Mapping\b',part):continue
+  if not re.search(r'@(?:org\.springframework\.web\.bind\.annotation\.)?(?:Get|Post|Put|Patch|Delete|Request)Mapping\b',part):continue
   signature=re.search(r'\bpublic\s+[^;{]+?\s+(\w+)\s*\(',mask(part))
   assert signature,part
-  auth=re.search(r'@PreAuthorize\(([^\n]*)\)',part) or class_auth
+  auth=re.search(r'@(?:org\.springframework\.security\.access\.prepost\.)?PreAuthorize\(([^\n]*)\)',part) or class_auth
   expression=auth[1] if auth else ''
   roles=set(re.findall("'(ADMIN|SUPER_ADMIN|RESIDENT|STAFF)'",expression))
   owner='admin' if roles and roles<={'ADMIN','SUPER_ADMIN'} else 'resident' if roles=={'RESIDENT'} else 'staff' if roles=={'STAFF'} else 'common'
@@ -133,6 +133,7 @@ def controller_destination(source,owner):
     return BE/owner/module/'controller'/(name+'.java')
 
 def inventory():
+ if not (BE/"workorder/controller/WorkOrderController.java").is_file():raise RuntimeError("S0 requires the pre-migration checkout; consume committed CSVs after relocation")
  rows=[];endpoints=[]
  for p in sorted(BE.rglob('*.java')):
   dest=backend_target(p);owners=[]

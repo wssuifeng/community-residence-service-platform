@@ -1,0 +1,69 @@
+package com.community.residence.common.payment.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+/** 租约支付单（lease_payment 表；状态机 PENDING → SUCCESS / CLOSED；R61 续期 + R71 首期同表不同型） */
+@Data
+@TableName("lease_payment")
+@Schema(description = "租约续约支付单")
+public class LeasePayment {
+
+    @TableId(type = IdType.AUTO)
+    @Schema(description = "支付单ID")
+    private Long id;
+
+    @Schema(description = "业务单号（RENEW+yyyyMMdd+6位随机）")
+    private String paymentNo;
+
+    @Schema(description = "租住记录ID")
+    private Long leaseId;
+
+    @Schema(description = "付款人ID（resident.id）")
+    private Long residentId;
+
+    @Schema(description = "支付单类型（R71）：FIRST-首期（首月租金+押金）, RENEWAL-续期（月租×月数）")
+    private String paymentType;
+
+    @Schema(description = "支付渠道：ALIPAY-支付宝, WECHAT-微信")
+    private String channel;
+
+    @Schema(description = "支付月数（首期固定 1，续期为居民所选月数）")
+    private Integer months;
+
+    @Schema(description = "应付金额（续期=月租×月数；首期=月租+押金；均由服务端计算）")
+    private BigDecimal amount;
+
+    @Schema(description = "状态：PENDING-待支付, SUCCESS-已支付, CLOSED-已关闭")
+    private String status;
+
+    @Schema(description = "渠道流水号（支付成功后回写）")
+    private String channelTradeNo;
+
+    @Schema(description = "支付完成时间")
+    private LocalDateTime paidAt;
+
+    @Schema(description = "创建时间")
+    private LocalDateTime createdAt;
+
+    @Schema(description = "更新时间")
+    private LocalDateTime updatedAt;
+
+    @Schema(description="跨合同段覆盖与金额分段JSON快照") private String coverageDetails;
+    @Schema(description="合同段ID，新单为首个覆盖段") private Long termId;
+    @Schema(description="单价快照") private BigDecimal monthlyRentSnapshot;
+    @Schema(description="租金快照") private BigDecimal rentAmount;
+    @Schema(description="押金快照") private BigDecimal depositAmount;
+    @Schema(description="租金覆盖开始") private java.time.LocalDate periodStart;
+    @Schema(description="租金覆盖止日，含当天") private java.time.LocalDate periodEnd;
+    @Schema(description="渠道可支付截止，新订单为首次发起后15分钟，历史订单保留原值") private LocalDateTime channelExpiresAt;
+    @Schema(description="本地截止，新订单为渠道截止后30秒，历史订单保留原值") private LocalDateTime expiresAt;
+    @Schema(description="结算异常，需核对") private String settlementIssue;
+    @Schema(description="异常成功结果实际渠道时间") private LocalDateTime channelSuccessAt;
+}

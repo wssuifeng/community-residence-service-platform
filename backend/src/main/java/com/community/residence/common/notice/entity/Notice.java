@@ -1,0 +1,69 @@
+package com.community.residence.common.notice.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+/** 公告（notice 表；社区归属经 notice_target 关联，全系统广播无 target 记录） */
+@Data
+@TableName("notice")
+@Schema(description = "公告")
+public class Notice {
+
+    @TableId(type = IdType.AUTO)
+    @Schema(description = "公告ID")
+    private Long id;
+
+    @Schema(description = "公告标题")
+    private String title;
+
+    @Schema(description = "公告内容")
+    private String content;
+
+    @Schema(description = "公告上传图片URL，以逗号分隔")
+    @com.baomidou.mybatisplus.annotation.TableField(updateStrategy = com.baomidou.mybatisplus.annotation.FieldStrategy.ALWAYS)
+    private String images;
+
+
+    @Schema(description="受限结构化正文JSON，旧公告为空") private String bodyJson;
+    @Schema(description="正文版本") private Integer contentVersion;
+    @Schema(description="最后编辑管理员ID") private Long editedBy;
+    @Schema(description="最后编辑时间") private LocalDateTime editedAt;
+
+    @Schema(description = "发布人ID")
+    private Long publisherId;
+
+    @Schema(description = "状态：DRAFT-草稿, PUBLISHED-已发布, WITHDRAWN-已撤回")
+    private String status;
+
+    @Schema(description = "发布时间")
+    private LocalDateTime publishTime;
+
+    @Schema(description = "生效时间")
+    private LocalDateTime startTime;
+
+    @Schema(description = "失效时间")
+    private LocalDateTime endTime;
+
+    @Schema(description = "浏览次数")
+    private Integer viewCount;
+
+    @Schema(description = "置顶：0-普通, 1-置顶（列表排最前，R25 v1.2）")
+    private Integer isPinned;
+
+    @Schema(description = "优先级：LOW-低, NORMAL-普通, HIGH-高, URGENT-紧急（V12）")
+    private String priority;
+
+    @Schema(description = "公告类型：ANNOUNCEMENT-公告（V12）")
+    private String type;
+
+    @Schema(description = "创建时间")
+    private LocalDateTime createdAt;
+
+    @Schema(description = "更新时间")
+    private LocalDateTime updatedAt;
+}
