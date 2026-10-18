@@ -1,0 +1,1229 @@
+{
+  "date": "2026-10-18",
+  "planningBaseCommit": "3c2f314f2386afe47799c2123b5e6406df71e412",
+  "productionCodeBase": "f58282cca0e8bb9c6660c76e6ff2acb560c6600a",
+  "productionCodeUnchangedSinceAssessment": true,
+  "counts": {
+    "productionJava": 464,
+    "controllers": 43,
+    "vue": 144,
+    "nonTestTs": 93,
+    "mapperXmlInMainResources": 0,
+    "mapperAnnotatedJava": 60,
+    "mapperScanAnnotatedJava": 0,
+    "sourcePathSensitiveFrontendTests": 1
+  },
+  "javaByRootModule": {
+    "CommunityResidenceApplication.java": 1,
+    "agreement": 12,
+    "auth": 28,
+    "common": 36,
+    "community": 73,
+    "config": 10,
+    "conversation": 26,
+    "evaluation": 11,
+    "feedback": 17,
+    "filter": 2,
+    "housing": 35,
+    "interceptor": 1,
+    "lease": 43,
+    "log": 4,
+    "messaging": 11,
+    "notice": 20,
+    "payment": 27,
+    "reservation": 13,
+    "resident": 34,
+    "schedule": 10,
+    "statistics": 6,
+    "workorder": 44
+  },
+  "controllerDeclarationInventory": [
+    {
+      "path": "backend/src/main/java/com/community/residence/agreement/controller/AgreementTemplateController.java",
+      "module": "agreement",
+      "requestMappings": [
+        "\"/api/v1/agreement-templates\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 7
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/agreement/controller/LeaseAgreementController.java",
+      "module": "agreement",
+      "requestMappings": [
+        "\"/api/v1/lease-agreements\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 5
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/auth/controller/AuthController.java",
+      "module": "auth",
+      "requestMappings": [
+        "\"/api/v1/auth\""
+      ],
+      "preAuthorizeExpressions": [],
+      "methodMappingAnnotations": 6
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/auth/controller/OperationLogController.java",
+      "module": "auth",
+      "requestMappings": [
+        "\"/api/v1/operation-logs\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 2
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/auth/controller/SysUserController.java",
+      "module": "auth",
+      "requestMappings": [
+        "\"/api/v1/sys-users\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN', 'STAFF')\"",
+        "\"hasRole('SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 9
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/controller/UploadController.java",
+      "module": "common",
+      "requestMappings": [
+        "\"/api/v1/upload\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"isAuthenticated()\""
+      ],
+      "methodMappingAnnotations": 1
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/BuildingController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 6
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/CommunityController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1/communities\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 12
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/HouseController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 10
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/HouseImageController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1/houses/{houseId}/images\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN','SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 4
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/PublicResourceController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 5
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/ResourceTimeslotController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 5
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/StructureGenerateController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1/structures\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 1
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/UnitController.java",
+      "module": "community",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 6
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/controller/ConversationController.java",
+      "module": "conversation",
+      "requestMappings": [
+        "\"/api/v1/conversations\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 11
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/controller/ConversationInboxController.java",
+      "module": "conversation",
+      "requestMappings": [
+        "\"/api/v1/conversation-inbox\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('RESIDENT','ADMIN','SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT','STAFF','ADMIN','SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 3
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/evaluation/controller/EvaluationController.java",
+      "module": "evaluation",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 7
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/feedback/controller/FeedbackAttachmentController.java",
+      "module": "feedback",
+      "requestMappings": [],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 2
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/feedback/controller/FeedbackController.java",
+      "module": "feedback",
+      "requestMappings": [
+        "\"/api/v1/feedbacks\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 7
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/controller/HousingController.java",
+      "module": "housing",
+      "requestMappings": [
+        "\"/api/v1/housings\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 10
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/controller/HousingTimeslotController.java",
+      "module": "housing",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 4
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/controller/ViewingAppointmentController.java",
+      "module": "housing",
+      "requestMappings": [
+        "\"/api/v1/viewing-appointments\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('STAFF', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 12
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/controller/LeaseContractTermController.java",
+      "module": "lease",
+      "requestMappings": [
+        "\"/api/v1/leases/{leaseId}/terms\") @RequiredArgsConstructor @Tag(name=\"租约合同段\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('RESIDENT','ADMIN','SUPER_ADMIN')\") @Operation(summary=\"取消未生效续租，不改变原合同\"",
+        "\"hasAnyRole('RESIDENT','ADMIN','SUPER_ADMIN')\") @Operation(summary=\"合同及续租协议快照\"",
+        "\"hasRole('RESIDENT')\") @Operation(summary=\"居民同意续租协议，未付款不延长\""
+      ],
+      "methodMappingAnnotations": 3
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/controller/LeaseController.java",
+      "module": "lease",
+      "requestMappings": [
+        "\"/api/v1/leases\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 16
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/controller/LeaseExtensionController.java",
+      "module": "lease",
+      "requestMappings": [
+        "\"/api/v1/leases/{leaseId}/extensions\") @RequiredArgsConstructor @Tag(name=\"租期延长\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN','SUPER_ADMIN')\") @Operation(summary=\"批准或驳回租期延长\"",
+        "\"hasAnyRole('RESIDENT','ADMIN','SUPER_ADMIN')\") @Operation(summary=\"租期延长申请记录\"",
+        "\"hasRole('RESIDENT')\") @Operation(summary=\"居民申请延长租期\"",
+        "\"hasRole('RESIDENT')\") @Operation(summary=\"撤回待审延长申请\""
+      ],
+      "methodMappingAnnotations": 4
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/controller/LeaseExtensionInboxController.java",
+      "module": "lease",
+      "requestMappings": [
+        "\"/api/v1/lease-extensions\") @RequiredArgsConstructor @Tag(name=\"租期延长\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN','SUPER_ADMIN')\") @Operation(summary=\"管辖租约待审延长申请\""
+      ],
+      "methodMappingAnnotations": 1
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/controller/LeaseMoveOutApplicationController.java",
+      "module": "lease",
+      "requestMappings": [],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 5
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/messaging/controller/NotificationController.java",
+      "module": "messaging",
+      "requestMappings": [
+        "\"/api/v1/notifications\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('SUPER_ADMIN')\"",
+        "\"isAuthenticated()\""
+      ],
+      "methodMappingAnnotations": 7
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/notice/controller/NoticeController.java",
+      "module": "notice",
+      "requestMappings": [
+        "\"/api/v1/notices\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 9
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/notice/controller/NoticeRevisionController.java",
+      "module": "notice",
+      "requestMappings": [
+        "\"/api/v1/notices/{id}/revisions\") @RequiredArgsConstructor @Tag(name=\"公告修订\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN','SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 2
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/payment/controller/PaymentChannelConfigController.java",
+      "module": "payment",
+      "requestMappings": [
+        "\"/api/v1/payment/channel-config/alipay\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasRole('SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 2
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/payment/controller/PaymentController.java",
+      "module": "payment",
+      "requestMappings": [
+        "\"/api/v1/payment\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 4
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/reservation/controller/ReservationController.java",
+      "module": "reservation",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 10
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/controller/ConfigController.java",
+      "module": "resident",
+      "requestMappings": [
+        "\"/api/v1/configs\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasRole('SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 3
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/controller/ResidenceApplicationController.java",
+      "module": "resident",
+      "requestMappings": [
+        "\"/api/v1/residence-applications\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 6
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/controller/ResidenceRelationController.java",
+      "module": "resident",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('ADMIN','SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 5
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/controller/ResidentController.java",
+      "module": "resident",
+      "requestMappings": [
+        "\"/api/v1/residents\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN', 'STAFF')\"",
+        "\"hasAnyRole('ADMIN','SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\""
+      ],
+      "methodMappingAnnotations": 9
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/statistics/controller/StatisticsController.java",
+      "module": "statistics",
+      "requestMappings": [
+        "\"/api/v1/statistics\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('ADMIN','SUPER_ADMIN')\"",
+        "\"hasAnyRole('STAFF', 'ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 8
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/controller/ServiceCategoryController.java",
+      "module": "workorder",
+      "requestMappings": [
+        "\"/api/v1\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 6
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/controller/StaffCapabilityController.java",
+      "module": "workorder",
+      "requestMappings": [
+        "\"/api/v1/staff-capabilities\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 4
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/controller/StaffScheduleController.java",
+      "module": "workorder",
+      "requestMappings": [
+        "\"/api/v1/staff-schedules\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 4
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/controller/WorkOrderAttachmentController.java",
+      "module": "workorder",
+      "requestMappings": [
+        "\"/api/v1/work-order-attachments\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')\""
+      ],
+      "methodMappingAnnotations": 1
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/controller/WorkOrderController.java",
+      "module": "workorder",
+      "requestMappings": [
+        "\"/api/v1/work-orders\""
+      ],
+      "preAuthorizeExpressions": [
+        "\"hasAnyRole('ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')\"",
+        "\"hasRole('RESIDENT')\"",
+        "\"hasRole('STAFF')\""
+      ],
+      "methodMappingAnnotations": 19
+    }
+  ],
+  "fullyQualifiedReferencesOutsidePackageAndImport": [
+    {
+      "path": "backend/src/main/java/com/community/residence/agreement/service/AgreementService.java",
+      "lines": [
+        92,
+        142,
+        155,
+        168,
+        179,
+        198,
+        304
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/auth/mapper/SysUserMapper.java",
+      "lines": [
+        23,
+        24
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/auth/service/SysUserService.java",
+      "lines": [
+        40,
+        48,
+        68,
+        107,
+        136,
+        175
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/service/FileUploadService.java",
+      "lines": [
+        90
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/CommunityController.java",
+      "lines": [
+        42,
+        122,
+        148
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/HouseController.java",
+      "lines": [
+        36,
+        38,
+        43,
+        111
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/controller/ResourceTimeslotController.java",
+      "lines": [
+        43,
+        44
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/mapper/CommunityMapper.java",
+      "lines": [
+        35
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/BuildingService.java",
+      "lines": [
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        55,
+        70,
+        89,
+        131,
+        132,
+        133,
+        142,
+        143,
+        145,
+        146,
+        150,
+        151,
+        152,
+        155,
+        156,
+        162,
+        163,
+        164,
+        167,
+        168,
+        170,
+        171,
+        176,
+        177
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/CommunityResponsibleService.java",
+      "lines": [
+        29,
+        30,
+        31,
+        35,
+        36,
+        37,
+        51
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/CommunityService.java",
+      "lines": [
+        112,
+        162,
+        165,
+        169,
+        177,
+        189,
+        228,
+        248,
+        252,
+        253,
+        433
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/HouseService.java",
+      "lines": [
+        45,
+        78,
+        98,
+        136,
+        202,
+        203,
+        219,
+        221,
+        223,
+        230,
+        236,
+        244,
+        258,
+        261,
+        263,
+        268
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/PublicResourceService.java",
+      "lines": [
+        39,
+        51,
+        66,
+        131,
+        141
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/ResourceTimeslotService.java",
+      "lines": [
+        30,
+        33,
+        54,
+        55,
+        56,
+        88,
+        92,
+        114,
+        124,
+        125,
+        127,
+        129,
+        131,
+        174,
+        175,
+        176
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/StructureGenerateService.java",
+      "lines": [
+        79
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/UnitService.java",
+      "lines": [
+        38,
+        53,
+        70,
+        116,
+        117,
+        120,
+        125,
+        130,
+        141,
+        144,
+        149
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/controller/ConversationController.java",
+      "lines": [
+        37,
+        77,
+        84,
+        124
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/service/ConversationInboxService.java",
+      "lines": [
+        52
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/service/ConversationService.java",
+      "lines": [
+        85,
+        622,
+        623,
+        637,
+        665,
+        774,
+        778
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/vo/ConversationMessageVO.java",
+      "lines": [
+        33
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/feedback/controller/FeedbackAttachmentController.java",
+      "lines": [
+        43
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/feedback/service/FeedbackService.java",
+      "lines": [
+        54,
+        113,
+        182,
+        190,
+        228,
+        229,
+        241,
+        343,
+        347
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/feedback/vo/MessageVO.java",
+      "lines": [
+        37,
+        53
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/controller/ViewingAppointmentController.java",
+      "lines": [
+        138
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/mapper/HousingMapper.java",
+      "lines": [
+        19,
+        61
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/service/HousingService.java",
+      "lines": [
+        102,
+        115,
+        148,
+        165,
+        243,
+        444,
+        665,
+        667,
+        835,
+        846,
+        859,
+        903,
+        905
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/service/ViewingAppointmentService.java",
+      "lines": [
+        78,
+        99,
+        105,
+        416,
+        429,
+        486,
+        578,
+        687,
+        693,
+        759
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/housing/vo/ViewingMessageVO.java",
+      "lines": [
+        34,
+        46
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/controller/LeaseContractTermController.java",
+      "lines": [
+        16,
+        21
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/controller/LeaseController.java",
+      "lines": [
+        34,
+        35,
+        36,
+        51,
+        62,
+        74,
+        83,
+        101,
+        103,
+        116,
+        118,
+        140,
+        175,
+        191,
+        195,
+        196
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/service/DepositRefundService.java",
+      "lines": [
+        122,
+        337
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/service/LeaseContractTermService.java",
+      "lines": [
+        20,
+        28,
+        30,
+        31,
+        32,
+        33,
+        38,
+        44,
+        140,
+        141
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/service/LeaseMoveOutApplicationService.java",
+      "lines": [
+        79,
+        110,
+        212,
+        323
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/service/LeasePaymentDeadlineService.java",
+      "lines": [
+        20,
+        21,
+        57
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/service/LeaseService.java",
+      "lines": [
+        70,
+        78,
+        80,
+        81,
+        82,
+        83,
+        88,
+        140,
+        190,
+        228,
+        276,
+        277,
+        278,
+        279,
+        293,
+        294,
+        295,
+        319,
+        331,
+        332,
+        333,
+        342,
+        343,
+        344,
+        345,
+        346,
+        354,
+        355,
+        356,
+        357,
+        358,
+        388,
+        453
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/log/aspect/SafeOperationParameters.java",
+      "lines": [
+        44
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/messaging/service/NotificationService.java",
+      "lines": [
+        169,
+        253,
+        254,
+        259,
+        260,
+        268,
+        271,
+        272
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/notice/service/NoticeRevisionService.java",
+      "lines": [
+        29
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/notice/service/NoticeService.java",
+      "lines": [
+        60,
+        95,
+        131,
+        239,
+        255,
+        360,
+        414,
+        516,
+        650,
+        651,
+        690
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/payment/service/PaymentService.java",
+      "lines": [
+        80,
+        81,
+        86,
+        132,
+        144,
+        169,
+        173,
+        233,
+        235,
+        236,
+        246,
+        248,
+        250,
+        279,
+        280,
+        417
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/reservation/service/ReservationService.java",
+      "lines": [
+        292,
+        310,
+        321,
+        349
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/controller/ResidenceRelationController.java",
+      "lines": [
+        55
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/controller/ResidentController.java",
+      "lines": [
+        41,
+        64,
+        107,
+        108,
+        116,
+        117
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/service/ResidenceApplicationService.java",
+      "lines": [
+        81,
+        170,
+        208,
+        209,
+        210,
+        211,
+        249,
+        371,
+        428
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/service/ResidenceRelationService.java",
+      "lines": [
+        48,
+        49,
+        95,
+        154,
+        155,
+        171,
+        172,
+        173,
+        176,
+        177,
+        178,
+        206
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/resident/service/ResidentService.java",
+      "lines": [
+        59,
+        155,
+        157,
+        164,
+        181,
+        248
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/statistics/controller/StatisticsController.java",
+      "lines": [
+        25
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/statistics/service/StatisticsService.java",
+      "lines": [
+        169,
+        170,
+        172,
+        173
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/service/StaffCapabilityService.java",
+      "lines": [
+        91
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/service/StaffScheduleService.java",
+      "lines": [
+        82,
+        156
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/workorder/service/WorkOrderService.java",
+      "lines": [
+        126,
+        144,
+        145,
+        146,
+        148,
+        149,
+        181,
+        213,
+        234,
+        377,
+        424,
+        447,
+        465,
+        483,
+        502,
+        520,
+        553,
+        571
+      ]
+    }
+  ],
+  "sourcePathSensitiveFrontendTests": [
+    "frontend/src/__tests__/focus-visible.spec.ts"
+  ],
+  "anchors": [
+    {
+      "path": "backend/src/main/java/com/community/residence/CommunityResidenceApplication.java",
+      "needle": "@SpringBootApplication",
+      "lines": [
+        10
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/config/MybatisPlusConfig.java",
+      "needle": "new DataScopeInterceptor()",
+      "lines": [
+        17
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/log/aspect/OperationLogAspect.java",
+      "needle": "@annotation",
+      "lines": [
+        51
+      ]
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/config/RedisConfig.java",
+      "needle": "GenericJackson2JsonRedisSerializer",
+      "lines": [
+        7,
+        27
+      ]
+    },
+    {
+      "path": "frontend/src/components/conversation/ConversationBusinessActions.vue",
+      "needle": "@/views/resident/HousingReservationView.vue",
+      "lines": [
+        5
+      ]
+    },
+    {
+      "path": "frontend/src/store/user.ts",
+      "needle": "useNotificationStore",
+      "lines": [
+        6,
+        23,
+        27
+      ]
+    },
+    {
+      "path": "frontend/src/store/permission.ts",
+      "needle": "residentRoutes",
+      "lines": [
+        6,
+        18
+      ]
+    },
+    {
+      "path": "frontend/src/router/index.ts",
+      "needle": "from './admin'",
+      "lines": [
+        9
+      ]
+    }
+  ],
+  "limits": [
+    "Annotation declarations are static inventory, not Spring runtime handler or permission verification.",
+    "Fully qualified reference hits include reflective string checks; not a Spring bean dependency graph.",
+    "No complete target ownership per class or endpoint is claimed; that is implementation task S0.",
+    "A configured Redis JSON serializer does not prove cached values contain old Java class names.",
+    "No application tests, build, profiling, service, browser, database, or payment operations executed."
+  ]
+}

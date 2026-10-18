@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-18",
+  "method": "Read official documentation over HTTPS; page text not reproduced",
+  "sources": [
+    {
+      "source": "spring-transaction",
+      "url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/event.html",
+      "status": 200,
+      "title": "Transaction-bound Events :: Spring Framework",
+      "terms": {
+        "AFTER_COMMIT": true,
+        "fallbackExecution": true
+      }
+    },
+    {
+      "source": "mybatis-scanning",
+      "url": "https://mybatis.org/spring/mappers.html",
+      "status": 200,
+      "title": "mybatis-spring",
+      "terms": {
+        "MapperScan": true,
+        "MapperFactoryBean": true
+      }
+    },
+    {
+      "source": "vue-route-reuse",
+      "url": "https://router.vuejs.org/guide/essentials/dynamic-matching.html",
+      "status": 200,
+      "title": "Dynamic Route Matching with Params | Vue Router",
+      "terms": {
+        "reused": true,
+        "params": true
+      }
+    }
+  ]
+}
