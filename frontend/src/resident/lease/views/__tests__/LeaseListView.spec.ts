@@ -14,6 +14,7 @@ import residentRoutes from '@/resident/routes'
  */
 
 const mocks = vi.hoisted(() => ({
+  paymentReads: vi.fn(),
   state: {
     leases: [] as unknown[],
     /** 'ERROR' = 该租约支付单回查失败（模拟接口异常，用于验证"不误判"） */
@@ -25,12 +26,24 @@ const mocks = vi.hoisted(() => ({
   }
 }))
 
+vi.mock('@/resident/lease/api/summaries', () => ({
+ getMyLeaseSummaries: async () => ({ records: (mocks.state.leases as ILeaseRecord[]).map(lease => {
+  const payments=mocks.state.payments[lease.id]
+  if(payments==='ERROR') return {lease,summary:null}
+  const first=(payments ?? []).find((p:any)=>p.paymentType==='FIRST'&&p.status==='SUCCESS') as ILeasePayment|undefined
+  return {lease,summary:{displayStatus:lease.status==='TO_SIGN'&&lease.agreementStatus==='SIGNED'?'待支付首期费用':lease.status==='ACTIVE'?'在租':undefined,
+   firstPaymentSucceeded:!!first,firstPaymentPaidAmount:first?.amount,firstPaymentPaidAt:first?.paidAt,
+   paidRentMonths:first?1:0,unpaidRentMonths:first?11:12,actions:{firstPayment:{enabled:!first,reason:'首期按约定首付月数加一次押金，支付成功后才正式入住'},rentPayment:{enabled:true,reason:''},extension:{enabled:true,reason:''},moveOut:{enabled:true,reason:''}}}}
+ }), total:mocks.state.leases.length })
+}))
+
 vi.mock('@/common/lease/api/lease', () => ({
   getLeaseList: async () => ({
     records: mocks.state.leases,
     total: mocks.state.leases.length
   }),
   listLeasePayments: async (leaseId: number) => {
+    mocks.paymentReads(leaseId)
     const value = mocks.state.payments[leaseId]
     if (value === 'ERROR') throw new Error('支付单查询失败')
     return value ?? []
@@ -116,6 +129,7 @@ function buttonTexts(wrapper: VueWrapper): string[] {
 }
 
 beforeEach(() => {
+  mocks.paymentReads.mockClear()
   mocks.state.leases = []
   mocks.state.payments = {}
   mocks.state.refunds = {}
@@ -580,4 +594,16 @@ describe('LeaseListView · 租约明细时间线（R73）', () => {
 
     expect(wrapper.text()).toContain('暂无租约明细流水')
   })
+})
+
+describe('租约摘要请求范围', () => {
+ it('十条卡片初始读取不逐条请求支付历史，展开一条才读取该条流水', async () => {
+  mocks.state.leases=Array.from({length:10},(_,i)=>lease({id:100+i,houseId:100+i}))
+  const wrapper=await mountList()
+  expect(mocks.paymentReads).not.toHaveBeenCalled()
+  await wrapper.find('.lease-row').trigger('click'); await flushPromises()
+  expect(mocks.paymentReads).toHaveBeenCalledTimes(1)
+  expect(mocks.paymentReads).toHaveBeenCalledWith(100)
+  wrapper.unmount()
+ })
 })

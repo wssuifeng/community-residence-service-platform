@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { getMyLeaseSummaries, type LeaseSummary } from '../api/summaries'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
 import LeaseTermsPanel from '@/common/lease/components/LeaseTermsPanel.vue'
 import { leaseDisplayLabel } from '@/common/lease/utils/leaseDisplay'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import Pagination from '@/common/web/components/Pagination.vue'
@@ -12,7 +14,6 @@ import AgreementSignPanel from '@/common/agreement/components/AgreementSignPanel
 import LeaseTimeline from '@/common/lease/components/LeaseTimeline.vue'
 import {
   getLeaseChanges,
-  getLeaseList,
   listDepositRefunds,
   listLeasePayments
 } from '@/common/lease/api/lease'
@@ -44,7 +45,7 @@ import type { LeaseAgreementSignStatus } from '@/common/agreement/types/agreemen
  *
  * 主卡动作按状态分流（一一对应后端端点，前端不做状态猜测）：
  * - 待签约 TO_SIGN：查看管理方发出的具体协议并确认同意；
- * - 已生效 ACTIVE：支付首期费用（/first-payments）、续租（三步支付弹窗）、申请退租（/move-out-applications）；
+ * - 已生效 ACTIVE：支付首期费用（/first-payments）、租期延长申请与合同内缴租、申请退租（/move-out-applications）；
  * - 已搬出 MOVED_OUT：只读 + 押金状态与押金退还记录（R72，居民侧只读不可发起）。
  *
  * 押金与明细（R72/R73）：
@@ -91,6 +92,9 @@ const headSub = computed(() =>
 const query = reactive({ page: 1, size: 10 })
 const total = ref(0)
 const records = ref<ILeaseRecord[]>([])
+const summaries = ref<Record<number, LeaseSummary>>({})
+let listVersion=0
+onBeforeUnmount(() => { listVersion++ })
 const loading = ref(false)
 /** 主卡点击展开的租约 id（单开模式） */
 const expandedId = ref<number | null>(null)
@@ -101,20 +105,24 @@ const expandedHistory = ref<string | null>(null)
 const focusLeaseId = ref<number | null>(null)
 
 async function loadLeases(): Promise<void> {
+  const current=++listVersion
   loading.value = true
   try {
-    const data = await getLeaseList({ page: query.page, size: query.size })
+    const cards = await getMyLeaseSummaries({ page: query.page, size: query.size })
+    if(current!==listVersion) return
+    const data={...cards,records:cards.records.map(card=>card.lease)}
+    summaries.value=Object.fromEntries(cards.records.map(card=>[card.lease.id,card.summary]))
     records.value = data.records
     total.value = data.total
     /* 翻页后展开行可能已不在当前页，统一收起避免错位 */
     if (expandedId.value !== null && !data.records.some((row) => row.id === expandedId.value)) {
       expandedId.value = null
     }
-    await loadLeasePayments(data.records)
+
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载租约列表失败')
   } finally {
-    loading.value = false
+    if(current===listVersion) loading.value = false
   }
 }
 
@@ -126,34 +134,18 @@ async function loadLeases(): Promise<void> {
 /** leaseId → 该租约支付单（键存在即表示已取回，用于区分「无成功首期单」与「未取到」） */
 const leasePayments = ref<Record<number, ILeasePayment[]>>({})
 
-/** 当前页每份租约取一次支付单（页大小 10，展开历史租约也要能看到其续期流水） */
-async function loadLeasePayments(rows: ILeaseRecord[]): Promise<void> {
-  await Promise.all(
-    rows.map(async (row) => {
-      try {
-        leasePayments.value[row.id] = await listLeasePayments(row.id)
-      } catch {
-        /* 取不到支付单时不落键：卡片退化为原有「支付首期」入口，不误报待支付 */
-      }
-    })
-  )
-}
-
 function paymentsOf(row: ILeaseRecord): ILeasePayment[] {
   return leasePayments.value[row.id] ?? []
 }
 
 function paymentsUnknown(row: ILeaseRecord): boolean {
-  return leasePayments.value[row.id] === undefined
+  return summaries.value[row.id] == null
 }
 
 /** 已支付的首期单（成功态）：卡片徽标与「首期已支付」文案的唯一依据 */
-function firstPaymentOf(row: ILeaseRecord): ILeasePayment | null {
-  return (
-    paymentsOf(row).find(
-      (item) => paymentTypeOf(item) === 'FIRST' && item.status === 'SUCCESS'
-    ) ?? null
-  )
+function firstPaymentOf(row: ILeaseRecord): Pick<ILeasePayment,'amount'|'paidAt'> | null {
+  const summary=summaries.value[row.id]
+  return summary?.firstPaymentSucceeded ? {amount:summary.firstPaymentPaidAmount ?? 0,paidAt:summary.firstPaymentPaidAt ?? undefined} : null
 }
 
 function firstPaymentText(row: ILeaseRecord): string | null {
@@ -246,7 +238,8 @@ async function findLeasePage(leaseId: number): Promise<number | null> {
   const size = query.size
   for (let page = 1; page <= 20; page += 1) {
     try {
-      const data = await getLeaseList({ page, size })
+      const cards = await getMyLeaseSummaries({ page, size })
+      const data={...cards,records:cards.records.map(card=>card.lease)}
       if (data.records.some((row) => row.id === leaseId)) return page
       if (data.records.length === 0 || page * size >= data.total) return null
     } catch {
@@ -460,16 +453,17 @@ function paymentEntryOf(row: ILeaseRecord): PaymentEntry {
       action: 'NONE',
       note:
         row.status === 'ACTIVE'
-          ? '首期已结清；需要延长租期时点「续租」并在此支付租金。'
+          ? '首期已结清；普通缴租不延长租期，需要延长时提交租期延长申请。'
           : '首期费用已结清，无可支付项；历史支付记录仍在下方可查。'
     }
   }
   if (row.status === 'ACTIVE' || (row.status === 'TO_SIGN' && row.agreementStatus === 'SIGNED')) {
+    if (summaries.value[row.id]?.actions.firstPayment.enabled === false && !expired) return { label:'支付首期费用', action:'NONE', note:summaries.value[row.id].actions.firstPayment.reason }
     if (!expired) {
       return {
         label: '待支付首期费用',
         action: 'FIRST',
-        note: '首期费用 = 首月租金 + 押金（一次收取，不做拆分支付），协议完成且支付成功后才正式入住；首期不顺延租期。'
+        note: summaries.value[row.id]?.actions.firstPayment.reason ?? '首期按约定首付月数加一次押金，成功后正式生效。' 
       }
     }
     return {
@@ -510,9 +504,9 @@ function handlePaymentEntry(row: ILeaseRecord): void {
 }
 
 /** unknown 兜底重试：单独重取该租约支付单；失败如实提示，成功后入口按真实结清态重渲 */
-async function retryLoadPayments(row: ILeaseRecord): Promise<void> {
+async function retryLoadPayments(_row: ILeaseRecord): Promise<void> {
   try {
-    leasePayments.value[row.id] = await listLeasePayments(row.id)
+    await loadLeases()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '支付记录加载失败，请稍后重试')
   }
@@ -521,7 +515,8 @@ async function retryLoadPayments(row: ILeaseRecord): Promise<void> {
 /** 租金支付状态文案：已存在任一成功支付单即视为已支付（首期或续租） */
 function rentPaidState(row: ILeaseRecord): string {
   if (paymentsUnknown(row)) return '状态待刷新'
-  return paymentsOf(row).some((item) => item.status === 'SUCCESS') ? '已支付' : '待支付'
+  const summary=summaries.value[row.id]
+  return summary?.paidRentMonths != null ? `已缴 ${summary.paidRentMonths} 个月，尚余 ${summary.unpaidRentMonths} 个月` : '历史覆盖待核对'
 }
 
 /** 首期成功后回读租约正式生效状态、关系及支付记录 */
@@ -608,7 +603,8 @@ async function loadLeaseDetail(leaseId: number): Promise<void> {
   detailCache[leaseId] = { refunds: [], changes: [], loading: true, refundsFailed: false }
   const [refunds, changes] = await Promise.all([
     listDepositRefunds(leaseId).catch(() => 'FAILED' as const),
-    getLeaseChanges(leaseId).catch(() => [] as ILeaseChange[])
+    getLeaseChanges(leaseId).catch(() => [] as ILeaseChange[]),
+    refreshLeasePayments(leaseId)
   ])
   detailCache[leaseId] = {
     refunds: refunds === 'FAILED' ? [] : refunds,
@@ -706,6 +702,8 @@ function handleExpand(row: ILeaseRecord): void {
   expandedId.value = next
   if (next !== null) void loadLeaseDetail(row.id)
 }
+
+useLiveRefresh(loadLeases, ['lease','agreement','payment'])
 
 onMounted(() => {
   const deepLinkId = Number(route.query.leaseId)
@@ -816,7 +814,7 @@ onMounted(() => {
                 协议{{ agreementLabel(group.current) }}
               </span>
               <span class="status-pill" :data-status="group.current.status">
-                {{ leaseDisplayLabel(group.current) }}
+                {{ summaries[group.current.id]?.displayStatus ?? leaseDisplayLabel(group.current) }}
               </span>
 
               <!-- 押金状态徽标（R72）：未缴/已缴/退还中/已退还/已抵扣，居民侧只读 -->
@@ -869,7 +867,7 @@ onMounted(() => {
                   @click.stop="termsTarget=group.current; termsVisible=true"
                 >
                   续租
-                </el-button><el-button v-if="group.current.status==='ACTIVE'" @click.stop="renewTarget=group.current; paymentPurpose='RENT'; renewVisible=true">缴纳租金</el-button>
+                </el-button><el-button v-if="group.current.status==='ACTIVE'" :disabled="!summaries[group.current.id]?.actions.rentPayment.enabled" :title="summaries[group.current.id]?.actions.rentPayment.reason" @click.stop="renewTarget=group.current; paymentPurpose='RENT'; renewVisible=true">缴纳租金</el-button>
                 <el-button
                   class="lease-action"
                   type="warning"
