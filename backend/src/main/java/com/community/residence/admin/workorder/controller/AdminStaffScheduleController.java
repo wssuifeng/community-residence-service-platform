@@ -1,4 +1,4 @@
-package com.community.residence.common.workorder.controller;
+package com.community.residence.admin.workorder.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.workorder.dto.BatchSaveScheduleDTO;
@@ -29,7 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/staff-schedules")
 @RequiredArgsConstructor
-public class StaffScheduleController {
+public class AdminStaffScheduleController {
 
     private final StaffScheduleService staffScheduleService;
 
