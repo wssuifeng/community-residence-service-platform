@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-18",
+  "commonMoved": 161,
+  "portalAndAssemblyMoved": 147,
+  "fullSuite": {
+    "tests": 426,
+    "passed": 425,
+    "failed": 1,
+    "cause": "new root-directory guard incorrectly counted empty source directories and required optional env.d.ts",
+    "resolution": "pruned empty directories and validated allowed root entries",
+    "focusedRecheck": {
+      "files": 2,
+      "tests": 4,
+      "passed": 4
+    }
+  },
+  "productionBuild": "passed",
+  "routeFixture": "unchanged; compatible",
+  "navigation": "per-portal definitions shared by shell and route titles",
+  "publicDependencies": "no portal imports in production shared code; integration tests may exercise multiple portals",
+  "liveServices": "not restarted"
+}

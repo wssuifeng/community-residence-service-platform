@@ -85,5 +85,7 @@ for p,s in all_files.items():
         t.write_text(rewritten,encoding='utf-8')
         changed.append({'source':p.relative_to(ROOT).as_posix(),'target':t.relative_to(ROOT).as_posix()})
 for p,t in mapping.items(): p.unlink()
+for p in sorted(FE.rglob('*'),key=lambda p:len(p.parts),reverse=True):
+    if p.is_dir() and p.resolve().is_relative_to(FE.resolve()) and not any(p.iterdir()): p.rmdir()
 (OUT / ('s5-'+stage+'-relocation.json')).write_text(json.dumps(changed,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print(json.dumps({'stage':stage,'moved':len(mapping),'affected':len(changed)}))

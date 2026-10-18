@@ -4,7 +4,7 @@ import ElementPlus from 'element-plus'
 import { createPinia } from 'pinia'
 import { createMemoryHistory, createRouter, type Router } from 'vue-router'
 import HousingDetailView from '@/common/public/views/HousingDetailView.vue'
-import HousingReservationView from '@/views/resident/HousingReservationView.vue'
+import HousingReservationView from '@/resident/housing/views/HousingReservationView.vue'
 import { fakeLogin } from '@/test/fakeBackend'
 
 const mocks = vi.hoisted(() => ({
