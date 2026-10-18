@@ -1,4 +1,4 @@
-package com.community.residence.common.community.controller;
+package com.community.residence.admin.community.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.community.dto.StructureBatchGenerateDTO;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/structures")
 @RequiredArgsConstructor
-public class StructureGenerateController {
+public class AdminStructureGenerateController {
 
     private final StructureGenerateService structureGenerateService;
 

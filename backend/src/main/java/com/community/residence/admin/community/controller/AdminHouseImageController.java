@@ -1,4 +1,4 @@
-package com.community.residence.common.community.controller;
+package com.community.residence.admin.community.controller;
 import com.community.residence.common.community.service.HouseImageService;
 import com.community.residence.common.community.entity.HouseImage;
 import com.community.residence.common.web.result.ApiResponse;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name="房屋相册")
 @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-public class HouseImageController {
+public class AdminHouseImageController {
     private final HouseImageService service;
     @GetMapping @Operation(summary="读取管辖房屋相册")
     public ApiResponse<List<HouseImage>> list(@PathVariable Long houseId){
