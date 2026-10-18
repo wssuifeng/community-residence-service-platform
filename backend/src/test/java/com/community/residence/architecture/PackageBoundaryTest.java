@@ -16,6 +16,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** 结构边界、Bean名称与注解SQL装配，全部离线运行。 */
 class PackageBoundaryTest {
     private static final Path ROOT = Path.of("src/main/java/com/community/residence");
+
+    @Test void sourceRootContainsOnlyPortalGroups() throws Exception {
+        try (var directories = Files.list(ROOT)) {
+            assertThat(directories.filter(Files::isDirectory)
+                    .map(path -> path.getFileName().toString()).toList())
+                    .containsExactlyInAnyOrder("admin", "resident", "staff", "common");
+        }
+    }
     private static final Pattern REFERENCE = Pattern.compile("com\\.community\\.residence\\.(admin|resident|staff)\\.");
 
     @Test void portalDependenciesAndControllerLayersRemainDirected() throws Exception {
