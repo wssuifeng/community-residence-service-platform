@@ -1,0 +1,23 @@
+{
+  "fixture": "Production shared useChatChannel, synthetic renderer/adapter. Four explicit older-page loads and twenty channel switches. Switching time includes deliberate 180ms settling per switch, not a latency benchmark.",
+  "result": {
+    "faults": [],
+    "history": {
+      "dom": 240,
+      "hasOlder": true,
+      "messages": 200,
+      "renderAndLoadMs": 1170
+    },
+    "initial": {
+      "messages": 40,
+      "reads": 1
+    },
+    "reads": 25,
+    "restored": {
+      "draft": "保留草稿",
+      "messages": 200
+    },
+    "switch20Ms": 3744
+  },
+  "sourceBound": "Existing channels.size > 30 evicts oldest channel. No new capacity/virtualization policy added."
+}

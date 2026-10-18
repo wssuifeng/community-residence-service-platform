@@ -1,0 +1,53 @@
+{
+  "o1": {
+    "frontendFocusedTests": 22,
+    "build": "passed"
+  },
+  "o2": {
+    "frontendFocusedTests": 30,
+    "initialMockFailures": 2,
+    "notificationFixtureRecheckTests": 5,
+    "build": "passed"
+  },
+  "o4": {
+    "initialFocusedTests": 17,
+    "houseFloorFormTests": 2,
+    "selectionContextMenuRecheckTests": 7,
+    "build": "passed"
+  },
+  "o5": {
+    "backend": {
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "result": "passed"
+    },
+    "frontendTests": 2
+  },
+  "o6": {
+    "backend": {
+      "tests": 35,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "result": "passed"
+    },
+    "frontendFocusedAtCommit": 26,
+    "requestScopeRecheckIncludedInFinalFullSuite": true
+  },
+  "o7": {
+    "backend": {
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "result": "passed"
+    }
+  },
+  "o8": {
+    "frontendFocusedTests": 37,
+    "browser": "o8-browser.json"
+  },
+  "counting": "Individual historical runs overlap. Do not sum these as distinct coverage or final total."
+}
