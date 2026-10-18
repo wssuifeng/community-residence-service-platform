@@ -54,7 +54,7 @@ onMounted(async () => {
   }
 })
 
-useLiveRefresh(async()=>{if(!notice.value)return;const oldVersion=notice.value.contentVersion;const fresh=await getNotice(noticeId);notice.value=fresh;if((oldVersion??1)!==(fresh.contentVersion??1))void recordNoticeView(noticeId,fresh.contentVersion).catch(()=>undefined)})
+useLiveRefresh(async()=>{if(!notice.value)return;const oldVersion=notice.value.contentVersion;const fresh=await getNotice(noticeId);notice.value=fresh;if((oldVersion??1)!==(fresh.contentVersion??1))void recordNoticeView(noticeId,fresh.contentVersion).catch(()=>undefined)}, () => [{domain:'notice', id:noticeId}])
 </script>
 
 <template>

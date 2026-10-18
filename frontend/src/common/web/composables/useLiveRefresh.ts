@@ -1,8 +1,8 @@
-import { computed, inject, onActivated, onBeforeUnmount, onMounted, watch, type InjectionKey, type Ref } from 'vue'
-import { dataRevision } from '@/common/web/utils/dataFreshness'
+import { computed, inject, onActivated, onBeforeUnmount, onMounted, watch, type InjectionKey, type Ref, toValue, type MaybeRefOrGetter } from 'vue'
+import { dataInvalidation, scopesOverlap, type DataScope } from '@/common/web/utils/dataFreshness'
 export const livePanelActive: InjectionKey<Readonly<Ref<boolean>>> = Symbol('livePanelActive')
 /** 可见列表在激活、业务通知及恢复窗口焦点时补读；刷新不重置筛选，也不碰编辑表单。 */
-export function useLiveRefresh(refresh: () => Promise<unknown> | void) {
+export function useLiveRefresh(refresh: () => Promise<unknown> | void, scopes: MaybeRefOrGetter<readonly DataScope[]>) {
  const active=inject(livePanelActive,computed(()=>true))
  let disposed=false, running=false, pending=false, activated=false
  let timer:ReturnType<typeof setTimeout>|undefined
@@ -18,7 +18,7 @@ export function useLiveRefresh(refresh: () => Promise<unknown> | void) {
  }
  function schedule() { if(!disposed && visible()) {clearTimeout(timer);timer=setTimeout(()=>void drain(),150)} }
  watch(active,(value,old)=>{if(value && !old)schedule()})
- watch(dataRevision,schedule)
+ watch(dataInvalidation, event => { if (event.scopes.some(changed => toValue(scopes).some(scope => scopesOverlap(scope, changed)))) schedule() }, { flush: 'sync' })
  onActivated(()=>{if(activated)schedule();activated=true})
  onMounted(()=>{
   window.addEventListener('focus',schedule);document.addEventListener('visibilitychange',schedule)

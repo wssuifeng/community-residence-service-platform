@@ -1,4 +1,4 @@
-import { invalidateData } from '@/common/web/utils/dataFreshness'
+import { invalidateNotification } from '@/common/web/utils/dataFreshness'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { INotification, IPulledNotification } from '@/common/messaging/types/notification'
@@ -37,7 +37,7 @@ export const useNotificationStore = defineStore('notification', () => {
     const payload = raw as WsNotificationPayload
     if (locallyRead.has(payload.id) || notifications.value.some((n) => n.id === payload.id || n.seq === payload.seq)) return
     const item: IPulledNotification = { ...payload, isRead: payload.isRead === 1 || (payload.isRead as unknown) === true }
-    invalidateData()
+    invalidateNotification(payload)
     notifications.value.unshift(item)
     pushedAt.set(item.id, ++pushVersion)
     lastSeq.value = Math.max(lastSeq.value, Number(payload.seq))
@@ -51,7 +51,7 @@ export const useNotificationStore = defineStore('notification', () => {
     try {
       const [result, snapshot] = await Promise.all([pullNotifications(lastSeq.value), listUnreadNotifications()])
       if (session !== generation || request !== requestVersion) return
-      if (result.latestSeq > lastSeq.value) invalidateData()
+      if (result.latestSeq > lastSeq.value) result.notifications.filter(item => item.seq > lastSeq.value).forEach(invalidateNotification)
       lastSeq.value = Math.max(lastSeq.value, result.latestSeq)
       /* 未读列表是完整权威快照，不从最新20条推算；保留请求期间的新推送，排除本地已读。 */
       const items = new Map<number, NotificationListItem>()

@@ -95,7 +95,7 @@ async function loadStats(): Promise<void> {
 
 onMounted(loadStats)
 
-useLiveRefresh(() => loadStats())
+useLiveRefresh(() => loadStats(), ['housing'])
 </script>
 
 <template>

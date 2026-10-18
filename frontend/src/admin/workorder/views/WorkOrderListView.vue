@@ -427,7 +427,7 @@ onMounted(() => {
   loadStaffOptions()
 })
 
-useLiveRefresh(() => refresh())
+useLiveRefresh(() => refresh(), ['workorder'])
 </script>
 
 <template>

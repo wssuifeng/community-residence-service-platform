@@ -502,7 +502,7 @@ async function handleBatchSubmit(): Promise<void> {
   }
 }
 
-useLiveRefresh(() => loadItems())
+useLiveRefresh(() => loadItems(), ['community','housing'])
 </script>
 
 <template>

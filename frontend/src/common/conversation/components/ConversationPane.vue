@@ -41,7 +41,7 @@ async function load() {
  finally { if (!disposed && version === request) loading.value = false }
 }
 function changed() { emit('changed'); void load() }
-useLiveRefresh(load)
+useLiveRefresh(load, () => [{domain:props.source === 'FEEDBACK' ? 'feedback' : 'conversation',id:props.id}])
 onMounted(load)
 onBeforeUnmount(() => { disposed = true; request++ })
 </script>

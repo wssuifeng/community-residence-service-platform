@@ -635,7 +635,7 @@ onMounted(async () => {
   monthWatchReady = true
 })
 
-useLiveRefresh(() => refreshData())
+useLiveRefresh(() => refreshData(), ['reservation'])
 </script>
 
 <template>
