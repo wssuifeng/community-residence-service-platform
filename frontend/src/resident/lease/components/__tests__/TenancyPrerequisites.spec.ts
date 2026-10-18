@@ -14,6 +14,7 @@ import type { FakeLease } from '@/test/fakeBackend'
  * - 承约后**由管理方直接推进协议确认**（DEF-078 去重：管理方确认时引用承约留痕），
  *   居民侧**没有二次确认入口/提示**。
  */
+vi.mock('@/resident/lease/api/summaries', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 vi.mock('@/common/lease/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 vi.mock('@/common/agreement/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
 vi.mock('@/common/payment/api/payment', async () => (await import('@/test/fakeBackend')).fakeApi('payment'))

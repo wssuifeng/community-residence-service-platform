@@ -1,0 +1,652 @@
+
+.staff-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* ---------- 问候条 ---------- */
+
+:where(.staff-dashboard) .greeting-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+:where(.staff-dashboard) .greeting-sun {
+  display: inline-flex;
+  color: var(--color-warning);
+}
+
+:where(.staff-dashboard) .greeting-sun svg {
+  width: 20px;
+  height: 20px;
+}
+
+:where(.staff-dashboard) .greeting-text {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+:where(.staff-dashboard) .greeting-divider {
+  color: var(--color-text-disabled);
+}
+
+:where(.staff-dashboard) .greeting-date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 通用白容器 ---------- */
+
+:where(.staff-dashboard) .panel {
+  padding: var(--spacing-lg);
+  background-color: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+:where(.staff-dashboard) .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+:where(.staff-dashboard) .panel-title {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+:where(.staff-dashboard) .panel-more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+:where(.staff-dashboard) .panel-more em {
+  padding: 0 6px;
+  background-color: var(--color-primary-bg);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-style: normal;
+}
+
+/* ---------- 今日概览 ---------- */
+
+:where(.staff-dashboard) .overview-panel .panel-title {
+  margin-bottom: var(--spacing-md);
+}
+
+:where(.staff-dashboard) .stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* 容器内卡片用浅灰底 + 描边，与白色大容器形成二级层次 */
+:where(.staff-dashboard) .stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+:where(.staff-dashboard) .stat-card:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-primary-light);
+  transform: translateY(-1px);
+}
+
+:where(.staff-dashboard) .stat-top {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+:where(.staff-dashboard) .stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+}
+
+:where(.staff-dashboard) .stat-icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+:where(.staff-dashboard) .stat-card.is-todo .stat-icon {
+  color: var(--status-pending);
+  background-color: var(--color-warning-soft);
+}
+
+:where(.staff-dashboard) .stat-card.is-doing .stat-icon {
+  color: var(--status-processing);
+  background-color: var(--color-primary-bg);
+}
+
+:where(.staff-dashboard) .stat-card.is-done .stat-icon {
+  color: var(--status-completed);
+  background-color: var(--color-success-soft);
+}
+
+:where(.staff-dashboard) .stat-card.is-urgent .stat-icon {
+  color: var(--status-rejected);
+  background-color: var(--color-danger-soft);
+}
+
+:where(.staff-dashboard) .stat-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+:where(.staff-dashboard) .stat-main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+:where(.staff-dashboard) .stat-figures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+:where(.staff-dashboard) .stat-value {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-primary);
+}
+
+/* 趋势指数：箭头与文字同色，上升红 / 下降绿（用户口径，纯方向着色） */
+:where(.staff-dashboard) .stat-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+:where(.staff-dashboard) .stat-delta svg {
+  width: 12px;
+  height: 12px;
+}
+
+:where(.staff-dashboard) .stat-delta.is-up {
+  color: var(--color-danger);
+}
+
+:where(.staff-dashboard) .stat-delta.is-down {
+  color: var(--color-success);
+}
+
+:where(.staff-dashboard) .stat-spark {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- 紧急告警条 ---------- */
+
+:where(.staff-dashboard) .urgent-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-danger-soft);
+  border-radius: var(--radius-lg);
+}
+
+:where(.staff-dashboard) .urgent-icon {
+  display: inline-flex;
+  color: var(--status-rejected);
+}
+
+:where(.staff-dashboard) .urgent-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+:where(.staff-dashboard) .urgent-text {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--status-rejected);
+}
+
+:where(.staff-dashboard) .urgent-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+:where(.staff-dashboard) .urgent-action:hover {
+  background-color: var(--color-primary-dark);
+}
+
+:where(.staff-dashboard) .urgent-action svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- 主体两栏：右栏两容器与左栏等高 ---------- */
+
+:where(.staff-dashboard) .dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  gap: var(--spacing-lg);
+  align-items: stretch;
+}
+
+:where(.staff-dashboard) .side-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 0;
+}
+
+:where(.staff-dashboard) .side-col > .panel {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---------- 待办工单 ---------- */
+
+:where(.staff-dashboard) .todo-panel {
+  min-width: 0;
+}
+
+:where(.staff-dashboard) .todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.staff-dashboard) .todo-row {
+  display: flex;
+  align-items: stretch;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+:where(.staff-dashboard) .todo-row:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* 左侧竖排紧急程度色条（紧急红 / 普通黄，文案取自后端优先级枚举） */
+:where(.staff-dashboard) .todo-flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  padding: var(--spacing-sm) 0;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 3px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: #fff;
+  background-color: var(--status-pending);
+}
+
+:where(.staff-dashboard) .todo-row.is-urgent .todo-flag {
+  background-color: var(--status-rejected);
+}
+
+:where(.staff-dashboard) .todo-body {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+:where(.staff-dashboard) .todo-main {
+  flex: 1;
+  min-width: 0;
+}
+
+:where(.staff-dashboard) .todo-title-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+:where(.staff-dashboard) .todo-title {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:where(.staff-dashboard) .todo-meta {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+  white-space: nowrap;
+}
+
+/* 发布人：头像 + 「姓名 / 身份」两行 */
+:where(.staff-dashboard) .todo-person {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+:where(.staff-dashboard) .todo-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-primary-bg);
+  border-radius: var(--radius-circle);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+:where(.staff-dashboard) .todo-person-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+:where(.staff-dashboard) .todo-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+:where(.staff-dashboard) .todo-identity {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-tight);
+}
+
+:where(.staff-dashboard) .todo-action {
+  flex-shrink: 0;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+:where(.staff-dashboard) .todo-action:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* ---------- 工单进度 ---------- */
+
+:where(.staff-dashboard) .progress-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+:where(.staff-dashboard) .progress-body {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex: 1;
+}
+
+:where(.staff-dashboard) .progress-chart {
+  position: relative;
+  flex-shrink: 0;
+  width: 132px;
+}
+
+:where(.staff-dashboard) .progress-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+:where(.staff-dashboard) .progress-center strong {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+:where(.staff-dashboard) .progress-center span {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+:where(.staff-dashboard) .progress-legend {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+:where(.staff-dashboard) .progress-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+:where(.staff-dashboard) .progress-legend em {
+  margin-left: auto;
+  font-style: normal;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+:where(.staff-dashboard) .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle);
+}
+
+:where(.staff-dashboard) .dot.is-done {
+  background-color: var(--color-success);
+}
+
+:where(.staff-dashboard) .dot.is-doing {
+  background-color: var(--color-primary);
+}
+
+:where(.staff-dashboard) .dot.is-todo {
+  background-color: var(--color-warning);
+}
+
+:where(.staff-dashboard) .progress-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-bg-hover);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+:where(.staff-dashboard) .progress-footer em {
+  font-style: normal;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* ---------- 最新消息 ---------- */
+
+:where(.staff-dashboard) .msg-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+:where(.staff-dashboard) .msg-empty {
+  margin: 0;
+  padding: var(--spacing-lg) 0;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-disabled);
+}
+
+:where(.staff-dashboard) .msg-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:where(.staff-dashboard) .msg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-bg-hover);
+}
+
+:where(.staff-dashboard) .msg-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+:where(.staff-dashboard) .msg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-circle);
+}
+
+:where(.staff-dashboard) .msg-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+:where(.staff-dashboard) .msg-icon.is-workorder {
+  color: var(--color-primary);
+  background-color: var(--color-primary-bg);
+}
+
+:where(.staff-dashboard) .msg-icon.is-system {
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-hover);
+}
+
+:where(.staff-dashboard) .msg-main {
+  flex: 1;
+  min-width: 0;
+}
+
+:where(.staff-dashboard) .msg-title {
+  margin: 0 0 2px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:where(.staff-dashboard) .msg-content {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:where(.staff-dashboard) .msg-time {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
+:where(.staff-dashboard) .workload-panel { margin-bottom: var(--spacing-lg); min-width: 0; }
+:where(.staff-dashboard) .workload-summary { margin: var(--spacing-md) 0; line-height: 1.8; }
+:where(.staff-dashboard) .workload-note { color: var(--color-text-secondary); font-size: var(--font-size-xs); line-height: 1.6; }
+:where(.staff-dashboard) .workload-error { padding: var(--spacing-md) 0; }
+
+/* ---------- 响应式 ---------- */
+
+@media (max-width: 1199px) {
+  :where(.staff-dashboard) .stat-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  :where(.staff-dashboard) .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :where(.staff-dashboard) .side-col > .panel {
+    flex: none;
+  }
+}

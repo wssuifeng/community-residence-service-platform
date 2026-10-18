@@ -48,3 +48,18 @@ describe('人员当前负荷与事件统计分开', () => {
     wrapper.unmount()
   })
 })
+
+describe('工作台摘要边界',()=>{
+ it('一份摘要替代五次列表，摘要失败不伪装为零负荷并可原地重试',async()=>{
+  mocks.orders.mockRejectedValueOnce(new Error('合成摘要失败'))
+  const wrapper=await open()
+  expect(wrapper.text()).toContain('工作台加载失败')
+  expect(wrapper.find('.overview-panel').exists()).toBe(false)
+  expect(wrapper.get('[data-testid="today-submitted"]').text()).toBe('3')
+  expect(mocks.orders).toHaveBeenCalledTimes(1)
+  await wrapper.findAll('button').find(button=>button.text()==='重新加载工作台')!.trigger('click');await flushPromises()
+  expect(wrapper.find('.overview-panel').exists()).toBe(true)
+  expect(mocks.orders).toHaveBeenCalledTimes(2)
+  wrapper.unmount()
+ })
+})

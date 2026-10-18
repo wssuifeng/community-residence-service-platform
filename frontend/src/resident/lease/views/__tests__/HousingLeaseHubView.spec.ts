@@ -17,6 +17,8 @@ const mocks = vi.hoisted(() => ({
   leases: [] as unknown[]
 }))
 
+vi.mock('@/resident/lease/api/summaries', () => ({ getMyLeaseSummaries: async () => ({ records:mocks.leases.map(lease=>({lease,summary:null})),total:mocks.leases.length }) }))
+
 vi.mock('@/common/lease/api/lease', () => ({
   getLeaseList: async () => ({ records: mocks.leases, total: mocks.leases.length }),
   listLeasePayments: async () => [],

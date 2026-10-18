@@ -14,6 +14,7 @@ import type { FakeLease } from '@/test/fakeBackend'
  *    无群不渲染；「入住申请入口」已通过项同样能进会话（有群进群、无群走居民侧直通会话）。
  * ② 支付租金/押金——租约展开区把「首期费用」拆成月租金/押金两行明示，并给出可点击的支付入口。
  */
+vi.mock('@/resident/lease/api/summaries', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 vi.mock('@/common/lease/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 vi.mock('@/common/resident/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
 vi.mock('@/common/agreement/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))

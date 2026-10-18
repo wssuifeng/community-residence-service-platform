@@ -39,6 +39,7 @@ import ResidentWorkOrderCreateView from '@/resident/workorder/views/WorkOrderCre
 
 /* 假后端装配：逐个模块一行（vi.mock 必须静态声明，工厂延迟到模块被导入时才求值） */
 vi.mock('@/common/resident/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
+vi.mock('@/resident/lease/api/summaries', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 vi.mock('@/common/lease/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 vi.mock('@/common/payment/api/payment', async () => (await import('@/test/fakeBackend')).fakeApi('payment'))
 vi.mock('@/common/lease/api/leaseMoveOut', async () => (await import('@/test/fakeBackend')).fakeApi('leaseMoveOut'))

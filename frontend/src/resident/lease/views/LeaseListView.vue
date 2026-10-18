@@ -1057,7 +1057,7 @@ onMounted(() => {
                 <li class="charge-item">
                   <span class="charge-name">月租金</span>
                   <span class="charge-amount mono">{{ money(group.current.monthlyRent) }}</span>
-                  <span class="charge-state" :data-paid="rentPaidState(group.current) === '已支付'">
+                  <span class="charge-state" :data-paid="(summaries[group.current.id]?.paidRentMonths ?? 0) > 0">
                     {{ rentPaidState(group.current) }}
                   </span>
                 </li>
