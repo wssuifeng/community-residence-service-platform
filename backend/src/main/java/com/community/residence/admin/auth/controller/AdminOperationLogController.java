@@ -1,4 +1,4 @@
-package com.community.residence.common.auth.controller;
+package com.community.residence.admin.auth.controller;
 
 import com.community.residence.common.auth.service.OperationLogService;
 import com.community.residence.common.auth.vo.OperationLogVO;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/v1/operation-logs")
 @RequiredArgsConstructor
-public class OperationLogController {
+public class AdminOperationLogController {
 
     private final OperationLogService operationLogService;
 
