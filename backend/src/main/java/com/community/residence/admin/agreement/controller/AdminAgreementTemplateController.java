@@ -1,4 +1,4 @@
-package com.community.residence.common.agreement.controller;
+package com.community.residence.admin.agreement.controller;
 
 import com.community.residence.common.agreement.dto.AgreementTemplateDTO;
 import com.community.residence.common.agreement.service.AgreementService;
@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/agreement-templates")
 @RequiredArgsConstructor
-public class AgreementTemplateController {
+public class AdminAgreementTemplateController {
 
     private final AgreementService agreementService;
 

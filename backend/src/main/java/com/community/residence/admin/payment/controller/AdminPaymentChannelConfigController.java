@@ -1,4 +1,4 @@
-package com.community.residence.common.payment.controller;
+package com.community.residence.admin.payment.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.payment.dto.UpdateAlipayChannelConfigDTO;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SUPER_ADMIN')")
 @Tag(name = "支付渠道配置", description = "仅超级管理员，私钥只写不读，启用由超管控制，保存不发起交易")
-public class PaymentChannelConfigController {
+public class AdminPaymentChannelConfigController {
     private final AlipayChannelConfigService service;
     @GetMapping @Operation(summary = "读取支付宝配置", description = "仅返回公钥和私钥已配置标志，不含私钥或密文")
     public ApiResponse<AlipayChannelConfigVO> get() { return ApiResponse.success(service.get()); }

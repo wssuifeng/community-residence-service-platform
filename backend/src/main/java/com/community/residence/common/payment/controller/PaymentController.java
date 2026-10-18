@@ -1,23 +1,16 @@
 package com.community.residence.common.payment.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
-import com.community.residence.common.web.result.PageVO;
-import com.community.residence.common.payment.dto.CreateRenewPaymentDTO;
 import com.community.residence.common.payment.service.PaymentService;
 import com.community.residence.common.payment.vo.LeasePaymentVO;
 import com.community.residence.common.payment.vo.PaymentChannelVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -74,22 +67,5 @@ public class PaymentController {
     @GetMapping("/orders/{paymentNo}")
     public ApiResponse<LeasePaymentVO> getStatus(@PathVariable String paymentNo) {
         return ApiResponse.success(paymentService.getStatus(paymentNo));
-    }
-
-    @Operation(summary = "关闭支付单", description = "居民放弃支付；仅待支付状态可关")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @PatchMapping("/orders/{paymentNo}/close")
-    public ApiResponse<Void> closePayment(@PathVariable String paymentNo) {
-        paymentService.closePayment(paymentNo);
-        return ApiResponse.success();
-    }
-
-    @Operation(summary = "本人支付单列表（分页）", description = "居民视角，可选渠道过滤")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @GetMapping("/orders")
-    public ApiResponse<PageVO<LeasePaymentVO>> page(@RequestParam(defaultValue = "1") long page,
-                                                    @RequestParam(defaultValue = "20") long size,
-                                                    @RequestParam(required = false) String channel) {
-        return ApiResponse.success(paymentService.page(page, size, channel));
     }
 }
