@@ -38,6 +38,11 @@ beforeEach(() => {
 })
 afterEach(() => { wrapper?.unmount(); wrapper = undefined; document.body.innerHTML = ''; sessionStorage.clear() })
 describe('DEF-154 社区结构按范围读取', () => {
+  it('网格多选与右键编辑在组件拆分后保留', async () => {
+    const w=await mountPage();const card=w.find('.grid-block');await card.trigger('click',{ctrlKey:true});await flushPromises()
+    expect(w.find('.selection-bar').text()).toContain('已选 1 套')
+    await card.trigger('contextmenu');await flushPromises();(document.querySelector('.layout-context-menu') as HTMLButtonElement).click();await flushPromises();expect(w.findComponent({name:'HouseAttributesDialog'}).props('modelValue')).toBe(true)
+  })
   it('初次仅读取序号第一栋房屋，社区计数不以局部缓存冒充全量', async () => {
     const w = await mountPage()
     expect(mocks.houses.mock.calls.map(c => c[0])).toEqual([10])
