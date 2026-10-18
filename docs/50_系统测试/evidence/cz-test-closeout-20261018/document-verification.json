@@ -1,0 +1,386 @@
+{
+  "date": "2026-10-18",
+  "sourceHead": "def6f90631950a77497db9ed10c4f1b2eae83cfc",
+  "method": "Skill read-only audit against current files and recorded source commit texts, compared by path/code/message/source-line text; plus fixed evidence hashes, facts and local links.",
+  "globalAuditPassed": false,
+  "globalAuditComplete": true,
+  "currentFindingCount": 1446,
+  "baselineFindingCount": 1446,
+  "newFindingCount": 0,
+  "newFindings": [],
+  "existingFindingTypes": {
+    "acceptance-missing": 3,
+    "status-symbol-out-of-scope": 1199,
+    "broken-link": 243,
+    "dependency-mismatch": 1
+  },
+  "checks": {
+    "sourceHashesMatch": true,
+    "testCaseCatalogUnique305": true,
+    "requirementRows85NoMissingIds": true,
+    "normalEnvironmentV43BusinessTables61Retention730": true,
+    "normalPortsObservedListening": true,
+    "noNewBusinessOrFinancialTests": true,
+    "finalRatesNotInvented": true,
+    "governanceAuditComplete": true,
+    "noAddedGovernanceFindings": true,
+    "gitDiffCheckPassed": true,
+    "newReportAndArchiveLinksResolve": true
+  },
+  "sourceChecks": [
+    {
+      "path": "docs/50_系统测试/01_测试需求分析.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/02_需求跟踪矩阵.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/03_系统测试计划.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C01_社区基础信息.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C02_居民与居住关系.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C03_租住管理.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C04_服务申请与工单.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C05_公告广播管理.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C06_居民反馈管理.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C07_公共资源预约.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C08_服务评价.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C09_社区运营统计.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C10_用户与权限.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C11_消息与通知.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C12_房源与看房预约.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/非功能与专项用例.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/05_测试环境与数据.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/06_冒烟测试记录.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/07_测试执行记录.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/evidence/ce-stale-test-orders-20261016/verification-summary.json",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/final-migration-validation.json",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/final-validation.json",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/s3-validation.json",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cx-current-runtime-20261018/startup-summary.json",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cy-header-navigation-20261018/verification-summary.json",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/scripts/nf_load.jmx",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/scripts/nf_steady_r2.jtl.gz",
+      "sha256Matches": true
+    },
+    {
+      "path": "docs/50_系统测试/scripts/nf_steady_r5.jtl",
+      "sha256Matches": true
+    }
+  ],
+  "linkChecks": [
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cx-current-runtime-20261018/README.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cy-header-navigation-20261018/README.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cz-test-closeout-20261018/evidence-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cz-test-closeout-20261018/test-case-catalog.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cz-test-closeout-20261018/rtm-snapshot.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "07_测试执行记录.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cz-test-closeout-20261018/historical-performance.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cf-notification-home-workorder-20261016/README.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cv-architecture-implementation-20261018/s3-validation.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cv-architecture-implementation-20261018/final-validation.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cv-architecture-implementation-20261018/README.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cx-current-runtime-20261018/startup-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cy-header-navigation-20261018/verification-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "07_测试执行记录.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "25_本轮修复定向回归手测.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "08_缺陷跟踪与回归.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "evidence/cz-test-closeout-20261018/defect-table-snapshot.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "03_系统测试计划.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/09_测试评估与报告.md",
+      "target": "05_测试环境与数据.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "09_测试评估与报告.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "01_测试需求分析.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "03_系统测试计划.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "04_测试用例/",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "02_需求跟踪矩阵.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "07_测试执行记录.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "08_缺陷跟踪与回归.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "13_核心业务流程三端联动手测用例.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "25_本轮修复定向回归手测.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "12_用户手测清单.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "05_测试环境与数据.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "11_测试执行入口.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "scripts/",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/10_测试总结与归档.md",
+      "target": "evidence/cz-test-closeout-20261018/README.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "../../09_测试评估与报告.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "../../10_测试总结与归档.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "../../_中控.md",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "evidence-summary.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "test-case-catalog.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "rtm-snapshot.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "defect-table-snapshot.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "historical-performance.json",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "collect-closeout.py",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "verify-documents.py",
+      "exists": true
+    },
+    {
+      "source": "docs/50_系统测试/evidence/cz-test-closeout-20261018/README.md",
+      "target": "document-verification.json",
+      "exists": true
+    }
+  ],
+  "changedTrackedFiles": [
+    "AGENTS.md",
+    "README.md",
+    "docs/00_总控.md",
+    "docs/50_系统测试/01_测试需求分析.md",
+    "docs/50_系统测试/02_需求跟踪矩阵.md",
+    "docs/50_系统测试/05_测试环境与数据.md",
+    "docs/50_系统测试/07_测试执行记录.md",
+    "docs/50_系统测试/08_缺陷跟踪与回归.md",
+    "docs/50_系统测试/09_测试评估与报告.md",
+    "docs/50_系统测试/10_测试总结与归档.md",
+    "docs/50_系统测试/11_测试执行入口.md",
+    "docs/50_系统测试/_中控.md"
+  ],
+  "businessAcceptance": "not_evaluated; no new business tests; original exit criteria not all signed",
+  "reportUserReview": "pending; latest-runtime confirmation is recorded separately"
+}

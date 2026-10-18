@@ -1,0 +1,69 @@
+{
+  "source": "docs/50_系统测试/scripts/nf_steady_r5.jtl",
+  "sha256": "be3fb06ef819d6b5c9e19f06a478719a78a46e18ca99c28d251c42fcd405abcb",
+  "historicalDate": "2026-09-15",
+  "baseline": "07f216f",
+  "newLoadTestRun": false,
+  "totalSamples": 54950,
+  "failedSamples": 1,
+  "failureCodes": {
+    "Non HTTP response code: java.net.BindException": 1
+  },
+  "labels": {
+    "setUp-登录": {
+      "total": 200,
+      "failed": 0,
+      "successfulSamples": 200,
+      "p95Milliseconds": 70
+    },
+    "L1-社区列表(公开)": {
+      "total": 6868,
+      "failed": 1,
+      "successfulSamples": 6867,
+      "p95Milliseconds": 8
+    },
+    "L2-房屋列表(公开)": {
+      "total": 6859,
+      "failed": 0,
+      "successfulSamples": 6859,
+      "p95Milliseconds": 9
+    },
+    "L3-公告列表(公开)": {
+      "total": 6852,
+      "failed": 0,
+      "successfulSamples": 6852,
+      "p95Milliseconds": 39
+    },
+    "L4-工单列表(令牌)": {
+      "total": 6848,
+      "failed": 0,
+      "successfulSamples": 6848,
+      "p95Milliseconds": 45
+    },
+    "L5-通知列表(令牌)": {
+      "total": 6842,
+      "failed": 0,
+      "successfulSamples": 6842,
+      "p95Milliseconds": 8
+    },
+    "L6-工单详情(admin1令牌2)": {
+      "total": 6836,
+      "failed": 0,
+      "successfulSamples": 6836,
+      "p95Milliseconds": 13
+    },
+    "L6-工单详情(admin1令牌)": {
+      "total": 6824,
+      "failed": 0,
+      "successfulSamples": 6824,
+      "p95Milliseconds": 13
+    },
+    "L7-房源详情(公开)": {
+      "total": 6821,
+      "failed": 0,
+      "successfulSamples": 6821,
+      "p95Milliseconds": 9
+    }
+  },
+  "limitation": "Historical baseline only; no final-source N1/N2/N3 claim."
+}
