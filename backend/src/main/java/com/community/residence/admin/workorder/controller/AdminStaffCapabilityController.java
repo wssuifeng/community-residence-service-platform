@@ -1,4 +1,4 @@
-package com.community.residence.common.workorder.controller;
+package com.community.residence.admin.workorder.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.web.result.PageVO;
@@ -26,7 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/staff-capabilities")
 @RequiredArgsConstructor
-public class StaffCapabilityController {
+public class AdminStaffCapabilityController {
 
     private final StaffCapabilityService staffCapabilityService;
 

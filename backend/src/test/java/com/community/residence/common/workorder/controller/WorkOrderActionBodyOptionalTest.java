@@ -46,7 +46,7 @@ class WorkOrderActionBodyOptionalTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new WorkOrderController(workOrderService))
+                .standaloneSetup(new com.community.residence.admin.workorder.controller.AdminWorkOrderController(workOrderService), new com.community.residence.resident.workorder.controller.ResidentWorkOrderController(workOrderService), new com.community.residence.staff.workorder.controller.StaffWorkOrderController(workOrderService), new WorkOrderQueryController(workOrderService))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
