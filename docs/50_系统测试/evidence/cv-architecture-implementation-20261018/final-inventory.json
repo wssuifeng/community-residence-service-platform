@@ -17,5 +17,13 @@
     "GET /api/v1/leases/my-summaries"
   ],
   "mappers": 60,
-  "schemaMigrationsAdded": 0
+  "schemaMigrationsAdded": 0,
+  "backendTopLevelSourceGroups": [
+    "admin",
+    "resident",
+    "staff",
+    "common"
+  ],
+  "legacyTopLevelScaffoldsRemoved": true,
+  "backendLegacyPlaceholderFiles": 0
 }
