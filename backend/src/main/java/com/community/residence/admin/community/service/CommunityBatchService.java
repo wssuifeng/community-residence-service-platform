@@ -1,4 +1,5 @@
-package com.community.residence.common.community.service;
+package com.community.residence.admin.community.service;
+import com.community.residence.common.community.service.CommunityService;
 
 import com.community.residence.common.web.constant.CommonStatus;
 import com.community.residence.common.web.constant.ErrorCode;
@@ -36,6 +37,7 @@ public class CommunityBatchService {
     static final int MAX_BATCH_SIZE = 50;
 
     private final CommunityService communityService;
+    private final CommunityDeletionService communityDeletionService;
 
     /** 批量级联删除：逐社区独立事务，失败项记录原因后继续 */
     public BatchOperationResultVO batchDelete(BatchCommunityIdsDTO dto) {
@@ -44,7 +46,7 @@ public class CommunityBatchService {
         List<Failure> failures = new ArrayList<>();
         for (Long id : ids) {
             try {
-                communityService.deleteConfirmed(id, dto.getConfirmationVersions() == null ? null : dto.getConfirmationVersions().get(id),
+                communityDeletionService.deleteConfirmed(id, dto.getConfirmationVersions() == null ? null : dto.getConfirmationVersions().get(id),
                         dto.getConfirmationNames() == null ? null : dto.getConfirmationNames().get(id));
                 successIds.add(id);
             } catch (Exception e) {

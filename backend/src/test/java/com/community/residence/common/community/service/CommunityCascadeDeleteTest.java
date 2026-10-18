@@ -209,8 +209,7 @@ class CommunityCascadeDeleteTest {
     @Mock
     private com.community.residence.common.lease.mapper.LeaseDepositRefundMapper leaseDepositRefundMapper;
 
-    @InjectMocks
-    private CommunityService communityService;
+    private com.community.residence.admin.community.service.CommunityDeletionService communityService;
 
     private Community community;
 
@@ -259,6 +258,7 @@ class CommunityCascadeDeleteTest {
 
     @BeforeEach
     void setUp() {
+        communityService=com.community.residence.admin.community.service.DeletionTestAssembly.from(this);
         community = new Community();
         community.setId(9L);
         community.setName("退场社区");

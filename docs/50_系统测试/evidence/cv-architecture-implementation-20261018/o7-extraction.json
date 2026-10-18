@@ -1,0 +1,38 @@
+{
+  "source": "common/community/service/CommunityService",
+  "cleanupServices": [
+    "common/evaluation/service/CommunityEvaluationCleanupService.java",
+    "common/resident/service/CommunityResidentCleanupService.java",
+    "common/agreement/service/CommunityAgreementCleanupService.java",
+    "common/workorder/service/CommunityWorkOrderCleanupService.java",
+    "common/conversation/service/CommunityConversationCleanupService.java",
+    "common/lease/service/CommunityLeaseCleanupService.java",
+    "common/feedback/service/CommunityFeedbackCleanupService.java",
+    "common/notice/service/CommunityNoticeCleanupService.java",
+    "common/reservation/service/CommunityReservationCleanupService.java",
+    "common/housing/service/CommunityHousingCleanupService.java",
+    "common/community/service/CommunityStructureCleanupService.java",
+    "common/statistics/service/CommunityStatisticsCleanupService.java",
+    "common/messaging/service/CommunityNotificationCleanupService.java",
+    "common/auth/service/CommunityAuthorizationCleanupService.java"
+  ],
+  "coordinator": "admin/community/service/CommunityDeletionService",
+  "sequence": [
+    "conversation:removeImages",
+    "lease:removeMoveOutApplications",
+    "workorder:removeOrders",
+    "feedback:removeFeedback",
+    "notice:removeNotices",
+    "reservation:removeReservations",
+    "housing:removeHousing",
+    "lease:removeLeases",
+    "workorder:removeStaffBindings",
+    "agreement:removeTemplates",
+    "resident:removeRelations",
+    "community:removeStructures",
+    "statistics:removeStatistics",
+    "messaging:removeNotifications",
+    "auth:removeBindings"
+  ],
+  "behavior": "Original deletion predicates and domain block order preserved. Mandatory cleanup joins the outer transaction."
+}
