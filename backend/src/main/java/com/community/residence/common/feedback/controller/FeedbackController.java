@@ -2,8 +2,6 @@ package com.community.residence.common.feedback.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.web.result.PageVO;
-import com.community.residence.common.feedback.dto.CloseFeedbackDTO;
-import com.community.residence.common.feedback.dto.CreateFeedbackDTO;
 import com.community.residence.common.feedback.dto.SendMessageDTO;
 import com.community.residence.common.feedback.service.FeedbackService;
 import com.community.residence.common.feedback.vo.AttachmentVO;
@@ -16,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,13 +33,6 @@ public class FeedbackController {
 
     private final FeedbackService feedbackService;
 
-    @Operation(summary = "提交反馈", description = "居民端；初始待受理")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @PostMapping
-    public ApiResponse<FeedbackVO> create(@RequestBody @Valid CreateFeedbackDTO dto) {
-        return ApiResponse.success(feedbackService.create(dto));
-    }
-
     @Operation(summary = "查询反馈详情", description = "居民限本人")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}")
@@ -59,14 +49,6 @@ public class FeedbackController {
                                                 @RequestParam(required = false) String category,
                                                 @RequestParam(required = false) String keyword) {
         return ApiResponse.success(feedbackService.page(page, size, status, category, keyword));
-    }
-
-    @Operation(summary = "办结反馈", description = "会话中 → 已办结；办结说明落档")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PatchMapping("/{id}/close")
-    public ApiResponse<Void> close(@PathVariable Long id, @RequestBody @Valid CloseFeedbackDTO dto) {
-        feedbackService.close(id, dto);
-        return ApiResponse.success();
     }
 
     @Operation(summary = "发送会话消息", description = "管理员首次回复自动受理；办结后不可会话")
