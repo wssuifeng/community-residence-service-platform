@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-18",
+  "currentDocumentLocalLinksChecked": 18,
+  "brokenLinks": [],
+  "originalContractFixturesUnchanged": {
+    "backend/src/test/resources/architecture/http-contract.tsv": true,
+    "frontend/src/__tests__/fixtures/portal-routes.json": true
+  },
+  "phase": "50 steps 7/8; no automatic exit",
+  "normalRuntime": "not restarted; packaged artifact only",
+  "git": "local commits only, no push",
+  "contractFixtureChecks": {
+    "backend/src/test/resources/architecture/http-contract.tsv": {
+      "baselineCommit": "cf3ce16",
+      "unchanged": true,
+      "evidenceSnapshotUnchanged": true,
+      "normalizedSha256": "1eba42df825eb9102ee8d8923f103ee13ac88e27e0f5bfadf0943d9d8bc6eedf"
+    },
+    "frontend/src/__tests__/fixtures/portal-routes.json": {
+      "baselineCommit": "cf3ce16",
+      "unchanged": true,
+      "evidenceSnapshotUnchanged": true,
+      "normalizedSha256": "96fe0668778da5e805a6b1a40f13dfaece937a642984140681962ddb13839d37"
+    }
+  },
+  "repositoryAudit": {
+    "exitCode": 1,
+    "passed": false,
+    "errorCount": 1444,
+    "errorCodes": {
+      "acceptance-missing": 3,
+      "status-symbol-out-of-scope": 1199,
+      "broken-link": 241,
+      "dependency-mismatch": 1
+    },
+    "changedLineFindings": [],
+    "currentEvidenceFindings": [],
+    "scope": "Read-only whole-repository audit; existing findings retained, no historical package rewrite."
+  },
+  "documentsChecked": [
+    "docs/50_系统测试/36_前后端项目结构与归属规则.md",
+    "docs/50_系统测试/37_架构优化实施计划.md",
+    "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/README.md"
+  ]
+}

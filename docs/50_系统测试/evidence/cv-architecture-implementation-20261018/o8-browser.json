@@ -1,0 +1,229 @@
+{
+  "scope": "Isolated current Vue components; synthetic Axios adapter blocks all unspecified requests. No backend E2E or production data.",
+  "layouts": [
+    {
+      "calls": [
+        {
+          "at": 84.29999999701977,
+          "url": "/staff/workbench/summary"
+        },
+        {
+          "at": 84.3999999910593,
+          "url": "/notifications"
+        },
+        {
+          "at": 84.3999999910593,
+          "url": "/statistics/staff/trend"
+        }
+      ],
+      "documentWidth": 1440,
+      "dom": 250,
+      "elapsedMs": 202.8999999910593,
+      "faults": [],
+      "houseCards": 0,
+      "leaseCards": 0,
+      "mode": "staff",
+      "todoRows": 6,
+      "width": 1440
+    },
+    {
+      "calls": [
+        {
+          "at": 11.400000005960464,
+          "url": "/staff/workbench/summary"
+        },
+        {
+          "at": 11.5,
+          "url": "/notifications"
+        },
+        {
+          "at": 11.600000008940697,
+          "url": "/statistics/staff/trend"
+        }
+      ],
+      "documentWidth": 1024,
+      "dom": 250,
+      "elapsedMs": 62.400000005960464,
+      "faults": [],
+      "houseCards": 0,
+      "leaseCards": 0,
+      "mode": "staff",
+      "todoRows": 6,
+      "width": 1024
+    },
+    {
+      "calls": [
+        {
+          "at": 51.599999994039536,
+          "url": "/leases/my-summaries"
+        }
+      ],
+      "documentWidth": 1440,
+      "dom": 470,
+      "elapsedMs": 102.29999999701975,
+      "faults": [],
+      "houseCards": 0,
+      "leaseCards": 10,
+      "mode": "lease",
+      "todoRows": 0,
+      "width": 1440,
+      "afterOneExpanded": [
+        {
+          "at": 51.599999994039536,
+          "url": "/leases/my-summaries"
+        },
+        {
+          "at": 130.90000000596046,
+          "url": "/leases/1/deposit-refunds"
+        },
+        {
+          "at": 130.90000000596046,
+          "url": "/leases/1/changes"
+        },
+        {
+          "at": 130.90000000596046,
+          "url": "/leases/1/payments"
+        },
+        {
+          "at": 131,
+          "url": "/lease-agreements"
+        }
+      ]
+    },
+    {
+      "calls": [
+        {
+          "at": 24.200000002980232,
+          "url": "/leases/my-summaries"
+        }
+      ],
+      "documentWidth": 1024,
+      "dom": 470,
+      "elapsedMs": 72.1000000089407,
+      "faults": [],
+      "houseCards": 0,
+      "leaseCards": 10,
+      "mode": "lease",
+      "todoRows": 0,
+      "width": 1024,
+      "afterOneExpanded": [
+        {
+          "at": 24.200000002980232,
+          "url": "/leases/my-summaries"
+        },
+        {
+          "at": 95.6000000089407,
+          "url": "/leases/1/deposit-refunds"
+        },
+        {
+          "at": 95.6000000089407,
+          "url": "/leases/1/changes"
+        },
+        {
+          "at": 95.6000000089407,
+          "url": "/leases/1/payments"
+        },
+        {
+          "at": 95.6000000089407,
+          "url": "/lease-agreements"
+        }
+      ]
+    },
+    {
+      "calls": [
+        {
+          "at": 33,
+          "url": "/communities"
+        },
+        {
+          "at": 180.70000000298023,
+          "url": "/communities/1/buildings"
+        },
+        {
+          "at": 180.79999999701977,
+          "url": "/statistics/dashboard"
+        },
+        {
+          "at": 180.79999999701977,
+          "url": "/statistics/dashboard"
+        },
+        {
+          "at": 257.1000000089407,
+          "url": "/buildings/1/units"
+        },
+        {
+          "at": 395.29999999701977,
+          "url": "/units/10/houses"
+        },
+        {
+          "at": 399.79999999701977,
+          "url": "/units/10/houses"
+        }
+      ],
+      "documentWidth": 1440,
+      "dom": 5192,
+      "elapsedMs": 4357.9000000059605,
+      "faults": [],
+      "houseCards": 120,
+      "leaseCards": 0,
+      "mode": "structure",
+      "todoRows": 0,
+      "width": 1440,
+      "detail": {
+        "dialogs": 1,
+        "faults": []
+      }
+    },
+    {
+      "calls": [
+        {
+          "at": 26,
+          "url": "/communities"
+        },
+        {
+          "at": 169.19999998807907,
+          "url": "/communities/1/buildings"
+        },
+        {
+          "at": 169.19999998807907,
+          "url": "/statistics/dashboard"
+        },
+        {
+          "at": 169.19999998807907,
+          "url": "/statistics/dashboard"
+        },
+        {
+          "at": 239.0999999940395,
+          "url": "/buildings/1/units"
+        },
+        {
+          "at": 365,
+          "url": "/units/10/houses"
+        },
+        {
+          "at": 367.3999999910593,
+          "url": "/units/10/houses"
+        }
+      ],
+      "documentWidth": 1024,
+      "dom": 5192,
+      "elapsedMs": 4707.29999999702,
+      "faults": [],
+      "houseCards": 120,
+      "leaseCards": 0,
+      "mode": "structure",
+      "todoRows": 0,
+      "width": 1024,
+      "detail": {
+        "dialogs": 1,
+        "faults": []
+      }
+    }
+  ],
+  "summaryFailure": {
+    "alert": "工作台加载失败：网络异常，请检查连接 重新加载工作台",
+    "hasEventStats": true,
+    "hasSummary": false
+  },
+  "retrySucceeded": true
+}

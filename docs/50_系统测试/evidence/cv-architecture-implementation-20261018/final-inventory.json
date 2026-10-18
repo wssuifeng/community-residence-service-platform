@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-18",
+  "backendProductionJava": 530,
+  "backendByOwner": {
+    "admin": 38,
+    "common": 469,
+    "CommunityResidenceApplication.java": 1,
+    "resident": 18,
+    "staff": 4
+  },
+  "frontendVue": 153,
+  "frontendProductionTs": 105,
+  "httpMappings": 266,
+  "originalHttpMappings": 264,
+  "newReadOnlyMappings": [
+    "GET /api/v1/staff/workbench/summary",
+    "GET /api/v1/leases/my-summaries"
+  ],
+  "mappers": 60,
+  "schemaMigrationsAdded": 0
+}

@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-18",
+  "backendFocusedFinal": {
+    "tests": 120,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "result": "passed"
+  },
+  "backendSummaryReadabilityRecheck": {
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "result": "passed"
+  },
+  "backendPackage": "passed",
+  "frontendFullFinal": {
+    "files": 77,
+    "tests": 442,
+    "failures": 0
+  },
+  "frontendProductionBuild": "passed, includes vue-tsc --noEmit",
+  "databaseSpecialistTestEnabled": false,
+  "databaseSchemaChanges": 0,
+  "channelCommands": 0,
+  "normalBackendRestarted": false,
+  "pushPerformed": false,
+  "coverageClaim": false,
+  "warnings": [
+    "JaCoCo execution-data mismatch and JDK25 runtime/release17 compilation; no coverage percentage asserted.",
+    "Some component fixtures omit navigation targets and warn about router matches; full suite passed."
+  ],
+  "previousAttempts": {
+    "frontendInitialFull": "Interrupted after missing new summary fixtures caused old tests to hit unmatched interfaces; not counted as passing.",
+    "frontendFixtureFocused": "47 original business-entry tests passed after explicit summary stubs; hub recheck passed.",
+    "browserFirstRun": "Inherited websocket proxy attempted connections during synthetic cache exercise; discarded and rerun with isolated no-proxy config and websocket stub. Final browser evidence is rerun only."
+  },
+  "artifact": {
+    "path": "backend/target/residence-backend-0.1.0-SNAPSHOT.jar",
+    "sha256": "822746a65c0d7ad90bad9e88370e96f4630946384e79fd4512e2c8e314d86c4b"
+  },
+  "runtimeScope": "Offline mapper and controller registration, synthetic transaction Connection, mocked component/API/browser fixtures. Not a normal-service Boot or end-to-end DB acceptance."
+}

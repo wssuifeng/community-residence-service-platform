@@ -163,6 +163,7 @@
   - 共享实体、状态流转和通用存储在`common/<业务模块>`唯一维护。端专属入口/协调/查询归端；多端一致的HTTP契约可保留一个公共Controller。端间不直接调用，公共不反向引用端，Controller不直连Mapper；目录不代替角色/社区/本人/参与者权限校验。
   - 技术模块：`common/security`上下文/过滤器/数据权限、`common/web`统一响应/异常/分页、`common/upload`上传，配置/留痕/任务分别为`common/config`、`common/log`、`common/schedule`；系统配置存储与规则归`common/auth`，管理入口归`admin/auth`。
   - 前端`frontend/src/`按`admin/resident/staff/common → 模块 → views/components/composables/api/types`组织，确有共享状态时设store。根入口负责应用与路由装配，各端路由/布局归端；游客归`common/public`，登录注册归`common/auth`。同一业务API/类型按真实复用保持一份，不机械复制三端。
+  - 2026-10-18实际维护入口：社区删除协调/批量在`admin/community/service`，域内`Community*CleanupService`必须参加外层事务；当前服务人员摘要在`staff/workorder`，本人租约摘要在`resident/lease`。原业务规则/模型仍在common，新增仅两个只读汇总入口。逐文件实际去向和验证见`docs/50_系统测试/36_前后端项目结构与归属规则.md`及evidence/cv的final-migration索引。
   - 登录、通知、聊天引擎与身份隔离缓存保留一份；公共组件不引用端页面。测试就近放置，全站契约与初始化留`__tests__/test`。根别名`@/*`保持指向`src/*`。
   - 逐文件及逐HTTP方法去向以当前50实施证据清单为准，不能按旧路径恢复重复实现；纯目录迁移与业务行为改动分别提交、分别验证。历史功能计数只作时点记录，不当作当前源码数量或覆盖率。
 
