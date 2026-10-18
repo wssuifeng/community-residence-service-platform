@@ -851,6 +851,11 @@ public class WorkOrderService {
 
     /* 工单视图装配（批量）：居民姓名、类别名称、当前处理人（派单表末条）、处理人姓名、
        处理人今日班次、处理人在手工单数、状态进入时间各一次批量查询，逐单仅内存装配 */
+    /** 将有界工单集合批量装配为现有详情，避免逐条详情查询。 */
+    public List<WorkOrderVO> currentStaffTodos(Long staffId) {
+        return toVOList(workOrderMapper.selectCurrentTodos(staffId));
+    }
+
     private List<WorkOrderVO> toVOList(List<WorkOrder> orders) {
         if (orders.isEmpty()) {
             return List.of();

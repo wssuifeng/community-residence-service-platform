@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { useStaffWorkbench } from '../composables/useStaffWorkbench'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
 import StatusTag from '@/common/web/components/StatusTag.vue'
 import EChart, { type ChartOption } from '@/common/statistics/components/EChart.vue'
-import { listWorkOrders } from '@/common/workorder/api/workorder'
 import { listNotifications } from '@/common/messaging/api/notification'
 import { getStaffWorkloadStats } from '@/common/statistics/api/statistics'
 import type { IStaffWorkloadStats } from '@/common/statistics/types/statistics'
@@ -36,16 +36,13 @@ const statusSemantic: Record<WorkOrderStatus, 'pending' | 'processing' | 'comple
   CANCELLED: 'canceled'
 }
 
-/* 紧急程度排序权重：越紧急越靠前 */
-const priorityWeight: Record<string, number> = { URGENT: 3, HIGH: 2, NORMAL: 1, LOW: 0 }
-
-const todoCount = ref(0)
-const doingCount = ref(0)
-const completedCount = ref(0)
-const urgentCount = ref(0)
-const todoOrders = ref<IWorkOrder[]>([])
+const { summary, loading, error: dashboardError, load: loadDashboard } = useStaffWorkbench()
+const todoCount = computed(() => summary.value.todoCount)
+const doingCount = computed(() => summary.value.doingCount)
+const completedCount = computed(() => summary.value.completedCount)
+const urgentCount = computed(() => summary.value.urgentCount)
+const todoOrders = computed(() => summary.value.todoOrders)
 const latestNotifications = ref<INotification[]>([])
-const loading = ref(false)
 
 const workload = ref<IStaffWorkloadStats | null>(null)
 const workloadLoading = ref(false)
@@ -110,7 +107,7 @@ const STAT_ICONS: Record<string, string[]> = {
 }
 
 
-/* ---------- 统计卡：数值读取真实列表总数，未定义的趋势不展示假数据 ---------- */
+/* ---------- 统计卡：数值读取后端当前负荷汇总，未定义的趋势不展示假数据 ---------- */
 
 const statCards = computed(() => {
   const defs = [
@@ -152,38 +149,6 @@ const progressOption = computed<ChartOption>(() => ({
   ]
 }))
 
-/** 加载工作台数据：统计卡片与待办列表同源，避免两处口径漂移 */
-async function loadDashboard(): Promise<void> {
-  loading.value = true
-  try {
-    /* 统计卡片：待接单 / 处理中（已接单+处理中）/ 完成，均由列表接口 total 汇总；
-       紧急待接单走 priority 过滤（后端 WorkOrderController 支持该参数）。
-       COMPLETED仅表示居民已确认，尚未终审关闭，不冒称当天完成。 */
-    const [assigned, accepted, inProgress, done, urgent] = await Promise.all([
-      listWorkOrders({ status: 'ASSIGNED', page: 1, size: 5 }),
-      listWorkOrders({ status: 'ACCEPTED', page: 1, size: 5 }),
-      listWorkOrders({ status: 'IN_PROGRESS', page: 1, size: 5 }),
-      listWorkOrders({ status: 'COMPLETED', page: 1, size: 1 }),
-      listWorkOrders({ status: 'ASSIGNED', priority: 'URGENT', page: 1, size: 1 })
-    ])
-
-    todoCount.value = assigned.total
-    doingCount.value = accepted.total + inProgress.total
-    completedCount.value = done.total
-    urgentCount.value = urgent.total
-
-    /* 待办列表：已派单 + 已接单 + 处理中，按紧急程度与时间排序 */
-    todoOrders.value = [...assigned.records, ...accepted.records, ...inProgress.records].sort((a, b) => {
-      const weight = priorityWeight[b.priority] - priorityWeight[a.priority]
-      return weight !== 0 ? weight : b.createdAt.localeCompare(a.createdAt)
-    })
-  } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '工作台数据加载失败')
-  } finally {
-    loading.value = false
-  }
-}
-
 /** 最新消息：只读面板，失败静默（不阻塞工作台主体） */
 async function loadNotifications(): Promise<void> {
   try {
@@ -219,6 +184,8 @@ function messageIconClass(item: INotification): string {
   return item.sourceType === 'WORK_ORDER' ? 'is-workorder' : 'is-system'
 }
 
+useLiveRefresh(loadDashboard, [{ domain: 'workorder' }])
+
 onMounted(() => {
   loadDashboard()
   loadNotifications()
@@ -228,6 +195,7 @@ onMounted(() => {
 
 <template>
   <section v-loading="loading" class="staff-dashboard">
+    <div v-if="dashboardError" role="alert" class="workload-error">工作台加载失败：{{ dashboardError }} <el-button @click="loadDashboard">重新加载工作台</el-button></div>
     <!-- 问候条 -->
     <div class="greeting-bar">
       <span class="greeting-sun" aria-hidden="true">
