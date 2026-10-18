@@ -3,7 +3,7 @@ import { nextTick, reactive, ref } from 'vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AdminLayout from './AdminLayout.vue'
 
-const state = vi.hoisted(() => ({ tablet: null as ReturnType<typeof ref<boolean>> | null, route: null as { fullPath: string; meta: { title: string } } | null }))
+const state = vi.hoisted(() => ({ tablet: null as ReturnType<typeof ref<boolean>> | null, route: null as { path: string; fullPath: string; meta: { title: string } } | null }))
 vi.mock('vue-router', () => ({ useRoute: () => state.route }))
 vi.mock('@/store/user', () => ({ useUserStore: () => ({ user: { realName: '管理员' } }) }))
 vi.mock('@/composables/useResponsive', () => ({ useResponsive: () => ({ isTablet: state.tablet }) }))
@@ -22,7 +22,7 @@ function page() {
 describe('DEF-178 管理端平板侧栏按响应式规范默认收起', () => {
   beforeEach(() => {
     state.tablet = ref(true)
-    state.route = reactive({ fullPath: '/admin/community', meta: { title: '社区管理' } })
+    state.route = reactive({ path: '/admin/community', fullPath: '/admin/community', meta: { title: '社区管理' } })
   })
 
   it('平板默认不占用侧栏宽度，菜单按钮可打开覆盖层', async () => {

@@ -1,0 +1,784 @@
+[
+  {
+    "path": "/admin",
+    "meta": {
+      "roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ]
+    },
+    "children": [
+      {
+        "path": "",
+        "redirect": "/admin/dashboard"
+      },
+      {
+        "path": "dashboard",
+        "name": "AdminDashboard",
+        "meta": {
+          "title": "运营看板"
+        }
+      },
+      {
+        "path": "community",
+        "name": "AdminCommunity",
+        "meta": {
+          "title": "社区管理"
+        }
+      },
+      {
+        "path": "work-orders",
+        "name": "AdminWorkOrders",
+        "meta": {
+          "title": "工单调度"
+        }
+      },
+      {
+        "path": "residents",
+        "name": "AdminResidents",
+        "meta": {
+          "title": "居民管理"
+        }
+      },
+      {
+        "path": "housing-lease",
+        "name": "AdminHousingLease",
+        "meta": {
+          "title": "租住与房源"
+        }
+      },
+      {
+        "path": "notices",
+        "name": "AdminNotices",
+        "meta": {
+          "title": "公告管理"
+        }
+      },
+      {
+        "path": "feedbacks",
+        "name": "AdminFeedbacks",
+        "meta": {
+          "title": "反馈管理"
+        }
+      },
+      {
+        "path": "reservations",
+        "name": "AdminReservations",
+        "meta": {
+          "title": "预约管理"
+        }
+      },
+      {
+        "path": "evaluations",
+        "name": "AdminEvaluations",
+        "meta": {
+          "title": "评价管理"
+        }
+      },
+      {
+        "path": "system",
+        "name": "AdminSystem",
+        "meta": {
+          "title": "系统管理"
+        }
+      },
+      {
+        "path": "staff-schedules",
+        "name": "AdminStaffSchedules",
+        "meta": {
+          "title": "人员排班"
+        }
+      },
+      {
+        "path": "staff-capabilities",
+        "name": "AdminStaffCapabilities",
+        "meta": {
+          "title": "服务人员"
+        }
+      },
+      {
+        "path": "communities/:id",
+        "name": "AdminCommunityDetail",
+        "meta": {
+          "title": "社区详情"
+        }
+      },
+      {
+        "path": "work-orders/:id",
+        "name": "AdminWorkOrderDetail",
+        "meta": {
+          "title": "工单详情"
+        }
+      },
+      {
+        "path": "leases/:id",
+        "name": "AdminLeaseDetail",
+        "meta": {
+          "title": "租约详情"
+        }
+      },
+      {
+        "path": "residents/:id",
+        "name": "AdminResidentDetail",
+        "meta": {
+          "title": "居民详情"
+        }
+      },
+      {
+        "path": "housings/:id",
+        "name": "AdminHousingDetail",
+        "meta": {
+          "title": "房源详情"
+        }
+      },
+      {
+        "path": "notifications",
+        "name": "AdminNotifications",
+        "meta": {
+          "title": "消息中心"
+        }
+      },
+      {
+        "path": "conversations",
+        "name": "AdminConversations",
+        "meta": {
+          "title": "会话"
+        }
+      },
+      {
+        "path": "conversations/:id",
+        "name": "AdminConversationDetail",
+        "meta": {
+          "title": "会话"
+        }
+      },
+      {
+        "path": "statistics/dashboard",
+        "redirect": "/admin/dashboard"
+      },
+      {
+        "path": "statistics/details",
+        "redirect": {
+          "name": "AdminDashboard",
+          "query": {
+            "tab": "details"
+          }
+        }
+      },
+      {
+        "path": "communities",
+        "redirect": "/admin/community"
+      },
+      {
+        "path": "buildings",
+        "redirect": [
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "tree"
+            }
+          },
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "tree",
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9"
+            }
+          }
+        ]
+      },
+      {
+        "path": "units",
+        "redirect": [
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "tree"
+            }
+          },
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "tree",
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9"
+            }
+          }
+        ]
+      },
+      {
+        "path": "houses",
+        "redirect": [
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "houses"
+            }
+          },
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "houses",
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9"
+            }
+          }
+        ]
+      },
+      {
+        "path": "resources",
+        "redirect": [
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "resources"
+            }
+          },
+          {
+            "name": "AdminCommunity",
+            "query": {
+              "tab": "resources",
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9"
+            }
+          }
+        ]
+      },
+      {
+        "path": "residence-applications",
+        "redirect": [
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "tab": "applications"
+            }
+          },
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9",
+              "tab": "applications"
+            }
+          }
+        ]
+      },
+      {
+        "path": "residence-relations",
+        "redirect": {
+          "name": "AdminResidents",
+          "query": {
+            "tab": "relations"
+          }
+        }
+      },
+      {
+        "path": "leases",
+        "redirect": [
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "tab": "leases"
+            }
+          },
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9",
+              "tab": "leases"
+            }
+          }
+        ]
+      },
+      {
+        "path": "housings",
+        "redirect": [
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "tab": "housings",
+              "view": "houses"
+            }
+          },
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "stage": "history",
+              "view": "houses",
+              "leaseId": "9",
+              "tab": "housings"
+            }
+          }
+        ]
+      },
+      {
+        "path": "move-out-applications",
+        "redirect": [
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "tab": "moveout"
+            }
+          },
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9",
+              "tab": "moveout"
+            }
+          }
+        ]
+      },
+      {
+        "path": "agreement-templates",
+        "redirect": [
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "tab": "agreements"
+            }
+          },
+          {
+            "name": "AdminHousingLease",
+            "query": {
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9",
+              "tab": "agreements"
+            }
+          }
+        ]
+      },
+      {
+        "path": "configs",
+        "redirect": {
+          "name": "AdminSystem",
+          "query": {
+            "tab": "configs"
+          }
+        }
+      },
+      {
+        "path": "service-categories",
+        "redirect": "/admin/work-orders"
+      },
+      {
+        "path": "resource-reservations",
+        "redirect": "/admin/reservations"
+      },
+      {
+        "path": "violations",
+        "redirect": {
+          "name": "AdminReservations",
+          "query": {
+            "tab": "violations"
+          }
+        }
+      },
+      {
+        "path": "viewing-appointments",
+        "redirect": {
+          "name": "AdminHousingLease",
+          "query": {
+            "tab": "housings",
+            "view": "viewings"
+          }
+        }
+      },
+      {
+        "path": "notices/create",
+        "redirect": {
+          "name": "AdminNotices",
+          "query": {
+            "action": "create"
+          }
+        }
+      },
+      {
+        "path": "notices/:id",
+        "redirect": "/admin/notices"
+      },
+      {
+        "path": "feedbacks/:id",
+        "redirect": "/admin/feedbacks"
+      },
+      {
+        "path": "evaluations/:id/followup",
+        "redirect": "/admin/evaluations"
+      },
+      {
+        "path": "sys-users",
+        "redirect": {
+          "name": "AdminSystem",
+          "query": {
+            "tab": "users"
+          }
+        }
+      },
+      {
+        "path": "sys-users/:id/communities",
+        "redirect": {
+          "name": "AdminSystem",
+          "query": {
+            "tab": "users"
+          }
+        }
+      },
+      {
+        "path": "operation-logs",
+        "redirect": {
+          "name": "AdminSystem",
+          "query": {
+            "tab": "logs"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "path": "/resident",
+    "meta": {
+      "roles": [
+        "RESIDENT"
+      ]
+    },
+    "children": [
+      {
+        "path": "",
+        "redirect": "/resident/home"
+      },
+      {
+        "path": "home",
+        "name": "ResidentHome",
+        "meta": {
+          "title": "首页"
+        }
+      },
+      {
+        "path": "profile",
+        "name": "ResidentProfile",
+        "meta": {
+          "title": "个人中心"
+        }
+      },
+      {
+        "path": "housing-lease",
+        "name": "ResidentHousingLease",
+        "meta": {
+          "title": "租住与房源"
+        }
+      },
+      {
+        "path": "work-orders",
+        "name": "ResidentWorkOrders",
+        "meta": {
+          "title": "我的工单"
+        }
+      },
+      {
+        "path": "work-orders/create",
+        "name": "ResidentWorkOrderCreate",
+        "meta": {
+          "title": "提交工单"
+        }
+      },
+      {
+        "path": "work-orders/:id",
+        "name": "ResidentWorkOrderDetail",
+        "meta": {
+          "title": "工单详情"
+        }
+      },
+      {
+        "path": "feedbacks",
+        "name": "ResidentFeedbacks",
+        "meta": {
+          "title": "我的反馈"
+        }
+      },
+      {
+        "path": "feedbacks/create",
+        "name": "ResidentFeedbackCreate",
+        "meta": {
+          "title": "提交反馈"
+        }
+      },
+      {
+        "path": "feedbacks/:id",
+        "name": "ResidentFeedbackDetail",
+        "meta": {
+          "title": "反馈详情"
+        }
+      },
+      {
+        "path": "reservations",
+        "name": "ResidentReservations",
+        "meta": {
+          "title": "我的预约"
+        }
+      },
+      {
+        "path": "resources",
+        "name": "ResidentResources",
+        "meta": {
+          "title": "公共资源"
+        }
+      },
+      {
+        "path": "resources/:id",
+        "name": "ResidentResourceDetail",
+        "meta": {
+          "title": "资源详情"
+        }
+      },
+      {
+        "path": "reservations/create",
+        "name": "ResidentReservationCreate",
+        "meta": {
+          "title": "创建预约"
+        }
+      },
+      {
+        "path": "notices",
+        "name": "ResidentNotices",
+        "meta": {
+          "title": "公告通知"
+        }
+      },
+      {
+        "path": "notices/:id",
+        "name": "ResidentNoticeDetail",
+        "meta": {
+          "title": "公告详情"
+        }
+      },
+      {
+        "path": "notifications",
+        "name": "ResidentNotifications",
+        "meta": {
+          "title": "消息中心"
+        }
+      },
+      {
+        "path": "conversations",
+        "name": "ResidentConversations",
+        "meta": {
+          "title": "会话"
+        }
+      },
+      {
+        "path": "conversations/:id",
+        "name": "ResidentConversationDetail",
+        "meta": {
+          "title": "会话"
+        }
+      },
+      {
+        "path": "housings/:id",
+        "name": "ResidentHousingDetail",
+        "meta": {
+          "title": "房源详情"
+        }
+      },
+      {
+        "path": "housings/:id/reserve",
+        "name": "ResidentHousingReserve",
+        "meta": {
+          "title": "预约看房"
+        }
+      },
+      {
+        "path": "housings/:id/apply",
+        "name": "ResidentHousingApply",
+        "meta": {
+          "title": "申请租住"
+        }
+      },
+      {
+        "path": "viewing-appointments/:id",
+        "name": "ResidentViewingAppointmentDetail",
+        "meta": {
+          "title": "看房预约详情"
+        }
+      },
+      {
+        "path": "viewing-appointments",
+        "redirect": {
+          "path": "/resident/reservations",
+          "query": {
+            "tab": "viewing"
+          }
+        }
+      },
+      {
+        "path": "leases",
+        "redirect": [
+          {
+            "path": "/resident/housing-lease",
+            "query": {
+              "tab": "lease"
+            }
+          },
+          {
+            "path": "/resident/housing-lease",
+            "query": {
+              "tab": "payments",
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9"
+            }
+          }
+        ]
+      },
+      {
+        "path": "housings",
+        "redirect": [
+          {
+            "path": "/resident/housing-lease",
+            "query": {
+              "tab": "housing"
+            }
+          },
+          {
+            "path": "/resident/housing-lease",
+            "query": {
+              "tab": "housing",
+              "stage": "history",
+              "view": "offline",
+              "leaseId": "9"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "/staff",
+    "meta": {
+      "roles": [
+        "STAFF"
+      ]
+    },
+    "children": [
+      {
+        "path": "",
+        "redirect": "/staff/dashboard"
+      },
+      {
+        "path": "dashboard",
+        "name": "StaffDashboard",
+        "meta": {
+          "title": "工作台首页"
+        }
+      },
+      {
+        "path": "work-orders",
+        "name": "StaffWorkOrders",
+        "meta": {
+          "title": "工单列表"
+        }
+      },
+      {
+        "path": "work-orders/:id",
+        "name": "StaffWorkOrderDetail",
+        "meta": {
+          "title": "工单详情"
+        }
+      },
+      {
+        "path": "viewings",
+        "name": "StaffViewings",
+        "meta": {
+          "title": "我的带看"
+        }
+      },
+      {
+        "path": "conversations",
+        "name": "StaffConversations",
+        "meta": {
+          "title": "会话"
+        }
+      },
+      {
+        "path": "notifications",
+        "name": "StaffNotifications",
+        "meta": {
+          "title": "消息中心"
+        }
+      }
+    ]
+  },
+  {
+    "path": "/guest",
+    "children": [
+      {
+        "path": "",
+        "redirect": "/guest/home"
+      },
+      {
+        "path": "home",
+        "name": "GuestHome",
+        "meta": {
+          "title": "首页"
+        }
+      },
+      {
+        "path": "housings",
+        "name": "GuestHousings",
+        "meta": {
+          "title": "房源浏览"
+        }
+      },
+      {
+        "path": "housings/:id",
+        "name": "GuestHousingDetail",
+        "meta": {
+          "title": "房源详情"
+        }
+      },
+      {
+        "path": "notices",
+        "name": "GuestNotices",
+        "meta": {
+          "title": "公开公告"
+        }
+      },
+      {
+        "path": "notices/:id",
+        "name": "GuestNoticeDetail",
+        "meta": {
+          "title": "公告详情"
+        }
+      }
+    ]
+  },
+  {
+    "path": "/auth",
+    "children": [
+      {
+        "path": "login",
+        "name": "Login",
+        "meta": {
+          "title": "登录"
+        }
+      },
+      {
+        "path": "register",
+        "name": "Register",
+        "meta": {
+          "title": "注册"
+        }
+      }
+    ]
+  }
+]
