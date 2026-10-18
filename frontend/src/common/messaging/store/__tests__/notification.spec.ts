@@ -4,7 +4,7 @@ let useNotificationStore: typeof import('@/common/messaging/store/notification')
 const api = vi.hoisted(() => ({ pull: vi.fn(), unread: vi.fn(), connect: vi.fn() }))
 vi.mock('@/common/messaging/api/notification', () => ({ pullNotifications: api.pull, listUnreadNotifications: api.unread }))
 vi.mock('@/common/messaging/utils/websocket', () => ({ connectWebSocket: api.connect, disconnectWebSocket: vi.fn() }))
-vi.mock('@/common/web/utils/dataFreshness', () => ({ invalidateData: vi.fn() }))
+vi.mock('@/common/web/utils/dataFreshness', () => ({ invalidateNotification: vi.fn() }))
 const item = (id: number, isRead = false) => ({ id, seq: id, title: `通知${id}`, content: '内容', isRead, sourceType: 'SYSTEM' as const, sourceId: null, createdAt: '2026-10-16T12:00:00' })
 beforeEach(async () => { vi.resetModules(); useNotificationStore = (await import('@/common/messaging/store/notification')).useNotificationStore; setActivePinia(createPinia()); vi.resetAllMocks(); api.pull.mockResolvedValue({ notifications: [], latestSeq: 0 }); api.unread.mockResolvedValue({ count: 0, notifications: [] }) })
 describe('铃铛完整未读快照', () => {

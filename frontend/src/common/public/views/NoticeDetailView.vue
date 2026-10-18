@@ -64,7 +64,7 @@ async function load(): Promise<void> {
 
 onMounted(load)
 
-useLiveRefresh(async()=>{if(!notice.value)return;const fresh=await getNotice(noticeId);notice.value=fresh;})
+useLiveRefresh(async()=>{if(!notice.value)return;const fresh=await getNotice(noticeId);notice.value=fresh;}, () => [{domain:'notice', id:noticeId}])
 </script>
 
 <template>

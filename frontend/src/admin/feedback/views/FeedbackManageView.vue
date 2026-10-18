@@ -281,7 +281,7 @@ onMounted(async () => {
 })
 
 
-useLiveRefresh(() => Promise.all([load(),loadCounts(),refreshDetail()]))
+useLiveRefresh(() => Promise.all([load(),loadCounts(),refreshDetail()]), ['feedback'])
 </script>
 
 <template>

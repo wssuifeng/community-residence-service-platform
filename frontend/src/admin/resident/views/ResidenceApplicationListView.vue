@@ -196,7 +196,7 @@ onMounted(async () => {
   }
 })
 
-useLiveRefresh(() => load())
+useLiveRefresh(() => load(), ['resident'])
 </script>
 
 <template>

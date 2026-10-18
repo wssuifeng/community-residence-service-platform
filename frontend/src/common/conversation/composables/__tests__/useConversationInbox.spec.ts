@@ -24,6 +24,11 @@ describe('统一会话服务端筛选与请求隔离', () => {
   await state.load(); api.list.mockResolvedValueOnce(result([row(1), row(2)], 31, 2)); await state.load(true)
   expect(state.items.value.map(item => `${item.source}:${item.id}`)).toEqual(['CONVERSATION:1','FEEDBACK:1','CONVERSATION:2'])
  })
+ it('刷新三页已加载会话合并成一次范围读取，不重复逐页拉取',async()=>{
+  setup();api.list.mockResolvedValue(result(Array.from({length:30},(_,i)=>row(i+1)),90));await state.load();await state.load(true);await state.load(true)
+  api.list.mockClear();api.list.mockResolvedValue(result(Array.from({length:90},(_,i)=>row(i+1)),90));await state.load()
+  expect(api.list).toHaveBeenCalledOnce();expect(api.list).toHaveBeenCalledWith(expect.objectContaining({page:1,size:90}));expect(state.items.value).toHaveLength(90)
+ })
  it('旧搜索响应不能覆盖新搜索', async () => {
   setup(); let finish: (value: ReturnType<typeof result>) => void = () => undefined
   api.list.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))

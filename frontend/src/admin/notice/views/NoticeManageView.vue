@@ -666,7 +666,7 @@ onMounted(async () => {
 
 onBeforeRouteLeave(()=>mayLeaveEditor())
 onBeforeRouteUpdate(to=>{if(to.query.action===route.query.action&&to.query.id===route.query.id)return true;return mayLeaveEditor()})
-useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)await loadDetail(current.value.id)}})
+useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)await loadDetail(current.value.id)}}, ['notice'])
 </script>
 
 <template>

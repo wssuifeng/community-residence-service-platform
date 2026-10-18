@@ -18,13 +18,15 @@ export function useConversationInbox() {
   try {
    const collected = more ? [...items.value] : []
    let count = 0
-   for (let next = more ? target : 1; next <= target; next++) {
-    const result = await listConversationInbox({ ...query, page: next })
+   const batchSize = more ? 30 : Math.min(100, target * 30)
+   const last = more ? target : Math.ceil(target * 30 / batchSize)
+   for (let next = more ? target : 1; next <= last; next++) {
+    const result = await listConversationInbox({ ...query, page: next, size: batchSize })
     if (disposed || request !== version) return
     collected.push(...result.records); count = result.total
     if (next >= result.pages) break
    }
-   items.value = [...new Map(collected.map(row => [inboxKey(row), row])).values()]
+   items.value = [...new Map(collected.map(row => [inboxKey(row), row])).values()].slice(0, target * 30)
    page.value = target; total.value = count
   } catch (e) { if (request === version && !disposed) error.value = e instanceof Error ? e.message : '会话列表加载失败' }
   finally { if (request === version && !disposed) loading.value = false }
@@ -34,7 +36,7 @@ export function useConversationInbox() {
   clearTimeout(debounce); debounce = setTimeout(() => void load(), 250)
  })
  watch(() => `${user.user?.role}:${user.user?.id}`, () => { version++; items.value = []; page.value = 1; void load() })
- const { refreshWhenVisible } = useLiveRefresh(() => load())
+ const { refreshWhenVisible } = useLiveRefresh(() => load(), ['conversation'])
  onBeforeUnmount(() => { disposed = true; version++; clearTimeout(debounce) })
  return { type, keyword, unreadOnly, items, loading, error, hasMore, total, load, refreshWhenVisible }
 }

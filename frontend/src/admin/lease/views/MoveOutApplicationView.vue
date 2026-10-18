@@ -293,7 +293,7 @@ onMounted(() => {
   loadCommunities()
 })
 
-useLiveRefresh(() => load())
+useLiveRefresh(() => load(), ['lease'])
 </script>
 
 <template>
