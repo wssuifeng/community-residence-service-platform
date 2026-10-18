@@ -8,7 +8,7 @@ describe('房屋图片的唯一数据来源与明确空态', () => {
   expect(svg).toContain('尚未上传房屋图片'); expect(svg).toContain('此处为空态，不代表房屋实拍')
  })
  it('所有房源入口不再轮换示例照片，旧管理员编辑器不提供URL输入', () => {
-  const paths = ['views/admin/housing/HousingListView.vue','views/admin/housing/HousingDetailView.vue','views/resident/HousingListView.vue','views/resident/HousingDetailView.vue','views/resident/ResidenceApplyView.vue','common/public/views/HomeView.vue','common/public/views/HousingListView.vue','common/public/views/HousingDetailView.vue']
+  const paths = ['admin/housing/views/HousingListView.vue','admin/housing/views/HousingDetailView.vue','resident/housing/views/HousingListView.vue','resident/housing/views/HousingDetailView.vue','resident/resident/views/ResidenceApplyView.vue','common/public/views/HomeView.vue','common/public/views/HousingListView.vue','common/public/views/HousingDetailView.vue']
   for (const path of paths) {
    const source = readFileSync(resolve(process.cwd(), 'src', path), 'utf8')
    expect(source).toContain('HOUSE_PHOTO_EMPTY'); expect(source).not.toContain('/images/housing-sample-')

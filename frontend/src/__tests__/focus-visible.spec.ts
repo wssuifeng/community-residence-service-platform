@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import ElementPlus from 'element-plus'
 import { createPinia } from 'pinia'
-import AgreementTemplateView from '@/views/admin/lease/AgreementTemplateView.vue'
+import AgreementTemplateView from '@/admin/lease/views/AgreementTemplateView.vue'
 import { installFakeBackend } from '@/test/fakeBackend'
 
 /**

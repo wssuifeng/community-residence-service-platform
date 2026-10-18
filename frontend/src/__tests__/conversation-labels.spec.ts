@@ -1,15 +1,15 @@
 import { defineComponent } from 'vue'
 import { mount, RouterLinkStub } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import ResidentLayout from '@/views/resident/ResidentLayout.vue'
-import StaffLayout from '@/views/staff/StaffLayout.vue'
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import residentRoutes from '@/router/resident'
-import staffRoutes from '@/router/staff'
-import adminRoutes from '@/router/admin'
+import ResidentLayout from '@/resident/layout/views/ResidentLayout.vue'
+import StaffLayout from '@/staff/layout/views/StaffLayout.vue'
+import AppSidebar from '@/admin/layout/components/AppSidebar.vue'
+import residentRoutes from '@/resident/routes'
+import staffRoutes from '@/staff/routes'
+import adminRoutes from '@/admin/routes'
 
 vi.mock('@/common/auth/store/user', () => ({ useUserStore: () => ({ role: 'ADMIN', user: { id: 1 } }) }))
-vi.mock('@/store/adminTodo', () => ({ useAdminTodoStore: () => ({ counts: {}, refresh: vi.fn().mockResolvedValue(undefined) }) }))
+vi.mock('@/admin/workbench/store/adminTodo', () => ({ useAdminTodoStore: () => ({ counts: {}, refresh: vi.fn().mockResolvedValue(undefined) }) }))
 vi.mock('vue-router', async importOriginal => ({
   ...await importOriginal<typeof import('vue-router')>(),
   useRoute: () => ({ path: '/admin/conversations', fullPath: '/admin/conversations' })
