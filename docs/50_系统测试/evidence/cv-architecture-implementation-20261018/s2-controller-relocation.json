@@ -1,0 +1,345 @@
+[
+  {
+    "source": "backend/src/main/java/com/community/residence/common/agreement/controller/AgreementTemplateController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/agreement/controller/AdminAgreementTemplateController.java"
+    ],
+    "methods": 7
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/agreement/controller/LeaseAgreementController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/agreement/controller/AdminLeaseAgreementController.java",
+      "backend/src/main/java/com/community/residence/common/agreement/controller/LeaseAgreementController.java",
+      "backend/src/main/java/com/community/residence/resident/agreement/controller/ResidentLeaseAgreementController.java"
+    ],
+    "methods": 5
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/auth/controller/AuthController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/common/auth/controller/AuthController.java"
+    ],
+    "methods": 6
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/auth/controller/OperationLogController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/auth/controller/AdminOperationLogController.java"
+    ],
+    "methods": 2
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/auth/controller/SysUserController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/auth/controller/AdminSysUserController.java",
+      "backend/src/main/java/com/community/residence/common/auth/controller/SysUserController.java"
+    ],
+    "methods": 9
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/upload/controller/UploadController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/common/upload/controller/UploadController.java"
+    ],
+    "methods": 1
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/BuildingController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminBuildingController.java",
+      "backend/src/main/java/com/community/residence/common/community/controller/BuildingController.java"
+    ],
+    "methods": 6
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/CommunityController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminCommunityController.java",
+      "backend/src/main/java/com/community/residence/common/community/controller/CommunityController.java"
+    ],
+    "methods": 12
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/HouseController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminHouseController.java",
+      "backend/src/main/java/com/community/residence/common/community/controller/HouseController.java"
+    ],
+    "methods": 10
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/HouseImageController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminHouseImageController.java"
+    ],
+    "methods": 4
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/PublicResourceController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminPublicResourceController.java",
+      "backend/src/main/java/com/community/residence/common/community/controller/PublicResourceController.java"
+    ],
+    "methods": 5
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/ResourceTimeslotController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminResourceTimeslotController.java",
+      "backend/src/main/java/com/community/residence/common/community/controller/ResourceTimeslotController.java"
+    ],
+    "methods": 5
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/StructureGenerateController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminStructureGenerateController.java"
+    ],
+    "methods": 1
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/community/controller/UnitController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/community/controller/AdminUnitController.java",
+      "backend/src/main/java/com/community/residence/common/community/controller/UnitController.java"
+    ],
+    "methods": 6
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/conversation/controller/ConversationController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/conversation/controller/AdminConversationController.java",
+      "backend/src/main/java/com/community/residence/common/conversation/controller/ConversationController.java",
+      "backend/src/main/java/com/community/residence/resident/conversation/controller/ResidentConversationController.java"
+    ],
+    "methods": 11
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/conversation/controller/ConversationInboxController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/common/conversation/controller/ConversationInboxController.java"
+    ],
+    "methods": 3
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/evaluation/controller/EvaluationController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/evaluation/controller/AdminEvaluationController.java",
+      "backend/src/main/java/com/community/residence/common/evaluation/controller/EvaluationController.java",
+      "backend/src/main/java/com/community/residence/resident/evaluation/controller/ResidentEvaluationController.java"
+    ],
+    "methods": 7
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/feedback/controller/FeedbackAttachmentController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/common/feedback/controller/FeedbackAttachmentController.java"
+    ],
+    "methods": 3
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/feedback/controller/FeedbackController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/feedback/controller/AdminFeedbackController.java",
+      "backend/src/main/java/com/community/residence/common/feedback/controller/FeedbackController.java",
+      "backend/src/main/java/com/community/residence/resident/feedback/controller/ResidentFeedbackController.java"
+    ],
+    "methods": 7
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/housing/controller/HousingController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/housing/controller/AdminHousingController.java",
+      "backend/src/main/java/com/community/residence/common/housing/controller/HousingController.java"
+    ],
+    "methods": 10
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/housing/controller/HousingTimeslotController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/housing/controller/AdminHousingTimeslotController.java",
+      "backend/src/main/java/com/community/residence/common/housing/controller/HousingTimeslotController.java"
+    ],
+    "methods": 4
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/housing/controller/ViewingAppointmentController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/housing/controller/AdminViewingAppointmentController.java",
+      "backend/src/main/java/com/community/residence/common/housing/controller/ViewingAppointmentController.java",
+      "backend/src/main/java/com/community/residence/resident/housing/controller/ResidentViewingAppointmentController.java"
+    ],
+    "methods": 12
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseContractTermController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/common/lease/controller/LeaseContractTermController.java",
+      "backend/src/main/java/com/community/residence/resident/lease/controller/ResidentLeaseContractTermController.java"
+    ],
+    "methods": 3
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/lease/controller/AdminLeaseController.java",
+      "backend/src/main/java/com/community/residence/common/lease/controller/LeaseController.java",
+      "backend/src/main/java/com/community/residence/resident/lease/controller/ResidentLeaseController.java"
+    ],
+    "methods": 16
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseExtensionController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/lease/controller/AdminLeaseExtensionController.java",
+      "backend/src/main/java/com/community/residence/common/lease/controller/LeaseExtensionController.java",
+      "backend/src/main/java/com/community/residence/resident/lease/controller/ResidentLeaseExtensionController.java"
+    ],
+    "methods": 4
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseExtensionInboxController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/lease/controller/AdminLeaseExtensionInboxController.java"
+    ],
+    "methods": 1
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/lease/controller/LeaseMoveOutApplicationController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/lease/controller/AdminLeaseMoveOutApplicationController.java",
+      "backend/src/main/java/com/community/residence/resident/lease/controller/ResidentLeaseMoveOutApplicationController.java"
+    ],
+    "methods": 5
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/messaging/controller/NotificationController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/messaging/controller/AdminNotificationController.java",
+      "backend/src/main/java/com/community/residence/common/messaging/controller/NotificationController.java"
+    ],
+    "methods": 7
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/notice/controller/NoticeController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/notice/controller/AdminNoticeController.java",
+      "backend/src/main/java/com/community/residence/common/notice/controller/NoticeController.java",
+      "backend/src/main/java/com/community/residence/resident/notice/controller/ResidentNoticeController.java"
+    ],
+    "methods": 9
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/notice/controller/NoticeRevisionController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/notice/controller/AdminNoticeRevisionController.java"
+    ],
+    "methods": 2
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/payment/controller/PaymentChannelConfigController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/payment/controller/AdminPaymentChannelConfigController.java"
+    ],
+    "methods": 2
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/payment/controller/PaymentController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/common/payment/controller/PaymentController.java",
+      "backend/src/main/java/com/community/residence/resident/payment/controller/ResidentPaymentController.java"
+    ],
+    "methods": 4
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/reservation/controller/ReservationController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/reservation/controller/AdminReservationController.java",
+      "backend/src/main/java/com/community/residence/common/reservation/controller/ReservationController.java",
+      "backend/src/main/java/com/community/residence/resident/reservation/controller/ResidentReservationController.java"
+    ],
+    "methods": 10
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/auth/controller/ConfigController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/auth/controller/AdminConfigController.java",
+      "backend/src/main/java/com/community/residence/common/auth/controller/ConfigController.java"
+    ],
+    "methods": 3
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/resident/controller/ResidenceApplicationController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/resident/controller/AdminResidenceApplicationController.java",
+      "backend/src/main/java/com/community/residence/common/resident/controller/ResidenceApplicationController.java",
+      "backend/src/main/java/com/community/residence/resident/resident/controller/ResidentResidenceApplicationController.java"
+    ],
+    "methods": 6
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/resident/controller/ResidenceRelationController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/resident/controller/AdminResidenceRelationController.java",
+      "backend/src/main/java/com/community/residence/common/resident/controller/ResidenceRelationController.java"
+    ],
+    "methods": 5
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/resident/controller/ResidentController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/resident/controller/AdminResidentController.java",
+      "backend/src/main/java/com/community/residence/common/resident/controller/ResidentController.java",
+      "backend/src/main/java/com/community/residence/resident/resident/controller/ResidentAccountController.java"
+    ],
+    "methods": 9
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/statistics/controller/StatisticsController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/statistics/controller/AdminStatisticsController.java",
+      "backend/src/main/java/com/community/residence/common/statistics/controller/StatisticsController.java"
+    ],
+    "methods": 8
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/workorder/controller/ServiceCategoryController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/workorder/controller/AdminServiceCategoryController.java",
+      "backend/src/main/java/com/community/residence/common/workorder/controller/ServiceCategoryController.java"
+    ],
+    "methods": 6
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/workorder/controller/StaffCapabilityController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/workorder/controller/AdminStaffCapabilityController.java"
+    ],
+    "methods": 4
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/workorder/controller/StaffScheduleController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/workorder/controller/AdminStaffScheduleController.java"
+    ],
+    "methods": 4
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/workorder/controller/WorkOrderAttachmentController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/common/workorder/controller/WorkOrderAttachmentController.java"
+    ],
+    "methods": 1
+  },
+  {
+    "source": "backend/src/main/java/com/community/residence/common/workorder/controller/WorkOrderController.java",
+    "destinations": [
+      "backend/src/main/java/com/community/residence/admin/workorder/controller/AdminWorkOrderController.java",
+      "backend/src/main/java/com/community/residence/common/workorder/controller/WorkOrderQueryController.java",
+      "backend/src/main/java/com/community/residence/resident/workorder/controller/ResidentWorkOrderController.java",
+      "backend/src/main/java/com/community/residence/staff/workorder/controller/StaffWorkOrderController.java"
+    ],
+    "methods": 19
+  }
+]

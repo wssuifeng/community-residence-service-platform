@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-18",
+  "backend": {
+    "tests": 1183,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "skip": "CL_INBOX_MYSQL_TEST=false",
+    "package": "success",
+    "httpMappings": 264,
+    "controllers": 85,
+    "mappers": 60,
+    "checks": [
+      "directed package dependencies",
+      "unique component names",
+      "MyBatis annotation SQL registration",
+      "actual method-security denial",
+      "HTTP contract compatibility"
+    ],
+    "scope": "Offline tests and Spring mapping/security/Mapper registration; no live Boot/DB/Redis/payment calls.",
+    "uploadCorrection": "common/common -> common/upload, 5 focused checks passed"
+  },
+  "limitations": [
+    "Java 25 runtime uses release 17 compilation; no coverage claim",
+    "Production service not restarted"
+  ]
+}
