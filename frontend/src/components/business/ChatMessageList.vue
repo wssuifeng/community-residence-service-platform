@@ -103,6 +103,7 @@ onBeforeUnmount(() => { save(); observer?.disconnect(); document.removeEventList
 .chat-message-body { display: flex; flex-direction: column; align-items: flex-start; gap: var(--spacing-xs, 4px); width: max-content; min-width: 0; max-width: min(78%, 640px); }
 .mine .chat-message-body { align-items: flex-end; }
 .chat-meta { display: flex; align-items: center; gap: 8px; width: fit-content; max-width: 100%; min-width: 0; line-height: 18px; color: var(--color-text-secondary, #788598); }
+.mine .chat-meta { flex-direction: row-reverse; }
 .chat-sender { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
 .chat-time { flex-shrink: 0; color: var(--color-text-disabled, #98a1af); font-size: 11px; white-space: nowrap; }
 .chat-bubble { width: fit-content; max-width: 100%; padding: 7px 11px; border: 1px solid #e8ecf2; border-radius: 4px 12px 12px; background: var(--color-surface, #fff); overflow-wrap: anywhere; }

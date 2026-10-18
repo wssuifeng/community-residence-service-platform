@@ -1,0 +1,132 @@
+{
+  "scope": "isolated Chromium with synthetic HTTP; shared component metadata order only",
+  "checks": [
+    {
+      "name": "ADMIN 1440: own time left/name right near avatar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440: own metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440: other name left/time right retained",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440: other metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 1440: no page overflow",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768: own time left/name right near avatar",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768: own metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768: other name left/time right retained",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768: other metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "ADMIN 768: no page overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440: own time left/name right near avatar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440: own metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440: other name left/time right retained",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440: other metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 1440: no page overflow",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768: own time left/name right near avatar",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768: own metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768: other name left/time right retained",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768: other metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT 768: no page overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440: own time left/name right near avatar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440: own metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440: other name left/time right retained",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440: other metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "STAFF 1440: no page overflow",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768: own time left/name right near avatar",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768: own metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768: other name left/time right retained",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768: other metadata above bubble",
+      "passed": true
+    },
+    {
+      "name": "STAFF 768: no page overflow",
+      "passed": true
+    },
+    {
+      "name": "no JavaScript errors",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "financialCommands": "none",
+  "userBrowser": "untouched"
+}
