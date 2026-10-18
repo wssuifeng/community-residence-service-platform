@@ -1,4 +1,4 @@
-package com.community.residence.common.notice.controller;
+package com.community.residence.admin.notice.controller;
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.notice.dto.ReviseNoticeDTO;
 import com.community.residence.common.notice.entity.NoticeRevision;
@@ -13,7 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 @RestController @RequestMapping("/api/v1/notices/{id}/revisions") @RequiredArgsConstructor @Tag(name="公告修订")
 @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-public class NoticeRevisionController {
+public class AdminNoticeRevisionController {
  private final NoticeRevisionService service;
  @GetMapping @Operation(summary="已发布公告版本历史，仅管辖管理端可读")
  public ApiResponse<List<NoticeRevision>> list(@PathVariable Long id){return ApiResponse.success(service.list(id));}
