@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-18",
+  "tests": 30,
+  "files": 5,
+  "sharedReservationTests": 4,
+  "typecheck": "passed",
+  "productionBuild": "passed",
+  "scope": "isolated Vue tests; API mocks only; no live bookings or payment requests",
+  "routing": "resident wrapper owns URL and navigation; conversation popup passes conversation id; shared form uses existing domain endpoints"
+}
