@@ -10,8 +10,8 @@ import {
   getWorkOrder,
   intakeWorkOrder,
   processWorkOrder
-} from '@/api/workorder'
-import { getConversation, listConversationMessages, sendConversationMessage } from '@/api/conversation'
+} from '@/common/workorder/api/workorder'
+import { getConversation, listConversationMessages, sendConversationMessage } from '@/common/conversation/api/conversation'
 
 /**
  * CF-E4 / R74 工单临时群聊会话（接口设计 §9.21.1~§9.21.4）接口级断言：
@@ -23,8 +23,8 @@ import { getConversation, listConversationMessages, sendConversationMessage } fr
 const backend = () => getFakeBackend()
 
 /* 工单与会话两条链路都走假后端（前端只调既有 api 函数，契约不变） */
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
-vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
+vi.mock('@/common/workorder/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
 
 function seedOrder(status: FakeWorkOrder['status'] = 'PENDING'): void {
   backend().state.workOrders.push({

@@ -10,19 +10,19 @@ import { installFakeBackend } from '@/test/fakeBackend'
 /**
  * 键盘焦点指示（`docs/30_系统设计/组件库设计规范.md` §6.2，WCAG AA）：
  * `:focus-visible` 的焦点环曾被紧随其后的 `:focus { outline: none }` 抹掉
- * （同特异性、后者胜出），自写交互元素完全不可见。修复见 `src/styles/index.css`。
+ * （同特异性、后者胜出），自写交互元素完全不可见。修复见 `src/common/styles/index.css`。
  *
  * 说明：jsdom 不会匹配 `:focus-visible`（无浏览器的键盘启发式），因此**无法**用
  * `getComputedStyle` 断言"聚焦后 outline 存在"。这里的做法是：
  * ① 对样式源码做回归级校验（一旦有人把 `:focus{outline:none}` 写回来就失败）；
  * ② 断言真实自写交互元素可被键盘聚焦（浏览器中即命中上述全局 `:focus-visible` 规则）。
  */
-vi.mock('@/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
-vi.mock('@/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
-vi.mock('@/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
+vi.mock('@/common/agreement/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
+vi.mock('@/common/community/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
+vi.mock('@/common/upload/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
 
 /* 去注释后再解析：注释紧贴规则，会把选择器文本污染成「注释尾巴 + :focus-visible」 */
-const css = readFileSync(resolve(process.cwd(), 'src/styles/index.css'), 'utf8').replace(
+const css = readFileSync(resolve(process.cwd(), 'src/common/styles/index.css'), 'utf8').replace(
   /\/\*[\s\S]*?\*\//g,
   ''
 )

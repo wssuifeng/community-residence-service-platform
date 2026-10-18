@@ -3,14 +3,14 @@
 import { reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { isValidUsername, USERNAME_HINT } from '@/utils/username'
-import { adminCreateResident } from '@/api/resident'
+import { isValidUsername, USERNAME_HINT } from '@/common/auth/utils/username'
+import { adminCreateResident } from '@/common/resident/api/resident'
 import ResidentHouseSelector from './ResidentHouseSelector.vue'
-import { loadAllPages } from '@/utils/paged'
-import { relationTypeLabels } from '@/types/modules/resident'
-import { getCommunityList } from '@/api/community'
-import type { IAdminCreateResidentVO, RelationType } from '@/types/modules/resident'
-import type { ICommunity } from '@/types/modules/community'
+import { loadAllPages } from '@/common/web/utils/paged'
+import { relationTypeLabels } from '@/common/resident/types/resident'
+import { getCommunityList } from '@/common/community/api/community'
+import type { IAdminCreateResidentVO, RelationType } from '@/common/resident/types/resident'
+import type { ICommunity } from '@/common/community/types/community'
 
 /**
  * 两段式：表单段（提交）→ 结果段（username + initialPassword 展示）。

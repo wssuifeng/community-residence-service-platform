@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { listFeedbacks } from '@/api/feedback'
-import type { IFeedback, FeedbackStatus, FeedbackCategory } from '@/types/modules/feedback'
-import { feedbackStatusLabels, feedbackCategoryLabels } from '@/types/modules/feedback'
-import { formatDate } from '@/utils/date'
+import { listFeedbacks } from '@/common/feedback/api/feedback'
+import type { IFeedback, FeedbackStatus, FeedbackCategory } from '@/common/feedback/types/feedback'
+import { feedbackStatusLabels, feedbackCategoryLabels } from '@/common/feedback/types/feedback'
+import { formatDate } from '@/common/web/utils/date'
 
 /** 我的反馈列表：状态 Tab + 分类图标卡片流（状态枚举以后端实际 PENDING/IN_SESSION/CLOSED 为准） */
 const router = useRouter()

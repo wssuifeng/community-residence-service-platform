@@ -11,7 +11,7 @@ import ResidentLeaseListView from '@/views/resident/LeaseListView.vue'
 import LeaseFirstPaymentDialog from '@/views/resident/LeaseFirstPaymentDialog.vue'
 import AdminMoveOutApplicationView from '@/views/admin/lease/MoveOutApplicationView.vue'
 import LeaseMoveOutDialog from '@/views/resident/LeaseMoveOutDialog.vue'
-import GuestNoticeListView from '@/views/guest/NoticeListView.vue'
+import GuestNoticeListView from '@/common/public/views/NoticeListView.vue'
 import ResidentNotificationListView from '@/views/resident/NotificationListView.vue'
 import AdminNotificationListView from '@/views/admin/notification/NotificationListView.vue'
 import ResidentReservationCreateView from '@/views/resident/ReservationCreateView.vue'
@@ -38,23 +38,23 @@ import ResidentWorkOrderCreateView from '@/views/resident/WorkOrderCreateView.vu
  */
 
 /* 假后端装配：逐个模块一行（vi.mock 必须静态声明，工厂延迟到模块被导入时才求值） */
-vi.mock('@/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
-vi.mock('@/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
-vi.mock('@/api/payment', async () => (await import('@/test/fakeBackend')).fakeApi('payment'))
-vi.mock('@/api/leaseMoveOut', async () => (await import('@/test/fakeBackend')).fakeApi('leaseMoveOut'))
-vi.mock('@/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
-vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
-vi.mock('@/api/evaluation', async () => (await import('@/test/fakeBackend')).fakeApi('evaluation'))
-vi.mock('@/api/notice', async () => (await import('@/test/fakeBackend')).fakeApi('notice'))
-vi.mock('@/api/feedback', async () => (await import('@/test/fakeBackend')).fakeApi('feedback'))
-vi.mock('@/api/reservation', async () => (await import('@/test/fakeBackend')).fakeApi('reservation'))
-vi.mock('@/api/notification', async () => (await import('@/test/fakeBackend')).fakeApi('notification'))
-vi.mock('@/api/housing', async () => (await import('@/test/fakeBackend')).fakeApi('housing'))
-vi.mock('@/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
-vi.mock('@/api/statistics', async () => (await import('@/test/fakeBackend')).fakeApi('statistics'))
-vi.mock('@/api/staff', async () => (await import('@/test/fakeBackend')).fakeApi('staff'))
-vi.mock('@/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
+vi.mock('@/common/resident/api/resident', async () => (await import('@/test/fakeBackend')).fakeApi('resident'))
+vi.mock('@/common/lease/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
+vi.mock('@/common/payment/api/payment', async () => (await import('@/test/fakeBackend')).fakeApi('payment'))
+vi.mock('@/common/lease/api/leaseMoveOut', async () => (await import('@/test/fakeBackend')).fakeApi('leaseMoveOut'))
+vi.mock('@/common/agreement/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
+vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
+vi.mock('@/common/workorder/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/common/evaluation/api/evaluation', async () => (await import('@/test/fakeBackend')).fakeApi('evaluation'))
+vi.mock('@/common/notice/api/notice', async () => (await import('@/test/fakeBackend')).fakeApi('notice'))
+vi.mock('@/common/feedback/api/feedback', async () => (await import('@/test/fakeBackend')).fakeApi('feedback'))
+vi.mock('@/common/reservation/api/reservation', async () => (await import('@/test/fakeBackend')).fakeApi('reservation'))
+vi.mock('@/common/messaging/api/notification', async () => (await import('@/test/fakeBackend')).fakeApi('notification'))
+vi.mock('@/common/housing/api/housing', async () => (await import('@/test/fakeBackend')).fakeApi('housing'))
+vi.mock('@/common/community/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
+vi.mock('@/common/statistics/api/statistics', async () => (await import('@/test/fakeBackend')).fakeApi('statistics'))
+vi.mock('@/common/workorder/api/staff', async () => (await import('@/test/fakeBackend')).fakeApi('staff'))
+vi.mock('@/common/upload/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
 
 const backend = () => getFakeBackend()
 
@@ -174,7 +174,7 @@ async function submitAndApprove(): Promise<number> {
 /** 走到「租约已生效」：审核通过 → 确认承租 → 协议双方确认 */
 async function activateLease(): Promise<number> {
   const leaseId = await submitAndApprove()
-  const agreementApi = await import('@/api/agreement')
+  const agreementApi = await import('@/common/agreement/api/agreement')
 
   actAs('RESIDENT', 1)
   actAs('ADMIN', 1)
@@ -265,7 +265,7 @@ describe('模拟 E2E · CF-E2 居民注册·入住申请审核', () => {
     expect(pageText()).toContain('已撤回')
 
     /* 重复撤回：经 api 层断言后端 5605（页面已无撤回入口，属状态终态口径） */
-    const residentApi = await import('@/api/resident')
+    const residentApi = await import('@/common/resident/api/resident')
     await expect(residentApi.withdrawResidenceApplication(1)).rejects.toMatchObject({ code: 5605 })
   })
 })
@@ -310,7 +310,7 @@ describe('模拟 E2E · CF-E3-A 审核通过只到「待签约」', () => {
     await submitAndApprove()
     expect(backend().state.leases).toHaveLength(1)
 
-    const residentApi = await import('@/api/resident')
+    const residentApi = await import('@/common/resident/api/resident')
     actAs('ADMIN', 1)
     await expect(
       residentApi.approveResidenceApplication(1, {
@@ -341,7 +341,7 @@ describe('模拟 E2E · CF-E3-C 发出协议与居民确认', () => {
   it('发出即管理方同意，不要求旧承租留痕且不自动生效', async () => {
     const leaseId = await submitAndApprove()
     actAs('ADMIN', 1)
-    const api = await import('@/api/agreement')
+    const api = await import('@/common/agreement/api/agreement')
     const issued = await api.createLeaseAgreement({ leaseId, templateId: 1 })
     expect(issued.status).toBe('PARTIAL')
     expect(issued.adminConfirmTime).toBeTruthy()
@@ -364,7 +364,7 @@ describe('模拟 E2E · CF-E3-C 发出协议与居民确认', () => {
     expect(backend().state.houses.find(x => x.id === lease.houseId)?.status).toBe('OCCUPIED')
     expect(backend().state.conversationMessages.some(x => x.senderType === 'SYSTEM')).toBe(true)
     const before = backend().state.leaseChanges.length
-    const api = await import('@/api/agreement')
+    const api = await import('@/common/agreement/api/agreement')
     await api.confirmLeaseAgreement(agreement.id, {})
     expect(backend().state.leaseChanges).toHaveLength(before)
   })
@@ -379,7 +379,7 @@ describe('模拟 E2E · CF-E3-D/E 支付与租期口径', () => {
     const leaseId = await activateLease()
     const before = { ...backend().state.leases.find((item) => item.id === leaseId) }
 
-    const paymentApi = await import('@/api/payment')
+    const paymentApi = await import('@/common/payment/api/payment')
     actAs('RESIDENT', 1)
     const order = (await paymentApi.createFirstPayment(leaseId, { channel: 'ALIPAY' } as never)) as {
       paymentNo: string
@@ -409,7 +409,7 @@ describe('模拟 E2E · CF-E3-D/E 支付与租期口径', () => {
 
   it('CF-E3-D 首期 PENDING 单重开弹窗幂等续接：原样返回同一单并补回凭据（DEF-068）', async () => {
     const leaseId = await activateLease()
-    const paymentApi = await import('@/api/payment')
+    const paymentApi = await import('@/common/payment/api/payment')
     actAs('RESIDENT', 1)
 
     const first = (await paymentApi.createFirstPayment(leaseId, { channel: 'ALIPAY' } as never)) as {
@@ -426,7 +426,7 @@ describe('模拟 E2E · CF-E3-D/E 支付与租期口径', () => {
 
   it('CF-E3-D 首期支付弹窗（页面）：命中既有待支付单时直达支付步并以该单渠道续接', async () => {
     const leaseId = await activateLease()
-    const paymentApi = await import('@/api/payment')
+    const paymentApi = await import('@/common/payment/api/payment')
     actAs('RESIDENT', 1)
     const pending = (await paymentApi.createFirstPayment(leaseId, { channel: 'ALIPAY' } as never)) as {
       paymentNo: string
@@ -465,7 +465,7 @@ describe('模拟 E2E · CF-E3-D/E 支付与租期口径', () => {
     const leaseId = await activateLease()
     const before = backend().state.leases.find((item) => item.id === leaseId)?.endDate ?? ''
 
-    const paymentApi = await import('@/api/payment')
+    const paymentApi = await import('@/common/payment/api/payment')
     actAs('RESIDENT', 1)
     const order = (await paymentApi.createRenewPayment(leaseId, {
       months: 3,
@@ -485,7 +485,7 @@ describe('模拟 E2E · CF-E3-D/E 支付与租期口径', () => {
 
   it('CF-E3-G 到期口径：止期已过首期被拒 5606（续期放行）；当天到期仍可付首期', async () => {
     const leaseId = await activateLease()
-    const paymentApi = await import('@/api/payment')
+    const paymentApi = await import('@/common/payment/api/payment')
     const lease = backend().state.leases.find((item) => item.id === leaseId)
     actAs('RESIDENT', 1)
 
@@ -515,7 +515,7 @@ describe('模拟 E2E · CF-E3-F 退租闭环（押金退还段待实现，跳过
   it('CF-E3-F 非 ACTIVE 发起退租被拒 5602；重复发起被拒 5603', async () => {
     /* 未生效租约（TO_SIGN）发起退租 → 5602 */
     const leaseId = await submitAndApprove()
-    const moveOutApi = await import('@/api/leaseMoveOut')
+    const moveOutApi = await import('@/common/lease/api/leaseMoveOut')
     actAs('RESIDENT', 1)
     await expect(
       moveOutApi.createMoveOutApplication(leaseId, { moveOutDate: '2026-10-01', reason: '工作调动' } as never)
@@ -551,7 +551,7 @@ describe('模拟 E2E · CF-E3-F 退租闭环（押金退还段待实现，跳过
 
   it('CF-E3-F 管理端审核通过：租约已搬出、房屋空置、群聊关闭（发消息 5604）', async () => {
     const leaseId = await activateLease()
-    const moveOutApi = await import('@/api/leaseMoveOut')
+    const moveOutApi = await import('@/common/lease/api/leaseMoveOut')
     actAs('RESIDENT', 1)
     const application = (await moveOutApi.createMoveOutApplication(leaseId, {
       moveOutDate: '2026-10-01',
@@ -571,7 +571,7 @@ describe('模拟 E2E · CF-E3-F 退租闭环（押金退还段待实现，跳过
     expect(backend().state.notifications.some((item) => item.sourceType === 'LEASE_RECORD')).toBe(true)
 
     /* 群聊关闭 + 停收停发（5604），历史消息仍可读 */
-    const conversationApi = await import('@/api/conversation')
+    const conversationApi = await import('@/common/conversation/api/conversation')
     const conversationId = lease?.conversationId ?? 0
     expect(backend().state.conversations.find((item) => item.id === conversationId)?.status).toBe('CLOSED')
     await expect(
@@ -584,7 +584,7 @@ describe('模拟 E2E · CF-E3-F 退租闭环（押金退还段待实现，跳过
 
   it('CF-E3-F 退租驳回：租约保持已生效', async () => {
     const leaseId = await activateLease()
-    const moveOutApi = await import('@/api/leaseMoveOut')
+    const moveOutApi = await import('@/common/lease/api/leaseMoveOut')
     actAs('RESIDENT', 1)
     const application = (await moveOutApi.createMoveOutApplication(leaseId, {
       moveOutDate: '2026-10-01',
@@ -600,8 +600,8 @@ describe('模拟 E2E · CF-E3-F 退租闭环（押金退还段待实现，跳过
 
   it('CF-E3-F 归档：已搬出租约可归档为只读终态，群聊保持关闭', async () => {
     const leaseId = await activateLease()
-    const moveOutApi = await import('@/api/leaseMoveOut')
-    const leaseApi = await import('@/api/lease')
+    const moveOutApi = await import('@/common/lease/api/leaseMoveOut')
+    const leaseApi = await import('@/common/lease/api/lease')
     actAs('RESIDENT', 1)
     const application = (await moveOutApi.createMoveOutApplication(leaseId, {
       moveOutDate: '2026-10-01',
@@ -688,7 +688,7 @@ describe('模拟 E2E · CF-E11 通知身份空间隔离', () => {
         createdAt: '2026-09-21T10:01:00'
       }
     )
-    const notificationApi = await import('@/api/notification')
+    const notificationApi = await import('@/common/messaging/api/notification')
 
     actAs('RESIDENT', 1)
     const residentUnread = await notificationApi.listUnreadNotifications()
@@ -746,7 +746,7 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
 
     /* 居民端：本社区公告可见（经 api 列表口径） */
     actAs('RESIDENT', 1)
-    const noticeApi = await import('@/api/notice')
+    const noticeApi = await import('@/common/notice/api/notice')
     const residentNotices = await noticeApi.listNotices({ page: 1, size: 20 })
     expect(residentNotices.records.map((item) => item.title)).toContain('社区停水通知')
 
@@ -757,7 +757,7 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
   })
 
   it('CF-E6 反馈：受理 → 会话中 → 发消息 → 办结 → 会话只读（再发消息被拒 5004）', async () => {
-    const feedbackApi = await import('@/api/feedback')
+    const feedbackApi = await import('@/common/feedback/api/feedback')
     actAs('RESIDENT', 1)
     const feedback = (await feedbackApi.createFeedback({
       communityId: 1,
@@ -790,7 +790,7 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
   })
 
   it('CF-E7 资源预约：首约待审核；同资源同时段再约被拒 5401（时段冲突）', async () => {
-    const reservationApi = await import('@/api/reservation')
+    const reservationApi = await import('@/common/reservation/api/reservation')
     actAs('RESIDENT', 1)
 
     const today = localToday()
@@ -818,7 +818,7 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
   })
 
   it('CF-E8 评价：已完成工单可评价一次；重复评价被拒 5502；未完成工单评价被拒 5501', async () => {
-    const evaluationApi = await import('@/api/evaluation')
+    const evaluationApi = await import('@/common/evaluation/api/evaluation')
     actAs('RESIDENT', 1)
     backend().state.workOrders.push(
       {
@@ -864,7 +864,7 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
   })
 
   it('CF-E4 工单主链五段三端交接：待受理→待派单→已派单→已接单→处理中→待确认→已完成；非法流转 5302', async () => {
-    const workorderApi = await import('@/api/workorder')
+    const workorderApi = await import('@/common/workorder/api/workorder')
 
     /* 居民端提交（页面挂载 + 提交） */
     actAs('RESIDENT', 1)
@@ -917,7 +917,7 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
 
   it('CF-E3-B 群聊内预约看房：状态待确认且与租约双向关联', async () => {
     const leaseId = await submitAndApprove()
-    const leaseApi = await import('@/api/lease')
+    const leaseApi = await import('@/common/lease/api/lease')
     const lease = backend().state.leases.find((item) => item.id === leaseId)
 
     actAs('RESIDENT', 1)
@@ -939,7 +939,7 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
 
 describe('模拟 E2E · CF-E1 社区初始化与结构配置', () => {
   it('CF-E1 超管建「社区→楼栋→单元→房屋→公共资源→时段」四级结构，逐级可读', async () => {
-    const communityApi = await import('@/api/community')
+    const communityApi = await import('@/common/community/api/community')
     actAs('SUPER_ADMIN', 1)
 
     const community = (await communityApi.createCommunity({ name: '二期社区' } as never)) as { id: number }
@@ -987,8 +987,8 @@ describe('模拟 E2E · CF-E1 社区初始化与结构配置', () => {
 
 describe('模拟 E2E · CF-E9 运营看板数据核对', () => {
   it('CF-E9 看板统计与库内真实数据逐项一致（工单/房屋/租约）', async () => {
-    const statisticsApi = await import('@/api/statistics')
-    const workorderApi = await import('@/api/workorder')
+    const statisticsApi = await import('@/common/statistics/api/statistics')
+    const workorderApi = await import('@/common/workorder/api/workorder')
     actAs('ADMIN', 1)
 
     const first = (await workorderApi.submitWorkOrder({
@@ -1035,7 +1035,7 @@ describe('模拟 E2E · CF-E9 运营看板数据核对', () => {
 describe('模拟 E2E · CF-E10 权限与越权拒绝', () => {
   it('管理端不能代居民同意协议，其他居民不能确认他人协议', async () => {
     const leaseId = await submitAndApprove()
-    const api = await import('@/api/agreement')
+    const api = await import('@/common/agreement/api/agreement')
     actAs('ADMIN', 1)
     const issued = await api.createLeaseAgreement({ leaseId, templateId: 1 })
     for (const role of ['ADMIN', 'SUPER_ADMIN'] as const) {
@@ -1049,8 +1049,8 @@ describe('模拟 E2E · CF-E10 权限与越权拒绝', () => {
 
 describe('模拟 E2E · CF-E12 房源上架与注册居民看房预约', () => {
   it('CF-E12 房源上架 → 游客浏览 → 居民预约（待确认）→ 管理方确认（已预约）→ 完成；违约分支留痕', async () => {
-    const housingApi = await import('@/api/housing')
-    const communityApi = await import('@/api/community')
+    const housingApi = await import('@/common/housing/api/housing')
+    const communityApi = await import('@/common/community/api/community')
 
     /* 管理端上架一套房源 */
     actAs('ADMIN', 1)
@@ -1133,7 +1133,7 @@ describe('模拟 E2E · CF-E12 房源上架与注册居民看房预约', () => {
 
 describe('模拟 E2E · 假后端自检', () => {
   it('未实现的 api 调用会抛出明确错误（不被静默吞掉）', async () => {
-    const communityApi = (await import('@/api/community')) as unknown as Record<string, unknown>
+    const communityApi = (await import('@/common/community/api/community')) as unknown as Record<string, unknown>
     /* 假后端只实现被流程用到的成员：deleteCommunity 未实现，必须大声失败而不是静默 undefined */
     const unknownFn = communityApi.deleteCommunity as (...args: unknown[]) => unknown
     expect(() => unknownFn()).toThrowError(/假后端未实现/)
@@ -1148,7 +1148,7 @@ describe('模拟 E2E · 假后端自检', () => {
       status: 'PENDING',
       createdAt: '2026-09-21T10:00:00'
     })
-    const residentApi = await import('@/api/resident')
+    const residentApi = await import('@/common/resident/api/resident')
 
     actAs('RESIDENT', 1)
     expect((await residentApi.getResidenceApplicationList({})).total).toBe(1)

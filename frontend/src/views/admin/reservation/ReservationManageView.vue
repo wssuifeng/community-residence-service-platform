@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
-import { reservationDayQuotas } from '@/utils/reservationQuota'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
+import { reservationDayQuotas } from '@/common/reservation/utils/reservationQuota'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import AdminStatCard from '@/components/admin/AdminStatCard.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import { getCommunityList, getResourceList } from '@/api/community'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import { getCommunityList, getResourceList } from '@/common/community/api/community'
 import {
   completeReservation,
   confirmReservation,
@@ -17,16 +17,16 @@ import {
   listResidentViolations,
   rejectReservation,
   violateReservation
-} from '@/api/reservation'
+} from '@/common/reservation/api/reservation'
 import type {
   IAvailableTimeslot,
   IResourceReservation,
   IViolationRecord,
   ReservationStatus
-} from '@/types/modules/reservation'
-import { reservationStatusLabels, violationTypeLabels } from '@/types/modules/reservation'
-import type { IPublicResource } from '@/types/modules/community'
-import { formatDateTime } from '@/utils/date'
+} from '@/common/reservation/types/reservation'
+import { reservationStatusLabels, violationTypeLabels } from '@/common/reservation/types/reservation'
+import type { IPublicResource } from '@/common/community/types/community'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 预约管理（R2 任务 A6 改版：资源先行 + 月历视图，替代任务 9 的固定周网格）：

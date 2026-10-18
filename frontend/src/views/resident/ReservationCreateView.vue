@@ -2,12 +2,12 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getResource } from '@/api/community'
-import { listAvailableTimeslots, createReservation } from '@/api/reservation'
-import { getMyProfile } from '@/api/resident'
-import type { IPublicResource } from '@/types/modules/community'
-import type { IAvailableTimeslot } from '@/types/modules/reservation'
-import type { IResident } from '@/types/modules/resident'
+import { getResource } from '@/common/community/api/community'
+import { listAvailableTimeslots, createReservation } from '@/common/reservation/api/reservation'
+import { getMyProfile } from '@/common/resident/api/resident'
+import type { IPublicResource } from '@/common/community/types/community'
+import type { IAvailableTimeslot } from '@/common/reservation/types/reservation'
+import type { IResident } from '@/common/resident/types/resident'
 
 /**
  * 预约子页（居民端三段预约流第三段，大表单治理示范）：

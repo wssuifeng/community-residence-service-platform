@@ -13,9 +13,9 @@ import { getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
  * - 列表首图缩略图：有图显示首图、无图显示占位符。
  */
 const batchSlots=vi.hoisted(()=>vi.fn().mockResolvedValue({createdDays:[1,2,3,4,5],skippedDays:[]}))
-vi.mock('@/api/community', async () => ({...(await import('@/test/fakeBackend')).fakeApi('community'),createTimeslotsBatch:batchSlots}))
+vi.mock('@/common/community/api/community', async () => ({...(await import('@/test/fakeBackend')).fakeApi('community'),createTimeslotsBatch:batchSlots}))
 
-vi.mock('@/api/upload', () => ({ uploadFile: vi.fn(async (file: File) => ({ fileUrl: '/uploads/' + file.name })) }))
+vi.mock('@/common/upload/api/upload', () => ({ uploadFile: vi.fn(async (file: File) => ({ fileUrl: '/uploads/' + file.name })) }))
 
 const backend = () => getFakeBackend()
 

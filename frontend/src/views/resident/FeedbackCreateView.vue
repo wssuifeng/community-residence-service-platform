@@ -5,13 +5,13 @@ import { ElMessage } from 'element-plus'
 import {
   createFeedback,
   uploadFeedbackAttachment
-} from '@/api/feedback'
-import type { FeedbackCategory } from '@/types/modules/feedback'
-import { feedbackCategoryLabels } from '@/types/modules/feedback'
-import { getMyProfile, getResidentResidenceList } from '@/api/resident'
-import { getHouse, getUnit, getBuilding } from '@/api/community'
-import { useUserStore } from '@/store/user'
-import FileUploader from '@/components/common/FileUploader.vue'
+} from '@/common/feedback/api/feedback'
+import type { FeedbackCategory } from '@/common/feedback/types/feedback'
+import { feedbackCategoryLabels } from '@/common/feedback/types/feedback'
+import { getMyProfile, getResidentResidenceList } from '@/common/resident/api/resident'
+import { getHouse, getUnit, getBuilding } from '@/common/community/api/community'
+import { useUserStore } from '@/common/auth/store/user'
+import FileUploader from '@/common/upload/components/FileUploader.vue'
 
 /**
  * 提交反馈：类别/标题/内容/附件；

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
-import NoticeBody from '@/components/business/NoticeBody.vue'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
+import NoticeBody from '@/common/notice/components/NoticeBody.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getNotice, listNotices, recordNoticeView } from '@/api/notice'
-import type { INotice } from '@/types/modules/notice'
-import { formatDateTime } from '@/utils/date'
+import { getNotice, listNotices, recordNoticeView } from '@/common/notice/api/notice'
+import type { INotice } from '@/common/notice/types/notice'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /** 居民端公告详情：与游客端同语言（加宽阅读容器 + 封面 + 上一篇/下一篇）+ 查看回执 */
 const route = useRoute()

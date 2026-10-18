@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { leaseDisplayLabel } from '@/utils/leaseDisplay'
+import { leaseDisplayLabel } from '@/common/lease/utils/leaseDisplay'
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { getMyProfile, updateMyProfile, changeMyPassword, getResidentResidenceList } from '@/api/resident'
-import { getLeaseList } from '@/api/lease'
-import type { IResident, IResidenceRelation, ResidenceRelationStatus } from '@/types/modules/resident'
-import type { ILeaseRecord, LeaseStatus } from '@/types/modules/lease'
-import { residenceRelationStatusLabels } from '@/types/modules/resident'
-import { formatDate } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
+import { getMyProfile, updateMyProfile, changeMyPassword, getResidentResidenceList } from '@/common/resident/api/resident'
+import { getLeaseList } from '@/common/lease/api/lease'
+import type { IResident, IResidenceRelation, ResidenceRelationStatus } from '@/common/resident/types/resident'
+import type { ILeaseRecord, LeaseStatus } from '@/common/lease/types/lease'
+import { residenceRelationStatusLabels } from '@/common/resident/types/resident'
+import { formatDate } from '@/common/web/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
 
 /** 居民个人中心：资料卡 + 居住关系 + 租住记录（卡片式，非密集表格） */
 const profile = ref<IResident | null>(null)

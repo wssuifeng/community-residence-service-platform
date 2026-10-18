@@ -1,7 +1,7 @@
 import { config } from '@vue/test-utils'
-import permission from '@/directives/permission'
-import responsive from '@/directives/responsive'
-import { applyElementPlusDefaults } from '@/utils/elementPlusDefaults'
+import permission from '@/common/web/directives/permission'
+import responsive from '@/common/web/directives/responsive'
+import { applyElementPlusDefaults } from '@/common/web/utils/elementPlusDefaults'
 
 /**
  * 组件测试全局前置：注册 main.ts 里 setupDirectives 的同款自定义指令。

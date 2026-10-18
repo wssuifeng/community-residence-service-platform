@@ -10,8 +10,8 @@ import { installFakeBackend, getFakeBackend } from '@/test/fakeBackend'
  * 居民端「不满意退回」（R22）：必须走专用退回端点 → 工单回到**处理中**，
  * 而不是借「确认完成」把工单推进到**已完成**（改前行为）。原因必填（后端 @NotBlank）。
  */
-vi.mock('@/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
-vi.mock('@/api/evaluation', async () => (await import('@/test/fakeBackend')).fakeApi('evaluation'))
+vi.mock('@/common/workorder/api/workorder', async () => (await import('@/test/fakeBackend')).fakeApi('workorder'))
+vi.mock('@/common/evaluation/api/evaluation', async () => (await import('@/test/fakeBackend')).fakeApi('evaluation'))
 
 const backend = () => getFakeBackend()
 

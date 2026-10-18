@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import ElementPlus, { ElMessageBox } from 'element-plus'
 import AlipayChannelConfigPanel from '../AlipayChannelConfigPanel.vue'
-import type { IAlipayChannelConfig } from '@/api/paymentChannelConfig'
+import type { IAlipayChannelConfig } from '@/common/payment/api/paymentChannelConfig'
 
 const api = vi.hoisted(() => ({ getAlipayChannelConfig: vi.fn(), saveAlipayChannelConfig: vi.fn() }))
-vi.mock('@/api/paymentChannelConfig', () => api)
+vi.mock('@/common/payment/api/paymentChannelConfig', () => api)
 let wrapper: VueWrapper | undefined
 const empty = (): IAlipayChannelConfig => ({ appId: null, applicationPublicKey: null, alipayPublicKey: null, environment: 'SANDBOX', privateKeyConfigured: false, configured: false, enabled: false, revision: 0, updatedAt: null })
 const saved = (): IAlipayChannelConfig => ({ ...empty(), appId: '9021000000000000', applicationPublicKey: 'APP_PUBLIC_TEST', alipayPublicKey: 'ALIPAY_PUBLIC_TEST', privateKeyConfigured: true, configured: true, revision: 1 })

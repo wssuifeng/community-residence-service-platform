@@ -11,7 +11,7 @@ import {
   getResourceList,
   getTimeslotList,
   updateResource
-} from '@/api/community'
+} from '@/common/community/api/community'
 import type {
   ICommunity,
   ICreateTimeslotDTO,
@@ -20,16 +20,16 @@ import type {
   IPublicResourceQuery,
   IResourceTimeslot,
   ResourceType
-} from '@/types/modules/community'
+} from '@/common/community/types/community'
 import {
   bookingUnitLabels,
   resourceStatusLabels,
   resourceTypeLabels
-} from '@/types/modules/community'
-import StatusTag from '@/components/common/StatusTag.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import ImageUploader from '@/components/common/ImageUploader.vue'
+} from '@/common/community/types/community'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import ImageUploader from '@/common/upload/components/ImageUploader.vue'
 
 /** 星期标签（后端 dayOfWeek 1-周一 … 7-周日，CreateTimeSlotDTO @Schema） */
 const DAY_OF_WEEK_LABELS: Record<number, string> = {

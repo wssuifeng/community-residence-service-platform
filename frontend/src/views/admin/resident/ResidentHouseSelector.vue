@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue'
-import { getBuildingList, getUnitList, getHouseList } from '@/api/community'
-import { loadAllPages, StaleStructureLoad } from '@/utils/paged'
-import type { IBuilding, IUnit, IHouse } from '@/types/modules/community'
+import { getBuildingList, getUnitList, getHouseList } from '@/common/community/api/community'
+import { loadAllPages, StaleStructureLoad } from '@/common/web/utils/paged'
+import type { IBuilding, IUnit, IHouse } from '@/common/community/types/community'
 const props = defineProps<{ communityId?: number; allowOccupied?: boolean }>()
 const houseId = defineModel<number | undefined>()
 const buildingId = ref<number>()

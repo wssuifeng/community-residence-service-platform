@@ -5,14 +5,14 @@ import ElementPlus from 'element-plus'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ConversationListView from '../ConversationListView.vue'
 const api = vi.hoisted(() => ({ list: vi.fn(), direct: vi.fn(), communities: vi.fn(), residents: vi.fn() }))
-vi.mock('@/api/conversationInbox', () => ({ listConversationInbox: api.list }))
-vi.mock('@/api/conversation', () => ({ openDirectConversation: api.direct }))
-vi.mock('@/api/community', () => ({ getCommunityList: api.communities }))
-vi.mock('@/api/resident', () => ({ getResidentList: api.residents }))
-vi.mock('@/api/lease', () => ({ getLeaseList: vi.fn() }))
-vi.mock('@/components/conversation/ConversationPane.vue', () => ({ default: defineComponent({ props: ['source','id'], template: '<div class="pane">{{source}}:{{id}}</div>' }) }))
+vi.mock('@/common/conversation/api/conversationInbox', () => ({ listConversationInbox: api.list }))
+vi.mock('@/common/conversation/api/conversation', () => ({ openDirectConversation: api.direct }))
+vi.mock('@/common/community/api/community', () => ({ getCommunityList: api.communities }))
+vi.mock('@/common/resident/api/resident', () => ({ getResidentList: api.residents }))
+vi.mock('@/common/lease/api/lease', () => ({ getLeaseList: vi.fn() }))
+vi.mock('@/common/conversation/components/ConversationPane.vue', () => ({ default: defineComponent({ props: ['source','id'], template: '<div class="pane">{{source}}:{{id}}</div>' }) }))
 const user = reactive({ role: 'ADMIN', user: { id: 1, role: 'ADMIN' } })
-vi.mock('@/store/user', () => ({ useUserStore: () => user }))
+vi.mock('@/common/auth/store/user', () => ({ useUserStore: () => user }))
 const row = (source = 'CONVERSATION', id = 1) => ({ source, id, title: `${source}会话`, type: source === 'FEEDBACK' ? 'FEEDBACK' : 'WORK_ORDER_GROUP', status: 'ACTIVE', communityName: '测试社区', unreadCount: 2, activityAt: '2026-10-17T10:00:00' })
 let wrapper: VueWrapper, router: Router
 beforeEach(() => {

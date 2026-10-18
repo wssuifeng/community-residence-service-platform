@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { canOpenPaymentPage } from '@/utils/payment'
+import { canOpenPaymentPage } from '@/common/payment/utils/payment'
 import QRCode from 'qrcode'
-import { formatDateTimeSeconds } from '@/utils/date'
+import { formatDateTimeSeconds } from '@/common/web/utils/date'
 import {
   closePayment,
   createRenewPayment,
@@ -11,14 +11,14 @@ import {
   getRentQuote,
   getPaymentStatus,
   listPaymentChannels
-} from '@/api/payment'
-import { getLease } from '@/api/lease'
+} from '@/common/payment/api/payment'
+import { getLease } from '@/common/lease/api/lease'
 import type {
   ILeasePayment,
   ILeaseRecord,
   IPaymentChannelOption,
   PaymentChannel
-} from '@/types/modules/lease'
+} from '@/common/lease/types/lease'
 
 /**
  * 合同付款弹窗：三步流——①核对服务端报价与渠道（本次月数/金额/覆盖由合同段决定，

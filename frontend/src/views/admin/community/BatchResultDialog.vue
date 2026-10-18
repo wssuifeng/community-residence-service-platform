@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IBatchFailure } from '@/types/modules/community'
+import type { IBatchFailure } from '@/common/community/types/community'
 
 /**
  * 批量操作结果对话框（社区批量启用/停用/删除与结构批量生成共用）。

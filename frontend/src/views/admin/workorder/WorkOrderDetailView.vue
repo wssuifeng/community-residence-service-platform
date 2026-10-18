@@ -2,12 +2,12 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import { ensureWorkOrderConversation } from '@/api/workorder'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import { ensureWorkOrderConversation } from '@/common/workorder/api/workorder'
 import StaffPickerDrawer from '@/views/admin/workorder/StaffPickerDrawer.vue'
-import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, intakeWorkOrder, listWorkOrderAttachments, rejectWorkOrder } from '@/api/workorder'
-import { getConversation } from '@/api/conversation'
-import type { IConversation } from '@/types/modules/conversation'
+import { closeWorkOrder, getWorkOrder, getWorkOrderTimeline, intakeWorkOrder, listWorkOrderAttachments, rejectWorkOrder } from '@/common/workorder/api/workorder'
+import { getConversation } from '@/common/conversation/api/conversation'
+import type { IConversation } from '@/common/conversation/types/conversation'
 import type {
   DispatchFlag,
   IWorkOrder,
@@ -15,10 +15,10 @@ import type {
   IWorkOrderProcess,
   WorkOrderPriority,
   WorkOrderStatus
-} from '@/types/modules/workorder'
-import { dispatchFlagColors, dispatchFlagLabels, workOrderStatusLabels, workOrderPriorityLabels } from '@/types/modules/workorder'
+} from '@/common/workorder/types/workorder'
+import { dispatchFlagColors, dispatchFlagLabels, workOrderStatusLabels, workOrderPriorityLabels } from '@/common/workorder/types/workorder'
 import { canAssignOrder, canFinalizeOrder, canIntakeOrder, formatWaited, isReassignOrder } from './dispatch'
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 工单详情（UI设计.md §4.3.5）：面包屑 + 状态条 + 工单信息 / 处理时间线 / 管理操作三栏。

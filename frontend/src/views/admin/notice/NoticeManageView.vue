@@ -4,10 +4,10 @@ function toLocalIso(date: Date): string {
   const pad = (value: number): string => String(value).padStart(2, '0')
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
-import NoticeBody from '@/components/business/NoticeBody.vue'
-import { legacyNoticeDocument, emptyNoticeDocument } from '@/utils/noticeDocument'
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
-const NoticeEditor=defineAsyncComponent(()=>import('@/components/business/NoticeEditor.vue'))
+import NoticeBody from '@/common/notice/components/NoticeBody.vue'
+import { legacyNoticeDocument, emptyNoticeDocument } from '@/common/notice/utils/noticeDocument'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
+const NoticeEditor=defineAsyncComponent(()=>import('@/common/notice/components/NoticeEditor.vue'))
 import { computed, defineAsyncComponent, nextTick, onMounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -23,8 +23,8 @@ import {
   publishNotice,
   updateNotice,
   withdrawNotice
-} from '@/api/notice'
-import { getCommunityList, getBuildingList } from '@/api/community'
+} from '@/common/notice/api/notice'
+import { getCommunityList, getBuildingList } from '@/common/community/api/community'
 import type {
   INotice,
   INoticeSaveRequest,
@@ -34,17 +34,17 @@ import type {
   NoticePriority,
   NoticeType,
   TargetAudience
-} from '@/types/modules/notice'
+} from '@/common/notice/types/notice'
 import {
   noticePriorityLabels,
   noticeStatusLabels,
   noticeTypeLabels
-} from '@/types/modules/notice'
-import { formatDate, formatDateTime } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
+} from '@/common/notice/types/notice'
+import { formatDate, formatDateTime } from '@/common/web/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 公告管理（对照设计稿 design-mockups/admin/06-公告管理.png，主从双栏）：

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import NotificationList from '@/components/business/NotificationList.vue'
+import NotificationList from '@/common/messaging/components/NotificationList.vue'
 const route = useRoute(), router = useRouter()
 watch(() => route.query.tab, value => {
  if (value === 'conversations') void router.replace({ path: '/resident/conversations', query: { ...route.query, tab: undefined } })

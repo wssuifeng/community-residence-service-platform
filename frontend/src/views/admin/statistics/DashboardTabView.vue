@@ -4,9 +4,9 @@ import { useRoute, useRouter } from 'vue-router'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import DashboardOverview from '@/views/admin/statistics/DashboardOverview.vue'
 import StatisticsView from '@/views/admin/statistics/StatisticsView.vue'
-import { getCommunityOptions } from '@/api/statistics'
-import type { ICommunityOption } from '@/types/modules/statistics'
-import { useUserStore } from '@/store/user'
+import { getCommunityOptions } from '@/common/statistics/api/statistics'
+import type { ICommunityOption } from '@/common/statistics/types/statistics'
+import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 运营看板：Tab 深链 ?tab=overview|details（任务 1 契约，取值不得变更）。

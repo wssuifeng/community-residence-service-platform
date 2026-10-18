@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import AppHeader from '@/components/layout/AppHeader.vue'
+import AppHeader from '@/common/web/components/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/common/auth/store/user'
 import { computed, ref, watch } from 'vue'
 import { ElDrawer } from 'element-plus'
-import { useResponsive } from '@/composables/useResponsive'
+import { useResponsive } from '@/common/web/composables/useResponsive'
 
 /** 管理端布局：左侧边栏 + 顶部导航（面包屑）+ 内容区（UI设计.md §2.3） */
 const route = useRoute()

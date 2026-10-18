@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { addEvaluationFollowup, listEvaluationFollowups } from '@/api/evaluation'
-import type { IEvaluation, IEvaluationFollowup } from '@/types/modules/evaluation'
-import { formatDate, formatDateTime } from '@/utils/date'
+import { addEvaluationFollowup, listEvaluationFollowups } from '@/common/evaluation/api/evaluation'
+import type { IEvaluation, IEvaluationFollowup } from '@/common/evaluation/types/evaluation'
+import { formatDate, formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 跟进抽屉（原 /admin/evaluations/:id/followup 独立页收编，对照任务 11）：

@@ -1,4 +1,4 @@
 <script setup lang="ts">
-import ConversationWorkspace from '@/components/conversation/ConversationWorkspace.vue'
+import ConversationWorkspace from '@/common/conversation/components/ConversationWorkspace.vue'
 </script>
 <template><ConversationWorkspace /></template>

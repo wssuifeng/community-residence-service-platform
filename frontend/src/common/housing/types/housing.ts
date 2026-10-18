@@ -1,0 +1,288 @@
+import type { PageQuery } from '@/common/web/types/api'
+
+/** 房源状态（接口设计.md 9.12.1.6：可租/已预订/已出租/已下架） */
+export type HousingStatus = 'AVAILABLE' | 'RESERVED' | 'RENTED' | 'OFFLINE'
+
+/** 房源状态中文标签 */
+export const housingStatusLabels: Record<HousingStatus, string> = {
+  AVAILABLE: '可租',
+  RESERVED: '已预订',
+  RENTED: '已出租',
+  OFFLINE: '已下架'
+}
+
+/** 租售类型（V9 迁移 R53：RENT-出租 / SALE-出售，后端 HousingService 白名单校验） */
+export type HousingRentType = 'RENT' | 'SALE'
+
+/** 租售类型中文标签 */
+export const housingRentTypeLabels: Record<HousingRentType, string> = {
+  RENT: '出租',
+  SALE: '出售'
+}
+
+/** 看房预约状态（架构设计 §6 状态机权威口径：TO_CONFIRM→RESERVED→COMPLETED + 已取消/已违约；接口文档 PENDING/CONFIRMED 为漂移命名） */
+export type ViewingAppointmentStatus =
+  | 'TO_CONFIRM'
+  | 'RESERVED'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'VIOLATED'
+
+/** 看房预约状态中文标签 */
+export const viewingAppointmentStatusLabels: Record<ViewingAppointmentStatus, string> = {
+  TO_CONFIRM: '待确认',
+  RESERVED: '已预约',
+  COMPLETED: '已完成',
+  CANCELLED: '已取消',
+  VIOLATED: '已违约'
+}
+
+/** 房源看房时段状态（接口设计.md 9.12.2.8 响应示例） */
+export type HousingTimeslotStatus = 'AVAILABLE' | 'FULL'
+
+/** 房源看房时段状态中文标签 */
+export const housingTimeslotStatusLabels: Record<HousingTimeslotStatus, string> = {
+  AVAILABLE: '可预约',
+  FULL: '已约满'
+}
+
+/**
+ * 房源（2026-09-12 管理端任务 10 以后端 HousingVO.java 逐一核对收口）。
+ * 后端实体含 id/communityId/houseId/title/description/monthlyRent/deposit/rentType/layout/images/status/viewCount/publishTime/createdAt；
+ * communityName/houseLocation 由服务层组装。接口设计.md 9.12.1.1 的
+ * houseAddress/depositAmount/availableDate/contactPerson/contactPhone 均为漂移命名，
+ * 无消费方后已从类型删除。
+ */
+export interface IHousing {
+  occupancy?: string
+  applicationId?: number | null
+  leaseId?: number | null
+  id: number
+  communityId: number
+  communityName: string
+  houseId: number
+  /** 房屋位置（服务层组装「楼栋+单元+房号」，如「1 号楼1 单元102」） */
+  houseLocation: string
+  title: string
+  description: string
+  monthlyRent: number
+  /** 押金，未填为 null（接口文档 depositAmount 为漂移命名） */
+  deposit: number | null
+  /** 租售类型（V9 起后端真实返回，默认 RENT） */
+  rentType: HousingRentType
+  /** 户型（V9 起后端真实返回，冗余自 house.layout 的自由文本，未填为 null） */
+  layout: string | null
+  images: string[]
+  status: HousingStatus
+  viewCount: number
+  /** 发布时间（创建即发布） */
+  publishTime: string
+  createdAt: string
+  /** 幽灵字段：后端 HousingVO 不返回 tags；游客/居民端列表与详情仍读取，使用处需空值防御 */
+  tags?: string[]
+  /** 幽灵字段：后端 HousingVO 不返回 contactPhone；游客/居民端详情仍读取，保留原因同 layout */
+  contactPhone: string | null
+}
+
+/**
+ * 创建/更新房源请求（2026-09-12 对齐后端 CreateHousingDTO：houseId/title/description/monthlyRent/deposit/images）。
+ * - 押金字段为 deposit：原 depositAmount 后端不识别，押金一直被静默丢弃，收口后可正常保存；
+ * - communityId 由后端从 houseId 推导，不接收（前端级联选择仅作定位房屋的本地状态）；
+ * - images 为逗号分隔 URL 单字符串（后端按 String 存储并以逗号拆分返回）；
+ * - availableDate/contactPerson/contactPhone/tags 后端无对应字段，已删。
+ */
+export interface HousingSaveDTO {
+  createTimeslots?: boolean
+  timeslotMode?: 'DEFAULT' | 'CUSTOM'
+  timeslots?: Array<{dayOfWeek:number;startTime:string;endTime:string}>
+  houseId: number
+  title: string
+  description: string
+  monthlyRent: number
+  deposit?: number
+  /** 历史兼容字段，后端已停写；真实图片由房屋相册管理。 */
+  images?: string
+  rentType?: HousingRentType
+}
+
+/** 房源列表查询参数（接口设计.md 9.12.1.5；V9 增 layout/rentType，R53） */
+export interface HousingListQuery extends PageQuery {
+  communityId?: number
+  status?: HousingStatus
+  minRent?: number
+  maxRent?: number
+  keyword?: string
+  /** 户型精确匹配（自由文本，如「2室1厅1卫」） */
+  layout?: string
+  /** 租售类型（后端白名单校验，非法值 400） */
+  rentType?: HousingRentType
+}
+
+/** 更新房源状态请求（接口设计.md 9.12.1.6 请求体） */
+export interface HousingStatusUpdateDTO {
+  status: HousingStatus
+  remark?: string
+}
+
+/**
+ * 看房预约单（2026-09-12 以后端 ViewingAppointmentVO.java 核对收口）。
+ * 接口设计.md 9.12.2.1 的 visitorPhone/residentId 为历史漂移命名：
+ * visitorPhone→contactPhone、residentId→userId 已收口；游客预约路径已退役，历史游客字段仅作兼容展示。
+ */
+export interface IViewingAppointment {
+  id: number
+  /** 预约人用户ID（新预约必有；历史游客预约可能为 null） */
+  userId: number | null
+  housingId: number
+  housingTitle: string
+  communityId: number
+  appointmentDate: string
+  startTime: string
+  endTime: string
+  /** 居民实名；历史游客预约可能来自存量字段 */
+  visitorName?: string | null
+  /** 联系电话；历史游客预约可能为空 */
+  contactPhone?: string | null
+  status: ViewingAppointmentStatus
+  remark: string | null
+  createdAt: string
+  /** R63 看房群聊关联会话（游客预约为空；居民预约创建时建立） */
+  conversationId?: number | null
+  /** 带看人（R59，v1.3 新增；未分配为 null，后端 VO 补齐后点亮） */
+  assigneeId?: number | null
+  assigneeName?: string | null
+  /** 所属租约（R69/V20）：租约群聊内发起的看房预约带此标识，房源页发起的为空 */
+  leaseId?: number | null
+}
+
+/** 带看会话消息（R59，v1.3；后端 ViewingMessageVO，会话参与者可读写） */
+export interface IViewingMessage {
+  messageType?: 'TEXT' | 'IMAGE'
+  image?: import('@/common/conversation/types/chat').ChatImage | null
+  id: number
+  appointmentId: number
+  senderId: number
+  senderName: string
+  content: string
+  createdAt: string
+}
+
+/** 带看人分配请求（R59；PATCH /viewing-appointments/{id}/assign，管理端） */
+export interface ViewingAppointmentAssignDTO {
+  assigneeId: number
+}
+
+/** 带看人候选选项（R59；最小暴露面仅 ID/姓名/角色） */
+export interface IViewingAssigneeOption {
+  id: number
+  realName: string
+  role: 'STAFF' | 'ADMIN'
+}
+
+/** 创建看房预约请求（接口设计.md 9.12.2.1，仅 RESIDENT） */
+export interface ViewingAppointmentCreateDTO {
+  /** 后端 CreateViewingAppointmentDTO：日期+起止时间直传 */
+  housingId: number
+  appointmentDate: string
+  startTime: string
+  endTime: string
+  /** 可选；为空时服务端从居民档案取手机号 */
+  contactPhone?: string
+  remark?: string
+}
+
+/** 看房预约操作请求体（后端 ReservationActionDTO：确认/完成/取消/违约四端点共用，reason 必填。
+ * 接口设计.md 9.12.2.4/9.12.2.5 的 remark 选填体为漂移契约，2026-09-12 收口） */
+export interface ViewingAppointmentReasonDTO {
+  reason: string
+}
+
+/** 看房预约列表查询参数（接口设计.md 9.12.2.3；leaseId 为 R69 新增按租约过滤） */
+export interface ViewingAppointmentListQuery extends PageQuery {
+  status?: ViewingAppointmentStatus
+  housingId?: number
+  startDate?: string
+  endDate?: string
+  /** 所属租约（R69/V20：租约详情查其关联看房记录） */
+  leaseId?: number
+}
+
+/** 房源可预约看房时段（接口设计.md 9.12.2.8 响应 data 元素） */
+export interface IAvailableViewingTimeslot {
+  timeslotId: number
+  date: string
+  startTime: string
+  endTime: string
+  maxBookings: number
+  currentBookings: number
+  status: HousingTimeslotStatus
+}
+
+/** 可预约看房时段查询参数（接口设计.md 9.12.2.8，ISO 8601 日期） */
+export interface AvailableViewingTimeslotQuery {
+  startDate: string
+  endDate: string
+}
+
+/** 房源看房时段（接口设计.md 9.12.3.1 响应 data） */
+/** 房源时段（后端 HousingTimeslotVO：周循环模板 dayOfWeek+isAvailable，接口文档的按日期时段为漂移模型） */
+export interface IHousingTimeslot {
+  id: number
+  housingId: number
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  isAvailable: number
+  createdAt: string
+  updatedAt: string
+}
+
+/** 创建/更新房源时段请求（后端 CreateHousingTimeslotDTO：周模板） */
+export interface HousingTimeslotSaveDTO {
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  isAvailable?: number
+}
+
+/** 房源时段列表查询参数（接口设计.md 9.12.3.4） */
+export interface HousingTimeslotListQuery extends PageQuery {
+  startDate?: string
+  endDate?: string
+  status?: HousingTimeslotStatus
+}
+
+export interface HousingBrief {
+  occupancy?: string
+  applicationId?: number | null
+  leaseId?: number | null
+  id: number
+  title: string
+  status: HousingStatus
+  monthlyRent: number
+  deposit: number | null
+  rentType: HousingRentType
+  coverImage: string | null
+}
+
+export interface HouseManageItem {
+  coverImage?: string | null
+  businessCode?: string
+  communityCode?: string
+  buildingCode?: string
+  unitCode?: string
+  houseId: number
+  communityId: number
+  communityName: string
+  buildingId: number | null
+  buildingName: string | null
+  unitId: number | null
+  unitName: string | null
+  houseNumber: string
+  floor: number
+  area: number | null
+  layout: string | null
+  houseStatus: string
+  /** null=未挂牌 */
+  housing: HousingBrief | null
+}

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
+import { HOUSE_PHOTO_EMPTY } from '@/common/community/utils/housePhoto'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getHousingDetail } from '@/api/housing'
-import { getCommunity } from '@/api/community'
-import { createResidenceApplication } from '@/api/resident'
-import { APPLICATION_PENDING_EXISTS } from '@/constants/apiCodes'
-import { ApiError } from '@/utils/request'
-import type { IHousing } from '@/types/modules/housing'
-import { housingRentTypeLabels } from '@/types/modules/housing'
-import type { RelationType } from '@/types/modules/resident'
-import { relationTypeLabels } from '@/types/modules/resident'
+import { getHousingDetail } from '@/common/housing/api/housing'
+import { getCommunity } from '@/common/community/api/community'
+import { createResidenceApplication } from '@/common/resident/api/resident'
+import { APPLICATION_PENDING_EXISTS } from '@/common/web/constants/apiCodes'
+import { ApiError } from '@/common/web/utils/request'
+import type { IHousing } from '@/common/housing/types/housing'
+import { housingRentTypeLabels } from '@/common/housing/types/housing'
+import type { RelationType } from '@/common/resident/types/resident'
+import { relationTypeLabels } from '@/common/resident/types/resident'
 
 /**
  * 申请租住（R62 补：居民端此前缺少直接的租住申请入口；R62 补 v2：社区级自动通过）。

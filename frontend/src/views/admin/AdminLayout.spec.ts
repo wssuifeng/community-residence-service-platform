@@ -5,8 +5,8 @@ import AdminLayout from './AdminLayout.vue'
 
 const state = vi.hoisted(() => ({ tablet: null as ReturnType<typeof ref<boolean>> | null, route: null as { path: string; fullPath: string; meta: { title: string } } | null }))
 vi.mock('vue-router', () => ({ useRoute: () => state.route }))
-vi.mock('@/store/user', () => ({ useUserStore: () => ({ user: { realName: '管理员' } }) }))
-vi.mock('@/composables/useResponsive', () => ({ useResponsive: () => ({ isTablet: state.tablet }) }))
+vi.mock('@/common/auth/store/user', () => ({ useUserStore: () => ({ user: { realName: '管理员' } }) }))
+vi.mock('@/common/web/composables/useResponsive', () => ({ useResponsive: () => ({ isTablet: state.tablet }) }))
 
 function page() {
   return mount(AdminLayout, {

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { HOUSE_PHOTO_EMPTY } from '@/utils/housePhoto'
+import { HOUSE_PHOTO_EMPTY } from '@/common/community/utils/housePhoto'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import { useUserStore } from '@/store/user'
-import { getHousingDetail, recordHousingView } from '@/api/housing'
-import type { IHousing, HousingStatus } from '@/types/modules/housing'
-import { housingStatusLabels } from '@/types/modules/housing'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import { useUserStore } from '@/common/auth/store/user'
+import { getHousingDetail, recordHousingView } from '@/common/housing/api/housing'
+import type { IHousing, HousingStatus } from '@/common/housing/types/housing'
+import { housingStatusLabels } from '@/common/housing/types/housing'
 
 /**
  * 房源详情（居民端）：视觉与游客端一致（16:9 主图 + 缩略图 + 信息面板 + 描述/配套两栏）；

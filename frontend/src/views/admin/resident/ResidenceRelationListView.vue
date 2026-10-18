@@ -13,17 +13,17 @@ import {
   getResidenceDependents,
   getResidentResidenceList,
   moveOutResidenceRelation
-} from '@/api/resident'
+} from '@/common/resident/api/resident'
 import type {
   IResident,
   IResidenceRelation,
   ResidenceRelationStatus
-} from '@/types/modules/resident'
-import { residenceRelationStatusLabels } from '@/types/modules/resident'
-import { formatDate, todayISO } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
-import Pagination from '@/components/common/Pagination.vue'
+} from '@/common/resident/types/resident'
+import { residenceRelationStatusLabels } from '@/common/resident/types/resident'
+import { formatDate, todayISO } from '@/common/web/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 
 const props = defineProps<{ presetResidentId?: number }>()
 

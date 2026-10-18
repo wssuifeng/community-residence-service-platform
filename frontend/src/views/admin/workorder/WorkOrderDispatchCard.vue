@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import type { IWorkOrder, WorkOrderStatus } from '@/types/modules/workorder'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import type { IWorkOrder, WorkOrderStatus } from '@/common/workorder/types/workorder'
 import {
   dispatchFlagColors,
   dispatchFlagLabels,
   workOrderPriorityLabels,
   workOrderStatusLabels
-} from '@/types/modules/workorder'
+} from '@/common/workorder/types/workorder'
 import { canAssignOrder, formatWaited, isReassignOrder } from './dispatch'
-import { formatDateTime } from '@/utils/date'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 调度工单卡（看板列与列表视图共用一张卡，避免两套展示口径）。

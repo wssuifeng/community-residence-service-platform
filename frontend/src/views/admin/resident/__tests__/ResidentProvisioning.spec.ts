@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ElementPlus from 'element-plus'
 import ResidentAdminCreateDialog from '../ResidentAdminCreateDialog.vue'
 import ResidentHouseSelector from '../ResidentHouseSelector.vue'
-import { adminCreateResident } from '@/api/resident'
-import { getCommunityList, getBuildingList, getUnitList, getHouseList } from '@/api/community'
-vi.mock('@/api/resident', () => ({ adminCreateResident: vi.fn() }))
-vi.mock('@/api/community', () => ({ getCommunityList: vi.fn(), getBuildingList: vi.fn(), getUnitList: vi.fn(), getHouseList: vi.fn() }))
+import { adminCreateResident } from '@/common/resident/api/resident'
+import { getCommunityList, getBuildingList, getUnitList, getHouseList } from '@/common/community/api/community'
+vi.mock('@/common/resident/api/resident', () => ({ adminCreateResident: vi.fn() }))
+vi.mock('@/common/community/api/community', () => ({ getCommunityList: vi.fn(), getBuildingList: vi.fn(), getUnitList: vi.fn(), getHouseList: vi.fn() }))
 const page = (records: any[]) => ({ records, total: records.length, page: 1, size: 100 })
 const dialog = { template: '<div><slot /><slot name="footer" /></div>' }
 async function open() {

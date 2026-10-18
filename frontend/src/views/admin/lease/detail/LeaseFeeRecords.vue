@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { IDepositRefund, ILeasePayment } from '@/types/modules/lease'
-import { depositRefundStatusLabels, leasePaymentTypeLabels } from '@/types/modules/lease'
-import StatusTag from '@/components/common/StatusTag.vue'
-import { formatDateTime } from '@/utils/date'
+import type { IDepositRefund, ILeasePayment } from '@/common/lease/types/lease'
+import { depositRefundStatusLabels, leasePaymentTypeLabels } from '@/common/lease/types/lease'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import { formatDateTime } from '@/common/web/utils/date'
 import { moneyText } from './display'
 defineProps<{ depositRefunds: IDepositRefund[]; payments: ILeasePayment[]; canRefundDeposit: boolean; refundDisabledReason: string; loading: boolean; error: string }>()
 const emit = defineEmits<{ refund: []; retry: [] }>()

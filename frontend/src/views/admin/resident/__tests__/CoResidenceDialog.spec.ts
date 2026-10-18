@@ -2,8 +2,8 @@ import { mount,flushPromises } from '@vue/test-utils'
 import { describe,it,expect,vi,beforeEach } from 'vitest'
 import ElementPlus from 'element-plus'
 import Dialog from '../ResidentCoResidenceDialog.vue'
-import { findCoResidentCandidates,getResidenceDependents,createResidenceRelation,adminCreateResident } from '@/api/resident'
-vi.mock('@/api/resident',()=>({findCoResidentCandidates:vi.fn(),getResidenceDependents:vi.fn(),createResidenceRelation:vi.fn(),adminCreateResident:vi.fn()}))
+import { findCoResidentCandidates,getResidenceDependents,createResidenceRelation,adminCreateResident } from '@/common/resident/api/resident'
+vi.mock('@/common/resident/api/resident',()=>({findCoResidentCandidates:vi.fn(),getResidenceDependents:vi.fn(),createResidenceRelation:vi.fn(),adminCreateResident:vi.fn()}))
 const anchor={id:10,residentId:1,residentName:'主住户',communityId:5,houseId:100,houseLocation:'1栋1单元101',relationType:'OWNER',moveInDate:'2026-10-01',moveOutDate:null,status:'ACTIVE',createdAt:''} as any
 async function open(){const w=mount(Dialog,{props:{modelValue:false,anchor},global:{plugins:[ElementPlus],stubs:{ElDialog:{template:'<div><slot/><slot name="footer"/></div>'}}}});await w.setProps({modelValue:true});await flushPromises();return w}
 function save(w:ReturnType<typeof mount>){return w.findAll('button').find(b=>b.text()==='登记同住关系')!}

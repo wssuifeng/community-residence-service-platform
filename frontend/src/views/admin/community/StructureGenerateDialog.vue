@@ -2,10 +2,10 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { batchGenerateStructure } from '@/api/community'
-import type { ICommunity, IStructureBatchGenerateResult } from '@/types/modules/community'
-import { houseStatusLabels } from '@/types/modules/community'
-import type { HouseStatus } from '@/types/modules/community'
+import { batchGenerateStructure } from '@/common/community/api/community'
+import type { ICommunity, IStructureBatchGenerateResult } from '@/common/community/types/community'
+import { houseStatusLabels } from '@/common/community/types/community'
+import type { HouseStatus } from '@/common/community/types/community'
 import { SKIP_SYNTAX_HINT, planHouseRows } from '@/views/admin/community/structureBatch'
 
 /**

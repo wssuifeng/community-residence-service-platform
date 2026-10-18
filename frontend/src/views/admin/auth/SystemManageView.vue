@@ -5,7 +5,7 @@ import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import SysUserListView from './SysUserListView.vue'
 import GlobalConfigView from './GlobalConfigView.vue'
 import OperationLogListView from './OperationLogListView.vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 系统管理容器（对照 design-mockups/admin/11-系统管理，任务 12）：

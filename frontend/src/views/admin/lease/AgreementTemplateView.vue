@@ -3,25 +3,25 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
 import {
   createAgreementTemplate,
   deleteAgreementTemplate,
   listAgreementTemplates,
   updateAgreementTemplate,
   updateAgreementTemplateStatus
-} from '@/api/agreement'
-import { getCommunityList } from '@/api/community'
-import { uploadFile } from '@/api/upload'
+} from '@/common/agreement/api/agreement'
+import { getCommunityList } from '@/common/community/api/community'
+import { uploadFile } from '@/common/upload/api/upload'
 import type {
   AgreementTemplateStatus,
   IAgreementTemplate,
   IAgreementTemplateDTO
-} from '@/types/modules/agreement'
-import { useUserStore } from '@/store/user'
-import { formatDateTime } from '@/utils/date'
+} from '@/common/agreement/types/agreement'
+import { useUserStore } from '@/common/auth/store/user'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 协议模板管理（R64 轻量版）：模板列表 + 新建/编辑（正文 + 变量 + 附件）+ 设默认/启停/删除。

@@ -2,9 +2,9 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ElementPlus from 'element-plus'
 import CommunityEditDialog from '../CommunityEditDialog.vue'
-import { getResponsibleAdmins } from '@/api/community'
+import { getResponsibleAdmins } from '@/common/community/api/community'
 
-vi.mock('@/api/community', () => ({
+vi.mock('@/common/community/api/community', () => ({
   getResponsibleAdmins: vi.fn(), createCommunity: vi.fn(), updateCommunity: vi.fn()
 }))
 const community = { id: 1, name: '测试社区', address: '测试地址', responsibleAdminId: 2,

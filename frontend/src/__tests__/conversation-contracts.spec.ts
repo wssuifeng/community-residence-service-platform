@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { actAs, getFakeBackend, installFakeBackend } from '@/test/fakeBackend'
-import { openDirectConversation, ensureLeaseGroupConversation, getConversation } from '@/api/conversation'
+import { openDirectConversation, ensureLeaseGroupConversation, getConversation } from '@/common/conversation/api/conversation'
 
 /**
  * 后端新交付契约的前端接入（第一层：接口级）——
  * ①`POST /conversations/direct` 放开 ADMIN/SUPER_ADMIN + `residentId`（幂等 / 缺居民 400 / 跨社区 403）
  * ②`POST /conversations/lease-groups`（幂等建/取 LEASE_GROUP 并回写 lease_record.conversation_id）
  */
-vi.mock('@/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
-vi.mock('@/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
+vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
+vi.mock('@/common/lease/api/lease', async () => (await import('@/test/fakeBackend')).fakeApi('lease'))
 
 const backend = () => getFakeBackend()
 

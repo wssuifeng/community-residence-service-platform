@@ -9,12 +9,12 @@ import { installFakeBackend } from '@/test/fakeBackend'
 /**
  * 弹窗蒙层点击不关闭（`docs/30_系统设计/组件库设计规范.md` §6.3.2）：
  * 长表单（760px + 正文 textarea）误点蒙层就关窗会丢输入。收口方式见
- * `src/utils/elementPlusDefaults.ts`（全局默认 `closeOnClickModal: false`），
+ * `src/common/web/utils/elementPlusDefaults.ts`（全局默认 `closeOnClickModal: false`），
  * 由 `src/main.ts` 与 `src/test/setup.ts` 共同应用。
  */
-vi.mock('@/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
-vi.mock('@/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
-vi.mock('@/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
+vi.mock('@/common/agreement/api/agreement', async () => (await import('@/test/fakeBackend')).fakeApi('agreement'))
+vi.mock('@/common/community/api/community', async () => (await import('@/test/fakeBackend')).fakeApi('community'))
+vi.mock('@/common/upload/api/upload', async () => (await import('@/test/fakeBackend')).fakeApi('upload'))
 
 function dialogDefault(): unknown {
   const props = ElDialog.props as unknown as Record<string, { default?: unknown }>

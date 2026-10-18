@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
-import ConversationEntry from '@/components/conversation/ConversationEntry.vue'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
+import ConversationEntry from '@/common/conversation/components/ConversationEntry.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -10,21 +10,21 @@ import {
   getFeedbackDetail,
   listFeedbackAttachments,
   listFeedbacks,
-} from '@/api/feedback'
+} from '@/common/feedback/api/feedback'
 import type {
   FeedbackCategory,
   FeedbackStatus,
   IFeedback,
   IFeedbackAttachment,
-} from '@/types/modules/feedback'
+} from '@/common/feedback/types/feedback'
 import {
   feedbackCategoryLabels,
   feedbackStatusLabels
-} from '@/types/modules/feedback'
-import { formatDate, formatDateTime } from '@/utils/date'
+} from '@/common/feedback/types/feedback'
+import { formatDate, formatDateTime } from '@/common/web/utils/date'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 
 /**
  * 反馈管理（对照设计稿 design-mockups/admin/07-反馈管理.png，主从聊天双栏）：

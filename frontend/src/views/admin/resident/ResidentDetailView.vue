@@ -7,17 +7,17 @@ import {
   getResident,
   getResidentResidenceList,
   updateResidentStatus
-} from '@/api/resident'
+} from '@/common/resident/api/resident'
 import type {
   IResident,
   IResidenceRelation,
   ResidenceRelationStatus,
   ResidentStatus
-} from '@/types/modules/resident'
-import { residentStatusLabels, residenceRelationStatusLabels } from '@/types/modules/resident'
-import { formatDate, formatDateTime } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
+} from '@/common/resident/types/resident'
+import { residentStatusLabels, residenceRelationStatusLabels } from '@/common/resident/types/resident'
+import { formatDate, formatDateTime } from '@/common/web/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 
 const route = useRoute()
 const router = useRouter()

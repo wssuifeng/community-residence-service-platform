@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import LivePanel from '@/components/common/LivePanel.vue'
+import LivePanel from '@/common/web/components/LivePanel.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/common/auth/store/user'
 import { useAdminTodoStore } from '@/store/adminTodo'
 import ResidenceApplicationListView from '@/views/admin/resident/ResidenceApplicationListView.vue'
 import LeaseListView from './LeaseListView.vue'

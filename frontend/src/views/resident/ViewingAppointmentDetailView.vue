@@ -2,13 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import ConversationChat from '@/components/business/ConversationChat.vue'
-import { getConversation } from '@/api/conversation'
-import { getViewingAppointmentDetail, cancelViewingAppointment } from '@/api/housing'
-import type { IViewingAppointment, ViewingAppointmentStatus } from '@/types/modules/housing'
-import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
-import { formatDateTime } from '@/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import ConversationChat from '@/common/conversation/components/ConversationChat.vue'
+import { getConversation } from '@/common/conversation/api/conversation'
+import { getViewingAppointmentDetail, cancelViewingAppointment } from '@/common/housing/api/housing'
+import type { IViewingAppointment, ViewingAppointmentStatus } from '@/common/housing/types/housing'
+import { viewingAppointmentStatusLabels } from '@/common/housing/types/housing'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 看房预约详情（R59 v1.3 → R63 v1.5 群聊化）：预约信息卡 + 看房群聊 + 取消入口。

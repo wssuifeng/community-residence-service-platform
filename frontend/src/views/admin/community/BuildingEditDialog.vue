@@ -7,7 +7,7 @@ import {
   createHousesBatch,
   createUnitsBatch,
   updateBuilding
-} from '@/api/community'
+} from '@/common/community/api/community'
 import type {
   HouseStatus,
   IBatchFailure,
@@ -15,8 +15,8 @@ import type {
   IBuildingDTO,
   ICommunity,
   IHouseDTO
-} from '@/types/modules/community'
-import { houseStatusLabels } from '@/types/modules/community'
+} from '@/common/community/types/community'
+import { houseStatusLabels } from '@/common/community/types/community'
 import { SKIP_SYNTAX_HINT, planHouseRows } from '@/views/admin/community/structureBatch'
 
 /**

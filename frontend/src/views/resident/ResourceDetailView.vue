@@ -2,13 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getResource, getTimeslotList } from '@/api/community'
-import { getMyResidenceRelations } from '@/api/resident'
-import { listAvailableTimeslots } from '@/api/reservation'
-import HorizontalScroller from '@/components/common/HorizontalScroller.vue'
-import type { IPublicResource, IResourceTimeslot, ResourceType } from '@/types/modules/community'
-import type { IAvailableTimeslot } from '@/types/modules/reservation'
-import { resourceTypeLabels } from '@/types/modules/community'
+import { getResource, getTimeslotList } from '@/common/community/api/community'
+import { getMyResidenceRelations } from '@/common/resident/api/resident'
+import { listAvailableTimeslots } from '@/common/reservation/api/reservation'
+import HorizontalScroller from '@/common/web/components/HorizontalScroller.vue'
+import type { IPublicResource, IResourceTimeslot, ResourceType } from '@/common/community/types/community'
+import type { IAvailableTimeslot } from '@/common/reservation/types/reservation'
+import { resourceTypeLabels } from '@/common/community/types/community'
 
 /**
  * 资源详情（居民端三段预约流第二段，视觉对齐房源详情）：

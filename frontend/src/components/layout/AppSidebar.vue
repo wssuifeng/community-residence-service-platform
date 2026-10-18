@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/common/auth/store/user'
 import { useAdminTodoStore } from '@/store/adminTodo'
 
 /**

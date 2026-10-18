@@ -3,13 +3,13 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getResidentList, updateResidentStatus } from '@/api/resident'
-import type { IResident, ResidentStatus } from '@/types/modules/resident'
-import { residentStatusLabels } from '@/types/modules/resident'
-import { formatDateTime } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
-import Pagination from '@/components/common/Pagination.vue'
+import { getResidentList, updateResidentStatus } from '@/common/resident/api/resident'
+import type { IResident, ResidentStatus } from '@/common/resident/types/resident'
+import { residentStatusLabels } from '@/common/resident/types/resident'
+import { formatDateTime } from '@/common/web/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 
 const emit = defineEmits<{ 'go-relations': [residentId: number] }>()
 

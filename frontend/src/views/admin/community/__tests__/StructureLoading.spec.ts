@@ -6,8 +6,8 @@ import ElementPlus from 'element-plus'
 import StructureTreePane from '../StructureTreePane.vue'
 
 const mocks = vi.hoisted(() => ({ communities: vi.fn(), buildings: vi.fn(), units: vi.fn(), houses: vi.fn(), stats: vi.fn() }))
-vi.mock('@/api/community', async (original) => ({ ...await original<object>(), getCommunityList: mocks.communities, getBuildingList: mocks.buildings, getUnitList: mocks.units, getHouseList: mocks.houses }))
-vi.mock('@/api/statistics', () => ({ getDashboardStats: mocks.stats }))
+vi.mock('@/common/community/api/community', async (original) => ({ ...await original<object>(), getCommunityList: mocks.communities, getBuildingList: mocks.buildings, getUnitList: mocks.units, getHouseList: mocks.houses }))
+vi.mock('@/common/statistics/api/statistics', () => ({ getDashboardStats: mocks.stats }))
 const community = { id: 1, name: '大社区', status: 'ACTIVE', address: '测试地址' }
 const page = (records: unknown[], total = records.length, current = 1) => ({ records, total, page: current, size: 100, pages: Math.ceil(total / 100) })
 const building = (id: number) => ({ id, communityId: 1, name: `${id}栋`, floors: 20 })

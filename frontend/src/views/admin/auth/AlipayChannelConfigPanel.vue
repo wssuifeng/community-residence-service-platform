@@ -2,8 +2,8 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { getAlipayChannelConfig, saveAlipayChannelConfig } from '@/api/paymentChannelConfig'
-import type { IAlipayChannelConfig } from '@/api/paymentChannelConfig'
+import { getAlipayChannelConfig, saveAlipayChannelConfig } from '@/common/payment/api/paymentChannelConfig'
+import type { IAlipayChannelConfig } from '@/common/payment/api/paymentChannelConfig'
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)

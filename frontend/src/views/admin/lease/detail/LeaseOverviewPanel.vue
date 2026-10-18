@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ILeaseRecord } from '@/types/modules/lease'
-import { depositStatusLabels } from '@/types/modules/lease'
-import { formatDate, formatDateTime } from '@/utils/date'
+import type { ILeaseRecord } from '@/common/lease/types/lease'
+import { depositStatusLabels } from '@/common/lease/types/lease'
+import { formatDate, formatDateTime } from '@/common/web/utils/date'
 import { leaseNo, moneyText } from './display'
 const props = defineProps<{ lease: ILeaseRecord; editable: boolean; editDisabledReason: string; remainText: string; remainTone: string }>()
 const emit = defineEmits<{ edit: [] }>()

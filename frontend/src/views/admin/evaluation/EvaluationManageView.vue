@@ -4,12 +4,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import AdminPageHeader from '@/views/admin/AdminPageHeader.vue'
 import AdminStatCard from '@/components/admin/AdminStatCard.vue'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 import FollowupDrawer from './FollowupDrawer.vue'
-import { getEvaluationStatistics, listEvaluationFollowups, listEvaluations, listUnsatisfiedEvaluations } from '@/api/evaluation'
-import type { IEvaluation, IEvaluationStatistics } from '@/types/modules/evaluation'
-import { formatDate } from '@/utils/date'
+import { getEvaluationStatistics, listEvaluationFollowups, listEvaluations, listUnsatisfiedEvaluations } from '@/common/evaluation/api/evaluation'
+import type { IEvaluation, IEvaluationStatistics } from '@/common/evaluation/types/evaluation'
+import { formatDate } from '@/common/web/utils/date'
 
 /**
  * 评价管理容器：对照 design-mockups/admin/10-评价管理。

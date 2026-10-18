@@ -2,7 +2,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { describe, it, expect, vi } from 'vitest'
 import ElementPlus from 'element-plus'
 import HouseEditDialog from '../HouseEditDialog.vue'
-vi.mock('@/api/community', () => ({ createHouse: vi.fn(), updateHouse: vi.fn() }))
+vi.mock('@/common/community/api/community', () => ({ createHouse: vi.fn(), updateHouse: vi.fn() }))
 async function open(house: any) {
   const wrapper = mount(HouseEditDialog, { props: { modelValue: false, house,
     unitContext: { buildingName: '9层楼', unitId: 1, unitName: '1单元', floors: 9 } },

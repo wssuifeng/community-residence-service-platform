@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useLiveRefresh } from '@/composables/useLiveRefresh'
+import { useLiveRefresh } from '@/common/web/composables/useLiveRefresh'
 /** 入住申请（「租住与房源」Hub 的入住申请 Tab，批次 g 由「居民」页迁入）：
  *  状态筛选 + 通过（租客只生成待签约租约）/ 驳回（接口设计.md 9.2.2.3 ~ 9.2.2.5） */
-import { getCommunity } from '@/api/community'
-import { contractEnd } from '@/utils/leaseTerms'
+import { getCommunity } from '@/common/community/api/community'
+import { contractEnd } from '@/common/lease/utils/leaseTerms'
 import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -14,16 +14,16 @@ import {
   getResidenceApplicationList,
   getResidenceApplication,
   rejectResidenceApplication
-} from '@/api/resident'
+} from '@/common/resident/api/resident'
 import type {
   IResidenceApplication,
   ResidenceApplicationStatus
-} from '@/types/modules/resident'
-import { relationTypeLabels, residenceApplicationStatusLabels } from '@/types/modules/resident'
-import { formatDateTime, todayISO } from '@/utils/date'
-import StatusTag from '@/components/common/StatusTag.vue'
-import FilterPanel from '@/components/common/FilterPanel.vue'
-import Pagination from '@/components/common/Pagination.vue'
+} from '@/common/resident/types/resident'
+import { relationTypeLabels, residenceApplicationStatusLabels } from '@/common/resident/types/resident'
+import { formatDateTime, todayISO } from '@/common/web/utils/date'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import FilterPanel from '@/common/web/components/FilterPanel.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
 
 const emit = defineEmits<{ reviewed: [] }>()
 const route = useRoute()

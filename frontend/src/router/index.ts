@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw, Router } from 'vue-router'
-import { useUserStore } from '@/store/user'
-import { hasRole } from '@/utils/permission'
-import type { Role } from '@/types/api'
+import { useUserStore } from '@/common/auth/store/user'
+import { hasRole } from '@/common/routing/utils/permission'
+import type { Role } from '@/common/web/types/api'
 import residentRoutes from './resident'
 import guestRoutes from './guest'
 import staffRoutes from './staff'
@@ -23,8 +23,8 @@ const routes: RouteRecordRaw[] = [
   ...staffRoutes,
   ...adminRoutes,
   { path: '/', redirect: '/guest/home' },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/NotFoundView.vue'), meta: { title: '页面不存在' } },
-  { path: '/403', name: 'Forbidden', component: () => import('@/views/ForbiddenView.vue'), meta: { title: '无权访问' } }
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/common/web/views/NotFoundView.vue'), meta: { title: '页面不存在' } },
+  { path: '/403', name: 'Forbidden', component: () => import('@/common/web/views/ForbiddenView.vue'), meta: { title: '无权访问' } }
 ]
 
 const router: Router = createRouter({

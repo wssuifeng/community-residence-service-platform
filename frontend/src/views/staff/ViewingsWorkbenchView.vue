@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import StatusTag from '@/components/common/StatusTag.vue'
-import Pagination from '@/components/common/Pagination.vue'
-import ConversationChat from '@/components/business/ConversationChat.vue'
-import { getConversation } from '@/api/conversation'
+import StatusTag from '@/common/web/components/StatusTag.vue'
+import Pagination from '@/common/web/components/Pagination.vue'
+import ConversationChat from '@/common/conversation/components/ConversationChat.vue'
+import { getConversation } from '@/common/conversation/api/conversation'
 import {
   listViewingAppointments,
   completeViewingAppointment
-} from '@/api/housing'
-import type { IViewingAppointment, ViewingAppointmentStatus } from '@/types/modules/housing'
-import { viewingAppointmentStatusLabels } from '@/types/modules/housing'
-import { formatDateTime } from '@/utils/date'
+} from '@/common/housing/api/housing'
+import type { IViewingAppointment, ViewingAppointmentStatus } from '@/common/housing/types/housing'
+import { viewingAppointmentStatusLabels } from '@/common/housing/types/housing'
+import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 我的带看工作台（R59，需求规格 v1.3）：服务人员视角被分配为带看人的看房预约。
