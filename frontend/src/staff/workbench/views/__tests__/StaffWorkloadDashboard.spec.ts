@@ -7,7 +7,7 @@ import DashboardView from '@/staff/workbench/views/DashboardView.vue'
 
 const mocks = vi.hoisted(() => ({ workload: vi.fn(), orders: vi.fn(), notices: vi.fn() }))
 vi.mock('@/common/statistics/api/statistics', () => ({ getStaffWorkloadStats: mocks.workload }))
-vi.mock('@/common/workorder/api/workorder', () => ({ listWorkOrders: mocks.orders }))
+vi.mock('@/staff/workbench/api/workbench', () => ({ getStaffWorkbenchSummary: mocks.orders }))
 vi.mock('@/common/messaging/api/notification', () => ({ listNotifications: mocks.notices }))
 vi.mock('@/common/statistics/components/EChart.vue', () => ({ default: { name: 'EChartStub', props: ['option', 'height'], template: '<div data-testid="chart" />' } }))
 
@@ -20,7 +20,7 @@ async function open() {
 }
 beforeEach(() => {
   mocks.workload.mockResolvedValue(stats)
-  mocks.orders.mockResolvedValue({ records: [], total: 0 })
+  mocks.orders.mockResolvedValue({ todoCount: 0, doingCount: 0, completedCount: 0, urgentCount: 0, todoOrders: [] })
   mocks.notices.mockResolvedValue({ records: [], total: 0 })
 })
 afterEach(() => vi.resetAllMocks())

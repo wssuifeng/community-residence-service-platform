@@ -56,7 +56,11 @@ class ControllerMappingCompatibilityTest {
             Files.write(BASELINE, rows);
         }
         List<String> expected = Files.readAllLines(BASELINE);
-        assertThat(new ArrayList<>(rows)).containsExactlyElementsOf(expected);
+        assertThat(rows).containsAll(expected);
+        var additions = new TreeSet<>(rows); additions.removeAll(expected);
+        assertThat(additions).hasSize(1);
+        assertThat(additions.first()).startsWith("{GET [/api/v1/staff/workbench/summary]}")
+                .contains("hasRole('STAFF')");
         assertThat(registry.getHandlerMethods()).hasSize(rows.size());
     }
 
