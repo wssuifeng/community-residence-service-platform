@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-19",
+  "dateBasis": "client Asia/Shanghai date",
+  "scope": "document status synchronization only",
+  "sourceCommit": "cf761e8a8da242640b79ed47df18032685b37b5c",
+  "businessSourceBaseline": "def6f90",
+  "backendRuntimeSource": "57f26e9",
+  "runtimeFactsLastObserved": "2026-10-18 cz; not rechecked during this document update",
+  "checks": {
+    "allChangesAreDocumentation": true,
+    "allSevenPhaseStatesPreserved": true,
+    "currentPointerRemains50": true,
+    "frozenStagesAndArchiveUnchanged": true,
+    "historicalEvidenceSnapshotsUnchanged": true,
+    "READMEStartupMigrationsMatchSource43": true,
+    "definitionVersionHistoryConsistent": true,
+    "closeoutCommitContainsNoNewBusinessSource": true,
+    "manualEntryConfirmationClosed": true,
+    "roadmapNoLongerWaitsForEntryConfirmation": true,
+    "reportsReferToActualCloseoutCommit": true,
+    "auditComplete": true,
+    "noNewAuditFindings": true,
+    "gitDiffCheckPassed": true
+  },
+  "globalAuditPassed": false,
+  "globalAuditComplete": true,
+  "currentFindingCount": 1446,
+  "baselineFindingCount": 1446,
+  "newFindingCount": 0,
+  "newFindings": [],
+  "baselineFindingTypes": {
+    "acceptance-missing": 3,
+    "status-symbol-out-of-scope": 1199,
+    "broken-link": 243,
+    "dependency-mismatch": 1
+  },
+  "changedDocuments": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "30153773c046d851c5f4673b7ee155b2660f12ea7dde7c3820c0bf457b03b3b7"
+    },
+    {
+      "path": "README.md",
+      "sha256": "39d881def4d40b041297cc45b8eb25de4e7292f2a27be32401b7a842cb966679"
+    },
+    {
+      "path": "docs/00_总控.md",
+      "sha256": "3194ca67638a61c0e029d50fa81ac71a911f72ca0fc9d3c7eea71c03a8b9493f"
+    },
+    {
+      "path": "docs/50_系统测试/09_测试评估与报告.md",
+      "sha256": "631e618024f962db2f13295e07eedd390abf7d27a0f23506c2fa125e0d90ce07"
+    },
+    {
+      "path": "docs/50_系统测试/10_测试总结与归档.md",
+      "sha256": "6040cf38a3b4f743c94b4607d0810a8fda5b1e3afb2cc43c5e58f34a8a289a76"
+    },
+    {
+      "path": "docs/50_系统测试/11_测试执行入口.md",
+      "sha256": "a3f7ad6fde5e1f1dd46564cc83a5f23c33c05c9355930509c334d45152676837"
+    },
+    {
+      "path": "docs/50_系统测试/12_用户手测清单.md",
+      "sha256": "7ac6d4ced06936a27fd67d94aac3df5cb9dab012942c581c9258a4aee72d7bda"
+    },
+    {
+      "path": "docs/50_系统测试/13_核心业务流程三端联动手测用例.md",
+      "sha256": "d2645fdda61a9124c933990eb0f9d5d3f9c83509a792843246d257bf8267a030"
+    },
+    {
+      "path": "docs/50_系统测试/25_本轮修复定向回归手测.md",
+      "sha256": "2ec9fa30580933e0f3c5ab149eff92973a5a45e4c0dc7145c0cef7cd592ccd51"
+    },
+    {
+      "path": "docs/50_系统测试/_中控.md",
+      "sha256": "01dcfe2710d25a73b894c71c8f4e19b102a6ee1328f07f69fe67bdd7089e18a2"
+    },
+    {
+      "path": "docs/90_全局/长任务路线图.md",
+      "sha256": "89fada5d4fc73be88760cdc393d1f16802d8269728d1fec5c55963a9fb779c1a"
+    }
+  ],
+  "historicalEvidenceEdited": [],
+  "businessTestsRun": 0,
+  "financialTestsRun": 0,
+  "databaseQueriesRun": 0,
+  "browserInteractions": 0,
+  "serviceOperations": 0,
+  "networkRequests": 0,
+  "phaseExitApproved": false,
+  "pushPerformed": false
+}
