@@ -2,20 +2,13 @@ package com.community.residence.common.community.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.web.result.PageVO;
-import com.community.residence.common.community.dto.CreateTimeSlotDTO;
 import com.community.residence.common.community.service.ResourceTimeslotService;
 import com.community.residence.common.community.vo.TimeSlotVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,37 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ResourceTimeslotController {
 
     private final ResourceTimeslotService timeslotService;
-
-    @Operation(summary = "创建资源时段", description = "按周循环模板，同资源同星期不允许重叠")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PostMapping("/resources/{resourceId}/timeslots")
-    public ApiResponse<TimeSlotVO> create(@PathVariable Long resourceId,
-                                          @RequestBody @Valid CreateTimeSlotDTO dto) {
-        return ApiResponse.success(timeslotService.create(resourceId, dto));
-    }
-
-    @Operation(summary = "为多个星期批量配置周循环时段", description = "完全相同跳过，部分重叠整批拒绝")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PostMapping("/resources/{resourceId}/timeslots/batch")
-    public ApiResponse<com.community.residence.common.community.vo.BatchTimeslotVO> createBatch(@PathVariable Long resourceId,
-            @RequestBody @Valid com.community.residence.common.community.dto.BatchCreateTimeslotDTO dto) {
-        return ApiResponse.success(timeslotService.createBatch(resourceId, dto));
-    }
-
-    @Operation(summary = "更新资源时段")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PutMapping("/timeslots/{id}")
-    public ApiResponse<TimeSlotVO> update(@PathVariable Long id, @RequestBody @Valid CreateTimeSlotDTO dto) {
-        return ApiResponse.success(timeslotService.update(id, dto));
-    }
-
-    @Operation(summary = "删除资源时段")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @DeleteMapping("/timeslots/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
-        timeslotService.delete(id);
-        return ApiResponse.success();
-    }
 
     @Operation(summary = "资源时段列表（分页）")
     @GetMapping("/resources/{resourceId}/timeslots")

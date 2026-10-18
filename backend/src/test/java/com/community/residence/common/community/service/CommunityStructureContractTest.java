@@ -39,7 +39,7 @@ class CommunityStructureContractTest {
   }
  }
  @Test void layoutRouteUsesTheActualControllerPrefix() throws Exception {
-  var type=com.community.residence.common.community.controller.HouseController.class;
+  var type=com.community.residence.admin.community.controller.AdminHouseController.class;
   var method=type.getDeclaredMethod("updateLayout",BatchHouseLayoutDTO.class);
   String route=type.getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class).value()[0]+method.getAnnotation(org.springframework.web.bind.annotation.PatchMapping.class).value()[0];
   assertThat(route).isEqualTo("/api/v1/houses/layout");
