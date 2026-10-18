@@ -1,0 +1,512 @@
+[
+  {
+    "id": "R1",
+    "testRequirement": "TR-C1-01, TR-C1-02, TR-C1-03, TR-C1-04, TR-C1-11",
+    "testCase": "TC-C1-001, TC-C1-002, TC-C1-003, TC-C1-004, TC-C1-005, TC-C1-006, TC-C1-007, TC-C1-008, TC-C1-009, TC-C1-024, TC-C1-025, TC-C1-026",
+    "recordedResult": "通过（CRUD/停用过滤/级联删除零残留+幂等/管理员越全局级 403×3）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R2",
+    "testRequirement": "TR-C1-05, TR-C1-12, TR-C1-13",
+    "testCase": "TC-C1-010, TC-C1-011, TC-C1-027, TC-C1-028",
+    "recordedResult": "通过（CRUD+边界）（2026-09-10 A 轨第一轮）；级联删除（2026-09-14 第三批专项：默认拒/在住保护/空楼直删过，历史关系级联 500=DEF-033）+ 批量创建（全有效行逐行反馈过，坏行整批 400=DEF-032）（r3_batch3 B3-11/12）"
+  },
+  {
+    "id": "R3",
+    "testRequirement": "TR-C1-06, TR-C1-13",
+    "testCase": "TC-C1-012, TC-C1-013, TC-C1-028",
+    "recordedResult": "通过（CRUD；名称长度无上限按实现口径）（2026-09-10 A 轨第一轮）；批量创建同 R2 口径（2026-09-14）"
+  },
+  {
+    "id": "R4",
+    "testRequirement": "TR-C1-07, TR-C1-13",
+    "testCase": "TC-C1-014, TC-C1-015, TC-C1-016, TC-C1-028",
+    "recordedResult": "通过（CRUD+四状态流转+历史留痕；五状态口径差异按实现四状态裁决）（2026-09-10 A 轨第一轮）；批量创建同 R2 口径（2026-09-14）"
+  },
+  {
+    "id": "R5",
+    "testRequirement": "TR-C1-08",
+    "testCase": "TC-C1-017, TC-C1-018",
+    "recordedResult": "通过（资源 CRUD+周模板时段）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R6",
+    "testRequirement": "TR-C1-09, TR-C1-11",
+    "testCase": "TC-C1-019, TC-C1-020, TC-C1-021, TC-C1-022, TC-C1-024, TC-C1-025, TC-C1-026",
+    "recordedResult": "通过（楼栋/单元/房屋 5102~5104+资源 5105 拒；社区级联删除 v1.1）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R7",
+    "testRequirement": "TR-C2-01, TR-C2-02, TR-C2-03",
+    "testCase": "TC-C2-001, TC-C2-002, TC-C2-003, TC-C2-004, TC-C2-005",
+    "recordedResult": "通过（三组合开关+非法值+管理员 403+关闭注册拒绝生效）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R8",
+    "testRequirement": "TR-C2-04, TR-C2-12",
+    "testCase": "TC-C2-006, TC-C2-007, TC-C2-021",
+    "recordedResult": "设计符合性复验：2026-10-12十列CSV真实12行成功、重复12行拒绝/零新增、混合逐行反馈与旧四列；资料及关系录入见15/18；当前手测HT-03待用户执行"
+  },
+  {
+    "id": "R9",
+    "testRequirement": "TR-C2-05, TR-C2-06, TR-C2-07",
+    "testCase": "TC-C2-008, TC-C2-009, TC-C2-010, TC-C2-011, TC-C2-012",
+    "recordedResult": "当前口径：租客审核仅生成待签约租约，协议确认且首期成功后才建正式关系/入住；bk实际提交临时占用/撤回释放通过，HT-06非交易段待手测；真实首期FT-01未执行"
+  },
+  {
+    "id": "R10",
+    "testRequirement": "TR-C2-08",
+    "testCase": "TC-C2-013, TC-C2-014",
+    "recordedResult": "通过（本批真实迁出、历史租约/同住者、旧页面双方刷新；08§3.76）"
+  },
+  {
+    "id": "R11",
+    "testRequirement": "TR-C2-09",
+    "testCase": "TC-C2-015, TC-C2-016",
+    "recordedResult": "通过（房屋/居民双向台账与库一致）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R12",
+    "testRequirement": "TR-C2-10",
+    "testCase": "TC-C2-017, TC-C2-018, TC-C2-019",
+    "recordedResult": "通过（游客 401×4+公开子集正常）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R13",
+    "testRequirement": "TR-C3-01",
+    "testCase": "TC-C3-001, TC-C3-002, TC-C3-003, TC-C3-015",
+    "recordedResult": "通过（登记 PENDING+非法日期/引用/越社区拒+审核流转）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R14",
+    "testRequirement": "TR-C3-02",
+    "testCase": "TC-C3-004, TC-C3-005, TC-C3-006, TC-C3-007",
+    "recordedResult": "通过（三档判定 EXPIRING/无/EXPIRED 不写库；N 可配作用于提醒任务与 expiring，详情窗口硬编码按现状记录）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R15",
+    "testRequirement": "TR-C3-03",
+    "testCase": "TC-C3-008, TC-C3-009, TC-C3-010",
+    "recordedResult": "主链路达标（2026-09-11 第二轮回归：LeaseExpiryReminderTask 全链验证——1010 条提醒（EXPIRING 491+EXPIRED 519）零失败、租户+管理员通知落库、lease_reminder 唯一键去重、sys_task_log SUCCESS；手动重发 DEF-016 弃置为用户裁决遗留评估）"
+  },
+  {
+    "id": "R16",
+    "testRequirement": "TR-C3-04",
+    "testCase": "TC-C3-011, TC-C3-012, TC-C3-013",
+    "recordedResult": "通过（流转全留痕+归档只读——流转/续租拒）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R17",
+    "testRequirement": "TR-C4-01",
+    "testCase": "TC-C4-001, TC-C4-002, TC-C4-003",
+    "recordedResult": "现行停用过滤保留；2026-10-12实际工单类别卡片可见/选中/提交一致，按用户新口径复核DEF-145；HT-07待手测"
+  },
+  {
+    "id": "R18",
+    "testRequirement": "TR-C4-02, TR-C4-08",
+    "testCase": "TC-C4-004, TC-C4-005, TC-C4-006, TC-C4-021, TC-C4-018, TC-C4-019, TC-C4-025",
+    "recordedResult": "通过（提交 PENDING+工单号生成+附件）（2026-09-10 A 轨第一轮）；DEF-026 修复回归通过（2026-09-14：20 单零 409+工单号 keyword 精确命中，r3_batch3 B3-02）"
+  },
+  {
+    "id": "R19",
+    "testRequirement": "TR-C4-03",
+    "testCase": "TC-C4-007, TC-C4-008, TC-C4-009, TC-C4-011",
+    "recordedResult": "通过（PENDING 直派实现口径+驳回理由必填+受理前取消）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R20",
+    "testRequirement": "TR-C4-04",
+    "testCase": "TC-C4-010, TC-C4-012, TC-C4-023",
+    "recordedResult": "通过（派单对象校验+接单限被派单人）（2026-09-10 A 轨第一轮）；DEF-025 修复回归通过（2026-09-14 第三批专项：assignable-staff ADMIN 可用/最小暴露面/熟手置前，r3_batch3 B3-01）"
+  },
+  {
+    "id": "R21",
+    "testRequirement": "TR-C4-05, TR-C4-08",
+    "testCase": "TC-C4-013, TC-C4-018, TC-C4-019",
+    "recordedResult": "通过（处理→待确认+文字必填+附件）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R22",
+    "testRequirement": "TR-C4-06",
+    "testCase": "TC-C4-014, TC-C4-015, TC-C4-016",
+    "recordedResult": "通过（确认→完成→关闭链路+时间线完整）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R23",
+    "testRequirement": "TR-C4-07",
+    "testCase": "TC-C4-017, TC-C4-022, TC-C4-024",
+    "recordedResult": "通过（时间线 7 记录全+三角色可见+他人拒）（2026-09-10 A 轨第一轮）；DEF-029 后半修复回归通过（2026-09-14：statuses 多选+时间范围+STAFF 数据域零泄漏，r3_batch3 B3-07）"
+  },
+  {
+    "id": "R24",
+    "testRequirement": "TR-C5-01, TR-C5-06",
+    "testCase": "TC-C5-001, TC-C5-002, TC-C5-003, TC-C5-004, TC-C5-011, TC-C5-012, TC-C5-013, TC-C5-010, TC-C5-016",
+    "recordedResult": "通过（targets 写法校验+定向可见性列表过滤）（2026-09-10 A 轨第一轮）；C3 项修复回归通过（2026-09-14：priority/type 接收落库+endTime 优先+VO 暴露 17 字段+V12 存量默认，r3_batch3 B3-10）"
+  },
+  {
+    "id": "R25",
+    "testRequirement": "TR-C5-02, TR-C5-03",
+    "testCase": "TC-C5-005, TC-C5-006, TC-C5-015",
+    "recordedResult": "已执行范围通过（原定向/置顶证据保留；bi公告回执目标范围与管理归属真实补充，08§3.81）"
+  },
+  {
+    "id": "R26",
+    "testRequirement": "TR-C5-04",
+    "testCase": "TC-C5-007, TC-C5-008",
+    "recordedResult": "通过（过期查询期过滤+下线任务 WITHDRAWN+管理归档可查）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R27",
+    "testRequirement": "TR-C5-05",
+    "testCase": "TC-C5-009",
+    "recordedResult": "通过（查看记录唯一+viewers 一致）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R28",
+    "testRequirement": "TR-C6-01",
+    "testCase": "TC-C6-001, TC-C6-002, TC-C6-014",
+    "recordedResult": "通过（提交+附件+详情）（2026-09-10 A 轨第一轮）；DEF-027 前半修复回归通过（2026-09-14：keyword 与库一致，r3_batch3 B3-03）"
+  },
+  {
+    "id": "R29",
+    "testRequirement": "TR-C6-02",
+    "testCase": "TC-C6-003",
+    "recordedResult": "通过（首条回复自动受理+通知）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R30",
+    "testRequirement": "TR-C6-03, TR-C6-04, TR-C6-05",
+    "testCase": "TC-C6-004, TC-C6-005, TC-C6-008, TC-C6-006, TC-C6-007, TC-C6-012, TC-C6-015",
+    "recordedResult": "通过（WS 时延 8~15ms+双端 DOM 渲染 0.23s；办结推送；**多连接场景第五轮修复关闭**——DEF-036 双连接关一推送不丢 17ms 实证 + C 轨双端复验 PASS，2026-09-15）"
+  },
+  {
+    "id": "R31",
+    "testRequirement": "TR-C6-06",
+    "testCase": "TC-C6-009, TC-C6-010, TC-C6-011",
+    "recordedResult": "通过（办结结论必填+系统消息+归档只读附件禁增删）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R32",
+    "testRequirement": "TR-C7-01, TR-C7-07",
+    "testCase": "TC-C7-001, TC-C7-002, TC-C7-003, TC-C7-016~024",
+    "recordedResult": "通过（时段内提交+时段外/跨间隙/非开放日拒+必填校验）（2026-09-10 A 轨第一轮）；Slot Grid 栅格化全断言通过（2026-09-14 第三批专项 r3_slotgrid 28/28：三粒度/对齐校验/分桶一致/并发不超卖/V11 用户级约束）"
+  },
+  {
+    "id": "R33",
+    "testRequirement": "TR-C7-02, TR-C7-07",
+    "testCase": "TC-C7-004, TC-C7-005, TC-C7-006, TC-C7-007, TC-C7-022, TC-C7-023",
+    "recordedResult": "已执行范围通过（原创建/冲突证据保留；bi选填联系信息省略成功、取消释放与冲突组合，08§3.81）"
+  },
+  {
+    "id": "R34",
+    "testRequirement": "TR-C7-03",
+    "testCase": "TC-C7-008, TC-C7-009, TC-C7-010",
+    "recordedResult": "通过（确认/拒绝理由必填+双通知+取消两态+容量释放+越权取消拒）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R35",
+    "testRequirement": "TR-C7-04",
+    "testCase": "TC-C7-011, TC-C7-012, TC-C7-013",
+    "recordedResult": "通过（完成登记+违约记录可查+超限自动冻结拒登）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R36",
+    "testRequirement": "TR-C7-05",
+    "testCase": "TC-C7-014",
+    "recordedResult": "通过（本人列表+组合检索与库一致）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R37",
+    "testRequirement": "TR-C8-01",
+    "testCase": "TC-C8-001, TC-C8-002, TC-C8-003, TC-C8-004, TC-C8-005",
+    "recordedResult": "已执行范围通过（原一单一评证据保留；bi父工单授权复用、其他居民/未派人员拒读与授权正向，08§3.81）"
+  },
+  {
+    "id": "R38",
+    "testRequirement": "TR-C8-02",
+    "testCase": "TC-C8-006, TC-C8-007, TC-C8-008, TC-C8-012",
+    "recordedResult": "通过（≤2星入清单+跟进闭环+满意评价拒跟进；**大数据量分页第五轮修复关闭**——DEF-035 N7 数据下 false/true/null 三分支 total 与库逐一相等+翻页合计一致，2026-09-15）"
+  },
+  {
+    "id": "R39",
+    "testRequirement": "TR-C8-03",
+    "testCase": "TC-C8-009, TC-C8-010",
+    "recordedResult": "达标（2026-09-11 第二轮回归：总量统计 SQL 一致 + byStaff/byCategory 双维度聚合端点通过；DEF-022 已修复关闭）"
+  },
+  {
+    "id": "R40",
+    "testRequirement": "TR-C9-01, TR-C9-05",
+    "testCase": "TC-C9-001, TC-C9-002, TC-C9-003, TC-C9-004, TC-C9-012",
+    "recordedResult": "通过（接口侧指标全一致；16 卡片 UI 归 B 轨）（2026-09-10 A 轨第一轮）；STAFF 本人按日趋势通过（2026-09-14 第三批专项：限本人数据级断言+他人单不计入+RESIDENT 403，r3_batch3 B3-06）；bl本人事件口径按采纳19实施/真实库与页面复验，938/287/34见08§3.88；用户HT-12未代填"
+  },
+  {
+    "id": "R41",
+    "testRequirement": "TR-C9-02",
+    "testCase": "TC-C9-005, TC-C9-006, TC-C9-007, TC-C9-008",
+    "recordedResult": "通过（工单/房屋/预约/评价/租住各指标与 SQL 一致含软删除口径）（2026-09-10 A 轨第一轮）；bl本人事件口径按采纳19实施/真实库与页面复验，938/287/34见08§3.88；用户HT-12未代填"
+  },
+  {
+    "id": "R42",
+    "testRequirement": "TR-C9-03",
+    "testCase": "TC-C9-009, TC-C9-010",
+    "recordedResult": "⚠️ 接口侧达标（数据源接口返回正确，2026-09-11 第二轮 C9 套件 11/11 复验）；渲染/导出归 B 轨 UI（用户执行窗口）"
+  },
+  {
+    "id": "R43",
+    "testRequirement": "TR-C10-01",
+    "testCase": "TC-C10-001, TC-C10-002, TC-C10-003, TC-C10-004, TC-C10-005, TC-C10-006",
+    "recordedResult": "通过（原认证证据保留；本批绑定/冻结/解冻/登出与签名过滤；08§3.76）"
+  },
+  {
+    "id": "R44",
+    "testRequirement": "TR-C10-02",
+    "testCase": "TC-C10-007, TC-C10-008",
+    "recordedResult": "通过（SP-02 矩阵 84/84+越权日志 52+条）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R45",
+    "testRequirement": "TR-C10-03",
+    "testCase": "TC-C10-009, TC-C10-010",
+    "recordedResult": "已执行范围通过（原证据保留；bi公告/反馈/资源预约/评价四域补充权限组合，08§3.81；未列全组合保留）"
+  },
+  {
+    "id": "R46",
+    "testRequirement": "TR-C10-04",
+    "testCase": "TC-C10-011, TC-C10-012, TC-C10-013, TC-C10-014, TC-C10-015, TC-C10-016, TC-C10-027",
+    "recordedResult": "通过（账号管理全链+自冻/STAFF 绑定拒+D3 修订口径）（2026-09-10 A 轨第一轮）；DEF-030 留痕口径回归通过（2026-09-14：缺/空 phone 400 零落库，前端校验归 C 轨）"
+  },
+  {
+    "id": "R47",
+    "testRequirement": "TR-C10-05",
+    "testCase": "TC-C10-017, TC-C10-018, TC-C10-019, TC-C10-020",
+    "recordedResult": "通过（本批显示/过滤、安全白名单参数与迁出状态审计回归；历史未采集不补造，08§3.76）"
+  },
+  {
+    "id": "R58",
+    "testRequirement": "TR-C10-07",
+    "testCase": "TC-C10-023, TC-C10-024, TC-C10-025, TC-C10-026",
+    "recordedResult": "达标（SP-03 已收口：阈值调低验证 + 验后恢复 730；**出口检查第五轮再确认库行 730**（2026-09-15）；清理对象 sys_operation_log 已随 DEF-014/034 修复有真实数据支撑）"
+  },
+  {
+    "id": "R48",
+    "testRequirement": "TR-C11-01",
+    "testCase": "TC-C11-001, TC-C11-002, TC-C11-003, TC-C11-004, TC-C11-005, TC-C11-006, TC-C11-007, TC-C11-016",
+    "recordedResult": "通过（工单/申请/预约/公告/反馈事件通知；驳回与看房流转缺失）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R49",
+    "testRequirement": "TR-C11-02",
+    "testCase": "TC-C11-008",
+    "recordedResult": "达标（SP-04 终态 8/8：握手认证/订阅鉴权/时延 22 样本 ≤50ms/重连重订阅/离线补拉；第五轮复跑 8/8 维持，2026-09-15）"
+  },
+  {
+    "id": "R50",
+    "testRequirement": "TR-C11-03",
+    "testCase": "TC-C11-009, TC-C11-010",
+    "recordedResult": "通过（pull 按 seq 增量与库一致）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R51",
+    "testRequirement": "TR-C11-04",
+    "testCase": "TC-C11-011, TC-C11-012, TC-C11-013, TC-C11-014, TC-C11-015",
+    "recordedResult": "通过（接口侧配置读写+权限+留痕表+等级键白名单（DEF-042 维持关闭）；**页面侧第五轮转绿**——渠道勾选 UI + PUT 请求体/读回/库三一致（DEF-037 接线复验），2026-09-15）"
+  },
+  {
+    "id": "R52",
+    "testRequirement": "TR-C12-01",
+    "testCase": "TC-C12-001, TC-C12-002, TC-C12-003",
+    "recordedResult": "通过（CRUD+下架 404+列表不含）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R53",
+    "testRequirement": "TR-C12-02",
+    "testCase": "TC-C12-004, TC-C12-005, TC-C12-006",
+    "recordedResult": "通过（接口侧 D5 租售/户型筛选+浏览计数；**页面侧第五轮转绿**——两维下拉 UI + 筛选参数 URL 透传与后端一致（DEF-040）+ 详情页租售标签对齐白名单（DEF-044 修复+双端渲染实证），2026-09-15）"
+  },
+  {
+    "id": "R54",
+    "testRequirement": "TR-C12-03",
+    "testCase": "TC-C12-007, TC-C12-008, TC-C12-009, TC-C12-010",
+    "recordedResult": "通过（时段校验+游客提交）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R55",
+    "testRequirement": "TR-C12-04, TR-C12-05",
+    "testCase": "TC-C12-011, TC-C12-012, TC-C12-013, TC-C12-014, TC-C12-018, TC-C12-019, TC-C12-015, TC-C12-016, TC-C12-023",
+    "recordedResult": "bl按采纳设计实际本人STAFF完成按钮200、旧人员/居民/游客/跨社区拒绝，重复/并发一次成功；HT-05仍待用户操作"
+  },
+  {
+    "id": "R56",
+    "testRequirement": "TR-C12-06",
+    "testCase": "TC-C12-017",
+    "recordedResult": "通过（既有完成登记与本批阈值冻结/吊销/重复防护实测；2026-10-11，08§3.75）"
+  },
+  {
+    "id": "R57",
+    "testRequirement": "TR-C12-07",
+    "testCase": "TC-C12-020",
+    "recordedResult": "通过（浏览计数入 Redis+定时回写任务运行中）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "R59",
+    "testRequirement": "TR-C12-09",
+    "testCase": "待 C 轨补用例（R59~R63 用例归后续批次）",
+    "recordedResult": "bl本人带看完成/职责分离已实施，按当前assigned_staff_id再校验；真按钮与否定矩阵通过，不再待裁决"
+  },
+  {
+    "id": "R60",
+    "testRequirement": "TR-C7-08, TR-C12-10",
+    "testCase": "待 C 轨补用例（R59~R63 用例归后续批次）",
+    "recordedResult": "未执行（2026-09-20 交付；复验归用户手测 U-26 + C 轨补用例）"
+  },
+  {
+    "id": "R61",
+    "testRequirement": "TR-C3-06",
+    "testCase": "TC-C3-025~030；CF-E3-D/E 交易链按原用例",
+    "recordedResult": "2026-10-11 配置子集：后端新增23例、UI8例，隔离浏览器/API30项及数据库无交易副作用核对通过；交易链仍暂缓未完整收口（原2026-09-20交接曾记录5笔支付，不能代替当前全部变体复验）"
+  },
+  {
+    "id": "R62",
+    "testRequirement": "TR-C12-11",
+    "testCase": "待 C 轨补用例（R59~R63 用例归后续批次）",
+    "recordedResult": "未执行（2026-09-20 交付，V16 端点 + V17 房号唯一；实测批量挂牌后游客可见房源 3→16 条）"
+  },
+  {
+    "id": "R63",
+    "testRequirement": "TR-C11-06",
+    "testCase": "待 C 轨补用例（R59~R63 用例归后续批次）",
+    "recordedResult": "未执行（2026-09-20 交付，V16 三表 + 存量回填 26 会话/82 参与者；复验归用户手测 U-23~U-25）"
+  },
+  {
+    "id": "R64",
+    "testRequirement": "TR-C3-07",
+    "testCase": "CF-E3-C、U-28、TC-C3-017~024",
+    "recordedResult": "当前管理方发出协议代表同意，居民确认当前快照一次；历史承租列不代替协议同意；非交易验证见bh，HT-06待手测，金融详情及FT首期未执行"
+  },
+  {
+    "id": "R65",
+    "testRequirement": "TR-C4-10",
+    "testCase": "待 C 轨补用例（R64/R65/R62 补用例归后续批次）",
+    "recordedResult": "未执行（2026-09-21 交付，V19 三表 + 存量派单回填；接口冒烟含排班批量保存/清空与候选档位，复验归用户手测 + C 轨补用例）"
+  },
+  {
+    "id": "R66",
+    "testRequirement": "TR-C3-08",
+    "testCase": "CF-E3-C、U-28、TC-C3-017~024",
+    "recordedResult": "申请临时占用；租客审核仅TO_SIGN待签约，协议完成且首期成功后生效与正式关系；bk提交/公众隐藏/撤回释放验证，不自动写完整出租链通过"
+  },
+  {
+    "id": "R67",
+    "testRequirement": "TR-C3-09",
+    "testCase": "CF-E3-C、U-28、TC-C3-017~024",
+    "recordedResult": "2026-10-11 自动化验证：AgreementIssueAcceptanceTest、AgreementConsentBoundaryTest、AgreementSignPanel.spec.ts；真实前后端/并发证据 def168-real-flow-20261011.json，用户手测仍需复验"
+  },
+  {
+    "id": "R68",
+    "testRequirement": "TR-C11-07",
+    "testCase": "待 C 轨补用例（R66~R71 用例归后续批次）",
+    "recordedResult": "未执行（2026-09-21 立项，数据库 V20 `conversation.status`/`closed_at`；关闭后发消息 5604，实测归用户手测 U-28/U-29 + C 轨补用例）"
+  },
+  {
+    "id": "R69",
+    "testRequirement": "TR-C11-08",
+    "testCase": "待 C 轨补用例（R66~R71 用例归后续批次）",
+    "recordedResult": "未执行（2026-09-21 立项，数据库 V20 `lease_id` + `idx_va_lease`；接口 §9.19.7/§9.19.8；实测归用户手测 U-28 + C 轨补用例）"
+  },
+  {
+    "id": "R70",
+    "testRequirement": "TR-C3-10",
+    "testCase": "待 C 轨补用例（R66~R71 用例归后续批次）",
+    "recordedResult": "未执行（2026-09-21 立项，**V20 新表 `lease_move_out_application` + 已纳入社区级联删除清单**；接口 §9.19.9~§9.19.11；实测归用户手测 U-29 + C 轨补用例）"
+  },
+  {
+    "id": "R71",
+    "testRequirement": "TR-C3-11",
+    "testCase": "待 C 轨补用例（R66~R71 用例归后续批次）",
+    "recordedResult": "未执行（2026-09-21 立项，数据库 V20 `lease_payment.payment_type`；接口 §9.19.12/§9.19.13；实测归用户手测 U-29 + C 轨补用例）"
+  },
+  {
+    "id": "R72",
+    "testRequirement": "TR-C3-12",
+    "testCase": "待当前批次用户手测补用例",
+    "recordedResult": "未完成最终用户手测（代码与设计已落地：V22 押金状态/退还记录、V25 存量回填，前后端代码级验证已通过；最终复验待 V27/V28、干净种子与 CF-E3-F / U-29）"
+  },
+  {
+    "id": "R73",
+    "testRequirement": "TR-C3-13",
+    "testCase": "待当前批次用户手测补用例",
+    "recordedResult": "未完成最终用户手测（实现已补齐：`GET /leases/{id}/changes`、`LeasePaymentVO` 金额构成/覆盖租期/渠道流水字段与居民端租约时间线；最终复验待 V27/V28、干净种子与 CF-E3-F / U-29）"
+  },
+  {
+    "id": "R74",
+    "testRequirement": "TR-C4-11（当前代码已落地，测试用例待用户手测前补登）",
+    "testCase": "待当前批次用户手测补用例",
+    "recordedResult": "未完成最终用户手测（V23 工单群聊、V24 身份空间、V27 会话幂等唯一键均已落地；前后端代码级验证已通过；最终复验待 V27/V28、干净种子与 CF-E4 / U-34）"
+  },
+  {
+    "id": "R75",
+    "testRequirement": "TR-C7-09（当前代码已落地，测试用例待用户手测前补登）",
+    "testCase": "待当前批次用户手测补用例",
+    "recordedResult": "未执行（2026-09-29 交付：**V29 迁移脚本已落盘待应用** + 后端 `public_resource.images` 全链路已实现，单元测试 14 例通过；前端展示对接另批；复验归用户手测 + C 轨补用例）"
+  },
+  {
+    "id": "N1",
+    "testRequirement": "TR-NF-01",
+    "testCase": "TC-NF-001, TC-NF-002, TC-NF-003",
+    "recordedResult": "达标（**最终代码出口证据**：2026-09-15 第五轮 JMeter 重跑——50 并发/600s 稳态/500ms pacing，7 接口 P95 8~45ms 全 ≤2s（余量 >97%），54950 样本零服务端错误；数据 nf_steady_r5.jtl；N7 规模数据上执行）"
+  },
+  {
+    "id": "N2",
+    "testRequirement": "TR-NF-02",
+    "testCase": "TC-NF-004",
+    "recordedResult": "达标（第二轮 + **第五轮重跑确认**：200 账号池 setUp 登录 200/200 + 50 并发全程在线；WS 在线挂载 SP-04 双端会话覆盖）"
+  },
+  {
+    "id": "N3",
+    "testRequirement": "TR-NF-03",
+    "testCase": "TC-NF-005",
+    "recordedResult": "达标（SP-04 WS 专项 22 样本 ≤50ms + 第五轮 SP-04 复跑 8/8（时延 8~17ms）+ C 轨双端 DOM 渲染 0.23s）"
+  },
+  {
+    "id": "N4",
+    "testRequirement": "TR-NF-04",
+    "testCase": "TC-NF-006, TC-NF-007",
+    "recordedResult": "通过（BCrypt 哈希 $2a$10$ 抽样核对）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "N5",
+    "testRequirement": "TR-NF-05",
+    "testCase": "TC-NF-008",
+    "recordedResult": "通过（SP-02 84/84 拒绝+日志）（2026-09-10 A 轨第一轮）"
+  },
+  {
+    "id": "N6",
+    "testRequirement": "TR-NF-06, TR-C10-07",
+    "testCase": "TC-NF-009, TC-NF-010, TC-C10-023, TC-C10-024, TC-C10-025, TC-C10-026",
+    "recordedResult": "达标（2026-09-11 第二轮回归：操作日志 AOP 落库 + 日志清理阈值验证（第一轮）+ 留存 730 确认（第二轮出口检查）——R58/N6 判据闭环；DEF-014 已修复关闭）"
+  },
+  {
+    "id": "N7",
+    "testRequirement": "TR-NF-07",
+    "testCase": "TC-NF-011",
+    "recordedResult": "达标（N7 批量数据 5000 房/10000 工单在库；**第五轮压测即 N7 规模上执行**——同口径（500ms pacing）对比第四轮 P95 全面改善零劣化，2026-09-15）"
+  },
+  {
+    "id": "N8",
+    "testRequirement": "TR-NF-08",
+    "testCase": "TC-NF-012, TC-NF-013",
+    "recordedResult": "⏳ 归 B 轨（用户手动巡检，并入 12 号文档 U-19 手测窗口，不阻塞出口——Q3 裁决以手头浏览器为准；AI 侧 C 轨 16 条均为 Edge/Playwright 执行通过）"
+  },
+  {
+    "id": "N9",
+    "testRequirement": "TR-NF-09",
+    "testCase": "TC-NF-014, TC-NF-015",
+    "recordedResult": "通过（TC-NF-014 冷启动：独立空库 Flyway 全新流程，第五轮口径 A 重建再复验（V1~V12 干净执行）；TC-NF-015 依赖核查：无支付/硬件/付费第三方依赖；前端 build 产物 vue-tsc+build 第五轮随 DEF-044 再自证）"
+  },
+  {
+    "id": "N10",
+    "testRequirement": "TR-NF-10",
+    "testCase": "TC-NF-016",
+    "recordedResult": "通过（2026-09-15 第五轮补执行：springdoc vs 接口设计.md §9 抽样 10 组——路径/方法 10/10 全一致，7 项参数/响应偏差全部落入既有裁决口径，无新未裁决漂移；文档示意滞后项归勘误批次，比对记录 07 §6.5）"
+  }
+]

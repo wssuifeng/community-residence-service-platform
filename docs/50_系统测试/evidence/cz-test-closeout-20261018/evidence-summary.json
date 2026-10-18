@@ -1,0 +1,206 @@
+{
+  "date": "2026-10-18",
+  "sourceCommit": "def6f90631950a77497db9ed10c4f1b2eae83cfc",
+  "activity": "existing-evidence review, JTL reaggregation, fixed read-only SQL and socket checks",
+  "newBusinessTests": 0,
+  "newFinancialTests": 0,
+  "testCaseCatalog": {
+    "definitions": 305,
+    "uniqueIds": 305,
+    "byPriority": {
+      "P1": 175,
+      "P0": 93,
+      "P2": 22,
+      "unspecified": 15
+    },
+    "byDomain": {
+      "TC-C1": 28,
+      "TC-C2": 21,
+      "TC-C3": 30,
+      "TC-C4": 25,
+      "TC-C5": 16,
+      "TC-C6": 15,
+      "TC-C7": 24,
+      "TC-C8": 12,
+      "TC-C9": 12,
+      "TC-C10": 27,
+      "TC-C11": 17,
+      "TC-C12": 23,
+      "TC-NF": 16,
+      "TC-SP": 39
+    },
+    "executionRate": null,
+    "reason": "Catalog definitions are not final-source executions."
+  },
+  "rtm": {
+    "rows": 85,
+    "uniqueRequirementIds": 85,
+    "missingRequirements": [],
+    "blankMappingCells": 0,
+    "finalExecutionRate": null
+  },
+  "historicalDefectTable": {
+    "rows": 177,
+    "bySeverity": {
+      "一般": 101,
+      "严重": 48,
+      "致命": 7,
+      "轻微": 21
+    },
+    "latestMentionedId": "DEF-212",
+    "currentClosureRate": null,
+    "reason": "Primary rows and later round-specific amendments use different dates and dispositions."
+  },
+  "runtime": {
+    "verifiedAt": "2026-10-18T22:14:49.507552+08:00",
+    "sqlMode": "SELECT only",
+    "flywayVersion": 43,
+    "businessTables": 61,
+    "logRetentionDays": 730,
+    "listeningPorts": {
+      "8084": true,
+      "5176": true,
+      "8087": false,
+      "5181": false,
+      "5184": false,
+      "5188": false
+    },
+    "servicesStartedOrStopped": false,
+    "dataChanged": false,
+    "financialCommands": 0,
+    "paymentConfigurationReadOrChanged": false,
+    "browserInteraction": false
+  },
+  "userConfirmations": [
+    {
+      "date": "2026-10-18",
+      "scope": "latest running version and affected clients",
+      "text": "已确认最新运行版本。未发现受到影响的客户端。开始 50_系统测试阶段的收尾工作吧。"
+    },
+    {
+      "date": "2026-10-18",
+      "scope": "financial availability",
+      "source": "user instruction; cx record",
+      "text": "金融专项，我确认了可用就行了，不需要AI再测试一遍。",
+      "claim": "User accepts availability; no claim that all financial abnormal branches ran."
+    }
+  ],
+  "sources": [
+    {
+      "path": "docs/50_系统测试/01_测试需求分析.md",
+      "sha256": "5773d1b37ceac3a517bd045467739d111545b0637d49cd5f0d5a6fc7e8939ec3"
+    },
+    {
+      "path": "docs/50_系统测试/02_需求跟踪矩阵.md",
+      "sha256": "850ced605e6e9229436c940d3a4693e64cc3eb84419e6cd756e0bade5e63be36"
+    },
+    {
+      "path": "docs/50_系统测试/03_系统测试计划.md",
+      "sha256": "f276b723535d3f959a0ba9576bf63b9f239dd3f950df0d241cc6649c7bbf897d"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C01_社区基础信息.md",
+      "sha256": "86a26f923ba0bc797bf5b0a31f5ced2e606acc87ef63dd750ae9d0cc101e5f78"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C02_居民与居住关系.md",
+      "sha256": "79ccf6860c100289c974a4ce0e7df4bb5688a579aed616f9b62ed64fe2769969"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C03_租住管理.md",
+      "sha256": "f19cbfb5de6a978ce17a3f74f267913a91bb220db54eb9d7cbb0493db60cfeb6"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C04_服务申请与工单.md",
+      "sha256": "f3f7d4c392c62ea00ebea228919cf3d88f6716678d2b2ce5bde736aa0465942b"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C05_公告广播管理.md",
+      "sha256": "766ccca96f626d5e37d6f45d26105db95d5dd4c1fac9a8729011917cd980f21b"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C06_居民反馈管理.md",
+      "sha256": "733a4b34650a1acef9ad1cf65e74556f46a789f7c96b7bca1a1e9fbbe80b8a7b"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C07_公共资源预约.md",
+      "sha256": "29d41080bd4e0350020bd9c8508e106a04fa75ff2301b4e012a58963e1bffb8c"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C08_服务评价.md",
+      "sha256": "5ffcbeba901755324e5e2034f6ef56ad8b6f57c9bc87ebf3a48c0f9abd4f9da7"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C09_社区运营统计.md",
+      "sha256": "9bebd943e3ffa62ec219a62c4959ef1106268daa06310523d03a54bac6ce9eef"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C10_用户与权限.md",
+      "sha256": "924c3366db5922a082da2065579e53c1c1f153a648579ec36c831acc92b542bf"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C11_消息与通知.md",
+      "sha256": "fbe849b2e1e646224cb52d5e82bf0debbfae2028603ca3a03ca86841e7df1dd2"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/功能用例_C12_房源与看房预约.md",
+      "sha256": "7fadbda17d998b20be8d31c6adbc14dfbe68f87fae866d7d18ccf79c089d6f1a"
+    },
+    {
+      "path": "docs/50_系统测试/04_测试用例/非功能与专项用例.md",
+      "sha256": "56a6a7ad9e12ea088f72fd36122008b15bd382a0ce18a25b6d7f80d2e798ca1f"
+    },
+    {
+      "path": "docs/50_系统测试/05_测试环境与数据.md",
+      "sha256": "b5aa7ebb57b0353ff08cff054db22704824e05edeb9cb2eb25b89a7843de900f"
+    },
+    {
+      "path": "docs/50_系统测试/06_冒烟测试记录.md",
+      "sha256": "eb4808ef5ffbfd7b2ac53746f8c5ba49e1bcb8bcf12462ae2552420cb55200a5"
+    },
+    {
+      "path": "docs/50_系统测试/07_测试执行记录.md",
+      "sha256": "639a0e489094e22d2a71af66d11b7a0a63fa30a50d272093a5d92458dfde0489"
+    },
+    {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "sha256": "3b824839de94bd2b25d81cc22dbbc71f6d3a06fe15de811e6c317970287557d8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/ce-stale-test-orders-20261016/verification-summary.json",
+      "sha256": "b11bcb581b7a53086187e45479a21aef9b67e920bf8ad02c6782a896f44850d8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/final-migration-validation.json",
+      "sha256": "89623c397753f61c30cf5af7922d6eb5ceb0573e1e8951c5f4be2710a89c6f47"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/final-validation.json",
+      "sha256": "431c8e25bce728763d8862600d3aa9926be614eaf524c1b93e36169b35bcbec8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cv-architecture-implementation-20261018/s3-validation.json",
+      "sha256": "ad082ab41272bf7e71370bde5ad7577a384c89f6d3dd8851ac7ea8370f53c81b"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cx-current-runtime-20261018/startup-summary.json",
+      "sha256": "addb7dac7bbe795bd40f9bf095e91fb54e5539204e2d9c1581aff68ae9182e01"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/cy-header-navigation-20261018/verification-summary.json",
+      "sha256": "a00fca6a64b6583f02817536fdedac689990376286e3b6e55cd552ccf63d36c2"
+    },
+    {
+      "path": "docs/50_系统测试/scripts/nf_load.jmx",
+      "sha256": "1ac7fd53d9465f3f43ecec72b722172bc6b4b60907b3d04c8d9d22c69e5d1527"
+    },
+    {
+      "path": "docs/50_系统测试/scripts/nf_steady_r2.jtl.gz",
+      "sha256": "f7b567af971ce5759490060263c791d117511e5f587497e850b272b27fb95e48"
+    },
+    {
+      "path": "docs/50_系统测试/scripts/nf_steady_r5.jtl",
+      "sha256": "be3fb06ef819d6b5c9e19f06a478719a78a46e18ca99c28d251c42fcd405abcb"
+    }
+  ]
+}

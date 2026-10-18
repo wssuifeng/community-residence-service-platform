@@ -1,0 +1,1241 @@
+[
+  {
+    "id": "DEF-001",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：无关系账号提单 code=403 零落库、在住居民放行（r2_def_regression.mjs）"
+  },
+  {
+    "id": "DEF-002",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：同天不同时段放行 + 同时段 5002 拦（SP-01/冒烟/TC-C7-004 三处口径一致）"
+  },
+  {
+    "id": "DEF-003",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮：跨社区详情 404、范围外居民列表不可见、本社区居民可见"
+  },
+  {
+    "id": "DEF-004",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮：communityId 单目标越权 404 拒且零落库"
+  },
+  {
+    "id": "DEF-005",
+    "severity": "致命",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮 SP-001 三轮 10 路并发全部 1/10 成功+落库 1（Redisson 锁+V10 约束）"
+  },
+  {
+    "id": "DEF-006",
+    "severity": "致命",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮 SP-002 六边界对全符（半重叠/包含/相同拦、首尾相接放行）"
+  },
+  {
+    "id": "DEF-007",
+    "severity": "致命",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮 SP-003 三轮 10 路并发全部 1/10 成功+落库 1"
+  },
+  {
+    "id": "DEF-008",
+    "severity": "致命",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮 SP-004 六边界对全符"
+  },
+  {
+    "id": "DEF-009",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮：冻结后存量令牌立即 401（含同秒签发；同秒重登被连带拦为已声明口径，脚本隔秒规避）"
+  },
+  {
+    "id": "DEF-010",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮：越社区详情 404、列表无跨社区泄露、追加绑定双社区均可见（行为正确）"
+  },
+  {
+    "id": "DEF-011",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮：同态 accept/终态 close 重复均 5302 且时间线零新增"
+  },
+  {
+    "id": "DEF-012",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮：ACCEPTED 取消/改派 5302、PENDING 取消放行；状态机矩阵 84/84"
+  },
+  {
+    "id": "DEF-013",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：ACTIVE→ARCHIVED 5004 拒、线性两步达 ARCHIVED"
+  },
+  {
+    "id": "DEF-014",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "见 §3.1（提交号由主会话回填）",
+    "recordedRegression": "2026-09-11 第二轮：多模块关键变更近 2 分钟 56 条落库（UPDATE/STATUS/REVIEW/DELETE）+ 检索端点 200；SP-02 越权日志断言新增 27 条"
+  },
+  {
+    "id": "DEF-015",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：占用中删时段 5106 拒、释放后放行"
+  },
+  {
+    "id": "DEF-018",
+    "severity": "轻微",
+    "recordedState": "延期（用户裁决 2026-09-11：随 C 轨 UI 批次处理展示净化，后端提交校验兜底有效）",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-019",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：TO_CONFIRM 退回 IN_PROGRESS + 通知服务人员 + 非本人 403（PATCH /work-orders/{id}/return）"
+  },
+  {
+    "id": "DEF-020",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：驳回后居民通知 +1（「工单已驳回」）"
+  },
+  {
+    "id": "DEF-021",
+    "severity": "严重",
+    "recordedState": "**拒绝（2026-09-11 主会话复核采纳：非系统缺陷，测试脚本时区口径问题，R26 实际达标）**",
+    "recordedFix": "—（无代码改动，脚本修正归第二轮 TC-C5-007 重跑）",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-022",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：GET /statistics/evaluations/aggregation 返回 byStaff/byCategory 双维度"
+  },
+  {
+    "id": "DEF-023",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：confirm/complete 各 +1 通知（「看房预约已确认/已完成」）"
+  },
+  {
+    "id": "DEF-024",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：11MB/13MB 均 400 + 「单个文件不能超过 10MB」（MaxUploadSizeExceededException 映射 + multipart buffer 12MB）"
+  },
+  {
+    "id": "DEF-016",
+    "severity": "一般",
+    "recordedState": "弃置（用户裁决 2026-09-11：自动提醒主链路正常，重发属辅助能力不实施，遗留评估入报告）",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-017",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "c946b69",
+    "recordedRegression": "2026-09-11 第二轮：ARCHIVED 修改 5004「已归档的租约不可修改」"
+  },
+  {
+    "id": "DEF-025",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "0a1935b",
+    "recordedRegression": "2026-09-14 第三批专项：ADMIN 200 仅启用 STAFF 最小暴露面+熟手置前+角色 403（r3_batch3 B3-01）"
+  },
+  {
+    "id": "DEF-026",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "0a1935b",
+    "recordedRegression": "2026-09-14 第三批专项：20 单零 409+工单号 keyword 精确命中（r3_batch3 B3-02）"
+  },
+  {
+    "id": "DEF-027",
+    "severity": "轻微",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "0a1935b",
+    "recordedRegression": "2026-09-14 第三批专项：keyword 库内一致+办结 FEEDBACK_STATUS 载荷在线送达（r3_batch3 B3-03/04）"
+  },
+  {
+    "id": "DEF-028",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "0a1935b",
+    "recordedRegression": "2026-09-14 第三批专项：hasFollowup true/false/null 三分支与库一致（r3_batch3 B3-05）"
+  },
+  {
+    "id": "DEF-029",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "0a1935b",
+    "recordedRegression": "2026-09-14 第三批专项：STAFF 趋势限本人+statuses/时间范围+STAFF 数据域零泄漏（r3_batch3 B3-06/07）"
+  },
+  {
+    "id": "DEF-030",
+    "severity": "轻微",
+    "recordedState": "关闭（回归通过·留痕口径）",
+    "recordedFix": "见 §3.8（无代码改动）",
+    "recordedRegression": "2026-09-14 第三批专项：缺/空 phone 均 400 零落库（r3_batch3 B3-08）"
+  },
+  {
+    "id": "DEF-031",
+    "severity": "一般",
+    "recordedState": "已修复",
+    "recordedFix": "0a1935b §3.8",
+    "recordedRegression": "2026-09-14 第三批专项：priority/isPinned/type 三过滤生效且锚点命中（r3_batch3 B3-09）→ 状态由「修复（待回归）」更正为「已修复」（回归已于 09-14 专项通过）"
+  },
+  {
+    "id": "DEF-032",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "e32a48b §3.9",
+    "recordedRegression": "2026-09-15 第五轮：三端点 1 好 1 坏行均 200 + 逐行 reason + 好行落库（r3_batch3 B3-12 新口径断言同步改写）"
+  },
+  {
+    "id": "DEF-042",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "本批 §3.11",
+    "recordedRegression": "2026-09-15 第五批：未知键 400 + 七键放行 + 读回一致（单测 2 + E2E 3 断言）"
+  },
+  {
+    "id": "DEF-043",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "本批 §3.11",
+    "recordedRegression": "2026-09-15 第五批：多目标重写/回收无残余/广播清空/越社区拒（单测 2 + E2E 5 断言）"
+  },
+  {
+    "id": "DEF-033",
+    "severity": "一般",
+    "recordedState": "修复（待回归）",
+    "recordedFix": "e32a48b §3.9",
+    "recordedRegression": "待 C 轨回归确认（§3.9 已有独立实例 E2E 记录：直建→迁出→级联 200 全清/在住保护 5104 拒绝，用户手测与 C 轨用例复验后方可置关闭）"
+  },
+  {
+    "id": "DEF-034",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "e32a48b §3.9",
+    "recordedRegression": "2026-09-15 第五轮：**10 服务 CREATE 逐服务断言**全落库（operationType/targetType/targetId/operator 正确 + Unit/House/ResourceTimeslot 三处 #result.communityId 推导命中）+ RESIDENT 越权反例 403 零日志 + 后端 WARN=0——出口阻塞解除"
+  },
+  {
+    "id": "DEF-035",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "e32a48b §3.9",
+    "recordedRegression": "2026-09-15 第五轮：N7 数据上 false/true/null 三分支 API total 与库逐一相等（798/5/803）+ 翻页遍历合计一致 + admin1 数据范围口径吻合"
+  },
+  {
+    "id": "DEF-036",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "e32a48b §3.9",
+    "recordedRegression": "2026-09-15 第五轮：双连接关一后剩余连接 17ms 内收到 topic 推送；全关才注销、重连恢复（13ms）；SP-04 8/8 复跑通过"
+  },
+  {
+    "id": "DEF-045",
+    "severity": "严重",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "本批 §3.13",
+    "recordedRegression": "2026-09-19 第六批：单测 5 用例（今日已过时段不返回/未过时段正常返回/明日不受影响/创建拒 5804/明日可约）+ 冒烟 4 断言（今日 []、明日 2 时段、创建 5804「不能预约已过去的时段」、明日 200）全过；全量单测 304/304"
+  },
+  {
+    "id": "DEF-046",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "本批 §3.13",
+    "recordedRegression": "2026-09-19 第六批：单测 11 用例（超管 GUEST 发布落库 targetId=0/ADMIN 403 零落库/GUEST 带 targetId 400/编辑先删后插重写/游客列表过滤 SQL/居民口径不回归/详情广播·GUEST·定向三态/GUEST-only 不触达居民·纯广播触达不变）+ 冒烟 8 断言（V13 幂等、游客列表/详情、admin 403、居民口径、触达 0/1 人）全过；全量单测 304/304"
+  },
+  {
+    "id": "DEF-047",
+    "severity": "一般",
+    "recordedState": "已修复（待用户复验）",
+    "recordedFix": "4e1fb93（§3.14）",
+    "recordedRegression": "2026-09-19 §3.14：Hero 搜索框内嵌「房源/公告」分段切换、按对象跳转带 keyword、两列表页 URL query 透传与回写；vue-tsc+build 绿 + Playwright 7 断言 PASS（真实后端）"
+  },
+  {
+    "id": "DEF-048",
+    "severity": "轻微",
+    "recordedState": "已修复（待用户复验）",
+    "recordedFix": "4e1fb93（§3.14）",
+    "recordedRegression": "2026-09-19 §3.14：主图左右毛玻璃箭头（首尾环绕）+ 悬浮虚化缩略图卡条、单图不渲染；Playwright 10 断言 PASS（3 图 route mock）"
+  },
+  {
+    "id": "DEF-049",
+    "severity": "轻微",
+    "recordedState": "已修复（待用户复验）",
+    "recordedFix": "4e1fb93（§3.14）",
+    "recordedRegression": "2026-09-19 §3.14：第二栏 `::before` 1px `var(--color-border)` 竖线，窄屏单栏隐藏；Playwright 3 断言 PASS"
+  },
+  {
+    "id": "DEF-050",
+    "severity": "轻微",
+    "recordedState": "已修复（待用户复验）",
+    "recordedFix": "4e1fb93（§3.14）",
+    "recordedRegression": "2026-09-19 §3.14：整宽单卡轮换（translateX）+ 左/右虚化箭头 + 缩略图导航 + 5s 自动轮播（悬浮暂停，手动后重新计时）+ 单置顶降级单卡；Playwright 8+3 断言 PASS"
+  },
+  {
+    "id": "DEF-051",
+    "severity": "一般",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "fc50353（§3.16）",
+    "recordedRegression": "2026-09-19 §3.16：ReservationService.create 插入日期窗口校验（过去日期拒 / today+7 含边界放行 / 今日 endTime<=now 拒，口径对齐 DEF-045），错误码 5403/5404；ReservationDateWindowFixTest 5 用例新增，全量 310/310"
+  },
+  {
+    "id": "DEF-052",
+    "severity": "轻微",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "d916787（§3.16）",
+    "recordedRegression": "2026-09-19 §3.16：ReservationListView 四口径筛选（未来 7 天默认/按月/按日期/全部，日历单日优先级最高）+ 通用 HorizontalScroller；合并后前端 build 绿"
+  },
+  {
+    "id": "DEF-053",
+    "severity": "轻微",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "fc50353（§3.16）",
+    "recordedRegression": "2026-09-19 §3.16：与 DEF-051 同点同修（today+7 含边界放行，超窗口拒）；接口设计 §9.7.1.1 同步真实口径"
+  },
+  {
+    "id": "DEF-054",
+    "severity": "轻微",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "d916787（§3.16）",
+    "recordedRegression": "2026-09-19 §3.16：ResidentLayout 导航新增「预约公共资源」+ 高频重排；AppHeader 窄屏（≤1199px）横向滚动兜底"
+  },
+  {
+    "id": "DEF-055",
+    "severity": "轻微",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "d916787（§3.16）",
+    "recordedRegression": "2026-09-19 §3.16：居民 NoticeListView 展示层同步游客 v5 定稿（详情路由 /resident/notices/:id + keyword URL 回写）"
+  },
+  {
+    "id": "DEF-056",
+    "severity": "一般",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "d916787（§3.16）",
+    "recordedRegression": "2026-09-19 §3.16：HousingDetailView 改时段卡点选 + 轻量确认区（联系人预填/电话必填本地校验/备注选填）；后续由 DEF-059 进一步升级为三步页"
+  },
+  {
+    "id": "DEF-057",
+    "severity": "轻微",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "d916787（§3.16）",
+    "recordedRegression": "2026-09-19 §3.16：新增通用 HorizontalScroller.vue（毛玻璃箭头、未溢出隐藏+居中、80% 步长平滑滚动、ResizeObserver 重算）；ResourceDetailView 增「可约时段（未来 7 天）」横拉展示区"
+  },
+  {
+    "id": "DEF-058",
+    "severity": "轻微",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "131d971（§3.17）",
+    "recordedRegression": "2026-09-20 §3.17：我的预约 tab 合并看房预约（?tab=viewing 回显）；旧看房列表页退役、路由重定向至新建 ViewingAppointmentDetailView"
+  },
+  {
+    "id": "DEF-059",
+    "severity": "一般",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "131d971（§3.17）",
+    "recordedRegression": "2026-09-20 §3.17：新建 HousingReservationView 三步页（月历 → 时段连续多选：相邻 end==next.start、120 分钟本地上限、禁跳段提示、约满禁选、中途取消保留最长连续段 → 合并区间确认提交）；ReservationCreateView 资源三步同步连续多选"
+  },
+  {
+    "id": "DEF-060",
+    "severity": "一般",
+    "recordedState": "已修复（待复验）",
+    "recordedFix": "22a10a8（后端）+ 04ef315（前端）",
+    "recordedRegression": "2026-09-20 §3.18：WebSocketConfig.configureMessageConverters 注册 JavaTimeModule + 禁 WRITE_DATES_AS_TIMESTAMPS（反馈/看房/通知三类 WS 载荷统一 ISO 字符串）+ 前端 AppointmentChat 三处防御（formatDateTime / 载荷形态校验 / handleSend 补 catch）；浏览器实测发送 1 秒内渲染（修复前 16s 轮询周期后才出现）"
+  },
+  {
+    "id": "DEF-061",
+    "severity": "一般",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "22a10a8（§3.18）",
+    "recordedRegression": "2026-09-20 §3.18：HousingService.availableSlots 60 分钟栅格切片（SlotGrids.gridId 复用、尾段<60min 丢弃、重叠计数、逐切片过滤过去时刻）；curl 实测房源 9 当日 3h+4h 模板 → 7 片各 60 分钟、既有预约跨片 FULL"
+  },
+  {
+    "id": "DEF-062",
+    "severity": "一般",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "22a10a8（§3.18）",
+    "recordedRegression": "2026-09-20 §3.18：两域创建锁内新增预约人日程冲突校验（活跃集 PENDING/RESERVED + TO_CONFIRM/RESERVED、首尾相接放行、游客跳过），错误码 5406/5807；curl 实测同刻跨资源 5406、跨域 5807 双向拦截；全量 354/354"
+  },
+  {
+    "id": "DEF-063",
+    "severity": "轻微",
+    "recordedState": "已修复（待回归）",
+    "recordedFix": "04ef315（§3.18）",
+    "recordedRegression": "2026-09-20 §3.18：详情页预约面板移除该展示区（-193 行死代码同步清理），面板收紧为入口式按钮+引导文案；前端 build 绿"
+  },
+  {
+    "id": "DEF-066",
+    "severity": "严重",
+    "recordedState": "修复（已验证）",
+    "recordedFix": "7520b99（本批）",
+    "recordedRegression": "2026-09-21 §3.24：级联顺序补齐——`staff_service_category` 先于 `service_category`、`lease_agreement` 与 `lease_change_log` 先于 `lease_record`、`staff_community`/`staff_schedule`/`agreement_template` 按 community_id 直删；新增回归用例 `CommunityCascadeDeleteTest.delete_cascadesV18V19Tables`（含 `InOrder` 顺序断言）；接口冒烟 34/34 通过（`POST /communities/batch-delete` 实测零残留）"
+  },
+  {
+    "id": "DEF-067",
+    "severity": "致命",
+    "recordedState": "已修复（待批次 g 验收）",
+    "recordedFix": "见 `50_系统测试/_中控.md` 批次 g 条目（提交号由主会话回填）",
+    "recordedRegression": "2026-09-21 批次 g 修复并验证：新增迁移 **`V21__notification_owner_identity.sql`**（`notification` 增列 `owner_type` VARCHAR(16) NOT NULL DEFAULT 'USER' + 组合索引 `idx_notification_owner (owner_type, user_id, seq)` + 存量回填，**表数不变仍 52**）；服务层 `NotificationService` 收口为 `createForUser` / `createForResident` 两个显式入口（无隐式默认重载），`page` / `unread` / `pull` / `markRead` 全部按 `(owner_type, user_id)` 过滤；**全部调用点按收件人身份标注**；WebSocket 点对点推送主体名分离（`common/context/IdentityPrincipal`：居民 `R:{residentId}` / 员工 `U:{sysUserId}`，在线判定同步按二元组）；新增回归用例 **`NotificationIdentitySpaceRegressionTest`（居民 1 与 sys_user 1 撞号双向不可见）+ `NotificationOwnerTypeCallSiteGuardTest`（调用点守卫）**；后端全量单测 **540 用例 / 0 失败 / 0 错误**"
+  },
+  {
+    "id": "DEF-068",
+    "severity": "严重",
+    "recordedState": "已修复（待批次 g 验收）",
+    "recordedFix": "由主会话回填（后端 + 前端两处修复提交）",
+    "recordedRegression": "2026-09-21 批次 g：后端 `createFirstPayment` 补幂等续接（`FIRST + PENDING` → 原样返回既有单 + `credentialOf` 重取渠道凭据；**仅 `SUCCESS` 拒 5904**；`CLOSED` 允许重新发起）；前端支付弹窗回查既有 `PENDING` 单并**直达支付页**（不再停在选渠道步；已支付完成时提示「首期费用已支付完成」并引导看支付记录）；回归用例 = 后端幂等三态断言（PENDING 返回同单 / SUCCESS 拒 5904 / CLOSED 允许重开）+ 前端弹窗续接；**单测与浏览器实测结果由主会话回填**；首测项见 `12_用户手测清单.md` **U-33**"
+  },
+  {
+    "id": "DEF-069",
+    "severity": "一般",
+    "recordedState": "已修复（待批次 g 验收）",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "修复口径（前后端并行，2026-09-21 批次 g，**已由主会话核验**）：前端 `firstPaymentDue` 增**止期门禁**（到期即隐藏/禁用首期入口并提示「首期费用不可再支付：租约止期已过；如需继续租住请续租，或办理退租。」）+ 卡片补「已到期（**日期标注，非状态流转**）」说明；后端 `createFirstPayment` 新增 **`LEASE_EXPIRED(5606)`** 兜底校验（止期**严格早于当天**即拒、**当天到期仍可支付**、**续期支付不受限**；判定复用 `common/constant/LeaseStatus.isExpired`，与 `LeaseService#toVO` 的 `expiryFlag` / `LeaseStatusTask` / `LeaseExpiryReminderTask` / 前端 `expiryOf` 同口径），且**校验顺序为 5904 先于 5606**（已收款单优先；已到期且遗留 `PENDING` 不再续接）；**核验结果（主会话）**：后端全量 **552/552 BUILD SUCCESS**、前端 `vue-tsc --noEmit` 与 `build` 双 **exit 0**；**提交号待主会话回填**；首测项见 `12_用户手测清单.md` **U-34**"
+  },
+  {
+    "id": "DEF-070",
+    "severity": "致命",
+    "recordedState": "**已修待回归**（2026-09-21 后端已改：`confirm`/`close` 的 `@RequestBody` 改为可选并重启 8081；**待按 CF-E4 第 6/7 步与 CF-E8 整链回归复测**）",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "**待回归**（修复后须复跑 F8 第⑨步与 CF-E8 全链：确认完成 → 出现「服务评价」区 → 提交评价 → ≤2 星进入不满意跟进；并复跑管理端「关闭工单」归档）"
+  },
+  {
+    "id": "DEF-071",
+    "severity": "一般",
+    "recordedState": "**已实施待回归**",
+    "recordedFix": "—（未派工）；裁决：**补实现**（新增管理端受理 `PATCH /work-orders/{id}/intake`，受理后建 `WORK_ORDER_GROUP` 群聊）；设计落点：接口设计 §9.21、架构设计 §6.1、UI 设计 v1.4；**后端（V23 已上线）与前端（管理端受理入口，`PENDING` 可见、ADMIN/SUPER_ADMIN）均已交付，前端 118/118 用例全绿**",
+    "recordedRegression": "待按新版 CF-E4 全链回归（受理 → 自动建临时群聊 → 派单入群 → 执行 → 居民确认 → 终审结束 → 会话回收）"
+  },
+  {
+    "id": "DEF-072",
+    "severity": "一般",
+    "recordedState": "**已实施待回归**",
+    "recordedFix": "—（未派工）；裁决：**纳入设计**（R48 事件集细化：提交 → 该社区绑定管理员 + 超管）；设计落点：接口设计 §9.21.4；**8 个事件后端已全部落地，「提交 → 该社区绑定管理员 + 超管」已实测收到（前端已交付）**",
+    "recordedRegression": "待按 R48 事件集与新版 CF-E4 第 1/12 步回归（居民提交 → 该社区绑定管理员 + 超管收到通知）"
+  },
+  {
+    "id": "DEF-073",
+    "severity": "一般",
+    "recordedState": "**待修（用户裁决暂缓）**",
+    "recordedFix": "—（未派工）",
+    "recordedRegression": "待修复后回归（须补断言：**轮询后微信二维码区块仍挂载**、支付宝引导文案不回退）"
+  },
+  {
+    "id": "DEF-074",
+    "severity": "一般",
+    "recordedState": "**已收口（2026-09-22，文档侧；①②③④ 四条全部执行完毕）**",
+    "recordedFix": "—（文档侧收口，无代码提交；**已收口处不编造提交号**）",
+    "recordedRegression": "待文档修正后回归（修正时须逐条对照 `ErrorCode.java` 实值）——**四条已完成，可作为\"按文档写用例不再错码\"的基线**"
+  },
+  {
+    "id": "DEF-075",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待按 **CF-E4-X1** 回归（须断言：非参与者访问群聊 **403**、撞号对（`resident1` 与 `superadmin`）双向不可见、看房群聊/租约群聊/工单群聊三类会话同口径；修复前实测 200 / 修复后 403 对照保留）"
+  },
+  {
+    "id": "DEF-076",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "recordedFix": "bd95ea9（本批）",
+    "recordedRegression": "2026-09-22 §3.25：删除 `.block-actions` 遮罩层，改为卡片右上角外沿 16px「⋯」角标 → 下拉菜单（查看详情/在住人员 · 编辑房屋 · 状态变更 · 删除房屋）；实测点卡片主体开详情、点角标不开详情而弹 4 项菜单、Ctrl+点击多选不误触"
+  },
+  {
+    "id": "DEF-077",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "recordedFix": "bd95ea9（本批）",
+    "recordedRegression": "2026-09-22 §3.25：弹窗新增「在住人员 / 租客账号」区块（`GET /houses/{id}/residents` ＋ 逐条 `GET /residents/{id}` 补登录账号，弹窗 480→640px，排序 居住中 → 租客 → 业主 → 家属）；实测 A 座 1 单元 301 显示「居住中 1 / 记录 1」及 `居思远 \\| resident2 \\| 租客 \\| 13905710102 \\| 2025-10-12 \\| 居住中`"
+  },
+  {
+    "id": "DEF-078",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "recordedFix": "bd95ea9（本批）",
+    "recordedRegression": "2026-09-22 §3.25：详情区改两栏（结构栏 320px `sticky` ＋ 独立滚动 `max-height: calc(100vh - 300px)` ＋ 可折叠、<1600px 默认折叠），房屋栏顶部**唯一筛选卡**（范围 楼栋/单元/房号 ＋ 条件 楼层/状态 ＋ 范围徽标 ＋ 结果口径 ＋ 清除筛选），删除结构树内「全部楼栋」「全部单元」重复筛选行；实测楼栋筛选 20→10 套、单元 10→5 套、清除回 20 套；注入 30 栋后 `clientHeight=700 / scrollHeight=1080`（限高生效）"
+  },
+  {
+    "id": "DEF-079",
+    "severity": "轻微",
+    "recordedState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "recordedFix": "bd95ea9（本批）",
+    "recordedRegression": "2026-09-22 §3.25：楼栋行与单元行的全部操作收敛为行尾一个「⋯」菜单（图标 ＋ 文字标签，默认隐形、hover/选中/键盘聚焦时出现、触屏常显），行内计数不再被挤压且完整口径移入 `title`；实测 `.outline-row .icon-btn` = 0、`.row-actions` = 0"
+  },
+  {
+    "id": "DEF-080",
+    "severity": "轻微",
+    "recordedState": "**已修复（浏览器实测通过，随批次 k 回归）**",
+    "recordedFix": "362f279（本批）",
+    "recordedRegression": "2026-09-22 §3.26：删除 `.outline-panel` 常驻栏及其全部状态/样式，`.detail` 退回单列 flex；实测结构类节点命中 0、房屋面板 952 → **1296px**"
+  },
+  {
+    "id": "DEF-081",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 k 回归）**",
+    "recordedFix": "362f279（本批）",
+    "recordedRegression": "2026-09-22 §3.26：新增 `.grid-groups` 横向列容器（一个单元一列、`overflow-x:auto`、列头带 `N 套·空 M` 与列内动作）＋ 缩放控件（100%↔70% 实测：方块 66→46px、列宽 234→164px）；`zoom` 仅作用于内层，框选坐标不受影响（回归：拖拽仍一次选中 20 套）"
+  },
+  {
+    "id": "DEF-082",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 k 回归）**",
+    "recordedFix": "362f279（本批）",
+    "recordedRegression": "2026-09-22 §3.26：头部新增「编辑楼栋」「编辑单元」快捷按钮 ＋「结构维护」下拉（新增楼栋/新增单元/批量建单元/删除楼栋/删除单元），原「编辑」改名「编辑社区」；所有目标型动作经统一的目标选择弹窗（楼栋+单元下拉，预选当前筛选范围）；实测两条快捷链路各自进入对应表单、菜单 5 项齐全、列头批量建房已预选该单元"
+  },
+  {
+    "id": "DEF-083",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 l 回归）**",
+    "recordedFix": "9cf8879（本批）",
+    "recordedRegression": "2026-09-22 §3.27：头部两枚编辑按钮下线，改为**建房带**三枚分步入口「①建楼栋 / ②建单元与房屋 / ③建房屋」，各自直达对应新建弹窗；编辑类动作回落到「结构维护」菜单"
+  },
+  {
+    "id": "DEF-084",
+    "severity": "轻微",
+    "recordedState": "**已修复（浏览器实测通过，随批次 l 回归）**",
+    "recordedFix": "9cf8879（本批）",
+    "recordedRegression": "2026-09-22 §3.27：新建一条**建房带**（浅底独立横带，位于社区头部与关键数字之间）——左起「建房」标签 ｜ **实心主按钮「一键生成结构链」**（副标题标明 楼栋 → 单元 → 房屋）｜「或按层级分步建」分隔 ｜ 三枚带序号徽标的分步按钮 ｜ 右端低频「结构维护 ▾」；社区级操作（编辑社区/停用/删除/社区设置）留在头部，两类动作不再混排"
+  },
+  {
+    "id": "DEF-085",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 l 回归）**",
+    "recordedFix": "9cf8879（本批）",
+    "recordedRegression": "2026-09-22 §3.27：`UnitBatchDialog` 升级为「建单元与房屋」——楼栋下拉（带 `N 个单元 · N 套` 规模）+ 单元序号规则 + **房屋规则开关**（楼层区间 / 每层序号 / 房号前后缀 / 跳过项 / 建筑面积/户型/朝向/初始状态）+ 实时预览；提交改为**后端批量端点** `POST /units/batch` → 对成功创建的单元逐个 `POST /houses/batch`，逐行结果交统一的批量结果弹窗，部分成功语义不再由前端循环模拟"
+  },
+  {
+    "id": "DEF-086",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器实测通过，随批次 m 回归）**",
+    "recordedFix": "0002fe3（本批）",
+    "recordedRegression": "2026-09-22 §3.28：`BuildingEditDialog` 新建模式重写为**批量建楼栋**——「名称前缀 + 起始/结束序号 + 名称后缀」按序号区间建多栋（或切「单栋自定义名称」建 `A 座` 这类无序号名称）＋ 总层数/描述 ＋ **「同时建立单元与房屋」开关**（每栋单元数、单元名前后缀、楼层区间 × 每层序号、房号前后缀、跳过项、建筑面积/房间数/初始状态）＋ 实时预览（楼栋名 chips / 单元名样例 / 首末房号 / 重名与层数不一致提示）；提交链 `POST /buildings/batch` → 成功行逐个 `POST /units/batch` → `POST /houses/batch`，逐行结果交统一的批量结果弹窗；编辑模式保持原单栋表单不变"
+  },
+  {
+    "id": "DEF-087",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：管理端可开启会话 + `residentId` 幂等与 400/403 边界 + 租约群聊回写 `conversation_id`）"
+  },
+  {
+    "id": "DEF-088",
+    "severity": "轻微",
+    "recordedState": "**已按裁决修正（待回归）**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：本人 + `TO_SIGN` 放行、非本人 403、5607/5608 零调用点）"
+  },
+  {
+    "id": "DEF-089",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：`tenant_confirm_time` 取首次承约 + 零二次点击 + 三态同时成立）"
+  },
+  {
+    "id": "DEF-090",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：两路径写死关联 + 同屋多租约一一对应 + `NULL` 即空不回退）"
+  },
+  {
+    "id": "DEF-091",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：变更历史失败主数据仍渲染 + 主数据失败有失败态 + 不出现整页空白）"
+  },
+  {
+    "id": "DEF-092",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：有群渲染并可进入正确会话 + 无群不渲染 + 申请入口真关联）"
+  },
+  {
+    "id": "DEF-093",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：任意状态入口可见 + 不可支付为禁用 + 有原因文案）"
+  },
+  {
+    "id": "DEF-094",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：接单真调 `accept` + 处理可调 `process` + 完成带 `?action=complete`）"
+  },
+  {
+    "id": "DEF-095",
+    "severity": "严重",
+    "recordedState": "**已修（已验证：admin1 → 200）**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "2026-09-22：admin1 调押金端点 → **200**（修复前 500）；全库 **54 表**（含 Flyway 历史表 `flyway_schema_history`，业务表 53 张）排查无其它遗漏，同类预防性收口 `sys_blacklist_log`"
+  },
+  {
+    "id": "DEF-096",
+    "severity": "严重",
+    "recordedState": "**已修（已验证）**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "2026-09-22：V25 幂等回填后实测租约 **4/6 = `PAID`**；重复执行幂等"
+  },
+  {
+    "id": "DEF-097",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：`CLOSED` 重复关闭幂等 200 零脏记录 + `PENDING → CLOSED` 仍 5302）"
+  },
+  {
+    "id": "DEF-098",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "待回归（判据见描述末：非参与者 403 + 撞号对双向不可见 + 三类会话同口径）"
+  },
+  {
+    "id": "DEF-099",
+    "severity": "轻微",
+    "recordedState": "**已修（接口级实测通过：405/415/400/404 四码实测命中，403 回归未改坏）**",
+    "recordedFix": "待提交（工作区改动）",
+    "recordedRegression": "2026-09-23 临时实例（端口 8099 + 临时库 `community_residence_defcheck`，用后已停并已删库）实测原始报文——`GET /api/v1/service-categories`（仅 POST）→ **HTTP 405** `{\"code\":405,\"message\":\"请求方法不被支持\",...}`；`POST` 同路径 `Content-Type: text/plain` → **HTTP 415** `{\"code\":415,\"message\":\"请求内容类型不被支持\",...}`；畸形 JSON → **HTTP 400** `{\"code\":400,\"message\":\"请求体缺失或格式不正确，请提交合法的 JSON 请求体\",...}`；不存在路径 → **HTTP 404** `{\"code\":4001,\"message\":\"接口不存在\",...}`；居民 token 调超管端点 → **HTTP 403** `{\"code\":403,\"message\":\"无权限访问\",...}`（回归未改坏）"
+  },
+  {
+    "id": "DEF-100",
+    "severity": "轻微",
+    "recordedState": "**已修**",
+    "recordedFix": "由主会话回填",
+    "recordedRegression": "2026-09-22：改顺序无关等价断言后**连跑 3 次全绿**"
+  },
+  {
+    "id": "DEF-101",
+    "severity": "一般",
+    "recordedState": "**已修（文档勘误，实现经核验符合设计源头 §9.21.4）**",
+    "recordedFix": "—",
+    "recordedRegression": "2026-09-29：`13` 号矩阵第 8 行按 §9.21.4 修订；新增 `WorkOrderNotificationMatrixTest`（10/10 绿）锁死矩阵"
+  },
+  {
+    "id": "DEF-102",
+    "severity": "一般",
+    "recordedState": "**已修（文档勘误，实现经核验符合设计源头 §9.21.4）**",
+    "recordedFix": "—",
+    "recordedRegression": "2026-09-29：`13` 号矩阵第 5 行按 §9.21.4 修订；新增 `WorkOrderNotificationMatrixTest`（10/10 绿）锁死矩阵"
+  },
+  {
+    "id": "DEF-103",
+    "severity": "致命",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-104",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-105",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-106",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-107",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-108",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-109",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-110",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-111",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-112",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-113",
+    "severity": "严重",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-114",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-115",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-116",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-117",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-118",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-119",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-120",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-121",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-122",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-123",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-124",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-125",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-126",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-127",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-128",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-129",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-130",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-131",
+    "severity": "一般",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-132",
+    "severity": "轻微",
+    "recordedState": "**已修待回归**",
+    "recordedFix": "676862a（批次 o）",
+    "recordedRegression": "待回归（判据见描述末）"
+  },
+  {
+    "id": "DEF-133",
+    "severity": "一般",
+    "recordedState": "关闭（按批准设计修正并回归）",
+    "recordedFix": "2026-10-11 bg-3，见§3.77；未提交",
+    "recordedRegression": "见§3.77真实接口/UI、V31及全量自动化证据"
+  },
+  {
+    "id": "DEF-134",
+    "severity": "严重",
+    "recordedState": "**现行仅超管新建边界符合设计；原入口期望交60裁决（见§3.75）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-135",
+    "severity": "一般",
+    "recordedState": "关闭（按批准设计修正并回归）",
+    "recordedFix": "2026-10-11 bg-3，见§3.77；未提交",
+    "recordedRegression": "见§3.77真实接口/UI、V31及全量自动化证据"
+  },
+  {
+    "id": "DEF-136",
+    "severity": "轻微",
+    "recordedState": "关闭（按批准设计修正并回归）",
+    "recordedFix": "2026-10-11 bg-3，见§3.77；未提交",
+    "recordedRegression": "见§3.77真实接口/UI、V31及全量自动化证据"
+  },
+  {
+    "id": "DEF-137",
+    "severity": "一般",
+    "recordedState": "**删除入口真实浏览器复核通过；结构交互增强仍待裁决（见§3.75）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-138",
+    "severity": "一般",
+    "recordedState": "**已按批准17修复：文件上传/真实图片校验/保存清空；见§3.79**",
+    "recordedFix": "2026-10-11",
+    "recordedRegression": "自动化与隔离实测通过，最终用户复验另行安排"
+  },
+  {
+    "id": "DEF-139",
+    "severity": "严重",
+    "recordedState": "安全白名单参数采集与显示/过滤已修复并验证；历史未采集不补造，见§3.76",
+    "recordedFix": "未提交",
+    "recordedRegression": "825/249全量；新参数与迁出日志真实核查通过"
+  },
+  {
+    "id": "DEF-140",
+    "severity": "一般",
+    "recordedState": "**已修复，单测与真实HTTP400回归通过（见§3.75）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-141",
+    "severity": "一般",
+    "recordedState": "**已修复并回归（bh-1，§3.78）**",
+    "recordedFix": "2026-10-11",
+    "recordedRegression": "866/265；真实隔离28项"
+  },
+  {
+    "id": "DEF-142",
+    "severity": "一般",
+    "recordedState": "**按用户2026-10-12新口径复核通过：当前十列CSV样例12行成功，重复12行全部拒绝/零新增；不再等旧Excel，不支持原生xlsx**",
+    "recordedFix": "—",
+    "recordedRegression": "§3.85；resident-import-category-verification.json"
+  },
+  {
+    "id": "DEF-143",
+    "severity": "严重",
+    "recordedState": "**已修复并回归（bh-1，§3.78）**",
+    "recordedFix": "2026-10-11",
+    "recordedRegression": "866/265；真实隔离28项"
+  },
+  {
+    "id": "DEF-144",
+    "severity": "严重",
+    "recordedState": "**已修复并定向回归（bh-2，§3.80）**",
+    "recordedFix": "2026-10-12",
+    "recordedRegression": "隔离61项/开发只读20项；895/274；未测渠道交易"
+  },
+  {
+    "id": "DEF-145",
+    "severity": "一般",
+    "recordedState": "**按用户2026-10-12新口径复核通过：居民提交工单类别实际显示、可选中并随提交读回一致**",
+    "recordedFix": "—",
+    "recordedRegression": "§3.85；category-visible-selected-1024.png"
+  },
+  {
+    "id": "DEF-146",
+    "severity": "严重",
+    "recordedState": "迁出主链、历史租约/同住者与旧页面刷新真实回归通过，见§3.76；不把TENANT身份类型当在住状态",
+    "recordedFix": "未提交",
+    "recordedRegression": "双端在租→已搬出，房屋/关系/租约一致；原未指明其他入口不泛化结案"
+  },
+  {
+    "id": "DEF-147",
+    "severity": "一般",
+    "recordedState": "**待修复（待排期）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-148",
+    "severity": "一般",
+    "recordedState": "**已修复并定向回归（bh-2，§3.80）**",
+    "recordedFix": "2026-10-12",
+    "recordedRegression": "隔离61项/开发只读20项；895/274；未测渠道交易"
+  },
+  {
+    "id": "DEF-149",
+    "severity": "一般",
+    "recordedState": "**已修复并定向回归（bh-2，§3.80）**",
+    "recordedFix": "2026-10-12",
+    "recordedRegression": "隔离61项/开发只读20项；895/274；未测渠道交易"
+  },
+  {
+    "id": "DEF-150",
+    "severity": "一般",
+    "recordedState": "**干净数据租约群创建时序回归通过（§3.42）；不混同预约创建即建看房群**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-151",
+    "severity": "一般",
+    "recordedState": "**干净数据单群/重复审批与申请幂等回归通过（§3.42）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-152",
+    "severity": "严重",
+    "recordedState": "**待修复（待排期）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-153",
+    "severity": "严重",
+    "recordedState": "**待修复（待排期）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-154",
+    "severity": "一般",
+    "recordedState": "**已修复，按范围加载/完整分页/竞态与真实浏览器回归通过（见§3.75）**",
+    "recordedFix": "—",
+    "recordedRegression": "—"
+  },
+  {
+    "id": "DEF-157",
+    "severity": "严重",
+    "recordedState": "**已修复（浏览器回归通过）**",
+    "recordedFix": "89671f1",
+    "recordedRegression": "`evidence/historical-reference-restored-20261012/24-staff-viewing-group-fixed.png`、`evidence/historical-reference-restored-20261012/25-resident-viewing-group-fixed.png`；前端 210/210、typecheck/build 通过`"
+  },
+  {
+    "id": "DEF-158",
+    "severity": "严重",
+    "recordedState": "**待用户裁决（身份凭据口径）**",
+    "recordedFix": "—",
+    "recordedRegression": "代码证据：`SecurityConfig.java`、`ViewingAppointmentController.java`、`ViewingAppointmentService.java`、`ReservationActionDTO.java`；本轮不擅自新增预约编号或改认证策略`"
+  },
+  {
+    "id": "DEF-159",
+    "severity": "一般",
+    "recordedState": "**已修复（单测回归通过）**",
+    "recordedFix": "8056c19",
+    "recordedRegression": "`WorkOrderStateMachineFixTest` 新增驳回/取消前置状态断言；定向后端 **14/14** 通过，修复后记录恢复为真实前置状态。`WorkOrderService.java` 原有通知注释改动未混入本提交。"
+  },
+  {
+    "id": "DEF-160",
+    "severity": "一般",
+    "recordedState": "**已修复（浏览器回归通过）**",
+    "recordedFix": "d7f5197（代码）/ 49103a7（测试补强）",
+    "recordedRegression": "居民详情与列表均将 `CLOSED` 纳入补评入口；前端回归用例通过。真实浏览器复测：终审后显示评价表单，提交 5 星成功，刷新后展示评价结果；首次查询无评价时的 HTTP 404 为既有「暂无评价」空态语义，由前端吞掉，不作为功能失败。"
+  },
+  {
+    "id": "DEF-161",
+    "severity": "一般",
+    "recordedState": "**已修复，依现行阈值规则冻结/吊销/防重回归通过（见§3.75）**",
+    "recordedFix": "—",
+    "recordedRegression": "真实 API 回归：3 条 `VIEWING_NO_SHOW` 记录、账号 ACTIVE、第 4 条预约 HTTP 200；证据见 `output/playwright/viewing-violation-audit-2026-10-09.txt`。需先裁决复用统一阈值自动冻结，还是每次违约由管理端明确选择处置。"
+  },
+  {
+    "id": "DEF-162",
+    "severity": "严重",
+    "recordedState": "**已修复并回归通过**",
+    "recordedFix": "当前工作区修复（待阶段提交）+ `NoticeDataScopeFixTest`",
+    "recordedRegression": "居民读列表与详情改为按当前有效居住关系匹配社区/楼栋；纯 `GUEST` 公告对居民不可见；管理员绑定社区可读取其楼栋公告；楼栋定向发布只触达目标楼栋在住 ACTIVE 居民；专项测试 12/12，公告专项 51/51，后端全量 745/745；浏览器最终回归：`A-2号楼` 目标公告对 `A-1号楼` 居民列表不可见、详情返回 404、居民通知数为 0、console/page/API 错误为 0。证据见 `output/playwright/cf-e5-building-scope-fixed-final-2026-10-09.txt`。"
+  },
+  {
+    "id": "DEF-163",
+    "severity": "严重",
+    "recordedState": "**已修复并回归通过**",
+    "recordedFix": "当前工作区修复（待阶段提交）+ `CommunityCascadeDeleteTest`",
+    "recordedRegression": "`CommunityService.delete` 按社区查询通知 ID，先删除 `notification_channel_log`，再删除 `notification`；单测 7/7 通过；隔离库 `community_residence_test` 真实回归：创建临时社区/楼栋/单元/房屋，造通知及渠道留痕后 DELETE 返回 200，社区、通知、渠道留痕、楼栋、单元、房屋残留计数均为 0。证据见 `output/playwright/cf-e1-cascade-notification-log-fixed-20261009.txt`。"
+  },
+  {
+    "id": "DEF-164",
+    "severity": "严重",
+    "recordedState": "**已修复并回归通过**",
+    "recordedFix": "当前工作区修复 + `DepositRefundServiceTest`",
+    "recordedRegression": "统一对发起/成功/失败留痕 detail 按 500 字符截断；定向测试 19/19；浏览器长失败原因 + 500 字符备注显示渠道失败原因，API/console/page 错误 0；隔离库验证 FAILED/PAID 与两列长度上限。证据见 `output/playwright/cf-e3f-refund-control-20261009.txt`。"
+  },
+  {
+    "id": "DEF-165",
+    "severity": "严重",
+    "recordedState": "**已修复并回归通过**",
+    "recordedFix": "fix(notification): notify admins on agreement confirmation",
+    "recordedRegression": "补齐社区绑定且启用的 `ADMIN` 管理员收件人：居民单方确认发送「居民已确认租赁协议」，双方确认发送「租赁协议已确认」；保留 `owner_type=USER`、`LEASE_AGREEMENT` 来源 ID 与幂等口径。定向协议测试 **11/11**、后端全量 **747/747**；隔离浏览器回归中管理端深链 `/admin/housing-lease?tab=leases`、居民端深链 `/resident/housing-lease?tab=lease` 均通过，API/console/page 错误为 0，测试数据已清理。详见 `output/playwright/cf-e11-agreement-notification-fixed-browser-20261010.json`。"
+  },
+  {
+    "id": "DEF-166",
+    "severity": "一般",
+    "recordedState": "**已修复并回归通过**",
+    "recordedFix": "fix(notification): complete viewing appointment notification matrix",
+    "recordedRegression": "新建预约向社区绑定管理员发送「新看房预约」；居民取消向绑定管理员发送「看房预约已取消」；保留确认 / 完成 / 违约 / 分配既有通知。新增后端回归 **7/7**，前端通知导航回归 **14/14**；方案 B 浏览器链路验证游客浏览 → 登录回跳 → 居民预约，居民无游客字段；管理员 / 居民 / 服务人员消息中心分别正确落到 `/admin/housing-lease?tab=housings&view=viewings`、`/resident/viewing-appointments/{id}`、`/staff/viewings`，API/console/page 错误为 0。证据见 `output/playwright/cf-e12-viewing-notification-audit-20261010.json`。"
+  },
+  {
+    "id": "DEF-167",
+    "severity": "一般",
+    "recordedState": "关闭（回归通过）",
+    "recordedFix": "本批提交",
+    "recordedRegression": "768/1024/1366px 浏览器无卡片重叠；租约组件 25/25，类型检查与构建通过；详见 §3.66。"
+  },
+  {
+    "id": "DEF-169",
+    "severity": "一般",
+    "recordedState": "已修复，异常类型与真实HTTP403回归通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "ViewingAppointmentRegistrationOnlyTest；08§3.75/§3.76 / nontransaction-isolated-regression-20261011.json"
+  },
+  {
+    "id": "DEF-170",
+    "severity": "严重",
+    "recordedState": "已修复，14项新增单测与真实旧401/新200验证通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "TokenRevisionBoundaryTest/TokenRevisionFilterTest；§3.76；nontransaction-engineering-red/full-20261011.json"
+  },
+  {
+    "id": "DEF-171",
+    "severity": "一般",
+    "recordedState": "已修复，单测先红后绿与真实total=2验证通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "ResidenceRelationEngineeringTest；§3.76；nontransaction-engineering-red/full-20261011.json"
+  },
+  {
+    "id": "DEF-172",
+    "severity": "一般",
+    "recordedState": "已修复，真实STATUS/对象ID/社区/日期留痕通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "§3.76；nontransaction-engineering-full-20261011.json"
+  },
+  {
+    "id": "DEF-173",
+    "severity": "一般",
+    "recordedState": "已修复，32个1024/768核心页组合无页面级溢出；组件3项通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "Pagination.spec.ts；§3.76；bf-logs-page-768-20261011.png"
+  },
+  {
+    "id": "DEF-174",
+    "severity": "严重",
+    "recordedState": "已修复，本批真实请求与12项新增单测通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "§3.81；domain-matrix-before-fix.json"
+  },
+  {
+    "id": "DEF-175",
+    "severity": "严重",
+    "recordedState": "已修复，本批真实请求与12项新增单测通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "§3.81；domain-matrix-before-fix.json"
+  },
+  {
+    "id": "DEF-176",
+    "severity": "一般",
+    "recordedState": "已修复，本批真实请求与12项新增单测通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "§3.81；domain-matrix-before-fixture-adjustment.json"
+  },
+  {
+    "id": "DEF-177",
+    "severity": "严重",
+    "recordedState": "已修复，910/278及81项接口回归通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "§3.82；def177-before-fix-api.json"
+  },
+  {
+    "id": "DEF-178",
+    "severity": "一般",
+    "recordedState": "已修复，4项新增测试及11项浏览器侧栏交互通过",
+    "recordedFix": "未提交",
+    "recordedRegression": "§3.82；def178-sidebar-before.png"
+  },
+  {
+    "id": "DEF-179",
+    "severity": "一般",
+    "recordedState": "已修复：受控fileList在重开同步清空，新增组件测试及真实文件选择重开/重复导入复验",
+    "recordedFix": "本批本地提交",
+    "recordedRegression": "§3.85；ResidentImportReset.spec.ts"
+  },
+  {
+    "id": "DEF-180",
+    "severity": "一般",
+    "recordedState": "已修复：真实姓名、中性居民角色、去MOCK趋势，完成卡片如实标未关闭；统计规则方案待确认",
+    "recordedFix": "本批本地提交",
+    "recordedRegression": "§3.86；19方案"
+  },
+  {
+    "id": "DEF-181",
+    "severity": "一般",
+    "recordedState": "已修复：分离错误/空态与统计/跟进状态，重试入口；失败无0条分页及误分类",
+    "recordedFix": "本批本地提交",
+    "recordedRegression": "§3.86；EvaluationLoadState.spec.ts"
+  },
+  {
+    "id": "DEF-182",
+    "severity": "一般",
+    "recordedState": "已修复并隔离回归（2026-10-12 bl）",
+    "recordedFix": "完整任务本地提交，见Git log",
+    "recordedRegression": "§3.88；staff-rules-20261012/regression.json；本人按钮200、越权拒绝、并发一次成功"
+  },
+  {
+    "id": "DEF-183",
+    "severity": "一般",
+    "recordedState": "验证（自动通过，用户复测待填）",
+    "recordedFix": "37558b9",
+    "recordedRegression": "996单测/305前端；隔离中文用户名、手机号、重复及标识碰撞拒绝"
+  },
+  {
+    "id": "DEF-184",
+    "severity": "严重",
+    "recordedState": "验证（自动通过，用户复测待填）",
+    "recordedFix": "37558b9",
+    "recordedRegression": "GBK12行/三类关系成功，重复12行拒绝，错归属行零残留；真实上传/下载按钮"
+  },
+  {
+    "id": "DEF-185",
+    "severity": "严重",
+    "recordedState": "验证（自动通过，用户复测待填）",
+    "recordedFix": "d046f01",
+    "recordedRegression": "普通ADMIN真实保存/下架200，单条记录更新；跨社区拒绝，占用历史不能删"
+  },
+  {
+    "id": "DEF-186",
+    "severity": "一般",
+    "recordedState": "验证（自动通过，用户复测待填）",
+    "recordedFix": "d046f01",
+    "recordedRegression": "故意置旧冗余列仍按真实模型筛选；公开占用隐藏/ADMIN范围；真实下拉与搜索按钮"
+  },
+  {
+    "id": "DEF-187",
+    "severity": "一般",
+    "recordedState": "验证（自动通过，用户复测待填）",
+    "recordedFix": "d046f01",
+    "recordedRegression": "1024/768所有动作边界内，真实下架可点，确认说明下线不取消占用"
+  },
+  {
+    "id": "DEF-188",
+    "severity": "一般",
+    "recordedState": "验证（自动通过，用户复测待填）",
+    "recordedFix": "d046f01",
+    "recordedRegression": "3前端加载/失败/迟到测试；延迟400ms真实保存门禁及描述更新读回"
+  }
+]
