@@ -8,9 +8,6 @@ import com.community.residence.common.conversation.dto.SendMessageDTO;
 import com.community.residence.common.conversation.service.ConversationService;
 import com.community.residence.common.conversation.vo.ConversationMessageVO;
 import com.community.residence.common.conversation.vo.ConversationVO;
-import com.community.residence.common.housing.dto.CreateViewingAppointmentDTO;
-import com.community.residence.common.housing.service.ViewingAppointmentService;
-import com.community.residence.common.housing.vo.ViewingAppointmentVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,23 +31,6 @@ import java.util.List;
 public class ConversationController {
 
     private final ConversationService conversationService;
-    private final com.community.residence.common.housing.service.HousingService housingService;
-    private final ViewingAppointmentService viewingAppointmentService;
-
-    /**
-     * 会话内发起看房预约（R69，接口设计.md 9.19）：仅注册并登录的居民租约群参与者可发起；
-     * 复用既有创建逻辑（同表/同状态机/同冲突校验），lease_id 取自会话 related_id，
-     * **不再新建 VIEWING_GROUP**（直接复用该租约群作为会话载体）。
-     */
-    @Operation(summary = "会话内发起看房预约",
-            description = "仅居民租约群聊参与者可在会话内预约看房；lease_id 取自会话关联租约，不再新建看房群聊")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @PostMapping("/{id}/viewing-appointments")
-    public ApiResponse<ViewingAppointmentVO> createViewingAppointment(
-            @PathVariable Long id,
-            @RequestBody @Valid CreateViewingAppointmentDTO dto) {
-        return ApiResponse.success(viewingAppointmentService.createInConversation(id, dto));
-    }
 
     @Operation(summary = "我的会话列表（分页）",
             description = "参与者视角，含未读数与最后消息摘要；type 过滤：VIEWING_GROUP/DIRECT")
@@ -69,22 +49,6 @@ public class ConversationController {
     @GetMapping("/{id}")
     public ApiResponse<ConversationVO> getById(@PathVariable Long id) {
         return ApiResponse.success(conversationService.getById(id));
-    }
-
-    @Operation(summary="租约会话来源房源预约上下文",description="仅承租居民且为未关闭租约会话参与者，不要求公开可见")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @GetMapping("/{id}/viewing-context")
-    public ApiResponse<com.community.residence.common.housing.vo.HousingVO> viewingContext(@PathVariable Long id) {
-        return ApiResponse.success(housingService.privateLeaseViewingDetail(viewingAppointmentService.requireConversationViewingHousing(id,null)));
-    }
-
-    @Operation(summary="租约会话可预约时段",description="复用公开入口相同的时段与冲突计算，私有上下文不扩大公众范围")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @GetMapping("/{id}/viewing-slots")
-    public ApiResponse<java.util.List<com.community.residence.common.reservation.vo.AvailableSlotVO>> viewingSlots(@PathVariable Long id,
-        @org.springframework.web.bind.annotation.RequestParam @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
-        @org.springframework.web.bind.annotation.RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate) {
-        return ApiResponse.success(housingService.availableSlotsForLeaseViewing(viewingAppointmentService.requireConversationViewingHousing(id,null),startDate,endDate));
     }
 
     @Operation(summary = "会话消息列表", description = "仅参与者可读，时间正序非分页；非参与者 403")
@@ -114,17 +78,6 @@ public class ConversationController {
                 conversationService.openDirect(dto.getCommunityId(), dto.getResidentId()));
     }
 
-    @Operation(summary = "建/取租约沟通会话",
-            description = "DEF-076 管理端补建入口（幂等）：审批通过内核已自动建群，本端点用于存量/旁路数据"
-                    + "缺会话时补建，或在会话中心按 leaseId 直接进入；已存在则返回既有会话，"
-                    + "并补写 lease_record.conversation_id（承约前置 DEF-077 的判定依据）")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PostMapping("/lease-groups")
-    public ApiResponse<ConversationVO> ensureLeaseGroup(
-            @RequestBody @Valid com.community.residence.common.conversation.dto.EnsureLeaseGroupDTO dto) {
-        return ApiResponse.success(conversationService.ensureLeaseGroup(dto.getLeaseId()));
-    }
-
     @Operation(summary = "标记会话已读",
             description = "更新参与者已读游标（仅前移）；lastMessageId=最后已读消息ID")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
@@ -139,5 +92,4 @@ public class ConversationController {
     public ApiResponse<ConversationMessageVO> sendImage(@PathVariable Long id, @org.springframework.web.bind.annotation.RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
         return ApiResponse.success(conversationService.sendImage(id,file));
     }
-
 }
