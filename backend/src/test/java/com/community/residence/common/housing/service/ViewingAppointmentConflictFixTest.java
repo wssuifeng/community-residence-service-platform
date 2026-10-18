@@ -46,6 +46,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("看房预约冲突修复回归（DEF-007/008）")
 class ViewingAppointmentConflictFixTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     /** 既有预约 A：10:00-12:00（占用中），TC-SP-004 前置 */
     private static final LocalTime A_START = LocalTime.of(10, 0);

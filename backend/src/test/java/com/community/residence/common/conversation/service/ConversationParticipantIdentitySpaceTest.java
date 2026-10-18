@@ -74,6 +74,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("会话参与者身份空间收口（DEF-075）")
 class ConversationParticipantIdentitySpaceTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final Long DIRECT_CONV = 1L;      /* 直通会话：resident1 + admin1 */
     private static final Long WORK_ORDER_CONV = 2L;  /* 工单临时群聊：resident1 + admin1 + staff1 */

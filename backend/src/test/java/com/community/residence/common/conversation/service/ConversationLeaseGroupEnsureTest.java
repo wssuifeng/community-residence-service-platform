@@ -61,6 +61,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("建/取租约沟通会话（DEF-076）")
 class ConversationLeaseGroupEnsureTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final Long LEASE_ID = 3L;
     private static final Long COMMUNITY_ID = 2L;

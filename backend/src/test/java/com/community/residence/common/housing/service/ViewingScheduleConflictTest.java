@@ -62,6 +62,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("看房预约日程冲突回归（DEF-062）")
 class ViewingScheduleConflictTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final long RESIDENT_ID = 5L;
 

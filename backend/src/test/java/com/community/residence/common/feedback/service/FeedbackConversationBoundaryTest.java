@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
 /** 反馈异常组合：拒绝发生在任何写入/通知之前，居民追问按实际处理人触达。 */
 @ExtendWith(MockitoExtension.class)
 class FeedbackConversationBoundaryTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
     @Mock FeedbackMapper feedbackMapper;
     @Mock FeedbackMessageMapper messageMapper;
     @Mock ResidentMapper residentMapper;

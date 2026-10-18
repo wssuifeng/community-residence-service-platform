@@ -56,6 +56,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("工单临时群聊（R74，会话侧）")
 class ConversationServiceWorkOrderGroupTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final Long GROUP_ID = 77L;
     private static final Long ORDER_ID = 5L;

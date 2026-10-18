@@ -37,7 +37,7 @@ class FeedbackPrivacyAndImageTest {
  private final WebSocketSessionService online=mock(WebSocketSessionService.class);
  private final SimpMessagingTemplate push=mock(SimpMessagingTemplate.class);
  private final NotificationService notifications=mock(NotificationService.class);
- private final FeedbackService service=new FeedbackService(images,feedback,messages,mock(FeedbackAttachmentMapper.class),residents,mock(SysUserMapper.class),notifications,mock(FileUploadService.class),push,online);
+ private final FeedbackService service=new FeedbackService(new com.community.residence.common.messaging.service.AfterCommitDeliveryService(), images,feedback,messages,mock(FeedbackAttachmentMapper.class),residents,mock(SysUserMapper.class),notifications,mock(FileUploadService.class),push,online);
  private Feedback item;
  @BeforeEach void before(){SecurityUtils.setAuthentication(new UserContext(1L,"测试账号","RESIDENT",Set.of()));item=new Feedback();item.setId(3L);item.setResidentId(1L);item.setCommunityId(8L);item.setStatus("PENDING");item.setTitle("测试反馈");when(feedback.selectById(3L)).thenReturn(item);}
  @AfterEach void after(){SecurityContextHolder.clearContext();}

@@ -139,6 +139,8 @@ class WorkOrderNotificationMatrixTest {
 
     @BeforeEach
     void setUp() {
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(
+                new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), "workorder-test"), com.community.residence.common.workorder.entity.WorkOrder.class);
         order = new WorkOrder();
         order.setId(ORDER_ID);
         order.setOrderNo(ORDER_NO);

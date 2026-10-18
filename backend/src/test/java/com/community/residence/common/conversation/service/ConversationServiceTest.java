@@ -69,6 +69,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("多方会话（R63）")
 class ConversationServiceTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final Long CONV_ID = 10L;
     private static final Long RESIDENT_USER_ID = 1L;

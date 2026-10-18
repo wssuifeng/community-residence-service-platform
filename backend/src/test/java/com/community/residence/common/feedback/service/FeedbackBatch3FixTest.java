@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("反馈第三批修复回归（DEF-027）")
 class FeedbackBatch3FixTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     @Mock
     private FeedbackMapper feedbackMapper;

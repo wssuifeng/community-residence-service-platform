@@ -63,6 +63,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("直通会话管理端发起（DEF-076）")
 class ConversationDirectAdminInitiatedTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     private static final Long COMMUNITY_ID = 1L;
     private static final Long RESIDENT_ID = 1L;

@@ -46,6 +46,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("看房预约流转通知修复回归（DEF-023）")
 class ViewingNotificationFixTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     @Mock
     private ViewingAppointmentMapper appointmentMapper;

@@ -71,6 +71,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ConversationService {
+
+    private final com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery;
     private final ChatImageService chatImageService;
 
     /** 系统消息发送人角色（群聊状态变更留痕，非任何账号发言） */
@@ -761,8 +763,9 @@ public class ConversationService {
             return;
         }
         try {
-            messagingTemplate.convertAndSend("/topic/conversation/" + conversation.getId(),
-                    ConversationPushVO.message(vo));
+            String destination = "/topic/conversation/" + conversation.getId();
+            ConversationPushVO payload = ConversationPushVO.message(vo);
+            afterCommitDelivery.deliver(destination, () -> messagingTemplate.convertAndSend(destination, payload));
         } catch (Exception e) {
             log.warn("会话 WebSocket 推送失败，由轮询兜底：conversationId={}", conversation.getId(), e);
         }

@@ -48,6 +48,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("看房预约注册居民权限回归（DEF-158）")
 class ViewingAppointmentRegistrationOnlyTest {
+    @org.mockito.Spy private com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery = new com.community.residence.common.messaging.service.AfterCommitDeliveryService();
 
     @Mock
     private ViewingAppointmentMapper appointmentMapper;

@@ -75,6 +75,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class ViewingAppointmentService {
+
+    private final com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery;
     private final com.community.residence.common.conversation.service.ChatImageService chatImageService;
 
     /** 占用时段的预约状态集合（冲突检测口径） */
@@ -744,8 +746,9 @@ public class ViewingAppointmentService {
                 && webSocketSessionService.isUserOnline(appointment.getAssignedStaffId());
         if (residentOnline || assigneeOnline) {
             try {
-                messagingTemplate.convertAndSend("/topic/appointment/" + appointment.getId(),
-                        ViewingPushVO.message(vo));
+                String destination = "/topic/appointment/" + appointment.getId();
+                ViewingPushVO payload = ViewingPushVO.message(vo);
+                afterCommitDelivery.deliver(destination, () -> messagingTemplate.convertAndSend(destination, payload));
             } catch (Exception e) {
                 log.warn("看房会话 WebSocket 推送失败，由轮询兜底：appointmentId={}", appointment.getId(), e);
             }
