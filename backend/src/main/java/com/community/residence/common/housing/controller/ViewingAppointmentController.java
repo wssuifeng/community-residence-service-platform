@@ -2,11 +2,8 @@ package com.community.residence.common.housing.controller;
 
 import com.community.residence.common.web.result.ApiResponse;
 import com.community.residence.common.web.result.PageVO;
-import com.community.residence.common.housing.dto.AssignViewingDTO;
-import com.community.residence.common.housing.dto.CreateViewingAppointmentDTO;
 import com.community.residence.common.housing.dto.CreateViewingMessageDTO;
 import com.community.residence.common.housing.service.ViewingAppointmentService;
-import com.community.residence.common.housing.vo.AssigneeOptionVO;
 import com.community.residence.common.housing.vo.ViewingAppointmentVO;
 import com.community.residence.common.housing.vo.ViewingMessageVO;
 import com.community.residence.common.reservation.dto.ReservationActionDTO;
@@ -37,35 +34,11 @@ public class ViewingAppointmentController {
 
     private final ViewingAppointmentService appointmentService;
 
-    @Operation(summary = "创建看房预约", description = "仅注册并登录的居民账号可提交；服务端从令牌绑定预约人身份")
-    @PreAuthorize("hasRole('RESIDENT')")
-    @PostMapping
-    public ApiResponse<ViewingAppointmentVO> create(@RequestBody @Valid CreateViewingAppointmentDTO dto) {
-        return ApiResponse.success(appointmentService.create(dto));
-    }
-
     @Operation(summary = "查询预约详情", description = "居民仅可查看本人；服务人员仅可查看被分配预约；管理端按社区范围查看")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}")
     public ApiResponse<ViewingAppointmentVO> getById(@PathVariable Long id) {
         return ApiResponse.success(appointmentService.getById(id));
-    }
-
-    @Operation(summary = "分配带看人",
-            description = "R59：将预约分配给启用状态的服务人员/社区管理员（禁超管），重复分配覆盖；成功后双方收到通知")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PatchMapping("/{id}/assign")
-    public ApiResponse<ViewingAppointmentVO> assign(@PathVariable Long id,
-                                                    @RequestBody @Valid AssignViewingDTO dto) {
-        return ApiResponse.success(appointmentService.assign(id, dto.getAssigneeId()));
-    }
-
-    @Operation(summary = "带看人候选列表",
-            description = "R59：启用状态服务人员全量 + 管辖该社区的启用社区管理员；ADMIN 仅可查其绑定社区")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @GetMapping("/assignable-assignees")
-    public ApiResponse<List<AssigneeOptionVO>> assignableAssignees(@RequestParam Long communityId) {
-        return ApiResponse.success(appointmentService.assignableAssignees(communityId));
     }
 
     @Operation(summary = "会话消息列表（R59 旧口径，保留兼容）",
@@ -101,14 +74,6 @@ public class ViewingAppointmentController {
         return ApiResponse.success(appointmentService.page(page, size, status, housingId, startDate, endDate));
     }
 
-    @Operation(summary = "确认预约", description = "待确认 → 已预约")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PatchMapping("/{id}/confirm")
-    public ApiResponse<Void> confirm(@PathVariable Long id, @RequestBody @Valid ReservationActionDTO dto) {
-        appointmentService.confirm(id, dto.getReason());
-        return ApiResponse.success();
-    }
-
     @Operation(summary = "完成预约", description = "已预约 → 已完成；STAFF仅本人被分配预约，管理员按社区范围")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/complete")
@@ -124,19 +89,10 @@ public class ViewingAppointmentController {
         appointmentService.cancel(id, dto.getReason());
         return ApiResponse.success();
     }
-
-    @Operation(summary = "标记违约", description = "已预约 → 已违约；居民违约记录留痕")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    @PatchMapping("/{id}/violate")
-    public ApiResponse<Void> violate(@PathVariable Long id, @RequestBody @Valid ReservationActionDTO dto) {
-        appointmentService.violate(id, dto.getReason());
-        return ApiResponse.success();
-    }
     @Operation(summary = "发送图片消息", description = "真实图片≤5MB；保存并向会话参与者发送，不是反馈附件")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @PostMapping(value = "/{id}/messages/image", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<com.community.residence.common.housing.vo.ViewingMessageVO> sendImage(@PathVariable Long id, @org.springframework.web.bind.annotation.RequestPart("file") org.springframework.web.multipart.MultipartFile file) {
         return ApiResponse.success(appointmentService.sendImage(id,file));
     }
-
 }
