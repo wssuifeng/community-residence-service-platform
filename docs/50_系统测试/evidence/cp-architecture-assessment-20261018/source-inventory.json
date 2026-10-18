@@ -1,0 +1,432 @@
+{
+  "assessmentDate": "2026-10-18",
+  "baseCommit": "f58282cca0e8bb9c6660c76e6ff2acb560c6600a",
+  "method": "Static source inventory and exact source anchors; no runtime profiling, traffic, database or business mutation.",
+  "limits": [
+    "Line counts indicate scale, not defect severity or runtime cost.",
+    "Role view counts include layouts/dialogs/subcomponents; not functional-page counts.",
+    "No Bean dependency-cycle conclusion or measured latency is inferred from imports."
+  ],
+  "frontend": {
+    "vueFiles": 144,
+    "nonTestTsFiles": 93,
+    "viewsByRole": {
+      "ForbiddenView.vue": 1,
+      "NotFoundView.vue": 1,
+      "admin": 62,
+      "auth": 2,
+      "guest": 6,
+      "resident": 28,
+      "staff": 7
+    },
+    "largestVue": [
+      {
+        "path": "frontend/src/views/admin/community/StructureTreePane.vue",
+        "lines": 4177
+      },
+      {
+        "path": "frontend/src/views/resident/LeaseListView.vue",
+        "lines": 2119
+      },
+      {
+        "path": "frontend/src/views/admin/reservation/ReservationManageView.vue",
+        "lines": 1596
+      },
+      {
+        "path": "frontend/src/views/admin/notice/NoticeManageView.vue",
+        "lines": 1497
+      },
+      {
+        "path": "frontend/src/views/admin/community/HousesWithHousingView.vue",
+        "lines": 1248
+      },
+      {
+        "path": "frontend/src/views/admin/lease/LeaseListView.vue",
+        "lines": 1231
+      },
+      {
+        "path": "frontend/src/views/resident/LeaseFirstPaymentDialog.vue",
+        "lines": 1141
+      },
+      {
+        "path": "frontend/src/views/resident/HousingReservationView.vue",
+        "lines": 1091
+      },
+      {
+        "path": "frontend/src/views/resident/ReservationListView.vue",
+        "lines": 1091
+      },
+      {
+        "path": "frontend/src/views/staff/WorkOrderDetailView.vue",
+        "lines": 1079
+      },
+      {
+        "path": "frontend/src/views/staff/DashboardView.vue",
+        "lines": 1074
+      },
+      {
+        "path": "frontend/src/views/resident/ReservationCreateView.vue",
+        "lines": 1072
+      },
+      {
+        "path": "frontend/src/views/admin/workorder/WorkOrderListView.vue",
+        "lines": 1035
+      },
+      {
+        "path": "frontend/src/views/resident/WorkOrderDetailView.vue",
+        "lines": 1018
+      },
+      {
+        "path": "frontend/src/views/admin/statistics/DashboardOverview.vue",
+        "lines": 988
+      }
+    ],
+    "largestTs": [
+      {
+        "path": "frontend/src/types/modules/lease.ts",
+        "lines": 422
+      },
+      {
+        "path": "frontend/src/types/modules/community.ts",
+        "lines": 397
+      },
+      {
+        "path": "frontend/src/types/modules/resident.ts",
+        "lines": 316
+      },
+      {
+        "path": "frontend/src/types/modules/housing.ts",
+        "lines": 288
+      },
+      {
+        "path": "frontend/src/api/community.ts",
+        "lines": 285
+      },
+      {
+        "path": "frontend/src/types/modules/workorder.ts",
+        "lines": 243
+      },
+      {
+        "path": "frontend/src/views/admin/community/structureBatch.ts",
+        "lines": 232
+      },
+      {
+        "path": "frontend/src/api/resident.ts",
+        "lines": 182
+      },
+      {
+        "path": "frontend/src/composables/useGridSelection.ts",
+        "lines": 166
+      },
+      {
+        "path": "frontend/src/api/workorder.ts",
+        "lines": 153
+      },
+      {
+        "path": "frontend/src/types/modules/notice.ts",
+        "lines": 153
+      },
+      {
+        "path": "frontend/src/types/modules/reservation.ts",
+        "lines": 150
+      },
+      {
+        "path": "frontend/src/api/housing.ts",
+        "lines": 146
+      },
+      {
+        "path": "frontend/src/types/modules/feedback.ts",
+        "lines": 140
+      },
+      {
+        "path": "frontend/src/views/admin/workorder/dispatch.ts",
+        "lines": 140
+      }
+    ]
+  },
+  "backend": {
+    "javaFiles": 464,
+    "domainFileCounts": {
+      "CommunityResidenceApplication.java": 1,
+      "agreement": 12,
+      "auth": 28,
+      "common": 36,
+      "community": 73,
+      "config": 10,
+      "conversation": 26,
+      "evaluation": 11,
+      "feedback": 17,
+      "filter": 2,
+      "housing": 35,
+      "interceptor": 1,
+      "lease": 43,
+      "log": 4,
+      "messaging": 11,
+      "notice": 20,
+      "payment": 27,
+      "reservation": 13,
+      "resident": 34,
+      "schedule": 10,
+      "statistics": 6,
+      "workorder": 44
+    },
+    "largestJava": [
+      {
+        "path": "backend/src/main/java/com/community/residence/workorder/service/WorkOrderService.java",
+        "lines": 1040
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/housing/service/HousingService.java",
+        "lines": 921
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/conversation/service/ConversationService.java",
+        "lines": 884
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/housing/service/ViewingAppointmentService.java",
+        "lines": 869
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/notice/service/NoticeService.java",
+        "lines": 716
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/agreement/service/AgreementService.java",
+        "lines": 610
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/reservation/service/ReservationService.java",
+        "lines": 583
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/payment/service/PaymentService.java",
+        "lines": 578
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/resident/service/ResidenceApplicationService.java",
+        "lines": 559
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/community/service/CommunityService.java",
+        "lines": 502
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/lease/service/LeaseMoveOutApplicationService.java",
+        "lines": 491
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/resident/service/ResidentService.java",
+        "lines": 472
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/lease/service/LeaseService.java",
+        "lines": 470
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/lease/service/DepositRefundService.java",
+        "lines": 449
+      },
+      {
+        "path": "backend/src/main/java/com/community/residence/community/service/StructureGenerateService.java",
+        "lines": 388
+      }
+    ]
+  },
+  "evidenceAnchors": [
+    {
+      "path": "frontend/src/views/admin/workorder/WorkOrderDetailView.vue",
+      "lines": [
+        120,
+        123
+      ],
+      "pattern": "async function fetchDetail|await Promise.all"
+    },
+    {
+      "path": "frontend/src/views/resident/WorkOrderDetailView.vue",
+      "lines": [
+        134,
+        137
+      ],
+      "pattern": "async function fetchDetail|await Promise.all"
+    },
+    {
+      "path": "frontend/src/views/staff/WorkOrderDetailView.vue",
+      "lines": [
+        95,
+        99,
+        116
+      ],
+      "pattern": "async function fetchDetail|order.value = await getWorkOrder|async function fetchTimeline"
+    },
+    {
+      "path": "frontend/src/utils/request.ts",
+      "lines": [
+        44
+      ],
+      "pattern": "includes\\(response.config.method"
+    },
+    {
+      "path": "frontend/src/utils/dataFreshness.ts",
+      "lines": [
+        3,
+        4
+      ],
+      "pattern": "dataRevision"
+    },
+    {
+      "path": "frontend/src/composables/useLiveRefresh.ts",
+      "lines": [
+        5,
+        9,
+        21,
+        25
+      ],
+      "pattern": "function useLiveRefresh|watch\\(dataRevision|setInterval"
+    },
+    {
+      "path": "frontend/src/composables/useConversationInbox.ts",
+      "lines": [
+        14,
+        21
+      ],
+      "pattern": "async function load|for \\(let next"
+    },
+    {
+      "path": "frontend/src/views/admin/community/StructureTreePane.vue",
+      "lines": [
+        337,
+        377
+      ],
+      "pattern": "async function loadStructure|async function loadScopeHouses"
+    },
+    {
+      "path": "frontend/src/views/admin/community/structureData.ts",
+      "lines": [
+        4
+      ],
+      "pattern": "export async function mapLimited"
+    },
+    {
+      "path": "frontend/src/views/staff/DashboardView.vue",
+      "lines": [
+        2,
+        156,
+        163,
+        164,
+        165,
+        166,
+        167,
+        222
+      ],
+      "pattern": "async function loadDashboard|listWorkOrders\\(|onMounted"
+    },
+    {
+      "path": "frontend/src/views/resident/LeaseListView.vue",
+      "lines": [
+        103,
+        130,
+        444
+      ],
+      "pattern": "async function loadLeases|async function loadLeasePayments|function paymentEntryOf"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/messaging/service/NotificationService.java",
+      "lines": [
+        74,
+        93,
+        118
+      ],
+      "pattern": "public void createForUser|private void create\\(|convertAndSendToUser"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/service/ConversationService.java",
+      "lines": [
+        391,
+        752,
+        764
+      ],
+      "pattern": "public void sendAgreementMessage|private void pushMessage|messagingTemplate.convertAndSend\\("
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/feedback/service/FeedbackService.java",
+      "lines": [
+        114,
+        137,
+        209
+      ],
+      "pattern": "public void close\\(|messagingTemplate.convertAndSend\\("
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/community/service/CommunityService.java",
+      "lines": [
+        249
+      ],
+      "pattern": "public void delete\\("
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/conversation/controller/ConversationController.java",
+      "lines": [
+        36,
+        37,
+        38,
+        77,
+        84
+      ],
+      "pattern": "private final|public ApiResponse.*viewingContext|public ApiResponse.*viewingSlots"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/lease/service/LeaseService.java",
+      "lines": [
+        257,
+        262
+      ],
+      "pattern": "public void applyTransition"
+    },
+    {
+      "path": "frontend/src/store/permission.ts",
+      "lines": [
+        14
+      ],
+      "pattern": "export const usePermissionStore"
+    },
+    {
+      "path": "frontend/src/components/layout/AppSidebar.vue",
+      "lines": [
+        38
+      ],
+      "pattern": "const menuItems"
+    },
+    {
+      "path": "frontend/src/components/conversation/ConversationPane.vue",
+      "lines": [
+        76,
+        77,
+        78
+      ],
+      "pattern": "^\\.conversation-pane"
+    },
+    {
+      "path": "frontend/src/styles/variables.css",
+      "lines": [
+        3
+      ],
+      "pattern": "唯一权威来源"
+    },
+    {
+      "path": "frontend/src/composables/useChatChannel.ts",
+      "lines": [
+        21,
+        40
+      ],
+      "pattern": "const channels = new Map|const merge ="
+    },
+    {
+      "path": "frontend/src/components/business/ChatMessageList.vue",
+      "lines": [
+        2
+      ],
+      "pattern": "const readingPositions"
+    }
+  ]
+}

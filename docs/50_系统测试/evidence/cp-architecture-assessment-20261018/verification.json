@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-18",
+  "assessmentBase": "f58282cca0e8bb9c6660c76e6ff2acb560c6600a",
+  "checks": {
+    "sourceAnchors": 23,
+    "localReportLinks": 21,
+    "trackedChangesUnderDocsOnly": true,
+    "gitDiffCheck": true
+  },
+  "notExecuted": [
+    "Application unit/integration/browser tests",
+    "Application build",
+    "Runtime profiling",
+    "Service startup/shutdown",
+    "Database reads/writes",
+    "Payment/order/refund requests",
+    "User browser operation",
+    "Remote push"
+  ]
+}
