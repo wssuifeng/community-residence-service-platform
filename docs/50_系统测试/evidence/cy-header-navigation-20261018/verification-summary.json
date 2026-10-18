@@ -1,0 +1,150 @@
+{
+  "date": "2026-10-18",
+  "scope": "independent named browser against normal current Vue app; demo logins and read-only pages only",
+  "checks": [
+    {
+      "name": "RESIDENT independent browser demo identity",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT keyboard opens all three personal actions",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT profile stays in its portal",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT returns to matching home",
+      "passed": true
+    },
+    {
+      "name": "resident notification nav active and distinct from conversations",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT header stays in viewport at 1440",
+      "passed": true
+    },
+    {
+      "name": "resident nine desktop nav items fully fit",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT header stays in viewport at 1024",
+      "passed": true
+    },
+    {
+      "name": "RESIDENT header stays in viewport at 768",
+      "passed": true
+    },
+    {
+      "name": "STAFF independent browser demo identity",
+      "passed": true
+    },
+    {
+      "name": "STAFF keyboard opens all three personal actions",
+      "passed": true
+    },
+    {
+      "name": "STAFF profile stays in its portal",
+      "passed": true
+    },
+    {
+      "name": "STAFF current account username rendered",
+      "passed": true
+    },
+    {
+      "name": "STAFF returns to matching home",
+      "passed": true
+    },
+    {
+      "name": "STAFF header stays in viewport at 1440",
+      "passed": true
+    },
+    {
+      "name": "STAFF header stays in viewport at 1024",
+      "passed": true
+    },
+    {
+      "name": "STAFF header stays in viewport at 768",
+      "passed": true
+    },
+    {
+      "name": "ADMIN independent browser demo identity",
+      "passed": true
+    },
+    {
+      "name": "ADMIN keyboard opens all three personal actions",
+      "passed": true
+    },
+    {
+      "name": "ADMIN profile stays in its portal",
+      "passed": true
+    },
+    {
+      "name": "ADMIN current account username rendered",
+      "passed": true
+    },
+    {
+      "name": "ADMIN returns to matching home",
+      "passed": true
+    },
+    {
+      "name": "ADMIN header stays in viewport at 1440",
+      "passed": true
+    },
+    {
+      "name": "ADMIN header stays in viewport at 1024",
+      "passed": true
+    },
+    {
+      "name": "ADMIN header stays in viewport at 768",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN independent browser demo identity",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN keyboard opens all three personal actions",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN profile stays in its portal",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN current account username rendered",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN returns to matching home",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN header stays in viewport at 1440",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN header stays in viewport at 1024",
+      "passed": true
+    },
+    {
+      "name": "SUPER_ADMIN header stays in viewport at 768",
+      "passed": true
+    }
+  ],
+  "allPassed": true,
+  "userBrowser": "untouched",
+  "financialCommands": 0,
+  "businessWrites": "none; demo login session metadata only",
+  "backendRestarted": false,
+  "frontendBuild": "passed, includes vue-tsc",
+  "focusedTests": {
+    "files": 3,
+    "tests": 8,
+    "result": "passed"
+  },
+  "screenshots": "cropped header regions; full images remain private under output/runtime"
+}
