@@ -11,5 +11,6 @@
   "source": "Maven Surefire final summary",
   "tcDenominatorRelation": "代码层全量测试结果，不替代50阶段305 TC系统测试分母，也不扩写为305 TC整册重放",
   "financialCommands": 0,
-  "note": "本次全量复跑包含已修正的WorkOrderStateMachineFixTest测试桩；金融专项仍按用户确认不执行交易、查单、退款测试。"
+  "note": "本次全量复跑包含已修正的WorkOrderStateMachineFixTest测试桩；金融专项仍按用户确认不执行交易、查单、退款测试。",
+  "sourceHead": "95b2fe44954167de547d8b10f2cda869720c10c6"
 }
