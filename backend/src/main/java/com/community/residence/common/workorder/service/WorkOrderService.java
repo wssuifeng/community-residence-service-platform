@@ -677,8 +677,11 @@ public class WorkOrderService {
                 .eq(WorkOrder::getId, order.getId())
                 .eq(WorkOrder::getStatus, current));
         if (rows == 0) {
-            WorkOrder fresh = workOrderMapper.selectById(order.getId());
+            /* 条件更新已等待赢家提交；改用当前读，避免继续读取请求开始时的旧快照。 */
+            WorkOrder fresh = workOrderMapper.selectOne(new LambdaQueryWrapper<WorkOrder>()
+                    .eq(WorkOrder::getId, order.getId()).last("FOR UPDATE"));
             if (fresh != null && order.getStatus().equals(fresh.getStatus())) {
+                org.springframework.beans.BeanUtils.copyProperties(fresh, order);
                 log.info("工单状态已被并发流转到目标状态，按幂等处理（不重复留痕/建群/通知）：orderId={}, {} -> {}",
                         order.getId(), current, target);
                 return false;

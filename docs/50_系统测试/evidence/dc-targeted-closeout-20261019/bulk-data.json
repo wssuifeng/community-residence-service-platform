@@ -1,0 +1,14 @@
+{
+  "before": {
+    "community": 3,
+    "house": 19,
+    "work_order": 206
+  },
+  "after": {
+    "community": 5,
+    "house": 5019,
+    "work_order": 10206
+  },
+  "housesPerCommunity": "1\t1018\n2\t1001\n3\t1000\n4\t1000\n5\t1000",
+  "normalDatabaseTouched": false
+}

@@ -1,10 +1,11 @@
 package com.community.residence.common.messaging.service;
 
+import com.community.residence.common.config.RedisFailures;
 import com.community.residence.common.messaging.constant.NotificationOwnerType;
 import com.community.residence.common.security.context.IdentityPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,8 @@ public class WebSocketSessionService {
             Long count = redisTemplate.opsForValue().increment(key);
             redisTemplate.expire(key, TTL);
             log.debug("WebSocket 连接注册：ownerType={}, userId={}, connections={}", ownerType, userId, count);
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，在线注册失败（推送将降级为轮询）：ownerType={}, userId={}", ownerType, userId);
         }
     }
@@ -51,7 +53,8 @@ public class WebSocketSessionService {
                 redisTemplate.delete(key);
             }
             log.debug("WebSocket 连接注销：ownerType={}, userId={}, remaining={}", ownerType, userId, count);
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，在线注销失败（TTL 兜底过期）：ownerType={}, userId={}", ownerType, userId);
         }
     }
@@ -60,7 +63,8 @@ public class WebSocketSessionService {
         try {
             String count = redisTemplate.opsForValue().get(key(ownerType, userId));
             return count != null && Long.parseLong(count) > 0;
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             return false;
         } catch (NumberFormatException e) {
             /* 旧格式残留（历史 SET "1" 单值）按在线处理，register 后自然归一为计数格式 */

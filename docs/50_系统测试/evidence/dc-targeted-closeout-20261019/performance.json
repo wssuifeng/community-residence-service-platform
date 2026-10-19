@@ -1,0 +1,91 @@
+{
+  "baseSummary": "performance-base.json",
+  "bulkSummary": "performance-bulk.json",
+  "comparison": {
+    "L1-communities": {
+      "baseP95ms": 4,
+      "bulkP95ms": 5,
+      "changePercent": 25.0
+    },
+    "L2-houses": {
+      "baseP95ms": 5,
+      "bulkP95ms": 8,
+      "changePercent": 60.0
+    },
+    "L3-notices": {
+      "baseP95ms": 12,
+      "bulkP95ms": 11,
+      "changePercent": -8.33
+    },
+    "L4-workorders": {
+      "baseP95ms": 6,
+      "bulkP95ms": 7,
+      "changePercent": 16.67
+    },
+    "L5-notifications": {
+      "baseP95ms": 5,
+      "bulkP95ms": 5,
+      "changePercent": 0.0
+    },
+    "L6-workorder-detail": {
+      "baseP95ms": 5,
+      "bulkP95ms": 5,
+      "changePercent": 0.0
+    },
+    "L7-housing-detail": {
+      "baseP95ms": 6,
+      "bulkP95ms": 6,
+      "changePercent": 0.0
+    }
+  },
+  "pushSamples": [
+    {
+      "round": 0,
+      "orderId": 259,
+      "received": true,
+      "conservativeRequestStartToTerminalMs": 49.878,
+      "scope": "真实DB事务业务API→STOMP终端；请求开始早于提交，所测为提交后时延上界"
+    },
+    {
+      "round": 1,
+      "orderId": 260,
+      "received": true,
+      "conservativeRequestStartToTerminalMs": 23.34,
+      "scope": "真实DB事务业务API→STOMP终端；请求开始早于提交，所测为提交后时延上界"
+    },
+    {
+      "round": 2,
+      "orderId": 261,
+      "received": true,
+      "conservativeRequestStartToTerminalMs": 33.018,
+      "scope": "真实DB事务业务API→STOMP终端；请求开始早于提交，所测为提交后时延上界"
+    },
+    {
+      "round": 0,
+      "orderId": 10497,
+      "received": true,
+      "conservativeRequestStartToTerminalMs": 36.605,
+      "scope": "真实DB事务业务API→STOMP终端；请求开始早于提交，所测为提交后时延上界"
+    },
+    {
+      "round": 1,
+      "orderId": 10498,
+      "received": true,
+      "conservativeRequestStartToTerminalMs": 24.212,
+      "scope": "真实DB事务业务API→STOMP终端；请求开始早于提交，所测为提交后时延上界"
+    },
+    {
+      "round": 2,
+      "orderId": 10499,
+      "received": true,
+      "conservativeRequestStartToTerminalMs": 37.44,
+      "scope": "真实DB事务业务API→STOMP终端；请求开始早于提交，所测为提交后时延上界"
+    }
+  ],
+  "allP95Within2s": true,
+  "allPushWithin3s": true,
+  "functionalErrors": 0,
+  "wsUsers": 50,
+  "registeredResidents": 200,
+  "normalServicesTouched": false
+}

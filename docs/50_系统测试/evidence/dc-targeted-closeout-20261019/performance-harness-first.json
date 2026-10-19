@@ -1,0 +1,6 @@
+{
+  "result": "未形成正式性能轮次",
+  "reason": "采样脚本局部变量round遮蔽内置函数，启动后即中断；仅停止本批JMeter，修正后完整重新执行",
+  "formalSamplesAdopted": 0,
+  "normalServicesTouched": false
+}

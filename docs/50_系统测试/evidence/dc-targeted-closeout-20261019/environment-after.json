@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-19",
+  "normalDatabase": "community_residence",
+  "readOnly": true,
+  "queries": {
+    "flyway": "43\t43",
+    "businessTables": "61",
+    "logRetentionDays": "730",
+    "businessCounts": "1\t16\t21\t3\t2\t0"
+  },
+  "listeners": {
+    "8084": 21936,
+    "3306": 6608,
+    "6379": 4868,
+    "5176": 30092
+  },
+  "expectedOriginalListeners": {
+    "8084": 21936,
+    "5176": 30092,
+    "6379": 4868,
+    "3306": 6608
+  },
+  "normalProcessesPreserved": true,
+  "financialConfigurationRead": false,
+  "normalServiceRestarts": 0,
+  "financialCommands": 0
+}

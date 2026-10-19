@@ -225,6 +225,13 @@ public class LeaseMoveOutApplicationService {
         houseMapper.selectByIdForUpdate(application.getHouseId());
         LeaseRecord lockedLease = leaseMapper.selectByIdForUpdate(application.getLeaseId());
         if (lockedLease != null) lease = lockedLease;
+        LeaseMoveOutApplication lockedApplication = moveOutMapper.selectByIdForUpdate(id);
+        if (lockedApplication != null) application = lockedApplication;
+        if (MoveOutStatus.APPROVED.equals(application.getStatus())) return toVO(application);
+        if (!MoveOutStatus.PENDING.equals(application.getStatus())) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
+                    "当前退租申请状态不可通过：" + application.getStatus());
+        }
         if (!LeaseStatus.ACTIVE.equals(lease.getStatus())) {
             throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,
                     "仅已生效租约可办理退租，当前状态：" + lease.getStatus());
@@ -242,7 +249,7 @@ public class LeaseMoveOutApplicationService {
                 .set(LeaseMoveOutApplication::getReviewerId, reviewerId)
                 .set(LeaseMoveOutApplication::getReviewTime, reviewTime));
         if (rows == 0) {
-            LeaseMoveOutApplication fresh = moveOutMapper.selectById(application.getId());
+            LeaseMoveOutApplication fresh = moveOutMapper.selectByIdForUpdate(application.getId());
             if (fresh != null && MoveOutStatus.APPROVED.equals(fresh.getStatus())) {
                 return toVO(fresh);
             }
@@ -326,6 +333,7 @@ public class LeaseMoveOutApplicationService {
     public LeaseMoveOutApplicationVO reject(Long id, RejectMoveOutDTO dto) {
         LeaseMoveOutApplication application = requireApplication(id);
         SecurityUtils.checkCommunityAccess(application.getCommunityId());
+        if (MoveOutStatus.REJECTED.equals(application.getStatus())) return toVO(application);
         if (!MoveOutStatus.PENDING.equals(application.getStatus())) {
             throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,
                     "仅待审核的退租申请可驳回，当前状态：" + application.getStatus());
@@ -343,7 +351,7 @@ public class LeaseMoveOutApplicationService {
                 .set(LeaseMoveOutApplication::getReviewTime, reviewTime)
                 .set(LeaseMoveOutApplication::getRejectReason, dto.getReason()));
         if (rows == 0) {
-            LeaseMoveOutApplication fresh = moveOutMapper.selectById(application.getId());
+            LeaseMoveOutApplication fresh = moveOutMapper.selectByIdForUpdate(application.getId());
             if (fresh != null && MoveOutStatus.REJECTED.equals(fresh.getStatus())) {
                 return toVO(fresh);
             }

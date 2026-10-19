@@ -1,0 +1,1067 @@
+{
+  "checks": [
+    {
+      "name": "SP-005/007/008 admin1管理否定1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定2",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定3",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定4",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定5",
+      "passed": true,
+      "actual": {
+        "http": 404,
+        "code": 404,
+        "message": "社区不存在"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定6",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定7",
+      "passed": false,
+      "actual": {
+        "http": 400,
+        "code": 400,
+        "message": "参数[status]状态仅支持 ACTIVE/FROZEN"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定8",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 admin1管理否定9",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定2",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定3",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定4",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定5",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定6",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定7",
+      "passed": false,
+      "actual": {
+        "http": 400,
+        "code": 400,
+        "message": "参数[status]状态仅支持 ACTIVE/FROZEN"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定8",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定9",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定2",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定3",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定4",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定5",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定6",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定7",
+      "passed": false,
+      "actual": {
+        "http": 400,
+        "code": 400,
+        "message": "参数[status]状态仅支持 ACTIVE/FROZEN"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定8",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定9",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "越权写入前后数据库对象与状态不变",
+      "passed": true,
+      "actual": {
+        "before": {
+          "community": "2",
+          "sys_user": "4",
+          "sys_admin_community": "2",
+          "notice": "2",
+          "communityStatus": "ACTIVE",
+          "userStatus": "ACTIVE"
+        },
+        "after": {
+          "community": "2",
+          "sys_user": "4",
+          "sys_admin_community": "2",
+          "notice": "2",
+          "communityStatus": "ACTIVE",
+          "userStatus": "ACTIVE"
+        }
+      }
+    },
+    {
+      "name": "SP-006游客私有1",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有2",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有3",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有4",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有5",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有6",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有7",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有8",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有9",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有10",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有11",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有12",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有13",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客私有14",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401,
+        "message": "未登录或令牌已失效"
+      }
+    },
+    {
+      "name": "SP-006游客公开正向/communities",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-006游客公开正向/notices",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-006游客公开正向/housings",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-006游客公开正向/housings/1",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-006游客公开正向/units/1/houses",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-008服务人员居民域/work-orders",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-008服务人员居民域/feedbacks",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-008服务人员居民域/resource-reservations",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-008服务人员居民域/viewing-appointments",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-008服务人员居民域/leases",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-008服务人员居民域/residence-applications",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-008服务人员居民域/work-orders/1/evaluation",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 resident1后台读取/sys-users",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 resident1后台读取/configs",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 resident1后台读取/statistics/dashboard",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 resident1后台读取/operation-logs",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 staff1后台读取/sys-users",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 staff1后台读取/configs",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 staff1后台读取/statistics/dashboard",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/008 staff1后台读取/operation-logs",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/009/010 resident2他人或跨社区/work-orders/1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "仅工单提交人可操作"
+      }
+    },
+    {
+      "name": "SP-007/009/010 resident2他人或跨社区/work-orders/1/attachments",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "仅工单提交人可操作"
+      }
+    },
+    {
+      "name": "SP-007/009/010 resident2他人或跨社区/feedbacks/1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权查看他人反馈"
+      }
+    },
+    {
+      "name": "SP-007/009/010 resident2他人或跨社区/feedbacks/1/messages",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权查看他人反馈"
+      }
+    },
+    {
+      "name": "SP-007/009/010 resident2他人或跨社区/feedbacks/1/attachments",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权查看他人反馈"
+      }
+    },
+    {
+      "name": "SP-007/009/010 staff1他人或跨社区/work-orders/1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "仅被派单的服务人员可操作该工单"
+      }
+    },
+    {
+      "name": "SP-007/009/010 staff1他人或跨社区/work-orders/1/attachments",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "仅被派单的服务人员可操作该工单"
+      }
+    },
+    {
+      "name": "SP-007/009/010 staff1他人或跨社区/feedbacks/1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/009/010 staff1他人或跨社区/feedbacks/1/messages",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "SP-007/009/010 admin2他人或跨社区/work-orders/1",
+      "passed": true,
+      "actual": {
+        "http": 404,
+        "code": 404,
+        "message": "工单不存在"
+      }
+    },
+    {
+      "name": "SP-007/009/010 admin2他人或跨社区/work-orders/1/attachments",
+      "passed": true,
+      "actual": {
+        "http": 404,
+        "code": 404,
+        "message": "工单不存在"
+      }
+    },
+    {
+      "name": "SP-007/009/010 admin2他人或跨社区/feedbacks/1",
+      "passed": true,
+      "actual": {
+        "http": 404,
+        "code": 404,
+        "message": "反馈不存在"
+      }
+    },
+    {
+      "name": "SP-007/009/010 admin2他人或跨社区/feedbacks/1/messages",
+      "passed": true,
+      "actual": {
+        "http": 404,
+        "code": 404,
+        "message": "反馈不存在"
+      }
+    },
+    {
+      "name": "SP-007/009/010 admin2他人或跨社区/feedbacks/1/attachments",
+      "passed": true,
+      "actual": {
+        "http": 404,
+        "code": 404,
+        "message": "反馈不存在"
+      }
+    },
+    {
+      "name": "SP-007/009/010 admin2他人或跨社区/residents/1",
+      "passed": true,
+      "actual": {
+        "http": 404,
+        "code": 404,
+        "message": "居民不存在"
+      }
+    },
+    {
+      "name": "SP-009 admin1列表可访问/work-orders",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin1列表社区过滤/work-orders",
+      "passed": true,
+      "actual": {
+        "recordCount": 20,
+        "communityIds": [
+          1
+        ]
+      }
+    },
+    {
+      "name": "SP-009 admin1列表可访问/residents",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin1列表社区过滤/residents",
+      "passed": true,
+      "actual": {
+        "recordCount": 20,
+        "communityIds": [
+          null
+        ]
+      }
+    },
+    {
+      "name": "SP-009 admin1列表可访问/resource-reservations",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin1列表社区过滤/resource-reservations",
+      "passed": true,
+      "actual": {
+        "recordCount": 6,
+        "communityIds": [
+          1
+        ]
+      }
+    },
+    {
+      "name": "SP-009 admin1列表可访问/leases",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin1列表社区过滤/leases",
+      "passed": true,
+      "actual": {
+        "recordCount": 1,
+        "communityIds": [
+          1
+        ]
+      }
+    },
+    {
+      "name": "SP-009 admin1列表可访问/feedbacks",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin1列表社区过滤/feedbacks",
+      "passed": true,
+      "actual": {
+        "recordCount": 1,
+        "communityIds": [
+          1
+        ]
+      }
+    },
+    {
+      "name": "SP-009 admin2列表可访问/work-orders",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin2列表社区过滤/work-orders",
+      "passed": true,
+      "actual": {
+        "recordCount": 0,
+        "communityIds": []
+      }
+    },
+    {
+      "name": "SP-009 admin2列表可访问/residents",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin2列表社区过滤/residents",
+      "passed": true,
+      "actual": {
+        "recordCount": 0,
+        "communityIds": []
+      }
+    },
+    {
+      "name": "SP-009 admin2列表可访问/resource-reservations",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin2列表社区过滤/resource-reservations",
+      "passed": true,
+      "actual": {
+        "recordCount": 0,
+        "communityIds": []
+      }
+    },
+    {
+      "name": "SP-009 admin2列表可访问/leases",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin2列表社区过滤/leases",
+      "passed": true,
+      "actual": {
+        "recordCount": 0,
+        "communityIds": []
+      }
+    },
+    {
+      "name": "SP-009 admin2列表可访问/feedbacks",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-009 admin2列表社区过滤/feedbacks",
+      "passed": true,
+      "actual": {
+        "recordCount": 0,
+        "communityIds": []
+      }
+    },
+    {
+      "name": "SP-009超管全局工单正向",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "C10-014/015按30设计管理员允许读取系统用户详情",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "新增服务人员摘要居民不可读",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "新增本人租约摘要服务人员不可读",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "无权限访问"
+      }
+    },
+    {
+      "name": "新增服务人员摘要本人可读",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "新增本人租约摘要居民可读",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-008正向被派单服务人员可读",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-008正向被派单服务人员可接单",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success"
+      }
+    },
+    {
+      "name": "SP-010反馈WS订阅 resident2",
+      "passed": true,
+      "actual": {
+        "connected": false,
+        "errors": [
+          "ERROR\nmessage:Forbidden\\c 非反馈会话参与者，拒绝订阅\ncontent-length:0\n\n\u0000",
+          "unexpected-close"
+        ]
+      }
+    },
+    {
+      "name": "SP-010反馈WS订阅 staff1",
+      "passed": true,
+      "actual": {
+        "connected": false,
+        "errors": [
+          "ERROR\nmessage:Forbidden\\c 非反馈会话参与者，拒绝订阅\ncontent-length:0\n\n\u0000",
+          "unexpected-close"
+        ]
+      }
+    },
+    {
+      "name": "SP-010反馈WS订阅 admin2",
+      "passed": true,
+      "actual": {
+        "connected": false,
+        "errors": [
+          "ERROR\nmessage:Forbidden\\c 非反馈会话参与者，拒绝订阅\ncontent-length:0\n\n\u0000",
+          "unexpected-close"
+        ]
+      }
+    },
+    {
+      "name": "SP-010反馈WS订阅 resident1",
+      "passed": true,
+      "actual": {
+        "connected": true,
+        "errors": []
+      }
+    },
+    {
+      "name": "SP-010反馈WS订阅 admin1",
+      "passed": true,
+      "actual": {
+        "connected": true,
+        "errors": []
+      }
+    },
+    {
+      "name": "身份空间撞号非参与者不可读 resident1",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "非会话参与者，无权访问会话"
+      }
+    },
+    {
+      "name": "身份空间撞号非参与者不可读 superadmin",
+      "passed": true,
+      "actual": {
+        "http": 403,
+        "code": 403,
+        "message": "非会话参与者，无权访问会话"
+      }
+    },
+    {
+      "name": "SP-005～010越权日志含URI/IP/原因",
+      "passed": true,
+      "actual": {
+        "denyEntries": 51
+      }
+    }
+  ],
+  "passed": 110,
+  "failed": [
+    {
+      "name": "SP-005/007/008 admin1管理否定7",
+      "passed": false,
+      "actual": {
+        "http": 400,
+        "code": 400,
+        "message": "参数[status]状态仅支持 ACTIVE/FROZEN"
+      }
+    },
+    {
+      "name": "SP-005/007/008 resident1管理否定7",
+      "passed": false,
+      "actual": {
+        "http": 400,
+        "code": 400,
+        "message": "参数[status]状态仅支持 ACTIVE/FROZEN"
+      }
+    },
+    {
+      "name": "SP-005/007/008 staff1管理否定7",
+      "passed": false,
+      "actual": {
+        "http": 400,
+        "code": 400,
+        "message": "参数[status]状态仅支持 ACTIVE/FROZEN"
+      }
+    }
+  ],
+  "scope": "现行角色矩阵、本人/社区/身份空间、附件与反馈WS；公开房源仍按批准R62全社区浏览，不用旧隐身预期判失败"
+}

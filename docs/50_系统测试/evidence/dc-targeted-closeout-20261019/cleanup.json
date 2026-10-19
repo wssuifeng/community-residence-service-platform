@@ -1,0 +1,34 @@
+{
+  "stopped": [
+    {
+      "kind": "backendPid",
+      "pid": 35076,
+      "verifiedOwnCommand": true
+    },
+    {
+      "kind": "frontendPid",
+      "pid": 25336,
+      "verifiedOwnCommand": true
+    },
+    {
+      "kind": "redisPid",
+      "pid": 31428,
+      "verifiedOwnCommand": true
+    }
+  ],
+  "ownProcessesStopped": true,
+  "listeningAfter": {
+    "8087": false,
+    "5181": false,
+    "6387": false,
+    "8084": true,
+    "5176": true,
+    "6379": true
+  },
+  "databaseRetained": "community_residence_dc_20261019",
+  "normalServicesStopped": false,
+  "userBrowserTouched": false,
+  "historicalOutputDeleted": false,
+  "temporaryHarnessRemoved": true,
+  "rawSamplesRetainedPrivately": true
+}

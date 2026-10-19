@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
@@ -43,8 +42,6 @@ class ChannelLevelsTest {
     @Mock
     private StringRedisTemplate redisTemplate;
     @Mock
-    private ValueOperations<String, String> valueOperations;
-    @Mock
     private SimpMessagingTemplate messagingTemplate;
     @Mock
     private WebSocketSessionService webSocketSessionService;
@@ -61,8 +58,8 @@ class ChannelLevelsTest {
         });
         lenient().when(webSocketSessionService.isOnline(anyString(), anyLong())).thenReturn(false);
         /* seq 生成走 Redis INCR */
-        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        lenient().when(valueOperations.increment(anyString())).thenReturn(1001L);
+
+        lenient().when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenReturn(1001L);
     }
 
     @Test

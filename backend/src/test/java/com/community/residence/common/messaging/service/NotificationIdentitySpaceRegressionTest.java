@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.ArrayList;
@@ -73,8 +72,6 @@ class NotificationIdentitySpaceRegressionTest {
     @Mock
     private StringRedisTemplate redisTemplate;
     @Mock
-    private ValueOperations<String, String> valueOps;
-    @Mock
     private SimpMessagingTemplate messagingTemplate;
     @Mock
     private WebSocketSessionService webSocketSessionService;
@@ -95,8 +92,7 @@ class NotificationIdentitySpaceRegressionTest {
                 row(19L, 103L, NotificationOwnerType.USER, 2L, "社区租约续约成功"),
                 row(20L, 104L, NotificationOwnerType.RESIDENT, 2L, "续租支付成功")));
 
-        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOps);
-        lenient().when(valueOps.increment(anyString())).thenReturn(900L);
+        lenient().when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenAnswer(call -> Math.max(900L, Long.parseLong(call.getArgument(2)) + 1));
         lenient().when(webSocketSessionService.isOnline(anyString(), anyLong())).thenReturn(false);
         lenient().when(notificationMapper.insert(any(Notification.class))).thenAnswer(inv -> {
             Notification inserted = inv.getArgument(0);

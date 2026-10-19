@@ -1,0 +1,2377 @@
+{
+  "defectCount": 215,
+  "newDefects": 3,
+  "original18Disposed": 18,
+  "nonFinancialTargeted": 13,
+  "financialEvidenceAdopted": 5,
+  "rows": [
+    {
+      "id": "DEF-001",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：无关系账号提单 code=403 零落库、在住居民放行（r2_def_regression.mjs）"
+    },
+    {
+      "id": "DEF-002",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：同天不同时段放行 + 同时段 5002 拦（SP-01/冒烟/TC-C7-004 三处口径一致）"
+    },
+    {
+      "id": "DEF-003",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：跨社区详情 404、范围外居民列表不可见、本社区居民可见"
+    },
+    {
+      "id": "DEF-004",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：communityId 单目标越权 404 拒且零落库"
+    },
+    {
+      "id": "DEF-005",
+      "severity": "致命",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-001 三轮 10 路并发全部 1/10 成功+落库 1（Redisson 锁+V10 约束）"
+    },
+    {
+      "id": "DEF-006",
+      "severity": "致命",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-002 六边界对全符（半重叠/包含/相同拦、首尾相接放行）"
+    },
+    {
+      "id": "DEF-007",
+      "severity": "致命",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-003 三轮 10 路并发全部 1/10 成功+落库 1"
+    },
+    {
+      "id": "DEF-008",
+      "severity": "致命",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-004 六边界对全符"
+    },
+    {
+      "id": "DEF-009",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：冻结后存量令牌立即 401（含同秒签发；同秒重登被连带拦为已声明口径，脚本隔秒规避）"
+    },
+    {
+      "id": "DEF-010",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：越社区详情 404、列表无跨社区泄露、追加绑定双社区均可见（行为正确）"
+    },
+    {
+      "id": "DEF-011",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：同态 accept/终态 close 重复均 5302 且时间线零新增"
+    },
+    {
+      "id": "DEF-012",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：ACCEPTED 取消/改派 5302、PENDING 取消放行；状态机矩阵 84/84"
+    },
+    {
+      "id": "DEF-013",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：ACTIVE→ARCHIVED 5004 拒、线性两步达 ARCHIVED"
+    },
+    {
+      "id": "DEF-014",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：多模块关键变更近 2 分钟 56 条落库（UPDATE/STATUS/REVIEW/DELETE）+ 检索端点 200；SP-02 越权日志断言新增 27 条"
+    },
+    {
+      "id": "DEF-015",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：占用中删时段 5106 拒、释放后放行"
+    },
+    {
+      "id": "DEF-016",
+      "severity": "一般",
+      "priorDisposition": "用户弃置",
+      "currentDisposition": "用户弃置",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "用户2026-09-11明确不实施独立重发；不是修复通过。"
+    },
+    {
+      "id": "DEF-017",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：ARCHIVED 修改 5004「已归档的租约不可修改」"
+    },
+    {
+      "id": "DEF-018",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5",
+        "UI5"
+      ],
+      "boundary": "原延期后已由后端树过滤正式修复，双向显隐回归通过；不继续延期。"
+    },
+    {
+      "id": "DEF-019",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：TO_CONFIRM 退回 IN_PROGRESS + 通知服务人员 + 非本人 403（PATCH /work-orders/{id}/return）"
+    },
+    {
+      "id": "DEF-020",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：驳回后居民通知 +1（「工单已驳回」）"
+    },
+    {
+      "id": "DEF-021",
+      "severity": "严重",
+      "priorDisposition": "拒绝",
+      "currentDisposition": "拒绝",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "原时区误判，非产品缺陷；按原用户采纳的拒绝保留，不算修复成功。"
+    },
+    {
+      "id": "DEF-022",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：GET /statistics/evaluations/aggregation 返回 byStaff/byCategory 双维度"
+    },
+    {
+      "id": "DEF-023",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：confirm/complete 各 +1 通知（「看房预约已确认/已完成」）"
+    },
+    {
+      "id": "DEF-024",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：11MB/13MB 均 400 + 「单个文件不能超过 10MB」（MaxUploadSizeExceededException 映射 + multipart buffer 12MB）"
+    },
+    {
+      "id": "DEF-025",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：ADMIN 200 仅启用 STAFF 最小暴露面+熟手置前+角色 403（r3_batch3 B3-01）"
+    },
+    {
+      "id": "DEF-026",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：20 单零 409+工单号 keyword 精确命中（r3_batch3 B3-02）"
+    },
+    {
+      "id": "DEF-027",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：keyword 库内一致+办结 FEEDBACK_STATUS 载荷在线送达（r3_batch3 B3-03/04）"
+    },
+    {
+      "id": "DEF-028",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：hasFollowup true/false/null 三分支与库一致（r3_batch3 B3-05）"
+    },
+    {
+      "id": "DEF-029",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：STAFF 趋势限本人+statuses/时间范围+STAFF 数据域零泄漏（r3_batch3 B3-06/07）"
+    },
+    {
+      "id": "DEF-030",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：缺/空 phone 均 400 零落库（r3_batch3 B3-08）"
+    },
+    {
+      "id": "DEF-031",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：priority/isPinned/type 三过滤生效且锚点命中（r3_batch3 B3-09）→ 状态由「修复（待回归）」更正为「已修复」（回归已于 09-14 专项通过）"
+    },
+    {
+      "id": "DEF-032",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：三端点 1 好 1 坏行均 200 + 逐行 reason + 好行落库（r3_batch3 B3-12 新口径断言同步改写）"
+    },
+    {
+      "id": "DEF-033",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：待 C 轨回归确认（§3.9 已有独立实例 E2E 记录：直建→迁出→级联 200 全清/在住保护 5104 拒绝，用户手测与 C 轨用例复验后方可置关闭）"
+    },
+    {
+      "id": "DEF-034",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：10 服务 CREATE 逐服务断言全落库（operationType/targetType/targetId/operator 正确 + Unit/House/ResourceTimeslot 三处 #result.communityId 推导命中）+ RESIDENT 越权反例 403 零日志 + 后端 WARN=0——出口阻塞解除"
+    },
+    {
+      "id": "DEF-035",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：N7 数据上 false/true/null 三分支 API total 与库逐一相等（798/5/803）+ 翻页遍历合计一致 + admin1 数据范围口径吻合"
+    },
+    {
+      "id": "DEF-036",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：双连接关一后剩余连接 17ms 内收到 topic 推送；全关才注销、重连恢复（13ms）；SP-04 8/8 复跑通过"
+    },
+    {
+      "id": "DEF-037",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨 UI 勾选入口 PASS + PUT 请求体（7 等级全量）正确 + GET 读回一致 + 库同步（验后还原）"
+    },
+    {
+      "id": "DEF-038",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨表单存在且可提交 PASS + UI 代建落库（resident id=298）+ CSV 导入 2/2 落库（id=299/300，保留供手测 U-12）"
+    },
+    {
+      "id": "DEF-039",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨置顶开关+定向勾选 PASS + notice.is_pinned=1 与 notice_target (COMMUNITY,1) 落库正确（测试公告已清理）；楼栋级 targets 控件存在已确认（端到端落库未做——admin1 仅绑社区 1，留痕）"
+    },
+    {
+      "id": "DEF-040",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨两维下拉 PASS + 筛选请求 URL 含 rentType=SALE/layout 参数且与后端直连结果一致 + DEF-044 标签双端渲染「出售」实证"
+    },
+    {
+      "id": "DEF-041",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5",
+        "UI5"
+      ],
+      "boundary": "原延期后已由后端树过滤正式修复，双向显隐回归通过；不继续延期。"
+    },
+    {
+      "id": "DEF-042",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五批：未知键 400 + 七键放行 + 读回一致（单测 2 + E2E 3 断言）"
+    },
+    {
+      "id": "DEF-043",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五批：多目标重写/回收无残余/广播清空/越社区拒（单测 2 + E2E 5 断言）"
+    },
+    {
+      "id": "DEF-044",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "D5"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：两处映射表移除 SHARED、补 SALE: '出售'、RENT 对齐「出租」；vue-tsc 0 错误 + build 通过 + SQL 临时改 SALE 双端渲染「出售」实证后还原"
+    },
+    {
+      "id": "DEF-045",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-19 第六批：单测 5 用例（今日已过时段不返回/未过时段正常返回/明日不受影响/创建拒 5804/明日可约）+ 冒烟 4 断言（今日 []、明日 2 时段、创建 5804「不能预约已过去的时段」、明日 200）全过；全量单测 304/304"
+    },
+    {
+      "id": "DEF-046",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-19 第六批：单测 11 用例（超管 GUEST 发布落库 targetId=0/ADMIN 403 零落库/GUEST 带 targetId 400/编辑先删后插重写/游客列表过滤 SQL/居民口径不回归/详情广播·GUEST·定向三态/GUEST-only 不触达居民·纯广播触达不变）+ 冒烟 8 断言（V13 幂等、游客列表/详情、admin 403、居民口径、触达 0/1 人）全过；全量单测 304/304"
+    },
+    {
+      "id": "DEF-047",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：Hero 搜索框内嵌「房源/公告」分段切换、按对象跳转带 keyword、两列表页 URL query 透传与回写；vue-tsc+build 绿 + Playwright 7 断言 PASS（真实后端）"
+    },
+    {
+      "id": "DEF-048",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：主图左右毛玻璃箭头（首尾环绕）+ 悬浮虚化缩略图卡条、单图不渲染；Playwright 10 断言 PASS（3 图 route mock）"
+    },
+    {
+      "id": "DEF-049",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：第二栏 ::before 1px var(--color-border) 竖线，窄屏单栏隐藏；Playwright 3 断言 PASS"
+    },
+    {
+      "id": "DEF-050",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：整宽单卡轮换（translateX）+ 左/右虚化箭头 + 缩略图导航 + 5s 自动轮播（悬浮暂停，手动后重新计时）+ 单置顶降级单卡；Playwright 8+3 断言 PASS"
+    },
+    {
+      "id": "DEF-051",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BI"
+      ],
+      "boundary": "日期窗口/过去时段/7天边界有原单测及后续真实预约回归。"
+    },
+    {
+      "id": "DEF-052",
+      "severity": "轻微",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-053",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BI"
+      ],
+      "boundary": "日期窗口/过去时段/7天边界有原单测及后续真实预约回归。"
+    },
+    {
+      "id": "DEF-054",
+      "severity": "轻微",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-055",
+      "severity": "轻微",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-056",
+      "severity": "一般",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-057",
+      "severity": "轻微",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-058",
+      "severity": "轻微",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-059",
+      "severity": "一般",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-060",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BL"
+      ],
+      "boundary": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。"
+    },
+    {
+      "id": "DEF-061",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BL"
+      ],
+      "boundary": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。"
+    },
+    {
+      "id": "DEF-062",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BL"
+      ],
+      "boundary": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。"
+    },
+    {
+      "id": "DEF-063",
+      "severity": "轻微",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BF",
+        "BK",
+        "CM",
+        "CY"
+      ],
+      "boundary": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。"
+    },
+    {
+      "id": "DEF-064",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BL"
+      ],
+      "boundary": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。"
+    },
+    {
+      "id": "DEF-065",
+      "severity": "致命",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BL"
+      ],
+      "boundary": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。"
+    },
+    {
+      "id": "DEF-066",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-21 §3.24：级联顺序补齐——staff_service_category 先于 service_category、lease_agreement 与 lease_change_log 先于 lease_record、staff_community/staff_schedule/agreement_template 按 community_id 直删；新增回归用例 CommunityCascadeDeleteTest.delete_cascadesV18V19Tables（含 InOrder 顺序断言）；接口冒烟 34/34 通过（POST /communities/batch-delete 实测零残留）"
+    },
+    {
+      "id": "DEF-067",
+      "severity": "致命",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BI",
+        "BX",
+        "CF"
+      ],
+      "boundary": "通知/会话身份空间、同ID双向不可见及未参与者拒绝已有真实隔离回归；原主表待批次验收已过时。"
+    },
+    {
+      "id": "DEF-068",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "RESUME",
+        "BMTEST",
+        "CFTEST",
+        "CV",
+        "CE"
+      ],
+      "boundary": "首期组件明确覆盖FIRST+PENDING重开续接、SUCCESS回查和5904兜底；PaymentServiceTest覆盖PENDING重用。对应既有组件/单元套件已执行，用户当前付款可用另记；不称真实中断支付或微信异常重验。"
+    },
+    {
+      "id": "DEF-069",
+      "severity": "一般",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BH2",
+        "CE",
+        "CZ"
+      ],
+      "boundary": "支付门禁/入口与用户FIRST/普通RENT成功承接；不补造所有重复下单/期限/渠道异常实测。"
+    },
+    {
+      "id": "DEF-070",
+      "severity": "致命",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "CF"
+      ],
+      "boundary": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。"
+    },
+    {
+      "id": "DEF-071",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "CF"
+      ],
+      "boundary": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。"
+    },
+    {
+      "id": "DEF-072",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "CF"
+      ],
+      "boundary": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。"
+    },
+    {
+      "id": "DEF-073",
+      "severity": "一般",
+      "priorDisposition": "用户暂缓",
+      "currentDisposition": "用户暂缓",
+      "evidence": [
+        "CE",
+        "CZ"
+      ],
+      "boundary": "原用户2026-09-22明确微信未支持先不管；金融本轮接受可用但不证明微信二维码异常修复，保留一般遗留，不追加金融测试。"
+    },
+    {
+      "id": "DEF-074",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BF",
+        "BM"
+      ],
+      "boundary": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。"
+    },
+    {
+      "id": "DEF-075",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BI",
+        "BX",
+        "CF"
+      ],
+      "boundary": "通知/会话身份空间、同ID双向不可见及未参与者拒绝已有真实隔离回归；原主表待批次验收已过时。"
+    },
+    {
+      "id": "DEF-076",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：删除 .block-actions 遮罩层，改为卡片右上角外沿 16px「⋯」角标 → 下拉菜单（查看详情/在住人员 · 编辑房屋 · 状态变更 · 删除房屋）；实测点卡片主体开详情、点角标不开详情而弹 4 项菜单、Ctrl+点击多选不误触"
+    },
+    {
+      "id": "DEF-077",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：弹窗新增「在住人员 / 租客账号」区块（GET /houses/{id}/residents ＋ 逐条 GET /residents/{id} 补登录账号，弹窗 480→640px，排序 居住中 → 租客 → 业主 → 家属）；实测 A 座 1 单元 301 显示「居住中 1 / 记录 1」及 居思远 \\／ resident2 \\／ 租客 \\／ 13905710102 \\／ 2025-10-12 \\／ 居住中"
+    },
+    {
+      "id": "DEF-078",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：详情区改两栏（结构栏 320px sticky ＋ 独立滚动 max-height: calc(100vh - 300px) ＋ 可折叠、<1600px 默认折叠），房屋栏顶部唯一筛选卡（范围 楼栋/单元/房号 ＋ 条件 楼层/状态 ＋ 范围徽标 ＋ 结果口径 ＋ 清除筛选），删除结构树内「全部楼栋」「全部单元」重复筛选行；实测楼栋筛选 20→10 套、单元 10→5 套、清除回 20 套；注入 30 栋后 clientHeight=700 / scrollHeight=1080（限高生效）"
+    },
+    {
+      "id": "DEF-079",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：楼栋行与单元行的全部操作收敛为行尾一个「⋯」菜单（图标 ＋ 文字标签，默认隐形、hover/选中/键盘聚焦时出现、触屏常显），行内计数不再被挤压且完整口径移入 title；实测 .outline-row .icon-btn = 0、.row-actions = 0"
+    },
+    {
+      "id": "DEF-080",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.26：删除 .outline-panel 常驻栏及其全部状态/样式，.detail 退回单列 flex；实测结构类节点命中 0、房屋面板 952 → 1296px"
+    },
+    {
+      "id": "DEF-081",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.26：新增 .grid-groups 横向列容器（一个单元一列、overflow-x:auto、列头带 N 套·空 M 与列内动作）＋ 缩放控件（100%↔70% 实测：方块 66→46px、列宽 234→164px）；zoom 仅作用于内层，框选坐标不受影响（回归：拖拽仍一次选中 20 套）"
+    },
+    {
+      "id": "DEF-082",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.26：头部新增「编辑楼栋」「编辑单元」快捷按钮 ＋「结构维护」下拉（新增楼栋/新增单元/批量建单元/删除楼栋/删除单元），原「编辑」改名「编辑社区」；所有目标型动作经统一的目标选择弹窗（楼栋+单元下拉，预选当前筛选范围）；实测两条快捷链路各自进入对应表单、菜单 5 项齐全、列头批量建房已预选该单元"
+    },
+    {
+      "id": "DEF-083",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.27：头部两枚编辑按钮下线，改为建房带三枚分步入口「①建楼栋 / ②建单元与房屋 / ③建房屋」，各自直达对应新建弹窗；编辑类动作回落到「结构维护」菜单"
+    },
+    {
+      "id": "DEF-084",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.27：新建一条建房带（浅底独立横带，位于社区头部与关键数字之间）——左起「建房」标签 ｜ 实心主按钮「一键生成结构链」（副标题标明 楼栋 → 单元 → 房屋）｜「或按层级分步建」分隔 ｜ 三枚带序号徽标的分步按钮 ｜ 右端低频「结构维护 ▾」；社区级操作（编辑社区/停用/删除/社区设置）留在头部，两类动作不再混排"
+    },
+    {
+      "id": "DEF-085",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.27：UnitBatchDialog 升级为「建单元与房屋」——楼栋下拉（带 N 个单元 · N 套 规模）+ 单元序号规则 + 房屋规则开关（楼层区间 / 每层序号 / 房号前后缀 / 跳过项 / 建筑面积/户型/朝向/初始状态）+ 实时预览；提交改为后端批量端点 POST /units/batch → 对成功创建的单元逐个 POST /houses/batch，逐行结果交统一的批量结果弹窗，部分成功语义不再由前端循环模拟"
+    },
+    {
+      "id": "DEF-086",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-22 §3.28：BuildingEditDialog 新建模式重写为批量建楼栋——「名称前缀 + 起始/结束序号 + 名称后缀」按序号区间建多栋（或切「单栋自定义名称」建 A 座 这类无序号名称）＋ 总层数/描述 ＋ 「同时建立单元与房屋」开关（每栋单元数、单元名前后缀、楼层区间 × 每层序号、房号前后缀、跳过项、建筑面积/房间数/初始状态）＋ 实时预览（楼栋名 chips / 单元名样例 / 首末房号 / 重名与层数不一致提示）；提交链 POST /buildings/batch → 成功行逐个 POST /units/batch → POST /houses/batch，逐行结果交统一的批量结果弹窗；编辑模式保持原单栋表单不变"
+    },
+    {
+      "id": "DEF-087",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BH2",
+        "BP",
+        "CP"
+      ],
+      "boundary": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。"
+    },
+    {
+      "id": "DEF-088",
+      "severity": "轻微",
+      "priorDisposition": "批准设计替代",
+      "currentDisposition": "批准设计替代",
+      "evidence": [
+        "BC",
+        "BH2",
+        "CE"
+      ],
+      "boundary": "旧独立承租确认、复用旧承租时间、TO_SIGN一律禁付均被后续协议去重及首期激活设计取代；按现行规则留证，不按旧预期判失败。"
+    },
+    {
+      "id": "DEF-089",
+      "severity": "一般",
+      "priorDisposition": "批准设计替代",
+      "currentDisposition": "批准设计替代",
+      "evidence": [
+        "BC",
+        "BH2",
+        "CE"
+      ],
+      "boundary": "旧独立承租确认、复用旧承租时间、TO_SIGN一律禁付均被后续协议去重及首期激活设计取代；按现行规则留证，不按旧预期判失败。"
+    },
+    {
+      "id": "DEF-090",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BH2",
+        "BP",
+        "CP"
+      ],
+      "boundary": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。"
+    },
+    {
+      "id": "DEF-091",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BH2",
+        "BP",
+        "CP"
+      ],
+      "boundary": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。"
+    },
+    {
+      "id": "DEF-092",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BH2",
+        "BP",
+        "CP"
+      ],
+      "boundary": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。"
+    },
+    {
+      "id": "DEF-093",
+      "severity": "一般",
+      "priorDisposition": "人工确认收口",
+      "currentDisposition": "人工确认收口",
+      "evidence": [
+        "BH2",
+        "CE",
+        "CZ"
+      ],
+      "boundary": "支付门禁/入口与用户FIRST/普通RENT成功承接；不补造所有重复下单/期限/渠道异常实测。"
+    },
+    {
+      "id": "DEF-094",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "CF"
+      ],
+      "boundary": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。"
+    },
+    {
+      "id": "DEF-095",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH2",
+        "BI"
+      ],
+      "boundary": "退款表权限白名单及deposit_status回填已有原真实验证；后续内核/权限单测承接，不等同新渠道退款实测。"
+    },
+    {
+      "id": "DEF-096",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH2",
+        "BI"
+      ],
+      "boundary": "退款表权限白名单及deposit_status回填已有原真实验证；后续内核/权限单测承接，不等同新渠道退款实测。"
+    },
+    {
+      "id": "DEF-097",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "CF"
+      ],
+      "boundary": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。"
+    },
+    {
+      "id": "DEF-098",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BI",
+        "BX",
+        "CF"
+      ],
+      "boundary": "通知/会话身份空间、同ID双向不可见及未参与者拒绝已有真实隔离回归；原主表待批次验收已过时。"
+    },
+    {
+      "id": "DEF-099",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF"
+      ],
+      "boundary": "保留原逐缺陷修复/回归结果：2026-09-23 临时实例（端口 8099 + 临时库 community_residence_defcheck，用后已停并已删库）实测原始报文——GET /api/v1/service-categories（仅 POST）→ HTTP 405 {\"code\":405,\"message\":\"请求方法不被支持\",...}；POST 同路径 Content-Type: text/plain → HTTP 415 {\"code\":415,\"message\":\"请求内容类型不被支持\",...}；畸形 JSON → HTTP 400 {\"code\":400,\"message\":\"请求体缺失或格式不正确，请提交合法的 JSON 请求体\",...}；不存在路径 → HTTP 404 {\"code\":4001,\"message\":\"接口不存在\",...}；居民 token 调超管端点 → HTTP 403 {\"code\":403,\"message\":\"无权限访问\",...}（回归未改坏）"
+    },
+    {
+      "id": "DEF-100",
+      "severity": "轻微",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BF",
+        "BM"
+      ],
+      "boundary": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。"
+    },
+    {
+      "id": "DEF-101",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BF",
+        "BM"
+      ],
+      "boundary": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。"
+    },
+    {
+      "id": "DEF-102",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BF",
+        "BM"
+      ],
+      "boundary": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。"
+    },
+    {
+      "id": "DEF-103",
+      "severity": "致命",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "沿用工程证据与用户金融确认",
+      "evidence": [
+        "../db-final-reconciliation-20261019/defect-ledger.json"
+      ],
+      "boundary": "用户已明确本人确认可用即可，AI不复测；沿用逐项既有修复/已运行工程证据，不新增渠道异常通过结论。"
+    },
+    {
+      "id": "DEF-104",
+      "severity": "严重",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "old-anomalies.json",
+        "reject-concurrency.json"
+      ],
+      "boundary": "真实十路提交、十路审核，只一单/一条状态日志/一条居民通知且重复请求幂等；本批补锁后最新终态读取，并以reject-concurrency.json追加十路驳回/通知一次验证"
+    },
+    {
+      "id": "DEF-105",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "MOVEOUT",
+        "BF"
+      ],
+      "boundary": "08§3.62真实通过/驳回两分支，三通知均sourceId=leaseId，管理员及居民消息中心实际落到正确租约。单测只作补充，不仅凭单测关闭。"
+    },
+    {
+      "id": "DEF-106",
+      "severity": "严重",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "old-anomalies.json"
+      ],
+      "boundary": "真实十路租约建群全部返回同一ID；唯一组1；本批修复旧快照重查及撞键锁升级"
+    },
+    {
+      "id": "DEF-107",
+      "severity": "严重",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "沿用工程证据与用户金融确认",
+      "evidence": [
+        "../db-final-reconciliation-20261019/defect-ledger.json"
+      ],
+      "boundary": "用户已明确本人确认可用即可，AI不复测；沿用逐项既有修复/已运行工程证据，不新增渠道异常通过结论。"
+    },
+    {
+      "id": "DEF-108",
+      "severity": "严重",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "old-anomalies.json"
+      ],
+      "boundary": "实际状态DTO接受TO_SIGN，PENDING→TO_SIGN成功"
+    },
+    {
+      "id": "DEF-109",
+      "severity": "严重",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-110",
+      "severity": "严重",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "old-anomalies.json"
+      ],
+      "boundary": "关闭租约群发起看房5604，预约零新增"
+    },
+    {
+      "id": "DEF-111",
+      "severity": "严重",
+      "priorDisposition": "批准设计替代",
+      "currentDisposition": "批准设计替代",
+      "evidence": [
+        "BC",
+        "BH2",
+        "CE"
+      ],
+      "boundary": "旧独立承租确认、复用旧承租时间、TO_SIGN一律禁付均被后续协议去重及首期激活设计取代；按现行规则留证，不按旧预期判失败。"
+    },
+    {
+      "id": "DEF-112",
+      "severity": "严重",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "沿用工程证据与用户金融确认",
+      "evidence": [
+        "../db-final-reconciliation-20261019/defect-ledger.json"
+      ],
+      "boundary": "用户已明确本人确认可用即可，AI不复测；沿用逐项既有修复/已运行工程证据，不新增渠道异常通过结论。"
+    },
+    {
+      "id": "DEF-113",
+      "severity": "严重",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-114",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-115",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "remaining-anomalies.json"
+      ],
+      "boundary": "非交易同目标状态竞争、仅一条留痕；首期生效按现行FIRST设计，未执行付款/协议激活交易"
+    },
+    {
+      "id": "DEF-116",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "remaining-anomalies.json"
+      ],
+      "boundary": "真实十路受理群/留痕/通知各一次；修复CAS输家旧快照误拒，当前读返回赢家群，合法重复状态仍5302；结合工程分支验证"
+    },
+    {
+      "id": "DEF-117",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "remaining-anomalies.json"
+      ],
+      "boundary": "真实撤回与审批三轮竞争仅一方终态；弱/强关联关闭边界采用本轮ResidenceApplicationLeaseLinkTest"
+    },
+    {
+      "id": "DEF-118",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "remaining-anomalies.json"
+      ],
+      "boundary": "真实会话无关房源400/零新增及日期倒序；结合7项归属工程回归"
+    },
+    {
+      "id": "DEF-119",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "old-anomalies.json"
+      ],
+      "boundary": "真实补回链不覆盖TO_SIGN且不重开CLOSED群；条件更新和重复参与者采用本轮工程回归"
+    },
+    {
+      "id": "DEF-120",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-121",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "MOVEOUT",
+        "BF"
+      ],
+      "boundary": "08§3.62真实通过/驳回两分支，三通知均sourceId=leaseId，管理员及居民消息中心实际落到正确租约。单测只作补充，不仅凭单测关闭。"
+    },
+    {
+      "id": "DEF-122",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "frontend-targeted.json"
+      ],
+      "boundary": "本轮会话组件/列表定向回归，失败只读、直通后选中等原判据"
+    },
+    {
+      "id": "DEF-123",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "沿用工程证据与用户金融确认",
+      "evidence": [
+        "../db-final-reconciliation-20261019/defect-ledger.json"
+      ],
+      "boundary": "用户已明确本人确认可用即可，AI不复测；沿用逐项既有修复/已运行工程证据，不新增渠道异常通过结论。 手动激活的旧预期已由FIRST支付生效取代，本轮只验证手动路径被拒。"
+    },
+    {
+      "id": "DEF-124",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "frontend-targeted.json"
+      ],
+      "boundary": "本轮管理/居民工单组件定向回归，确认框未决防重与退回提示"
+    },
+    {
+      "id": "DEF-125",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-126",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-127",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "backend-targeted.json"
+      ],
+      "boundary": "新增双行分页断言，六种关联selectBatchIds各一次且不逐行查关联；符合原spec层判据"
+    },
+    {
+      "id": "DEF-128",
+      "severity": "一般",
+      "priorDisposition": "金融异常证据保留",
+      "currentDisposition": "金融异常证据保留",
+      "evidence": [
+        "CE",
+        "CZ"
+      ],
+      "boundary": "微信退款null状态和金额转换修复有原记录，但未找到对应逐项已执行专项结果；用户接受金融可用不扩写成微信退款异常通过。"
+    },
+    {
+      "id": "DEF-129",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "沿用工程证据与用户金融确认",
+      "evidence": [
+        "../db-final-reconciliation-20261019/defect-ledger.json"
+      ],
+      "boundary": "用户已明确本人确认可用即可，AI不复测；沿用逐项既有修复/已运行工程证据，不新增渠道异常通过结论。"
+    },
+    {
+      "id": "DEF-130",
+      "severity": "一般",
+      "priorDisposition": "工程回归有据，专项待评审",
+      "currentDisposition": "本轮补证处置",
+      "evidence": [
+        "old-anomalies.json"
+      ],
+      "boundary": "真实早于起租/晚于止租均业务码400且无申请；HTTP200统一响应不误作未拒绝"
+    },
+    {
+      "id": "DEF-131",
+      "severity": "一般",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-132",
+      "severity": "轻微",
+      "priorDisposition": "文档或测试资产修正",
+      "currentDisposition": "文档或测试资产修正",
+      "evidence": [
+        "BMTEST",
+        "BH2"
+      ],
+      "boundary": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。"
+    },
+    {
+      "id": "DEF-133",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BG",
+        "BO"
+      ],
+      "boundary": "批准设计后结构边界/责任人/户型完整落地且真实隔离回归；旧手填联系人和roomCount模型不恢复。"
+    },
+    {
+      "id": "DEF-134",
+      "severity": "严重",
+      "priorDisposition": "按现行设计终结",
+      "currentDisposition": "按现行设计终结",
+      "evidence": [
+        "BE",
+        "BF",
+        "BO"
+      ],
+      "boundary": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。"
+    },
+    {
+      "id": "DEF-135",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BG",
+        "BO"
+      ],
+      "boundary": "批准设计后结构边界/责任人/户型完整落地且真实隔离回归；旧手填联系人和roomCount模型不恢复。"
+    },
+    {
+      "id": "DEF-136",
+      "severity": "轻微",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BG",
+        "BO"
+      ],
+      "boundary": "批准设计后结构边界/责任人/户型完整落地且真实隔离回归；旧手填联系人和roomCount模型不恢复。"
+    },
+    {
+      "id": "DEF-137",
+      "severity": "一般",
+      "priorDisposition": "按现行设计终结",
+      "currentDisposition": "按现行设计终结",
+      "evidence": [
+        "BE",
+        "BF",
+        "BO"
+      ],
+      "boundary": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。"
+    },
+    {
+      "id": "DEF-138",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH3"
+      ],
+      "boundary": "真实上传/清空/图片校验已替代URL手填，后续用户基础确认有效。"
+    },
+    {
+      "id": "DEF-139",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-140",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-141",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH1",
+        "BO"
+      ],
+      "boundary": "账号资料与具体居住关系录入真实隔离通过；依赖成员后续按主关系规则。"
+    },
+    {
+      "id": "DEF-142",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BK",
+        "CM"
+      ],
+      "boundary": "已按用户新CSV/服务类别口径复核，旧现场等待不继续要求复验。"
+    },
+    {
+      "id": "DEF-143",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH1",
+        "BO"
+      ],
+      "boundary": "账号资料与具体居住关系录入真实隔离通过；依赖成员后续按主关系规则。"
+    },
+    {
+      "id": "DEF-144",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH2",
+        "BP",
+        "CE"
+      ],
+      "boundary": "挂牌来源/占用/价格与首期成功激活内核定向回归；交易主路径用户已确认，异常范围独立保留。"
+    },
+    {
+      "id": "DEF-145",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BK",
+        "CM"
+      ],
+      "boundary": "已按用户新CSV/服务类别口径复核，旧现场等待不继续要求复验。"
+    },
+    {
+      "id": "DEF-146",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-147",
+      "severity": "一般",
+      "priorDisposition": "按现行设计终结",
+      "currentDisposition": "按现行设计终结",
+      "evidence": [
+        "BE",
+        "BF",
+        "BO"
+      ],
+      "boundary": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。"
+    },
+    {
+      "id": "DEF-148",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH2",
+        "BP",
+        "CE"
+      ],
+      "boundary": "挂牌来源/占用/价格与首期成功激活内核定向回归；交易主路径用户已确认，异常范围独立保留。"
+    },
+    {
+      "id": "DEF-149",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BH2",
+        "BP",
+        "CE"
+      ],
+      "boundary": "挂牌来源/占用/价格与首期成功激活内核定向回归；交易主路径用户已确认，异常范围独立保留。"
+    },
+    {
+      "id": "DEF-150",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-151",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-152",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-153",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-154",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-155",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-156",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-157",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-158",
+      "severity": "严重",
+      "priorDisposition": "按现行设计终结",
+      "currentDisposition": "按现行设计终结",
+      "evidence": [
+        "BE",
+        "BF",
+        "BO"
+      ],
+      "boundary": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。"
+    },
+    {
+      "id": "DEF-159",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-160",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BP"
+      ],
+      "boundary": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。"
+    },
+    {
+      "id": "DEF-161",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-162",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BI"
+      ],
+      "boundary": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。"
+    },
+    {
+      "id": "DEF-163",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BC"
+      ],
+      "boundary": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。"
+    },
+    {
+      "id": "DEF-164",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BC"
+      ],
+      "boundary": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。"
+    },
+    {
+      "id": "DEF-165",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BC"
+      ],
+      "boundary": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。"
+    },
+    {
+      "id": "DEF-166",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BC"
+      ],
+      "boundary": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。"
+    },
+    {
+      "id": "DEF-167",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BF",
+        "BC"
+      ],
+      "boundary": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。"
+    },
+    {
+      "id": "DEF-168",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BC",
+        "BH2"
+      ],
+      "boundary": "协议一次同意、角色拒绝、幂等、撤回与竞争原专项通过；SIGNED仍待首期，金融不执行。"
+    },
+    {
+      "id": "DEF-169",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-170",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-171",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-172",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-173",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BE",
+        "BF"
+      ],
+      "boundary": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。"
+    },
+    {
+      "id": "DEF-174",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BI"
+      ],
+      "boundary": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。"
+    },
+    {
+      "id": "DEF-175",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BI"
+      ],
+      "boundary": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。"
+    },
+    {
+      "id": "DEF-176",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BI"
+      ],
+      "boundary": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。"
+    },
+    {
+      "id": "DEF-177",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BJ"
+      ],
+      "boundary": "最新被派人员列表/详情权限及768/1024侧栏真实回归。"
+    },
+    {
+      "id": "DEF-178",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BJ"
+      ],
+      "boundary": "最新被派人员列表/详情权限及768/1024侧栏真实回归。"
+    },
+    {
+      "id": "DEF-179",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BK",
+        "BL"
+      ],
+      "boundary": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。"
+    },
+    {
+      "id": "DEF-180",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BK",
+        "BL"
+      ],
+      "boundary": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。"
+    },
+    {
+      "id": "DEF-181",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BK",
+        "BL"
+      ],
+      "boundary": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。"
+    },
+    {
+      "id": "DEF-182",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BK",
+        "BL"
+      ],
+      "boundary": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。"
+    },
+    {
+      "id": "DEF-183",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BN",
+        "BO",
+        "CM"
+      ],
+      "boundary": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。"
+    },
+    {
+      "id": "DEF-184",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BN",
+        "BO",
+        "CM"
+      ],
+      "boundary": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。"
+    },
+    {
+      "id": "DEF-185",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BN",
+        "BO",
+        "CM"
+      ],
+      "boundary": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。"
+    },
+    {
+      "id": "DEF-186",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BN",
+        "BO",
+        "CM"
+      ],
+      "boundary": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。"
+    },
+    {
+      "id": "DEF-187",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BN",
+        "BO",
+        "CM"
+      ],
+      "boundary": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。"
+    },
+    {
+      "id": "DEF-188",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BN",
+        "BO",
+        "CM"
+      ],
+      "boundary": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。"
+    },
+    {
+      "id": "DEF-189",
+      "severity": "严重",
+      "priorDisposition": "批准设计替代",
+      "currentDisposition": "批准设计替代",
+      "evidence": [
+        "BP",
+        "BU",
+        "BX"
+      ],
+      "boundary": "bp有效关系/资金一律禁止已由用户bu批准的真实影响、名称、版本、双确认取代；不得恢复原硬禁止或恢复用户主动删除资料。"
+    },
+    {
+      "id": "DEF-190",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BP",
+        "BO",
+        "CM"
+      ],
+      "boundary": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。"
+    },
+    {
+      "id": "DEF-191",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BP",
+        "BO",
+        "CM"
+      ],
+      "boundary": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。"
+    },
+    {
+      "id": "DEF-192",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BP",
+        "BO",
+        "CM"
+      ],
+      "boundary": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。"
+    },
+    {
+      "id": "DEF-193",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BP",
+        "BO",
+        "CM"
+      ],
+      "boundary": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。"
+    },
+    {
+      "id": "DEF-194",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BP",
+        "BO",
+        "CM"
+      ],
+      "boundary": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。"
+    },
+    {
+      "id": "DEF-195",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BP",
+        "BO",
+        "CM"
+      ],
+      "boundary": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。"
+    },
+    {
+      "id": "DEF-196",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BQ",
+        "CM",
+        "CP"
+      ],
+      "boundary": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。"
+    },
+    {
+      "id": "DEF-197",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BQ",
+        "CM",
+        "CP"
+      ],
+      "boundary": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。"
+    },
+    {
+      "id": "DEF-198",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BQ",
+        "CM",
+        "CP"
+      ],
+      "boundary": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。"
+    },
+    {
+      "id": "DEF-199",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BQ",
+        "CM",
+        "CP"
+      ],
+      "boundary": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。"
+    },
+    {
+      "id": "DEF-200",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BQ",
+        "CM",
+        "CP"
+      ],
+      "boundary": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。"
+    },
+    {
+      "id": "DEF-201",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BQ",
+        "CM",
+        "CP"
+      ],
+      "boundary": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。"
+    },
+    {
+      "id": "DEF-202",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BX",
+        "CM",
+        "CP"
+      ],
+      "boundary": "显式配置开关、身份空间已读游标与父表权限均有真实API/浏览器/并发定向证据；保存不代表交易。"
+    },
+    {
+      "id": "DEF-203",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BX",
+        "CM",
+        "CP"
+      ],
+      "boundary": "显式配置开关、身份空间已读游标与父表权限均有真实API/浏览器/并发定向证据；保存不代表交易。"
+    },
+    {
+      "id": "DEF-204",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "BX",
+        "CM",
+        "CP"
+      ],
+      "boundary": "显式配置开关、身份空间已读游标与父表权限均有真实API/浏览器/并发定向证据；保存不代表交易。"
+    },
+    {
+      "id": "DEF-205",
+      "severity": "一般",
+      "priorDisposition": "用户确认主路径",
+      "currentDisposition": "用户确认主路径",
+      "evidence": [
+        "CE",
+        "CZ"
+      ],
+      "boundary": "新FIRST/普通RENT成功已确认，当前租金不阻塞；原INVALID_PARAMETER确切根因仍未知，不填“定位并修复”。"
+    },
+    {
+      "id": "DEF-206",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "CA",
+        "CM"
+      ],
+      "boundary": "ca单套挂牌默认/自定义时段复用批量解析且同事务；非法配置不留半成品，隔离API与浏览器入口已验，后续用户此前回归确认承接。"
+    },
+    {
+      "id": "DEF-207",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "CA",
+        "CM"
+      ],
+      "boundary": "ca的LivePanel/useLiveRefresh在激活/通知/前台恢复与30秒补读，隐藏停止，保留筛选/表单并防旧响应覆盖；真实新申请自动出现/切回更新已验。"
+    },
+    {
+      "id": "DEF-208",
+      "severity": "严重",
+      "priorDisposition": "工程回归关闭",
+      "currentDisposition": "工程回归关闭",
+      "evidence": [
+        "CE"
+      ],
+      "boundary": "缓存表单打开前和系统截止相等保护有失败先行/修复后定向19及后端1157记录；不是远端404根因确证。"
+    },
+    {
+      "id": "DEF-209",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "CF",
+        "CP",
+        "CY"
+      ],
+      "boundary": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。"
+    },
+    {
+      "id": "DEF-210",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "CF",
+        "CP",
+        "CY"
+      ],
+      "boundary": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。"
+    },
+    {
+      "id": "DEF-211",
+      "severity": "一般",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "CF",
+        "CP",
+        "CY"
+      ],
+      "boundary": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。"
+    },
+    {
+      "id": "DEF-212",
+      "severity": "严重",
+      "priorDisposition": "修复回归关闭",
+      "currentDisposition": "修复回归关闭",
+      "evidence": [
+        "CF",
+        "CP",
+        "CY"
+      ],
+      "boundary": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。"
+    },
+    {
+      "id": "DEF-213",
+      "severity": "严重",
+      "title": "直通会话并发重复",
+      "priorDisposition": "本轮新发现",
+      "currentDisposition": "修复定向验证",
+      "evidence": [
+        "old-anomalies.json",
+        "backend-targeted.json"
+      ],
+      "boundary": "当前独立库/Redis/终端定向验证；不推定为所有业务全量回归"
+    },
+    {
+      "id": "DEF-214",
+      "severity": "严重",
+      "title": "Redis包装连接异常未命中降级",
+      "priorDisposition": "本轮新发现",
+      "currentDisposition": "修复定向验证",
+      "evidence": [
+        "redis-fault.json",
+        "backend-targeted.json"
+      ],
+      "boundary": "当前独立库/Redis/终端定向验证；不推定为所有业务全量回归"
+    },
+    {
+      "id": "DEF-215",
+      "severity": "严重",
+      "title": "Redis恢复后通知序号回退导致增量补拉遗漏",
+      "priorDisposition": "本轮新发现",
+      "currentDisposition": "修复定向验证",
+      "evidence": [
+        "redis-fault.json",
+        "backend-targeted.json"
+      ],
+      "boundary": "当前独立库/Redis/终端定向验证；不推定为所有业务全量回归"
+    }
+  ],
+  "finalExitApproved": false
+}

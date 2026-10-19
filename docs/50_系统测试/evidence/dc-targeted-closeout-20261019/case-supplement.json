@@ -1,0 +1,1929 @@
+{
+  "caseCount": 305,
+  "supplementedCases": 23,
+  "rows": [
+    {
+      "id": "TC-C1-001",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-002",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-003",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-004",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-005",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-006",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-007",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-008",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-009",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-010",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-011",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-012",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-013",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-014",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-015",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-016",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-017",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-018",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-019",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-020",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-021",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-022",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-023",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-024",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-025",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-026",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-027",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C1-028",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-001",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-002",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-003",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-004",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-005",
+      "priority": "P1",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-006",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-007",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-008",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-009",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-010",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-012",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-013",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-014",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-015",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-016",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-017",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-018",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-019",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-020",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C2-021",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-001",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-002",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-003",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-004",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-005",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-006",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-007",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-008",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-009",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-010",
+      "priority": "P1",
+      "priorDisposition": "用户弃置",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-012",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-013",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-014",
+      "priority": "P1",
+      "priorDisposition": "批准预期替代",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-015",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-016",
+      "priority": "P1",
+      "priorDisposition": "人工主路径确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-001",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-002",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-003",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-004",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-005",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-006",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-007",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-008",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-009",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-010",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-011",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-012",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-013",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-014",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-015",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-016",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-017",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-018",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-019",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-020",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-021",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-022",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-023",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-024",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C4-025",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-001",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-002",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-003",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-004",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-005",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-006",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-007",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-008",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-009",
+      "priority": "P2",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-010",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-012",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-013",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-014",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-015",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C5-016",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-001",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-002",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-003",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-004",
+      "priority": "P0",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "真实Edge双通道各10次DOM计时",
+        "evidence": "realtime-browser.json",
+        "boundary": "补齐时延子判据；原反馈流程证据继续采用"
+      }
+    },
+    {
+      "id": "TC-C6-005",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-006",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-007",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-008",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-009",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-010",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-012",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-013",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-014",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C6-015",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-001",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-002",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-003",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-004",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-005",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-006",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-007",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-008",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-009",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-010",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-012",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-013",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-014",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-015",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-016",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-017",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-018",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-019",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-020",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-021",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-022",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-023",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C7-024",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-001",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-002",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-003",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-004",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-005",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-006",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-007",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-008",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-009",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-010",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C8-012",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-001",
+      "priority": "P1",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-002",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-003",
+      "priority": "P1",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-004",
+      "priority": "P1",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-005",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-006",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-007",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-008",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-009",
+      "priority": "P2",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-010",
+      "priority": "P2",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-011",
+      "priority": "P1",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C9-012",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-001",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-002",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-003",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-004",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-005",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-006",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-007",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-008",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-009",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-010",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-012",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-013",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-014",
+      "priority": "P1",
+      "priorDisposition": "按30设计勘误",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-015",
+      "priority": "P1",
+      "priorDisposition": "按30设计勘误",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-016",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-017",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-018",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-019",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-020",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-021",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-022",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-023",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-024",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-025",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-026",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C10-027",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-001",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-002",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-003",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-004",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-005",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-006",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-007",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-008",
+      "priority": "P0",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "在线通知DOM与负载下STOMP计时",
+        "evidence": "realtime-browser.json",
+        "boundary": "真实终端，不将在线线程数当WS数量"
+      }
+    },
+    {
+      "id": "TC-C11-009",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-010",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-011",
+      "priority": "P2",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-012",
+      "priority": "P2",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-013",
+      "priority": "P2",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-014",
+      "priority": "P2",
+      "priorDisposition": "部分执行证据",
+      "currentSupplement": {
+        "method": "真实UI保存两态、公告发布和SQL留痕",
+        "evidence": "browser.json",
+        "boundary": "站内必达，站外按勾选留痕；实际金融请求0"
+      }
+    },
+    {
+      "id": "TC-C11-015",
+      "priority": "P2",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-016",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C11-017",
+      "priority": "P1",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "事件通知、在线呈现、补拉、已读及两态留痕",
+        "evidence": "realtime-browser.json",
+        "boundary": "与原E11流程记录及browser/old-anomalies共同采用，不声明全部故障分支重放"
+      }
+    },
+    {
+      "id": "TC-C12-001",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-002",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-003",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-004",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-005",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-006",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-007",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-008",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-009",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-010",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-011",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-012",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-013",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-014",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-015",
+      "priority": "P1",
+      "priorDisposition": "批准预期替代",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-016",
+      "priority": "P1",
+      "priorDisposition": "批准预期替代",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-017",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-018",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-019",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-020",
+      "priority": "P2",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-021",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-022",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C12-023",
+      "priority": "P0",
+      "priorDisposition": "批准预期替代",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-001",
+      "priority": "P0",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-002",
+      "priority": "P0",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "基础/N7规模各50HTTP＋50WS，稳态600秒",
+        "evidence": "performance.json",
+        "boundary": "N7前后差值如实保留；03绝对P95门槛未改，04的30%建议单独评估"
+      }
+    },
+    {
+      "id": "TC-NF-003",
+      "priority": "P0",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "基础/N7规模各50HTTP＋50WS，稳态600秒",
+        "evidence": "performance.json",
+        "boundary": "N7前后差值如实保留；03绝对P95门槛未改，04的30%建议单独评估"
+      }
+    },
+    {
+      "id": "TC-NF-004",
+      "priority": "P0",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "基础/N7规模各50HTTP＋50WS，稳态600秒",
+        "evidence": "performance.json",
+        "boundary": "N7前后差值如实保留；03绝对P95门槛未改，04的30%建议单独评估"
+      }
+    },
+    {
+      "id": "TC-NF-005",
+      "priority": "P0",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "通知与反馈各10个真实DOM计时",
+        "evidence": "realtime-browser.json",
+        "boundary": "HTTP发出到DOM出现为DB提交后时延上界"
+      }
+    },
+    {
+      "id": "TC-NF-006",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-007",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-008",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-009",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-010",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-011",
+      "priority": "P1",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "基础/N7规模各50HTTP＋50WS，稳态600秒",
+        "evidence": "performance.json",
+        "boundary": "N7前后差值如实保留；03绝对P95门槛未改，04的30%建议单独评估"
+      }
+    },
+    {
+      "id": "TC-NF-012",
+      "priority": "P2",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-013",
+      "priority": "P2",
+      "priorDisposition": "人工基础确认",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-014",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-015",
+      "priority": "P1",
+      "priorDisposition": "批准预期替代",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-NF-016",
+      "priority": "P2",
+      "priorDisposition": "执行证据缺项",
+      "currentSupplement": {
+        "method": "10组契约/11操作及sinceSeq非零边界",
+        "evidence": "contracts.json",
+        "boundary": "抽样口径；不是211条path全部接口穷举"
+      }
+    },
+    {
+      "id": "TC-SP-001",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "两类预约各3轮10路竞争及有效边界矩阵",
+        "evidence": "concurrency.json",
+        "boundary": "原非法大段看房组合按现行栅格/单次上限调整，未冒称已穿透前置校验"
+      }
+    },
+    {
+      "id": "TC-SP-002",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "两类预约各3轮10路竞争及有效边界矩阵",
+        "evidence": "concurrency.json",
+        "boundary": "原非法大段看房组合按现行栅格/单次上限调整，未冒称已穿透前置校验"
+      }
+    },
+    {
+      "id": "TC-SP-003",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "两类预约各3轮10路竞争及有效边界矩阵",
+        "evidence": "concurrency.json",
+        "boundary": "原非法大段看房组合按现行栅格/单次上限调整，未冒称已穿透前置校验"
+      }
+    },
+    {
+      "id": "TC-SP-004",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "两类预约各3轮10路竞争及有效边界矩阵",
+        "evidence": "concurrency.json",
+        "boundary": "原非法大段看房组合按现行栅格/单次上限调整，未冒称已穿透前置校验"
+      }
+    },
+    {
+      "id": "TC-SP-005",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "五角色、本人与社区、身份空间、附件与反馈WS矩阵",
+        "evidence": "permissions.json",
+        "boundary": "分母为实际113检查；不是所有HTTP方法与角色任意组合全集"
+      }
+    },
+    {
+      "id": "TC-SP-006",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "五角色、本人与社区、身份空间、附件与反馈WS矩阵",
+        "evidence": "permissions.json",
+        "boundary": "分母为实际113检查；不是所有HTTP方法与角色任意组合全集"
+      }
+    },
+    {
+      "id": "TC-SP-007",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "五角色、本人与社区、身份空间、附件与反馈WS矩阵",
+        "evidence": "permissions.json",
+        "boundary": "分母为实际113检查；不是所有HTTP方法与角色任意组合全集"
+      }
+    },
+    {
+      "id": "TC-SP-008",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "五角色、本人与社区、身份空间、附件与反馈WS矩阵",
+        "evidence": "permissions.json",
+        "boundary": "分母为实际113检查；不是所有HTTP方法与角色任意组合全集"
+      }
+    },
+    {
+      "id": "TC-SP-009",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "五角色、本人与社区、身份空间、附件与反馈WS矩阵",
+        "evidence": "permissions.json",
+        "boundary": "分母为实际113检查；不是所有HTTP方法与角色任意组合全集"
+      }
+    },
+    {
+      "id": "TC-SP-010",
+      "priority": "P0",
+      "priorDisposition": "专项适用性保留",
+      "currentSupplement": {
+        "method": "五角色、本人与社区、身份空间、附件与反馈WS矩阵",
+        "evidence": "permissions.json",
+        "boundary": "分母为实际113检查；不是所有HTTP方法与角色任意组合全集"
+      }
+    },
+    {
+      "id": "TC-SP-011",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-012",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-013",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-014",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-015",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-016",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-017",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-018",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-019",
+      "priority": "P0",
+      "priorDisposition": "量化适用性保留",
+      "currentSupplement": {
+        "method": "通知与反馈各10个真实DOM计时",
+        "evidence": "realtime-browser.json",
+        "boundary": "HTTP发出到DOM出现为DB提交后时延上界"
+      }
+    },
+    {
+      "id": "TC-SP-020",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-021",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-022",
+      "priority": "P0",
+      "priorDisposition": "执行证据缺项",
+      "currentSupplement": {
+        "method": "独立Redis真实五分钟断开、轮询、退出与恢复",
+        "evidence": "redis-fault.json",
+        "boundary": "正常6379保持；故障响应变慢保留为观察"
+      }
+    },
+    {
+      "id": "TC-SP-023",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-024",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-025",
+      "priority": "P1",
+      "priorDisposition": "执行证据缺项",
+      "currentSupplement": {
+        "method": "真实Edge图片/文档上传组件异常矩阵",
+        "evidence": "browser.json",
+        "boundary": "图片用业务表单，文档用原组件独立挂载，不宣称已验所有业务入口"
+      }
+    },
+    {
+      "id": "TC-SP-026",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-027",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-028",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-029",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-030",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-031",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-032",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-033",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-034",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-035",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-036",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-037",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-038",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-SP-039",
+      "priority": "P1",
+      "priorDisposition": "历史执行证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-017",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-018",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-019",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-020",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-021",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-022",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-023",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-024",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-025",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-026",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-027",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-028",
+      "priority": "P1",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-029",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    },
+    {
+      "id": "TC-C3-030",
+      "priority": "P0",
+      "priorDisposition": "现行定向证据",
+      "currentSupplement": null
+    }
+  ],
+  "claimBoundary": "累计证据与本轮定向补证；未将脚本断言/单测总数换算为305 TC最终源码整册执行率"
+}

@@ -1,0 +1,195 @@
+{
+  "checks": [
+    {
+      "name": "故障前专用Redis正常",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "故障前WS认证订阅正常",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "仅专用6387Redis故障注入",
+      "passed": true,
+      "actual": {
+        "stoppedPid": 35520,
+        "normal6379Untouched": true
+      }
+    },
+    {
+      "name": "Redis不可用核心浏览/notices",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "Redis不可用核心浏览/housings",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "Redis故障通知业务仍提交",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "seconds": 32.354
+      }
+    },
+    {
+      "name": "Redis故障登出仍成功",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "Redis故障已登出令牌DB拒绝",
+      "passed": true,
+      "actual": {
+        "http": 401,
+        "code": 401
+      }
+    },
+    {
+      "name": "故障窗口至少5分钟",
+      "passed": true,
+      "actual": {
+        "seconds": 306.28
+      }
+    },
+    {
+      "name": "真实前端约30秒周期轮询",
+      "passed": false,
+      "actual": {
+        "intervalSeconds": [
+          0.01,
+          18.7,
+          29.99,
+          30.0,
+          30.01,
+          30.0,
+          30.0,
+          30.0,
+          30.0
+        ],
+        "count": 12
+      }
+    },
+    {
+      "name": "轮询可读故障期间新通知",
+      "passed": true,
+      "actual": {
+        "notificationId": 825,
+        "seq": 1792380236142
+      }
+    },
+    {
+      "name": "真实界面显示故障期间通知",
+      "passed": true,
+      "actual": {
+        "visibleItems": 9
+      }
+    },
+    {
+      "name": "专用Redis恢复正常",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "恢复后浏览/notices",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "恢复后浏览/housings",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "恢复后WS重新注册且通知送达",
+      "passed": true,
+      "actual": {
+        "messages": 1,
+        "errors": []
+      }
+    },
+    {
+      "name": "恢复后通知游标继续递增且补拉可达",
+      "passed": false,
+      "actual": {
+        "outageSeq": 1792380236142,
+        "maxSeq": 825,
+        "pulledCount": 0
+      }
+    },
+    {
+      "name": "Redis故障有明确降级告警",
+      "passed": true,
+      "actual": {
+        "fallbackWarnings": 28
+      }
+    },
+    {
+      "name": "故障窗口无认证过滤器异常雪崩",
+      "passed": true,
+      "actual": {
+        "unhandledServletErrors": 0
+      }
+    }
+  ],
+  "passed": 17,
+  "failed": [
+    {
+      "name": "真实前端约30秒周期轮询",
+      "passed": false,
+      "actual": {
+        "intervalSeconds": [
+          0.01,
+          18.7,
+          29.99,
+          30.0,
+          30.01,
+          30.0,
+          30.0,
+          30.0,
+          30.0
+        ],
+        "count": 12
+      }
+    },
+    {
+      "name": "恢复后通知游标继续递增且补拉可达",
+      "passed": false,
+      "actual": {
+        "outageSeq": 1792380236142,
+        "maxSeq": 825,
+        "pulledCount": 0
+      }
+    }
+  ],
+  "pollTimestamps": [
+    1792380207.99723,
+    1792380208.1404757,
+    1792380279.292091,
+    1792380279.3017628,
+    1792380297.9972959,
+    1792380327.9871798,
+    1792380357.9856951,
+    1792380387.99402,
+    1792380417.99168,
+    1792380447.9867892,
+    1792380477.9890127,
+    1792380507.9889286
+  ],
+  "normalRedisTouched": false,
+  "faultSeconds": 314.43,
+  "originalUserStopMethodAdapted": "用户本轮授权AI收尾；在独立6387实例实施同等停机/恢复，正常6379保持"
+}

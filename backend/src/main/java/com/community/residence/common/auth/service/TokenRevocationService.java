@@ -1,10 +1,11 @@
 package com.community.residence.common.auth.service;
 
+import com.community.residence.common.config.RedisFailures;
 import com.community.residence.common.auth.entity.AuthTokenBlacklist;
 import com.community.residence.common.auth.mapper.AuthTokenBlacklistMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,8 @@ public class TokenRevocationService {
         try {
             redisTemplate.opsForValue().set(KEY_PREFIX + scope + "-" + userId,
                     String.valueOf(System.currentTimeMillis() / 1000), revokeRetention);
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，用户吊销已写 DB，缓存未生效：scope={}, userId={}", scope, userId);
         }
     }
@@ -110,7 +112,8 @@ public class TokenRevocationService {
             if (cached != null) {
                 return Long.parseLong(cached);
             }
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             // 降级查 DB
         }
         String scopePrefix = "USER-" + scope + "-" + userId + "-%";
@@ -125,7 +128,8 @@ public class TokenRevocationService {
             if (ttl > 0) {
                 redisTemplate.opsForValue().set(key, String.valueOf(epochSec), Duration.ofMillis(ttl));
             }
-        } catch (RedisConnectionFailureException ignored) {
+        } catch (DataAccessException ignored) {
+            RedisFailures.rethrowUnlessUnavailable(ignored);
             // 回种失败不影响本次结果
         }
         return epochSec;

@@ -138,7 +138,9 @@ public class ConversationService {
         if (residentUserId == null) {
             return null;
         }
-        Conversation existing = findTypedGroup(ConversationType.LEASE_GROUP, leaseId);
+        /* 同一租约先取得父行锁再当前读，避免并发撞唯一键后共享锁升级的死锁。 */
+        leaseRecordMapper.selectByIdForUpdate(leaseId);
+        Conversation existing = findTypedGroup(ConversationType.LEASE_GROUP, leaseId, true);
         if (existing != null) {
             return existing;
         }
@@ -154,7 +156,7 @@ public class ConversationService {
             /* 并发建群撞 uk_conversation_type_related（DEF-106）：先查后插窗口内
                另一路已建群，重查返回既有会话（同一租约不产生第二群，参与者/消息
                不分裂）；重查仍为空属异常场景（约束归属不明等），原样抛出不吞 */
-            Conversation winner = findTypedGroup(ConversationType.LEASE_GROUP, leaseId);
+            Conversation winner = findTypedGroup(ConversationType.LEASE_GROUP, leaseId, true);
             if (winner != null) {
                 return winner;
             }
@@ -282,7 +284,7 @@ public class ConversationService {
             /* 并发建群撞 uk_conversation_type_related（DEF-106）：受理重试/换管理员
                受理与首建并发时，重查复用既有群并补登本次受理人（addParticipant 幂等），
                与上方先查命中路径同一语义；重查仍为空属异常场景，原样抛出不吞 */
-            Conversation winner = findWorkOrderGroup(workOrderId);
+            Conversation winner = findTypedGroup(ConversationType.WORK_ORDER_GROUP, workOrderId, true);
             if (winner != null) {
                 if (intakeAdminId != null) {
                     addParticipant(winner.getId(), NotificationOwnerType.USER, intakeAdminId);
@@ -311,10 +313,15 @@ public class ConversationService {
        V27 uk_conversation_type_related 保证 (type, related_id) 至多一条，
        LIMIT 1 仅兜底防御性去重前的历史脏数据 */
     private Conversation findTypedGroup(String type, Long relatedId) {
+        return findTypedGroup(type, relatedId, false);
+    }
+
+    /* 撞唯一键后的查询必须是当前读，普通一致性读仍可能停在插入之前的快照。 */
+    private Conversation findTypedGroup(String type, Long relatedId, boolean currentRead) {
         return conversationMapper.selectOne(new LambdaQueryWrapper<Conversation>()
                 .eq(Conversation::getType, type)
                 .eq(Conversation::getRelatedId, relatedId)
-                .last("LIMIT 1"));
+                .last(currentRead ? "LIMIT 1 FOR UPDATE" : "LIMIT 1"));
     }
 
     /**
@@ -512,11 +519,16 @@ public class ConversationService {
         }
         String callerSpace = currentOwnerType();
 
+        /* 直通没有可锁的新会话行；先锁居民父行直到事务提交，串行化同一居民的建群。
+           后续用当前读，避免等待父锁前形成的可重复读快照漏掉另一事务刚提交的会话。 */
+        residentMapper.selectByIdForUpdate(residentId);
+
         /* 幂等命中：该居民（居民身份空间）参与的 DIRECT 会话中找该社区的一条 */
         List<Long> mine = participantMapper.selectList(
                         new LambdaQueryWrapper<ConversationParticipant>()
                                 .eq(ConversationParticipant::getOwnerType, NotificationOwnerType.RESIDENT)
-                                .eq(ConversationParticipant::getUserId, residentId))
+                                .eq(ConversationParticipant::getUserId, residentId)
+                                .last("FOR UPDATE"))
                 .stream().map(ConversationParticipant::getConversationId).toList();
         if (!mine.isEmpty()) {
             Conversation existing = conversationMapper.selectOne(
@@ -524,7 +536,7 @@ public class ConversationService {
                             .in(Conversation::getId, mine)
                             .eq(Conversation::getType, ConversationType.DIRECT)
                             .eq(Conversation::getCommunityId, communityId)
-                            .last("LIMIT 1"));
+                            .last("LIMIT 1 FOR UPDATE"));
             if (existing != null) {
                 return toVO(existing, callerSpace, callerId);
             }

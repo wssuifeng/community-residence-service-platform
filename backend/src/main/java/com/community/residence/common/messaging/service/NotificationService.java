@@ -1,5 +1,6 @@
 package com.community.residence.common.messaging.service;
 
+import com.community.residence.common.config.RedisFailures;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,8 +18,9 @@ import com.community.residence.common.messaging.vo.NotificationVO;
 import com.community.residence.common.auth.service.SysConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +35,7 @@ import java.util.Objects;
 /**
  * 通知业务逻辑：站内通知统一生成（P2 升级 WebSocket 实时推送）。
  * 生成时若接收人 WebSocket 在线则即时推送，离线由前端登录后 pull 补拉；
- * seq 由 Redis INCR 生成，Redis 不可用时以毫秒时间戳兜底（保持递增性）。
+ * seq 由 Redis 原子递增生成；故障时沿用本进程序号下限，恢复及重启后不回退。
  * <p>
  * 收件人身份为 **(ownerType, userId) 二元组**（DEF-067）：resident 表与 sys_user
  * 表是两套独立身份空间且主键可撞号（resident 1 与 sys_user 1），单靠 user_id
@@ -47,6 +49,13 @@ public class NotificationService {
     private final com.community.residence.common.messaging.service.AfterCommitDeliveryService afterCommitDelivery;
 
     private static final String SEQ_KEY = "notification:seq";
+    private static final DefaultRedisScript<Long> NEXT_SEQ = new DefaultRedisScript<>("""
+            local current = tonumber(redis.call('GET', KEYS[1]) or '0')
+            local floor = tonumber(ARGV[1])
+            if current < floor then redis.call('SET', KEYS[1], ARGV[1]) end
+            return redis.call('INCR', KEYS[1])
+            """, Long.class);
+    private Long lastSeq;
 
     /** 渠道分级配置键（R51：按通知等级勾选模拟渠道，JSON 承载于 sys_config） */
     public static final String KEY_CHANNEL_LEVELS = "notify.channel.levels";
@@ -192,15 +201,24 @@ public class NotificationService {
         return NotificationOwnerType.ofRole(user == null ? null : user.getRole());
     }
 
-    /** seq 生成：Redis INCR；不可用时毫秒时间戳兜底（仍全局递增） */
-    private Long nextSeq() {
-        try {
-            Long seq = redisTemplate.opsForValue().increment(SEQ_KEY);
-            return seq != null ? seq : System.currentTimeMillis();
-        } catch (RedisConnectionFailureException e) {
-            log.warn("Redis 不可用，通知 seq 以时间戳兜底");
-            return System.currentTimeMillis();
+    /* 单体内串行分配序号：首次从数据库恢复下限；Redis 原子抬升下限并递增。
+       故障期间同毫秒也不复用序号，恢复后先传播本地最大值，避免 sinceSeq 漏拉。 */
+    private synchronized Long nextSeq() {
+        if (lastSeq == null) {
+            lastSeq = notificationMapper.selectMaxSeq();
         }
+        try {
+            Long seq = redisTemplate.execute(NEXT_SEQ, List.of(SEQ_KEY), lastSeq.toString());
+            if (seq == null || seq <= lastSeq) {
+                throw new IllegalStateException("通知序号未递增");
+            }
+            lastSeq = seq;
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
+            log.warn("Redis 不可用，通知 seq 沿本地序号下限递增");
+            lastSeq = Math.max(lastSeq + 1, System.currentTimeMillis());
+        }
+        return lastSeq;
     }
 
     /* 渠道留痕（R51）：站内必达；模拟渠道按 sys_config notify.channel.levels

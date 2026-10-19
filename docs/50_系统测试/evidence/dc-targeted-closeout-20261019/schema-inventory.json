@@ -1,0 +1,78 @@
+{
+  "resident": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nusername\tvarchar(50)\tNO\tUNI\tNULL\t\npassword_hash\tvarchar(255)\tNO\t\tNULL\t\nreal_name\tvarchar(50)\tNO\t\tNULL\t\nphone\tvarchar(20)\tNO\tUNI\tNULL\t\nid_card\tvarchar(18)\tYES\t\tNULL\t\nemail\tvarchar(100)\tYES\t\tNULL\t\navatar_url\tvarchar(255)\tYES\t\tNULL\t\nstatus\tvarchar(20)\tNO\tMUL\tACTIVE\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "1"
+  },
+  "sys_user": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nusername\tvarchar(50)\tNO\tUNI\tNULL\t\npassword_hash\tvarchar(255)\tNO\t\tNULL\t\nreal_name\tvarchar(50)\tNO\t\tNULL\t\nphone\tvarchar(20)\tNO\tUNI\tNULL\t\nemail\tvarchar(100)\tYES\t\tNULL\t\navatar_url\tvarchar(255)\tYES\t\tNULL\t\nrole\tvarchar(20)\tNO\tMUL\tNULL\t\nstatus\tvarchar(20)\tNO\tMUL\tACTIVE\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "3"
+  },
+  "residence_relation": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nresident_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nhouse_id\tbigint unsigned\tNO\tMUL\tNULL\t\nrelation_type\tvarchar(20)\tNO\t\tNULL\t\nmove_in_date\tdate\tNO\t\tNULL\t\nmove_out_date\tdate\tYES\t\tNULL\t\nis_primary\ttinyint\tNO\t\t0\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nlease_id\tbigint unsigned\tYES\tUNI\tNULL\t\nanchor_relation_id\tbigint unsigned\tYES\tMUL\tNULL\t\nactive_resident_id\tbigint unsigned\tYES\t\tNULL\tSTORED GENERATED",
+    "sample": "1"
+  },
+  "community": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nname\tvarchar(100)\tNO\t\tNULL\t\naddress\tvarchar(255)\tNO\t\tNULL\t\ndescription\ttext\tYES\t\tNULL\t\nstatus\tvarchar(20)\tNO\tMUL\tACTIVE\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nauto_approve_residence\ttinyint(1)\tNO\t\t0\t\ndefault_lease_months\tint\tNO\t\t12\t\nresponsible_admin_id\tbigint unsigned\tYES\tMUL\tNULL\t\nbusiness_code\tvarchar(32)\tYES\tUNI\tNULL",
+    "sample": "1"
+  },
+  "building": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nname\tvarchar(50)\tNO\t\tNULL\t\nfloors\tint\tNO\t\tNULL\t\ndescription\ttext\tYES\t\tNULL\t\nis_deleted\ttinyint\tNO\tMUL\t0\t\ndeleted_at\tdatetime\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nbusiness_code\tvarchar(32)\tYES\t\tNULL",
+    "sample": "1"
+  },
+  "unit": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nbuilding_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nname\tvarchar(50)\tNO\t\tNULL\t\ndescription\ttext\tYES\t\tNULL\t\nis_deleted\ttinyint\tNO\tMUL\t0\t\ndeleted_at\tdatetime\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nbusiness_code\tvarchar(32)\tYES\t\tNULL",
+    "sample": "1"
+  },
+  "house": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nunit_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nhouse_number\tvarchar(20)\tNO\t\tNULL\t\nfloor\tint\tNO\t\tNULL\t\narea\tdecimal(10,2)\tYES\t\tNULL\t\nlayout\tvarchar(50)\tYES\t\tNULL\t\norientation\tvarchar(20)\tYES\t\tNULL\t\nstatus\tvarchar(20)\tNO\tMUL\tVACANT\t\ndescription\ttext\tYES\t\tNULL\t\nis_deleted\ttinyint\tNO\tMUL\t0\t\ndeleted_at\tdatetime\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "3"
+  },
+  "public_resource": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nname\tvarchar(100)\tNO\t\tNULL\t\ntype\tvarchar(50)\tNO\tMUL\tNULL\t\nlocation\tvarchar(255)\tYES\t\tNULL\t\ncapacity\tint\tYES\t\tNULL\t\nslot_unit\tint\tNO\t\t30\t\ndescription\ttext\tYES\t\tNULL\t\nimages\tvarchar(1000)\tYES\t\tNULL\t\nis_deleted\ttinyint\tNO\tMUL\t0\t\ndeleted_at\tdatetime\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "1"
+  },
+  "resource_timeslot": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nresource_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nday_of_week\ttinyint\tNO\t\tNULL\t\nstart_time\ttime\tNO\t\tNULL\t\nend_time\ttime\tNO\t\tNULL\t\nis_available\ttinyint\tNO\t\t1\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "10"
+  },
+  "housing_timeslot": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nhousing_id\tbigint unsigned\tNO\tMUL\tNULL\t\nday_of_week\ttinyint\tNO\t\tNULL\t\nstart_time\ttime\tNO\t\tNULL\t\nend_time\ttime\tNO\t\tNULL\t\nis_available\ttinyint\tNO\t\t1\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "14"
+  },
+  "housing": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nhouse_id\tbigint unsigned\tNO\tMUL\tNULL\t\ntitle\tvarchar(200)\tNO\t\tNULL\t\ndescription\ttext\tYES\t\tNULL\t\nmonthly_rent\tdecimal(10,2)\tNO\t\tNULL\t\ndeposit\tdecimal(10,2)\tYES\t\tNULL\t\nrent_type\tvarchar(10)\tNO\t\tRENT\t\nlayout\tvarchar(50)\tYES\t\tNULL\t\nimages\tvarchar(1000)\tYES\t\tNULL\t\nstatus\tvarchar(20)\tNO\tMUL\tAVAILABLE\t\nview_count\tint\tNO\t\t0\t\npublish_time\tdatetime\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "1"
+  },
+  "viewing_appointment": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nuser_id\tbigint unsigned\tYES\tMUL\tNULL\t\nvisitor_name\tvarchar(50)\tYES\t\tNULL\t\nvisitor_phone\tvarchar(20)\tYES\t\tNULL\t\nassigned_staff_id\tbigint unsigned\tYES\tMUL\tNULL\t\nconversation_id\tbigint unsigned\tYES\tMUL\tNULL\t\nlease_id\tbigint unsigned\tYES\tMUL\tNULL\t\nhousing_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nappointment_date\tdate\tNO\t\tNULL\t\nstart_time\ttime\tNO\t\tNULL\t\nend_time\ttime\tNO\t\tNULL\t\nstatus\tvarchar(20)\tNO\t\tTO_CONFIRM\t\ncontact_phone\tvarchar(20)\tNO\t\tNULL\t\nremark\ttext\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nslot_occupied\ttinyint\tYES\t\tNULL\tSTORED GENERATED",
+    "sample": "0"
+  },
+  "work_order": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\norder_no\tvarchar(50)\tNO\tUNI\tNULL\t\nresident_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncategory_id\tbigint unsigned\tNO\tMUL\tNULL\t\ntitle\tvarchar(100)\tNO\t\tNULL\t\ncontent\ttext\tNO\t\tNULL\t\ncontact_phone\tvarchar(20)\tNO\t\tNULL\t\naddress\tvarchar(255)\tYES\t\tNULL\t\nstatus\tvarchar(20)\tNO\t\tPENDING\t\npriority\tvarchar(20)\tNO\t\tNORMAL\t\nconversation_id\tbigint unsigned\tYES\tMUL\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "0"
+  },
+  "lease_record": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\ntenant_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nhouse_id\tbigint unsigned\tNO\tMUL\tNULL\t\nstart_date\tdate\tNO\t\tNULL\t\nend_date\tdate\tNO\t\tNULL\t\nmonthly_rent\tdecimal(10,2)\tNO\t\tNULL\t\ndeposit\tdecimal(10,2)\tYES\t\tNULL\t\ndeposit_status\tvarchar(20)\tNO\tMUL\tUNPAID\t\nstatus\tvarchar(20)\tNO\tMUL\tPENDING\t\ncontract_url\tvarchar(255)\tYES\t\tNULL\t\nremark\ttext\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nagreement_status\tvarchar(30)\tNO\t\tNONE\t\ntenant_confirm_at\tdatetime\tYES\t\tNULL\t\ntenant_confirm_by\tbigint unsigned\tYES\t\tNULL\t\nconversation_id\tbigint unsigned\tYES\tMUL\tNULL\t\ncontract_months\tint\tYES\t\tNULL\t\nfirst_payment_months\tint\tYES\t\tNULL\t\npayment_cycle_months\tint\tYES\t\tNULL",
+    "sample": "1"
+  },
+  "lease_move_out_application": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nlease_id\tbigint unsigned\tNO\tMUL\tNULL\t\nresident_id\tbigint unsigned\tNO\tMUL\tNULL\t\ncommunity_id\tbigint unsigned\tNO\tMUL\tNULL\t\nhouse_id\tbigint unsigned\tNO\tMUL\tNULL\t\nmove_out_date\tdate\tNO\t\tNULL\t\nreason\tvarchar(500)\tYES\t\tNULL\t\nstatus\tvarchar(16)\tNO\t\tPENDING\t\nreviewer_id\tbigint unsigned\tYES\t\tNULL\t\nreview_time\tdatetime\tYES\t\tNULL\t\nreject_reason\tvarchar(500)\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP",
+    "sample": "0"
+  },
+  "conversation": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\ntype\tvarchar(20)\tNO\tMUL\tNULL\t\ntitle\tvarchar(200)\tNO\t\tNULL\t\ncommunity_id\tbigint unsigned\tYES\tMUL\tNULL\t\nrelated_id\tbigint unsigned\tYES\t\tNULL\t\nstatus\tvarchar(16)\tNO\t\tACTIVE\t\nclosed_at\tdatetime\tYES\t\tNULL\t\nlast_message\tvarchar(500)\tYES\t\tNULL\t\nlast_message_at\tdatetime\tYES\t\tNULL\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED",
+    "sample": "0"
+  },
+  "conversation_participant": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nconversation_id\tbigint unsigned\tNO\tMUL\tNULL\t\nowner_type\tvarchar(16)\tNO\tMUL\tNULL\t\nuser_id\tbigint unsigned\tNO\t\tNULL\t\nlast_read_message_id\tbigint unsigned\tNO\t\t0\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED",
+    "sample": "0"
+  },
+  "notification_channel_log": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\nnotification_id\tbigint unsigned\tNO\tMUL\tNULL\t\nchannel\tvarchar(50)\tNO\t\tNULL\t\nstatus\tvarchar(20)\tNO\t\tNULL\t\nerror_message\ttext\tYES\t\tNULL\t\nsent_time\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED",
+    "sample": "0"
+  },
+  "notice": {
+    "columns": "id\tbigint unsigned\tNO\tPRI\tNULL\tauto_increment\ntitle\tvarchar(200)\tNO\t\tNULL\t\ncontent\ttext\tNO\t\tNULL\t\npublisher_id\tbigint unsigned\tNO\tMUL\tNULL\t\nstatus\tvarchar(20)\tNO\tMUL\tDRAFT\t\npublish_time\tdatetime\tYES\t\tNULL\t\nstart_time\tdatetime\tYES\t\tNULL\t\nend_time\tdatetime\tYES\t\tNULL\t\nview_count\tint\tNO\t\t0\t\nis_pinned\ttinyint\tNO\t\t0\t\npriority\tvarchar(20)\tNO\t\tNORMAL\t\ntype\tvarchar(20)\tNO\t\tANNOUNCEMENT\t\ncreated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED\nupdated_at\tdatetime\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\nimages\tvarchar(1000)\tYES\t\tNULL\t\nbody_json\tjson\tYES\t\tNULL\t\ncontent_version\tint\tNO\t\t1\t\nedited_by\tbigint unsigned\tYES\t\tNULL\t\nedited_at\tdatetime\tYES\t\tNULL",
+    "sample": "1"
+  }
+}

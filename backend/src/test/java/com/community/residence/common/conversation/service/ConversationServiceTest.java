@@ -475,6 +475,7 @@ class ConversationServiceTest {
         Conversation result = service.createLeaseGroup(88L, 1L, RESIDENT_USER_ID, "租约沟通");
 
         assertThat(result.getId()).isEqualTo(77L);
+        verify(leaseRecordMapper).selectByIdForUpdate(88L);
         /* 输家路径即刻返回，不再向新群插参与者（既有群成员已就位） */
         verify(participantMapper, never()).insert(any(ConversationParticipant.class));
     }

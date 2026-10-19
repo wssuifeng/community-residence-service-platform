@@ -1,5 +1,6 @@
 package com.community.residence.common.housing.service;
 
+import com.community.residence.common.config.RedisFailures;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -39,7 +40,7 @@ import com.community.residence.common.reservation.service.SlotGrids;
 import com.community.residence.common.reservation.vo.AvailableSlotVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -266,7 +267,8 @@ public class HousingService {
         try {
             Long increment = redisTemplate.opsForValue().increment(VIEW_COUNT_KEY_PREFIX + id);
             return (long) effectiveViewCount(housing.getViewCount(), increment);
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，浏览计数直写数据库：housingId={}", id);
             housingMapper.update(null, new LambdaUpdateWrapper<Housing>()
                     .eq(Housing::getId, id)

@@ -1,0 +1,547 @@
+{
+  "checks": [
+    {
+      "name": "resource 10路第1轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 1
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "resource 10路第2轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 2
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "resource 10路第3轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "id": 3
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "resource边界10:00:00-12:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "rows": 1
+      }
+    },
+    {
+      "name": "resource边界12:00:00-14:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "rows": 2
+      }
+    },
+    {
+      "name": "resource边界08:00:00-10:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "rows": 3
+      }
+    },
+    {
+      "name": "resource边界11:00:00-13:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5401,
+        "rows": 3
+      }
+    },
+    {
+      "name": "resource边界09:00:00-11:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5401,
+        "rows": 3
+      }
+    },
+    {
+      "name": "resource边界09:00:00-13:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5405,
+        "rows": 3
+      }
+    },
+    {
+      "name": "resource边界10:00:00-11:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5401,
+        "rows": 3
+      }
+    },
+    {
+      "name": "viewing 10路第1轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 7
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "viewing 10路第2轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 8
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "viewing 10路第3轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 9
+          },
+          {
+            "http": 200,
+            "code": 5401,
+            "id": null
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "viewing边界10:00:00-12:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "rows": 1
+      }
+    },
+    {
+      "name": "viewing边界12:00:00-14:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "rows": 2
+      }
+    },
+    {
+      "name": "viewing边界08:00:00-10:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "rows": 3
+      }
+    },
+    {
+      "name": "viewing边界11:00:00-13:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5401,
+        "rows": 3
+      }
+    },
+    {
+      "name": "viewing边界09:00:00-11:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5401,
+        "rows": 3
+      }
+    },
+    {
+      "name": "viewing边界09:00:00-13:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5806,
+        "rows": 3
+      }
+    },
+    {
+      "name": "viewing边界10:00:00-11:00:00",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5401,
+        "rows": 3
+      }
+    },
+    {
+      "name": "DEF-213真实10路直通会话防重复",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 23
+          }
+        ],
+        "rows": 1
+      }
+    }
+  ],
+  "passed": 21,
+  "failed": [],
+  "httpRaceRequests": 70,
+  "scope": "SP-001～004及DEF-213；当前60分钟看房栅格使用整点有效边界；跨模板非法请求不冒充重叠验证"
+}

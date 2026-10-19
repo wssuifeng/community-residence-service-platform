@@ -1,10 +1,11 @@
 package com.community.residence.common.auth.service;
 
+import com.community.residence.common.config.RedisFailures;
 import com.community.residence.common.auth.entity.AuthTokenBlacklist;
 import com.community.residence.common.auth.mapper.AuthTokenBlacklistMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +50,8 @@ public class TokenBlacklistService {
             if (ttl > 0) {
                 redisTemplate.opsForValue().set(KEY_PREFIX + jti, "1", Duration.ofMillis(ttl));
             }
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，黑名单已写入 DB，登出成功但缓存未生效：jti={}", jti);
         }
     }
@@ -71,7 +73,8 @@ public class TokenBlacklistService {
             if (Boolean.TRUE.equals(cached)) {
                 return true;
             }
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，降级查 DB 黑名单：jti={}", jti);
             return blacklistMapper.selectByJtiNotExpired(jti) != null;
         }
@@ -85,7 +88,8 @@ public class TokenBlacklistService {
             if (ttl > 0) {
                 redisTemplate.opsForValue().set(KEY_PREFIX + jti, "1", Duration.ofMillis(ttl));
             }
-        } catch (RedisConnectionFailureException ignored) {
+        } catch (DataAccessException ignored) {
+            RedisFailures.rethrowUnlessUnavailable(ignored);
             // 回种失败仅影响下次查询性能，不影响校验结果
         }
         return true;
