@@ -1,0 +1,114 @@
+{
+  "recordedAt": "2026-10-20T00:00:00+08:00",
+  "gitHead": "008737b8e584a1dddc85c8ef97120920e68c348c",
+  "productBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productDiffFromBaseline": [],
+  "sourceFilesChecked": [
+    "backend/src/main/java/com/community/residence/common/notice/controller/NoticeController.java",
+    "backend/src/main/java/com/community/residence/common/notice/service/NoticeService.java",
+    "backend/src/main/java/com/community/residence/common/feedback/controller/FeedbackController.java",
+    "backend/src/main/java/com/community/residence/common/feedback/service/FeedbackService.java",
+    "backend/src/main/java/com/community/residence/common/messaging/controller/NotificationController.java",
+    "backend/src/main/java/com/community/residence/common/messaging/service/NotificationService.java",
+    "backend/src/main/java/com/community/residence/common/conversation/controller/ConversationController.java",
+    "backend/src/main/java/com/community/residence/common/conversation/service/ConversationService.java",
+    "frontend/src/common/messaging/store/notification.ts",
+    "frontend/src/common/messaging/utils/notificationNav.ts",
+    "frontend/src/common/conversation/composables/useConversationInbox.ts",
+    "frontend/src/common/conversation/composables/useChatChannel.ts",
+    "frontend/src/admin/notice/views/NoticeManageView.vue"
+  ],
+  "sourceFilesMissing": [],
+  "evidenceSources": [
+    {
+      "id": "R12",
+      "requirements": [
+        "R12"
+      ],
+      "tests": [
+        "TC-C2-017",
+        "TC-C2-018",
+        "TC-C2-019"
+      ],
+      "historicalEvidence": "A5",
+      "limitation": "历史执行证据，产品代码与当前验收构建一致"
+    },
+    {
+      "id": "C5",
+      "requirements": [
+        "R24",
+        "R25",
+        "R26",
+        "R27",
+        "E5"
+      ],
+      "tests": [
+        "TC-C5-001..016",
+        "TC-C5-014"
+      ],
+      "historicalEvidence": "A5/B3/BI/BQ/CF/CE/D5/WS1",
+      "limitation": "E5需完整当前版本跨端链补证；R条目按单项证据核对"
+    },
+    {
+      "id": "C6",
+      "requirements": [
+        "R28",
+        "R29",
+        "R30",
+        "R31",
+        "E6"
+      ],
+      "tests": [
+        "TC-C6-001..015",
+        "TC-C6-013"
+      ],
+      "historicalEvidence": "A5/B3/BI/BQ/CP/WS1/BF/CVP",
+      "limitation": "E6需同一批业务数据完整链补证；R30/R49时延依据现有realtime-browser记录"
+    },
+    {
+      "id": "C11",
+      "requirements": [
+        "R48",
+        "R49",
+        "R50",
+        "R51",
+        "E11"
+      ],
+      "tests": [
+        "TC-C11-001..017"
+      ],
+      "historicalEvidence": "BF/BI/BQ/BC/CF/CP/WS1/EVENTS/JOB/UI5/CHLEVEL/BMTEST/BD",
+      "limitation": "E11需完整当前版本事件→补拉→已读链补证；模拟渠道不等于真实第三方通道"
+    },
+    {
+      "id": "R63",
+      "requirements": [
+        "R63"
+      ],
+      "tests": [
+        "TC-C12-021",
+        "TC-C3-016"
+      ],
+      "historicalEvidence": "BF/BL/BC/BH2/CE/CZ",
+      "limitation": "现有测试为定向与历史组合证据，不把它单独升格为完整E12流程"
+    }
+  ],
+  "frontendSelectiveTest": {
+    "testFiles": 10,
+    "tests": 66,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "npm run test -- --run src/common/messaging src/common/conversation src/admin/conversation/views/__tests__/ConversationListView.spec.ts src/__tests__/module-boundaries.spec.ts"
+  },
+  "backendSelectiveTest": {
+    "testClasses": 36,
+    "tests": 219,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "command": ".\\mvnw.cmd -Dtest=Notice*Test,Feedback*Test,Conversation*Test,Notification*Test,ChannelLevelsTest,AfterCommitDeliveryTest,NotificationSequenceRecoveryTest,WebSocketSessionCountTest,ConversationSubscriptionInterceptorTest,FeedbackSubscriptionInterceptorTest test",
+    "skipReason": "ConversationInboxDatabaseTest skipped by test assumption/environment; no failure or error"
+  },
+  "financialOperationCount": 0
+}

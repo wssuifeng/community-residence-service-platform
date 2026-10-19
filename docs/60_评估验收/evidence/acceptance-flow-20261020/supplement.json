@@ -1,0 +1,1971 @@
+{
+  "recordedAt": "2026-10-20T02:30:51.949250",
+  "base": "http://127.0.0.1:8087",
+  "jarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "normalDatabaseWrites": 0,
+  "financialOperations": 0,
+  "ids": {
+    "scopedAdminId": 25,
+    "scopedAdminUsername": "acc_scope_649891",
+    "staffIds": [
+      26,
+      27,
+      28,
+      29,
+      30
+    ],
+    "testStaffUsername": "acc_staff_649891_1",
+    "workOrderId": 10509,
+    "groupId": 71,
+    "evaluationId": 6,
+    "followupId": 2
+  },
+  "checks": [
+    {
+      "name": "R45 own community query includes its building",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "R45 out of scope query empty",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "R45 superadmin sees both communities",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "R65 unique schedule MORNING",
+      "passed": true,
+      "detail": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "12:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "早班",
+          "shiftType": "MORNING",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "08:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "name": "R65 unique schedule AFTERNOON",
+      "passed": true,
+      "detail": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "18:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "午班",
+          "shiftType": "AFTERNOON",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "12:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "name": "R65 unique schedule EVENING",
+      "passed": true,
+      "detail": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "22:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "晚班",
+          "shiftType": "EVENING",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "18:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "name": "R65 unique schedule REST",
+      "passed": true,
+      "detail": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "22:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "休息",
+          "shiftType": "REST",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "18:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "name": "R65 unique schedule FULL",
+      "passed": true,
+      "detail": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "18:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "全天",
+          "shiftType": "FULL",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "08:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "name": "R65 empty arrays clear bindings",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "E4 group automatically created",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "R65 recommendation tiers",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "R65 same tier lower workload first",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "R65 dispatch fields filled",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "E8 followup trace saved",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "E4 closed group retained",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "E4 work order closed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "E6 feedback closed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "G-016 future reservation was accepted as completed",
+      "passed": true,
+      "detail": {
+        "reserveDate": "2026-10-23",
+        "status": "COMPLETED",
+        "today": "2026-10-20"
+      }
+    }
+  ],
+  "trace": [
+    {
+      "actor": "guest",
+      "step": "login superadmin",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 1,
+          "realName": "超级管理员",
+          "role": "SUPER_ADMIN",
+          "username": "superadmin"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login admin1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            1,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "id": 2,
+          "realName": "社区管理员",
+          "role": "ADMIN",
+          "username": "admin1"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login staff1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 3,
+          "realName": "服务人员",
+          "role": "STAFF",
+          "username": "staff1"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_owner_34481",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 214,
+          "realName": "Acceptance Owner",
+          "role": "RESIDENT",
+          "username": "acc_owner_34481"
+        }
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "create scoped administrator",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "boundCommunities": null,
+        "createdAt": null,
+        "email": null,
+        "id": 25,
+        "phone": "13700649891",
+        "realName": "Acceptance Scoped Admin",
+        "role": "ADMIN",
+        "status": "ACTIVE",
+        "username": "acc_scope_649891"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "bind only acceptance community",
+      "method": "POST",
+      "path": "/api/v1/sys-users/25/communities",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "communityAddress": "Acceptance Flow Road 1",
+        "boundAt": null
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_scope_649891",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            15
+          ],
+          "id": 25,
+          "realName": "Acceptance Scoped Admin",
+          "role": "ADMIN",
+          "username": "acc_scope_649891"
+        }
+      }
+    },
+    {
+      "actor": "acc_scope_649891",
+      "step": "bound community structure visible",
+      "method": "GET",
+      "path": "/api/v1/communities/15/buildings",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "businessCode": "1",
+            "communityId": 15,
+            "communityName": null,
+            "createdAt": "2026-10-20T02:30:35",
+            "description": "acceptance",
+            "floors": 2,
+            "id": 13,
+            "name": "A1"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 20,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "acc_scope_649891",
+      "step": "out of scope community structure",
+      "method": "GET",
+      "path": "/api/v1/communities/1/buildings",
+      "http": 403,
+      "code": 403,
+      "message": "无权操作未绑定社区的数据",
+      "data": null
+    },
+    {
+      "actor": "acc_scope_649891",
+      "step": "out of scope detail denied",
+      "method": "GET",
+      "path": "/api/v1/houses/1",
+      "http": 404,
+      "code": 404,
+      "message": "房屋不存在",
+      "data": null
+    },
+    {
+      "actor": "acc_scope_649891",
+      "step": "global user creation denied",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 403,
+      "code": 403,
+      "message": "无权限访问",
+      "data": null
+    },
+    {
+      "actor": "superadmin",
+      "step": "global community list",
+      "method": "GET",
+      "path": "/api/v1/communities?page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "15",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T02:30:35",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 15,
+            "name": "ACC-FLOW-34481",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T02:30:35"
+          },
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "14",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T02:05:53",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 14,
+            "name": "ACC-FLOW-53866",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T02:05:53"
+          },
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "13",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T02:05:24",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 13,
+            "name": "ACC-FLOW-24402",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T02:05:24"
+          },
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "12",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T02:05:03",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 12,
+            "name": "ACC-FLOW-3225",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T02:05:03"
+          },
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "11",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T02:04:16",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 11,
+            "name": "ACC-FLOW-55847",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T02:04:16"
+          },
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "10",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T02:02:25",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 10,
+            "name": "ACC-FLOW-45663",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T02:02:25"
+          },
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "9",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T01:56:20",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 9,
+            "name": "ACC-FLOW-80423",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T01:56:20"
+          },
+          {
+            "address": "Acceptance Flow Road 1",
+            "autoApproveResidence": 0,
+            "businessCode": "8",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T01:53:21",
+            "defaultLeaseMonths": 12,
+            "description": "phase60 acceptance isolated",
+            "id": 8,
+            "name": "ACC-FLOW-1564",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T01:53:21"
+          },
+          {
+            "address": "冒烟市E1路2号",
+            "autoApproveResidence": 0,
+            "businessCode": "7",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T01:43:11",
+            "defaultLeaseMonths": 12,
+            "description": "E1 冒烟",
+            "id": 7,
+            "name": "TEST-冒烟E1社区91874",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T01:43:11"
+          },
+          {
+            "address": "冒烟市E10b路1号",
+            "autoApproveResidence": 0,
+            "businessCode": "6",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-20T01:43:10",
+            "defaultLeaseMonths": 12,
+            "description": "E10b 权限初始化冒烟",
+            "id": 6,
+            "name": "TEST-冒烟E10b社区90086",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-20T01:43:10"
+          },
+          {
+            "address": "隔离规模数据",
+            "autoApproveResidence": 0,
+            "businessCode": "5",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-19T12:00:09",
+            "defaultLeaseMonths": 12,
+            "description": null,
+            "id": 5,
+            "name": "dc规模社区5",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-19T12:00:09"
+          },
+          {
+            "address": "隔离规模数据",
+            "autoApproveResidence": 0,
+            "businessCode": "4",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-19T12:00:08",
+            "defaultLeaseMonths": 12,
+            "description": null,
+            "id": 4,
+            "name": "dc规模社区4",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-19T12:00:08"
+          },
+          {
+            "address": "独立测试数据",
+            "autoApproveResidence": 0,
+            "businessCode": "3",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-19T11:12:35",
+            "defaultLeaseMonths": 12,
+            "description": null,
+            "id": 3,
+            "name": "dc契约抽样社区",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-19T11:12:35"
+          },
+          {
+            "address": "仅隔离测试",
+            "autoApproveResidence": 0,
+            "businessCode": "2",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-19T11:02:04",
+            "defaultLeaseMonths": 12,
+            "description": "dc-closeout",
+            "id": 2,
+            "name": "dc独立社区",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-19T11:02:04"
+          },
+          {
+            "address": "示范市幸福路 88 号",
+            "autoApproveResidence": 0,
+            "businessCode": "1",
+            "contactPerson": null,
+            "contactPhone": null,
+            "createdAt": "2026-10-19T10:57:53",
+            "defaultLeaseMonths": 12,
+            "description": null,
+            "id": 1,
+            "name": "阳光花园社区",
+            "responsibleAdminId": null,
+            "status": "ACTIVE",
+            "updatedAt": "2026-10-19T10:57:56"
+          }
+        ],
+        "total": 15,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 create candidate 1",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "boundCommunities": null,
+        "createdAt": null,
+        "email": null,
+        "id": 26,
+        "phone": "13506498911",
+        "realName": "Acceptance Staff 1",
+        "role": "STAFF",
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_1"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 save capability 1",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/26",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [
+          101
+        ],
+        "categoryNames": [
+          "AC-Repair-34481"
+        ],
+        "communityIds": [
+          15
+        ],
+        "communityNames": [
+          "ACC-FLOW-34481"
+        ],
+        "phone": "13506498911",
+        "realName": "Acceptance Staff 1",
+        "staffId": 26,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_1"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 create candidate 2",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "boundCommunities": null,
+        "createdAt": null,
+        "email": null,
+        "id": 27,
+        "phone": "13506498912",
+        "realName": "Acceptance Staff 2",
+        "role": "STAFF",
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_2"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 save capability 2",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/27",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [
+          101
+        ],
+        "categoryNames": [
+          "AC-Repair-34481"
+        ],
+        "communityIds": [
+          15
+        ],
+        "communityNames": [
+          "ACC-FLOW-34481"
+        ],
+        "phone": "13506498912",
+        "realName": "Acceptance Staff 2",
+        "staffId": 27,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_2"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 create candidate 3",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "boundCommunities": null,
+        "createdAt": null,
+        "email": null,
+        "id": 28,
+        "phone": "13506498913",
+        "realName": "Acceptance Staff 3",
+        "role": "STAFF",
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_3"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 save capability 3",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/28",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [],
+        "categoryNames": [],
+        "communityIds": [
+          15
+        ],
+        "communityNames": [
+          "ACC-FLOW-34481"
+        ],
+        "phone": "13506498913",
+        "realName": "Acceptance Staff 3",
+        "staffId": 28,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_3"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 create candidate 4",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "boundCommunities": null,
+        "createdAt": null,
+        "email": null,
+        "id": 29,
+        "phone": "13506498914",
+        "realName": "Acceptance Staff 4",
+        "role": "STAFF",
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_4"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 save capability 4",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/29",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [
+          101
+        ],
+        "categoryNames": [
+          "AC-Repair-34481"
+        ],
+        "communityIds": [],
+        "communityNames": [],
+        "phone": "13506498914",
+        "realName": "Acceptance Staff 4",
+        "staffId": 29,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_4"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 create candidate 5",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "boundCommunities": null,
+        "createdAt": null,
+        "email": null,
+        "id": 30,
+        "phone": "13506498915",
+        "realName": "Acceptance Staff 5",
+        "role": "STAFF",
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_5"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 save capability 5",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/30",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [],
+        "categoryNames": [],
+        "communityIds": [],
+        "communityNames": [],
+        "phone": "13506498915",
+        "realName": "Acceptance Staff 5",
+        "staffId": 30,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_5"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 overwrite same-day shift MORNING",
+      "method": "PUT",
+      "path": "/api/v1/staff-schedules/batch",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "saved": 1
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 verify same-day shift MORNING",
+      "method": "GET",
+      "path": "/api/v1/staff-schedules?communityId=15&startDate=2026-10-20&endDate=2026-10-20",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "12:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "早班",
+          "shiftType": "MORNING",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "08:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 overwrite same-day shift AFTERNOON",
+      "method": "PUT",
+      "path": "/api/v1/staff-schedules/batch",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "saved": 1
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 verify same-day shift AFTERNOON",
+      "method": "GET",
+      "path": "/api/v1/staff-schedules?communityId=15&startDate=2026-10-20&endDate=2026-10-20",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "18:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "午班",
+          "shiftType": "AFTERNOON",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "12:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 overwrite same-day shift EVENING",
+      "method": "PUT",
+      "path": "/api/v1/staff-schedules/batch",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "saved": 1
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 verify same-day shift EVENING",
+      "method": "GET",
+      "path": "/api/v1/staff-schedules?communityId=15&startDate=2026-10-20&endDate=2026-10-20",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "22:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "晚班",
+          "shiftType": "EVENING",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "18:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 overwrite same-day shift REST",
+      "method": "PUT",
+      "path": "/api/v1/staff-schedules/batch",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "saved": 1
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 verify same-day shift REST",
+      "method": "GET",
+      "path": "/api/v1/staff-schedules?communityId=15&startDate=2026-10-20&endDate=2026-10-20",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "22:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "休息",
+          "shiftType": "REST",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "18:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 overwrite same-day shift FULL",
+      "method": "PUT",
+      "path": "/api/v1/staff-schedules/batch",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "saved": 1
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 verify same-day shift FULL",
+      "method": "GET",
+      "path": "/api/v1/staff-schedules?communityId=15&startDate=2026-10-20&endDate=2026-10-20",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "communityName": "ACC-FLOW-34481",
+          "endTime": "18:00:00",
+          "id": 4,
+          "remark": null,
+          "shiftLabel": "全天",
+          "shiftType": "FULL",
+          "staffId": 26,
+          "staffName": "Acceptance Staff 1",
+          "startTime": "08:00:00",
+          "workDate": "2026-10-20"
+        }
+      ]
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 clear both binding dimensions",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/30",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [
+          101
+        ],
+        "categoryNames": [
+          "AC-Repair-34481"
+        ],
+        "communityIds": [
+          15
+        ],
+        "communityNames": [
+          "ACC-FLOW-34481"
+        ],
+        "phone": "13506498915",
+        "realName": "Acceptance Staff 5",
+        "staffId": 30,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_5"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 clear with empty arrays",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/30",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [],
+        "categoryNames": [],
+        "communityIds": [],
+        "communityNames": [],
+        "phone": "13506498915",
+        "realName": "Acceptance Staff 5",
+        "staffId": 30,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_5"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "R65 read cleared capability",
+      "method": "GET",
+      "path": "/api/v1/staff-capabilities/30",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "categoryIds": [],
+        "categoryNames": [],
+        "communityIds": [],
+        "communityNames": [],
+        "phone": "13506498915",
+        "realName": "Acceptance Staff 5",
+        "staffId": 30,
+        "status": "ACTIVE",
+        "username": "acc_staff_649891_5"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 second work order with evidence images",
+      "method": "POST",
+      "path": "/api/v1/work-orders",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "address": null,
+        "assigneeActiveOrders": null,
+        "assigneeId": null,
+        "assigneeName": null,
+        "assigneeShiftLabel": null,
+        "categoryId": 101,
+        "categoryName": "AC-Repair-34481",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "content": "image and group chain",
+        "conversationId": null,
+        "createdAt": null,
+        "dispatchFlag": "URGENT",
+        "id": 10509,
+        "orderNo": "WO202610204014",
+        "priority": "URGENT",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "PENDING",
+        "title": "Acceptance full work order 649891",
+        "updatedAt": null,
+        "waitedMinutes": 0
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "upload synthetic image",
+      "method": "POST",
+      "path": "/api/v1/work-orders/10509/attachments",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "createdAt": null,
+        "fileName": "acceptance.png",
+        "fileSize": 92,
+        "fileType": "IMAGE",
+        "fileUrl": "/uploads/50d8f2d5bcca406faa6ee48c08b40c23.png",
+        "id": 4,
+        "workOrderId": 10509
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E4 intake and group creation",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10509/intake",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "address": null,
+        "assigneeActiveOrders": null,
+        "assigneeId": null,
+        "assigneeName": null,
+        "assigneeShiftLabel": null,
+        "categoryId": 101,
+        "categoryName": "AC-Repair-34481",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "content": "image and group chain",
+        "conversationId": 71,
+        "createdAt": "2026-10-20T02:30:50",
+        "dispatchFlag": "URGENT",
+        "id": 10509,
+        "orderNo": "WO202610204014",
+        "priority": "URGENT",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "TO_ASSIGN",
+        "title": "Acceptance full work order 649891",
+        "updatedAt": "2026-10-20T02:30:50",
+        "waitedMinutes": 0
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E4 assign staff and join group",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10509/assign",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "R65 recommendation query",
+      "method": "GET",
+      "path": "/api/v1/work-orders/assignable-staff?communityId=15&categoryId=101",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-34481",
+          "id": 27,
+          "matchedCategory": true,
+          "matchedCommunity": true,
+          "realName": "Acceptance Staff 2",
+          "recommendLevel": 1,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 1,
+          "communityNames": "ACC-FLOW-34481",
+          "id": 26,
+          "matchedCategory": true,
+          "matchedCommunity": true,
+          "realName": "Acceptance Staff 1",
+          "recommendLevel": 1,
+          "todayShiftLabel": "全天"
+        },
+        {
+          "activeOrderCount": 9,
+          "communityNames": "ACC-FLOW-34481",
+          "id": 3,
+          "matchedCategory": true,
+          "matchedCommunity": true,
+          "realName": "服务人员",
+          "recommendLevel": 1,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-34481",
+          "id": 28,
+          "matchedCategory": false,
+          "matchedCommunity": true,
+          "realName": "Acceptance Staff 3",
+          "recommendLevel": 2,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 29,
+          "matchedCategory": true,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 4",
+          "recommendLevel": 3,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 8,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 1",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 9,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 2",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 10,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 3",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 11,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 4",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 12,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 5",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 14,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 1",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 15,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 2",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 16,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 3",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 17,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 4",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 18,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 5",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 20,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 1",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 21,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 2",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": "ACC-FLOW-53866",
+          "id": 22,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 3",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 23,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 4",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 24,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 5",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        },
+        {
+          "activeOrderCount": 0,
+          "communityNames": null,
+          "id": 30,
+          "matchedCategory": false,
+          "matchedCommunity": false,
+          "realName": "Acceptance Staff 5",
+          "recommendLevel": 4,
+          "todayShiftLabel": null
+        }
+      ]
+    },
+    {
+      "actor": "admin1",
+      "step": "R65 current dispatch metadata",
+      "method": "GET",
+      "path": "/api/v1/work-orders/10509",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "address": null,
+        "assigneeActiveOrders": 1,
+        "assigneeId": 26,
+        "assigneeName": "Acceptance Staff 1",
+        "assigneeShiftLabel": "全天",
+        "categoryId": 101,
+        "categoryName": "AC-Repair-34481",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "content": "image and group chain",
+        "conversationId": 71,
+        "createdAt": "2026-10-20T02:30:50",
+        "dispatchFlag": "URGENT",
+        "id": 10509,
+        "orderNo": "WO202610204014",
+        "priority": "URGENT",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "ASSIGNED",
+        "title": "Acceptance full work order 649891",
+        "updatedAt": "2026-10-20T02:30:50",
+        "waitedMinutes": 0
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_staff_649891_1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 26,
+          "realName": "Acceptance Staff 1",
+          "role": "STAFF",
+          "username": "acc_staff_649891_1"
+        }
+      }
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "step": "E4 service staff group communication",
+      "method": "POST",
+      "path": "/api/v1/conversations/71/messages",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "agreementId": null,
+        "content": "acceptance group communication",
+        "conversationId": 71,
+        "createdAt": "2026-10-20T02:30:51.3060459",
+        "id": 32,
+        "image": null,
+        "messageType": "TEXT",
+        "senderId": 26,
+        "senderName": "Acceptance Staff 1",
+        "senderRole": "STAFF"
+      }
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "step": "R65 unassigned work order denied",
+      "method": "GET",
+      "path": "/api/v1/work-orders/10508",
+      "http": 403,
+      "code": 403,
+      "message": "仅被派单的服务人员可操作该工单",
+      "data": null
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "step": "E4 accept",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10509/accept",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "step": "E4 process",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10509/process",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "step": "upload synthetic image",
+      "method": "POST",
+      "path": "/api/v1/work-orders/10509/attachments",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "createdAt": null,
+        "fileName": "acceptance.png",
+        "fileSize": 92,
+        "fileType": "IMAGE",
+        "fileUrl": "/uploads/95a6a6aa71e44fe29e451c3d3b667498.png",
+        "id": 5,
+        "workOrderId": 10509
+      }
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "step": "upload synthetic image",
+      "method": "POST",
+      "path": "/api/v1/work-orders/10509/attachments",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "createdAt": null,
+        "fileName": "acceptance.png",
+        "fileSize": 92,
+        "fileType": "IMAGE",
+        "fileUrl": "/uploads/6c8e214f341f4e5da9c9d1301f24e3a0.png",
+        "id": 6,
+        "workOrderId": 10509
+      }
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "step": "E4 complete",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10509/complete",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 resident confirmation",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10509/confirm",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E8 two-star evaluation",
+      "method": "POST",
+      "path": "/api/v1/work-orders/10509/evaluation",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "content": "acceptance followup required",
+        "createdAt": null,
+        "id": 6,
+        "isSatisfied": 0,
+        "rating": 2,
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "tags": null,
+        "workOrderId": 10509,
+        "workOrderNo": "WO202610204014"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E8 followup result",
+      "method": "POST",
+      "path": "/api/v1/evaluations/6/followup",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "evaluationId": 6,
+        "followupContent": "Acceptance issue followed up and resolved",
+        "followupTime": "2026-10-20T02:30:51.5604664",
+        "handlerId": 2,
+        "handlerName": "社区管理员",
+        "id": 2
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E8 followup history",
+      "method": "GET",
+      "path": "/api/v1/evaluations/6/followups",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "evaluationId": 6,
+          "followupContent": "Acceptance issue followed up and resolved",
+          "followupTime": "2026-10-20T02:30:52",
+          "handlerId": 2,
+          "handlerName": "社区管理员",
+          "id": 2
+        }
+      ]
+    },
+    {
+      "actor": "admin1",
+      "step": "E8 evaluation aggregation",
+      "method": "GET",
+      "path": "/api/v1/statistics/evaluations/aggregation?communityId=15",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "byCategory": [
+          {
+            "total": 2,
+            "satisfiedRate": 50.0,
+            "name": "AC-Repair-34481",
+            "avgRating": 3.5
+          }
+        ],
+        "byStaff": [
+          {
+            "total": 1,
+            "satisfiedRate": 100.0,
+            "name": "服务人员",
+            "avgRating": 5.0
+          },
+          {
+            "total": 1,
+            "satisfiedRate": 0.0,
+            "name": "Acceptance Staff 1",
+            "avgRating": 2.0
+          }
+        ]
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E4 final close",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10509/close",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 historical group remains readable",
+      "method": "GET",
+      "path": "/api/v1/conversations/71",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "closedAt": "2026-10-20T02:30:52",
+        "communityId": 15,
+        "createdAt": "2026-10-20T02:30:51",
+        "id": 71,
+        "lastMessage": "工单已终审结束（已关闭），本群停止接收新消息，历史记录保留可查",
+        "lastMessageAt": "2026-10-20T02:30:52",
+        "participantCount": 3,
+        "participants": [
+          {
+            "name": "Acceptance Owner",
+            "ownerType": "RESIDENT",
+            "role": "RESIDENT",
+            "userId": 214
+          },
+          {
+            "name": "社区管理员",
+            "ownerType": "USER",
+            "role": "ADMIN",
+            "userId": 2
+          },
+          {
+            "name": "Acceptance Staff 1",
+            "ownerType": "USER",
+            "role": "STAFF",
+            "userId": 26
+          }
+        ],
+        "relatedId": 10509,
+        "status": "CLOSED",
+        "title": "工单沟通·WO202610204014",
+        "type": "WORK_ORDER_GROUP",
+        "unreadCount": 4
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 closed group rejects message",
+      "method": "POST",
+      "path": "/api/v1/conversations/71/messages",
+      "http": 200,
+      "code": 5604,
+      "message": "会话已关闭，不可再发送消息",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 final closed work order",
+      "method": "GET",
+      "path": "/api/v1/work-orders/10509",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "address": null,
+        "assigneeActiveOrders": 0,
+        "assigneeId": 26,
+        "assigneeName": "Acceptance Staff 1",
+        "assigneeShiftLabel": "全天",
+        "categoryId": 101,
+        "categoryName": "AC-Repair-34481",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "content": "image and group chain",
+        "conversationId": 71,
+        "createdAt": "2026-10-20T02:30:50",
+        "dispatchFlag": "NEW",
+        "id": 10509,
+        "orderNo": "WO202610204014",
+        "priority": "URGENT",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "CLOSED",
+        "title": "Acceptance full work order 649891",
+        "updatedAt": "2026-10-20T02:30:50",
+        "waitedMinutes": 0
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 closed feedback final state",
+      "method": "GET",
+      "path": "/api/v1/feedbacks/10",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "category": "SUGGESTION",
+        "communityId": 15,
+        "content": "feedback session evidence",
+        "createdAt": "2026-10-20T02:30:37",
+        "handlerId": 2,
+        "handlerName": "社区管理员",
+        "id": 10,
+        "isAnonymous": false,
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "CLOSED",
+        "title": "AC acceptance feedback"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 post-close message denied",
+      "method": "POST",
+      "path": "/api/v1/feedbacks/10/messages",
+      "http": 200,
+      "code": 5004,
+      "message": "反馈已办结，不可继续会话",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "G-016 premature resource completion evidence",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/12",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "createdAt": "2026-10-20T02:30:37",
+        "endTime": "09:30:00",
+        "id": 12,
+        "purpose": "acceptance resource flow",
+        "remark": "E7",
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:00:00",
+        "status": "COMPLETED",
+        "userId": 214,
+        "userName": "Acceptance Owner"
+      }
+    }
+  ],
+  "databaseReadOnly": {
+    "initializationLogCounts": [
+      [
+        "BUILDING",
+        "1"
+      ],
+      [
+        "COMMUNITY",
+        "1"
+      ],
+      [
+        "HOUSE",
+        "3"
+      ],
+      [
+        "PUBLIC_RESOURCE",
+        "1"
+      ],
+      [
+        "UNIT",
+        "1"
+      ]
+    ],
+    "authorizationDenials": [],
+    "workorderNotificationSources": [
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "新工单待受理",
+        "3"
+      ],
+      [
+        "RESIDENT",
+        "WORK_ORDER",
+        "10509",
+        "工单已受理",
+        "1"
+      ],
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "工单已受理",
+        "2"
+      ],
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "新工单派发",
+        "1"
+      ],
+      [
+        "RESIDENT",
+        "WORK_ORDER",
+        "10509",
+        "工单已派单",
+        "1"
+      ],
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "工单已接单",
+        "3"
+      ],
+      [
+        "RESIDENT",
+        "WORK_ORDER",
+        "10509",
+        "服务人员已接单",
+        "1"
+      ],
+      [
+        "RESIDENT",
+        "WORK_ORDER",
+        "10509",
+        "工单处理中",
+        "1"
+      ],
+      [
+        "RESIDENT",
+        "WORK_ORDER",
+        "10509",
+        "工单已处理完成",
+        "1"
+      ],
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "工单待居民确认",
+        "2"
+      ],
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "居民已确认工单",
+        "1"
+      ],
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "工单待终审关闭",
+        "2"
+      ],
+      [
+        "RESIDENT",
+        "WORK_ORDER",
+        "10509",
+        "工单已结束",
+        "1"
+      ],
+      [
+        "USER",
+        "WORK_ORDER",
+        "10509",
+        "工单已关闭",
+        "2"
+      ]
+    ],
+    "evaluationSummary": [
+      [
+        "2",
+        "7",
+        "3.5000",
+        "1"
+      ]
+    ],
+    "groupParticipants": [
+      [
+        "RESIDENT",
+        "1"
+      ],
+      [
+        "USER",
+        "2"
+      ]
+    ]
+  },
+  "remaining": [
+    "E2 moveout segment",
+    "E3 first-payment-to-archive segment with user financial confirmation",
+    "E5 scheduled auto-offline",
+    "E6 realtime and E11 same-event websocket",
+    "E7 violation branch",
+    "N8 browser version matrix"
+  ]
+}

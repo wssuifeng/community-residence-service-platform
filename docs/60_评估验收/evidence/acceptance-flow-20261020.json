@@ -1,0 +1,2406 @@
+{
+  "base": "http://127.0.0.1:8087",
+  "runAt": "2026-10-19T18:30:34.481254+00:00",
+  "jarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "financialOperations": 0,
+  "ids": {
+    "communityId": 15,
+    "buildingId": 13,
+    "unitId": 13,
+    "houseIds": [
+      5170,
+      5171,
+      5172
+    ],
+    "categoryId": 101,
+    "resourceId": 9,
+    "ownerResidentId": 214,
+    "ownerApplicationId": 13,
+    "workOrderId": 10508,
+    "noticeId": 7,
+    "feedbackId": 10,
+    "reservationId": 12,
+    "housingId": 4,
+    "viewingAppointmentId": 21,
+    "tenantResidentId": 215,
+    "tenantApplicationId": 14,
+    "leaseId": 29,
+    "targetDate": "2026-10-23",
+    "dayOfWeek": 5
+  },
+  "trace": [
+    {
+      "actor": "superadmin",
+      "step": "login",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 1,
+          "realName": "超级管理员",
+          "role": "SUPER_ADMIN",
+          "username": "superadmin"
+        }
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "list system users",
+      "method": "GET",
+      "path": "/api/v1/sys-users?page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:41",
+            "email": null,
+            "id": 24,
+            "phone": "13505602575",
+            "realName": "Acceptance Staff 5",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_560257_5"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:40",
+            "email": null,
+            "id": 23,
+            "phone": "13505602574",
+            "realName": "Acceptance Staff 4",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_560257_4"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:40",
+            "email": null,
+            "id": 22,
+            "phone": "13505602573",
+            "realName": "Acceptance Staff 3",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_560257_3"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:40",
+            "email": null,
+            "id": 21,
+            "phone": "13505602572",
+            "realName": "Acceptance Staff 2",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_560257_2"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:40",
+            "email": null,
+            "id": 20,
+            "phone": "13505602571",
+            "realName": "Acceptance Staff 1",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_560257_1"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:40",
+            "email": null,
+            "id": 19,
+            "phone": "13700560257",
+            "realName": "Acceptance Scoped Admin",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "username": "acc_scope_560257"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:08",
+            "email": null,
+            "id": 18,
+            "phone": "13505275745",
+            "realName": "Acceptance Staff 5",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_527574_5"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:08",
+            "email": null,
+            "id": 17,
+            "phone": "13505275744",
+            "realName": "Acceptance Staff 4",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_527574_4"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:08",
+            "email": null,
+            "id": 16,
+            "phone": "13505275743",
+            "realName": "Acceptance Staff 3",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_527574_3"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:08",
+            "email": null,
+            "id": 15,
+            "phone": "13505275742",
+            "realName": "Acceptance Staff 2",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_527574_2"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:07",
+            "email": null,
+            "id": 14,
+            "phone": "13505275741",
+            "realName": "Acceptance Staff 1",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_527574_1"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:12:07",
+            "email": null,
+            "id": 13,
+            "phone": "13700527574",
+            "realName": "Acceptance Scoped Admin",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "username": "acc_scope_527574"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:11:54",
+            "email": null,
+            "id": 12,
+            "phone": "13505135435",
+            "realName": "Acceptance Staff 5",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_513543_5"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:11:54",
+            "email": null,
+            "id": 11,
+            "phone": "13505135434",
+            "realName": "Acceptance Staff 4",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_513543_4"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:11:54",
+            "email": null,
+            "id": 10,
+            "phone": "13505135433",
+            "realName": "Acceptance Staff 3",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_513543_3"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:11:53",
+            "email": null,
+            "id": 9,
+            "phone": "13505135432",
+            "realName": "Acceptance Staff 2",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_513543_2"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:11:53",
+            "email": null,
+            "id": 8,
+            "phone": "13505135431",
+            "realName": "Acceptance Staff 1",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "acc_staff_513543_1"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:11:53",
+            "email": null,
+            "id": 7,
+            "phone": "13700513543",
+            "realName": "Acceptance Scoped Admin",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "username": "acc_scope_513543"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T02:11:40",
+            "email": null,
+            "id": 6,
+            "phone": "13700500544",
+            "realName": "Acceptance Scoped Admin",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "username": "acc_scope_500544"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-20T01:43:10",
+            "email": null,
+            "id": 5,
+            "phone": "13828821811",
+            "realName": "冒烟管理员",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "username": "smkadm90367"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-19T11:02:04",
+            "email": null,
+            "id": 4,
+            "phone": "13870009999",
+            "realName": "隔离管理员",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "username": "dc_admin2"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-19T10:57:53",
+            "email": null,
+            "id": 3,
+            "phone": "13800000102",
+            "realName": "服务人员",
+            "role": "STAFF",
+            "status": "ACTIVE",
+            "username": "staff1"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-19T10:57:53",
+            "email": null,
+            "id": 2,
+            "phone": "13800000101",
+            "realName": "社区管理员",
+            "role": "ADMIN",
+            "status": "ACTIVE",
+            "username": "admin1"
+          },
+          {
+            "boundCommunities": null,
+            "createdAt": "2026-10-19T10:57:52",
+            "email": null,
+            "id": 1,
+            "phone": "13800000000",
+            "realName": "超级管理员",
+            "role": "SUPER_ADMIN",
+            "status": "ACTIVE",
+            "username": "superadmin"
+          }
+        ],
+        "total": 24,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create community",
+      "method": "POST",
+      "path": "/api/v1/communities",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "address": "Acceptance Flow Road 1",
+        "autoApproveResidence": 0,
+        "businessCode": "15",
+        "contactPerson": null,
+        "contactPhone": null,
+        "createdAt": null,
+        "defaultLeaseMonths": 12,
+        "description": "phase60 acceptance isolated",
+        "id": 15,
+        "name": "ACC-FLOW-34481",
+        "responsibleAdminId": null,
+        "status": "ACTIVE",
+        "updatedAt": null
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E10b bind admin community",
+      "method": "POST",
+      "path": "/api/v1/sys-users/2/communities",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "communityAddress": "Acceptance Flow Road 1",
+        "boundAt": null
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create building",
+      "method": "POST",
+      "path": "/api/v1/buildings",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "businessCode": "1",
+        "communityId": 15,
+        "communityName": null,
+        "createdAt": null,
+        "description": "acceptance",
+        "floors": 2,
+        "id": 13,
+        "name": "A1"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create unit",
+      "method": "POST",
+      "path": "/api/v1/units",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "buildingId": 13,
+        "buildingName": null,
+        "businessCode": "1",
+        "communityId": 15,
+        "createdAt": null,
+        "description": "acceptance",
+        "id": 13,
+        "name": "U1"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create house 101",
+      "method": "POST",
+      "path": "/api/v1/houses",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "area": 88.5,
+        "communityId": 15,
+        "createdAt": null,
+        "description": null,
+        "floor": 1,
+        "houseNumber": "101",
+        "id": 5170,
+        "layout": "2B1L",
+        "orientation": "SOUTH",
+        "status": "VACANT",
+        "unitId": 13,
+        "unitName": null
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create house 102",
+      "method": "POST",
+      "path": "/api/v1/houses",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "area": 66.0,
+        "communityId": 15,
+        "createdAt": null,
+        "description": null,
+        "floor": 1,
+        "houseNumber": "102",
+        "id": 5171,
+        "layout": "1B1L",
+        "orientation": "EAST",
+        "status": "VACANT",
+        "unitId": 13,
+        "unitName": null
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create house 103",
+      "method": "POST",
+      "path": "/api/v1/houses",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "area": 72.0,
+        "communityId": 15,
+        "createdAt": null,
+        "description": null,
+        "floor": 1,
+        "houseNumber": "103",
+        "id": 5172,
+        "layout": "2B1L",
+        "orientation": "SOUTH",
+        "status": "VACANT",
+        "unitId": 13,
+        "unitName": null
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create service category",
+      "method": "POST",
+      "path": "/api/v1/service-categories",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "children": null,
+        "communityId": 15,
+        "createdAt": null,
+        "description": "acceptance",
+        "id": 101,
+        "isActive": 1,
+        "name": "AC-Repair-34481",
+        "parentId": null,
+        "sortOrder": 0
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create public resource",
+      "method": "POST",
+      "path": "/api/v1/resources",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "capacity": 20,
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "createdAt": null,
+        "description": "acceptance",
+        "id": 9,
+        "images": [],
+        "location": "A1-1F",
+        "name": "AC-Room-34481",
+        "slotUnit": 30,
+        "type": "MEETING_ROOM"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E1 create resource timeslot",
+      "method": "POST",
+      "path": "/api/v1/resources/9/timeslots",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "createdAt": null,
+        "dayOfWeek": 5,
+        "endTime": "11:00:00",
+        "id": 31,
+        "isAvailable": 1,
+        "resourceId": 9,
+        "resourceName": null,
+        "startTime": "09:00:00"
+      }
+    },
+    {
+      "actor": "superadmin",
+      "step": "E10b bind staff capability",
+      "method": "PUT",
+      "path": "/api/v1/staff-capabilities/3",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "categoryIds": [
+          101
+        ],
+        "categoryNames": [
+          "AC-Repair-34481"
+        ],
+        "communityIds": [
+          15
+        ],
+        "communityNames": [
+          "ACC-FLOW-34481"
+        ],
+        "phone": "13800000102",
+        "realName": "服务人员",
+        "staffId": 3,
+        "status": "ACTIVE",
+        "username": "staff1"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "login",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            1,
+            15,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8
+          ],
+          "id": 2,
+          "realName": "社区管理员",
+          "role": "ADMIN",
+          "username": "admin1"
+        }
+      }
+    },
+    {
+      "actor": "staff1",
+      "step": "login",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 3,
+          "realName": "服务人员",
+          "role": "STAFF",
+          "username": "staff1"
+        }
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E1 read community",
+      "method": "GET",
+      "path": "/api/v1/communities/15",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "address": "Acceptance Flow Road 1",
+        "autoApproveResidence": 0,
+        "businessCode": "15",
+        "contactPerson": null,
+        "contactPhone": null,
+        "createdAt": "2026-10-20T02:30:35",
+        "defaultLeaseMonths": 12,
+        "description": "phase60 acceptance isolated",
+        "id": 15,
+        "name": "ACC-FLOW-34481",
+        "responsibleAdminId": null,
+        "status": "ACTIVE",
+        "updatedAt": "2026-10-20T02:30:35"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E1 read buildings",
+      "method": "GET",
+      "path": "/api/v1/communities/15/buildings",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "businessCode": "1",
+            "communityId": 15,
+            "communityName": null,
+            "createdAt": "2026-10-20T02:30:35",
+            "description": "acceptance",
+            "floors": 2,
+            "id": 13,
+            "name": "A1"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 20,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E1 read houses",
+      "method": "GET",
+      "path": "/api/v1/units/13/houses?page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "area": 88.5,
+            "communityId": 15,
+            "createdAt": "2026-10-20T02:30:35",
+            "description": null,
+            "floor": 1,
+            "houseNumber": "101",
+            "id": 5170,
+            "layout": "2B1L",
+            "orientation": "SOUTH",
+            "status": "VACANT",
+            "unitId": 13,
+            "unitName": null
+          },
+          {
+            "area": 66.0,
+            "communityId": 15,
+            "createdAt": "2026-10-20T02:30:35",
+            "description": null,
+            "floor": 1,
+            "houseNumber": "102",
+            "id": 5171,
+            "layout": "1B1L",
+            "orientation": "EAST",
+            "status": "VACANT",
+            "unitId": 13,
+            "unitName": null
+          },
+          {
+            "area": 72.0,
+            "communityId": 15,
+            "createdAt": "2026-10-20T02:30:35",
+            "description": null,
+            "floor": 1,
+            "houseNumber": "103",
+            "id": 5172,
+            "layout": "2B1L",
+            "orientation": "SOUTH",
+            "status": "VACANT",
+            "unitId": 13,
+            "unitName": null
+          }
+        ],
+        "total": 3,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E1 read resources",
+      "method": "GET",
+      "path": "/api/v1/communities/15/resources",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "capacity": 20,
+            "communityId": 15,
+            "communityName": "ACC-FLOW-34481",
+            "createdAt": "2026-10-20T02:30:35",
+            "description": "acceptance",
+            "id": 9,
+            "images": [],
+            "location": "A1-1F",
+            "name": "AC-Room-34481",
+            "slotUnit": 30,
+            "type": "MEETING_ROOM"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 20,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "E2 register resident",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/register",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "createdAt": null,
+        "email": null,
+        "id": 214,
+        "idCardMasked": null,
+        "phone": "13900034481",
+        "realName": "Acceptance Owner",
+        "status": "ACTIVE",
+        "username": "acc_owner_34481"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "login",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 214,
+          "realName": "Acceptance Owner",
+          "role": "RESIDENT",
+          "username": "acc_owner_34481"
+        }
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E2 submit owner residence application",
+      "method": "POST",
+      "path": "/api/v1/residence-applications",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "conversationId": null,
+        "createdAt": null,
+        "houseId": 5170,
+        "houseLocation": "A1U1101",
+        "housingId": null,
+        "id": 13,
+        "leaseId": null,
+        "listedDeposit": null,
+        "listedMonthlyRent": null,
+        "relationType": "OWNER",
+        "remark": "acceptance E2",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "reviewRemark": null,
+        "reviewTime": null,
+        "status": "PENDING"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E2 approve owner residence application",
+      "method": "PATCH",
+      "path": "/api/v1/residence-applications/13/approve",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "conversationId": null,
+        "createdAt": "2026-10-20T02:30:36",
+        "houseId": 5170,
+        "houseLocation": "A1U1101",
+        "housingId": null,
+        "id": 13,
+        "leaseId": null,
+        "listedDeposit": null,
+        "listedMonthlyRent": null,
+        "relationType": "OWNER",
+        "remark": "acceptance E2",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "reviewRemark": "acceptance E2 approve",
+        "reviewTime": "2026-10-20T02:30:36.4722595",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E2 read own residences",
+      "method": "GET",
+      "path": "/api/v1/residents/214/residences",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "anchorRelationId": null,
+            "communityId": 15,
+            "createdAt": "2026-10-20T02:30:36",
+            "houseId": 5170,
+            "houseLocation": "A1U1101",
+            "id": 268,
+            "leaseId": null,
+            "moveInDate": "2026-10-20",
+            "moveOutDate": null,
+            "relationType": "OWNER",
+            "residentId": 214,
+            "residentName": "Acceptance Owner",
+            "residentPhone": "13900034481",
+            "residentUsername": "acc_owner_34481",
+            "status": "ACTIVE"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 20,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "login",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 214,
+          "realName": "Acceptance Owner",
+          "role": "RESIDENT",
+          "username": "acc_owner_34481"
+        }
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 submit work order",
+      "method": "POST",
+      "path": "/api/v1/work-orders",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "address": "A1 U1 101",
+        "assigneeActiveOrders": null,
+        "assigneeId": null,
+        "assigneeName": null,
+        "assigneeShiftLabel": null,
+        "categoryId": 101,
+        "categoryName": "AC-Repair-34481",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "content": "cross-role flow evidence",
+        "conversationId": null,
+        "createdAt": null,
+        "dispatchFlag": "NORMAL",
+        "id": 10508,
+        "orderNo": "WO202610200574",
+        "priority": "HIGH",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "PENDING",
+        "title": "AC acceptance repair",
+        "updatedAt": null,
+        "waitedMinutes": 0
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E4 intake work order",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10508/intake",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "address": "A1 U1 101",
+        "assigneeActiveOrders": null,
+        "assigneeId": null,
+        "assigneeName": null,
+        "assigneeShiftLabel": null,
+        "categoryId": 101,
+        "categoryName": "AC-Repair-34481",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "content": "cross-role flow evidence",
+        "conversationId": 68,
+        "createdAt": "2026-10-20T02:30:36",
+        "dispatchFlag": "NEW",
+        "id": 10508,
+        "orderNo": "WO202610200574",
+        "priority": "HIGH",
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "TO_ASSIGN",
+        "title": "AC acceptance repair",
+        "updatedAt": "2026-10-20T02:30:36",
+        "waitedMinutes": 0
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E4 assign work order",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10508/assign",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "staff1",
+      "step": "E4 accept work order",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10508/accept",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "staff1",
+      "step": "E4 process work order",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10508/process",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "staff1",
+      "step": "E4 complete work order",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10508/complete",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 resident confirm work order",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10508/confirm",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E8 submit evaluation",
+      "method": "POST",
+      "path": "/api/v1/work-orders/10508/evaluation",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "content": "acceptance evaluation",
+        "createdAt": null,
+        "id": 5,
+        "isSatisfied": 1,
+        "rating": 5,
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "tags": "QUALITY",
+        "workOrderId": 10508,
+        "workOrderNo": "WO202610200574"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E4 close work order",
+      "method": "PATCH",
+      "path": "/api/v1/work-orders/10508/close",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E4 read work order timeline",
+      "method": "GET",
+      "path": "/api/v1/work-orders/10508/timeline",
+      "http": 200,
+      "code": 200,
+      "data": [
+        {
+          "action": "SUBMIT",
+          "content": "cross-role flow evidence",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 58,
+          "newStatus": "PENDING",
+          "oldStatus": null,
+          "operatorId": 214,
+          "operatorName": "Acceptance Owner",
+          "operatorType": "RESIDENT"
+        },
+        {
+          "action": "INTAKE",
+          "content": "accepted for dispatch",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 59,
+          "newStatus": "TO_ASSIGN",
+          "oldStatus": "PENDING",
+          "operatorId": 2,
+          "operatorName": "社区管理员",
+          "operatorType": "ADMIN"
+        },
+        {
+          "action": "ASSIGN",
+          "content": "派单给 服务人员：assigned to staff1",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 60,
+          "newStatus": "ASSIGNED",
+          "oldStatus": "TO_ASSIGN",
+          "operatorId": 2,
+          "operatorName": "社区管理员",
+          "operatorType": "ADMIN"
+        },
+        {
+          "action": "ACCEPT",
+          "content": "accepted",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 61,
+          "newStatus": "ACCEPTED",
+          "oldStatus": "ASSIGNED",
+          "operatorId": 3,
+          "operatorName": "服务人员",
+          "operatorType": "STAFF"
+        },
+        {
+          "action": "PROCESS",
+          "content": "started",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 62,
+          "newStatus": "IN_PROGRESS",
+          "oldStatus": "ACCEPTED",
+          "operatorId": 3,
+          "operatorName": "服务人员",
+          "operatorType": "STAFF"
+        },
+        {
+          "action": "COMPLETE",
+          "content": "completed",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 63,
+          "newStatus": "TO_CONFIRM",
+          "oldStatus": "IN_PROGRESS",
+          "operatorId": 3,
+          "operatorName": "服务人员",
+          "operatorType": "STAFF"
+        },
+        {
+          "action": "CONFIRM",
+          "content": "confirmed",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 64,
+          "newStatus": "COMPLETED",
+          "oldStatus": "TO_CONFIRM",
+          "operatorId": 214,
+          "operatorName": "Acceptance Owner",
+          "operatorType": "RESIDENT"
+        },
+        {
+          "action": "CLOSE",
+          "content": "final close",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 65,
+          "newStatus": "CLOSED",
+          "oldStatus": "COMPLETED",
+          "operatorId": 2,
+          "operatorName": "社区管理员",
+          "operatorType": "ADMIN"
+        }
+      ]
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 create notice",
+      "method": "POST",
+      "path": "/api/v1/notices",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "bodyJson": null,
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "content": "notice cross-end evidence",
+        "contentVersion": 1,
+        "createdAt": null,
+        "editedAt": null,
+        "editedBy": null,
+        "endTime": "2026-10-27T02:30:37.261423",
+        "expireTime": "2026-10-27T02:30:37.261423",
+        "id": 7,
+        "images": [],
+        "isPinned": 1,
+        "priority": "NORMAL",
+        "publishTime": "2026-10-20T02:30:37",
+        "publisherId": 2,
+        "publisherName": "社区管理员",
+        "status": "DRAFT",
+        "targets": [
+          {
+            "targetId": 15,
+            "targetName": "ACC-FLOW-34481",
+            "targetType": "COMMUNITY"
+          }
+        ],
+        "title": "AC acceptance notice 34481",
+        "type": "ANNOUNCEMENT",
+        "viewCount": 0
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 publish notice",
+      "method": "PATCH",
+      "path": "/api/v1/notices/7/publish",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "guest",
+      "step": "E5 guest read published notices",
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=50&communityId=15",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [],
+        "total": 0,
+        "page": 1,
+        "size": 50,
+        "pages": 0
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E5 resident view notice",
+      "method": "POST",
+      "path": "/api/v1/notices/7/view",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 read notice viewers",
+      "method": "GET",
+      "path": "/api/v1/notices/7/viewers?page=1&size=50",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "residentId": 214,
+            "residentName": "Acceptance Owner",
+            "contentVersion": 1,
+            "viewedAt": "2026-10-20T02:30:37"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 50,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 submit feedback",
+      "method": "POST",
+      "path": "/api/v1/feedbacks",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "category": "SUGGESTION",
+        "communityId": 15,
+        "content": "feedback session evidence",
+        "createdAt": null,
+        "handlerId": null,
+        "handlerName": null,
+        "id": 10,
+        "isAnonymous": false,
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "PENDING",
+        "title": "AC acceptance feedback"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E6 admin message feedback",
+      "method": "POST",
+      "path": "/api/v1/feedbacks/10/messages",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "content": "received and handled",
+        "createdAt": "2026-10-20T02:30:37.5780402",
+        "feedbackId": 10,
+        "id": 26,
+        "image": null,
+        "messageType": "TEXT",
+        "parentId": null,
+        "senderId": 2,
+        "senderName": "社区管理员",
+        "senderType": "ADMIN"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 resident message feedback",
+      "method": "POST",
+      "path": "/api/v1/feedbacks/10/messages",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "content": "thank you",
+        "createdAt": "2026-10-20T02:30:37.6060373",
+        "feedbackId": 10,
+        "id": 27,
+        "image": null,
+        "messageType": "TEXT",
+        "parentId": null,
+        "senderId": 214,
+        "senderName": "Acceptance Owner",
+        "senderType": "RESIDENT"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 read feedback messages",
+      "method": "GET",
+      "path": "/api/v1/feedbacks/10/messages",
+      "http": 200,
+      "code": 200,
+      "data": [
+        {
+          "content": "received and handled",
+          "createdAt": "2026-10-20T02:30:38",
+          "feedbackId": 10,
+          "id": 26,
+          "image": null,
+          "messageType": "TEXT",
+          "parentId": null,
+          "senderId": 2,
+          "senderName": "社区管理员",
+          "senderType": "ADMIN"
+        },
+        {
+          "content": "thank you",
+          "createdAt": "2026-10-20T02:30:38",
+          "feedbackId": 10,
+          "id": 27,
+          "image": null,
+          "messageType": "TEXT",
+          "parentId": null,
+          "senderId": 214,
+          "senderName": "Acceptance Owner",
+          "senderType": "RESIDENT"
+        }
+      ]
+    },
+    {
+      "actor": "admin1",
+      "step": "E6 close feedback",
+      "method": "PATCH",
+      "path": "/api/v1/feedbacks/10/close",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E7 read available resource slots",
+      "method": "GET",
+      "path": "/api/v1/resources/9/available-slots?startDate=2026-10-23&endDate=2026-10-23",
+      "http": 200,
+      "code": 200,
+      "data": [
+        {
+          "timeslotId": 310540,
+          "date": "2026-10-23",
+          "startTime": "09:00:00",
+          "endTime": "09:30:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310570,
+          "date": "2026-10-23",
+          "startTime": "09:30:00",
+          "endTime": "10:00:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310600,
+          "date": "2026-10-23",
+          "startTime": "10:00:00",
+          "endTime": "10:30:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310630,
+          "date": "2026-10-23",
+          "startTime": "10:30:00",
+          "endTime": "11:00:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        }
+      ]
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E7 submit resource reservation",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "createdAt": null,
+        "endTime": "09:30:00",
+        "id": 12,
+        "purpose": "acceptance resource flow",
+        "remark": "E7",
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:00:00",
+        "status": "PENDING",
+        "userId": 214,
+        "userName": "Acceptance Owner"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E7 confirm resource reservation",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/12/confirm",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E7 complete resource reservation",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/12/complete",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E7 read resource reservation",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/12",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "createdAt": "2026-10-20T02:30:37",
+        "endTime": "09:30:00",
+        "id": 12,
+        "purpose": "acceptance resource flow",
+        "remark": "E7",
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:00:00",
+        "status": "COMPLETED",
+        "userId": 214,
+        "userName": "Acceptance Owner"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 list notifications",
+      "method": "GET",
+      "path": "/api/v1/notifications?page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "communityId": 15,
+            "content": "您 2026-10-23 的预约已确认",
+            "createdAt": "2026-10-20T02:30:37",
+            "id": 1046,
+            "isRead": 0,
+            "seq": 1792380990043,
+            "sourceId": 12,
+            "sourceType": "RESOURCE_RESERVATION",
+            "title": "预约已确认",
+            "type": "RESERVATION"
+          },
+          {
+            "communityId": 15,
+            "content": "您的反馈「AC acceptance feedback」已办结",
+            "createdAt": "2026-10-20T02:30:37",
+            "id": 1045,
+            "isRead": 0,
+            "seq": 1792380990042,
+            "sourceId": 10,
+            "sourceType": "FEEDBACK",
+            "title": "反馈已办结",
+            "type": "FEEDBACK"
+          },
+          {
+            "communityId": 15,
+            "content": "您的反馈「AC acceptance feedback」有新回复",
+            "createdAt": "2026-10-20T02:30:37",
+            "id": 1043,
+            "isRead": 0,
+            "seq": 1792380990040,
+            "sourceId": 10,
+            "sourceType": "FEEDBACK",
+            "title": "反馈有新回复",
+            "type": "FEEDBACK"
+          },
+          {
+            "communityId": null,
+            "content": "新公告「AC acceptance notice 34481」已发布，请查看",
+            "createdAt": "2026-10-20T02:30:37",
+            "id": 1042,
+            "isRead": 0,
+            "seq": 1792380990039,
+            "sourceId": 7,
+            "sourceType": "NOTICE",
+            "title": "社区公告",
+            "type": "NOTICE"
+          },
+          {
+            "communityId": 15,
+            "content": "您的工单 WO202610200574 已终审结束（已关闭）",
+            "createdAt": "2026-10-20T02:30:37",
+            "id": 1040,
+            "isRead": 0,
+            "seq": 1792380990037,
+            "sourceId": 10508,
+            "sourceType": "WORK_ORDER",
+            "title": "工单已结束",
+            "type": "WORK_ORDER"
+          },
+          {
+            "communityId": 15,
+            "content": "您的工单 WO202610200574 已处理完成，请确认",
+            "createdAt": "2026-10-20T02:30:37",
+            "id": 1036,
+            "isRead": 0,
+            "seq": 1792380990033,
+            "sourceId": 10508,
+            "sourceType": "WORK_ORDER",
+            "title": "工单已处理完成",
+            "type": "WORK_ORDER"
+          },
+          {
+            "communityId": 15,
+            "content": "您的工单 WO202610200574 服务人员已开始处理",
+            "createdAt": "2026-10-20T02:30:37",
+            "id": 1035,
+            "isRead": 0,
+            "seq": 1792380990032,
+            "sourceId": 10508,
+            "sourceType": "WORK_ORDER",
+            "title": "工单处理中",
+            "type": "WORK_ORDER"
+          },
+          {
+            "communityId": 15,
+            "content": "您的工单 WO202610200574 已被服务人员接单",
+            "createdAt": "2026-10-20T02:30:36",
+            "id": 1034,
+            "isRead": 0,
+            "seq": 1792380990031,
+            "sourceId": 10508,
+            "sourceType": "WORK_ORDER",
+            "title": "服务人员已接单",
+            "type": "WORK_ORDER"
+          },
+          {
+            "communityId": 15,
+            "content": "您的工单 WO202610200574 已派单给 服务人员",
+            "createdAt": "2026-10-20T02:30:36",
+            "id": 1031,
+            "isRead": 0,
+            "seq": 1792380990028,
+            "sourceId": 10508,
+            "sourceType": "WORK_ORDER",
+            "title": "工单已派单",
+            "type": "WORK_ORDER"
+          },
+          {
+            "communityId": 15,
+            "content": "您的工单 WO202610200574 已被受理，正在安排服务人员",
+            "createdAt": "2026-10-20T02:30:36",
+            "id": 1028,
+            "isRead": 0,
+            "seq": 1792380990025,
+            "sourceId": 10508,
+            "sourceType": "WORK_ORDER",
+            "title": "工单已受理",
+            "type": "WORK_ORDER"
+          },
+          {
+            "communityId": 15,
+            "content": "您的入住申请（A1U1101）已审批通过",
+            "createdAt": "2026-10-20T02:30:36",
+            "id": 1025,
+            "isRead": 0,
+            "seq": 1792380990022,
+            "sourceId": 13,
+            "sourceType": "RESIDENCE_APPLICATION",
+            "title": "入住申请已通过",
+            "type": "RESIDENCE"
+          }
+        ],
+        "total": 11,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 list unread notifications",
+      "method": "GET",
+      "path": "/api/v1/notifications/unread",
+      "http": 200,
+      "code": 200,
+      "data": [
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的预约已确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1046,
+          "isRead": 0,
+          "seq": 1792380990043,
+          "sourceId": 12,
+          "sourceType": "RESOURCE_RESERVATION",
+          "title": "预约已确认",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」已办结",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1045,
+          "isRead": 0,
+          "seq": 1792380990042,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈已办结",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」有新回复",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1043,
+          "isRead": 0,
+          "seq": 1792380990040,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈有新回复",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": null,
+          "content": "新公告「AC acceptance notice 34481」已发布，请查看",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1042,
+          "isRead": 0,
+          "seq": 1792380990039,
+          "sourceId": 7,
+          "sourceType": "NOTICE",
+          "title": "社区公告",
+          "type": "NOTICE"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已终审结束（已关闭）",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1040,
+          "isRead": 0,
+          "seq": 1792380990037,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已结束",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已处理完成，请确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1036,
+          "isRead": 0,
+          "seq": 1792380990033,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已处理完成",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 服务人员已开始处理",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1035,
+          "isRead": 0,
+          "seq": 1792380990032,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单处理中",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被服务人员接单",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1034,
+          "isRead": 0,
+          "seq": 1792380990031,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "服务人员已接单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已派单给 服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1031,
+          "isRead": 0,
+          "seq": 1792380990028,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已派单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被受理，正在安排服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1028,
+          "isRead": 0,
+          "seq": 1792380990025,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已受理",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的入住申请（A1U1101）已审批通过",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1025,
+          "isRead": 0,
+          "seq": 1792380990022,
+          "sourceId": 13,
+          "sourceType": "RESIDENCE_APPLICATION",
+          "title": "入住申请已通过",
+          "type": "RESIDENCE"
+        }
+      ]
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 pull notifications",
+      "method": "GET",
+      "path": "/api/v1/notifications/pull",
+      "http": 200,
+      "code": 200,
+      "data": [
+        {
+          "communityId": 15,
+          "content": "您的入住申请（A1U1101）已审批通过",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1025,
+          "isRead": 0,
+          "seq": 1792380990022,
+          "sourceId": 13,
+          "sourceType": "RESIDENCE_APPLICATION",
+          "title": "入住申请已通过",
+          "type": "RESIDENCE"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被受理，正在安排服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1028,
+          "isRead": 0,
+          "seq": 1792380990025,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已受理",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已派单给 服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1031,
+          "isRead": 0,
+          "seq": 1792380990028,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已派单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被服务人员接单",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1034,
+          "isRead": 0,
+          "seq": 1792380990031,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "服务人员已接单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 服务人员已开始处理",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1035,
+          "isRead": 0,
+          "seq": 1792380990032,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单处理中",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已处理完成，请确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1036,
+          "isRead": 0,
+          "seq": 1792380990033,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已处理完成",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已终审结束（已关闭）",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1040,
+          "isRead": 0,
+          "seq": 1792380990037,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已结束",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": null,
+          "content": "新公告「AC acceptance notice 34481」已发布，请查看",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1042,
+          "isRead": 0,
+          "seq": 1792380990039,
+          "sourceId": 7,
+          "sourceType": "NOTICE",
+          "title": "社区公告",
+          "type": "NOTICE"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」有新回复",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1043,
+          "isRead": 0,
+          "seq": 1792380990040,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈有新回复",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」已办结",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1045,
+          "isRead": 0,
+          "seq": 1792380990042,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈已办结",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的预约已确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1046,
+          "isRead": 0,
+          "seq": 1792380990043,
+          "sourceId": 12,
+          "sourceType": "RESOURCE_RESERVATION",
+          "title": "预约已确认",
+          "type": "RESERVATION"
+        }
+      ]
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 mark notification read",
+      "method": "PATCH",
+      "path": "/api/v1/notifications/1025/read",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E12 create housing listing",
+      "method": "POST",
+      "path": "/api/v1/housings",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "applicationId": null,
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "createdAt": null,
+        "deposit": 8400,
+        "description": "viewing cross-end evidence",
+        "houseId": 5172,
+        "houseLocation": "A1U1103",
+        "id": 4,
+        "images": [],
+        "layout": "2B1L",
+        "leaseId": null,
+        "monthlyRent": 4200,
+        "occupancy": null,
+        "publishTime": "2026-10-20T02:30:38.0229792",
+        "rentType": "RENT",
+        "status": "AVAILABLE",
+        "title": "AC viewing listing 34481",
+        "viewCount": 0
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E12 create housing viewing slot",
+      "method": "POST",
+      "path": "/api/v1/housings/4/timeslots",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "createdAt": null,
+        "dayOfWeek": 5,
+        "endTime": "15:00:00",
+        "housingId": 4,
+        "id": 24,
+        "isAvailable": 1,
+        "startTime": "14:00:00",
+        "updatedAt": null
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "E12 guest browse housing",
+      "method": "GET",
+      "path": "/api/v1/housings?page=1&size=50&communityId=15",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "records": [
+          {
+            "applicationId": null,
+            "communityId": 15,
+            "communityName": "ACC-FLOW-34481",
+            "createdAt": "2026-10-20T02:30:38",
+            "deposit": 8400.0,
+            "description": "viewing cross-end evidence",
+            "houseId": 5172,
+            "houseLocation": "A1U1103",
+            "id": 4,
+            "images": [],
+            "layout": "2B1L",
+            "leaseId": null,
+            "monthlyRent": 4200.0,
+            "occupancy": null,
+            "publishTime": "2026-10-20T02:30:38",
+            "rentType": "RENT",
+            "status": "AVAILABLE",
+            "title": "AC viewing listing 34481",
+            "viewCount": 0
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 50,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "E12 guest view housing",
+      "method": "POST",
+      "path": "/api/v1/housings/4/view",
+      "http": 200,
+      "code": 200,
+      "data": 1
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E12 resident read available viewing slots",
+      "method": "GET",
+      "path": "/api/v1/housings/4/available-slots?startDate=2026-10-23&endDate=2026-10-23",
+      "http": 200,
+      "code": 200,
+      "data": [
+        {
+          "timeslotId": 240840,
+          "date": "2026-10-23",
+          "startTime": "14:00:00",
+          "endTime": "15:00:00",
+          "maxBookings": 1,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        }
+      ]
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E12 create viewing appointment",
+      "method": "POST",
+      "path": "/api/v1/viewing-appointments",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "appointmentDate": "2026-10-23",
+        "assigneeId": null,
+        "assigneeName": null,
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "conversationId": 69,
+        "createdAt": null,
+        "endTime": "15:00:00",
+        "housingId": 4,
+        "housingTitle": "AC viewing listing 34481",
+        "id": 21,
+        "leaseId": null,
+        "remark": "E12",
+        "startTime": "14:00:00",
+        "status": "TO_CONFIRM",
+        "userId": 214,
+        "visitorName": "Acceptance Owner"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E12 confirm viewing appointment",
+      "method": "PATCH",
+      "path": "/api/v1/viewing-appointments/21/confirm",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E12 assign viewing staff",
+      "method": "PATCH",
+      "path": "/api/v1/viewing-appointments/21/assign",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "appointmentDate": "2026-10-23",
+        "assigneeId": 3,
+        "assigneeName": "服务人员",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "conversationId": 69,
+        "createdAt": "2026-10-20T02:30:38",
+        "endTime": "15:00:00",
+        "housingId": 4,
+        "housingTitle": "AC viewing listing 34481",
+        "id": 21,
+        "leaseId": null,
+        "remark": "E12",
+        "startTime": "14:00:00",
+        "status": "RESERVED",
+        "userId": 214,
+        "visitorName": "Acceptance Owner"
+      }
+    },
+    {
+      "actor": "staff1",
+      "step": "E12 send viewing message",
+      "method": "POST",
+      "path": "/api/v1/viewing-appointments/21/messages",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "appointmentId": 21,
+        "content": "staff confirmed viewing",
+        "createdAt": "2026-10-20T02:30:38.3174836",
+        "id": 3,
+        "image": null,
+        "messageType": "TEXT",
+        "senderId": 3,
+        "senderName": "服务人员"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E12 read viewing messages",
+      "method": "GET",
+      "path": "/api/v1/viewing-appointments/21/messages",
+      "http": 200,
+      "code": 200,
+      "data": [
+        {
+          "appointmentId": 21,
+          "content": "staff confirmed viewing",
+          "createdAt": "2026-10-20T02:30:38",
+          "id": 3,
+          "image": null,
+          "messageType": "TEXT",
+          "senderId": 3,
+          "senderName": "服务人员"
+        }
+      ]
+    },
+    {
+      "actor": "staff1",
+      "step": "E12 complete viewing appointment",
+      "method": "PATCH",
+      "path": "/api/v1/viewing-appointments/21/complete",
+      "http": 200,
+      "code": 200,
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E12 read completed viewing appointment",
+      "method": "GET",
+      "path": "/api/v1/viewing-appointments/21",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "appointmentDate": "2026-10-23",
+        "assigneeId": 3,
+        "assigneeName": "服务人员",
+        "communityId": 15,
+        "contactPhone": "13900034481",
+        "conversationId": 69,
+        "createdAt": "2026-10-20T02:30:38",
+        "endTime": "15:00:00",
+        "housingId": 4,
+        "housingTitle": "AC viewing listing 34481",
+        "id": 21,
+        "leaseId": null,
+        "remark": "viewing completed",
+        "startTime": "14:00:00",
+        "status": "COMPLETED",
+        "userId": 214,
+        "visitorName": "Acceptance Owner"
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "E3 register tenant",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/register",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "createdAt": null,
+        "email": null,
+        "id": 215,
+        "idCardMasked": null,
+        "phone": "13800034481",
+        "realName": "Acceptance Tenant",
+        "status": "ACTIVE",
+        "username": "acc_tenant_34481"
+      }
+    },
+    {
+      "actor": "acc_tenant_34481",
+      "step": "login",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 215,
+          "realName": "Acceptance Tenant",
+          "role": "RESIDENT",
+          "username": "acc_tenant_34481"
+        }
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E3 create rental listing",
+      "method": "POST",
+      "path": "/api/v1/housings",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "applicationId": null,
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "createdAt": null,
+        "deposit": 7200,
+        "description": "rental chain evidence",
+        "houseId": 5171,
+        "houseLocation": "A1U1102",
+        "id": 5,
+        "images": [],
+        "layout": "1B1L",
+        "leaseId": null,
+        "monthlyRent": 3600,
+        "occupancy": null,
+        "publishTime": "2026-10-20T02:30:38.5231128",
+        "rentType": "RENT",
+        "status": "AVAILABLE",
+        "title": "AC rental listing 34481",
+        "viewCount": 0
+      }
+    },
+    {
+      "actor": "acc_tenant_34481",
+      "step": "E3 submit tenant application from listing",
+      "method": "POST",
+      "path": "/api/v1/residence-applications",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "conversationId": null,
+        "createdAt": null,
+        "houseId": 5171,
+        "houseLocation": "A1U1102",
+        "housingId": 5,
+        "id": 14,
+        "leaseId": null,
+        "listedDeposit": 7200.0,
+        "listedMonthlyRent": 3600.0,
+        "relationType": "TENANT",
+        "remark": "E3 tenant application",
+        "residentId": 215,
+        "residentName": "Acceptance Tenant",
+        "reviewRemark": null,
+        "reviewTime": null,
+        "status": "PENDING"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E3 approve tenant application",
+      "method": "PATCH",
+      "path": "/api/v1/residence-applications/14/approve",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "conversationId": 70,
+        "createdAt": "2026-10-20T02:30:38",
+        "houseId": 5171,
+        "houseLocation": "A1U1102",
+        "housingId": 5,
+        "id": 14,
+        "leaseId": 29,
+        "listedDeposit": 7200.0,
+        "listedMonthlyRent": 3600.0,
+        "relationType": "TENANT",
+        "remark": "E3 tenant application",
+        "residentId": 215,
+        "residentName": "Acceptance Tenant",
+        "reviewRemark": "E3 approve",
+        "reviewTime": "2026-10-20T02:30:38.6551146",
+        "status": "APPROVED"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E3 read pending lease",
+      "method": "GET",
+      "path": "/api/v1/leases/29",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "agreementStatus": "NONE",
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "contractMonths": 12,
+        "contractUrl": null,
+        "conversationId": 70,
+        "createdAt": "2026-10-20T02:30:38",
+        "deposit": 7200.0,
+        "depositStatus": "UNPAID",
+        "endDate": "2027-10-19",
+        "expiryFlag": null,
+        "firstPaymentMonths": 1,
+        "houseId": 5171,
+        "houseLocation": "A1U1102",
+        "id": 29,
+        "monthlyRent": 3600.0,
+        "paymentCycleMonths": 1,
+        "remark": "入住申请审批通过自动建立",
+        "startDate": "2026-10-20",
+        "status": "TO_SIGN",
+        "tenantId": 215,
+        "tenantName": "Acceptance Tenant"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E3 create agreement template",
+      "method": "POST",
+      "path": "/api/v1/agreement-templates",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "communityId": 15,
+        "communityName": null,
+        "content": "Lease {{租客}} {{房屋}} {{开始日期}} {{结束日期}} {{租金}} {{押金}}",
+        "createdAt": null,
+        "fileName": null,
+        "fileSize": null,
+        "fileUrl": null,
+        "id": 2,
+        "isDefault": 0,
+        "name": "AC Template 34481",
+        "remark": "acceptance",
+        "status": "ACTIVE",
+        "updatedAt": null
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E3 create lease agreement",
+      "method": "POST",
+      "path": "/api/v1/lease-agreements",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "adminConfirmName": "社区管理员",
+        "adminConfirmTime": "2026-10-20T02:30:38.7712402",
+        "cancelReason": null,
+        "communityId": 15,
+        "content": "Lease {{租客}} {{房屋}} {{开始日期}} {{结束日期}} {{租金}} ¥7200\n\n租赁协议（平台内确认留痕，不构成可靠电子签名）\n租约：29；类型：INITIAL\n期限：2026-10-20 至 2027-10-19（12个月）\n月租：3600.00元；首付：1个月；后续每1个月支付；本段押金：7200.00元。\n普通交租不延长合同；续租居民同意且该段首笔租金成功后生效，未生效方案取消不影响原合同。",
+        "createdAt": null,
+        "id": 2,
+        "leaseId": 29,
+        "remark": "acceptance",
+        "status": "PARTIAL",
+        "templateFileName": null,
+        "templateFileUrl": null,
+        "templateId": 2,
+        "templateName": "AC Template 34481",
+        "tenantConfirmName": null,
+        "tenantConfirmTime": null,
+        "tenantId": 215,
+        "title": "AC Agreement 34481"
+      }
+    },
+    {
+      "actor": "acc_tenant_34481",
+      "step": "E3 resident confirm agreement",
+      "method": "POST",
+      "path": "/api/v1/lease-agreements/2/confirm",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "adminConfirmName": "社区管理员",
+        "adminConfirmTime": "2026-10-20T02:30:39",
+        "cancelReason": null,
+        "communityId": 15,
+        "content": "Lease {{租客}} {{房屋}} {{开始日期}} {{结束日期}} {{租金}} ¥7200\n\n租赁协议（平台内确认留痕，不构成可靠电子签名）\n租约：29；类型：INITIAL\n期限：2026-10-20 至 2027-10-19（12个月）\n月租：3600.00元；首付：1个月；后续每1个月支付；本段押金：7200.00元。\n普通交租不延长合同；续租居民同意且该段首笔租金成功后生效，未生效方案取消不影响原合同。",
+        "createdAt": "2026-10-20T02:30:38",
+        "id": 2,
+        "leaseId": 29,
+        "remark": "confirmed for evidence",
+        "status": "SIGNED",
+        "templateFileName": null,
+        "templateFileUrl": null,
+        "templateId": 2,
+        "templateName": "AC Template 34481",
+        "tenantConfirmName": "Acceptance Tenant",
+        "tenantConfirmTime": "2026-10-20T02:30:38.8117508",
+        "tenantId": 215,
+        "title": "AC Agreement 34481"
+      }
+    },
+    {
+      "actor": "acc_tenant_34481",
+      "step": "E3 read confirmed agreement",
+      "method": "GET",
+      "path": "/api/v1/lease-agreements/2",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "adminConfirmName": "社区管理员",
+        "adminConfirmTime": "2026-10-20T02:30:39",
+        "cancelReason": null,
+        "communityId": 15,
+        "content": "Lease {{租客}} {{房屋}} {{开始日期}} {{结束日期}} {{租金}} ¥7200\n\n租赁协议（平台内确认留痕，不构成可靠电子签名）\n租约：29；类型：INITIAL\n期限：2026-10-20 至 2027-10-19（12个月）\n月租：3600.00元；首付：1个月；后续每1个月支付；本段押金：7200.00元。\n普通交租不延长合同；续租居民同意且该段首笔租金成功后生效，未生效方案取消不影响原合同。",
+        "createdAt": "2026-10-20T02:30:38",
+        "id": 2,
+        "leaseId": 29,
+        "remark": "confirmed for evidence",
+        "status": "SIGNED",
+        "templateFileName": null,
+        "templateFileUrl": null,
+        "templateId": 2,
+        "templateName": "AC Template 34481",
+        "tenantConfirmName": "Acceptance Tenant",
+        "tenantConfirmTime": "2026-10-20T02:30:39",
+        "tenantId": 215,
+        "title": "AC Agreement 34481"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E10b bound admin reads community",
+      "method": "GET",
+      "path": "/api/v1/communities/15",
+      "http": 200,
+      "code": 200,
+      "data": {
+        "address": "Acceptance Flow Road 1",
+        "autoApproveResidence": 0,
+        "businessCode": "15",
+        "contactPerson": null,
+        "contactPhone": null,
+        "createdAt": "2026-10-20T02:30:35",
+        "defaultLeaseMonths": 12,
+        "description": "phase60 acceptance isolated",
+        "id": 15,
+        "name": "ACC-FLOW-34481",
+        "responsibleAdminId": null,
+        "status": "ACTIVE",
+        "updatedAt": "2026-10-20T02:30:35"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E10b resident admin endpoint denied",
+      "method": "GET",
+      "path": "/api/v1/sys-users?page=1&size=10",
+      "http": 403,
+      "code": 403,
+      "data": null
+    }
+  ]
+}

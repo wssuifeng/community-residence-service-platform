@@ -1,0 +1,548 @@
+{
+  "recordedAt": "2026-10-20T02:37:35.918681",
+  "jarSha256": "8cd5106bfe2197ce895b9aa51b29d677e53c1358e7c759a5e3b6848a23d3a2db",
+  "normalDatabaseWrites": 0,
+  "financialOperations": 0,
+  "trace": [
+    {
+      "actor": "guest",
+      "step": "login acc_expiry_937251",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 219,
+          "realName": "Acceptance Expiry Resident",
+          "role": "RESIDENT",
+          "username": "acc_expiry_937251"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login admin1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            1,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "id": 2,
+          "realName": "社区管理员",
+          "role": "ADMIN",
+          "username": "admin1"
+        }
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "configure today's template for completion retest",
+      "method": "POST",
+      "path": "/api/v1/resources/9/timeslots",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "createdAt": null,
+        "dayOfWeek": 2,
+        "endTime": "11:00:00",
+        "id": 32,
+        "isAvailable": 1,
+        "resourceId": 9,
+        "resourceName": null,
+        "startTime": "09:00:00"
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "future reservation submit",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": null,
+        "endTime": "09:30:00",
+        "id": 15,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:00:00",
+        "status": "PENDING",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "future reservation approve",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/15/confirm",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "future capacity before rejection",
+      "method": "GET",
+      "path": "/api/v1/resources/9/available-slots?startDate=2026-10-23&endDate=2026-10-23",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "timeslotId": 310540,
+          "date": "2026-10-23",
+          "startTime": "09:00:00",
+          "endTime": "09:30:00",
+          "maxBookings": 20,
+          "currentBookings": 1,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310570,
+          "date": "2026-10-23",
+          "startTime": "09:30:00",
+          "endTime": "10:00:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310600,
+          "date": "2026-10-23",
+          "startTime": "10:00:00",
+          "endTime": "10:30:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310630,
+          "date": "2026-10-23",
+          "startTime": "10:30:00",
+          "endTime": "11:00:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        }
+      ]
+    },
+    {
+      "actor": "admin1",
+      "step": "future completion rejected",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/15/complete",
+      "http": 200,
+      "code": 5004,
+      "message": "预约时段尚未结束，不能登记完成",
+      "data": null
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "future status unchanged",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/15",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "09:30:00",
+        "id": 15,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:00:00",
+        "status": "RESERVED",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "future capacity after rejection",
+      "method": "GET",
+      "path": "/api/v1/resources/9/available-slots?startDate=2026-10-23&endDate=2026-10-23",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "timeslotId": 310540,
+          "date": "2026-10-23",
+          "startTime": "09:00:00",
+          "endTime": "09:30:00",
+          "maxBookings": 20,
+          "currentBookings": 1,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310570,
+          "date": "2026-10-23",
+          "startTime": "09:30:00",
+          "endTime": "10:00:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310600,
+          "date": "2026-10-23",
+          "startTime": "10:00:00",
+          "endTime": "10:30:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        },
+        {
+          "timeslotId": 310630,
+          "date": "2026-10-23",
+          "startTime": "10:30:00",
+          "endTime": "11:00:00",
+          "maxBookings": 20,
+          "currentBookings": 0,
+          "status": "AVAILABLE"
+        }
+      ]
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "today unfinished reservation submit",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": null,
+        "endTime": "09:30:00",
+        "id": 16,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-20",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:00:00",
+        "status": "PENDING",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "today unfinished reservation approve",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/16/confirm",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "today before end rejected",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/16/complete",
+      "http": 200,
+      "code": 5004,
+      "message": "预约时段尚未结束，不能登记完成",
+      "data": null
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "today status unchanged",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/16",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "09:30:00",
+        "id": 16,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-20",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:00:00",
+        "status": "RESERVED",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "elapsed temporal fixture submit",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": null,
+        "endTime": "10:00:00",
+        "id": 17,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:30:00",
+        "status": "PENDING",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "elapsed temporal fixture approve",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/17/confirm",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "pending temporal fixture submit",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": null,
+        "endTime": "10:30:00",
+        "id": 18,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "10:00:00",
+        "status": "PENDING",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "read temporal fixture before date setup",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/17",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "10:00:00",
+        "id": 17,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:30:00",
+        "status": "RESERVED",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "read temporal fixture before date setup",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/18",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "10:30:00",
+        "id": 18,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "10:00:00",
+        "status": "PENDING",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "elapsed reservation completes",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/17/complete",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "elapsed status completed",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/17",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "10:00:00",
+        "id": 17,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-19",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:30:00",
+        "status": "COMPLETED",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "pending remains invalid after elapsed",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/18/complete",
+      "http": 200,
+      "code": 5004,
+      "message": "预约状态不允许从 PENDING 流转到 COMPLETED",
+      "data": null
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "pending status unchanged",
+      "method": "GET",
+      "path": "/api/v1/resource-reservations/18",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "10:30:00",
+        "id": 18,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-19",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "10:00:00",
+        "status": "PENDING",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    }
+  ],
+  "ids": {
+    "residentId": 219,
+    "futureReservation": 15,
+    "todayReservation": 16,
+    "elapsedReservation": 17,
+    "pendingReservation": 18
+  },
+  "temporalFixture": {
+    "sql": "UPDATE resource_reservation SET reserve_date='2026-10-19' WHERE id IN (17,18) AND user_id=219 AND resource_id=9 AND reserve_date='2026-10-23'; SELECT ROW_COUNT();",
+    "affectedRows": 2,
+    "before": {
+      "17": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "10:00:00",
+        "id": 17,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "09:30:00",
+        "status": "RESERVED",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      },
+      "18": {
+        "communityId": 15,
+        "contactPhone": "13100000000",
+        "createdAt": "2026-10-20T02:37:35",
+        "endTime": "10:30:00",
+        "id": 18,
+        "purpose": "isolated G-016 retest",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "10:00:00",
+        "status": "PENDING",
+        "userId": 219,
+        "userName": "Acceptance Expiry Resident"
+      }
+    },
+    "purpose": "Simulate elapsed time only on API-created and approved synthetic isolated rows; no production data or payment fields modified."
+  },
+  "assertions": {
+    "futureRejected5004": true,
+    "todayBeforeEndRejected5004": true,
+    "rejectedStatusUnchanged": true,
+    "rejectedCapacityUnchanged": true,
+    "elapsedApprovedCompleted": true,
+    "elapsedPendingRejected": true
+  },
+  "limitations": [
+    "The past-date setup is an explicit test fixture, not a claim that a real-world booking interval elapsed during this run.",
+    "Exact-end boundary and cross-community rejection are additionally covered by the seven fixed-time unit tests."
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-20T00:00:00+08:00",
+  "purpose": "60-02.1批次E文档与证据一致性核对；不写正常库，不执行金融操作",
+  "checks": {
+    "sourceReviewExists": true,
+    "batchRecordExists": true,
+    "ledgerRowsUpdated": true,
+    "gapRegisterIncludesG013": true,
+    "controllerIncludesBatchE": true,
+    "implementationPlanIncludesG013": true,
+    "frontendSelective": {
+      "testFiles": 9,
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "backendSelective": {
+      "tests": 244,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 2
+    },
+    "normalDatabaseWriteCount": 0,
+    "financialOperationCount": 0,
+    "batchEExpected": {
+      "reaffirmedR": [
+        "R5"
+      ],
+      "passedR": [
+        "R32",
+        "R33",
+        "R34",
+        "R35",
+        "R36",
+        "R52",
+        "R53",
+        "R54",
+        "R55",
+        "R56",
+        "R57",
+        "R59",
+        "R60",
+        "R75"
+      ],
+      "evidenceGapFlows": [
+        "E7",
+        "E12"
+      ],
+      "gap": "G-013",
+      "qualityAssessmentStarted": false
+    },
+    "status": "PASS"
+  }
+}

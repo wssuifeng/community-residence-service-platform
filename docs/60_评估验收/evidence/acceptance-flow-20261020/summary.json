@@ -1,0 +1,110 @@
+{
+  "recordedAt": "2026-10-20T02:46:08.471359",
+  "runtimeHttp": {
+    "8084": {
+      "http": 200
+    },
+    "5176": {
+      "http": 200
+    },
+    "8087": {
+      "http": 200
+    },
+    "5181": {
+      "http": 200
+    }
+  },
+  "requestsByEvidence": {
+    "../acceptance-flow-20261020.json": 78,
+    "supplement.json": 61,
+    "browser-realtime.json": 14,
+    "branches.json": 31,
+    "notice-expiry.json": 13,
+    "g016-retest.json": 22
+  },
+  "assertionsOrObservationsByEvidence": {
+    "../acceptance-flow-20261020.json": 0,
+    "supplement.json": 18,
+    "browser-realtime.json": 7,
+    "branches.json": 7,
+    "notice-expiry.json": 7,
+    "g016-retest.json": 6
+  },
+  "functional": {
+    "passed": 71,
+    "failed": 3,
+    "insufficientEvidence": 1,
+    "failedIds": [
+      "R4",
+      "R40",
+      "R46"
+    ],
+    "insufficientEvidenceIds": [
+      "R41"
+    ]
+  },
+  "nonFunctional": {
+    "passed": 9,
+    "insufficientEvidence": [
+      "N8"
+    ]
+  },
+  "flows": {
+    "passed": [
+      "E1",
+      "E4",
+      "E5",
+      "E6",
+      "E7",
+      "E8",
+      "E10",
+      "E10b",
+      "E11",
+      "E12"
+    ],
+    "failed": [
+      "E9"
+    ],
+    "insufficientEvidence": [
+      "E2",
+      "E3"
+    ]
+  },
+  "closedGaps": [
+    "G-002",
+    "G-004",
+    "G-009",
+    "G-010",
+    "G-011",
+    "G-012",
+    "G-013",
+    "G-016"
+  ],
+  "partiallyResolved": [
+    "G-008",
+    "G-014"
+  ],
+  "normalDatabaseWrites": 0,
+  "financialOperations": 0,
+  "qualityAssessmentStarted": false,
+  "baselineJarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "currentBackendJarSha256": "8cd5106bfe2197ce895b9aa51b29d677e53c1358e7c759a5e3b6848a23d3a2db",
+  "openGaps": [
+    "G-001",
+    "G-005",
+    "G-006",
+    "G-007",
+    "G-008",
+    "G-014",
+    "G-015",
+    "G-017"
+  ],
+  "newEvidenceGap": "G-017: complete C9 numeric reconciliation after final filters/metrics",
+  "c9Retest": "../acceptance-c9-fix-20261020/verification.json",
+  "normalRuntimeLoad": "normal-remediation-load.json",
+  "limitations": [
+    "Old-build traces remain bound to the independently copied df-final.jar; G-016 patch has separate unit/API evidence.",
+    "Past reservation dates in g016-retest.json are explicit isolated temporal fixtures.",
+    "Notice task kernel was controlled-triggered against real mapper/Redis; hourly cron dispatch not observed."
+  ]
+}

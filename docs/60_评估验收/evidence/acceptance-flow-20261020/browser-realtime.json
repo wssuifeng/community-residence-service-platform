@@ -1,0 +1,805 @@
+{
+  "recordedAt": "2026-10-20T02:31:02.027435",
+  "browser": {
+    "name": "Microsoft Edge",
+    "version": "155.0.4283.62"
+  },
+  "base": "http://127.0.0.1:5181",
+  "jarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "normalDatabaseWrites": 0,
+  "financialOperations": 0,
+  "observations": [
+    {
+      "actor": "acc_owner_34481",
+      "check": "login through actual form",
+      "path": "http://127.0.0.1:5181/resident/home",
+      "passed": true
+    },
+    {
+      "check": "resident sees same closed work order",
+      "id": 10509,
+      "passed": true
+    },
+    {
+      "check": "E6 realtime same-message delivery and closed status delivery",
+      "feedbackId": 11,
+      "messageId": 29,
+      "passed": true
+    },
+    {
+      "check": "E11 same-notification WS, unread, incremental pull, read",
+      "notificationId": 1078,
+      "seq": 1792380990075,
+      "passed": true
+    },
+    {
+      "check": "E10 actual denials appear in application error log; critical writes have DB operation logs",
+      "passed": true
+    },
+    {
+      "actor": "acc_scope_649891",
+      "check": "login through actual form",
+      "path": "http://127.0.0.1:5181/admin/dashboard",
+      "passed": true
+    },
+    {
+      "actor": "acc_staff_649891_1",
+      "check": "login through actual form",
+      "path": "http://127.0.0.1:5181/staff/dashboard",
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "feedbackId": 11,
+  "notification": {
+    "communityId": 15,
+    "content": "您的反馈「Acceptance realtime feedback」有新回复",
+    "createdAt": null,
+    "id": 1078,
+    "isRead": 0,
+    "seq": 1792380990075,
+    "sourceId": 11,
+    "sourceType": "FEEDBACK",
+    "title": "反馈有新回复",
+    "type": "FEEDBACK"
+  },
+  "websocketMessages": {
+    "notifications": [
+      {
+        "communityId": 15,
+        "content": "您的反馈「Acceptance realtime feedback」有新回复",
+        "createdAt": null,
+        "id": 1078,
+        "isRead": 0,
+        "seq": 1792380990075,
+        "sourceId": 11,
+        "sourceType": "FEEDBACK",
+        "title": "反馈有新回复",
+        "type": "FEEDBACK"
+      }
+    ],
+    "feedback": [
+      {
+        "data": {
+          "content": "same-event realtime response",
+          "createdAt": "2026-10-20T02:30:55.9937326",
+          "feedbackId": 11,
+          "id": 29,
+          "image": null,
+          "messageType": "TEXT",
+          "parentId": null,
+          "senderId": 2,
+          "senderName": "社区管理员",
+          "senderType": "ADMIN"
+        },
+        "type": "FEEDBACK_MESSAGE"
+      }
+    ]
+  },
+  "channelLogs": [
+    [
+      "1078",
+      "WEBSOCKET",
+      "SUCCESS"
+    ]
+  ],
+  "trace": [
+    {
+      "actor": "guest",
+      "step": "login admin1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            1,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "id": 2,
+          "realName": "社区管理员",
+          "role": "ADMIN",
+          "username": "admin1"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login superadmin",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 1,
+          "realName": "超级管理员",
+          "role": "SUPER_ADMIN",
+          "username": "superadmin"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_scope_649891",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            15
+          ],
+          "id": 25,
+          "realName": "Acceptance Scoped Admin",
+          "role": "ADMIN",
+          "username": "acc_scope_649891"
+        }
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 realtime feedback submit",
+      "method": "POST",
+      "path": "/api/v1/feedbacks",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "category": "COMPLAINT",
+        "communityId": 15,
+        "content": "same event WS evidence",
+        "createdAt": null,
+        "handlerId": null,
+        "handlerName": null,
+        "id": 11,
+        "isAnonymous": false,
+        "residentId": 214,
+        "residentName": "Acceptance Owner",
+        "status": "PENDING",
+        "title": "Acceptance realtime feedback"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E6 realtime admin response",
+      "method": "POST",
+      "path": "/api/v1/feedbacks/11/messages",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "content": "same-event realtime response",
+        "createdAt": "2026-10-20T02:30:55.9937326",
+        "feedbackId": 11,
+        "id": 29,
+        "image": null,
+        "messageType": "TEXT",
+        "parentId": null,
+        "senderId": 2,
+        "senderName": "社区管理员",
+        "senderType": "ADMIN"
+      }
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 same delivered event unread",
+      "method": "GET",
+      "path": "/api/v1/notifications/unread",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "content": "您的反馈「Acceptance realtime feedback」有新回复",
+          "createdAt": "2026-10-20T02:30:55",
+          "id": 1078,
+          "isRead": 0,
+          "seq": 1792380990075,
+          "sourceId": 11,
+          "sourceType": "FEEDBACK",
+          "title": "反馈有新回复",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已终审结束（已关闭）",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1075,
+          "isRead": 0,
+          "seq": 1792380990072,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已结束",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已处理完成，请确认",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1069,
+          "isRead": 0,
+          "seq": 1792380990066,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已处理完成",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 服务人员已开始处理",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1068,
+          "isRead": 0,
+          "seq": 1792380990065,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单处理中",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已被服务人员接单",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1067,
+          "isRead": 0,
+          "seq": 1792380990064,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "服务人员已接单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已派单给 Acceptance Staff 1",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1063,
+          "isRead": 0,
+          "seq": 1792380990060,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已派单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已被受理，正在安排服务人员",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1059,
+          "isRead": 0,
+          "seq": 1792380990056,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已受理",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的看房预约已完成",
+          "createdAt": "2026-10-20T02:30:38",
+          "id": 1051,
+          "isRead": 0,
+          "seq": 1792380990048,
+          "sourceId": 21,
+          "sourceType": "VIEWING_APPOINTMENT",
+          "title": "看房预约已完成",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的看房预约已安排带看人，可与其沟通看房事宜",
+          "createdAt": "2026-10-20T02:30:38",
+          "id": 1050,
+          "isRead": 0,
+          "seq": 1792380990047,
+          "sourceId": 21,
+          "sourceType": "VIEWING_APPOINTMENT",
+          "title": "您的看房预约已安排带看人",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的看房预约已确认",
+          "createdAt": "2026-10-20T02:30:38",
+          "id": 1048,
+          "isRead": 0,
+          "seq": 1792380990045,
+          "sourceId": 21,
+          "sourceType": "VIEWING_APPOINTMENT",
+          "title": "看房预约已确认",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的预约已确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1046,
+          "isRead": 0,
+          "seq": 1792380990043,
+          "sourceId": 12,
+          "sourceType": "RESOURCE_RESERVATION",
+          "title": "预约已确认",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」已办结",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1045,
+          "isRead": 0,
+          "seq": 1792380990042,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈已办结",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」有新回复",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1043,
+          "isRead": 0,
+          "seq": 1792380990040,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈有新回复",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": null,
+          "content": "新公告「AC acceptance notice 34481」已发布，请查看",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1042,
+          "isRead": 0,
+          "seq": 1792380990039,
+          "sourceId": 7,
+          "sourceType": "NOTICE",
+          "title": "社区公告",
+          "type": "NOTICE"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已终审结束（已关闭）",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1040,
+          "isRead": 0,
+          "seq": 1792380990037,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已结束",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已处理完成，请确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1036,
+          "isRead": 0,
+          "seq": 1792380990033,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已处理完成",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 服务人员已开始处理",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1035,
+          "isRead": 0,
+          "seq": 1792380990032,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单处理中",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被服务人员接单",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1034,
+          "isRead": 0,
+          "seq": 1792380990031,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "服务人员已接单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已派单给 服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1031,
+          "isRead": 0,
+          "seq": 1792380990028,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已派单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被受理，正在安排服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1028,
+          "isRead": 0,
+          "seq": 1792380990025,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已受理",
+          "type": "WORK_ORDER"
+        }
+      ]
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 same delivered event incremental pull",
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=1792380990074",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "content": "您的反馈「Acceptance realtime feedback」有新回复",
+          "createdAt": "2026-10-20T02:30:55",
+          "id": 1078,
+          "isRead": 0,
+          "seq": 1792380990075,
+          "sourceId": 11,
+          "sourceType": "FEEDBACK",
+          "title": "反馈有新回复",
+          "type": "FEEDBACK"
+        }
+      ]
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 mark same delivered event read",
+      "method": "PATCH",
+      "path": "/api/v1/notifications/1078/read",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E11 verify same event no longer unread",
+      "method": "GET",
+      "path": "/api/v1/notifications/unread",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": [
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已终审结束（已关闭）",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1075,
+          "isRead": 0,
+          "seq": 1792380990072,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已结束",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已处理完成，请确认",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1069,
+          "isRead": 0,
+          "seq": 1792380990066,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已处理完成",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 服务人员已开始处理",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1068,
+          "isRead": 0,
+          "seq": 1792380990065,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单处理中",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已被服务人员接单",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1067,
+          "isRead": 0,
+          "seq": 1792380990064,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "服务人员已接单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已派单给 Acceptance Staff 1",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1063,
+          "isRead": 0,
+          "seq": 1792380990060,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已派单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610204014 已被受理，正在安排服务人员",
+          "createdAt": "2026-10-20T02:30:51",
+          "id": 1059,
+          "isRead": 0,
+          "seq": 1792380990056,
+          "sourceId": 10509,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已受理",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的看房预约已完成",
+          "createdAt": "2026-10-20T02:30:38",
+          "id": 1051,
+          "isRead": 0,
+          "seq": 1792380990048,
+          "sourceId": 21,
+          "sourceType": "VIEWING_APPOINTMENT",
+          "title": "看房预约已完成",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的看房预约已安排带看人，可与其沟通看房事宜",
+          "createdAt": "2026-10-20T02:30:38",
+          "id": 1050,
+          "isRead": 0,
+          "seq": 1792380990047,
+          "sourceId": 21,
+          "sourceType": "VIEWING_APPOINTMENT",
+          "title": "您的看房预约已安排带看人",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的看房预约已确认",
+          "createdAt": "2026-10-20T02:30:38",
+          "id": 1048,
+          "isRead": 0,
+          "seq": 1792380990045,
+          "sourceId": 21,
+          "sourceType": "VIEWING_APPOINTMENT",
+          "title": "看房预约已确认",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您 2026-10-23 的预约已确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1046,
+          "isRead": 0,
+          "seq": 1792380990043,
+          "sourceId": 12,
+          "sourceType": "RESOURCE_RESERVATION",
+          "title": "预约已确认",
+          "type": "RESERVATION"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」已办结",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1045,
+          "isRead": 0,
+          "seq": 1792380990042,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈已办结",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": 15,
+          "content": "您的反馈「AC acceptance feedback」有新回复",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1043,
+          "isRead": 0,
+          "seq": 1792380990040,
+          "sourceId": 10,
+          "sourceType": "FEEDBACK",
+          "title": "反馈有新回复",
+          "type": "FEEDBACK"
+        },
+        {
+          "communityId": null,
+          "content": "新公告「AC acceptance notice 34481」已发布，请查看",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1042,
+          "isRead": 0,
+          "seq": 1792380990039,
+          "sourceId": 7,
+          "sourceType": "NOTICE",
+          "title": "社区公告",
+          "type": "NOTICE"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已终审结束（已关闭）",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1040,
+          "isRead": 0,
+          "seq": 1792380990037,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已结束",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已处理完成，请确认",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1036,
+          "isRead": 0,
+          "seq": 1792380990033,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已处理完成",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 服务人员已开始处理",
+          "createdAt": "2026-10-20T02:30:37",
+          "id": 1035,
+          "isRead": 0,
+          "seq": 1792380990032,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单处理中",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被服务人员接单",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1034,
+          "isRead": 0,
+          "seq": 1792380990031,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "服务人员已接单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已派单给 服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1031,
+          "isRead": 0,
+          "seq": 1792380990028,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已派单",
+          "type": "WORK_ORDER"
+        },
+        {
+          "communityId": 15,
+          "content": "您的工单 WO202610200574 已被受理，正在安排服务人员",
+          "createdAt": "2026-10-20T02:30:36",
+          "id": 1028,
+          "isRead": 0,
+          "seq": 1792380990025,
+          "sourceId": 10508,
+          "sourceType": "WORK_ORDER",
+          "title": "工单已受理",
+          "type": "WORK_ORDER"
+        }
+      ]
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 realtime resident response",
+      "method": "POST",
+      "path": "/api/v1/feedbacks/11/messages",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "content": "resident response",
+        "createdAt": "2026-10-20T02:30:56.1663652",
+        "feedbackId": 11,
+        "id": 30,
+        "image": null,
+        "messageType": "TEXT",
+        "parentId": null,
+        "senderId": 214,
+        "senderName": "Acceptance Owner",
+        "senderType": "RESIDENT"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E6 realtime close",
+      "method": "PATCH",
+      "path": "/api/v1/feedbacks/11/close",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E6 closed realtime feedback rejects writes",
+      "method": "POST",
+      "path": "/api/v1/feedbacks/11/messages",
+      "http": 200,
+      "code": 5004,
+      "message": "反馈已办结，不可继续会话",
+      "data": null
+    },
+    {
+      "actor": "acc_scope_649891",
+      "step": "E10 scoped query outside community denied",
+      "method": "GET",
+      "path": "/api/v1/communities/1/buildings",
+      "http": 403,
+      "code": 403,
+      "message": "无权操作未绑定社区的数据",
+      "data": null
+    },
+    {
+      "actor": "acc_scope_649891",
+      "step": "E10 global user create denied",
+      "method": "POST",
+      "path": "/api/v1/sys-users",
+      "http": 403,
+      "code": 403,
+      "message": "无权限访问",
+      "data": null
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-20T00:00:00+08:00",
+  "checks": {
+    "jsonFiles": 17,
+    "jsonErrors": [],
+    "markdownLinksChecked": 168,
+    "brokenMarkdownLinks": [],
+    "productDiffFromBaseline": [],
+    "runtimeApiPathCount": 211,
+    "runtimeSelectedPathCount": 30,
+    "runtimeEndpointStatuses": {
+      "backendOpenApi": 200,
+      "backendHealth": 401,
+      "publicNotices": 200,
+      "unauthenticatedFeedbacks": 401,
+      "unauthenticatedNotifications": 401,
+      "unauthenticatedConversations": 401,
+      "frontendRoot": 200,
+      "frontendProxyPublicNotices": 200
+    },
+    "runtimeWriteCount": 0,
+    "financialOperationCount": 0,
+    "frontendSelective": {
+      "testFiles": 10,
+      "tests": 66,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "command": "npm run test -- --run src/common/messaging src/common/conversation src/admin/conversation/views/__tests__/ConversationListView.spec.ts src/__tests__/module-boundaries.spec.ts"
+    },
+    "backendSelective": {
+      "testClasses": 36,
+      "tests": 219,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "command": ".\\mvnw.cmd -Dtest=Notice*Test,Feedback*Test,Conversation*Test,Notification*Test,ChannelLevelsTest,AfterCommitDeliveryTest,NotificationSequenceRecoveryTest,WebSocketSessionCountTest,ConversationSubscriptionInterceptorTest,FeedbackSubscriptionInterceptorTest test",
+      "skipReason": "ConversationInboxDatabaseTest skipped by test assumption/environment; no failure or error"
+    },
+    "sourceFilesMissing": [],
+    "batchDExpected": {
+      "passedR": [
+        "R12",
+        "R24",
+        "R25",
+        "R26",
+        "R27",
+        "R28",
+        "R29",
+        "R30",
+        "R31",
+        "R48",
+        "R49",
+        "R50",
+        "R51",
+        "R63"
+      ],
+      "evidenceGapFlows": [
+        "E5",
+        "E6",
+        "E11"
+      ],
+      "gap": "G-012",
+      "qualityAssessmentStarted": false
+    },
+    "status": "PASS"
+  }
+}

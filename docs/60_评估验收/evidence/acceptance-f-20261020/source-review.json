@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-20T01:22:04+08:00",
+  "purpose": "60-02.1批次F租住闭环需求验收；金融沿用户确认，不发起交易",
+  "gitHead": "008737b8e584a1dddc85c8ef97120920e68c348c",
+  "productBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productDiffFromBaseline": [],
+  "runtimeArtifact": {
+    "path": "output/runtime/df-closeout/df-final.jar",
+    "sha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+    "port": 8084
+  },
+  "nonFinancialVerification": {
+    "frontend": {
+      "testFiles": 12,
+      "tests": 98,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "command": "npm run test -- --run [12 lease/agreement/move-out non-financial spec files]"
+    },
+    "backend": {
+      "testClasses": 20,
+      "tests": 195,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "command": "./mvnw.cmd -Dtest=[20 agreement/lease/conversation/housing/residence non-financial classes] test"
+    }
+  },
+  "existingEvidence": {
+    "backendFullSuite": {
+      "tests": 1101,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "path": "../50_系统测试/evidence/bu-implementation-20261015/backend-suite-summary.json"
+    },
+    "rentalClosureIsolation": {
+      "backendTests": 895,
+      "frontendTests": 274,
+      "frontendFiles": 40,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "realChannelTrades": false,
+      "path": "../50_系统测试/evidence/rental-closure-20261012/verification-summary.json"
+    },
+    "financialInterpretation": "R61/R71/R72金融可用性采用用户确认；既有证据仅作离线门禁、配置、状态和退款服务适用性边界，不扩写为本批新增真实交易。"
+  },
+  "normalDatabaseWriteCount": 0,
+  "financialOperationCount": 0,
+  "passedR": [
+    "R13",
+    "R14",
+    "R15",
+    "R16",
+    "R61",
+    "R64",
+    "R66",
+    "R67",
+    "R68",
+    "R69",
+    "R70",
+    "R71",
+    "R72",
+    "R73"
+  ],
+  "evidenceGapFlows": [
+    "E3"
+  ],
+  "gap": "G-014"
+}

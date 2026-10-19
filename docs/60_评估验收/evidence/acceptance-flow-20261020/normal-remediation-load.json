@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-10-20T02:43:03.298239",
+  "backendPort": 8084,
+  "backendPid": 32144,
+  "backendJar": "D:\\code\\community-residence-service-platform\\output\\runtime\\phase60-remediation-20261020\\phase60-g016.jar",
+  "backendJarSha256": "8cd5106bfe2197ce895b9aa51b29d677e53c1358e7c759a5e3b6848a23d3a2db",
+  "previousBackendPid": 36972,
+  "previousBackendJarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "frontendPort": 5176,
+  "frontendHttp": 200,
+  "backendPublicReadCode": 200,
+  "businessWritesByProbe": 0,
+  "financialOperationsByProbe": 0,
+  "scope": "G-016 completion guard; frontend dev server serves G-002/G-004 source changes. No claim of complete acceptance."
+}

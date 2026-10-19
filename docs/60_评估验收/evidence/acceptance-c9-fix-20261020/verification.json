@@ -1,0 +1,199 @@
+{
+  "recordedAt": "2026-10-20T02:41:37.056456",
+  "browser": {
+    "family": "Microsoft Edge",
+    "version": "155.0.4283.62"
+  },
+  "backendJarSha256": "8cd5106bfe2197ce895b9aa51b29d677e53c1358e7c759a5e3b6848a23d3a2db",
+  "frontendSources": {
+    "frontend/src/common/statistics/components/EChart.vue": "1216a17b4af30abf926200ba7dbb876a6efec58f65a3a02d10f595b77b6722dc",
+    "frontend/src/admin/statistics/views/DashboardOverview.vue": "25cd6132eae86c71ba1cd4ec6138583e357f020cd9d0cf20833f0b6ca9c9f0d2",
+    "frontend/src/admin/statistics/views/StatisticsView.vue": "b30ff4912c0f2b8ce0a50e5b3fea23dbca614c07386dd6daae4b4a0500609c5c"
+  },
+  "normalDatabaseWrites": 0,
+  "businessWrites": 0,
+  "financialOperations": 0,
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/work-orders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/residents"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/resources"
+    }
+  ],
+  "observations": [
+    {
+      "view": "overview",
+      "noFixedMonthComparison": true,
+      "pngDownloads": 2
+    },
+    {
+      "view": "workorder",
+      "noFixedMonthComparison": true,
+      "pngDownloads": 2
+    },
+    {
+      "view": "resident",
+      "noFixedMonthComparison": true,
+      "pngDownloads": 1
+    },
+    {
+      "view": "resource",
+      "noFixedMonthComparison": true,
+      "pngDownloads": 1
+    }
+  ],
+  "downloads": [
+    {
+      "view": "overview",
+      "label": "工单提交趋势导出图片",
+      "file": "overview-1.png",
+      "suggestedFilename": "工单提交趋势.png",
+      "size": [
+        1444,
+        544
+      ],
+      "bytes": 46583,
+      "sha256": "7fbefa50074f6cea21f7084e1f8636af16f31495b05be0cbfc4cb37f90a84f59"
+    },
+    {
+      "view": "overview",
+      "label": "工单状态分布导出图片",
+      "file": "overview-2.png",
+      "suggestedFilename": "工单状态分布.png",
+      "size": [
+        316,
+        472
+      ],
+      "bytes": 15419,
+      "sha256": "281e8be4549f3f9d3697e8b36894ae3ae2b3f50bc1945ed2bbcd6baf0637eefe"
+    },
+    {
+      "view": "workorder",
+      "label": "工单状态分布导出图片",
+      "file": "workorder-1.png",
+      "suggestedFilename": "工单状态分布.png",
+      "size": [
+        1276,
+        640
+      ],
+      "bytes": 46924,
+      "sha256": "6880f49ba3a56606eb2c96306d10aac8a5dc38a30eaa48b4e679e9f2c75e1eec"
+    },
+    {
+      "view": "workorder",
+      "label": "工单优先级分布导出图片",
+      "file": "workorder-2.png",
+      "suggestedFilename": "工单优先级分布.png",
+      "size": [
+        820,
+        640
+      ],
+      "bytes": 29238,
+      "sha256": "ae82ab93e6ce522cac05fd581ab6d0376593790bac792492c02e87bbc10963bb"
+    },
+    {
+      "view": "resident",
+      "label": "居民状态分布导出图片",
+      "file": "resident-1.png",
+      "suggestedFilename": "居民状态分布.png",
+      "size": [
+        1276,
+        640
+      ],
+      "bytes": 38898,
+      "sha256": "a868d85d96bef70d1e01a00b71057436b3a04338020796019ad34c4c2702603c"
+    },
+    {
+      "view": "resource",
+      "label": "资源预约状态分布导出图片",
+      "file": "resource-1.png",
+      "suggestedFilename": "资源预约状态分布.png",
+      "size": [
+        1276,
+        640
+      ],
+      "bytes": 47067,
+      "sha256": "59de82d70d38f3b865d4c286efe7ddca0a555ae8b0b7a1498a86e75bacb841c7"
+    }
+  ],
+  "pageErrors": [],
+  "limitations": [
+    "G-002 and fixed placeholder display G-004 only; G-001 time filter and G-005 missing indicators remain open.",
+    "R41 full numeric acceptance remains subject to the final filtered SQL/detail comparison."
+  ]
+}
