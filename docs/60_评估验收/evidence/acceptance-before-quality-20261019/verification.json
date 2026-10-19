@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-19",
+  "scope": "用户裁决：先验收项目是否按需求实现，再评估项目质量；仅文档修订校验",
+  "baseline_commit": "37082a578ffa51b8c7d7125fa17bf77e47155fee",
+  "checks": {
+    "local_links_checked": 35,
+    "heading_anchors_checked": 3,
+    "work_groups_in_execution_order": 7,
+    "acceptance_before_quality": true,
+    "quality_dimension_count": 11,
+    "quality_dimension_ids": [
+      "60-04.1",
+      "60-04.2",
+      "60-04.3",
+      "60-04.4",
+      "60-05.1",
+      "60-05.2",
+      "60-05.3",
+      "60-05.4",
+      "60-06.1",
+      "60-06.2",
+      "60-06.3"
+    ],
+    "requirement_flow_counts": {
+      "R": 75,
+      "N": 10,
+      "E": 13
+    },
+    "acceptance_rows_changed_only_in_pending_terminology": true,
+    "quality_results_remain_unexecuted": true,
+    "nonfunctional_requirements_accepted_before_quality": true,
+    "previous_verification_evidence_unchanged": true,
+    "requirement_source_sha256": "23ac1b5c86bd3e3f40358c8287d833a25570d3545ab13ae49eb09903fdcb204c",
+    "control_lines": 73,
+    "git_diff_check_exit": 0,
+    "previous_evidence_comparison": "Git diff无改动且JSON内容一致；原始字节差异仅为Windows工作区CRLF与Git存储LF。"
+  },
+  "governance_audit": {
+    "exit_code": 1,
+    "complete": true,
+    "phase60_errors": 0,
+    "phase60_warnings": 0,
+    "global_baseline_errors": 1450,
+    "global_current_errors": 1450,
+    "business_acceptance": "not_evaluated"
+  },
+  "business_tests_executed": false,
+  "financial_operations_executed": false,
+  "quality_assessments_executed": false,
+  "errors": [],
+  "passed": true
+}
