@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-19",
+  "scope": "细化实施计划、60-01覆盖登记与C9首批需求验收的文档/事实校验",
+  "passed": true,
+  "checks": {
+    "local_links_checked": 127,
+    "heading_anchors_checked": 7,
+    "groups": 7,
+    "execution_order": true,
+    "registry_objects": {
+      "R": 75,
+      "N": 10,
+      "E": 13
+    },
+    "registry_is_not_acceptance": true,
+    "c9_checked_objects": [
+      "R40",
+      "R41",
+      "R42",
+      "E9"
+    ],
+    "confirmed_gaps": [
+      "G-001",
+      "G-002",
+      "G-004",
+      "G-005"
+    ],
+    "clarified_item": "G-003",
+    "quality_assessments_executed": false,
+    "financial_operations": 0,
+    "frozen_packages_unchanged": true
+  },
+  "errors": [],
+  "limitations": [
+    "全仓既有治理错误仍为1450项，未在本批处理",
+    "C9其余子判据、其余R/N/E尚未验收",
+    "C9差距尚未修复与复验"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-19",
+  "method": "真实页面观察后按需求核对源码和当前OpenAPI；不是仅凭关键词作通过判定",
+  "files": [
+    {
+      "path": "frontend/src/admin/statistics/views/DashboardTabView.vue",
+      "sha256": "dfe416a8400e42c1c744d7ddd6bfc1d976d21d0c943aed76dc3a4a6dbf07e818"
+    },
+    {
+      "path": "frontend/src/admin/statistics/views/DashboardOverview.vue",
+      "sha256": "617ed540b45b82fb8fe074f7ae0dfa4c7fc2028c703d36ed579ee45695ae9f5d"
+    },
+    {
+      "path": "frontend/src/admin/statistics/views/StatisticsView.vue",
+      "sha256": "e276d80db6b55d9d88fd991babea81eee027d8a9cef6ccdce6a82dbc4ceab4f8"
+    },
+    {
+      "path": "frontend/src/common/statistics/components/EChart.vue",
+      "sha256": "a2cbf926e88479530f88a4e2c1200795f18ed7747a1c565c9298ce62d3911aab"
+    },
+    {
+      "path": "frontend/src/common/statistics/api/statistics.ts",
+      "sha256": "0f51b2d16c62cf9b3d2589eb643f3d7ef55b39b4fea4bb7f758b28cf736cfaf4"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/admin/statistics/controller/AdminStatisticsController.java",
+      "sha256": "364a439034accef4218a1b74dba542fe94b6baa69d208e632e05cc0e4b3859a1"
+    }
+  ],
+  "confirmed_gaps": {
+    "G-001": "时间范围控件、查询字段和后台参数均缺失",
+    "G-002": "无页面导出动作或图表导出工具栏",
+    "G-004": "MOCK_TREND固定环比和迷你趋势被当前页面作为真实统计展示",
+    "G-005": "当前管理端运营看板及三个详细统计分区未呈现全部R40指标"
+  },
+  "clarified_item": {
+    "G-003": "16卡/四图不作为现行独立验收门槛；按实际指标和能力判定"
+  },
+  "limitations": [
+    "R41其他真实数值与数据库明细抽样未执行",
+    "未完成所有社区/角色与全部图表数据状态核对",
+    "未修复差距，不启动质量评估"
+  ]
+}
