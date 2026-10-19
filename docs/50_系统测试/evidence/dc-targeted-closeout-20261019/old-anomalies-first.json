@@ -1,0 +1,553 @@
+{
+  "checks": [
+    {
+      "name": "DEF-104十路提交只有一条待审申请",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": null,
+              "houseId": 5,
+              "houseLocation": "1 号楼1 单元DC-DEF-104",
+              "id": 1,
+              "leaseId": 2,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": null,
+              "reviewerId": null,
+              "reviewerName": null,
+              "status": "PENDING"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "DEF-104十路审核副作用仅一次且输家幂等",
+      "passed": false,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T11:42:08",
+              "houseId": 5,
+              "houseLocation": "1 号楼1 单元DC-DEF-104",
+              "id": 1,
+              "leaseId": 2,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T11:42:08.9304316",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          }
+        ],
+        "leaseState": "MOVED_OUT",
+        "statusLogs": 1,
+        "residentNotifications": 1
+      }
+    },
+    {
+      "name": "DEF-106租约群十路创建只保留一条",
+      "passed": false,
+      "actual": {
+        "ids": [
+          25
+        ],
+        "rows": 1,
+        "responses": [
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": null,
+              "id": 25,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 3,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DEF-119补回链不覆盖租约且不重开关闭群",
+      "passed": true,
+      "actual": {
+        "row": "TO_SIGN\t25\tCLOSED"
+      }
+    },
+    {
+      "name": "DEF-110关闭租约群禁止发起看房且零落库",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5604
+      }
+    },
+    {
+      "name": "DEF-108待审核可达待签约",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "DEF-115/123现行FIRST边界拒绝手动生效",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5004
+      }
+    },
+    {
+      "name": "DEF-130租期边界0",
+      "passed": false,
+      "actual": {
+        "http": 200,
+        "code": 400
+      }
+    },
+    {
+      "name": "DEF-130租期边界1",
+      "passed": false,
+      "actual": {
+        "http": 200,
+        "code": 400
+      }
+    },
+    {
+      "name": "DEF-213跨端十路直通建群17",
+      "passed": true,
+      "actual": {
+        "ids": [
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35
+        ],
+        "residentId": 18
+      }
+    },
+    {
+      "name": "DEF-213跨端十路直通建群18",
+      "passed": true,
+      "actual": {
+        "ids": [
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36
+        ],
+        "residentId": 19
+      }
+    },
+    {
+      "name": "TC-NF-016通知补拉sinceSeq非零边界",
+      "passed": true,
+      "actual": {
+        "cursor": 820,
+        "returned": 6,
+        "minSeq": 821
+      }
+    }
+  ],
+  "passed": 8,
+  "failed": [
+    {
+      "name": "DEF-104十路审核副作用仅一次且输家幂等",
+      "passed": false,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T11:42:08",
+              "houseId": 5,
+              "houseLocation": "1 号楼1 单元DC-DEF-104",
+              "id": 1,
+              "leaseId": 2,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T11:42:08.9304316",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 5602,
+            "data": null,
+            "message": "仅已生效租约可办理退租，当前状态：MOVED_OUT"
+          }
+        ],
+        "leaseState": "MOVED_OUT",
+        "statusLogs": 1,
+        "residentNotifications": 1
+      }
+    },
+    {
+      "name": "DEF-106租约群十路创建只保留一条",
+      "passed": false,
+      "actual": {
+        "ids": [
+          25
+        ],
+        "rows": 1,
+        "responses": [
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": null,
+              "id": 25,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 3,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 409,
+            "code": 409,
+            "data": null,
+            "message": "数据已存在"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DEF-130租期边界0",
+      "passed": false,
+      "actual": {
+        "http": 200,
+        "code": 400
+      }
+    },
+    {
+      "name": "DEF-130租期边界1",
+      "passed": false,
+      "actual": {
+        "http": 200,
+        "code": 400
+      }
+    }
+  ],
+  "financialRequests": 0,
+  "syntheticLeaseSeed": "仅独立库合成历史状态、押金0，无支付单，无外部渠道调用"
+}

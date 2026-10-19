@@ -1,0 +1,739 @@
+{
+  "checks": [
+    {
+      "sample": "1 社区创建",
+      "method": "POST",
+      "path": "/api/v1/communities",
+      "passed": true,
+      "requestRequiredExpected": [
+        "address",
+        "name"
+      ],
+      "requestRequiredOpenAPI": [
+        "address",
+        "name"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "address",
+        "autoApproveResidence",
+        "businessCode",
+        "defaultLeaseMonths",
+        "description",
+        "name",
+        "responsibleAdminId"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "address",
+        "autoApproveResidence",
+        "businessCode",
+        "contactPerson",
+        "contactPhone",
+        "createdAt",
+        "defaultLeaseMonths",
+        "description",
+        "id",
+        "name",
+        "responsibleAdminId",
+        "status",
+        "updatedAt"
+      ],
+      "responseActualFields": [
+        "address",
+        "autoApproveResidence",
+        "businessCode",
+        "contactPerson",
+        "contactPhone",
+        "createdAt",
+        "defaultLeaseMonths",
+        "description",
+        "id",
+        "name",
+        "responsibleAdminId",
+        "status",
+        "updatedAt"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "2 居民注册",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/register",
+      "passed": true,
+      "requestRequiredExpected": [
+        "password",
+        "phone",
+        "realName",
+        "username"
+      ],
+      "requestRequiredOpenAPI": [
+        "password",
+        "phone",
+        "realName",
+        "username"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "email",
+        "idCard",
+        "password",
+        "phone",
+        "realName",
+        "username"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "createdAt",
+        "email",
+        "id",
+        "idCardMasked",
+        "phone",
+        "realName",
+        "status",
+        "username"
+      ],
+      "responseActualFields": [
+        "createdAt",
+        "email",
+        "id",
+        "idCardMasked",
+        "phone",
+        "realName",
+        "status",
+        "username"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "3 工单创建",
+      "method": "POST",
+      "path": "/api/v1/work-orders",
+      "passed": true,
+      "requestRequiredExpected": [
+        "categoryId",
+        "contactPhone",
+        "content",
+        "title"
+      ],
+      "requestRequiredOpenAPI": [
+        "categoryId",
+        "contactPhone",
+        "content",
+        "title"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "address",
+        "categoryId",
+        "contactPhone",
+        "content",
+        "priority",
+        "title"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "address",
+        "assigneeActiveOrders",
+        "assigneeId",
+        "assigneeName",
+        "assigneeShiftLabel",
+        "categoryId",
+        "categoryName",
+        "communityId",
+        "contactPhone",
+        "content",
+        "conversationId",
+        "createdAt",
+        "dispatchFlag",
+        "id",
+        "orderNo",
+        "priority",
+        "residentId",
+        "residentName",
+        "status",
+        "title",
+        "updatedAt",
+        "waitedMinutes"
+      ],
+      "responseActualFields": [
+        "address",
+        "assigneeActiveOrders",
+        "assigneeId",
+        "assigneeName",
+        "assigneeShiftLabel",
+        "categoryId",
+        "categoryName",
+        "communityId",
+        "contactPhone",
+        "content",
+        "conversationId",
+        "createdAt",
+        "dispatchFlag",
+        "id",
+        "orderNo",
+        "priority",
+        "residentId",
+        "residentName",
+        "status",
+        "title",
+        "updatedAt",
+        "waitedMinutes"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "4 工单详情",
+      "method": "GET",
+      "path": "/api/v1/work-orders/{id}",
+      "passed": true,
+      "requestRequiredExpected": [],
+      "requestRequiredOpenAPI": [],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "requestFields": [],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "address",
+        "assigneeActiveOrders",
+        "assigneeId",
+        "assigneeName",
+        "assigneeShiftLabel",
+        "categoryId",
+        "categoryName",
+        "communityId",
+        "contactPhone",
+        "content",
+        "conversationId",
+        "createdAt",
+        "dispatchFlag",
+        "id",
+        "orderNo",
+        "priority",
+        "residentId",
+        "residentName",
+        "status",
+        "title",
+        "updatedAt",
+        "waitedMinutes"
+      ],
+      "responseActualFields": [
+        "address",
+        "assigneeActiveOrders",
+        "assigneeId",
+        "assigneeName",
+        "assigneeShiftLabel",
+        "categoryId",
+        "categoryName",
+        "communityId",
+        "contactPhone",
+        "content",
+        "conversationId",
+        "createdAt",
+        "dispatchFlag",
+        "id",
+        "orderNo",
+        "priority",
+        "residentId",
+        "residentName",
+        "status",
+        "title",
+        "updatedAt",
+        "waitedMinutes"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "5 公告创建",
+      "method": "POST",
+      "path": "/api/v1/notices",
+      "passed": true,
+      "requestRequiredExpected": [
+        "content",
+        "publishTime",
+        "title"
+      ],
+      "requestRequiredOpenAPI": [
+        "content",
+        "publishTime",
+        "title"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "bodyJson",
+        "communityId",
+        "content",
+        "endTime",
+        "expectedVersion",
+        "expireTime",
+        "images",
+        "isPinned",
+        "priority",
+        "publishTime",
+        "targets",
+        "title",
+        "type"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "bodyJson",
+        "communityId",
+        "communityName",
+        "content",
+        "contentVersion",
+        "createdAt",
+        "editedAt",
+        "editedBy",
+        "endTime",
+        "expireTime",
+        "id",
+        "images",
+        "isPinned",
+        "priority",
+        "publishTime",
+        "publisherId",
+        "publisherName",
+        "status",
+        "targets",
+        "title",
+        "type",
+        "viewCount"
+      ],
+      "responseActualFields": [
+        "bodyJson",
+        "communityId",
+        "communityName",
+        "content",
+        "contentVersion",
+        "createdAt",
+        "editedAt",
+        "editedBy",
+        "endTime",
+        "expireTime",
+        "id",
+        "images",
+        "isPinned",
+        "priority",
+        "publishTime",
+        "publisherId",
+        "publisherName",
+        "status",
+        "targets",
+        "title",
+        "type",
+        "viewCount"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "5 公告发布（同组）",
+      "method": "PATCH",
+      "path": "/api/v1/notices/{id}/publish",
+      "passed": false,
+      "requestRequiredExpected": [],
+      "requestRequiredOpenAPI": [
+        "publishTime"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "requestFields": [
+        "publishTime"
+      ],
+      "responseType": null,
+      "responseDeclaredFields": [],
+      "responseActualFields": [],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "6 反馈创建",
+      "method": "POST",
+      "path": "/api/v1/feedbacks",
+      "passed": true,
+      "requestRequiredExpected": [
+        "category",
+        "communityId",
+        "content",
+        "title"
+      ],
+      "requestRequiredOpenAPI": [
+        "category",
+        "communityId",
+        "content",
+        "title"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "category",
+        "communityId",
+        "content",
+        "isAnonymous",
+        "title"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "category",
+        "communityId",
+        "content",
+        "createdAt",
+        "handlerId",
+        "handlerName",
+        "id",
+        "isAnonymous",
+        "residentId",
+        "residentName",
+        "status",
+        "title"
+      ],
+      "responseActualFields": [
+        "category",
+        "communityId",
+        "content",
+        "createdAt",
+        "handlerId",
+        "handlerName",
+        "id",
+        "isAnonymous",
+        "residentId",
+        "residentName",
+        "status",
+        "title"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "7 资源预约",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "passed": true,
+      "requestRequiredExpected": [
+        "endTime",
+        "reserveDate",
+        "resourceId",
+        "startTime"
+      ],
+      "requestRequiredOpenAPI": [
+        "endTime",
+        "reserveDate",
+        "resourceId",
+        "startTime"
+      ],
+      "parameters": [],
+      "requestFields": [
+        "contactPhone",
+        "endTime",
+        "purpose",
+        "remark",
+        "reserveDate",
+        "resourceId",
+        "startTime"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "communityId",
+        "contactPhone",
+        "createdAt",
+        "endTime",
+        "id",
+        "purpose",
+        "remark",
+        "reserveDate",
+        "resourceId",
+        "resourceName",
+        "startTime",
+        "status",
+        "userId",
+        "userName"
+      ],
+      "responseActualFields": [
+        "communityId",
+        "contactPhone",
+        "createdAt",
+        "endTime",
+        "id",
+        "purpose",
+        "remark",
+        "reserveDate",
+        "resourceId",
+        "resourceName",
+        "startTime",
+        "status",
+        "userId",
+        "userName"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "8 工单评价",
+      "method": "POST",
+      "path": "/api/v1/work-orders/{orderId}/evaluation",
+      "passed": true,
+      "requestRequiredExpected": [
+        "isSatisfied",
+        "rating"
+      ],
+      "requestRequiredOpenAPI": [
+        "isSatisfied",
+        "rating"
+      ],
+      "parameters": [
+        {
+          "name": "orderId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "requestFields": [
+        "content",
+        "isSatisfied",
+        "rating",
+        "tags"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "communityId",
+        "content",
+        "createdAt",
+        "id",
+        "isSatisfied",
+        "rating",
+        "residentId",
+        "residentName",
+        "tags",
+        "workOrderId",
+        "workOrderNo"
+      ],
+      "responseActualFields": [
+        "communityId",
+        "content",
+        "createdAt",
+        "id",
+        "isSatisfied",
+        "rating",
+        "residentId",
+        "residentName",
+        "tags",
+        "workOrderId",
+        "workOrderNo"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "9 通知补拉",
+      "method": "GET",
+      "path": "/api/v1/notifications/pull",
+      "passed": true,
+      "requestRequiredExpected": [],
+      "requestRequiredOpenAPI": [],
+      "parameters": [
+        {
+          "name": "sinceSeq",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "requestFields": [],
+      "responseType": "array",
+      "responseDeclaredFields": [],
+      "responseActualFields": [],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "10 通用上传",
+      "method": "POST",
+      "path": "/api/v1/upload",
+      "passed": false,
+      "requestRequiredExpected": [
+        "file",
+        "type"
+      ],
+      "requestRequiredOpenAPI": [
+        "file"
+      ],
+      "parameters": [
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "default": "IMAGE"
+          }
+        }
+      ],
+      "requestFields": [
+        "file"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "fileId",
+        "fileName",
+        "fileSize",
+        "fileType",
+        "fileUrl"
+      ],
+      "responseActualFields": [
+        "fileId",
+        "fileName",
+        "fileSize",
+        "fileType",
+        "fileUrl"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    }
+  ],
+  "sampleGroups": 10,
+  "operations": 11,
+  "passed": 9,
+  "failed": [
+    {
+      "sample": "5 公告发布（同组）",
+      "method": "PATCH",
+      "path": "/api/v1/notices/{id}/publish",
+      "passed": false,
+      "requestRequiredExpected": [],
+      "requestRequiredOpenAPI": [
+        "publishTime"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      ],
+      "requestFields": [
+        "publishTime"
+      ],
+      "responseType": null,
+      "responseDeclaredFields": [],
+      "responseActualFields": [],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    },
+    {
+      "sample": "10 通用上传",
+      "method": "POST",
+      "path": "/api/v1/upload",
+      "passed": false,
+      "requestRequiredExpected": [
+        "file",
+        "type"
+      ],
+      "requestRequiredOpenAPI": [
+        "file"
+      ],
+      "parameters": [
+        {
+          "name": "type",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "default": "IMAGE"
+          }
+        }
+      ],
+      "requestFields": [
+        "file"
+      ],
+      "responseType": "object",
+      "responseDeclaredFields": [
+        "fileId",
+        "fileName",
+        "fileSize",
+        "fileType",
+        "fileUrl"
+      ],
+      "responseActualFields": [
+        "fileId",
+        "fileName",
+        "fileSize",
+        "fileType",
+        "fileUrl"
+      ],
+      "requiredResponseFields": [],
+      "responseUndeclaredFields": [],
+      "http": 200,
+      "code": 200,
+      "designBasis": "30接口设计对应条目；社区字段按50/14、通知数组按2026-09-09裁决，审核/首期生效按批准16/23/27"
+    }
+  ],
+  "scope": "严格按TC-NF-016的10组抽样，不宣称全API全部字段证明"
+}

@@ -3,7 +3,6 @@ package com.community.residence.common.messaging.service;
 import com.community.residence.common.messaging.constant.NotificationOwnerType;
 import com.community.residence.common.messaging.entity.Notification;
 import com.community.residence.common.messaging.mapper.NotificationMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +13,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,8 +33,6 @@ class NotificationServiceTest {
     @Mock
     private StringRedisTemplate redisTemplate;
     @Mock
-    private ValueOperations<String, String> valueOps;
-    @Mock
     private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
     @Mock
     private WebSocketSessionService webSocketSessionService;
@@ -44,16 +40,10 @@ class NotificationServiceTest {
     @InjectMocks
     private NotificationService notificationService;
 
-    @BeforeEach
-    void setUp() {
-        // StringRedisTemplate.opsForValue 由各用例按需打桩
-    }
-
     @Test
     @DisplayName("生成通知：seq 取 Redis INCR 值，落 owner_type=USER（sys_user 身份空间）")
     void create_usesRedisSeq() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOps);
-        when(valueOps.increment(anyString())).thenReturn(42L);
+        when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenReturn(42L);
         when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
         when(webSocketSessionService.isOnline(NotificationOwnerType.USER, 1L)).thenReturn(false);
 
@@ -70,8 +60,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("生成居民通知：落 owner_type=RESIDENT（resident 身份空间）")
     void createForResident_persistsResidentOwnerType() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOps);
-        when(valueOps.increment(anyString())).thenReturn(45L);
+        when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenReturn(45L);
         when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
         when(webSocketSessionService.isOnline(NotificationOwnerType.RESIDENT, 1L)).thenReturn(false);
 
@@ -86,8 +75,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("在线推送：接收人 WebSocket 在线时推送到用户专属队列（主体名带 U: 前缀）")
     void create_onlineUser_pushesToQueue() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOps);
-        when(valueOps.increment(anyString())).thenReturn(43L);
+        when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenReturn(43L);
         when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
         when(webSocketSessionService.isOnline(NotificationOwnerType.USER, 1L)).thenReturn(true);
 
@@ -100,8 +88,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("在线推送：居民通知推送到 R:{residentId} 目的地，与 sys_user 同 id 不共用 destination")
     void create_onlineResident_pushesToPrefixedQueue() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOps);
-        when(valueOps.increment(anyString())).thenReturn(46L);
+        when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenReturn(46L);
         when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
         when(webSocketSessionService.isOnline(NotificationOwnerType.RESIDENT, 1L)).thenReturn(true);
 
@@ -114,8 +101,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("推送失败：不影响通知落库（轮询兜底）")
     void create_pushFailure_notificationStillPersisted() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOps);
-        when(valueOps.increment(anyString())).thenReturn(44L);
+        when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenReturn(44L);
         when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
         when(webSocketSessionService.isOnline(NotificationOwnerType.USER, 1L)).thenReturn(true);
         org.mockito.Mockito.doThrow(new RuntimeException("ws down"))
@@ -129,7 +115,7 @@ class NotificationServiceTest {
     @Test
     @DisplayName("seq 降级：Redis 不可用时时间戳兜底（仍写入成功）")
     void create_redisDown_fallsBackToTimestamp() {
-        when(redisTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
+        when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenThrow(new RedisConnectionFailureException("down"));
         when(notificationMapper.insert(any(Notification.class))).thenReturn(1);
 
         notificationService.createForResident(1L, null, "T", "C", "TYPE", null, null);

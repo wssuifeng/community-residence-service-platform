@@ -1,0 +1,10 @@
+{
+  "phase": "complete",
+  "durationSeconds": 660,
+  "rampSeconds": 60,
+  "steadySeconds": 600,
+  "httpThreads": 50,
+  "registeredResidentAccounts": 200,
+  "elapsedSeconds": 685,
+  "wsConnected": 50
+}

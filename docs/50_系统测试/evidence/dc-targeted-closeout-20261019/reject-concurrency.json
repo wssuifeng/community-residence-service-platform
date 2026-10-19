@@ -1,0 +1,78 @@
+{
+  "checks": [
+    {
+      "name": "DEF-104十路驳回幂等且通知一次不改变租约",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "status": "REJECTED"
+          }
+        ],
+        "leaseStatus": "ACTIVE",
+        "applicationStatus": "REJECTED",
+        "notificationCount": 1
+      }
+    }
+  ],
+  "passed": 1,
+  "financialRequests": 0,
+  "scope": "隔离合成历史租约，仅驳回状态与通知，不支付或退款"
+}

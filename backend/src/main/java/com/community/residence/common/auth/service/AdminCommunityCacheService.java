@@ -1,9 +1,10 @@
 package com.community.residence.common.auth.service;
 
+import com.community.residence.common.config.RedisFailures;
 import com.community.residence.common.auth.mapper.SysAdminCommunityMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,8 @@ public class AdminCommunityCacheService {
                 }
                 return ids;
             }
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，绑定社区直查 DB：adminId={}", adminId);
             return Set.copyOf(adminCommunityMapper.selectCommunityIdsByAdminId(adminId));
         }
@@ -57,7 +59,8 @@ public class AdminCommunityCacheService {
                 redisTemplate.opsForSet().add(key, members);
                 redisTemplate.expire(key, Duration.ofHours(2));
             }
-        } catch (RedisConnectionFailureException ignored) {
+        } catch (DataAccessException ignored) {
+            RedisFailures.rethrowUnlessUnavailable(ignored);
             // 回种失败不影响本次结果
         }
         return ids;
@@ -67,7 +70,8 @@ public class AdminCommunityCacheService {
     public void evict(Long adminId) {
         try {
             redisTemplate.delete(KEY_PREFIX + adminId + KEY_SUFFIX);
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，绑定社区缓存未清理（2h TTL 自然过期）：adminId={}", adminId);
         }
     }

@@ -71,6 +71,9 @@ class WorkOrderServiceTest {
 
     @BeforeEach
     void setUp() {
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(
+                new org.apache.ibatis.builder.MapperBuilderAssistant(
+                        new com.baomidou.mybatisplus.core.MybatisConfiguration(), "work-order-test"), WorkOrder.class);
         order = new WorkOrder();
         order.setId(1L);
         order.setOrderNo("WO202609080001");

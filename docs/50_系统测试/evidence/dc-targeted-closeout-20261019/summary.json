@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-19",
+  "sourceBase": "caae28d",
+  "caseCount": 305,
+  "supplementedCases": 23,
+  "defectCount": 215,
+  "newDefects": [
+    213,
+    214,
+    215
+  ],
+  "original18Disposed": 18,
+  "checks": {
+    "contracts.json": {
+      "passed": 11,
+      "count": 11
+    },
+    "browser.json": {
+      "passed": 18,
+      "count": 18
+    },
+    "redis-fault.json": {
+      "passed": 19,
+      "count": 19
+    },
+    "concurrency.json": {
+      "passed": 21,
+      "count": 21
+    },
+    "permissions.json": {
+      "passed": 113,
+      "count": 113
+    },
+    "old-anomalies.json": {
+      "passed": 12,
+      "count": 12
+    },
+    "remaining-anomalies.json": {
+      "passed": 8,
+      "count": 8
+    },
+    "reject-concurrency.json": {
+      "passed": 1,
+      "count": 1
+    }
+  },
+  "financialCommands": 0,
+  "normalServicesReplaced": false,
+  "phaseExitApproved": false
+}

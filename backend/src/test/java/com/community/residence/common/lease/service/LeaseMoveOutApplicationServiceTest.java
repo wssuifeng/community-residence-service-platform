@@ -161,6 +161,7 @@ class LeaseMoveOutApplicationServiceTest {
 
         when(leaseMapper.selectById(LEASE_ID)).thenReturn(activeLease);
         when(moveOutMapper.selectById(APPLICATION_ID)).thenReturn(pendingApplication);
+        when(moveOutMapper.selectByIdForUpdate(APPLICATION_ID)).thenReturn(pendingApplication);
         when(houseMapper.selectById(5L)).thenReturn(house);
         Community community = new Community();
         community.setId(3L);
@@ -378,7 +379,8 @@ class LeaseMoveOutApplicationServiceTest {
     void approve_concurrentWinner_idempotent() {
         LeaseMoveOutApplication approved = approvedApplication();
         when(moveOutMapper.update(any(), any())).thenReturn(0);
-        when(moveOutMapper.selectById(APPLICATION_ID)).thenReturn(pendingApplication, approved);
+        when(moveOutMapper.selectById(APPLICATION_ID)).thenReturn(pendingApplication);
+        when(moveOutMapper.selectByIdForUpdate(APPLICATION_ID)).thenReturn(pendingApplication, approved);
 
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUserId).thenReturn(2L);
@@ -465,5 +467,90 @@ class LeaseMoveOutApplicationServiceTest {
         approved.setStatus("APPROVED");
         approved.setReviewerId(2L);
         return approved;
+    }
+    @Test
+    @DisplayName("DEF-127：分页多行仅批量装载六类关联各一次")
+    void pageLoadsEachAssociationOnce() {
+        LeaseMoveOutApplication second = new LeaseMoveOutApplication();
+        second.setId(APPLICATION_ID + 1);
+        second.setResidentId(RESIDENT_ID);
+        second.setCommunityId(3L);
+        second.setHouseId(5L);
+        pendingApplication.setReviewerId(9L);
+        second.setReviewerId(9L);
+        house.setUnitId(7L);
+        com.community.residence.common.community.entity.Unit unit =
+                new com.community.residence.common.community.entity.Unit();
+        unit.setId(7L);
+        unit.setBuildingId(8L);
+        com.community.residence.common.community.entity.Building building =
+                new com.community.residence.common.community.entity.Building();
+        building.setId(8L);
+        when(houseMapper.selectBatchIds(any())).thenReturn(List.of(house));
+        when(unitMapper.selectBatchIds(any())).thenReturn(List.of(unit));
+        when(buildingMapper.selectBatchIds(any())).thenReturn(List.of(building));
+        when(moveOutMapper.selectPage(any(), any())).thenAnswer(call -> {
+            com.baomidou.mybatisplus.extension.plugins.pagination.Page<LeaseMoveOutApplication> page =
+                    call.getArgument(0);
+            page.setRecords(List.of(pendingApplication, second));
+            page.setTotal(2);
+            return page;
+        });
+        assertThat(service.page(1, 20, null, null).getRecords()).hasSize(2);
+        verify(residentMapper).selectBatchIds(any());
+        verify(communityMapper).selectBatchIds(any());
+        verify(houseMapper).selectBatchIds(any());
+        verify(unitMapper).selectBatchIds(any());
+        verify(buildingMapper).selectBatchIds(any());
+        verify(sysUserMapper).selectBatchIds(any());
+        verify(residentMapper, never()).selectById(any());
+        verify(communityMapper, never()).selectById(any());
+        verify(houseMapper, never()).selectById(any());
+    }
+
+    @Test
+    @DisplayName("DEF-104：等待房屋锁后读到已通过申请，租约已搬出仍幂等返回")
+    void approveWinnerCommittedBeforeLeaseLock() {
+        activeLease.setStatus("MOVED_OUT");
+        when(moveOutMapper.selectByIdForUpdate(APPLICATION_ID)).thenReturn(approvedApplication());
+        LeaseMoveOutApplicationVO result = service.approve(APPLICATION_ID, new ApproveMoveOutDTO());
+        assertThat(result.getStatus()).isEqualTo("APPROVED");
+        verify(leaseMapper, never()).updateById(any(LeaseRecord.class));
+        verify(conversationService, never()).closeLeaseGroup(anyLong());
+    }
+
+
+    @Test
+    @DisplayName("DEF-104：并发驳回等待后读取赢家，不重复通知")
+    void rejectConcurrentWinnerIsIdempotent() {
+        LeaseMoveOutApplication winner = approvedApplication();
+        winner.setStatus("REJECTED");
+        winner.setRejectReason("原审核原因");
+        when(moveOutMapper.update(any(), any())).thenReturn(0);
+        when(moveOutMapper.selectByIdForUpdate(APPLICATION_ID)).thenReturn(winner);
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(SecurityUtils::getUserId).thenReturn(2L);
+            RejectMoveOutDTO dto = new RejectMoveOutDTO();
+            dto.setReason("并发重复原因");
+            LeaseMoveOutApplicationVO vo = service.reject(APPLICATION_ID, dto);
+            assertThat(vo.getStatus()).isEqualTo("REJECTED");
+            assertThat(vo.getRejectReason()).isEqualTo("原审核原因");
+        }
+        verify(notificationService, never()).createForResident(any(), any(), any(), any(), any(), any(), any());
+        verify(leaseMapper, never()).updateById(any(LeaseRecord.class));
+    }
+
+    @Test
+    @DisplayName("DEF-104：已驳回的同目标重试返回原结果且不再写入")
+    void rejectAlreadyRejectedIsIdempotent() {
+        pendingApplication.setStatus("REJECTED");
+        pendingApplication.setRejectReason("原审核原因");
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            RejectMoveOutDTO dto = new RejectMoveOutDTO();
+            dto.setReason("重复请求");
+            assertThat(service.reject(APPLICATION_ID, dto).getRejectReason()).isEqualTo("原审核原因");
+        }
+        verify(moveOutMapper, never()).update(any(), any());
+        verify(notificationService, never()).createForResident(any(), any(), any(), any(), any(), any(), any());
     }
 }

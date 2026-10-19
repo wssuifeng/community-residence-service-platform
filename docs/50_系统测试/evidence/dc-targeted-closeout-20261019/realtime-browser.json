@@ -1,0 +1,72 @@
+{
+  "samples": [
+    {
+      "sample": 1,
+      "conversationDOMMs": 63.953,
+      "notificationDOMMs": 70.162,
+      "passed": true
+    },
+    {
+      "sample": 2,
+      "conversationDOMMs": 71.8,
+      "notificationDOMMs": 75.348,
+      "passed": true
+    },
+    {
+      "sample": 3,
+      "conversationDOMMs": 63.046,
+      "notificationDOMMs": 64.978,
+      "passed": true
+    },
+    {
+      "sample": 4,
+      "conversationDOMMs": 58.495,
+      "notificationDOMMs": 61.103,
+      "passed": true
+    },
+    {
+      "sample": 5,
+      "conversationDOMMs": 91.809,
+      "notificationDOMMs": 95.668,
+      "passed": true
+    },
+    {
+      "sample": 6,
+      "conversationDOMMs": 56.339,
+      "notificationDOMMs": 58.454,
+      "passed": true
+    },
+    {
+      "sample": 7,
+      "conversationDOMMs": 51.831,
+      "notificationDOMMs": 53.778,
+      "passed": true
+    },
+    {
+      "sample": 8,
+      "conversationDOMMs": 61.959,
+      "notificationDOMMs": 64.757,
+      "passed": true
+    },
+    {
+      "sample": 9,
+      "conversationDOMMs": 74.434,
+      "notificationDOMMs": 76.634,
+      "passed": true
+    },
+    {
+      "sample": 10,
+      "conversationDOMMs": 74.247,
+      "notificationDOMMs": 77.956,
+      "passed": true
+    }
+  ],
+  "allWithin3s": true,
+  "notificationSamples": 10,
+  "conversationSamples": 10,
+  "method": "同一台机器perf_counter记录HTTP请求开始到真实Edge接收端DOM出现；请求开始早于DB提交，记录保守上界；反馈/通知均真实WS订阅",
+  "wsReceivedMessageFrames": 20,
+  "subscribedFeedback": true,
+  "consoleErrors": [],
+  "financialRequests": 0
+}

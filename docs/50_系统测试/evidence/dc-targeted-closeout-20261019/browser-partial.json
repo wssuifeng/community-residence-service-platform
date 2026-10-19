@@ -1,0 +1,100 @@
+{
+  "checks": [
+    {
+      "name": "SP-025合法JPG真实上传并回显",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025WEBP拒绝且明确提示",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025六MB图片前端拒绝且未发送上传",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025断网明确提示并保留成功图片",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025失败不阻塞其它字段",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025网络恢复可重试成功",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025PDF真实上传成功",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025EXE拒绝且保留成功文档",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "SP-025文件失败不阻塞其它字段",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "C11-014公告配置行唯一",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "C11-014配置保存False",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "C11-014界面发布成功False",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "C11-014站内必达False",
+      "passed": true,
+      "actual": {
+        "notifications": 200,
+        "channels": "WEBSOCKET\t200"
+      }
+    },
+    {
+      "name": "C11-014站外勾选两态False",
+      "passed": true,
+      "actual": "WEBSOCKET\t200"
+    },
+    {
+      "name": "C11-014配置保存True",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "C11-014界面发布成功True",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "C11-014站内必达True",
+      "passed": true,
+      "actual": {
+        "notifications": 200,
+        "channels": "WEBSOCKET\t200\nEMAIL\t200\nSMS\t200"
+      }
+    },
+    {
+      "name": "C11-014站外勾选两态True",
+      "passed": true,
+      "actual": "WEBSOCKET\t200\nEMAIL\t200\nSMS\t200"
+    }
+  ]
+}

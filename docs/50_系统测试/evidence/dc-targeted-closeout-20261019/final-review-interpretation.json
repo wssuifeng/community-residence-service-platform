@@ -1,0 +1,21 @@
+{
+  "scope": "最终原始响应复核，不新增缺陷编号",
+  "observations": [
+    {
+      "defect": "DEF-116",
+      "priorResult": "remaining-anomalies-first-review.json",
+      "finding": "原断言只检查无500及副作用一次，未充分约束同目标CAS输家的幂等结果；原始响应9条5302仍显示PENDING，证实普通重查读取旧快照",
+      "fix": "CAS失败后用锁定当前读，返回赢家最新会话；开始时已处于目标的重复受理仍按设计5302",
+      "verification": "remaining-anomalies.json及WorkOrderR74IntakeTest的两个新增分支"
+    },
+    {
+      "defect": "DEF-104",
+      "priorResult": "reject-concurrency-first-review.json",
+      "finding": "真实十路驳回9条5603仍显示PENDING；普通重查读旧快照",
+      "fix": "CAS失败后锁定当前读，已驳回同目标重试返回原结果，不重复通知",
+      "verification": "reject-concurrency.json及LeaseMoveOutApplicationServiceTest的两个新增分支"
+    }
+  ],
+  "performanceReuseBoundary": "此后只改写入竞争分支与工程整理；七类性能GET及通知/认证实现保持，保留对应运行包哈希",
+  "financialRequests": 0
+}

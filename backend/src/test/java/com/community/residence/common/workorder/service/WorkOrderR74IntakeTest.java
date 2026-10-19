@@ -110,6 +110,9 @@ class WorkOrderR74IntakeTest {
 
     @BeforeEach
     void setUp() {
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(
+                new org.apache.ibatis.builder.MapperBuilderAssistant(
+                        new com.baomidou.mybatisplus.core.MybatisConfiguration(), "work-order-test"), WorkOrder.class);
         order = new WorkOrder();
         order.setId(ORDER_ID);
         order.setOrderNo(ORDER_NO);
@@ -285,5 +288,41 @@ class WorkOrderR74IntakeTest {
             verify(notificationService, never()).createForResident(anyLong(), anyLong(), anyString(), anyString(),
                     anyString(), anyString(), anyLong());
         }
+    }
+
+    @Test
+    @DisplayName("DEF-116：等待条件更新后读取赢家状态与会话，不重复副作用")
+    void intakeConcurrentWinnerReturnsCurrentGroup() {
+        WorkOrder winner = new WorkOrder();
+        org.springframework.beans.BeanUtils.copyProperties(order, winner);
+        winner.setStatus(WorkOrderStatus.TO_ASSIGN);
+        winner.setConversationId(GROUP_ID);
+        when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(0);
+        when(workOrderMapper.selectOne(any())).thenReturn(winner);
+        try (MockedStatic<SecurityUtils> mocked = login(ADMIN_USER_ID, false)) {
+            WorkOrderVO vo = service.intake(ORDER_ID, "并发受理");
+            assertThat(vo.getStatus()).isEqualTo(WorkOrderStatus.TO_ASSIGN);
+            assertThat(vo.getConversationId()).isEqualTo(GROUP_ID);
+        }
+        verify(processMapper, never()).insert(any(WorkOrderProcess.class));
+        verify(conversationService, never()).createWorkOrderGroup(anyLong(), anyLong(), anyLong(), anyLong(), anyString());
+        verify(notificationService, never()).createForResident(anyLong(), anyLong(), anyString(), anyString(), anyString(), anyString(), anyLong());
+    }
+
+    @Test
+    @DisplayName("DEF-116：等待后已到其他状态仍拒绝，不误当同目标幂等")
+    void intakeConcurrentDifferentTargetStillConflicts() {
+        WorkOrder winner = new WorkOrder();
+        org.springframework.beans.BeanUtils.copyProperties(order, winner);
+        winner.setStatus(WorkOrderStatus.ASSIGNED);
+        when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(0);
+        when(workOrderMapper.selectOne(any())).thenReturn(winner);
+        try (MockedStatic<SecurityUtils> mocked = login(ADMIN_USER_ID, false)) {
+            assertThatThrownBy(() -> service.intake(ORDER_ID, "并发状态漂移"))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
+                            .isEqualTo(ErrorCode.WORK_ORDER_INVALID_TRANSITION));
+        }
+        verify(processMapper, never()).insert(any(WorkOrderProcess.class));
     }
 }

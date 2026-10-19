@@ -1,5 +1,6 @@
 package com.community.residence.common.auth.service;
 
+import com.community.residence.common.config.RedisFailures;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.community.residence.common.web.constant.ErrorCode;
 import com.community.residence.common.web.exception.BusinessException;
@@ -7,7 +8,7 @@ import com.community.residence.common.auth.entity.SysConfig;
 import com.community.residence.common.auth.mapper.SysConfigMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,8 @@ public class SysConfigService {
             if (cached != null) {
                 return cached;
             }
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，配置直查 DB：key={}", key);
             return queryValue(key);
         }
@@ -47,7 +49,8 @@ public class SysConfigService {
         if (value != null) {
             try {
                 redisTemplate.opsForValue().set(cacheKey, value, CACHE_TTL);
-            } catch (RedisConnectionFailureException ignored) {
+            } catch (DataAccessException ignored) {
+                RedisFailures.rethrowUnlessUnavailable(ignored);
                 // 回种失败不影响本次结果
             }
         }
@@ -71,7 +74,8 @@ public class SysConfigService {
         sysConfigMapper.updateById(config);
         try {
             redisTemplate.delete(CACHE_PREFIX + key);
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，配置缓存未清理（1h TTL 自然过期）：key={}", key);
         }
         log.info("全局配置已更新：key={}, value={}", key, value);
@@ -108,7 +112,8 @@ public class SysConfigService {
         }
         try {
             redisTemplate.delete(CACHE_PREFIX + key);
-        } catch (RedisConnectionFailureException e) {
+        } catch (DataAccessException e) {
+            RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，配置缓存未清理（1h TTL 自然过期）：key={}", key);
         }
         log.info("全局配置已写入：key={}", key);

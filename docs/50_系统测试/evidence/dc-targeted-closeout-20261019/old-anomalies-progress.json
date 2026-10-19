@@ -1,0 +1,637 @@
+{
+  "checks": [
+    {
+      "name": "DEF-104十路提交只有一条待审申请",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": null,
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": null,
+              "reviewerId": null,
+              "reviewerName": null,
+              "status": "PENDING"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          },
+          {
+            "http": 200,
+            "code": 5603,
+            "data": null,
+            "message": "已有待审核的退租申请"
+          }
+        ],
+        "rows": 1
+      }
+    },
+    {
+      "name": "DEF-104十路审核副作用仅一次且输家幂等",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49.3909207",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "communityId": 1,
+              "communityName": "阳光花园社区",
+              "createdAt": "2026-10-19T12:17:48",
+              "houseId": 5140,
+              "houseLocation": "1 号楼1 单元DC-DEF-104-83468",
+              "id": 5,
+              "leaseId": 20,
+              "moveOutDate": "2026-10-20",
+              "reason": "dc非金融并发申请",
+              "rejectReason": null,
+              "residentId": 1,
+              "residentName": "演示居民",
+              "reviewTime": "2026-10-19T12:17:49",
+              "reviewerId": 1,
+              "reviewerName": "超级管理员",
+              "status": "APPROVED"
+            },
+            "message": "success"
+          }
+        ],
+        "leaseState": "MOVED_OUT",
+        "statusLogs": 1,
+        "residentNotifications": 1
+      }
+    },
+    {
+      "name": "DEF-106租约群十路创建只保留一条",
+      "passed": true,
+      "actual": {
+        "ids": [
+          58
+        ],
+        "rows": 1,
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": null,
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "data": {
+              "closedAt": null,
+              "communityId": 1,
+              "createdAt": "2026-10-19T12:17:49",
+              "id": 58,
+              "lastMessage": null,
+              "lastMessageAt": null,
+              "participantCount": null,
+              "participants": null,
+              "relatedId": 21,
+              "status": "ACTIVE",
+              "title": "租约沟通",
+              "type": "LEASE_GROUP",
+              "unreadCount": 0
+            },
+            "message": "success"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DEF-119补回链不覆盖租约且不重开关闭群",
+      "passed": true,
+      "actual": {
+        "row": "TO_SIGN\t58\tCLOSED"
+      }
+    },
+    {
+      "name": "DEF-110关闭租约群禁止发起看房且零落库",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5604
+      }
+    },
+    {
+      "name": "DEF-108待审核可达待签约",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200
+      }
+    },
+    {
+      "name": "DEF-115/123现行FIRST边界拒绝手动生效",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5004
+      }
+    },
+    {
+      "name": "DEF-130租期边界0",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 400
+      }
+    },
+    {
+      "name": "DEF-130租期边界1",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 400
+      }
+    },
+    {
+      "name": "DEF-213跨端十路直通建群17",
+      "passed": true,
+      "actual": {
+        "ids": [
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35,
+          35
+        ],
+        "residentId": 18
+      }
+    },
+    {
+      "name": "DEF-213跨端十路直通建群18",
+      "passed": true,
+      "actual": {
+        "ids": [
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36,
+          36
+        ],
+        "residentId": 19
+      }
+    },
+    {
+      "name": "TC-NF-016通知补拉sinceSeq非零边界",
+      "passed": true,
+      "actual": {
+        "cursor": 1792380989839,
+        "returned": 16,
+        "minSeq": 1792380989840
+      }
+    }
+  ]
+}

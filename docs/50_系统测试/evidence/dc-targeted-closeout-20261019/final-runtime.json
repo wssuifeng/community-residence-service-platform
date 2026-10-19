@@ -1,0 +1,17 @@
+{
+  "database": "community_residence_dc_20261019",
+  "backendPid": 35076,
+  "frontendPid": 25336,
+  "redisPid": 31428,
+  "ports": [
+    8087,
+    5181,
+    6387
+  ],
+  "backendSource": "caae28d + DEF-213/214/215 + DEF-104/106/116 regression fixes",
+  "sourceHead": "caae28d8670ef561ae30f4d6abe111f5d1fd1b59",
+  "jarSHA256": "24431ad4d98bb8247bb69ab2cc0f4c9bf150015efec6f2e6e75d1354c19967a2",
+  "normalServicesUntouched": true,
+  "paymentCommands": 0,
+  "stoppedOnlyOwnPreviousBackendPid": 29108
+}

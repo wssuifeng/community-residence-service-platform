@@ -1,0 +1,473 @@
+{
+  "sourceBase": "caae28d8670ef561ae30f4d6abe111f5d1fd1b59",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "5317d8904c09e3864a94f29c118dd53b280f1511b9c7216c6b59adbc8c19cfad"
+    },
+    {
+      "path": "README.md",
+      "sha256": "c1ee3d1f280ed9fa23387502606dfb99155c9a5a54983bb51d234d0683e1a14b"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/auth/service/AdminCommunityCacheService.java",
+      "sha256": "195a7dde6aac85b4637ca2479a8a99f552c8b27cc6632bb3881d5fd0a8e158b5"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/auth/service/SysConfigService.java",
+      "sha256": "635945e8287e64f82dbcfbebea3a80913c36e2b53bd528abe0b7ff82edaefee2"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/auth/service/TokenBlacklistService.java",
+      "sha256": "8bc8af4ad628b5ae688211f2cbd6e2da9b6483d6be9935da10489c834d76d542"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/auth/service/TokenRevocationService.java",
+      "sha256": "d45cb7341a05ded3b5f8e2b721091834b1ba47430e57d34a3a2c4782561f9ac5"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/config/RedisFailures.java",
+      "sha256": "0f17b610456e6bc6cdf03afbdd3b1cbd114fc6d224af548616f0d4bee3784633"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/conversation/service/ConversationService.java",
+      "sha256": "8f7c007c414ad9b43cde1e43d093b612977c2576ec301bd51e6222fdb54df7e8"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/housing/service/HousingService.java",
+      "sha256": "702ddae8474f2f299453822ef5336f96dca3f26f0c5e9cb59a0f007eb77f45dd"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/lease/mapper/LeaseMoveOutApplicationMapper.java",
+      "sha256": "09fe40c7c15cb3247227e3d1265f5fa4c78cf245c82e5147641cc7b1bf3feca8"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationService.java",
+      "sha256": "d5c504ca54043ca237f796551724217208b499c0ce7978cdb8666ca0ba4b82e4"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/messaging/mapper/NotificationMapper.java",
+      "sha256": "a2b45b1f5d2e3fe9c865d465e96a8932aef60a97bb090e9277792c869e3828f6"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/messaging/service/NotificationService.java",
+      "sha256": "6ff8f53d286c5c9075a0d64e2b868654f0044b57e9d6a22b5d2308e0edcfbc92"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/messaging/service/WebSocketSessionService.java",
+      "sha256": "3ffe7e6656357a1d6b59dcd6928f71f3512b2030c035b4d667d5bf1590a389ef"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/resident/mapper/ResidentMapper.java",
+      "sha256": "ebb6e0d6dc571f9485683db92a7b8a9909c2a247d4e5e809b17ef9c64231a813"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/workorder/service/WorkOrderService.java",
+      "sha256": "cc9ed9de2e59dc9b0b1d0cc61c5cc181c8d2fb63847cd3187c72f95c180e08d2"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/auth/service/TokenBlacklistRedisOutageTest.java",
+      "sha256": "86b71a517c4660450a19777e24d2d11737c2e9c540291af5e16172b9c26badb8"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/config/RedisFailuresTest.java",
+      "sha256": "be8d7155c1dc1d33879c97271e223f6729cccaeff4a2fe64c424cf8f799c7458"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationServiceTest.java",
+      "sha256": "867dea60f818226c2becc1b680a47e706c724e9d9ed4ba4b2967a914fd3efbd0"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationServiceTest.java",
+      "sha256": "3e2fbcfed34234d558f4109869dab9058d2af5f94b4284d30556e8320d2d6634"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/messaging/service/ChannelLevelsTest.java",
+      "sha256": "5282d6b80eb8682b431c7d8611fc11fc6cc67939039ae6066408deb6f101904b"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/messaging/service/NotificationIdentitySpaceRegressionTest.java",
+      "sha256": "f8af443b75124786b042f30aa6340b2944a2edae2bfa27902cdf6ea07be0b035"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/messaging/service/NotificationSequenceRecoveryTest.java",
+      "sha256": "ca442c5689204fd93580cd1acabb093827795013deb78275dc7f8a565958ceb2"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/messaging/service/NotificationServiceTest.java",
+      "sha256": "59952ac148cc0f18ae5c61f14fba65836b7aa2320c362d4d4ae94ce1189ccac1"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderR74IntakeTest.java",
+      "sha256": "eb579e3e9ebbd0dbdfe7b15f44e70c4bf1641810ef0e4a312a1dbe48c6992e3c"
+    },
+    {
+      "path": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderServiceTest.java",
+      "sha256": "771a8f06a490dbb874fb35c28e23c1102919be712b7d139473d9223e509c4c0a"
+    },
+    {
+      "path": "docs/00_总控.md",
+      "sha256": "b9cf92008f6ef18f02735e05fb43453232612548ed413eccd2737c83919b0463"
+    },
+    {
+      "path": "docs/50_系统测试/02_需求跟踪矩阵.md",
+      "sha256": "dfbb9b27eaf1f602f73b317dacad987de98d1ed479a3519fa38de497e3404186"
+    },
+    {
+      "path": "docs/50_系统测试/05_测试环境与数据.md",
+      "sha256": "e39ae22b98494b29b257f187a39e4036488bbac73e8b558ade1875e8e6494c39"
+    },
+    {
+      "path": "docs/50_系统测试/07_测试执行记录.md",
+      "sha256": "29fb3e41b8c39df49a230823868254ebfca610c17ffe7d51c47bc83f9f3ee72f"
+    },
+    {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "sha256": "f584a2275f4c2c88cf6b9898bf77d29f94171c8f73c88213358e5e4234e92c66"
+    },
+    {
+      "path": "docs/50_系统测试/09_测试评估与报告.md",
+      "sha256": "1e9fcfd0e5952f2a19150da63c486ebfda75a3b0d6f3eb8a89151c30f13c8e38"
+    },
+    {
+      "path": "docs/50_系统测试/10_测试总结与归档.md",
+      "sha256": "d3bf726634b0973a87a6aa0ac03ec3e895cc6922c824422fdb16792425ee3b17"
+    },
+    {
+      "path": "docs/50_系统测试/11_测试执行入口.md",
+      "sha256": "c5e894fd97ebcd6efbe7396e452fbdf1d4b4b6b2066ee2605ff029f8bcdac627"
+    },
+    {
+      "path": "docs/50_系统测试/39_最终用例与缺陷处置台账.md",
+      "sha256": "da24988ea5758bf974290eeac97b3147c403de9df4e5389c8b50e6bfad7e6593"
+    },
+    {
+      "path": "docs/50_系统测试/_中控.md",
+      "sha256": "53ff08794a2b44be170cd16ae1efaba2bba0c67ce15e97df0165363f436bdaac"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/18-defect-dispositions.md",
+      "sha256": "cc91b2d673e1d77487a014841ac3ce289f0dc9267e12dcecc23e22eda22a3460"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/README.md",
+      "sha256": "7ffaabc1529d35c4189e7e364d526ac70e4575860e293e1264f3379087f792a0"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/account-pool-summary.json",
+      "sha256": "ffeb923457ef19a89829b6d35b3d9bf27af0828cb2e0af619bcce9061f5816cb"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/backend-targeted.json",
+      "sha256": "4901969a61be91143f1127e1b292f36fc655a5bdf5c19af3dea80c9530a71f91"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/browser-partial.json",
+      "sha256": "c80613e5e894ffbd17a88b5dc445f435c94ef21fcd4649fca036f72498408f87"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/browser.json",
+      "sha256": "d4944882338ef36254e06bd0ce70b9f4fc1cc01d2f5ffed19c3814fdd8af02b0"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/browser_checks.py",
+      "sha256": "c933fb7a3674d432f80bc599713214b4682bfd403258851302dd842dd5bb1e51"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/bulk-data.json",
+      "sha256": "be3535c47b7d968daca45a840d0d0b2047f5d6a3a1bb9b5eb48cd57127ff2275"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/case-supplement.json",
+      "sha256": "d5f7ed1ad2108b4ccb6d56d52075feca637b11a34ed236cd9733f58d4c233ae2"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/case-supplement.md",
+      "sha256": "fe100b80b5eb51a028b807192c1b59540d940fdaa4f9ece5618bce3f166e4733"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/channel-config.png",
+      "sha256": "1be1f0dbfddbad3d1ec83c237375b6996f110d0eab84a15d9d35d0a6ae58fa27"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/check-normal-readonly.py",
+      "sha256": "c03f19affb262c0c8a1a8632182e4eedf0e5d0d0989b070a7616d668352088ee"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/cleanup.json",
+      "sha256": "7d558ca2d0a74fd8c3aca8ac2bb204a7d18103c64e165c2c535387d44a681c7e"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/cleanup.py",
+      "sha256": "adabb60d0dbbcaa5cd0d6abbf84992f0603e0559aadff3bf3e24f7f1a85a54b2"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/concurrency-first.json",
+      "sha256": "2aa8fc04d91ede5e67d83d30fdf03ae63e0abfb7a40211cf9e206b9d951bd731"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/concurrency.json",
+      "sha256": "d3d58bf3519d67fdfa29e58fb55ee67cfe6875917d9ba109308584fcb639ea76"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/concurrency.py",
+      "sha256": "1015d2d33009f0be1a6e06088fb5c3425b378597ab6c18c44c14750be4db32a6"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/contracts-first.json",
+      "sha256": "47401d5b0ac1cc962e999d2b409b5c42107a915461539c7c580d8d47b6108415"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/contracts-partial.json",
+      "sha256": "dfedbb1e6b546f63aa60cdf138cb35b8d5e68241eae7e684f0e98fe8b690e9b5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/contracts.json",
+      "sha256": "6b134a42022241fe87b1573868458587321cbace75b0566aaf6b4906e6f5bca8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/contracts.py",
+      "sha256": "8ce0c68a31b6cf52e251ca3067ad09fefc1215d241db8d3b889968d5f63dd731"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/defect-supplement.json",
+      "sha256": "1e817fcd5b28ed9f4a06b290b91fc8ca7417833934fbf43212fb3babb988fd45"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/environment-after.json",
+      "sha256": "d68d2c8d42327b24c2e0817b5fb2c5231120ec8c9b7c487bd0c8db9aa3c40098"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/final-review-interpretation.json",
+      "sha256": "b0bd7580c62711170c6ada71e05c84d62985dd15fc71541ab1c4f761c83f5dad"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/final-runtime.json",
+      "sha256": "3e89171fdabbbc8a7ed8981696356be5456bfc05ff922fc54186761067a745b8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/finalize-evidence.py",
+      "sha256": "20bcd6c62eaa5d3687f911abb82d8351ca75dbabe7a5fc3910f49a16a0829381"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/finish-fixtures.py",
+      "sha256": "9e1178b2353e6d64f34b783a46e4672da2fa87f1a094f113ffe9d4adedaad1d6"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/fixtures.json",
+      "sha256": "a64c91dba8b56d8d24f64d1477468613d0cf3c42902bfae036b55e0e144b3b60"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/frontend-targeted.json",
+      "sha256": "810e6e47819faf7d461a1ac39df8b732e0d4635a318e022ee9f6d90bf27d2b5d"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/load-base.jmx",
+      "sha256": "d00211fdfd2303df286c48e9c5228803ba9a7aa1045f05dce52a8c8dfd0e912d"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/load-bulk.jmx",
+      "sha256": "4adde715524e9afbcc977386faaef88017f0d43b8d3f71fe5ac3d27234b81786"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/old-anomalies-first.json",
+      "sha256": "c823351af5967e2314391565f81f5ca193182e8d37e908b61be22fe43357be97"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/old-anomalies-progress.json",
+      "sha256": "b42aaafb694f7b501c33371abcd3cf0e4e0a389e5c6be3dfd9735d7c1f778c50"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/old-anomalies-second.json",
+      "sha256": "ce4e42899ad4f44b95568c508f8142eac806838da94f362335fc492360ede1c2"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/old-anomalies.json",
+      "sha256": "b8b322512848d17be4f66a2a1287c0e04886934fa1474c1b8f648ac5c4d48f1f"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/old_anomalies.py",
+      "sha256": "7b11d52627b1cc16684a37f2931bbc6383c436c34234c03a8af314cc7b7be3f7"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/openapi-final.json",
+      "sha256": "2aa954c59be48ce5d6648c9e343cd707e71de7becfb21a42c355c85138f336c3"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/openapi.json",
+      "sha256": "2aa954c59be48ce5d6648c9e343cd707e71de7becfb21a42c355c85138f336c3"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance-base.json",
+      "sha256": "fc0274022d3bce33b1901fbc141dfd151656b2f438d5287d37ef37905c9a7e82"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance-bulk.json",
+      "sha256": "753b48315a95ec00f972b66d1f85a48721700ecdf448f80a263541967f673df7"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance-harness-first.json",
+      "sha256": "4cdaea28fb96ce33ecbe350884bff2b0c37d573248d2c5dde2a17c8722f41516"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance-progress.json",
+      "sha256": "00297137bd9cb9a364e2e1af55e588ea16f3fcd63c5b8af044db7f6c7bab93ab"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance-tested-runtime.json",
+      "sha256": "0d6336c4972f24bc2ff1d59e96ea08b9b3941ff097467afa5aa7472220d4d3a8"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance.json",
+      "sha256": "c4486eaac1794b3e176159710043358874c4eee5617891f8fa950908379e0240"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance.py",
+      "sha256": "0eff5decdbff114f886c7b976acbe924d87c31c07f10eed629845beb591367d7"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/permissions-first.json",
+      "sha256": "7b698592f56baaac460c37cdd7f74ab0acac65db34d3775f14489ac3a8795c4f"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/permissions.json",
+      "sha256": "12c16e43cd773dcb95717e92832332d3d53ac89cabfd0e53423f91089db75767"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/permissions.py",
+      "sha256": "ff364442a73ba18323003956bb4558817372ddceb20747b9868badffd5269071"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/prepare.py",
+      "sha256": "03d22ec20a6a3f9d5cdb1a0127089dc082759fb261036fb38c7e6386c1dedd4d"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/realtime-browser.json",
+      "sha256": "01e744e2ccfe35451b06852a4ee257ac3ee0677c23294960a898aebd13edb5ed"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/realtime-browser.png",
+      "sha256": "77ff4c85abeb0df4fae89c5e94d13a5d073151ec5c9b608a52d2acc7aa2e9cc0"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/realtime_browser.py",
+      "sha256": "3924ea265b820674a9825b6ff04d1565130387c170b49413c618f7fe8f8ac364"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-fault-first.json",
+      "sha256": "6c43b28c49ed4427507e9eec9de99ac256df9c9e106cf325cf935dce46a578f9"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-fault-progress.json",
+      "sha256": "721f957f6e8bc251f3179c07788a8eac6aab1cd06cf5d7488cd9e48964faacb1"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-fault-second.json",
+      "sha256": "be3a3fc44ef7482310db533faf18c00a982721d598f84ad1323546a0cbfe80f5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-fault.json",
+      "sha256": "1ab88d557e253f770e7dc5859d5e79a36642779c29a0805154091ae5c76048f5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-polling.png",
+      "sha256": "8f8852e5ec8b1090355e17bc15c1b9d011b0a72e566f9b45dca402c3ca4237c4"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-tested-runtime.json",
+      "sha256": "a74ff5b046431b0906fadd6748df04c434af4c3ca2f08bd4b6bd0908b8e93598"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis_fault.py",
+      "sha256": "2b6d9f14ced106ab4df48437b38975e02be512eac214b8748940b867693b007a"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/reject-concurrency-first-review.json",
+      "sha256": "a8935da55e73c1a5ca07182d35199db07808bc46942817aaadf1539515c51837"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/reject-concurrency.json",
+      "sha256": "852e878d198fc86e33c72cb381b60d307b39ca5950002a8a19a70e254697dc69"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/reject_concurrency.py",
+      "sha256": "60c5a3a10c20f29df652bf3d888b73396c3bee943c2518c5817e7618c513d860"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/remaining-anomalies-first-review.json",
+      "sha256": "f06215def7104e6e02f58b4ecc467350dd65132878eb3ca757c7b3f437cd384f"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/remaining-anomalies-progress.json",
+      "sha256": "de93f1e2e65102d3429f38612ea01fdabfb8a51774765a28d0a5b7b58eeb4592"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/remaining-anomalies.json",
+      "sha256": "3de4f939652c3dd3d95e1e3c20102ac552b87d96b90a6c5b7b243e151a9b0ff5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/remaining_anomalies.py",
+      "sha256": "33a6dea8cfa3a65e22207855f44ca02788fefd2569949a120cb11b753f38ef92"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/restart-isolated.py",
+      "sha256": "4965efe5470baba8d814a87ef95c14d587c6a5f222ff9f8fcd7444dd6eae3aa5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/run-backend.py",
+      "sha256": "15467b55d1084bde5ea55ea7bfb4e93f6b97a892af4e00b7b3b6b68be2de252e"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/schema-inventory.json",
+      "sha256": "4a4bac72c3b3f84382347b55ff0c7a44e7ee3fd2c42fe72dce8b0c944b960976"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/seed-fixtures.py",
+      "sha256": "2d9591cb48a31cb025361cca26238078d907880aca350414192ddb1b5fe76db5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/start-isolated.py",
+      "sha256": "8f842bcb4cefe59fa7b034c7b17d291c43686d0df4db846602a46ed952227431"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/startup.json",
+      "sha256": "63c388d2008b1ba32b8afa2a9fc2a32d48cd7dfbe331a854dfb086667332777f"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/summary.json",
+      "sha256": "d2e54b35b96f7cdd7749bd89d94de5e85c5ed47f40f135094f4c8ac838476b64"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/support.py",
+      "sha256": "9d7d37e96beb8c3c841b359666558040936c9f714861ad9305a99f7ed2e7bede"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/update-documents.py",
+      "sha256": "c6afe685a521af8b6f62323f1e91a4ea471046ff6a40e2c7ec13dde9362ebe59"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/upload-document.png",
+      "sha256": "f84ea5b6fc7e38410ccb0835af53704630f3b40f2dc73a86cfbc6328eb415b1b"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/upload-image.png",
+      "sha256": "577d5cd0e03c4437d9749dd4095684bdab0debd30e7f38364bc72b912c06311f"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/verify-documents.py",
+      "sha256": "d5543e41ac6bf3e7a958684c38a31f67cd60f8012cb8728dcaf044373521fed1"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/ws_client.py",
+      "sha256": "6c967dd26786b2088df8d05d44b13b7b387a3bfb38b70011f75409a2bf77617c"
+    },
+    {
+      "path": "docs/90_全局/决策日志.md",
+      "sha256": "aa7fe0be80ce06a92c445bd5229698efa327b02253140faa937c2452b219e240"
+    },
+    {
+      "path": "docs/90_全局/长任务路线图.md",
+      "sha256": "7ec7609c10b493ecc7cfe77d75935cd7a26a6a0d22e9329a94fb8d0bef34691a"
+    }
+  ]
+}

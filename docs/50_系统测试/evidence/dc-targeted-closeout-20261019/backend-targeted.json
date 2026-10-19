@@ -1,0 +1,378 @@
+{
+  "suites": [
+    {
+      "class": "com.community.residence.common.messaging.service.NotificationSequenceRecoveryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "rapidOutageNotificationsRemainUniqueAndIncreasing",
+        "restartRestoresDatabaseCursorBeforeUsingFreshRedis",
+        "outageThenRecoveryNeverMovesCursorBackwards",
+        "commandErrorsAreNeverConvertedIntoSuccessfulNotifications"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.config.RedisFailuresTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "redissonWrappedConnectionRefusedMayFallBack",
+        "serializationFailureIsNotSwallowed",
+        "malformedCommandIsNotAnAvailabilityFailure",
+        "wrappedTransportTimeoutMayFallBack",
+        "originalSpringConnectionFailureStillFallsBack"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.auth.service.TokenBlacklistRedisOutageTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "validTokenUsesDatabaseDuringWrappedDriverFailure",
+        "revokedTokenRemainsRejectedDuringWrappedDriverFailure",
+        "unavailableDatabaseIsNeverTreatedAsValidAuthentication"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.auth.service.TokenRevocationFixTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "afterRevokedAt_valid",
+        "redisDown_dbFallback_sameSecondRevoked",
+        "sameSecondIssued_revoked",
+        "noRevocation_valid",
+        "beforeRevokedAt_revoked"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.auth.service.TokenRevisionFilterTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "blacklistedTokenCannotAuthenticate",
+        "malformedSignedRevisionCannotAuthenticate",
+        "residentTokenKeepsResidentScope",
+        "expiredSignedTokenCannotAuthenticate",
+        "unsignedForgeryCannotAuthenticate",
+        "legacyTokenUsesLegacyRevocationBranch",
+        "preChangeRevisionIsRejected",
+        "currentRevisionSignedTokenAuthenticates"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.NotificationServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_pushFailure_notificationStillPersisted",
+        "createForResident_persistsResidentOwnerType",
+        "create_usesRedisSeq",
+        "create_redisDown_fallsBackToTimestamp",
+        "create_onlineUser_pushesToQueue",
+        "create_onlineResident_pushesToPrefixedQueue",
+        "markAllRead_scopesToCurrentUser"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.NotificationIdentitySpaceRegressionTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "markRead_crossIdentitySpace_forbidden",
+        "unread_collidingIds_seeOwnIdentitySpaceOnly",
+        "markRead_ownIdentitySpace_allowed",
+        "createForUser_notVisibleToCollidingResident",
+        "createForResident_notVisibleToCollidingSuperAdmin",
+        "pull_collidingIds_seeOwnIdentitySpaceOnly",
+        "pushSubject_collidingId_usesDistinctDestination",
+        "page_collidingIds_seeOwnIdentitySpaceOnly",
+        "queryCondition_differsByOwnerType_forCollidingId",
+        "markAllRead_scopesToOwnerType"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.ChannelLevelsTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "updateChannelLevels_invalidChannel_rejected",
+        "readChannelLevels_parsesJson",
+        "create_withoutConfiguredChannels_logsWebsocketOnly",
+        "updateChannelLevels_allSevenLevels_accepted",
+        "create_brokenConfig_fallsBackToWebsocketOnly",
+        "readChannelLevels_missing_returnsEmpty",
+        "updateChannelLevels_unknownLevel_rejected",
+        "updateChannelLevels_valid_persisted",
+        "create_withConfiguredChannels_logsBoth"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.conversation.service.ConversationServiceTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "addParticipant_idempotent",
+        "unread_and_markRead",
+        "listMessages_access",
+        "sendMessage_push",
+        "createViewingGroup_participants",
+        "sendSystemMessage_closedConversationRejected",
+        "closeConversation_blocksSend",
+        "createLeaseGroup_duplicateKeyFallsBackToWinner",
+        "foreignMessageCannotAdvanceReadCursor",
+        "closeConversation_idempotent",
+        "joinWorkOrderGroup_closedConversationRejected",
+        "getById_participantOnly",
+        "createLeaseGroup_idempotent",
+        "ensureLeaseGroup_backfillsConversationIdViaConditionalUpdate",
+        "createLeaseGroup_participants",
+        "sendMessage_noPushWhenAllOffline",
+        "listMessages_notFound",
+        "createViewingGroup_idempotent",
+        "unreadExcludesSelfWithinIdentitySpaceNotOnlyNumericId",
+        "openDirect_belongCheck",
+        "addParticipant_duplicateKeySilentlyIgnored"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingConversationDefectFixTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "privateContextStillRejectsUnavailableLeaseOrAnotherTenant",
+        "createInConversation_housingOfLeaseHouse_accepted",
+        "listByLease_orderByDateThenIdDesc",
+        "createInConversation_activeGroup_resolvedHousing_proceeds",
+        "createInConversation_resolvedHousingMistargeted_rejected",
+        "createInConversation_closedGroup_rejected5604",
+        "createInConversation_housingOfOtherHouse_rejected",
+        "ambiguousLegacySourceRejectedWithoutGuessing",
+        "createInConversation_leaseMissing_throws404",
+        "suppliedDifferentSourceEvenInSameHouseIsRejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.conversation.service.ConversationLeaseGroupEnsureTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "ensure_leaseWithoutResident_rejected",
+        "ensure_alreadyLinked_noUpdate",
+        "ensure_createsGroupAndBackfillsLink",
+        "ensure_leaseNotFound",
+        "ensure_idempotentWhenGroupExists"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.lease.service.LeaseStateMachineFixTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "updateStatus_linearPath_ok",
+        "update_activeLease_ok",
+        "applyTransition_concurrentDrift_rejected",
+        "updateStatus_activeToArchived_throws",
+        "updateStatus_pendingDirectActive_throws",
+        "applyTransition_concurrentSameTarget_idempotentNoRepeatLog",
+        "updateStatus_pendingToSignThenActive_flipsHouseOnActiveOnly",
+        "update_archivedLease_throws",
+        "updateStatus_toSignRejected_ok"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.lease.service.LeaseServiceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "directLeaseMoveOutPassesExplicitConfirmation",
+        "updateStatus_illegalTransition_throws",
+        "editingLegacyLeaseDoesNotInventMonthsOrReplaceDatesWithToday",
+        "create_endBeforeStart_throws",
+        "updateLeaseStatusDto_patternAcceptsToSign",
+        "toVO_expiringFlag",
+        "directLeaseMoveOutCannotBypassDependentConfirmation",
+        "create_existingLease_throws",
+        "updateStatus_legalTransitions_pass",
+        "toVO_expiredFlag"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.agreement.service.AgreementConsentBoundaryTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "issueThenAcceptUsesActualResidentAction"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.workorder.service.WorkOrderR74IntakeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "intake_success",
+        "intakeConcurrentWinnerReturnsCurrentGroup",
+        "assign_joinsGroup",
+        "intakeConcurrentDifferentTargetStillConflicts",
+        "submit_notifiesAdminsAndSuperAdmins",
+        "close_requiresCompletedAndRecycles",
+        "intake_invalidState_conflict"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.workorder.service.WorkOrderServiceTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "close_otherCommunityAdmin_throws",
+        "restoreClosedOrderKeepsClosedGroupReadOnly",
+        "confirmAndClose_withNullRemark_succeeds",
+        "residentCannotRestoreOrJoinAsAdministrator",
+        "restoreGroupOutsideManagedCommunityIsForbidden",
+        "restoreAssignedGroupOnlyWritesReferenceAndAddsCurrentAssignee",
+        "assign_nonStaff_throws",
+        "cancel_fromCompleted_throws",
+        "confirm_notOwner_throws",
+        "accept_notAssignee_throws",
+        "directAssignmentCreatesCommunicationGroupBeforeJoiningStaff",
+        "confirm_fromPending_throws",
+        "fullLifecycle_legalTransitions",
+        "restorePendingGroupIsRejectedWithoutChangingStatus"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.lease.service.LeaseMoveOutApplicationServiceTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "approve_fullCascade",
+        "create_pendingExists_rejected",
+        "approve_leaseNotActive_rejected",
+        "reject_keepsLeaseActive",
+        "create_nonActiveLease_rejected",
+        "approve_concurrentWinner_idempotent",
+        "create_notifiesAdminWithLeaseIdSourceId",
+        "rejectAlreadyRejectedIsIdempotent",
+        "rejectConcurrentWinnerIsIdempotent",
+        "create_ownActiveLease_pending",
+        "approve_alreadyApproved_idempotent",
+        "pageLoadsEachAssociationOnce",
+        "create_othersLease_forbidden",
+        "approveWinnerCommittedBeforeLeaseLock",
+        "reject_approvedApplication_rejected",
+        "approveAndReject_notifyWithLeaseIdSourceId",
+        "create_moveOutDateOutsideLeaseTerm_rejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.resident.service.ResidenceApplicationServiceTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "withdraw_concurrentWinnerAlreadyWithdrawn_idempotent",
+        "withdraw_weakFallbackActiveLease_skipsGroupClose",
+        "withdraw_concurrentReviewed_throwsNotWithdrawable",
+        "withdraw_strongLinkLease_closesGroupRegardlessOfActive",
+        "wrongHouseOrSaleSourceIsRejected",
+        "tenantMissingSourceIsRejectedWithoutInsert",
+        "withdraw_reviewedApplication_rejected",
+        "approve_concurrentWinnerAlreadyApproved_idempotent",
+        "withdraw_pendingApplication_ok",
+        "approve_existingLease_throwsBeforeSideEffects",
+        "create_autoApproveCommunity_createsLeaseImmediately",
+        "approve_alreadyReviewed_throws",
+        "approve_tenant_flipsHouseAndCreatesLease",
+        "withdraw_othersApplication_forbidden",
+        "create_occupiedHouse_throws",
+        "create_otherPendingApplication_throws",
+        "create_manualApproveCommunity_staysPending",
+        "create_existingLease_throws",
+        "monthEndApprovalPreservesThirteenMonthsAndThreeMonthFirstPayment",
+        "create_duplicatePending_throws",
+        "explicitSourcePriceIsFrozenAtSubmission"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.resident.service.ResidenceApplicationLeaseLinkTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "approve_linksViewingsToNewLease",
+        "autoApprove_writesBackLeaseId",
+        "approve_writesBackLeaseId",
+        "withdraw_usesStrongLinkFirst",
+        "autoApprove_linksViewingsToNewLease",
+        "withdraw_noLeaseAtAll_noClose",
+        "withdraw_weakFallbackClosesGroup"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.mapper.ViewingLeaseLinkGuardTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "matchesResidentAndHouseListings",
+        "onlyFillsNullLink",
+        "doesNotTouchViewingStatus"
+      ]
+    }
+  ],
+  "tests": 176,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "scope": "本轮20个非金融定向套件；非全后端覆盖率。最终源码构建成功，旧jacoco积累数据不用于覆盖率。",
+  "buildSucceeded": true,
+  "command": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "D:\\code\\community-residence-service-platform\\backend\\mvnw.cmd",
+    "--batch-mode",
+    "--no-transfer-progress",
+    "-Dtest=com.community.residence.common.messaging.service.NotificationSequenceRecoveryTest,com.community.residence.common.config.RedisFailuresTest,com.community.residence.common.auth.service.TokenBlacklistRedisOutageTest,com.community.residence.common.auth.service.TokenRevocationFixTest,com.community.residence.common.auth.service.TokenRevisionFilterTest,com.community.residence.common.messaging.service.NotificationServiceTest,com.community.residence.common.messaging.service.NotificationIdentitySpaceRegressionTest,com.community.residence.common.messaging.service.ChannelLevelsTest,com.community.residence.common.conversation.service.ConversationServiceTest,com.community.residence.common.housing.service.ViewingConversationDefectFixTest,com.community.residence.common.conversation.service.ConversationLeaseGroupEnsureTest,com.community.residence.common.lease.service.LeaseStateMachineFixTest,com.community.residence.common.lease.service.LeaseServiceTest,com.community.residence.common.agreement.service.AgreementConsentBoundaryTest,com.community.residence.common.workorder.service.WorkOrderR74IntakeTest,com.community.residence.common.workorder.service.WorkOrderServiceTest,com.community.residence.common.lease.service.LeaseMoveOutApplicationServiceTest,com.community.residence.common.resident.service.ResidenceApplicationServiceTest,com.community.residence.common.resident.service.ResidenceApplicationLeaseLinkTest,com.community.residence.common.housing.mapper.ViewingLeaseLinkGuardTest",
+    "package"
+  ],
+  "buildLogSHA256": "551302abc32d67ec0bb4425b284dc2e10fbeb1dfea5f9a0de33729ba227bdbe9",
+  "jarSHA256": "24431ad4d98bb8247bb69ab2cc0f4c9bf150015efec6f2e6e75d1354c19967a2"
+}

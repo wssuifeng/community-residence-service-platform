@@ -1,0 +1,242 @@
+{
+  "checks": [
+    {
+      "name": "DEF-115同目标并发状态迁移幂等且只一条留痕",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": null,
+            "message": "success"
+          }
+        ],
+        "logs": 1
+      }
+    },
+    {
+      "name": "DEF-116受理并发只产生一次群留痕通知",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "id": 10501,
+            "message": "success"
+          }
+        ],
+        "groups": 1,
+        "process": 1,
+        "residentNotifications": 1
+      }
+    },
+    {
+      "name": "DEF-116错误状态或无派单权限被拒",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5302
+      }
+    },
+    {
+      "name": "DEF-117撤回审批竞争第1轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "id": 4,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 5202,
+            "id": null,
+            "message": "申请已被处理（当前状态：WITHDRAWN）"
+          }
+        ],
+        "applicationState": "WITHDRAWN",
+        "leaseRows": 0
+      }
+    },
+    {
+      "name": "DEF-117撤回审批竞争第2轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "id": 5,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 5202,
+            "id": null,
+            "message": "入住申请已审核"
+          }
+        ],
+        "applicationState": "WITHDRAWN",
+        "leaseRows": 0
+      }
+    },
+    {
+      "name": "DEF-117撤回审批竞争第3轮",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "id": 6,
+            "message": "success"
+          },
+          {
+            "http": 200,
+            "code": 5202,
+            "id": null,
+            "message": "入住申请已审核"
+          }
+        ],
+        "applicationState": "WITHDRAWN",
+        "leaseRows": 0
+      }
+    },
+    {
+      "name": "DEF-118会话内无关房源被拒且零落库",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 400,
+        "message": "历史租约缺少唯一来源挂牌，请联系管理方核对，不自动选择最近房源"
+      }
+    },
+    {
+      "name": "DEF-118租约看房列表按日期降序",
+      "passed": true,
+      "actual": {
+        "dates": [
+          "2026-10-22",
+          "2026-10-21",
+          "2026-10-20"
+        ]
+      }
+    }
+  ],
+  "passed": 8,
+  "failed": [],
+  "financialRequests": 0,
+  "scope": "仅非交易状态和幂等，不创建支付单"
+}
