@@ -1,0 +1,269 @@
+{
+  "date": "2026-10-19T22:23:22.9979047+08:00",
+  "base": "http://localhost:8084",
+  "backendOpenApi": "3.1.0",
+  "pathCount": 211,
+  "tokensStored": false,
+  "businessWrites": 0,
+  "financialOperations": 0,
+  "observations": [
+    {
+      "role": "SUPER_ADMIN",
+      "method": "GET",
+      "path": "/api/v1/communities?page=1&size=100",
+      "status": 200,
+      "total": 1,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "method": "GET",
+      "path": "/api/v1/sys-users?page=1&size=100",
+      "status": 200,
+      "total": 5,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "method": "GET",
+      "path": "/api/v1/residents?page=1&size=5",
+      "status": 200,
+      "total": 21,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "method": "GET",
+      "path": "/api/v1/housings?page=1&size=5",
+      "status": 200,
+      "total": 16,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "method": "GET",
+      "path": "/api/v1/operation-logs?page=1&size=5",
+      "status": 200,
+      "total": 317,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "method": "GET",
+      "path": "/api/v1/communities/houses-manage?page=1&size=5",
+      "status": 200,
+      "total": 16,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "method": "GET",
+      "path": "/api/v1/communities?page=1&size=100",
+      "status": 200,
+      "total": 1,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "method": "GET",
+      "path": "/api/v1/operation-logs?page=1&size=5",
+      "status": 200,
+      "total": 3,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ]
+    },
+    {
+      "role": "ADMIN",
+      "method": "GET",
+      "path": "/api/v1/sys-users?page=1&size=5",
+      "status": 403,
+      "error": "Response status code does not indicate success: 403 ()."
+    }
+  ],
+  "extraObservations": [
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/communities/7",
+      "status": 200,
+      "dataKeys": [
+        "address",
+        "autoApproveResidence",
+        "businessCode",
+        "contactPerson",
+        "contactPhone",
+        "createdAt",
+        "defaultLeaseMonths",
+        "description",
+        "id",
+        "name",
+        "responsibleAdminId",
+        "status",
+        "updatedAt"
+      ],
+      "recordCount": null
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/communities/7/buildings?page=1&size=100",
+      "status": 200,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ],
+      "recordCount": 1
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/communities/7/resources?page=1&size=100",
+      "status": 200,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ],
+      "recordCount": 1
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/communities/7/houses-with-housing",
+      "status": 200,
+      "dataKeys": [],
+      "recordCount": null
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/communities/7/deletion-impact",
+      "status": 200,
+      "dataKeys": [
+        "activeLeases",
+        "activeRelations",
+        "applications",
+        "blockingReason",
+        "communityId",
+        "communityName",
+        "confirmationVersion",
+        "deletable",
+        "houses",
+        "leases",
+        "payments",
+        "pendingApplications",
+        "refunds",
+        "relations"
+      ],
+      "recordCount": null
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/communities/houses-manage?page=1&size=5&communityId=7",
+      "status": 200,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ],
+      "recordCount": 5
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/residents/25/residences",
+      "status": 200,
+      "dataKeys": [
+        "records",
+        "total",
+        "page",
+        "size",
+        "pages"
+      ],
+      "recordCount": null
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "/api/v1/auth/renew",
+      "status": 405,
+      "error": "Response status code does not indicate success: 405 ()."
+    },
+    {
+      "role": "ADMIN",
+      "path": "/api/v1/sys-users?page=1&size=5",
+      "status": 403,
+      "error": "Response status code does not indicate success: 403 ()."
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "path": "login response",
+      "status": 200,
+      "expiresIn": 129600,
+      "tokensStored": false,
+      "selectedCommunityIdPresent": true,
+      "selectedResidentIdPresent": true
+    }
+  ],
+  "permissionBoundaryObservations": [
+    {
+      "role": "ADMIN",
+      "path": "/api/v1/sys-users/1",
+      "status": 200,
+      "note": "社区管理员可读取系统用户详情；未保存响应个人字段"
+    },
+    {
+      "role": "ADMIN",
+      "path": "/api/v1/sys-users/1/communities",
+      "status": 403,
+      "note": "社区管理员不能读取系统用户绑定社区列表"
+    }
+  ]
+}

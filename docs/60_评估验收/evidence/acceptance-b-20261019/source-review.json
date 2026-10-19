@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-19",
+  "documentCommit": "8e02439",
+  "productSourceBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productSourceDiffFiles": 0,
+  "runtime": {
+    "backend": "http://localhost:8084",
+    "frontend": "http://localhost:5176",
+    "openapi": "3.1.0",
+    "pathCount": 211,
+    "jarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+    "businessWrites": 0,
+    "financialOperations": 0,
+    "tokensStored": false
+  },
+  "scope": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R43", "R44", "R45", "R46", "R47", "R58", "R62", "E1", "E2", "E10", "E10b"],
+  "sourceFindings": [
+    {
+      "id": "R4",
+      "status": "mismatch",
+      "requirement": "需求列5种房屋状态",
+      "implementation": "HouseStatusConstant与UpdateHouseStatusDTO仅接受VACANT/OCCUPIED/RESERVED/MAINTENANCE",
+      "files": [
+        "docs/20_需求分析/需求规格说明.md",
+        "backend/src/main/java/com/community/residence/common/community/constant/HouseStatusConstant.java",
+        "backend/src/main/java/com/community/residence/common/community/dto/UpdateHouseStatusDTO.java"
+      ]
+    },
+    {
+      "id": "R46",
+      "status": "mismatch",
+      "requirement": "社区管理员不可见管理员与服务人员账号体系",
+      "implementation": "AdminSysUserController允许ADMIN读取GET /api/v1/sys-users/{id}，列表/写入/绑定仍为SUPER_ADMIN",
+      "files": [
+        "docs/20_需求分析/需求规格说明.md",
+        "backend/src/main/java/com/community/residence/admin/auth/controller/AdminSysUserController.java"
+      ]
+    },
+    {
+      "id": "R62",
+      "status": "behavior-covered",
+      "implementation": "自动通过、租约写回、看房关联和手工审核保持PENDING均有最终后端定向回归；社区详情公开自动审批配置字段",
+      "files": [
+        "backend/src/main/java/com/community/residence/common/resident/service/ResidenceApplicationService.java",
+        "docs/50_系统测试/evidence/df-final-remediation-20261019/backend-targeted.json",
+        "docs/50_系统测试/evidence/acceptance-b-20261019/runtime-readonly.json"
+      ]
+    }
+  ],
+  "conclusions": {
+    "passed": ["R1", "R2", "R3", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R43", "R44", "R47", "R58", "R62"],
+    "failed": ["R4", "R46"],
+    "insufficientEvidence": ["R45", "E1", "E2", "E10", "E10b"],
+    "financialBoundary": "按用户确认采用既有可用结论，不重复支付、查单、退款或渠道配置写入"
+  }
+}
