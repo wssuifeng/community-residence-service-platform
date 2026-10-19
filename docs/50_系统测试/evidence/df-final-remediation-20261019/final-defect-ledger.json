@@ -1,0 +1,6737 @@
+[
+  {
+    "id": "DEF-001",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 33
+    },
+    "title": "无居住关系的注册账号提交工单成功",
+    "originalSeverity": "一般",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：无关系账号提单 code=403 零落库、在住居民放行（r2_def_regression.mjs）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：无关系账号提单 code=403 零落库、在住居民放行（r2_def_regression.mjs）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      33,
+      256,
+      281,
+      302,
+      327,
+      627,
+      2696,
+      2719
+    ]
+  },
+  {
+    "id": "DEF-002",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 34
+    },
+    "title": "同天不同时段预约被误拒",
+    "originalSeverity": "一般",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：同天不同时段放行 + 同时段 5002 拦（SP-01/冒烟/TC-C7-004 三处口径一致）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：同天不同时段放行 + 同时段 5002 拦（SP-01/冒烟/TC-C7-004 三处口径一致）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      34,
+      257,
+      282,
+      303,
+      372
+    ]
+  },
+  {
+    "id": "DEF-003",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 35
+    },
+    "title": "公告跨社区读路径未做数据级过滤",
+    "originalSeverity": "严重（R25 范围外不可见判据不达标）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮：跨社区详情 404、范围外居民列表不可见、本社区居民可见",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：跨社区详情 404、范围外居民列表不可见、本社区居民可见",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      35,
+      231,
+      238,
+      628
+    ]
+  },
+  {
+    "id": "DEF-004",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 36
+    },
+    "title": "公告创建 communityId 单目标写法绕过越范围校验",
+    "originalSeverity": "严重（写路径越权）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮：communityId 单目标越权 404 拒且零落库",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：communityId 单目标越权 404 拒且零落库",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      36,
+      239
+    ]
+  },
+  {
+    "id": "DEF-005",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 37
+    },
+    "title": "资源预约并发竞态致容量突破",
+    "originalSeverity": "致命（P0 出口准则 5：R33 拦截率 100% 未达标不得出口）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮 SP-001 三轮 10 路并发全部 1/10 成功+落库 1（Redisson 锁+V10 约束）",
+    "severity": "致命",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-001 三轮 10 路并发全部 1/10 成功+落库 1（Redisson 锁+V10 约束）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      37,
+      38,
+      231,
+      236,
+      326,
+      394,
+      441
+    ]
+  },
+  {
+    "id": "DEF-006",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 38
+    },
+    "title": "资源预约半重叠时段不拦截",
+    "originalSeverity": "致命（同 DEF-005 判据）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮 SP-002 六边界对全符（半重叠/包含/相同拦、首尾相接放行）",
+    "severity": "致命",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-002 六边界对全符（半重叠/包含/相同拦、首尾相接放行）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      38
+    ]
+  },
+  {
+    "id": "DEF-007",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 39
+    },
+    "title": "看房预约并发竞态致同房源同时段多重预约",
+    "originalSeverity": "致命（P0 出口准则 5：R55 拦截率 100% 未达标不得出口）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮 SP-003 三轮 10 路并发全部 1/10 成功+落库 1",
+    "severity": "致命",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-003 三轮 10 路并发全部 1/10 成功+落库 1",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      39,
+      40,
+      237
+    ]
+  },
+  {
+    "id": "DEF-008",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 40
+    },
+    "title": "看房预约半重叠时段不拦截",
+    "originalSeverity": "致命（同 DEF-007 判据）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮 SP-004 六边界对全符",
+    "severity": "致命",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮 SP-004 六边界对全符",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      40
+    ]
+  },
+  {
+    "id": "DEF-009",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 41
+    },
+    "title": "用户级令牌吊销因秒级时间戳碰撞不生效",
+    "originalSeverity": "严重（冻结即时吊销判据不达标；跨秒签发的旧令牌可正常吊销，故非全量失效）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮：冻结后存量令牌立即 401（含同秒签发；同秒重登被连带拦为已声明口径，脚本隔秒规避）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：冻结后存量令牌立即 401（含同秒签发；同秒重登被连带拦为已声明口径，脚本隔秒规避）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      41,
+      240,
+      333
+    ]
+  },
+  {
+    "id": "DEF-010",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 42
+    },
+    "title": "居民账号数据未按绑定社区过滤",
+    "originalSeverity": "严重（两级数据授权 R45 判据不达标，跨社区居民敏感信息泄露）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮：越社区详情 404、列表无跨社区泄露、追加绑定双社区均可见（行为正确）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：越社区详情 404、列表无跨社区泄露、追加绑定双社区均可见（行为正确）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      42,
+      241,
+      256
+    ]
+  },
+  {
+    "id": "DEF-011",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 43
+    },
+    "title": "工单终态/同态重复动作被幂等放行并追加脏时间线",
+    "originalSeverity": "一般→严重（升级理由：影响 R20/R22 两项需求验收判据，非仅留痕污染）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮：同态 accept/终态 close 重复均 5302 且时间线零新增",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：同态 accept/终态 close 重复均 5302 且时间线零新增",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      43,
+      242
+    ]
+  },
+  {
+    "id": "DEF-012",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 44
+    },
+    "title": "工单取消与改派的合法流转集超宽",
+    "originalSeverity": "严重（状态机完整性 P0 判据；TO_CONFIRM/COMPLETED/IN_PROGRESS→cancel 同超集，本次矩阵 IN_PROGRESS/TO_CONFIRM/COMPLETED→cancel 亦 200 放行）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮：ACCEPTED 取消/改派 5302、PENDING 取消放行；状态机矩阵 84/84",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：ACCEPTED 取消/改派 5302、PENDING 取消放行；状态机矩阵 84/84",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      44,
+      243,
+      258
+    ]
+  },
+  {
+    "id": "DEF-013",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 45
+    },
+    "title": "租约跳级归档放行",
+    "originalSeverity": "一般（状态机完整性；数据语义受损——未搬出即归档）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：ACTIVE→ARCHIVED 5004 拒、线性两步达 ARCHIVED",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：ACTIVE→ARCHIVED 5004 拒、线性两步达 ARCHIVED",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      45,
+      258,
+      286,
+      307
+    ]
+  },
+  {
+    "id": "DEF-014",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 46
+    },
+    "title": "操作日志 AOP 切面未实现，关键变更大面积零留痕",
+    "originalSeverity": "严重（R47 判据大面积不达标；波及 C1~C12 各用例日志断言项与 R58 清理对象）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "见 §3.1（提交号由主会话回填）",
+    "historicalRegression": "2026-09-11 第二轮：多模块关键变更近 2 分钟 56 条落库（UPDATE/STATUS/REVIEW/DELETE）+ 检索端点 200；SP-02 越权日志断言新增 27 条",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：多模块关键变更近 2 分钟 56 条落库（UPDATE/STATUS/REVIEW/DELETE）+ 检索端点 200；SP-02 越权日志断言新增 27 条",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      46,
+      244,
+      561,
+      1422
+    ]
+  },
+  {
+    "id": "DEF-015",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 47
+    },
+    "title": "资源时段删除无未完成预约引用保护",
+    "originalSeverity": "一般（删除保护缺口；资源本体有保护，时段为旁路）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：占用中删时段 5106 拒、释放后放行",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：占用中删时段 5106 拒、释放后放行",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      47,
+      259,
+      288,
+      309
+    ]
+  },
+  {
+    "id": "DEF-016",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 68
+    },
+    "title": "到期提醒无管理员手动重发入口",
+    "originalSeverity": "一般（功能缺失；自动提醒主链路不受影响，重发为辅助能力）",
+    "historicalState": "弃置（用户裁决 2026-09-11：自动提醒主链路正常，重发属辅助能力不实施，遗留评估入报告）",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "用户弃置",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "用户2026-09-11明确不实施独立重发；不是修复通过。",
+    "verificationLayer": "用户裁决",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      68,
+      265,
+      274,
+      277,
+      341,
+      630
+    ]
+  },
+  {
+    "id": "DEF-017",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 69
+    },
+    "title": "归档租约可修改业务字段",
+    "originalSeverity": "一般（数据完整性：归档语义失效）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：ARCHIVED 修改 5004「已归档的租约不可修改」",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：ARCHIVED 修改 5004「已归档的租约不可修改」",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      69,
+      260,
+      287,
+      308
+    ]
+  },
+  {
+    "id": "DEF-018",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 48
+    },
+    "title": "停用类别仍出现在提交选项数据源",
+    "originalSeverity": "轻微（后端有兜底，用户可见选项列表含停用项的体验问题；预判清单项确认）",
+    "historicalState": "延期（用户裁决 2026-09-11：随 C 轨 UI 批次处理展示净化，后端提交校验兜底有效）",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5",
+      "UI5"
+    ],
+    "conclusion": "原延期后已由后端树过滤正式修复，双向显隐回归通过；不继续延期。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      48,
+      183,
+      266,
+      275,
+      341,
+      510,
+      528,
+      545,
+      562,
+      630,
+      1454
+    ]
+  },
+  {
+    "id": "DEF-019",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 49
+    },
+    "title": "工单「不满意退回处理中」未实现",
+    "originalSeverity": "一般（R22 判据缺失：不满意场景无闭环，只能确认完成）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：TO_CONFIRM 退回 IN_PROGRESS + 通知服务人员 + 非本人 403（PATCH /work-orders/{id}/return）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：TO_CONFIRM 退回 IN_PROGRESS + 通知服务人员 + 非本人 403（PATCH /work-orders/{id}/return）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      49,
+      243,
+      261,
+      289,
+      310
+    ]
+  },
+  {
+    "id": "DEF-020",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 50
+    },
+    "title": "工单驳回不发通知",
+    "originalSeverity": "一般（R48 覆盖缺口单项）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：驳回后居民通知 +1（「工单已驳回」）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：驳回后居民通知 +1（「工单已驳回」）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      50,
+      262,
+      284,
+      305
+    ]
+  },
+  {
+    "id": "DEF-021",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 51
+    },
+    "title": "公告时间字段时区偏移 8 小时",
+    "originalSeverity": "严重（R26 有效期判据失真；影响定时发布与过期下线判定）",
+    "historicalState": "**拒绝（2026-09-11 主会话复核采纳：非系统缺陷，测试脚本时区口径问题，R26 实际达标）**",
+    "historicalFix": "—（无代码改动，脚本修正归第二轮 TC-C5-007 重跑）",
+    "historicalRegression": "—",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "拒绝",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "原时区误判，非产品缺陷；按原用户采纳的拒绝保留，不算修复成功。",
+    "verificationLayer": "测试口径裁决",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      51,
+      53,
+      232,
+      274,
+      327,
+      340,
+      631
+    ]
+  },
+  {
+    "id": "DEF-022",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 65
+    },
+    "title": "评价双维度聚合接口缺失",
+    "originalSeverity": "一般（R39 双维度判据缺失；看板 ratingDistribution 有分档但无人员/类别维度）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：GET /statistics/evaluations/aggregation 返回 byStaff/byCategory 双维度",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：GET /statistics/evaluations/aggregation 返回 byStaff/byCategory 双维度",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      65,
+      263,
+      290,
+      311
+    ]
+  },
+  {
+    "id": "DEF-023",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 66
+    },
+    "title": "看房预约状态流转全链无通知",
+    "originalSeverity": "一般（R48/R55 通知覆盖缺口；预判清单「看房确认通知未挂接」确认）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：confirm/complete 各 +1 通知（「看房预约已确认/已完成」）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：confirm/complete 各 +1 通知（「看房预约已确认/已完成」）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      66,
+      264,
+      285,
+      306
+    ]
+  },
+  {
+    "id": "DEF-024",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 67
+    },
+    "title": "文档超限错误契约破损",
+    "originalSeverity": "一般（功能拒绝生效、无落盘残留；错误契约与提示缺失）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "c946b69",
+    "historicalRegression": "2026-09-11 第二轮：11MB/13MB 均 400 + 「单个文件不能超过 10MB」（MaxUploadSizeExceededException 映射 + multipart buffer 12MB）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-11 第二轮：11MB/13MB 均 400 + 「单个文件不能超过 10MB」（MaxUploadSizeExceededException 映射 + multipart buffer 12MB）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      67,
+      268,
+      283,
+      304
+    ]
+  },
+  {
+    "id": "DEF-025",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 70
+    },
+    "title": "ADMIN 调 GET /sys-users 403 → 社区管理员无法派单",
+    "originalSeverity": "严重（R20 主链路断裂）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "0a1935b",
+    "historicalRegression": "2026-09-14 第三批专项：ADMIN 200 仅启用 STAFF 最小暴露面+熟手置前+角色 403（r3_batch3 B3-01）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：ADMIN 200 仅启用 STAFF 最小暴露面+熟手置前+角色 403（r3_batch3 B3-01）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      70,
+      341,
+      353,
+      357,
+      414,
+      482,
+      500
+    ]
+  },
+  {
+    "id": "DEF-026",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 71
+    },
+    "title": "工单号撞唯一键 409 无重试",
+    "originalSeverity": "一般",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "0a1935b",
+    "historicalRegression": "2026-09-14 第三批专项：20 单零 409+工单号 keyword 精确命中（r3_batch3 B3-02）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：20 单零 409+工单号 keyword 精确命中（r3_batch3 B3-02）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      71,
+      360,
+      417,
+      483
+    ]
+  },
+  {
+    "id": "DEF-027",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 72
+    },
+    "title": "反馈办结不推 WS + 列表缺 keyword",
+    "originalSeverity": "轻微/一般",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "0a1935b",
+    "historicalRegression": "2026-09-14 第三批专项：keyword 库内一致+办结 FEEDBACK_STATUS 载荷在线送达（r3_batch3 B3-03/04）",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：keyword 库内一致+办结 FEEDBACK_STATUS 载荷在线送达（r3_batch3 B3-03/04）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      72,
+      359,
+      416,
+      484
+    ]
+  },
+  {
+    "id": "DEF-028",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 73
+    },
+    "title": "unsatisfied 无 hasFollowup 参数",
+    "originalSeverity": "一般",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "0a1935b",
+    "historicalRegression": "2026-09-14 第三批专项：hasFollowup true/false/null 三分支与库一致（r3_batch3 B3-05）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：hasFollowup true/false/null 三分支与库一致（r3_batch3 B3-05）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      73,
+      361,
+      418,
+      485
+    ]
+  },
+  {
+    "id": "DEF-029",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 74
+    },
+    "title": "统计无 STAFF 按日序列 + 工单列表无时间范围/多状态分页",
+    "originalSeverity": "一般",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "0a1935b",
+    "historicalRegression": "2026-09-14 第三批专项：STAFF 趋势限本人+statuses/时间范围+STAFF 数据域零泄漏（r3_batch3 B3-06/07）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：STAFF 趋势限本人+statuses/时间范围+STAFF 数据域零泄漏（r3_batch3 B3-06/07）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      74,
+      362,
+      419,
+      486
+    ]
+  },
+  {
+    "id": "DEF-030",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 75
+    },
+    "title": "创建用户手机号选填 vs @NotBlank 契约漂移",
+    "originalSeverity": "轻微",
+    "historicalState": "关闭（回归通过·留痕口径）",
+    "historicalFix": "见 §3.8（无代码改动）",
+    "historicalRegression": "2026-09-14 第三批专项：缺/空 phone 均 400 零落库（r3_batch3 B3-08）",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：缺/空 phone 均 400 零落库（r3_batch3 B3-08）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      75,
+      363,
+      381,
+      408,
+      420,
+      487,
+      500
+    ]
+  },
+  {
+    "id": "DEF-031",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 76
+    },
+    "title": "公告 GET /notices 缺 priority 过滤参数",
+    "originalSeverity": "一般",
+    "historicalState": "已修复",
+    "historicalFix": "0a1935b §3.8",
+    "historicalRegression": "2026-09-14 第三批专项：priority/isPinned/type 三过滤生效且锚点命中（r3_batch3 B3-09）→ 状态由「修复（待回归）」更正为「已修复」（回归已于 09-14 专项通过）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-14 第三批专项：priority/isPinned/type 三过滤生效且锚点命中（r3_batch3 B3-09）→ 状态由「修复（待回归）」更正为「已修复」（回归已于 09-14 专项通过）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      76,
+      358,
+      373,
+      415,
+      431,
+      488
+    ]
+  },
+  {
+    "id": "DEF-032",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 77
+    },
+    "title": "批量创建「部分成功」语义对参数校验类行失败不可达",
+    "originalSeverity": "一般（功能可用——整批拒绝偏保守方向，无数据风险；语义与设计意图不符）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "e32a48b §3.9",
+    "historicalRegression": "2026-09-15 第五轮：三端点 1 好 1 坏行均 200 + 逐行 reason + 好行落库（r3_batch3 B3-12 新口径断言同步改写）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：三端点 1 好 1 坏行均 200 + 逐行 reason + 好行落库（r3_batch3 B3-12 新口径断言同步改写）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      77,
+      490,
+      502,
+      529,
+      532,
+      537,
+      547,
+      564,
+      575,
+      620
+    ]
+  },
+  {
+    "id": "DEF-033",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 80
+    },
+    "title": "楼栋级联删除遇历史居住关系 FK 阻断返回 500",
+    "originalSeverity": "一般（错误契约破损；在住保护有效、无数据损坏）",
+    "historicalState": "修复（待回归）",
+    "historicalFix": "e32a48b §3.9",
+    "historicalRegression": "待 C 轨回归确认（§3.9 已有独立实例 E2E 记录：直建→迁出→级联 200 全清/在住保护 5104 拒绝，用户手测与 C 轨用例复验后方可置关闭）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：待 C 轨回归确认（§3.9 已有独立实例 E2E 记录：直建→迁出→级联 200 全清/在住保护 5104 拒绝，用户手测与 C 轨用例复验后方可置关闭）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      80,
+      489,
+      502,
+      546,
+      563
+    ]
+  },
+  {
+    "id": "DEF-034",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 81
+    },
+    "title": "CREATE 类操作日志全量写入失败（#result 未绑定）",
+    "originalSeverity": "严重（R47 判据缺口：创建类关键变更大面积零留痕）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "e32a48b §3.9",
+    "historicalRegression": "2026-09-15 第五轮：**10 服务 CREATE 逐服务断言**全落库（operationType/targetType/targetId/operator 正确 + Unit/House/ResourceTimeslot 三处 #result.communityId 推导命中）+ RESIDENT 越权反例 403 零日志 + 后端 WARN=0——出口阻塞解除",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：10 服务 CREATE 逐服务断言全落库（operationType/targetType/targetId/operator 正确 + Unit/House/ResourceTimeslot 三处 #result.communityId 推导命中）+ RESIDENT 越权反例 403 零日志 + 后端 WARN=0——出口阻塞解除",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      81,
+      491,
+      502,
+      531,
+      537,
+      544,
+      557,
+      561,
+      574,
+      606,
+      620,
+      1422
+    ]
+  },
+  {
+    "id": "DEF-035",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 82
+    },
+    "title": "unsatisfied 列表 hasFollowup 过滤为页内内存过滤，分页语义失真",
+    "originalSeverity": "一般（小数据量功能正确；工作台待跟进清单大数据量漏项）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "e32a48b §3.9",
+    "historicalRegression": "2026-09-15 第五轮：N7 数据上 false/true/null 三分支 API total 与库逐一相等（798/5/803）+ 翻页遍历合计一致 + admin1 数据范围口径吻合",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：N7 数据上 false/true/null 三分支 API total 与库逐一相等（798/5/803）+ 翻页遍历合计一致 + admin1 数据范围口径吻合",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      82,
+      526,
+      548,
+      565
+    ]
+  },
+  {
+    "id": "DEF-036",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 83
+    },
+    "title": "同一用户多 WebSocket 连接时任一连接断开即注销整个在线状态",
+    "originalSeverity": "一般（单连接场景正确；多标签页/多端登录的会话实时性降级，轮询兜底不丢消息）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "e32a48b §3.9",
+    "historicalRegression": "2026-09-15 第五轮：双连接关一后剩余连接 17ms 内收到 topic 推送；全关才注销、重连恢复（13ms）；SP-04 8/8 复跑通过",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：双连接关一后剩余连接 17ms 内收到 topic 推送；全关才注销、重连恢复（13ms）；SP-04 8/8 复跑通过",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      83,
+      522,
+      527,
+      549,
+      566
+    ]
+  },
+  {
+    "id": "DEF-037",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 506
+    },
+    "title": "通知渠道分级配置无前端入口",
+    "originalSeverity": "一般（后端能力完整，管理操作体验缺前端入口）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "fba9012（前端接线批次）",
+    "historicalRegression": "2026-09-15 第五轮：C 轨 UI 勾选入口 PASS + PUT 请求体（7 等级全量）正确 + GET 读回一致 + 库同步（验后还原）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨 UI 勾选入口 PASS + PUT 请求体（7 等级全量）正确 + GET 读回一致 + 库同步（验后还原）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      506,
+      524,
+      527,
+      532,
+      538,
+      551,
+      591,
+      606,
+      623
+    ]
+  },
+  {
+    "id": "DEF-038",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 507
+    },
+    "title": "居民代建与 CSV 批量导入无前端表单",
+    "originalSeverity": "一般（后端能力完整）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "fba9012（前端接线批次）",
+    "historicalRegression": "2026-09-15 第五轮：C 轨表单存在且可提交 PASS + UI 代建落库（resident id=298）+ CSV 导入 2/2 落库（id=299/300，保留供手测 U-12）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨表单存在且可提交 PASS + UI 代建落库（resident id=298）+ CSV 导入 2/2 落库（id=299/300，保留供手测 U-12）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      507
+    ]
+  },
+  {
+    "id": "DEF-039",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 508
+    },
+    "title": "公告置顶无管理端设置入口",
+    "originalSeverity": "一般（后端能力完整；另公告定向粒度止于社区级，楼栋级 targets 前端未接——同源问题一并留痕）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "fba9012（前端接线批次）",
+    "historicalRegression": "2026-09-15 第五轮：C 轨置顶开关+定向勾选 PASS + notice.is_pinned=1 与 notice_target (COMMUNITY,1) 落库正确（测试公告已清理）；楼栋级 targets 控件存在已确认（端到端落库未做——admin1 仅绑社区 1，留痕）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨置顶开关+定向勾选 PASS + notice.is_pinned=1 与 notice_target (COMMUNITY,1) 落库正确（测试公告已清理）；楼栋级 targets 控件存在已确认（端到端落库未做——admin1 仅绑社区 1，留痕）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      508
+    ]
+  },
+  {
+    "id": "DEF-040",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 509
+    },
+    "title": "游客端房源筛选缺「租售类型」「户型」两维控件",
+    "originalSeverity": "一般（后端能力完整；游客端 IHousing.layout/rentType 幽灵字段问题一并留痕）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "fba9012（前端接线批次）",
+    "historicalRegression": "2026-09-15 第五轮：C 轨两维下拉 PASS + 筛选请求 URL 含 rentType=SALE/layout 参数且与后端直连结果一致 + DEF-044 标签双端渲染「出售」实证",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：C 轨两维下拉 PASS + 筛选请求 URL 含 rentType=SALE/layout 参数且与后端直连结果一致 + DEF-044 标签双端渲染「出售」实证",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      509
+    ]
+  },
+  {
+    "id": "DEF-041",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 510
+    },
+    "title": "DEF-018 闭环验证不通过（双侧根因）",
+    "originalSeverity": "轻微→一般（升级理由：DEF-018 原延期裁决「随 C 轨处理展示净化」，现证实需后端改动而非纯前端过滤）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "e32a48b §3.9",
+    "historicalRegression": "2026-09-15 第五轮：isActive=0 居民树不含/管理端全量树含/PUT 双向生效（8 项断言）+ C 轨 track_c_ui 页面侧 PASS——DEF-018 正式闭环",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5",
+      "UI5"
+    ],
+    "conclusion": "原延期后已由后端树过滤正式修复，双向显隐回归通过；不继续延期。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      183,
+      510,
+      528,
+      545,
+      562,
+      607,
+      630,
+      1454
+    ]
+  },
+  {
+    "id": "DEF-042",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 78
+    },
+    "title": "channel-levels PUT 无等级键白名单",
+    "originalSeverity": "一般（配置漂移防线缺失；前端已按真实全集渲染）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "本批 §3.11",
+    "historicalRegression": "2026-09-15 第五批：未知键 400 + 七键放行 + 读回一致（单测 2 + E2E 3 断言）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五批：未知键 400 + 七键放行 + 读回一致（单测 2 + E2E 3 断言）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      78,
+      584,
+      594,
+      600,
+      620
+    ]
+  },
+  {
+    "id": "DEF-043",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 79
+    },
+    "title": "公告 update 端点不重写 targets",
+    "originalSeverity": "一般（编辑功能失真；create 正常）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "本批 §3.11",
+    "historicalRegression": "2026-09-15 第五批：多目标重写/回收无残余/广播清空/越社区拒（单测 2 + E2E 5 断言）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五批：多目标重写/回收无残余/广播清空/越社区拒（单测 2 + E2E 5 断言）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      79,
+      585,
+      601
+    ]
+  },
+  {
+    "id": "DEF-044",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 505
+    },
+    "title": "房源详情页租售标签旧口径",
+    "originalSeverity": "轻微",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "本轮（2026-09-15 第五轮修复，随步骤 8 收口提交）",
+    "historicalRegression": "2026-09-15 第五轮：两处映射表移除 SHARED、补 SALE: '出售'、RENT 对齐「出租」；vue-tsc 0 错误 + build 通过 + SQL 临时改 SALE 双端渲染「出售」实证后还原",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "D5"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-15 第五轮：两处映射表移除 SHARED、补 SALE: '出售'、RENT 对齐「出租」；vue-tsc 0 错误 + build 通过 + SQL 临时改 SALE 双端渲染「出售」实证后还原",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      505,
+      509,
+      586,
+      596,
+      607,
+      624,
+      630
+    ]
+  },
+  {
+    "id": "DEF-045",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 84
+    },
+    "title": "可约时段/预约创建不过滤过去时刻",
+    "originalSeverity": "严重（业务合理性 + R55 时段语义）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "本批 §3.13",
+    "historicalRegression": "2026-09-19 第六批：单测 5 用例（今日已过时段不返回/未过时段正常返回/明日不受影响/创建拒 5804/明日可约）+ 冒烟 4 断言（今日 []、明日 2 时段、创建 5804「不能预约已过去的时段」、明日 200）全过；全量单测 304/304",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-19 第六批：单测 5 用例（今日已过时段不返回/未过时段正常返回/明日不受影响/创建拒 5804/明日可约）+ 冒烟 4 断言（今日 []、明日 2 时段、创建 5804「不能预约已过去的时段」、明日 200）全过；全量单测 304/304",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      84,
+      90,
+      640,
+      649,
+      667,
+      675,
+      682,
+      691,
+      711,
+      735,
+      740,
+      742,
+      746,
+      775,
+      777,
+      2697
+    ]
+  },
+  {
+    "id": "DEF-046",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 85
+    },
+    "title": "游客公告池过宽",
+    "originalSeverity": "一般（R12 公开信息子集口径缺口）",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "本批 §3.13",
+    "historicalRegression": "2026-09-19 第六批：单测 11 用例（超管 GUEST 发布落库 targetId=0/ADMIN 403 零落库/GUEST 带 targetId 400/编辑先删后插重写/游客列表过滤 SQL/居民口径不回归/详情广播·GUEST·定向三态/GUEST-only 不触达居民·纯广播触达不变）+ 冒烟 8 断言（V13 幂等、游客列表/详情、admin 403、居民口径、触达 0/1 人）全过；全量单测 304/304",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-19 第六批：单测 11 用例（超管 GUEST 发布落库 targetId=0/ADMIN 403 零落库/GUEST 带 targetId 400/编辑先删后插重写/游客列表过滤 SQL/居民口径不回归/详情广播·GUEST·定向三态/GUEST-only 不触达居民·纯广播触达不变）+ 冒烟 8 断言（V13 幂等、游客列表/详情、admin 403、居民口径、触达 0/1 人）全过；全量单测 304/304",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      85,
+      650,
+      661,
+      668,
+      676,
+      692,
+      704,
+      708,
+      718,
+      729,
+      731,
+      753
+    ]
+  },
+  {
+    "id": "DEF-047",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 86
+    },
+    "title": "游客首页搜索框未实装（仅跳转按钮）",
+    "originalSeverity": "一般",
+    "historicalState": "已修复（待用户复验）",
+    "historicalFix": "4e1fb93（§3.14）",
+    "historicalRegression": "2026-09-19 §3.14：Hero 搜索框内嵌「房源/公告」分段切换、按对象跳转带 keyword、两列表页 URL query 透传与回写；vue-tsc+build 绿 + Playwright 7 断言 PASS（真实后端）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：Hero 搜索框内嵌「房源/公告」分段切换、按对象跳转带 keyword、两列表页 URL query 透传与回写；vue-tsc+build 绿 + Playwright 7 断言 PASS（真实后端）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      86,
+      667,
+      677,
+      708,
+      717,
+      744,
+      745
+    ]
+  },
+  {
+    "id": "DEF-048",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 87
+    },
+    "title": "房源详情多图缺交互",
+    "originalSeverity": "轻微（视觉）",
+    "historicalState": "已修复（待用户复验）",
+    "historicalFix": "4e1fb93（§3.14）",
+    "historicalRegression": "2026-09-19 §3.14：主图左右毛玻璃箭头（首尾环绕）+ 悬浮虚化缩略图卡条、单图不渲染；Playwright 10 断言 PASS（3 图 route mock）",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：主图左右毛玻璃箭头（首尾环绕）+ 悬浮虚化缩略图卡条、单图不渲染；Playwright 10 断言 PASS（3 图 route mock）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      87,
+      678,
+      719
+    ]
+  },
+  {
+    "id": "DEF-049",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 88
+    },
+    "title": "房源详情描述/配套设施容器间缺设计稿淡色竖直分隔线。期望",
+    "originalSeverity": "轻微（视觉）",
+    "historicalState": "已修复（待用户复验）",
+    "historicalFix": "4e1fb93（§3.14）",
+    "historicalRegression": "2026-09-19 §3.14：第二栏 `::before` 1px `var(--color-border)` 竖线，窄屏单栏隐藏；Playwright 3 断言 PASS",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：第二栏 ::before 1px var(--color-border) 竖线，窄屏单栏隐藏；Playwright 3 断言 PASS",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      88,
+      679,
+      720
+    ]
+  },
+  {
+    "id": "DEF-050",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 89
+    },
+    "title": "社区公告页置顶公告建议改轮播",
+    "originalSeverity": "轻微（视觉增强）",
+    "historicalState": "已修复（待用户复验）",
+    "historicalFix": "4e1fb93（§3.14）",
+    "historicalRegression": "2026-09-19 §3.14：整宽单卡轮换（translateX）+ 左/右虚化箭头 + 缩略图导航 + 5s 自动轮播（悬浮暂停，手动后重新计时）+ 单置顶降级单卡；Playwright 8+3 断言 PASS",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-19 §3.14：整宽单卡轮换（translateX）+ 左/右虚化箭头 + 缩略图导航 + 5s 自动轮播（悬浮暂停，手动后重新计时）+ 单置顶降级单卡；Playwright 8+3 断言 PASS",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      89,
+      94,
+      680,
+      719,
+      721,
+      763
+    ]
+  },
+  {
+    "id": "DEF-051",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 90
+    },
+    "title": "C7 资源预约 create 同样缺「过去时段/过去日期」服务端校验（后端代理核实 ReservationService 与 DEF-045 同性质缺口）——栅格化改造后此缺口与容量检查同点；前端日期下限可挡常",
+    "originalSeverity": "一般（业务合理性，含 DEF-045 已修的跨域口径不一致）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "fc50353（§3.16）",
+    "historicalRegression": "2026-09-19 §3.16：ReservationService.create 插入日期窗口校验（过去日期拒 / today+7 含边界放行 / 今日 endTime<=now 拒，口径对齐 DEF-045），错误码 5403/5404；ReservationDateWindowFixTest 5 用例新增，全量 310/310",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BI"
+    ],
+    "conclusion": "日期窗口/过去时段/7天边界有原单测及后续真实预约回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      90,
+      92,
+      739,
+      767,
+      773,
+      794
+    ]
+  },
+  {
+    "id": "DEF-052",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 91
+    },
+    "title": "「我的预约」未默认展示当天起 7 天内预约；历史信息缺按月/按具体日期筛选。后端 GET /resource-reservations 已支持 startDate/endDate，属前端默认口径与筛选 UI 缺",
+    "originalSeverity": "轻微（体验）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "d916787（§3.16）",
+    "historicalRegression": "2026-09-19 §3.16：ReservationListView 四口径筛选（未来 7 天默认/按月/按日期/全部，日历单日优先级最高）+ 通用 HorizontalScroller；合并后前端 build 绿",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      91,
+      760,
+      782
+    ]
+  },
+  {
+    "id": "DEF-053",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 92
+    },
+    "title": "C7 创建预约无「最多提前 7 天」服务端限制，API 直调可预约远期日期（用户裁决新增业务规则）。",
+    "originalSeverity": "轻微（规则缺口）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "fc50353（§3.16）",
+    "historicalRegression": "2026-09-19 §3.16：与 DEF-051 同点同修（today+7 含边界放行，超窗口拒）；接口设计 §9.7.1.1 同步真实口径",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BI"
+    ],
+    "conclusion": "日期窗口/过去时段/7天边界有原单测及后续真实预约回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      92,
+      761,
+      767
+    ]
+  },
+  {
+    "id": "DEF-054",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 93
+    },
+    "title": "居民端导航缺「预约公共资源」直达入口；导航项排序按居民高频使用重排。",
+    "originalSeverity": "轻微（体验）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "d916787（§3.16）",
+    "historicalRegression": "2026-09-19 §3.16：ResidentLayout 导航新增「预约公共资源」+ 高频重排；AppHeader 窄屏（≤1199px）横向滚动兜底",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      93,
+      762,
+      789
+    ]
+  },
+  {
+    "id": "DEF-055",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 94
+    },
+    "title": "居民端社区公告页未同步游客端新设计（DEF-050 v5 口径",
+    "originalSeverity": "轻微（一致性）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "d916787（§3.16）",
+    "historicalRegression": "2026-09-19 §3.16：居民 NoticeListView 展示层同步游客 v5 定稿（详情路由 /resident/notices/:id + keyword URL 回写）",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      94,
+      763
+    ]
+  },
+  {
+    "id": "DEF-056",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 95
+    },
+    "title": "看房预约为长表单交互（HousingDetailView），应参照公共资源预约详情页式交互重构（用户裁决）。",
+    "originalSeverity": "一般（体验）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "d916787（§3.16）",
+    "historicalRegression": "2026-09-19 §3.16：HousingDetailView 改时段卡点选 + 轻量确认区（联系人预填/电话必填本地校验/备注选填）；后续由 DEF-059 进一步升级为三步页",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      95,
+      102,
+      764,
+      836,
+      855
+    ]
+  },
+  {
+    "id": "DEF-057",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 96
+    },
+    "title": "详情页可约时段横拉列表视觉单薄",
+    "originalSeverity": "轻微（视觉增强）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "d916787（§3.16）",
+    "historicalRegression": "2026-09-19 §3.16：新增通用 HorizontalScroller.vue（毛玻璃箭头、未溢出隐藏+居中、80% 步长平滑滚动、ResizeObserver 重算）；ResourceDetailView 增「可约时段（未来 7 天）」横拉展示区",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      96,
+      765
+    ]
+  },
+  {
+    "id": "DEF-058",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 97
+    },
+    "title": "「我的预约」未涵盖看房预约；居民端看房预约独立列表页信息价值低（与「我的预约」割裂）。",
+    "originalSeverity": "轻微（信息架构）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "131d971（§3.17）",
+    "historicalRegression": "2026-09-20 §3.17：我的预约 tab 合并看房预约（?tab=viewing 回显）；旧看房列表页退役、路由重定向至新建 ViewingAppointmentDetailView",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      97,
+      802,
+      831
+    ]
+  },
+  {
+    "id": "DEF-059",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 98
+    },
+    "title": "看房预约未采用资源预约同款三步交互（选日期→选时段→确认）；时段选择无连续多选与上限能力（R60）。",
+    "originalSeverity": "一般（交互模式）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "131d971（§3.17）",
+    "historicalRegression": "2026-09-20 §3.17：新建 HousingReservationView 三步页（月历 → 时段连续多选：相邻 end==next.start、120 分钟本地上限、禁跳段提示、约满禁选、中途取消保留最长连续段 → 合并区间确认提交）；ReservationCreateView 资源三步同步连续多选",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      95,
+      98,
+      803
+    ]
+  },
+  {
+    "id": "DEF-060",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 99
+    },
+    "title": "会话消息发送后 UI 不更新（用户手测报「发消息没有直接变化」）",
+    "originalSeverity": "一般（实时性失效）",
+    "historicalState": "已修复（待复验）",
+    "historicalFix": "22a10a8（后端）+ 04ef315（前端）",
+    "historicalRegression": "2026-09-20 §3.18：WebSocketConfig.configureMessageConverters 注册 JavaTimeModule + 禁 WRITE_DATES_AS_TIMESTAMPS（反馈/看房/通知三类 WS 载荷统一 ISO 字符串）+ 前端 AppointmentChat 三处防御（formatDateTime / 载荷形态校验 / handleSend 补 catch）；浏览器实测发送 1 秒内渲染（修复前 16s 轮询周期后才出现）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BL"
+    ],
+    "conclusion": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      99,
+      852,
+      857,
+      869
+    ]
+  },
+  {
+    "id": "DEF-061",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 100
+    },
+    "title": "C12 可约时段按模板整段暴露（V6 模板 3~4 小时长段），无栅格切片，用户只能「约整个长时段」；且与 120 分钟连续上限组合后长段无法提交——需按 60 分钟切片（对齐 C7 Slot Grid 口径）",
+    "originalSeverity": "一般（可用性阻断）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "22a10a8（§3.18）",
+    "historicalRegression": "2026-09-20 §3.18：HousingService.availableSlots 60 分钟栅格切片（SlotGrids.gridId 复用、尾段<60min 丢弃、重叠计数、逐切片过滤过去时刻）；curl 实测房源 9 当日 3h+4h 模板 → 7 片各 60 分钟、既有预约跨片 FULL",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BL"
+    ],
+    "conclusion": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      100,
+      853,
+      877
+    ]
+  },
+  {
+    "id": "DEF-062",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 101
+    },
+    "title": "用户日程冲突未拦截",
+    "originalSeverity": "一般（业务规则缺口）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "22a10a8（§3.18）",
+    "historicalRegression": "2026-09-20 §3.18：两域创建锁内新增预约人日程冲突校验（活跃集 PENDING/RESERVED + TO_CONFIRM/RESERVED、首尾相接放行、游客跳过），错误码 5406/5807；curl 实测同刻跨资源 5406、跨域 5807 双向拦截；全量 354/354",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BL"
+    ],
+    "conclusion": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      101,
+      854,
+      881
+    ]
+  },
+  {
+    "id": "DEF-063",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 102
+    },
+    "title": "房源详情页预约面板残留「近两周可约时段」横拉展示区，面板被拉得极长（DEF-056 改三步入口后该区信息冗余）——整体移除收紧布局。",
+    "originalSeverity": "轻微（布局）",
+    "historicalState": "已修复（待回归）",
+    "historicalFix": "04ef315（§3.18）",
+    "historicalRegression": "2026-09-20 §3.18：详情页预约面板移除该展示区（-193 行死代码同步清理），面板收紧为入口式按钮+引导文案；前端 build 绿",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BF",
+      "BK",
+      "CM",
+      "CY"
+    ],
+    "conclusion": "历史UI实现/定向观察与用户此前业务完成确认承接；不扩写为各筛选/动画/视口分支全部自动实测。",
+    "verificationLayer": "界面证据及用户基础确认",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      102,
+      855,
+      885
+    ]
+  },
+  {
+    "id": "DEF-064",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 1020
+    },
+    "title": "浏览计数只读DB而滞后",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BL"
+    ],
+    "conclusion": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      1020
+    ]
+  },
+  {
+    "id": "DEF-065",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 1025
+    },
+    "title": "可约时段跨午夜死循环/OOM",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "致命",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BL"
+    ],
+    "conclusion": "分别按原修复专项及后续会话消息、60分钟切片、重叠/首尾相接真实回归承接；DEF-065 C7同型循环观察不冒称已有真实OOM压力复现。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      1025
+    ]
+  },
+  {
+    "id": "DEF-066",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 103
+    },
+    "title": "社区级联删除未纳入 V18/V19 新增表导致 FK 违约",
+    "originalSeverity": "严重（R1/R6 级联删除判据在「含租约/含人员绑定」社区上不达标）",
+    "historicalState": "修复（已验证）",
+    "historicalFix": "7520b99（本批）",
+    "historicalRegression": "2026-09-21 §3.24：级联顺序补齐——`staff_service_category` 先于 `service_category`、`lease_agreement` 与 `lease_change_log` 先于 `lease_record`、`staff_community`/`staff_schedule`/`agreement_template` 按 community_id 直删；新增回归用例 `CommunityCascadeDeleteTest.delete_cascadesV18V19Tables`（含 `InOrder` 顺序断言）；接口冒烟 34/34 通过（`POST /communities/batch-delete` 实测零残留）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-21 §3.24：级联顺序补齐——staff_service_category 先于 service_category、lease_agreement 与 lease_change_log 先于 lease_record、staff_community/staff_schedule/agreement_template 按 community_id 直删；新增回归用例 CommunityCascadeDeleteTest.delete_cascadesV18V19Tables（含 InOrder 顺序断言）；接口冒烟 34/34 通过（POST /communities/batch-delete 实测零残留）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      103,
+      133,
+      1098
+    ]
+  },
+  {
+    "id": "DEF-067",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 104
+    },
+    "title": "通知收件人身份空间串号 ⇒ 跨身份越权可读（P0）",
+    "originalSeverity": "致命（P0 越权可读：跨身份空间读到他人通知）",
+    "historicalState": "已修复（待批次 g 验收）",
+    "historicalFix": "见 `50_系统测试/_中控.md` 批次 g 条目（提交号由主会话回填）",
+    "historicalRegression": "2026-09-21 批次 g 修复并验证：新增迁移 **`V21__notification_owner_identity.sql`**（`notification` 增列 `owner_type` VARCHAR(16) NOT NULL DEFAULT 'USER' + 组合索引 `idx_notification_owner (owner_type, user_id, seq)` + 存量回填，**表数不变仍 52**）；服务层 `NotificationService` 收口为 `createForUser` / `createForResident` 两个显式入口（无隐式默认重载），`page` / `unread` / `pull` / `markRead` 全部按 `(owner_type, user_id)` 过滤；**全部调用点按收件人身份标注**；WebSocket 点对点推送主体名分离（`common/context/IdentityPrincipal`：居民 `R:{residentId}` / 员工 `U:{sysUserId}`，在线判定同步按二元组）；新增回归用例 **`NotificationIdentitySpaceRegressionTest`（居民 1 与 sys_user 1 撞号双向不可见）+ `NotificationOwnerTypeCallSiteGuardTest`（调用点守卫）**；后端全量单测 **540 用例 / 0 失败 / 0 错误**",
+    "severity": "致命",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BI",
+      "BX",
+      "CF"
+    ],
+    "conclusion": "通知/会话身份空间、同ID双向不可见及未参与者拒绝已有真实隔离回归；原主表待批次验收已过时。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      104,
+      112,
+      136,
+      139,
+      147,
+      2698
+    ]
+  },
+  {
+    "id": "DEF-068",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 105
+    },
+    "title": "首期支付中断后无法续接 ⇒ PENDING 单永久死锁",
+    "originalSeverity": "严重（功能死锁 + 无自助出路）",
+    "historicalState": "已修复（待批次 g 验收）",
+    "historicalFix": "由主会话回填（后端 + 前端两处修复提交）",
+    "historicalRegression": "2026-09-21 批次 g：后端 `createFirstPayment` 补幂等续接（`FIRST + PENDING` → 原样返回既有单 + `credentialOf` 重取渠道凭据；**仅 `SUCCESS` 拒 5904**；`CLOSED` 允许重新发起）；前端支付弹窗回查既有 `PENDING` 单并**直达支付页**（不再停在选渠道步；已支付完成时提示「首期费用已支付完成」并引导看支付记录）；回归用例 = 后端幂等三态断言（PENDING 返回同单 / SUCCESS 拒 5904 / CLOSED 允许重开）+ 前端弹窗续接；**单测与浏览器实测结果由主会话回填**；首测项见 `12_用户手测清单.md` **U-33**",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "RESUME",
+      "BMTEST",
+      "CFTEST",
+      "CV",
+      "CE"
+    ],
+    "conclusion": "首期组件明确覆盖FIRST+PENDING重开续接、SUCCESS回查和5904兜底；PaymentServiceTest覆盖PENDING重用。对应既有组件/单元套件已执行，用户当前付款可用另记；不称真实中断支付或微信异常重验。",
+    "verificationLayer": "已执行组件/单元回归",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/payment/service/PaymentServiceTest.java",
+        "line": 1,
+        "classOrFile": "PaymentServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.payment.service.PaymentServiceTest",
+          "tests": "35",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      },
+      {
+        "path": "frontend/src/resident/lease/components/__tests__/LeaseFirstPaymentDialog.spec.ts",
+        "line": 10,
+        "classOrFile": "LeaseFirstPaymentDialog.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      105
+    ]
+  },
+  {
+    "id": "DEF-069",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 106
+    },
+    "title": "已到期租约仍展示并可支付「待支付首期费用」⇒ 规则缺口 + 观感误导",
+    "originalSeverity": "一般（规则缺口 + 观感误导）",
+    "historicalState": "已修复（待批次 g 验收）",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "修复口径（前后端并行，2026-09-21 批次 g，**已由主会话核验**）：前端 `firstPaymentDue` 增**止期门禁**（到期即隐藏/禁用首期入口并提示「首期费用不可再支付：租约止期已过；如需继续租住请续租，或办理退租。」）+ 卡片补「已到期（**日期标注，非状态流转**）」说明；后端 `createFirstPayment` 新增 **`LEASE_EXPIRED(5606)`** 兜底校验（止期**严格早于当天**即拒、**当天到期仍可支付**、**续期支付不受限**；判定复用 `common/constant/LeaseStatus.isExpired`，与 `LeaseService#toVO` 的 `expiryFlag` / `LeaseStatusTask` / `LeaseExpiryReminderTask` / 前端 `expiryOf` 同口径），且**校验顺序为 5904 先于 5606**（已收款单优先；已到期且遗留 `PENDING` 不再续接）；**核验结果（主会话）**：后端全量 **552/552 BUILD SUCCESS**、前端 `vue-tsc --noEmit` 与 `build` 双 **exit 0**；**提交号待主会话回填**；首测项见 `12_用户手测清单.md` **U-34**",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BH2",
+      "CE",
+      "CZ"
+    ],
+    "conclusion": "支付门禁/入口与用户FIRST/普通RENT成功承接；不补造所有重复下单/期限/渠道异常实测。",
+    "verificationLayer": "离线门禁与用户主路径",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      106
+    ]
+  },
+  {
+    "id": "DEF-070",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 107
+    },
+    "title": "居民端「确认完成」与管理端「关闭工单」缺请求体 → HTTP 400，工单永卡「待确认」（同一根因两处表现）。①根因（静态定位）",
+    "originalSeverity": "致命（P0 阻断）",
+    "historicalState": "**已修待回归**（2026-09-21 后端已改：`confirm`/`close` 的 `@RequestBody` 改为可选并重启 8081；**待按 CF-E4 第 6/7 步与 CF-E8 整链回归复测**）",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "**待回归**（修复后须复跑 F8 第⑨步与 CF-E8 全链：确认完成 → 出现「服务评价」区 → 提交评价 → ≤2 星进入不满意跟进；并复跑管理端「关闭工单」归档）",
+    "severity": "致命",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "CF"
+    ],
+    "conclusion": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      107,
+      110,
+      187
+    ]
+  },
+  {
+    "id": "DEF-071",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 108
+    },
+    "title": "管理端无「受理」入口，CF-E4 第 2 步「待受理 → 待派单」无处执行。①文档要求侧",
+    "originalSeverity": "一般（P2 文档-实现不一致）",
+    "historicalState": "**已实施待回归**",
+    "historicalFix": "—（未派工）；裁决：**补实现**（新增管理端受理 `PATCH /work-orders/{id}/intake`，受理后建 `WORK_ORDER_GROUP` 群聊）；设计落点：接口设计 §9.21、架构设计 §6.1、UI 设计 v1.4；**后端（V23 已上线）与前端（管理端受理入口，`PENDING` 可见、ADMIN/SUPER_ADMIN）均已交付，前端 118/118 用例全绿**",
+    "historicalRegression": "待按新版 CF-E4 全链回归（受理 → 自动建临时群聊 → 派单入群 → 执行 → 居民确认 → 终审结束 → 会话回收）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "CF"
+    ],
+    "conclusion": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      108
+    ]
+  },
+  {
+    "id": "DEF-072",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 109
+    },
+    "title": "居民提交工单不给管理端发任何通知（管理端待办正常，仅通知缺失）。①文档要求侧",
+    "originalSeverity": "一般（P2 文档-实现不一致）",
+    "historicalState": "**已实施待回归**",
+    "historicalFix": "—（未派工）；裁决：**纳入设计**（R48 事件集细化：提交 → 该社区绑定管理员 + 超管）；设计落点：接口设计 §9.21.4；**8 个事件后端已全部落地，「提交 → 该社区绑定管理员 + 超管」已实测收到（前端已交付）**",
+    "historicalRegression": "待按 R48 事件集与新版 CF-E4 第 1/12 步回归（居民提交 → 该社区绑定管理员 + 超管收到通知）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "CF"
+    ],
+    "conclusion": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      109
+    ]
+  },
+  {
+    "id": "DEF-073",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 110
+    },
+    "title": "首期支付弹窗 3 秒轮询后引导文案回退",
+    "originalSeverity": "**一般（P1 功能受损：微信渠道支付路径不可用）**",
+    "historicalState": "**待修（用户裁决暂缓）**",
+    "historicalFix": "—（未派工）",
+    "historicalRegression": "待修复后回归（须补断言：**轮询后微信二维码区块仍挂载**、支付宝引导文案不回退）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "用户暂缓",
+    "evidence": [
+      "CE",
+      "CZ"
+    ],
+    "conclusion": "原用户2026-09-22明确微信未支持先不管；金融本轮接受可用但不证明微信二维码异常修复，保留一般遗留，不追加金融测试。",
+    "verificationLayer": "用户范围裁决",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      110
+    ]
+  },
+  {
+    "id": "DEF-074",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 111
+    },
+    "title": "接口设计文档错误码/枚举多处与实现漂移，按文档写用例会写出错误断言。①重复入住申请（码值错位）",
+    "originalSeverity": "一般（文档与实现不一致：会导致测试断言错码）",
+    "historicalState": "**已收口（2026-09-22，文档侧；①②③④ 四条全部执行完毕）**",
+    "historicalFix": "—（文档侧收口，无代码提交；**已收口处不编造提交号**）",
+    "historicalRegression": "待文档修正后回归（修正时须逐条对照 `ErrorCode.java` 实值）——**四条已完成，可作为\"按文档写用例不再错码\"的基线**",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BF",
+      "BM"
+    ],
+    "conclusion": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      111
+    ]
+  },
+  {
+    "id": "DEF-075",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 112
+    },
+    "title": "会话参与者身份空间撞号 → 非参与者可读群聊（应 403）。事实（实测证据）",
+    "originalSeverity": "严重（跨身份空间越权可读会话内容）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待按 **CF-E4-X1** 回归（须断言：非参与者访问群聊 **403**、撞号对（`resident1` 与 `superadmin`）双向不可见、看房群聊/租约群聊/工单群聊三类会话同口径；修复前实测 200 / 修复后 403 对照保留）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BI",
+      "BX",
+      "CF"
+    ],
+    "conclusion": "通知/会话身份空间、同ID双向不可见及未参与者拒绝已有真实隔离回归；原主表待批次验收已过时。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      112,
+      136
+    ]
+  },
+  {
+    "id": "DEF-076",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 113
+    },
+    "title": "房屋小卡片被三个悬浮按钮盖满 ⇒ 点卡片得到的是\"操作\"而不是\"详情\"",
+    "originalSeverity": "一般（操作可达性受损 + 误触风险）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "historicalFix": "bd95ea9（本批）",
+    "historicalRegression": "2026-09-22 §3.25：删除 `.block-actions` 遮罩层，改为卡片右上角外沿 16px「⋯」角标 → 下拉菜单（查看详情/在住人员 · 编辑房屋 · 状态变更 · 删除房屋）；实测点卡片主体开详情、点角标不开详情而弹 4 项菜单、Ctrl+点击多选不误触",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：删除 .block-actions 遮罩层，改为卡片右上角外沿 16px「⋯」角标 → 下拉菜单（查看详情/在住人员 · 编辑房屋 · 状态变更 · 删除房屋）；实测点卡片主体开详情、点角标不开详情而弹 4 项菜单、Ctrl+点击多选不误触",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      113,
+      1119,
+      1129,
+      2699
+    ]
+  },
+  {
+    "id": "DEF-077",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 114
+    },
+    "title": "房屋详情不展示该房屋的入住租客账号信息",
+    "originalSeverity": "一般（信息缺失：房屋视图与居住关系脱节）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "historicalFix": "bd95ea9（本批）",
+    "historicalRegression": "2026-09-22 §3.25：弹窗新增「在住人员 / 租客账号」区块（`GET /houses/{id}/residents` ＋ 逐条 `GET /residents/{id}` 补登录账号，弹窗 480→640px，排序 居住中 → 租客 → 业主 → 家属）；实测 A 座 1 单元 301 显示「居住中 1 / 记录 1」及 `居思远 \\| resident2 \\| 租客 \\| 13905710102 \\| 2025-10-12 \\| 居住中`",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：弹窗新增「在住人员 / 租客账号」区块（GET /houses/{id}/residents ＋ 逐条 GET /residents/{id} 补登录账号，弹窗 480→640px，排序 居住中 → 租客 → 业主 → 家属）；实测 A 座 1 单元 301 显示「居住中 1 / 记录 1」及 居思远 \\／ resident2 \\／ 租客 \\／ 13905710102 \\／ 2025-10-12 \\／ 居住中",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      114,
+      1120,
+      1135
+    ]
+  },
+  {
+    "id": "DEF-078",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 115
+    },
+    "title": "同一页并存两处同类筛选 + 长结构目录顶飞结果区",
+    "originalSeverity": "一般（信息架构缺陷）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "historicalFix": "bd95ea9（本批）",
+    "historicalRegression": "2026-09-22 §3.25：详情区改两栏（结构栏 320px `sticky` ＋ 独立滚动 `max-height: calc(100vh - 300px)` ＋ 可折叠、<1600px 默认折叠），房屋栏顶部**唯一筛选卡**（范围 楼栋/单元/房号 ＋ 条件 楼层/状态 ＋ 范围徽标 ＋ 结果口径 ＋ 清除筛选），删除结构树内「全部楼栋」「全部单元」重复筛选行；实测楼栋筛选 20→10 套、单元 10→5 套、清除回 20 套；注入 30 栋后 `clientHeight=700 / scrollHeight=1080`（限高生效）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：详情区改两栏（结构栏 320px sticky ＋ 独立滚动 max-height: calc(100vh - 300px) ＋ 可折叠、<1600px 默认折叠），房屋栏顶部唯一筛选卡（范围 楼栋/单元/房号 ＋ 条件 楼层/状态 ＋ 范围徽标 ＋ 结果口径 ＋ 清除筛选），删除结构树内「全部楼栋」「全部单元」重复筛选行；实测楼栋筛选 20→10 套、单元 10→5 套、清除回 20 套；注入 30 栋后 clientHeight=700 / scrollHeight=1080（限高生效）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      115,
+      192,
+      1121,
+      1140,
+      1192,
+      1511
+    ]
+  },
+  {
+    "id": "DEF-079",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 116
+    },
+    "title": "楼栋/单元行按钮铺满行尾，不便查看",
+    "originalSeverity": "轻微（视觉噪声与可读性）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 j 回归）**",
+    "historicalFix": "bd95ea9（本批）",
+    "historicalRegression": "2026-09-22 §3.25：楼栋行与单元行的全部操作收敛为行尾一个「⋯」菜单（图标 ＋ 文字标签，默认隐形、hover/选中/键盘聚焦时出现、触屏常显），行内计数不再被挤压且完整口径移入 `title`；实测 `.outline-row .icon-btn` = 0、`.row-actions` = 0",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.25：楼栋行与单元行的全部操作收敛为行尾一个「⋯」菜单（图标 ＋ 文字标签，默认隐形、hover/选中/键盘聚焦时出现、触屏常显），行内计数不再被挤压且完整口径移入 title；实测 .outline-row .icon-btn = 0、.row-actions = 0",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      116,
+      1122,
+      1148
+    ]
+  },
+  {
+    "id": "DEF-080",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 118
+    },
+    "title": "常驻结构目录与右侧筛选职责重叠、白占半屏",
+    "originalSeverity": "轻微（占位与职责重复；功能未受损）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 k 回归）**",
+    "historicalFix": "362f279（本批）",
+    "historicalRegression": "2026-09-22 §3.26：删除 `.outline-panel` 常驻栏及其全部状态/样式，`.detail` 退回单列 flex；实测结构类节点命中 0、房屋面板 952 → **1296px**",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.26：删除 .outline-panel 常驻栏及其全部状态/样式，.detail 退回单列 flex；实测结构类节点命中 0、房屋面板 952 → 1296px",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      118,
+      158,
+      192,
+      1180,
+      1188,
+      1423,
+      1511
+    ]
+  },
+  {
+    "id": "DEF-081",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 119
+    },
+    "title": "单元按纵向堆叠，多单元时无法平行对照、也无法缩放",
+    "originalSeverity": "一般（多单元场景的浏览效率）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 k 回归）**",
+    "historicalFix": "362f279（本批）",
+    "historicalRegression": "2026-09-22 §3.26：新增 `.grid-groups` 横向列容器（一个单元一列、`overflow-x:auto`、列头带 `N 套·空 M` 与列内动作）＋ 缩放控件（100%↔70% 实测：方块 66→46px、列宽 234→164px）；`zoom` 仅作用于内层，框选坐标不受影响（回归：拖拽仍一次选中 20 套）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.26：新增 .grid-groups 横向列容器（一个单元一列、overflow-x:auto、列头带 N 套·空 M 与列内动作）＋ 缩放控件（100%↔70% 实测：方块 66→46px、列宽 234→164px）；zoom 仅作用于内层，框选坐标不受影响（回归：拖拽仍一次选中 20 套）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      119,
+      192,
+      1181,
+      1196,
+      1511
+    ]
+  },
+  {
+    "id": "DEF-082",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 120
+    },
+    "title": "删除结构目录后缺楼栋/单元维护入口",
+    "originalSeverity": "一般（维护能力可达性）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 k 回归）**",
+    "historicalFix": "362f279（本批）",
+    "historicalRegression": "2026-09-22 §3.26：头部新增「编辑楼栋」「编辑单元」快捷按钮 ＋「结构维护」下拉（新增楼栋/新增单元/批量建单元/删除楼栋/删除单元），原「编辑」改名「编辑社区」；所有目标型动作经统一的目标选择弹窗（楼栋+单元下拉，预选当前筛选范围）；实测两条快捷链路各自进入对应表单、菜单 5 项齐全、列头批量建房已预选该单元",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.26：头部新增「编辑楼栋」「编辑单元」快捷按钮 ＋「结构维护」下拉（新增楼栋/新增单元/批量建单元/删除楼栋/删除单元），原「编辑」改名「编辑社区」；所有目标型动作经统一的目标选择弹窗（楼栋+单元下拉，预选当前筛选范围）；实测两条快捷链路各自进入对应表单、菜单 5 项齐全、列头批量建房已预选该单元",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      120,
+      1182,
+      1192,
+      1203
+    ]
+  },
+  {
+    "id": "DEF-083",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 121
+    },
+    "title": "头部「编辑楼栋 / 编辑单元」语义不符",
+    "originalSeverity": "一般（入口语义与层级不匹配）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 l 回归）**",
+    "historicalFix": "9cf8879（本批）",
+    "historicalRegression": "2026-09-22 §3.27：头部两枚编辑按钮下线，改为**建房带**三枚分步入口「①建楼栋 / ②建单元与房屋 / ③建房屋」，各自直达对应新建弹窗；编辑类动作回落到「结构维护」菜单",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.27：头部两枚编辑按钮下线，改为建房带三枚分步入口「①建楼栋 / ②建单元与房屋 / ③建房屋」，各自直达对应新建弹窗；编辑类动作回落到「结构维护」菜单",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      121,
+      1246,
+      1260
+    ]
+  },
+  {
+    "id": "DEF-084",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 122
+    },
+    "title": "建房入口与社区级操作混排，无主次层级",
+    "originalSeverity": "轻微（视觉层级与可读性）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 l 回归）**",
+    "historicalFix": "9cf8879（本批）",
+    "historicalRegression": "2026-09-22 §3.27：新建一条**建房带**（浅底独立横带，位于社区头部与关键数字之间）——左起「建房」标签 ｜ **实心主按钮「一键生成结构链」**（副标题标明 楼栋 → 单元 → 房屋）｜「或按层级分步建」分隔 ｜ 三枚带序号徽标的分步按钮 ｜ 右端低频「结构维护 ▾」；社区级操作（编辑社区/停用/删除/社区设置）留在头部，两类动作不再混排",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.27：新建一条建房带（浅底独立横带，位于社区头部与关键数字之间）——左起「建房」标签 ｜ 实心主按钮「一键生成结构链」（副标题标明 楼栋 → 单元 → 房屋）｜「或按层级分步建」分隔 ｜ 三枚带序号徽标的分步按钮 ｜ 右端低频「结构维护 ▾」；社区级操作（编辑社区/停用/删除/社区设置）留在头部，两类动作不再混排",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      122,
+      1247,
+      1252
+    ]
+  },
+  {
+    "id": "DEF-085",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 123
+    },
+    "title": "「批量建单元」不能同批生成楼层与房屋",
+    "originalSeverity": "一般（能力缺口：结构链生成覆盖不到既有楼栋）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 l 回归）**",
+    "historicalFix": "9cf8879（本批）",
+    "historicalRegression": "2026-09-22 §3.27：`UnitBatchDialog` 升级为「建单元与房屋」——楼栋下拉（带 `N 个单元 · N 套` 规模）+ 单元序号规则 + **房屋规则开关**（楼层区间 / 每层序号 / 房号前后缀 / 跳过项 / 建筑面积/户型/朝向/初始状态）+ 实时预览；提交改为**后端批量端点** `POST /units/batch` → 对成功创建的单元逐个 `POST /houses/batch`，逐行结果交统一的批量结果弹窗，部分成功语义不再由前端循环模拟",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.27：UnitBatchDialog 升级为「建单元与房屋」——楼栋下拉（带 N 个单元 · N 套 规模）+ 单元序号规则 + 房屋规则开关（楼层区间 / 每层序号 / 房号前后缀 / 跳过项 / 建筑面积/户型/朝向/初始状态）+ 实时预览；提交改为后端批量端点 POST /units/batch → 对成功创建的单元逐个 POST /houses/batch，逐行结果交统一的批量结果弹窗，部分成功语义不再由前端循环模拟",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      123,
+      1248,
+      1266
+    ]
+  },
+  {
+    "id": "DEF-086",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 124
+    },
+    "title": "「1建楼栋」按钮名不副实，只能建空的单栋楼房",
+    "originalSeverity": "一般（入口能力与命名不符：名为\"快速建\"实为\"单个空壳\"）",
+    "historicalState": "**已修复（浏览器实测通过，随批次 m 回归）**",
+    "historicalFix": "0002fe3（本批）",
+    "historicalRegression": "2026-09-22 §3.28：`BuildingEditDialog` 新建模式重写为**批量建楼栋**——「名称前缀 + 起始/结束序号 + 名称后缀」按序号区间建多栋（或切「单栋自定义名称」建 `A 座` 这类无序号名称）＋ 总层数/描述 ＋ **「同时建立单元与房屋」开关**（每栋单元数、单元名前后缀、楼层区间 × 每层序号、房号前后缀、跳过项、建筑面积/房间数/初始状态）＋ 实时预览（楼栋名 chips / 单元名样例 / 首末房号 / 重名与层数不一致提示）；提交链 `POST /buildings/batch` → 成功行逐个 `POST /units/batch` → `POST /houses/batch`，逐行结果交统一的批量结果弹窗；编辑模式保持原单栋表单不变",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-22 §3.28：BuildingEditDialog 新建模式重写为批量建楼栋——「名称前缀 + 起始/结束序号 + 名称后缀」按序号区间建多栋（或切「单栋自定义名称」建 A 座 这类无序号名称）＋ 总层数/描述 ＋ 「同时建立单元与房屋」开关（每栋单元数、单元名前后缀、楼层区间 × 每层序号、房号前后缀、跳过项、建筑面积/房间数/初始状态）＋ 实时预览（楼栋名 chips / 单元名样例 / 首末房号 / 重名与层数不一致提示）；提交链 POST /buildings/batch → 成功行逐个 POST /units/batch → POST /houses/batch，逐行结果交统一的批量结果弹窗；编辑模式保持原单栋表单不变",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      124,
+      1318
+    ]
+  },
+  {
+    "id": "DEF-087",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 125
+    },
+    "title": "管理端无法开启会话（后端真缺陷）",
+    "originalSeverity": "一般（管理端入口缺失：授权白名单过窄）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：管理端可开启会话 + `residentId` 幂等与 400/403 边界 + 租约群聊回写 `conversation_id`）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BH2",
+      "BP",
+      "CP"
+    ],
+    "conclusion": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      125,
+      2700
+    ]
+  },
+  {
+    "id": "DEF-088",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 126
+    },
+    "title": "承约前置校验缺失——首版修复口径被用户裁决推翻（如实登记该过程）",
+    "originalSeverity": "轻微（口径澄清项：经裁决「沟通手段非门槛」，最终不设代码门槛）",
+    "historicalState": "**已按裁决修正（待回归）**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：本人 + `TO_SIGN` 放行、非本人 403、5607/5608 零调用点）",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "批准设计替代",
+    "evidence": [
+      "BC",
+      "BH2",
+      "CE"
+    ],
+    "conclusion": "旧独立承租确认、复用旧承租时间、TO_SIGN一律禁付均被后续协议去重及首期激活设计取代；按现行规则留证，不按旧预期判失败。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      126
+    ]
+  },
+  {
+    "id": "DEF-089",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 127
+    },
+    "title": "承约意愿被重复确认",
+    "originalSeverity": "一般（交互冗余：同一意愿重复采集）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：`tenant_confirm_time` 取首次承约 + 零二次点击 + 三态同时成立）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "批准设计替代",
+    "evidence": [
+      "BC",
+      "BH2",
+      "CE"
+    ],
+    "conclusion": "旧独立承租确认、复用旧承租时间、TO_SIGN一律禁付均被后续协议去重及首期激活设计取代；按现行规则留证，不按旧预期判失败。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      127
+    ]
+  },
+  {
+    "id": "DEF-090",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 128
+    },
+    "title": "入住申请 VO 缺租约关联 ⇒ 前端只能按 houseId 反查（同屋多租约会取错）",
+    "originalSeverity": "一般（数据关联缺失：同屋多租约场景会取错关联对象）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：两路径写死关联 + 同屋多租约一一对应 + `NULL` 即空不回退）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BH2",
+      "BP",
+      "CP"
+    ],
+    "conclusion": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      128,
+      130
+    ]
+  },
+  {
+    "id": "DEF-091",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 129
+    },
+    "title": "租约详情打不开（前端硬绑辅助接口致整页空白）",
+    "originalSeverity": "严重（主数据不可达：整页空白，超管亦无法查看租约详情）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：变更历史失败主数据仍渲染 + 主数据失败有失败态 + 不出现整页空白）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BH2",
+      "BP",
+      "CP"
+    ],
+    "conclusion": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      129
+    ]
+  },
+  {
+    "id": "DEF-092",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 130
+    },
+    "title": "居民端缺会话入口",
+    "originalSeverity": "一般（功能入口缺失：会话能力在居民侧不可达）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：有群渲染并可进入正确会话 + 无群不渲染 + 申请入口真关联）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BH2",
+      "BP",
+      "CP"
+    ],
+    "conclusion": "管理端直通/申请确定关联/详情错误态/真实群入口已有定向实测与后续会话基础确认；不恢复旧目录路径。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      130
+    ]
+  },
+  {
+    "id": "DEF-093",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 131
+    },
+    "title": "租约卡无任何支付入口",
+    "originalSeverity": "一般（功能不可达：支付入口在多数状态下消失）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：任意状态入口可见 + 不可支付为禁用 + 有原因文案）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "人工确认收口",
+    "evidence": [
+      "BH2",
+      "CE",
+      "CZ"
+    ],
+    "conclusion": "支付门禁/入口与用户FIRST/普通RENT成功承接；不补造所有重复下单/期限/渠道异常实测。",
+    "verificationLayer": "离线门禁与用户主路径",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      131
+    ]
+  },
+  {
+    "id": "DEF-094",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 132
+    },
+    "title": "服务人员端派单后无法操作",
+    "originalSeverity": "严重（主链路断裂：派单后服务人员无法在列表推进工单）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：接单真调 `accept` + 处理可调 `process` + 完成带 `?action=complete`）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "CF"
+    ],
+    "conclusion": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      132
+    ]
+  },
+  {
+    "id": "DEF-095",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 133
+    },
+    "title": "lease_deposit_refund 未登记数据级权限白名单 ⇒ 社区管理员调用押金端点一律 500",
+    "originalSeverity": "严重（社区管理员押金链路 100% 500：业务码全不可达）",
+    "historicalState": "**已修（已验证：admin1 → 200）**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "2026-09-22：admin1 调押金端点 → **200**（修复前 500）；全库 **54 表**（含 Flyway 历史表 `flyway_schema_history`，业务表 53 张）排查无其它遗漏，同类预防性收口 `sys_blacklist_log`",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH2",
+      "BI"
+    ],
+    "conclusion": "退款表权限白名单及deposit_status回填已有原真实验证；后续内核/权限单测承接，不等同新渠道退款实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      133
+    ]
+  },
+  {
+    "id": "DEF-096",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 134
+    },
+    "title": "deposit_status 未为存量已付首期租约回填 ⇒ 押金退还被打回 5703",
+    "originalSeverity": "严重（存量租约押金退还不可用：被打回 5703）",
+    "historicalState": "**已修（已验证）**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "2026-09-22：V25 幂等回填后实测租约 **4/6 = `PAID`**；重复执行幂等",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH2",
+      "BI"
+    ],
+    "conclusion": "退款表权限白名单及deposit_status回填已有原真实验证；后续内核/权限单测承接，不等同新渠道退款实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      134
+    ]
+  },
+  {
+    "id": "DEF-097",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 135
+    },
+    "title": "工单重复关闭非幂等（原返回 5302，需求口径要求不报错）",
+    "originalSeverity": "一般（契约不符：重复关闭报错与需求口径相反）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：`CLOSED` 重复关闭幂等 200 零脏记录 + `PENDING → CLOSED` 仍 5302）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "CF"
+    ],
+    "conclusion": "工单受理/派单/处理/确认/终审/群生命周期有后续真实回归，旧待回归不保留为当前阻塞。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      135
+    ]
+  },
+  {
+    "id": "DEF-098",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 136
+    },
+    "title": "（本项即 DEF-075 的修复落地登记）会话参与者身份空间撞号 ⇒ 非参与者可读群聊",
+    "originalSeverity": "严重（跨身份空间越权可读会话内容）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "待回归（判据见描述末：非参与者 403 + 撞号对双向不可见 + 三类会话同口径）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BI",
+      "BX",
+      "CF"
+    ],
+    "conclusion": "通知/会话身份空间、同ID双向不可见及未参与者拒绝已有真实隔离回归；原主表待批次验收已过时。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      136
+    ]
+  },
+  {
+    "id": "DEF-099",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 137
+    },
+    "title": "405/415 被全局异常处理器包成 500",
+    "originalSeverity": "轻微（错误语义丢失：不影响正常业务，仅影响排障与错误契约）",
+    "historicalState": "**已修（接口级实测通过：405/415/400/404 四码实测命中，403 回归未改坏）**",
+    "historicalFix": "待提交（工作区改动）",
+    "historicalRegression": "2026-09-23 临时实例（端口 8099 + 临时库 `community_residence_defcheck`，用后已停并已删库）实测原始报文——`GET /api/v1/service-categories`（仅 POST）→ **HTTP 405** `{\"code\":405,\"message\":\"请求方法不被支持\",...}`；`POST` 同路径 `Content-Type: text/plain` → **HTTP 415** `{\"code\":415,\"message\":\"请求内容类型不被支持\",...}`；畸形 JSON → **HTTP 400** `{\"code\":400,\"message\":\"请求体缺失或格式不正确，请提交合法的 JSON 请求体\",...}`；不存在路径 → **HTTP 404** `{\"code\":4001,\"message\":\"接口不存在\",...}`；居民 token 调超管端点 → **HTTP 403** `{\"code\":403,\"message\":\"无权限访问\",...}`（回归未改坏）",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF"
+    ],
+    "conclusion": "保留原逐缺陷修复/回归结果：2026-09-23 临时实例（端口 8099 + 临时库 community_residence_defcheck，用后已停并已删库）实测原始报文——GET /api/v1/service-categories（仅 POST）→ HTTP 405 {\"code\":405,\"message\":\"请求方法不被支持\",...}；POST 同路径 Content-Type: text/plain → HTTP 415 {\"code\":415,\"message\":\"请求内容类型不被支持\",...}；畸形 JSON → HTTP 400 {\"code\":400,\"message\":\"请求体缺失或格式不正确，请提交合法的 JSON 请求体\",...}；不存在路径 → HTTP 404 {\"code\":4001,\"message\":\"接口不存在\",...}；居民 token 调超管端点 → HTTP 403 {\"code\":403,\"message\":\"无权限访问\",...}（回归未改坏）",
+    "verificationLayer": "原登记中的实际测试层次；无新增执行",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      137
+    ]
+  },
+  {
+    "id": "DEF-100",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 138
+    },
+    "title": "DataScopeSkipTableTest 跨 JVM 随机红（测试自身缺陷，非产品缺陷）",
+    "originalSeverity": "轻微（测试可靠性：随机红，不反映产品缺陷）",
+    "historicalState": "**已修**",
+    "historicalFix": "由主会话回填",
+    "historicalRegression": "2026-09-22：改顺序无关等价断言后**连跑 3 次全绿**",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BF",
+      "BM"
+    ],
+    "conclusion": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      138
+    ]
+  },
+  {
+    "id": "DEF-101",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 139
+    },
+    "title": "事件 8「终审关闭」的通知收件对象与文档矩阵不符",
+    "originalSeverity": "一般（通知矩阵一格不成立：**文档误抄，非实现缺陷**）",
+    "historicalState": "**已修（文档勘误，实现经核验符合设计源头 §9.21.4）**",
+    "historicalFix": "—",
+    "historicalRegression": "2026-09-29：`13` 号矩阵第 8 行按 §9.21.4 修订；新增 `WorkOrderNotificationMatrixTest`（10/10 绿）锁死矩阵",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BF",
+      "BM"
+    ],
+    "conclusion": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      139
+    ]
+  },
+  {
+    "id": "DEF-102",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 140
+    },
+    "title": "事件 5「开始处理」的通知收件对象与文档矩阵不符",
+    "originalSeverity": "一般（通知矩阵一格不成立：**文档误抄，非实现缺陷**）",
+    "historicalState": "**已修（文档勘误，实现经核验符合设计源头 §9.21.4）**",
+    "historicalFix": "—",
+    "historicalRegression": "2026-09-29：`13` 号矩阵第 5 行按 §9.21.4 修订；新增 `WorkOrderNotificationMatrixTest`（10/10 绿）锁死矩阵",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BF",
+      "BM"
+    ],
+    "conclusion": "错误码文档/随机测试顺序/工单收件矩阵已按对应原记录修正；不是产品修复通过数量。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      139,
+      140
+    ]
+  },
+  {
+    "id": "DEF-103",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 141
+    },
+    "title": "押金退还并发可超退 + 渠道调用在事务内（critical）",
+    "originalSeverity": "致命（资金并发超退 + 二次退款面）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "致命",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/DepositRefundServiceTest.java",
+        "line": 64,
+        "classOrFile": "DepositRefundServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.DepositRefundServiceTest",
+          "tests": "19",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      11,
+      141,
+      2701
+    ]
+  },
+  {
+    "id": "DEF-104",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 142
+    },
+    "title": "并发双 PENDING 退租申请与双审核",
+    "originalSeverity": "严重（并发双审核/双份申请）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationServiceTest.java",
+        "line": 72,
+        "classOrFile": "LeaseMoveOutApplicationServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.LeaseMoveOutApplicationServiceTest",
+          "tests": "13",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      142
+    ]
+  },
+  {
+    "id": "DEF-105",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 143
+    },
+    "title": "退租通知 sourceId 传申请 ID，深链跳无关租约",
+    "originalSeverity": "严重（通知深链错链，三处系统性）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "MOVEOUT",
+      "BF"
+    ],
+    "conclusion": "08§3.62真实通过/驳回两分支，三通知均sourceId=leaseId，管理员及居民消息中心实际落到正确租约。单测只作补充，不仅凭单测关闭。",
+    "verificationLayer": "真实隔离API/浏览器深链及配套单测",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationServiceTest.java",
+        "line": 71,
+        "classOrFile": "LeaseMoveOutApplicationServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.LeaseMoveOutApplicationServiceTest",
+          "tests": "13",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      143,
+      159
+    ]
+  },
+  {
+    "id": "DEF-106",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 144
+    },
+    "title": "并发重复建群",
+    "originalSeverity": "严重（会话数据分裂）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationServiceTest.java",
+        "line": 65,
+        "classOrFile": "ConversationServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.conversation.service.ConversationServiceTest",
+          "tests": "19",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      144,
+      154
+    ]
+  },
+  {
+    "id": "DEF-107",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 145
+    },
+    "title": "首期支付并发双 PENDING 单",
+    "originalSeverity": "严重（双扣款面）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/payment/service/PaymentServiceTest.java",
+        "line": 1,
+        "classOrFile": "PaymentServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.payment.service.PaymentServiceTest",
+          "tests": "35",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      145
+    ]
+  },
+  {
+    "id": "DEF-108",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 146
+    },
+    "title": "TO_SIGN 经状态端点不可达",
+    "originalSeverity": "严重（设计状态经端点不可达）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseStateMachineFixTest.java",
+        "line": 221,
+        "classOrFile": "LeaseStateMachineFixTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.LeaseStateMachineFixTest",
+          "tests": "9",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      },
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseServiceTest.java",
+        "line": 79,
+        "classOrFile": "LeaseServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.LeaseServiceTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      146
+    ]
+  },
+  {
+    "id": "DEF-109",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 147
+    },
+    "title": "V21 存量回填可把管理员通知误划 RESIDENT",
+    "originalSeverity": "严重（DEF-067 同类泄漏面）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      147
+    ]
+  },
+  {
+    "id": "DEF-110",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 148
+    },
+    "title": "CLOSED 会话仍可发起看房预约",
+    "originalSeverity": "严重（违反冻结接口契约）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/housing/service/ViewingConversationDefectFixTest.java",
+        "line": 63,
+        "classOrFile": "ViewingConversationDefectFixTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.housing.service.ViewingConversationDefectFixTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      148
+    ]
+  },
+  {
+    "id": "DEF-111",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 149
+    },
+    "title": "首期结清口径错乱",
+    "originalSeverity": "严重（首期支付链路被堵死）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "批准设计替代",
+    "evidence": [
+      "BC",
+      "BH2",
+      "CE"
+    ],
+    "conclusion": "旧独立承租确认、复用旧承租时间、TO_SIGN一律禁付均被后续协议去重及首期激活设计取代；按现行规则留证，不按旧预期判失败。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      149
+    ]
+  },
+  {
+    "id": "DEF-112",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 150
+    },
+    "title": "退款失败永显「退还中」",
+    "originalSeverity": "严重（状态失真误导运营）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "CFTEST",
+      "CV"
+    ],
+    "conclusion": "对应前端组件/导航/并发防重测试已有全量运行记录，精确文件见testBindings。退款组件仅合成状态，不触发渠道。",
+    "verificationLayer": "已执行前端组件/导航测试",
+    "testBindings": [
+      {
+        "path": "frontend/src/admin/lease/views/__tests__/MoveOutApplicationView.spec.ts",
+        "line": 14,
+        "classOrFile": "MoveOutApplicationView.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      },
+      {
+        "path": "frontend/src/admin/lease/components/__tests__/DepositRefundDialog.spec.ts",
+        "line": 1,
+        "classOrFile": "DepositRefundDialog.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      150
+    ]
+  },
+  {
+    "id": "DEF-113",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 151
+    },
+    "title": "干净种子漏 deposit_status 列",
+    "originalSeverity": "严重（堵死手测路径）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      151
+    ]
+  },
+  {
+    "id": "DEF-114",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 152
+    },
+    "title": "主流程轨坐标反向",
+    "originalSeverity": "一般（资产渲染破损）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      152
+    ]
+  },
+  {
+    "id": "DEF-115",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 153
+    },
+    "title": "applyTransition 竞态 + 协议生效内核重复实现",
+    "originalSeverity": "一般（并发双写 + 内核漂移）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseServiceTest.java",
+        "line": 117,
+        "classOrFile": "LeaseServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.LeaseServiceTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      },
+      {
+        "path": "backend/src/test/java/com/community/residence/common/agreement/service/AgreementConsentBoundaryTest.java",
+        "line": 110,
+        "classOrFile": "AgreementConsentBoundaryTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.agreement.service.AgreementConsentBoundaryTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      153
+    ]
+  },
+  {
+    "id": "DEF-116",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 154
+    },
+    "title": "状态迁移无条件 updateById",
+    "originalSeverity": "一般（并发双副作用）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderR74IntakeTest.java",
+        "line": 122,
+        "classOrFile": "WorkOrderR74IntakeTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.workorder.service.WorkOrderR74IntakeTest",
+          "tests": "5",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      },
+      {
+        "path": "backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderServiceTest.java",
+        "line": 102,
+        "classOrFile": "WorkOrderServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.workorder.service.WorkOrderServiceTest",
+          "tests": "8",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      154
+    ]
+  },
+  {
+    "id": "DEF-117",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 155
+    },
+    "title": "withdraw/approve 竞态 + 弱回退误关活跃群",
+    "originalSeverity": "一般（竞态 + 误关现行沟通渠道）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceApplicationServiceTest.java",
+        "line": 89,
+        "classOrFile": "ResidenceApplicationServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.resident.service.ResidenceApplicationServiceTest",
+          "tests": "20",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      },
+      {
+        "path": "backend/src/test/java/com/community/residence/common/resident/service/ResidenceApplicationLeaseLinkTest.java",
+        "line": 103,
+        "classOrFile": "ResidenceApplicationLeaseLinkTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.resident.service.ResidenceApplicationLeaseLinkTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      155
+    ]
+  },
+  {
+    "id": "DEF-118",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 156
+    },
+    "title": "housingId 归属不校验 + 列表排序缺日期",
+    "originalSeverity": "一般（跨房屋泄露 + 契约不符）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/housing/service/ViewingConversationDefectFixTest.java",
+        "line": 63,
+        "classOrFile": "ViewingConversationDefectFixTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.housing.service.ViewingConversationDefectFixTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      },
+      {
+        "path": "backend/src/test/java/com/community/residence/common/housing/mapper/ViewingLeaseLinkGuardTest.java",
+        "line": 1,
+        "classOrFile": "ViewingLeaseLinkGuardTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.housing.mapper.ViewingLeaseLinkGuardTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      156
+    ]
+  },
+  {
+    "id": "DEF-119",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 157
+    },
+    "title": "ensureLeaseGroup 全字段回写 + 关闭态防御缺失",
+    "originalSeverity": "一般（丢更新 + 契约纵深缺口）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationServiceTest.java",
+        "line": 65,
+        "classOrFile": "ConversationServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.conversation.service.ConversationServiceTest",
+          "tests": "19",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      },
+      {
+        "path": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationLeaseGroupEnsureTest.java",
+        "line": 104,
+        "classOrFile": "ConversationLeaseGroupEnsureTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.conversation.service.ConversationLeaseGroupEnsureTest",
+          "tests": "5",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      157
+    ]
+  },
+  {
+    "id": "DEF-120",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 158
+    },
+    "title": "V26 存量回填未限定 relation_type='TENANT'",
+    "originalSeverity": "一般（错挂强关联）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      158
+    ]
+  },
+  {
+    "id": "DEF-121",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 159
+    },
+    "title": "LEASE_MOVE_OUT 前端三处缺席 + LEASE_SIGN 死分支",
+    "originalSeverity": "一般（通知分类与导航缺口）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "MOVEOUT",
+      "BF"
+    ],
+    "conclusion": "08§3.62真实通过/驳回两分支，三通知均sourceId=leaseId，管理员及居民消息中心实际落到正确租约。单测只作补充，不仅凭单测关闭。",
+    "verificationLayer": "真实隔离API/浏览器深链及配套单测",
+    "testBindings": [
+      {
+        "path": "frontend/src/common/messaging/utils/__tests__/notificationNav.spec.ts",
+        "line": 36,
+        "classOrFile": "notificationNav.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      159
+    ]
+  },
+  {
+    "id": "DEF-122",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 160
+    },
+    "title": "会话状态未知误判可写等",
+    "originalSeverity": "一般（误判可写 + 交互死角）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "CFTEST",
+      "CV"
+    ],
+    "conclusion": "对应前端组件/导航/并发防重测试已有全量运行记录，精确文件见testBindings。退款组件仅合成状态，不触发渠道。",
+    "verificationLayer": "已执行前端组件/导航测试",
+    "testBindings": [
+      {
+        "path": "frontend/src/common/conversation/components/__tests__/ConversationChat.spec.ts",
+        "line": 1,
+        "classOrFile": "ConversationChat.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      },
+      {
+        "path": "frontend/src/admin/conversation/views/__tests__/ConversationListView.spec.ts",
+        "line": 1,
+        "classOrFile": "ConversationListView.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      160
+    ]
+  },
+  {
+    "id": "DEF-123",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 161
+    },
+    "title": "租约详情双请求乱序 / TO_SIGN 死代码 / 退租弹窗假成功",
+    "originalSeverity": "一般（交互口径杂项族）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "CFTEST",
+      "CV"
+    ],
+    "conclusion": "对应前端组件/导航/并发防重测试已有全量运行记录，精确文件见testBindings。退款组件仅合成状态，不触发渠道。",
+    "verificationLayer": "已执行前端组件/导航测试",
+    "testBindings": [
+      {
+        "path": "frontend/src/admin/lease/views/__tests__/LeaseDetailView.spec.ts",
+        "line": 18,
+        "classOrFile": "LeaseDetailView.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      },
+      {
+        "path": "frontend/src/admin/lease/components/__tests__/DepositRefundDialog.spec.ts",
+        "line": 17,
+        "classOrFile": "DepositRefundDialog.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      161
+    ]
+  },
+  {
+    "id": "DEF-124",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 162
+    },
+    "title": "终审防重入时序 + 退回 toast 文案",
+    "originalSeverity": "一般（防重入 + 文案误导）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "CFTEST",
+      "CV"
+    ],
+    "conclusion": "对应前端组件/导航/并发防重测试已有全量运行记录，精确文件见testBindings。退款组件仅合成状态，不触发渠道。",
+    "verificationLayer": "已执行前端组件/导航测试",
+    "testBindings": [
+      {
+        "path": "frontend/src/admin/workorder/views/__tests__/WorkOrderListView.spec.ts",
+        "line": 175,
+        "classOrFile": "WorkOrderListView.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      },
+      {
+        "path": "frontend/src/resident/workorder/views/__tests__/WorkOrderDetailView.spec.ts",
+        "line": 160,
+        "classOrFile": "WorkOrderDetailView.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      },
+      {
+        "path": "frontend/src/admin/workorder/views/__tests__/WorkOrderDetailView.spec.ts",
+        "line": 1,
+        "classOrFile": "WorkOrderDetailView.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      162
+    ]
+  },
+  {
+    "id": "DEF-125",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 163
+    },
+    "title": "错误码魔法数 5206 / v-for 与 v-else 同元素 / 撤回空页",
+    "originalSeverity": "一般（可维护性杂项族）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      163
+    ]
+  },
+  {
+    "id": "DEF-126",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 164
+    },
+    "title": "假后端与真后端语义漂移",
+    "originalSeverity": "一般（测试底座掩盖回归）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      164
+    ]
+  },
+  {
+    "id": "DEF-127",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 165
+    },
+    "title": "N+1 分页查询",
+    "originalSeverity": "一般（分页 N+1）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationServiceTest.java",
+        "line": 186,
+        "classOrFile": "LeaseMoveOutApplicationServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.LeaseMoveOutApplicationServiceTest",
+          "tests": "13",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      165
+    ]
+  },
+  {
+    "id": "DEF-128",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 166
+    },
+    "title": "微信退款 null 状态当成功 + 金额精度",
+    "originalSeverity": "一般（退款落账防御）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "金融异常证据保留",
+    "evidence": [
+      "CE",
+      "CZ"
+    ],
+    "conclusion": "微信退款null状态和金额转换修复有原记录，但未找到对应逐项已执行专项结果；用户接受金融可用不扩写成微信退款异常通过。",
+    "verificationLayer": "修复记录；无该异常渠道实测结论",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      166
+    ]
+  },
+  {
+    "id": "DEF-129",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 167
+    },
+    "title": "document.write 注入面",
+    "originalSeverity": "一般（注入面防御）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "CFTEST",
+      "CV"
+    ],
+    "conclusion": "对应前端组件/导航/并发防重测试已有全量运行记录，精确文件见testBindings。退款组件仅合成状态，不触发渠道。",
+    "verificationLayer": "已执行前端组件/导航测试",
+    "testBindings": [
+      {
+        "path": "frontend/src/resident/lease/components/__tests__/LeaseFirstPaymentDialog.spec.ts",
+        "line": 13,
+        "classOrFile": "LeaseFirstPaymentDialog.spec.ts",
+        "historicalExecutedSuite": null,
+        "subsequentFullSuiteEvidence": [
+          "CV"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      167
+    ]
+  },
+  {
+    "id": "DEF-130",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 168
+    },
+    "title": "退租日期无范围校验",
+    "originalSeverity": "一般（业务校验缺失）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "工程回归有据，专项待评审",
+    "evidence": [
+      "BMTEST",
+      "CFTEST",
+      "CV3"
+    ],
+    "conclusion": "逐缺陷对应测试类及历史已执行套件见testBindings；锁/条件更新/幂等/归属/日期均按测试实际模拟层次读取。未把Mock竞争断言称为真实数据库并发或渠道交易。",
+    "verificationLayer": "已执行单元/组件套件；实际并发另看专项",
+    "testBindings": [
+      {
+        "path": "backend/src/test/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationServiceTest.java",
+        "line": 69,
+        "classOrFile": "LeaseMoveOutApplicationServiceTest",
+        "historicalExecutedSuite": {
+          "name": "com.community.residence.lease.service.LeaseMoveOutApplicationServiceTest",
+          "tests": "13",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        "subsequentFullSuiteEvidence": [
+          "CFTEST",
+          "CV3"
+        ]
+      }
+    ],
+    "newExecution": false,
+    "mentionLines": [
+      168
+    ]
+  },
+  {
+    "id": "DEF-131",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 169
+    },
+    "title": "撤回边失真",
+    "originalSeverity": "一般（设计资产失真）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      169
+    ]
+  },
+  {
+    "id": "DEF-132",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 170
+    },
+    "title": "种子头部版本矛盾 + created_by 越社区",
+    "originalSeverity": "轻微（文档矛盾 + 数据卫生）",
+    "historicalState": "**已修待回归**",
+    "historicalFix": "676862a（批次 o）",
+    "historicalRegression": "待回归（判据见描述末）",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "文档或测试资产修正",
+    "evidence": [
+      "BMTEST",
+      "BH2"
+    ],
+    "conclusion": "存量/种子/图/前端模板或测试后端资产按原修订保留；迁移实际执行与当前V43来源分开。历史正常数据不重置，不把静态修订算业务执行通过。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      11,
+      170
+    ]
+  },
+  {
+    "id": "DEF-133",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 171
+    },
+    "title": "创建社区表单「联系人/联系电话」为手填，应为绑定社区管理员账号并渲染账号信息",
+    "originalSeverity": "一般（设计变更：需 30 阶段表单/接口设计变更）",
+    "historicalState": "关闭（按批准设计修正并回归）",
+    "historicalFix": "2026-10-11 bg-3，见§3.77；未提交",
+    "historicalRegression": "见§3.77真实接口/UI、V31及全量自动化证据",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BG",
+      "BO"
+    ],
+    "conclusion": "批准设计后结构边界/责任人/户型完整落地且真实隔离回归；旧手填联系人和roomCount模型不恢复。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      171,
+      1397,
+      1404,
+      1417,
+      1420,
+      1481,
+      2245,
+      2287,
+      2323,
+      2329,
+      2702
+    ]
+  },
+  {
+    "id": "DEF-134",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 172
+    },
+    "title": "admin 前端不渲染「创建社区」按钮 ⇒ 社区管理员无法操作社区",
+    "originalSeverity": "严重（主链路断裂：社区管理员无社区管理入口）",
+    "historicalState": "**现行仅超管新建边界符合设计；原入口期望交60裁决（见§3.75）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "按现行设计终结",
+    "evidence": [
+      "BE",
+      "BF",
+      "BO"
+    ],
+    "conclusion": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。",
+    "verificationLayer": "设计核对及原用户裁决",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      172,
+      1405,
+      2246
+    ]
+  },
+  {
+    "id": "DEF-135",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 173
+    },
+    "title": "楼栋「层数」无实际约束，创建房屋时可超出层数",
+    "originalSeverity": "一般（结构数据一致性）",
+    "historicalState": "关闭（按批准设计修正并回归）",
+    "historicalFix": "2026-10-11 bg-3，见§3.77；未提交",
+    "historicalRegression": "见§3.77真实接口/UI、V31及全量自动化证据",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BG",
+      "BO"
+    ],
+    "conclusion": "批准设计后结构边界/责任人/户型完整落地且真实隔离回归；旧手填联系人和roomCount模型不恢复。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      173,
+      1408,
+      2247,
+      2327
+    ]
+  },
+  {
+    "id": "DEF-136",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 174
+    },
+    "title": "一键创建户型表单「房间数」为数值类型，应为描述字符串",
+    "originalSeverity": "轻微（表单/数据模型设计）",
+    "historicalState": "关闭（按批准设计修正并回归）",
+    "historicalFix": "2026-10-11 bg-3，见§3.77；未提交",
+    "historicalRegression": "见§3.77真实接口/UI、V31及全量自动化证据",
+    "severity": "轻微",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BG",
+      "BO"
+    ],
+    "conclusion": "批准设计后结构边界/责任人/户型完整落地且真实隔离回归；旧手填联系人和roomCount模型不恢复。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      174,
+      1409,
+      2248,
+      2328
+    ]
+  },
+  {
+    "id": "DEF-137",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 175
+    },
+    "title": "缺单元/楼栋删除按钮（前端缺陷）+ 社区结构列表交互增强建议",
+    "originalSeverity": "一般（维护入口缺失 + 信息架构增强）",
+    "historicalState": "**删除入口真实浏览器复核通过；结构交互增强仍待裁决（见§3.75）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "按现行设计终结",
+    "evidence": [
+      "BE",
+      "BF",
+      "BO"
+    ],
+    "conclusion": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。",
+    "verificationLayer": "设计核对及原用户裁决",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      175,
+      1410,
+      1423,
+      2249
+    ]
+  },
+  {
+    "id": "DEF-138",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 176
+    },
+    "title": "公共资源表单无法上传图片（疑似文本输入框）",
+    "originalSeverity": "一般（表单能力缺口）",
+    "historicalState": "**已按批准17修复：文件上传/真实图片校验/保存清空；见§3.79**",
+    "historicalFix": "2026-10-11",
+    "historicalRegression": "自动化与隔离实测通过，最终用户复验另行安排",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH3"
+    ],
+    "conclusion": "真实上传/清空/图片校验已替代URL手填，后续用户基础确认有效。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      176,
+      1411,
+      1421,
+      2250,
+      2323,
+      2356,
+      2368
+    ]
+  },
+  {
+    "id": "DEF-139",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 177
+    },
+    "title": "操作日志缺具体内容（模块/操作类型/操作描述/请求参数为空）",
+    "originalSeverity": "严重（R47 判据不达标：日志内容不可用）",
+    "historicalState": "安全白名单参数采集与显示/过滤已修复并验证；历史未采集不补造，见§3.76",
+    "historicalFix": "未提交",
+    "historicalRegression": "825/249全量；新参数与迁出日志真实核查通过",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      177,
+      1397,
+      1414,
+      1422,
+      2235,
+      2251,
+      2293
+    ]
+  },
+  {
+    "id": "DEF-140",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 178
+    },
+    "title": "注册开关配置值校验过宽",
+    "originalSeverity": "一般（配置防线缺失：非法值静默降级）",
+    "historicalState": "**已修复，单测与真实HTTP400回归通过（见§3.75）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      178,
+      1429,
+      1435,
+      1450,
+      1456,
+      2236,
+      2252
+    ]
+  },
+  {
+    "id": "DEF-141",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 179
+    },
+    "title": "代建居民表单信息项与项目内其它账号基础信息项不统一",
+    "originalSeverity": "一般（表单口径不统一）",
+    "historicalState": "**已修复并回归（bh-1，§3.78）**",
+    "historicalFix": "2026-10-11",
+    "historicalRegression": "866/265；真实隔离28项",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH1",
+      "BO"
+    ],
+    "conclusion": "账号资料与具体居住关系录入真实隔离通过；依赖成员后续按主关系规则。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      179,
+      1437,
+      2347
+    ]
+  },
+  {
+    "id": "DEF-142",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 180
+    },
+    "title": "批量导入重复数据未拦截",
+    "originalSeverity": "一般（幂等/唯一性缺口）",
+    "historicalState": "**按用户2026-10-12新口径复核通过：当前十列CSV样例12行成功，重复12行全部拒绝/零新增；不再等旧Excel，不支持原生xlsx**",
+    "historicalFix": "—",
+    "historicalRegression": "§3.85；resident-import-category-verification.json",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BK",
+      "CM"
+    ],
+    "conclusion": "已按用户新CSV/服务类别口径复核，旧现场等待不继续要求复验。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      180,
+      1438,
+      1455,
+      2347,
+      2393,
+      2410,
+      2420,
+      2445,
+      2468
+    ]
+  },
+  {
+    "id": "DEF-143",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 181
+    },
+    "title": "代建/导入居民选择了社区但实际未绑定 ⇒ 产生「空账号」",
+    "originalSeverity": "严重（表单选择静默丢失 + 账号无归属）",
+    "historicalState": "**已修复并回归（bh-1，§3.78）**",
+    "historicalFix": "2026-10-11",
+    "historicalRegression": "866/265；真实隔离28项",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH1",
+      "BO"
+    ],
+    "conclusion": "账号资料与具体居住关系录入真实隔离通过；依赖成员后续按主关系规则。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      181,
+      1438,
+      1453,
+      1455
+    ]
+  },
+  {
+    "id": "DEF-144",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 182
+    },
+    "title": "入住申请不临时占用房源",
+    "originalSeverity": "严重（房源占用口径缺失：一房多申）",
+    "historicalState": "**已修复并定向回归（bh-2，§3.80）**",
+    "historicalFix": "2026-10-12",
+    "historicalRegression": "隔离61项/开发只读20项；895/274；未测渠道交易",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH2",
+      "BP",
+      "CE"
+    ],
+    "conclusion": "挂牌来源/占用/价格与首期成功激活内核定向回归；交易主路径用户已确认，异常范围独立保留。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      182,
+      190,
+      1439,
+      1453,
+      1482,
+      1509,
+      1521,
+      2262,
+      2376
+    ]
+  },
+  {
+    "id": "DEF-145",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 183
+    },
+    "title": "服务类别出现不可选/异常类别",
+    "originalSeverity": "一般（类别选项净化）",
+    "historicalState": "**按用户2026-10-12新口径复核通过：居民提交工单类别实际显示、可选中并随提交读回一致**",
+    "historicalFix": "—",
+    "historicalRegression": "§3.85；category-visible-selected-1024.png",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BK",
+      "CM"
+    ],
+    "conclusion": "已按用户新CSV/服务类别口径复核，旧现场等待不继续要求复验。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      183,
+      1445,
+      1454,
+      2393,
+      2468,
+      2472
+    ]
+  },
+  {
+    "id": "DEF-146",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 184
+    },
+    "title": "居住关系操作后状态未同步",
+    "originalSeverity": "严重（跨端状态不一致）",
+    "historicalState": "迁出主链、历史租约/同住者与旧页面刷新真实回归通过，见§3.76；不把TENANT身份类型当在住状态",
+    "historicalFix": "未提交",
+    "historicalRegression": "双端在租→已搬出，房屋/关系/租约一致；原未指明其他入口不泛化结案",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      184,
+      1446,
+      1453,
+      2257,
+      2294
+    ]
+  },
+  {
+    "id": "DEF-147",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 185
+    },
+    "title": "无居住关系时无可操作按钮，缺「搬出」入口",
+    "originalSeverity": "一般（操作入口缺失）",
+    "historicalState": "**待修复（待排期）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "按现行设计终结",
+    "evidence": [
+      "BE",
+      "BF",
+      "BO"
+    ],
+    "conclusion": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。",
+    "verificationLayer": "设计核对及原用户裁决",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      185,
+      1429,
+      1447,
+      2258
+    ]
+  },
+  {
+    "id": "DEF-148",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 186
+    },
+    "title": "审核通过时租约「月租 / 押金」未自动带出挂牌默认价格",
+    "originalSeverity": "一般（表单效率与口径一致性）",
+    "historicalState": "**已修复并定向回归（bh-2，§3.80）**",
+    "historicalFix": "2026-10-12",
+    "historicalRegression": "隔离61项/开发只读20项；895/274；未测渠道交易",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH2",
+      "BP",
+      "CE"
+    ],
+    "conclusion": "挂牌来源/占用/价格与首期成功激活内核定向回归；交易主路径用户已确认，异常范围独立保留。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      186,
+      1462,
+      1470,
+      1478,
+      1481,
+      1608,
+      2259,
+      2356,
+      2368
+    ]
+  },
+  {
+    "id": "DEF-149",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 187
+    },
+    "title": "审核通过后房源仍显示「可租」",
+    "originalSeverity": "一般（设计口径 vs 用户预期，**待裁决**）",
+    "historicalState": "**已修复并定向回归（bh-2，§3.80）**",
+    "historicalFix": "2026-10-12",
+    "historicalRegression": "隔离61项/开发只读20项；895/274；未测渠道交易",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BH2",
+      "BP",
+      "CE"
+    ],
+    "conclusion": "挂牌来源/占用/价格与首期成功激活内核定向回归；交易主路径用户已确认，异常范围独立保留。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      187,
+      1462,
+      1472,
+      1478,
+      1482,
+      2260
+    ]
+  },
+  {
+    "id": "DEF-150",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 188
+    },
+    "title": "管理端未通过审核前就已存在租约群聊",
+    "originalSeverity": "一般（会话创建时机与设计口径不符）",
+    "historicalState": "**干净数据租约群创建时序回归通过（§3.42）；不混同预约创建即建看房群**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      188,
+      1489,
+      1495,
+      1503,
+      1508,
+      1522,
+      1532,
+      1558,
+      1593,
+      1677,
+      1684,
+      2262,
+      2703
+    ]
+  },
+  {
+    "id": "DEF-151",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 189
+    },
+    "title": "出现重复会话",
+    "originalSeverity": "一般（会话唯一性缺口）",
+    "historicalState": "**干净数据单群/重复审批与申请幂等回归通过（§3.42）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      189,
+      190,
+      1497,
+      1508,
+      1522
+    ]
+  },
+  {
+    "id": "DEF-152",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 190
+    },
+    "title": "已有租约 / 已通过后仍可再次提交入住申请并再次通过（用户标注「这也是一个大缺陷」）",
+    "originalSeverity": "严重（重复租约 / 重复会话的数据根因）",
+    "historicalState": "**待修复（待排期）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      188,
+      189,
+      190,
+      1497,
+      1508,
+      1509,
+      1521
+    ]
+  },
+  {
+    "id": "DEF-153",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 191
+    },
+    "title": "房源挂牌缺「看房可预约时段」配置 ⇒ 居民端无可预约时段（本轮手测阻塞点）",
+    "originalSeverity": "严重（功能缺口 + **本轮手测阻塞**）",
+    "historicalState": "**待修复（待排期）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      191,
+      1499,
+      1500,
+      1504,
+      1510,
+      1523
+    ]
+  },
+  {
+    "id": "DEF-154",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 192
+    },
+    "title": "社区结构页全量渲染整个社区房屋 ⇒ 大社区进入即卡顿数秒",
+    "originalSeverity": "一般（性能 / 可用性，数据量越大越明显）",
+    "historicalState": "**已修复，按范围加载/完整分页/竞态与真实浏览器回归通过（见§3.75）**",
+    "historicalFix": "—",
+    "historicalRegression": "—",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      192,
+      1489,
+      1499,
+      1511,
+      1524,
+      1532,
+      1749,
+      2179,
+      2206,
+      2227,
+      2233,
+      2704
+    ]
+  },
+  {
+    "id": "DEF-155",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 1525
+    },
+    "title": "周日=0导致看房时段无法保存",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      1525
+    ]
+  },
+  {
+    "id": "DEF-156",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 1540
+    },
+    "title": "取消看房后群未关闭",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      1540
+    ]
+  },
+  {
+    "id": "DEF-157",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 193
+    },
+    "title": "服务人员端「我的带看」仍使用 R59 旧单聊，未接入 R63 看房群聊",
+    "originalSeverity": "严重（核心沟通链断裂）",
+    "historicalState": "**已修复（浏览器回归通过）**",
+    "historicalFix": "89671f1",
+    "historicalRegression": "`evidence/historical-reference-restored-20261012/24-staff-viewing-group-fixed.png`、`evidence/historical-reference-restored-20261012/25-resident-viewing-group-fixed.png`；前端 210/210、typecheck/build 通过`",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      193,
+      1552
+    ]
+  },
+  {
+    "id": "DEF-158",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 194
+    },
+    "title": "游客看房预约的手机号 + 预约编号凭据链未实现",
+    "originalSeverity": "严重（游客链路不可用 + 预约隐私边界缺失）",
+    "historicalState": "**待用户裁决（身份凭据口径）**",
+    "historicalFix": "—",
+    "historicalRegression": "代码证据：`SecurityConfig.java`、`ViewingAppointmentController.java`、`ViewingAppointmentService.java`、`ReservationActionDTO.java`；本轮不擅自新增预约编号或改认证策略`",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "按现行设计终结",
+    "evidence": [
+      "BE",
+      "BF",
+      "BO"
+    ],
+    "conclusion": "分别为仅超管新建、既有删除入口、非ACTIVE不可再次迁出、注册居民预约方案B；可操作性/体验观察交60，不开越权或非法流转入口。",
+    "verificationLayer": "设计核对及原用户裁决",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      194,
+      1578,
+      1593
+    ]
+  },
+  {
+    "id": "DEF-159",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 195
+    },
+    "title": "工单驳回/取消的处理记录把前置状态写成目标状态",
+    "originalSeverity": "一般（处理时间线失真，不改变主状态机结果）",
+    "historicalState": "**已修复（单测回归通过）**",
+    "historicalFix": "8056c19",
+    "historicalRegression": "`WorkOrderStateMachineFixTest` 新增驳回/取消前置状态断言；定向后端 **14/14** 通过，修复后记录恢复为真实前置状态。`WorkOrderService.java` 原有通知注释改动未混入本提交。",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      195,
+      1662,
+      1667
+    ]
+  },
+  {
+    "id": "DEF-160",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 196
+    },
+    "title": "管理端终审关闭后居民评价入口消失",
+    "originalSeverity": "一般（居民无法完成已允许的评价闭环）",
+    "historicalState": "**已修复（浏览器回归通过）**",
+    "historicalFix": "d7f5197（代码）/ 49103a7（测试补强）",
+    "historicalRegression": "居民详情与列表均将 `CLOSED` 纳入补评入口；前端回归用例通过。真实浏览器复测：终审后显示评价表单，提交 5 星成功，刷新后展示评价结果；首次查询无评价时的 HTTP 404 为既有「暂无评价」空态语义，由前端吞掉，不作为功能失败。",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BJ",
+      "BP"
+    ],
+    "conclusion": "08§3.33/3.34/3.42对应申请唯一、群、时段、ISO星期、取消只读、工单前态和CLOSED补评真实回归；主表旧待修不作为当前未修。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      196,
+      1661,
+      1667
+    ]
+  },
+  {
+    "id": "DEF-161",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 197
+    },
+    "title": "看房违约记录成功但处置未生效",
+    "originalSeverity": "一般（风险控制未生效，可继续预约）",
+    "historicalState": "**已修复，依现行阈值规则冻结/吊销/防重回归通过（见§3.75）**",
+    "historicalFix": "—",
+    "historicalRegression": "真实 API 回归：3 条 `VIEWING_NO_SHOW` 记录、账号 ACTIVE、第 4 条预约 HTTP 200；证据见 `output/playwright/viewing-violation-audit-2026-10-09.txt`。需先裁决复用统一阈值自动冻结，还是每次违约由管理端明确选择处置。",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      197,
+      1735,
+      1738,
+      2227,
+      2234
+    ]
+  },
+  {
+    "id": "DEF-162",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 198
+    },
+    "title": "BUILDING 定向公告错误扩散到同社区其他楼栋居民",
+    "originalSeverity": "严重（定向公告越范围泄露，且通知触达范围可能扩大）",
+    "historicalState": "**已修复并回归通过**",
+    "historicalFix": "当前工作区修复（待阶段提交）+ `NoticeDataScopeFixTest`",
+    "historicalRegression": "居民读列表与详情改为按当前有效居住关系匹配社区/楼栋；纯 `GUEST` 公告对居民不可见；管理员绑定社区可读取其楼栋公告；楼栋定向发布只触达目标楼栋在住 ACTIVE 居民；专项测试 12/12，公告专项 51/51，后端全量 745/745；浏览器最终回归：`A-2号楼` 目标公告对 `A-1号楼` 居民列表不可见、详情返回 404、居民通知数为 0、console/page/API 错误为 0。证据见 `output/playwright/cf-e5-building-scope-fixed-final-2026-10-09.txt`。",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BI"
+    ],
+    "conclusion": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      198,
+      1768,
+      2705
+    ]
+  },
+  {
+    "id": "DEF-163",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 199
+    },
+    "title": "社区级联删除遗漏通知渠道留痕",
+    "originalSeverity": "严重（级联删除判据不达标；含通知渠道留痕的社区无法删除）",
+    "historicalState": "**已修复并回归通过**",
+    "historicalFix": "当前工作区修复（待阶段提交）+ `CommunityCascadeDeleteTest`",
+    "historicalRegression": "`CommunityService.delete` 按社区查询通知 ID，先删除 `notification_channel_log`，再删除 `notification`；单测 7/7 通过；隔离库 `community_residence_test` 真实回归：创建临时社区/楼栋/单元/房屋，造通知及渠道留痕后 DELETE 返回 200，社区、通知、渠道留痕、楼栋、单元、房屋残留计数均为 0。证据见 `output/playwright/cf-e1-cascade-notification-log-fixed-20261009.txt`。",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BC"
+    ],
+    "conclusion": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      199,
+      1874,
+      1887
+    ]
+  },
+  {
+    "id": "DEF-164",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 200
+    },
+    "title": "退款失败结算被超长留痕阻断",
+    "originalSeverity": "严重（退款失败状态卡死，无法按设计回落 PAID 重试）",
+    "historicalState": "**已修复并回归通过**",
+    "historicalFix": "当前工作区修复 + `DepositRefundServiceTest`",
+    "historicalRegression": "统一对发起/成功/失败留痕 detail 按 500 字符截断；定向测试 19/19；浏览器长失败原因 + 500 字符备注显示渠道失败原因，API/console/page 错误 0；隔离库验证 FAILED/PAID 与两列长度上限。证据见 `output/playwright/cf-e3f-refund-control-20261009.txt`。",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BC"
+    ],
+    "conclusion": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      200,
+      1891,
+      1913
+    ]
+  },
+  {
+    "id": "DEF-165",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 201
+    },
+    "title": "协议双方确认后管理方未收到通知",
+    "originalSeverity": "严重（协议签约完成依赖管理端待办 / 刷新，C11 收件矩阵与设计不一致）",
+    "historicalState": "**已修复并回归通过**",
+    "historicalFix": "fix(notification): notify admins on agreement confirmation",
+    "historicalRegression": "补齐社区绑定且启用的 `ADMIN` 管理员收件人：居民单方确认发送「居民已确认租赁协议」，双方确认发送「租赁协议已确认」；保留 `owner_type=USER`、`LEASE_AGREEMENT` 来源 ID 与幂等口径。定向协议测试 **11/11**、后端全量 **747/747**；隔离浏览器回归中管理端深链 `/admin/housing-lease?tab=leases`、居民端深链 `/resident/housing-lease?tab=lease` 均通过，API/console/page 错误为 0，测试数据已清理。详见 `output/playwright/cf-e11-agreement-notification-fixed-browser-20261010.json`。",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BC"
+    ],
+    "conclusion": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      201,
+      1945,
+      1959
+    ]
+  },
+  {
+    "id": "DEF-166",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 202
+    },
+    "title": "看房预约通知矩阵不完整且前端不可达",
+    "originalSeverity": "一般（预约待办可能漏收，已有通知无法从消息中心直达业务入口）",
+    "historicalState": "**已修复并回归通过**",
+    "historicalFix": "fix(notification): complete viewing appointment notification matrix",
+    "historicalRegression": "新建预约向社区绑定管理员发送「新看房预约」；居民取消向绑定管理员发送「看房预约已取消」；保留确认 / 完成 / 违约 / 分配既有通知。新增后端回归 **7/7**，前端通知导航回归 **14/14**；方案 B 浏览器链路验证游客浏览 → 登录回跳 → 居民预约，居民无游客字段；管理员 / 居民 / 服务人员消息中心分别正确落到 `/admin/housing-lease?tab=housings&view=viewings`、`/resident/viewing-appointments/{id}`、`/staff/viewings`，API/console/page 错误为 0。证据见 `output/playwright/cf-e12-viewing-notification-audit-20261010.json`。",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BC"
+    ],
+    "conclusion": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      202,
+      1996,
+      2016
+    ]
+  },
+  {
+    "id": "DEF-167",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 203
+    },
+    "title": "1024px 下租约操作区禁止收缩，房屋地址逐字竖排、租期与徽标重叠；期望 768px 以上内容可读、操作可达。改为有最小信息宽度的 Grid，平板上下排列，状态和按钮换行，长说明独占一行。",
+    "originalSeverity": "一般",
+    "historicalState": "关闭（回归通过）",
+    "historicalFix": "本批提交",
+    "historicalRegression": "768/1024/1366px 浏览器无卡片重叠；租约组件 25/25，类型检查与构建通过；详见 §3.66。",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BF",
+      "BC"
+    ],
+    "conclusion": "原独立真实专项/界面几何均有实际回归，后续协议通知与去重按现行规则；退款失败留痕不扩大到全渠道异常。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      203,
+      2065
+    ]
+  },
+  {
+    "id": "DEF-168",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2185
+    },
+    "title": "协议意愿重复采集及生效边界",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BC",
+      "BH2"
+    ],
+    "conclusion": "协议一次同意、角色拒绝、幂等、撤回与竞争原专项通过；SIGNED仍待首期，金融不执行。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2110,
+      2128,
+      2143,
+      2171,
+      2179,
+      2185,
+      2206
+    ]
+  },
+  {
+    "id": "DEF-169",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 204
+    },
+    "title": "居民他人详情、服务人员未分配详情原以普通BusinessException拒绝，HTTP200/code403且未走专用越权日志；改ForbiddenException，查看范围不变；本批补齐其他居民取消预约的",
+    "originalSeverity": "一般（错误协议与审计）",
+    "historicalState": "已修复，异常类型与真实HTTP403回归通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "ViewingAppointmentRegistrationOnlyTest；08§3.75/§3.76 / nontransaction-isolated-regression-20261011.json",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      204,
+      2237,
+      2239,
+      2297,
+      2706
+    ]
+  },
+  {
+    "id": "DEF-170",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 205
+    },
+    "title": "绑定变更与重新登录同秒，旧秒级<=判断把变更后新登录一并吊销，真实返回401。新登录签名包含当前DB吊销记录ID，验证只拒绝之后的新吊销；旧令牌保持保守时间戳语义，登录使用一致读快照。",
+    "originalSeverity": "严重（授权变更后登录不可立即使用）",
+    "historicalState": "已修复，14项新增单测与真实旧401/新200验证通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "TokenRevisionBoundaryTest/TokenRevisionFilterTest；§3.76；nontransaction-engineering-red/full-20261011.json",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      205,
+      2295
+    ]
+  },
+  {
+    "id": "DEF-171",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 206
+    },
+    "title": "授权范围中有2条关系，size=1返回total=1；页后过滤错误把总数重写为当前页长度。改授权范围先进入SQL再分页，保留数据库总数；无绑定直接空页。",
+    "originalSeverity": "一般（分页遗漏/总数错误）",
+    "historicalState": "已修复，单测先红后绿与真实total=2验证通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "ResidenceRelationEngineeringTest；§3.76；nontransaction-engineering-red/full-20261011.json",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      206,
+      2296
+    ]
+  },
+  {
+    "id": "DEF-172",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 207
+    },
+    "title": "原moveOut只有运行日志，没有关键变更操作日志。补现有AOP注解，内部返回居住关系用于准确解析社区归属，HTTP响应保持不变；仅保存关系ID/日期，不采集迁出理由原文。",
+    "originalSeverity": "一般（关键状态变更缺审计）",
+    "historicalState": "已修复，真实STATUS/对象ID/社区/日期留痕通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "§3.76；nontransaction-engineering-full-20261011.json",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      207
+    ]
+  },
+  {
+    "id": "DEF-173",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 208
+    },
+    "title": "完整分页控件撑出内容区，768px页面宽872px。分页薄封装按内容区换行，窄内容区保持上一页/页码/下一页一组，不隐藏总数、页大小或跳页。",
+    "originalSeverity": "一般（平板页面级溢出）",
+    "historicalState": "已修复，32个1024/768核心页组合无页面级溢出；组件3项通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "Pagination.spec.ts；§3.76；bf-logs-page-768-20261011.png",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BE",
+      "BF"
+    ],
+    "conclusion": "原现场与后续真实隔离HTTP/日志/分页/冻结/迁出/布局证据逐项承接；DEF-139安全白名单补齐而历史原始请求不补造。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      208,
+      2300
+    ]
+  },
+  {
+    "id": "DEF-174",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 209
+    },
+    "title": "他社区居民POST公告view返回200并写回执；他社区ADMIN GET viewers返回200并暴露阅读者。notice相关表跳过SQL社区注入，子接口漏用父公告可见性/管理归属检查。",
+    "originalSeverity": "严重（数据权限）",
+    "historicalState": "已修复，本批真实请求与12项新增单测通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "§3.81；domain-matrix-before-fix.json",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BI"
+    ],
+    "conclusion": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      209,
+      2414
+    ]
+  },
+  {
+    "id": "DEF-175",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 210
+    },
+    "title": "非提交居民及未被派人员GET工单evaluation均200，可读评价正文与居民信息；EvaluationService只查评价，SQL拦截不处理RESIDENT/STAFF个人权限。",
+    "originalSeverity": "严重（数据权限）",
+    "historicalState": "已修复，本批真实请求与12项新增单测通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "§3.81；domain-matrix-before-fix.json",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BI"
+    ],
+    "conclusion": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      210,
+      2414
+    ]
+  },
+  {
+    "id": "DEF-176",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 211
+    },
+    "title": "省略contactPhone通过请求校验后写NULL，真实SQL报Field contact_phone does not have a default value，HTTP500；前端选填与服务端落库未闭合。",
+    "originalSeverity": "一般（合法选填请求失败）",
+    "historicalState": "已修复，本批真实请求与12项新增单测通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "§3.81；domain-matrix-before-fixture-adjustment.json",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BI"
+    ],
+    "conclusion": "真实公告范围/回执/评价参与者/选填电话回归已通过，跨社区不可见的断言按BI保存。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      211,
+      2414
+    ]
+  },
+  {
+    "id": "DEF-177",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 212
+    },
+    "title": "ASSIGNED改派后旧服务人员详情403但列表仍返回正文；管理assigneeId筛选也命中历史处理人。page使用全部历史派单ID而非最新派单归属。",
+    "originalSeverity": "严重（列表权限泄漏）",
+    "historicalState": "已修复，910/278及81项接口回归通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "§3.82；def177-before-fix-api.json",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BJ"
+    ],
+    "conclusion": "最新被派人员列表/详情权限及768/1024侧栏真实回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      212,
+      2431,
+      2433
+    ]
+  },
+  {
+    "id": "DEF-178",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 213
+    },
+    "title": "768/1024px管理端侧栏固定占232px，无菜单开关；规范要求768～1199px默认收起、覆盖展开及路由变化关闭。",
+    "originalSeverity": "一般（低分辨率内容拥挤）",
+    "historicalState": "已修复，4项新增测试及11项浏览器侧栏交互通过",
+    "historicalFix": "未提交",
+    "historicalRegression": "§3.82；def178-sidebar-before.png",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BJ"
+    ],
+    "conclusion": "最新被派人员列表/详情权限及768/1024侧栏真实回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      213,
+      2431,
+      2435
+    ]
+  },
+  {
+    "id": "DEF-179",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 214
+    },
+    "title": "关闭并重开导入表单只重置selectedFile，未同步清空上传组件内部文件列表；单文件limit=1下再次选择可能被拒、开始导入不可用。",
+    "originalSeverity": "一般（重复操作阻断）",
+    "historicalState": "已修复：受控fileList在重开同步清空，新增组件测试及真实文件选择重开/重复导入复验",
+    "historicalFix": "本批本地提交",
+    "historicalRegression": "§3.85；ResidentImportReset.spec.ts",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BK",
+      "BL"
+    ],
+    "conclusion": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      214,
+      2474
+    ]
+  },
+  {
+    "id": "DEF-180",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 215
+    },
+    "title": "姓名只取首字后按ID拼先生/女士，身份按ID轮换业主/租客/家属；工作台固定MOCK趋势且COMPLETED总数冒称今日完成。",
+    "originalSeverity": "一般（展示误导）",
+    "historicalState": "已修复：真实姓名、中性居民角色、去MOCK趋势，完成卡片如实标未关闭；统计规则方案待确认",
+    "historicalFix": "本批本地提交",
+    "historicalRegression": "§3.86；19方案",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BK",
+      "BL"
+    ],
+    "conclusion": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      215,
+      2479
+    ]
+  },
+  {
+    "id": "DEF-181",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 216
+    },
+    "title": "列表或统计请求失败呈现暂无评价/0条，跟进明细读取失败按0条误归待跟进。",
+    "originalSeverity": "一般（错误与业务空态混淆）",
+    "historicalState": "已修复：分离错误/空态与统计/跟进状态，重试入口；失败无0条分页及误分类",
+    "historicalFix": "本批本地提交",
+    "historicalRegression": "§3.86；EvaluationLoadState.spec.ts",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BK",
+      "BL"
+    ],
+    "conclusion": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      216,
+      2481
+    ]
+  },
+  {
+    "id": "DEF-182",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 217
+    },
+    "title": "原本人STAFF完成403且有无权违约按钮。用户采纳推荐后",
+    "originalSeverity": "一般（跨端链路阻断／设计冲突）",
+    "historicalState": "已修复并隔离回归（2026-10-12 bl）",
+    "historicalFix": "完整任务本地提交，见Git log",
+    "historicalRegression": "§3.88；staff-rules-20261012/regression.json；本人按钮200、越权拒绝、并发一次成功",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BK",
+      "BL"
+    ],
+    "conclusion": "重复导入文件、真实状态、错误空态及本人STAFF完成权限均有具体新增测试和实际按钮回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      217,
+      2483,
+      2490,
+      2502
+    ]
+  },
+  {
+    "id": "DEF-183",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 220
+    },
+    "title": "用户修正规则",
+    "originalSeverity": "一般",
+    "historicalState": "验证（自动通过，用户复测待填）",
+    "historicalFix": "37558b9",
+    "historicalRegression": "996单测/305前端；隔离中文用户名、手机号、重复及标识碰撞拒绝",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BN",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      220,
+      2523,
+      2707
+    ]
+  },
+  {
+    "id": "DEF-184",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 221
+    },
+    "title": "Excel GBK文件误报表头，导入者无法准确查房屋/社区主键；严格多编码解析及引号表头校验，增加完整授权位置/ID对照与模板真实社区ID",
+    "originalSeverity": "严重",
+    "historicalState": "验证（自动通过，用户复测待填）",
+    "historicalFix": "37558b9",
+    "historicalRegression": "GBK12行/三类关系成功，重复12行拒绝，错归属行零残留；真实上传/下载按钮",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BN",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      221
+    ]
+  },
+  {
+    "id": "DEF-185",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 222
+    },
+    "title": "管理员编辑与下架500",
+    "originalSeverity": "严重",
+    "historicalState": "验证（自动通过，用户复测待填）",
+    "historicalFix": "d046f01",
+    "historicalRegression": "普通ADMIN真实保存/下架200，单条记录更新；跨社区拒绝，占用历史不能删",
+    "severity": "严重",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BN",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      222
+    ]
+  },
+  {
+    "id": "DEF-186",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 223
+    },
+    "title": "户型筛选种子硬编码、挂牌冗余列作条件、重复搜索/筛选；按真实house.layout及可见集合选项，去冗余按钮/不可见状态，范围切换清旧户型",
+    "originalSeverity": "一般",
+    "historicalState": "验证（自动通过，用户复测待填）",
+    "historicalFix": "d046f01",
+    "historicalRegression": "故意置旧冗余列仍按真实模型筛选；公开占用隐藏/ADMIN范围；真实下拉与搜索按钮",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BN",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      223
+    ]
+  },
+  {
+    "id": "DEF-187",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 224
+    },
+    "title": "占用卡片新增动作后不换行，overflow裁掉下架按钮；动作容器可换行，按钮间距与窄屏可达修复",
+    "originalSeverity": "一般",
+    "historicalState": "验证（自动通过，用户复测待填）",
+    "historicalFix": "d046f01",
+    "historicalRegression": "1024/768所有动作边界内，真实下架可点，确认说明下线不取消占用",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BN",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      224
+    ]
+  },
+  {
+    "id": "DEF-188",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 225
+    },
+    "title": "编辑弹窗详情迟到覆盖已输入描述，详情失败也可能空值保存；加载门禁、失败重试和请求失效控制，避免未知图片丢失",
+    "originalSeverity": "一般",
+    "historicalState": "验证（自动通过，用户复测待填）",
+    "historicalFix": "d046f01",
+    "historicalRegression": "3前端加载/失败/迟到测试；延迟400ms真实保存门禁及描述更新读回",
+    "severity": "一般",
+    "severityBasis": "原专项原定级，未降级",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BN",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "bn原现场真实隔离修复，bo后续模型修正及用户此前回归文档已测完承接；不再保留“用户复测待填”为待办。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      225
+    ]
+  },
+  {
+    "id": "DEF-189",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2548
+    },
+    "title": "社区单删缺真实影响和确认保护",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "批准设计替代",
+    "evidence": [
+      "BP",
+      "BU",
+      "BX"
+    ],
+    "conclusion": "bp有效关系/资金一律禁止已由用户bu批准的真实影响、名称、版本、双确认取代；不得恢复原硬禁止或恢复用户主动删除资料。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2548,
+      2584,
+      2708
+    ]
+  },
+  {
+    "id": "DEF-190",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2549
+    },
+    "title": "主关系成员及整户迁出确认不清",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BP",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2549
+    ]
+  },
+  {
+    "id": "DEF-191",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2550
+    },
+    "title": "挂牌/占用状态混淆",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BP",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2550
+    ]
+  },
+  {
+    "id": "DEF-192",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2551
+    },
+    "title": "会话有效期与36h裁决不一致",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BP",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2551
+    ]
+  },
+  {
+    "id": "DEF-193",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2552
+    },
+    "title": "本人租约会话私有来源预约被拒",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BP",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2552
+    ]
+  },
+  {
+    "id": "DEF-194",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2553
+    },
+    "title": "SIGNED未付仍显示待签约",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BP",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2553
+    ]
+  },
+  {
+    "id": "DEF-195",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2554
+    },
+    "title": "取消子看房误关父租约群",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BP",
+      "BO",
+      "CM"
+    ],
+    "conclusion": "按bp各项真实API/浏览器与用户业务确认收口；DEF-195取消子看房不关闭父租约群有独立红绿及隔离回归。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2554
+    ]
+  },
+  {
+    "id": "DEF-196",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2569
+    },
+    "title": "新社区缺服务类别和空态",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BQ",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2569,
+      2709
+    ]
+  },
+  {
+    "id": "DEF-197",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2570
+    },
+    "title": "公告示例图片和新建残留",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BQ",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2570
+    ]
+  },
+  {
+    "id": "DEF-198",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2571
+    },
+    "title": "在线无续期及迟到401误清新会话",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BQ",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2571
+    ]
+  },
+  {
+    "id": "DEF-199",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2572
+    },
+    "title": "聊天图片未形成共享消息",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BQ",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2572
+    ]
+  },
+  {
+    "id": "DEF-200",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2573
+    },
+    "title": "匿名反馈泄露姓名及账号ID",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BQ",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2573
+    ]
+  },
+  {
+    "id": "DEF-201",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2574
+    },
+    "title": "资源时段额度分子/分母不同源",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BQ",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "类别/公告真图/在线续期/共享图片/匿名身份/时段额度逐项专项已执行；36h不是耐久实测。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2574
+    ]
+  },
+  {
+    "id": "DEF-202",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2596
+    },
+    "title": "支付配置保存误停用/配置误报",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BX",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "显式配置开关、身份空间已读游标与父表权限均有真实API/浏览器/并发定向证据；保存不代表交易。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2596,
+      2710
+    ]
+  },
+  {
+    "id": "DEF-203",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2597
+    },
+    "title": "群聊已读未持久化和自发消息误计",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BX",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "显式配置开关、身份空间已读游标与父表权限均有真实API/浏览器/并发定向证据；保存不代表交易。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2597
+    ]
+  },
+  {
+    "id": "DEF-204",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2598
+    },
+    "title": "房屋相册/合同子表权限注入导致500",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "BX",
+      "CM",
+      "CP"
+    ],
+    "conclusion": "显式配置开关、身份空间已读游标与父表权限均有真实API/浏览器/并发定向证据；保存不代表交易。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2598
+    ]
+  },
+  {
+    "id": "DEF-205",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2611
+    },
+    "title": "普通租金收银台INVALID_PARAMETER",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "用户确认主路径",
+    "evidence": [
+      "CE",
+      "CZ"
+    ],
+    "conclusion": "新FIRST/普通RENT成功已确认，当前租金不阻塞；原INVALID_PARAMETER确切根因仍未知，不填“定位并修复”。",
+    "verificationLayer": "用户真实支付成功；无AI渠道复测",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2611,
+      2623,
+      2630,
+      2632,
+      2634,
+      2638,
+      2640,
+      2648,
+      2711,
+      2719
+    ]
+  },
+  {
+    "id": "DEF-206",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2624
+    },
+    "title": "单套挂牌缺看房时段配置",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "CA",
+      "CM"
+    ],
+    "conclusion": "ca单套挂牌默认/自定义时段复用批量解析且同事务；非法配置不留半成品，隔离API与浏览器入口已验，后续用户此前回归确认承接。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2624
+    ]
+  },
+  {
+    "id": "DEF-207",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2625
+    },
+    "title": "红点已更新而缓存列表陈旧",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "CA",
+      "CM"
+    ],
+    "conclusion": "ca的LivePanel/useLiveRefresh在激活/通知/前台恢复与30秒补读，隐藏停止，保留筛选/表单并防旧响应覆盖；真实新申请自动出现/切回更新已验。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2625
+    ]
+  },
+  {
+    "id": "DEF-208",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2647
+    },
+    "title": "缓存支付表单过期仍可重开",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "工程回归关闭",
+    "evidence": [
+      "CE"
+    ],
+    "conclusion": "缓存表单打开前和系统截止相等保护有失败先行/修复后定向19及后端1157记录；不是远端404根因确证。",
+    "verificationLayer": "固定时钟/真实组件测试",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2647
+    ]
+  },
+  {
+    "id": "DEF-209",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2657
+    },
+    "title": "铃铛未读漏列/混入已读",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "CF",
+      "CP",
+      "CY"
+    ],
+    "conclusion": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2657,
+      2712
+    ]
+  },
+  {
+    "id": "DEF-210",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2658
+    },
+    "title": "首页横向溢出",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "CF",
+      "CP",
+      "CY"
+    ],
+    "conclusion": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2658,
+      2666
+    ]
+  },
+  {
+    "id": "DEF-211",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2659
+    },
+    "title": "公告ALL单值无效范围控件",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "CF",
+      "CP",
+      "CY"
+    ],
+    "conclusion": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      2659
+    ]
+  },
+  {
+    "id": "DEF-212",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "line": 2660
+    },
+    "title": "直接派单漏建群与会话筛选缺失",
+    "originalSeverity": null,
+    "historicalState": "见专项原登记，未单列统一状态",
+    "historicalFix": null,
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "db补定级：按原登记影响归类，非历史追认；一般展示/局部阻断，严重身份泄露/核心链/数据或截止保护，致命OOM",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "CF",
+      "CP",
+      "CY"
+    ],
+    "conclusion": "cf/ch实际未读/滚动/首页/范围/三端工单群和筛选通过；CF-02用户确认与后续整册、三端及最新运行确认承接，不要求重复。",
+    "verificationLayer": "原专项所列层次",
+    "testBindings": [],
+    "newExecution": false,
+    "mentionLines": [
+      5,
+      2660
+    ]
+  },
+  {
+    "id": "DEF-213",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.108"
+    },
+    "title": "直通会话并发重复",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "dc-targeted-closeout-20261019/old-anomalies.json",
+      "dc-targeted-closeout-20261019/backend-targeted.json"
+    ],
+    "conclusion": "dc真实并发复现；居民父行锁与锁后当前读修复，10路交错返回同一会话ID。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-214",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.108"
+    },
+    "title": "Redis包装连接异常未命中降级",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "dc-targeted-closeout-20261019/redis-fault.json",
+      "dc-targeted-closeout-20261019/backend-targeted.json"
+    ],
+    "conclusion": "dc真实Redis断开复现；故障降级、认证DB黑名单与恢复回归通过。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-215",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.108"
+    },
+    "title": "Redis恢复后通知序号回退导致增量补拉遗漏",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "dc-targeted-closeout-20261019/redis-fault.json",
+      "dc-targeted-closeout-20261019/backend-targeted.json"
+    ],
+    "conclusion": "恢复时抬升数据库序号下限，故障补拉与序号回归通过。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-216",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.109"
+    },
+    "title": "Redis故障时通知业务35.599秒超过前端15秒请求超时",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/redis-fault.json",
+      "df-final-remediation-20261019/backend-targeted.json"
+    ],
+    "conclusion": "断开后真实前端30.8ms；无响应Redis 1027.3ms；150次故障写入最长910.97ms。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-217",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.109"
+    },
+    "title": "前端通知补拉游标lastSeq与后端sinceSeq不一致",
+    "originalSeverity": "一般",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "一般",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/frontend-build-summary.json",
+      "df-final-remediation-20261019/redis-fault.json"
+    ],
+    "conclusion": "统一前端参数为sinceSeq；非零游标真实调用与结果过滤通过，完整未读快照保留。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-218",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.110"
+    },
+    "title": "同居民跨资源或跨域预约并发绕过日程冲突",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/concurrency.json",
+      "df-final-remediation-20261019/backend-targeted.json"
+    ],
+    "conclusion": "旧版双写真实复现；居民日期锁修复后两类各3轮仅1笔成功。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-219",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.110"
+    },
+    "title": "退租创建等待期间租约结束或缩短仍落库旧申请",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/concurrency.json",
+      "df-final-remediation-20261019/backend-targeted.json"
+    ],
+    "conclusion": "旧版产生PENDING；house→lease锁内重检后两种交错均零旧申请。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-220",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.110"
+    },
+    "title": "资源预约状态被旧请求覆盖并重复产生违约副作用",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/state-fixed.json",
+      "df-final-remediation-20261019/backend-targeted.json"
+    ],
+    "conclusion": "资源状态锁后当前读；confirm/complete旧状态覆盖和10路违约重复副作用被拦截。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-221",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.110"
+    },
+    "title": "看房预约确认或取消覆盖已取消或已完成状态",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/state-fixed.json",
+      "df-final-remediation-20261019/backend-targeted.json"
+    ],
+    "conclusion": "看房confirm/cancel统一预约行锁和当前状态重检，旧确认覆盖回归通过。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-222",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.110"
+    },
+    "title": "反馈办结后迟到消息写入或重复办结产生副作用",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/state-fixed.json",
+      "df-final-remediation-20261019/backend-targeted.json"
+    ],
+    "conclusion": "反馈父行锁后当前读覆盖消息、图片、附件和close；迟到写入拒绝，重复副作用一次。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  },
+  {
+    "id": "DEF-223",
+    "registration": {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "section": "§3.110"
+    },
+    "title": "资源违约冻结账号后旧令牌仍可用或计数使用旧快照",
+    "originalSeverity": "严重",
+    "historicalState": "df最终收尾",
+    "historicalFix": "df final remediation",
+    "historicalRegression": null,
+    "severity": "严重",
+    "severityBasis": "本批真实隔离复现或既有真实故障证据",
+    "disposition": "修复回归关闭",
+    "evidence": [
+      "df-final-remediation-20261019/state-fixed.json",
+      "df-final-remediation-20261019/backend-targeted.json"
+    ],
+    "conclusion": "居民行锁与当前计数后只首次冻结并吊销；旧令牌401且有吊销记录。",
+    "verificationLayer": "独立隔离环境真实HTTP/SQL交错与工程回归",
+    "testBindings": [],
+    "newExecution": true
+  }
+]

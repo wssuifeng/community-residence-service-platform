@@ -83,6 +83,7 @@ public class ReservationService {
     private final SysConfigService sysConfigService;
     private final NotificationService notificationService;
     private final RedissonClient redissonClient;
+    private final com.community.residence.common.auth.service.TokenRevocationService tokenRevocationService;
 
     /**
      * 创建预约：Slot Grid 模型（08 §3.7 定案）。日期窗口（DEF-051/053）：
@@ -149,6 +150,12 @@ public class ReservationService {
         }
 
         Long userId = SecurityUtils.getUserId();
+        return ResidentScheduleLock.execute(redissonClient, userId, dto.getReserveDate(),
+                () -> insertUnderScheduleLock(dto, resource, slotUnit, userId));
+    }
+
+    private ReservationVO insertUnderScheduleLock(CreateReservationDTO dto, PublicResource resource,
+                                                   int slotUnit, Long userId) {
         RLock lock = redissonClient.getLock(
                 "reservation:lock:resource:" + resource.getId() + ":" + dto.getReserveDate());
         boolean locked = false;
@@ -291,7 +298,7 @@ public class ReservationService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约审核通过'")
     public void confirm(Long id, String remark) {
-        ResourceReservation reservation = requireReservation(id);
+        ResourceReservation reservation = requireReservationForUpdate(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
         validateTransition(reservation, ReservationStatus.RESERVED);
         checkCapacity(resourceMapper.selectById(reservation.getResourceId()),
@@ -309,7 +316,7 @@ public class ReservationService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "STATUS", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约完成登记'")
     public void complete(Long id, String remark) {
-        ResourceReservation reservation = requireReservation(id);
+        ResourceReservation reservation = requireReservationForUpdate(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
         validateTransition(reservation, ReservationStatus.COMPLETED);
         reservation.setStatus(ReservationStatus.COMPLETED);
@@ -320,7 +327,7 @@ public class ReservationService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "REVIEW", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约审核拒绝：' + #reason")
     public void reject(Long id, String reason) {
-        ResourceReservation reservation = requireReservation(id);
+        ResourceReservation reservation = requireReservationForUpdate(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
         validateTransition(reservation, ReservationStatus.REJECTED);
         reservation.setStatus(ReservationStatus.REJECTED);
@@ -334,7 +341,7 @@ public class ReservationService {
     /* 取消预约：PENDING/RESERVED → CANCELLED；仅预约人本人可取消 */
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long id, String reason) {
-        ResourceReservation reservation = requireReservation(id);
+        ResourceReservation reservation = requireReservationForUpdate(id);
         if (!reservation.getUserId().equals(SecurityUtils.getUserId())) {
             throw new ForbiddenException("仅预约人本人可取消预约");
         }
@@ -348,13 +355,14 @@ public class ReservationService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "DISPOSAL", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约违约处置：' + #reason")
     public void violate(Long id, String reason) {
-        ResourceReservation reservation = requireReservation(id);
+        ResourceReservation reservation = requireReservationForUpdate(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
         validateTransition(reservation, ReservationStatus.VIOLATED);
         reservation.setStatus(ReservationStatus.VIOLATED);
         reservation.setRemark(reason);
         reservationMapper.updateById(reservation);
 
+        Resident resident = residentMapper.selectByIdForUpdate(reservation.getUserId());
         ViolationRecord record = new ViolationRecord();
         record.setUserId(reservation.getUserId());
         record.setViolationType("RESERVATION_NO_SHOW");
@@ -363,7 +371,7 @@ public class ReservationService {
         record.setRemark(reason);
         violationRecordMapper.insert(record);
 
-        freezeIfExceeded(reservation.getUserId(), reason);
+        freezeIfExceeded(reservation.getUserId(), reason, resident);
         notificationService.createForResident(reservation.getUserId(), reservation.getCommunityId(),
                 "预约违约处置", "您 " + reservation.getReserveDate() + " 的预约被标记违约：" + reason,
                 "RESERVATION", "RESOURCE_RESERVATION", id);
@@ -529,28 +537,30 @@ public class ReservationService {
         }
     }
 
-    /* 违约超限自动冻结（violation.max_count 配置，缺省 3） */
-    private void freezeIfExceeded(Long userId, String reason) {
-        Long violationCount = violationRecordMapper.selectCount(
-                new LambdaQueryWrapper<ViolationRecord>().eq(ViolationRecord::getUserId, userId));
-        String maxConfig = sysConfigService.getValue(CONFIG_VIOLATION_MAX);
+    /* 与看房共用账号行锁及当前读计数，避免并发资源/看房违约漏冻结；冻结须吊销旧令牌。 */
+    private void freezeIfExceeded(Long userId, String reason, Resident resident) {
+        int violationCount = violationRecordMapper.selectIdsByUserIdForUpdate(userId).size();
+        String configured = sysConfigService.getValue(CONFIG_VIOLATION_MAX);
         int maxCount = 3;
-        if (maxConfig != null) {
+        if (configured != null) {
             try {
-                maxCount = Integer.parseInt(maxConfig);
-            } catch (NumberFormatException e) {
-                log.warn("违约上限配置不合法，使用缺省 3：value={}", maxConfig);
-            }
+                int value = Integer.parseInt(configured);
+                if (value > 0) maxCount = value;
+            } catch (NumberFormatException e) { log.warn("违约上限配置不合法，使用缺省3"); }
         }
-        if (violationCount >= maxCount) {
-            Resident resident = residentMapper.selectById(userId);
-            if (resident != null) {
-                resident.setStatus(CommonStatus.FROZEN);
-                residentMapper.updateById(resident);
-                log.warn("居民违约超限自动冻结：residentId={}, violations={}, threshold={}, lastReason={}",
-                        userId, violationCount, maxCount, reason);
-            }
+        if (resident != null && violationCount >= maxCount && !CommonStatus.FROZEN.equals(resident.getStatus())) {
+            resident.setStatus(CommonStatus.FROZEN);
+            residentMapper.updateById(resident);
+            tokenRevocationService.revokeResident(userId);
+            log.warn("居民违约超限自动冻结：residentId={}, violations={}, threshold={}, lastReason={}",
+                    userId, violationCount, maxCount, reason);
         }
+    }
+
+    private ResourceReservation requireReservationForUpdate(Long id) {
+        ResourceReservation row = reservationMapper.selectByIdForUpdate(id);
+        if (row == null) throw new ResourceNotFoundException("资源预约不存在");
+        return row;
     }
 
     private void checkReadAccess(ResourceReservation reservation) {

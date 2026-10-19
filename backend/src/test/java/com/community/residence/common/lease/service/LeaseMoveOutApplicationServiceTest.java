@@ -160,6 +160,7 @@ class LeaseMoveOutApplicationServiceTest {
         house.setStatus("OCCUPIED");
 
         when(leaseMapper.selectById(LEASE_ID)).thenReturn(activeLease);
+        when(leaseMapper.selectByIdForUpdate(LEASE_ID)).thenReturn(activeLease);
         when(moveOutMapper.selectById(APPLICATION_ID)).thenReturn(pendingApplication);
         when(moveOutMapper.selectByIdForUpdate(APPLICATION_ID)).thenReturn(pendingApplication);
         when(houseMapper.selectById(5L)).thenReturn(house);
@@ -553,4 +554,20 @@ class LeaseMoveOutApplicationServiceTest {
         verify(moveOutMapper, never()).update(any(), any());
         verify(notificationService, never()).createForResident(any(), any(), any(), any(), any(), any(), any());
     }
+    @Test
+    void createRechecksLeaseAfterWaitingAndRejectsEndedLease() {
+        LeaseRecord ended = new LeaseRecord();
+        ended.setId(LEASE_ID); ended.setTenantId(RESIDENT_ID); ended.setStatus("MOVED_OUT");
+        when(leaseMapper.selectByIdForUpdate(LEASE_ID)).thenReturn(ended);
+        try (MockedStatic<SecurityUtils> security = mockStatic(SecurityUtils.class)) {
+            security.when(SecurityUtils::getUserId).thenReturn(RESIDENT_ID);
+            var dto = new CreateMoveOutApplicationDTO(); dto.setMoveOutDate(LocalDate.now().plusDays(1));
+            assertThatThrownBy(() -> service.create(LEASE_ID, dto)).isInstanceOf(BusinessException.class);
+            verify(moveOutMapper, never()).insert(any(LeaseMoveOutApplication.class));
+            var order = org.mockito.Mockito.inOrder(houseMapper, leaseMapper);
+            order.verify(houseMapper).selectByIdForUpdate(5L);
+            order.verify(leaseMapper).selectByIdForUpdate(LEASE_ID);
+        }
+    }
+
 }

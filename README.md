@@ -1,9 +1,6 @@
-# 社区居住服务管理系统（community-residence-service-platform）
+﻿# 社区居住服务管理系统（community-residence-service-platform）
 
-> **2026-10-19 de复核**：[40复核](docs/50_系统测试/40_并发与Redis故障复核.md)确认DEF-216/217待修：Redis故障请求35.599秒超过前端15秒，通知增量补拉参数不一致；另4项并发风险需实证。当前登记217项，[09报告](docs/50_系统测试/09_测试评估与报告.md)保留dc实测并撤回“仅待审阅”结论。先整改并回归，再办理出口；正常包尚未加载上一批修复。金融本人确认、不复测。
-
-> **维护说明（2026-10-19）**：本批从`caae28d`补充收尾修复，代码及文档同次本地提交；[最终隔离包](docs/50_系统测试/evidence/dc-targeted-closeout-20261019/final-runtime.json)、[性能测试包](docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance-tested-runtime.json)、[Redis故障测试包](docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-tested-runtime.json)分别保留哈希。正常运行包仍沿用户确认版本。此前cz的`cf761e8`/`def6f90`/`57f26e9`分别是当时资料、源码及运行来源，按历史读取。
-> **最近运行核查为2026-10-19**：正常8084/5176、MySQL3306和Redis6379进程均保持；只读核查正常库V43/61、日志留存730天，见[本批核查](docs/50_系统测试/evidence/dc-targeted-closeout-20261019/environment-after.json)。隔离8087/5181/6387已停止，本批修复尚未加载正常后端；下方8080/5173是通用启动默认值。
+> **2026-10-19 df最终收尾**：DEF-216～223已修复并完成受影响回归；最终后端449/449、前端38/38，Redis故障12/12、状态竞态7/7、跨入口并发13/13、通知提交2/2通过。最终证据见[df证据](docs/50_系统测试/evidence/df-final-remediation-20261019/README.md)。50阶段已收尾，当前指针进入60评估验收；金融沿用户确认不复测，论文仍按整体首个大版本完成后启动。
 
 > 课题名称：**基于 Spring Boot 的社区居住服务管理系统设计与实现**（毕业设计）。
 > 对外说明文档。阶段状态与验收结论唯一来源为 `docs/00_总控.md` 和各阶段 `_中控.md`；

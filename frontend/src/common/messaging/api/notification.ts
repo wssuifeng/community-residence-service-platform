@@ -43,7 +43,7 @@ export interface PulledNotifications {
  *  后端返回纯数组（文档示例 {notifications, latestSeq} 为偏差），
  *  latestSeq 由数组最大 seq 推导，空数组沿用入参游标） */
 export async function pullNotifications(lastSeq: number): Promise<PulledNotifications> {
-  const list = await http.get<IPulledNotification[]>('/notifications/pull', { lastSeq })
+  const list = await http.get<IPulledNotification[]>('/notifications/pull', { sinceSeq: lastSeq })
   const latestSeq = list.reduce((max, item) => Math.max(max, Number(item.seq)), lastSeq)
   return { notifications: list, latestSeq }
 }

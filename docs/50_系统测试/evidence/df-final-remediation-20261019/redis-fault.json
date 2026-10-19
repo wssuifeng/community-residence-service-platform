@@ -1,0 +1,119 @@
+{
+  "checks": [
+    {
+      "name": "断开后真实前端请求小于15秒且业务成功",
+      "passed": true,
+      "actual": {
+        "ok": true,
+        "id": 169,
+        "ms": 30.80000001192093
+      }
+    },
+    {
+      "name": "故障50路业务写入第1轮",
+      "passed": true,
+      "actual": {
+        "requests": 50,
+        "maxMs": 667.365
+      }
+    },
+    {
+      "name": "故障50路业务写入第2轮",
+      "passed": true,
+      "actual": {
+        "requests": 50,
+        "maxMs": 722.175
+      }
+    },
+    {
+      "name": "故障50路业务写入第3轮",
+      "passed": true,
+      "actual": {
+        "requests": 50,
+        "maxMs": 910.97
+      }
+    },
+    {
+      "name": "Redis故障退出仍写DB黑名单",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "Redis故障退出令牌仍被拒绝",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "150条反馈及通知全部落库",
+      "passed": true,
+      "actual": null
+    },
+    {
+      "name": "断开后恢复",
+      "passed": true,
+      "actual": {
+        "faultSeconds": 10.016
+      }
+    },
+    {
+      "name": "Redis进程无响应时前端15秒内成功",
+      "passed": true,
+      "actual": {
+        "ok": true,
+        "id": 320,
+        "ms": 1027.2999999821186
+      }
+    },
+    {
+      "name": "恢复后实际前端继续成功",
+      "passed": true,
+      "actual": {
+        "ok": true,
+        "id": 321,
+        "ms": 21.30000001192093
+      }
+    },
+    {
+      "name": "真实前端非零sinceSeq契约",
+      "passed": true,
+      "actual": {
+        "cursor": 1,
+        "count": 322,
+        "latestSeq": 1792389089432,
+        "allAfter": true,
+        "pullURLs": [
+          "http://127.0.0.1:5181/api/v1/notifications/pull?sinceSeq=0",
+          "http://127.0.0.1:5181/api/v1/notifications/pull?sinceSeq=1"
+        ]
+      }
+    },
+    {
+      "name": "Redis恢复后WS投递继续",
+      "passed": true,
+      "actual": {
+        "messages": 1,
+        "errors": []
+      }
+    }
+  ],
+  "passed": 12,
+  "failed": [],
+  "firstBrowser": {
+    "ok": true,
+    "id": 169,
+    "ms": 30.80000001192093
+  },
+  "unresponsiveBrowser": {
+    "ok": true,
+    "id": 320,
+    "ms": 1027.2999999821186
+  },
+  "faultWriteRequests": 150,
+  "latencyMs": {
+    "max": 910.97,
+    "p95": 823.696
+  },
+  "normalRedisTouched": false,
+  "financialRequests": 0,
+  "scope": "本轮故障时延/50路负载与恢复定向复验；原dc五分钟窗口证据保留，未重复宣称本轮五分钟"
+}

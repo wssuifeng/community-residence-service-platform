@@ -90,6 +90,7 @@ class ViewingAppointmentRegistrationOnlyTest {
 
     @BeforeEach
     void setUp() throws InterruptedException {
+        lenient().when(appointmentMapper.selectByIdForUpdate(anyLong())).thenAnswer(call -> appointmentMapper.selectById((Long) call.getArgument(0)));
         lenient().when(redissonClient.getLock(anyString())).thenReturn(lock);
         lenient().when(lock.tryLock(anyLong(), any(java.util.concurrent.TimeUnit.class))).thenReturn(true);
         lenient().when(sysConfigService.getValue("viewing.max_continuous_minutes")).thenReturn(null);

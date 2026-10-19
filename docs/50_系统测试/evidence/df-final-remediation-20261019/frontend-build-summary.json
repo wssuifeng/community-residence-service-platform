@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-19",
+  "vitest": {
+    "suites": 14,
+    "passedSuites": 14,
+    "tests": 38,
+    "passedTests": 38,
+    "failedTests": 0
+  },
+  "typecheck": "passed",
+  "build": "passed",
+  "source": "output/runtime/df-closeout/frontend-targeted.json and frontend-step-2.log",
+  "financialCommands": 0
+}

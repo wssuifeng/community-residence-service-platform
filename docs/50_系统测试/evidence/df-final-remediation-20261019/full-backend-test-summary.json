@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-19",
+  "verifiedAt": "2026-10-19T16:05:12.476454+08:00",
+  "scope": "backend full code-level regression after final defect remediation",
+  "command": "backend\\mvnw.cmd test",
+  "exitCode": 0,
+  "tests": 1231,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1,
+  "source": "Maven Surefire final summary",
+  "tcDenominatorRelation": "代码层全量测试结果，不替代50阶段305 TC系统测试分母，也不扩写为305 TC整册重放",
+  "financialCommands": 0,
+  "note": "本次全量复跑包含已修正的WorkOrderStateMachineFixTest测试桩；金融专项仍按用户确认不执行交易、查单、退款测试。"
+}

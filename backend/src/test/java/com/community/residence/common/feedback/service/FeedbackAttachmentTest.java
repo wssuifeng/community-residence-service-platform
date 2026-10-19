@@ -49,6 +49,7 @@ class FeedbackAttachmentTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(feedbackMapper.selectByIdForUpdate(org.mockito.ArgumentMatchers.anyLong())).thenAnswer(call -> feedbackMapper.selectById((Long) call.getArgument(0)));
         pendingFeedback = new Feedback();
         pendingFeedback.setId(1L);
         pendingFeedback.setResidentId(4L);

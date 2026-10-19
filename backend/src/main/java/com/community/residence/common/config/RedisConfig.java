@@ -16,6 +16,23 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
+    /** 单机Redis故障时限制连接/命令等待；分布式锁失败仍拒绝写入，不按缓存放行。 */
+    @Bean
+    public org.redisson.spring.starter.RedissonAutoConfigurationCustomizer redisTimeoutCustomizer() {
+        return config -> {
+            if (config.isSingleConfig()) {
+                config.useSingleServer().setConnectTimeout(1000).setTimeout(1000).setRetryAttempts(0);
+            }
+        };
+    }
+
+    @Bean
+    public org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate(
+            RedisConnectionFactory factory) {
+        return new FailFastStringRedisTemplate(factory);
+    }
+
+
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();

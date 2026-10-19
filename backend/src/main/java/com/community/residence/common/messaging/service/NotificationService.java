@@ -55,7 +55,7 @@ public class NotificationService {
             if current < floor then redis.call('SET', KEYS[1], ARGV[1]) end
             return redis.call('INCR', KEYS[1])
             """, Long.class);
-    private Long lastSeq;
+    private final java.util.concurrent.atomic.AtomicLong lastSeq = new java.util.concurrent.atomic.AtomicLong(-1);
 
     /** 渠道分级配置键（R51：按通知等级勾选模拟渠道，JSON 承载于 sys_config） */
     public static final String KEY_CHANNEL_LEVELS = "notify.channel.levels";
@@ -201,24 +201,27 @@ public class NotificationService {
         return NotificationOwnerType.ofRole(user == null ? null : user.getRole());
     }
 
-    /* 单体内串行分配序号：首次从数据库恢复下限；Redis 原子抬升下限并递增。
-       故障期间同毫秒也不复用序号，恢复后先传播本地最大值，避免 sinceSeq 漏拉。 */
-    private synchronized Long nextSeq() {
-        if (lastSeq == null) {
-            lastSeq = notificationMapper.selectMaxSeq();
-        }
-        try {
-            Long seq = redisTemplate.execute(NEXT_SEQ, List.of(SEQ_KEY), lastSeq.toString());
-            if (seq == null || seq <= lastSeq) {
-                throw new IllegalStateException("通知序号未递增");
+    /* 只在初始化时恢复数据库下限；Redis等待不持有进程级序号锁。
+       并发及故障恢复均在本地原子抬升下限，避免同毫秒重复或游标回退。 */
+    private Long nextSeq() {
+        if (lastSeq.get() < 0) {
+            synchronized (lastSeq) {
+                if (lastSeq.get() < 0) lastSeq.set(notificationMapper.selectMaxSeq());
             }
-            lastSeq = seq;
+        }
+        long candidate;
+        try {
+            long floor = lastSeq.get();
+            Long seq = redisTemplate.execute(NEXT_SEQ, List.of(SEQ_KEY), Long.toString(floor));
+            if (seq == null || seq <= floor) throw new IllegalStateException("通知序号未递增");
+            candidate = seq;
         } catch (DataAccessException e) {
             RedisFailures.rethrowUnlessUnavailable(e);
             log.warn("Redis 不可用，通知 seq 沿本地序号下限递增");
-            lastSeq = Math.max(lastSeq + 1, System.currentTimeMillis());
+            candidate = System.currentTimeMillis();
         }
-        return lastSeq;
+        long proposed = candidate;
+        return lastSeq.updateAndGet(current -> Math.max(current + 1, proposed));
     }
 
     /* 渠道留痕（R51）：站内必达；模拟渠道按 sys_config notify.channel.levels

@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-19",
+  "registeredDefects": 223,
+  "effectiveProductDenominator": 201,
+  "excludedWithReason": 22,
+  "severityRegistered": {
+    "一般": 128,
+    "严重": 65,
+    "致命": 8,
+    "轻微": 22
+  },
+  "finalClosure": {
+    "致命": "8/8",
+    "严重": "58/58",
+    "一般": "114/116",
+    "轻微": "19/19"
+  },
+  "dispositionCounts": {
+    "修复回归关闭": 169,
+    "用户弃置": 1,
+    "拒绝": 1,
+    "人工确认收口": 10,
+    "用户暂缓": 1,
+    "文档或测试资产修正": 12,
+    "批准设计替代": 4,
+    "工程回归有据，专项待评审": 18,
+    "金融异常证据保留": 1,
+    "按现行设计终结": 4,
+    "用户确认主路径": 1,
+    "工程回归关闭": 1
+  },
+  "targetedEvidence": {
+    "backend": "449/449",
+    "frontend": "38/38",
+    "redisFault": "12/12",
+    "stateRaces": "7/7",
+    "crossEntryConcurrency": "13/13",
+    "notificationCommitOrder": "2/2",
+    "frontendTypecheck": "passed",
+    "frontendBuild": "passed",
+    "backendFullSuite": "1231 tests; 0 failures; 0 errors; 1 skipped"
+  },
+  "financialCommands": 0,
+  "boundaries": [
+    "未把34项真实定向断言换算成305个TC整册新执行率",
+    "未完成全项目每个写入口的穷举审查",
+    "金融沿用户确认不复测",
+    "C9需求满足性与现行改版口径转入60"
+  ]
+}
