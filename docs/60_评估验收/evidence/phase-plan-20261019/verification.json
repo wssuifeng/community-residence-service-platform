@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-19",
+  "scope": "60阶段整体计划的文档结构校验；不是质量评估或业务验收",
+  "baseline_commit": "dd62d0e65677ec9421b6ab5c22bc6a9b92b599bf",
+  "checks": {
+    "local_markdown_links_checked": 33,
+    "heading_anchors_checked": 2,
+    "quality_dimensions": [
+      "60-02.1",
+      "60-02.2",
+      "60-02.3",
+      "60-02.4",
+      "60-03.1",
+      "60-03.2",
+      "60-03.3",
+      "60-03.4",
+      "60-04.1",
+      "60-04.2",
+      "60-04.3"
+    ],
+    "quality_dimension_count": 11,
+    "work_groups": 7,
+    "requirement_and_flow_counts": {
+      "R": 75,
+      "N": 10,
+      "E": 13
+    },
+    "requirement_and_flow_rows_unchanged": true,
+    "requirement_source_sha256": "23ac1b5c86bd3e3f40358c8287d833a25570d3545ab13ae49eb09903fdcb204c",
+    "control_line_count": 67,
+    "unrelated_phase_rows_unchanged": true,
+    "current_pointer": "60_评估验收",
+    "git_diff_check_exit": 0
+  },
+  "governance_audit": {
+    "command": [
+      "C:\\Users\\17841\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+      "-X",
+      "utf8",
+      "C:/Users/17841/.agents/skills/project-docs-governance/scripts/audit_project_docs.py",
+      "D:\\code\\community-residence-service-platform",
+      "--format",
+      "json"
+    ],
+    "exit_code": 1,
+    "complete": true,
+    "global_baseline_errors": 1450,
+    "global_current_errors": 1450,
+    "phase60_errors": 0,
+    "phase60_warnings": 0,
+    "business_acceptance": "not_evaluated",
+    "interpretation": "60包未发现文档治理错误；全仓保留既有1450项历史问题，不宣称全仓通过。"
+  },
+  "business_tests_executed": false,
+  "financial_operations_executed": false,
+  "quality_assessments_executed": false,
+  "errors": [],
+  "passed": true
+}
