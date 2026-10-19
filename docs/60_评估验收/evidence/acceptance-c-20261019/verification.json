@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-19",
+  "scope": "60-02.1批次C文档与证据回写",
+  "checks": {
+    "jsonParse": true,
+    "phase60MarkdownLinks": {
+      "passed": true,
+      "missing": []
+    },
+    "ledgerCounts": {
+      "functionalRequirements": 75,
+      "nonFunctionalRequirements": 10,
+      "flows": 13
+    },
+    "productSourceDiffBackendFrontendToBaseline": 0,
+    "gitDiffCheck": "passed",
+    "projectDocsAudit": {
+      "passed": false,
+      "returnCode": 1,
+      "totalErrors": 1452,
+      "changedFileErrors": [],
+      "interpretation": "全仓库审计仍受既有文档体系错误影响；本批变更文件及本批证据目录未产生新增审计错误。"
+    }
+  },
+  "businessWrites": 0,
+  "financialOperations": 0,
+  "qualityAssessmentStarted": false
+}

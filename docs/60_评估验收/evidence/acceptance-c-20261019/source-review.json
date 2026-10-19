@@ -1,0 +1,242 @@
+{
+  "date": "2026-10-19",
+  "documentCommitBeforeBatch": "a569bf37076f39e848f05bdfa14ceed9bcd149c1",
+  "productSourceBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productSourceDiffFiles": 0,
+  "runtime": {
+    "backend": "http://localhost:8084",
+    "frontend": "http://localhost:5176",
+    "openapi": "3.1.0",
+    "pathCount": 211,
+    "businessWrites": 0,
+    "financialOperations": 0
+  },
+  "scope": [
+    "R17",
+    "R18",
+    "R19",
+    "R20",
+    "R21",
+    "R22",
+    "R23",
+    "R37",
+    "R38",
+    "R39",
+    "R65",
+    "R74",
+    "E4",
+    "E8"
+  ],
+  "evidenceSources": [
+    {
+      "id": "RTM",
+      "path": "docs/50_系统测试/evidence/db-final-reconciliation-20261019/rtm-ledger.json",
+      "use": "R17-R23/R37-R39/R65/R74关联测试与证据边界"
+    },
+    {
+      "id": "CASE",
+      "path": "docs/50_系统测试/evidence/db-final-reconciliation-20261019/case-ledger.json",
+      "use": "C4/C8用例处置、历史执行与现行定向证据分类"
+    },
+    {
+      "id": "DF-BE",
+      "path": "docs/50_系统测试/evidence/df-final-remediation-20261019/backend-targeted.json",
+      "use": "现行版本非金融定向套件449项，含WorkOrderR74IntakeTest 7项"
+    },
+    {
+      "id": "WORKORDER-FLOW",
+      "path": "docs/50_系统测试/evidence/nontransaction-matrix-20261012/historical-workorder-evidence.json",
+      "use": "E4既有完整链证据映射；文件明确未重跑原场景"
+    },
+    {
+      "id": "R74-SERVICE",
+      "path": "docs/50_系统测试/evidence/db-final-reconciliation-20261019/case-ledger.json#TC-C4-007/020",
+      "use": "工单受理、状态、群生命周期与角色边界的现行定向记录"
+    },
+    {
+      "id": "R65-SOURCE",
+      "path": "backend/src/test/java/com/community/residence/common/workorder/service/StaffCapabilityServiceTest.java; backend/src/test/java/com/community/residence/common/workorder/service/StaffScheduleServiceTest.java; backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderDispatchTest.java",
+      "use": "实现与局部单测可核对，但不替代最终独立组合执行"
+    },
+    {
+      "id": "R74-SOURCE",
+      "path": "backend/src/test/java/com/community/residence/common/conversation/service/ConversationServiceWorkOrderGroupTest.java; backend/src/test/java/com/community/residence/common/workorder/service/WorkOrderR74IntakeTest.java; frontend/src/__tests__/workorder-group-chat.spec.ts",
+      "use": "建群、幂等入群、参与者隔离、关闭只读与5604边界"
+    }
+  ],
+  "requirements": {
+    "R17": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "BF/CF现行定向",
+        "ServiceCategoryActiveFilterTest"
+      ],
+      "limit": "未向正常库新建或停用类别"
+    },
+    "R18": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "B3",
+        "DEF-026回归"
+      ],
+      "limit": "未向正常库提交新工单或上传附件"
+    },
+    "R19": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "BJ",
+        "CF",
+        "BF",
+        "WorkOrderR74IntakeTest"
+      ],
+      "limit": "当前实现口径按受理独立动作及现行状态机核对"
+    },
+    "R20": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "BJ",
+        "CF",
+        "BF",
+        "WorkOrderStaffDispatchChainTest"
+      ],
+      "limit": "未新增派单数据"
+    },
+    "R21": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "WorkOrderServiceTest"
+      ],
+      "limit": "处理结果文字必填与附件边界沿适用证据"
+    },
+    "R22": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "BJ",
+        "CF",
+        "BF",
+        "WorkOrderServiceTest"
+      ],
+      "limit": "居民确认、退回、终审关闭按现行状态机核对"
+    },
+    "R23": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "B3",
+        "D5",
+        "WS1",
+        "BJ/CF/BF"
+      ],
+      "limit": "时间线与角色访问边界沿适用证据"
+    },
+    "R37": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "BF",
+        "BI",
+        "EvaluationReadAccessTest"
+      ],
+      "limit": "未向正常库新增评价"
+    },
+    "R38": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "B3",
+        "D5",
+        "WS1",
+        "EvaluationBatch3FixTest"
+      ],
+      "limit": "未向正常库新增跟进记录"
+    },
+    "R39": {
+      "status": "passed",
+      "evidence": [
+        "A5",
+        "EvaluationAggregationFixTest"
+      ],
+      "limit": "本批采用既有SQL/接口聚合核对，不重复造数"
+    },
+    "R65": {
+      "status": "insufficient-evidence",
+      "gap": "G-010",
+      "evidence": [
+        "BF",
+        "BJ",
+        "BMTEST",
+        "StaffCapabilityServiceTest",
+        "StaffScheduleServiceTest",
+        "WorkOrderDispatchTest"
+      ],
+      "limit": "现有RTM明确无独立完整R65执行；未形成能力绑定、排班、调度标记、等待时长、班次/负载和四档候选在同一当前版本场景中的完整组合证据"
+    },
+    "R74": {
+      "status": "passed",
+      "evidence": [
+        "BJ",
+        "CF",
+        "CP",
+        "DF-BE",
+        "ConversationServiceWorkOrderGroupTest",
+        "WorkOrderR74IntakeTest",
+        "workorder-group-chat.spec.ts"
+      ],
+      "limit": "未向正常库创建或关闭工单群；通过适用回归和当前源码同基线复用"
+    }
+  },
+  "flows": {
+    "E4": {
+      "status": "insufficient-evidence",
+      "gap": "G-011",
+      "evidence": [
+        "BJ",
+        "CF",
+        "BF",
+        "WORKORDER-FLOW",
+        "TC-C4-020"
+      ],
+      "limit": "分散功能与通知深链证据存在，但当前版本未形成一次完整的提交→受理建群→派单入群→接单处理→确认→评价→终审关闭→会话回收跨端记录"
+    },
+    "E8": {
+      "status": "insufficient-evidence",
+      "gap": "G-011",
+      "evidence": [
+        "A5",
+        "TC-C8-011",
+        "EvaluationAggregationFixTest"
+      ],
+      "limit": "评价/跟进/聚合功能分别有历史与定向证据，但没有当前版本同一批业务数据的完成→评价→跟进→统计完整链记录"
+    }
+  },
+  "conclusions": {
+    "passedRequirements": [
+      "R17",
+      "R18",
+      "R19",
+      "R20",
+      "R21",
+      "R22",
+      "R23",
+      "R37",
+      "R38",
+      "R39",
+      "R74"
+    ],
+    "insufficientEvidenceRequirements": [
+      "R65"
+    ],
+    "failedRequirements": [],
+    "insufficientEvidenceFlows": [
+      "E4",
+      "E8"
+    ],
+    "financialBoundary": "按用户确认采用既有可用结论，不重复支付、查单、退款或渠道配置写入"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-19",
+  "base": "http://localhost:8084",
+  "frontend": "http://localhost:5176",
+  "sourceBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productSourceDiffFiles": 0,
+  "backendOpenApi": "3.1.0",
+  "pathCount": 211,
+  "probes": [
+    {
+      "method": "GET",
+      "url": "http://localhost:8084/v3/api-docs",
+      "status": 200,
+      "purpose": "只读接口契约可加载"
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5176/",
+      "status": 200,
+      "purpose": "前端开发入口可加载"
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:5176/resident",
+      "status": 200,
+      "purpose": "居民端入口可加载"
+    },
+    {
+      "method": "GET",
+      "url": "http://localhost:8084/actuator/health",
+      "status": 401,
+      "purpose": "健康端点受认证保护，非本批业务验收入口"
+    }
+  ],
+  "businessWrites": 0,
+  "financialOperations": 0,
+  "tokensStored": false,
+  "note": "本批只读探针不替代工单/评价写入流程；需求结论采用已核对且版本适用的50阶段证据。金融沿用户确认，不执行支付、查单、退款或渠道配置操作。"
+}
