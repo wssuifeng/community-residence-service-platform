@@ -223,6 +223,13 @@ public class ViewingAppointmentService {
     }
 
     private ViewingAppointment insertAppointment(CreateViewingAppointmentDTO dto, Long conversationId) {
+        Long residentId = requireResidentIdentity();
+        return com.community.residence.common.reservation.service.ResidentScheduleLock.execute(
+                redissonClient, residentId, dto.getAppointmentDate(),
+                () -> insertUnderScheduleLock(dto, conversationId));
+    }
+
+    private ViewingAppointment insertUnderScheduleLock(CreateViewingAppointmentDTO dto, Long conversationId) {
         if (dto.getHousingId() == null) {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "房源不能为空");
         }
@@ -417,7 +424,7 @@ public class ViewingAppointmentService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "REVIEW", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约确认'")
     public void confirm(Long id, String remark) {
-        ViewingAppointment appointment = requireAppointment(id);
+        ViewingAppointment appointment = requireAppointmentForUpdate(id);
         SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
         validateTransition(appointment, "RESERVED");
         appointment.setStatus("RESERVED");
@@ -452,7 +459,7 @@ public class ViewingAppointmentService {
     /* 取消预约：TO_CONFIRM/RESERVED → CANCELLED（居民本人或管理端） */
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long id, String reason) {
-        ViewingAppointment appointment = requireAppointment(id);
+        ViewingAppointment appointment = requireAppointmentForUpdate(id);
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             if (!java.util.Objects.equals(appointment.getUserId(), SecurityUtils.getUserId())) {
                 throw new ForbiddenException("仅预约人本人可取消");

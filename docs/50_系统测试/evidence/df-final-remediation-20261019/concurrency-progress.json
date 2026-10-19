@@ -1,0 +1,558 @@
+{
+  "checks": [
+    {
+      "name": "旧版本真实复现跨资源及跨域竞态",
+      "passed": true,
+      "actual": [
+        {
+          "kind": "crossResource",
+          "round": 1,
+          "responses": [
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 44,
+              "ms": 775.82
+            },
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 45,
+              "ms": 776.297
+            }
+          ],
+          "successfulWrites": 2
+        },
+        {
+          "kind": "crossResource",
+          "round": 2,
+          "responses": [
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 47,
+              "ms": 314.916
+            },
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 46,
+              "ms": 315.148
+            }
+          ],
+          "successfulWrites": 2
+        },
+        {
+          "kind": "crossResource",
+          "round": 3,
+          "responses": [
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 49,
+              "ms": 307.996
+            },
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 48,
+              "ms": 293.3
+            }
+          ],
+          "successfulWrites": 2
+        },
+        {
+          "kind": "crossDomain",
+          "round": 1,
+          "responses": [
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 50,
+              "ms": 302.114
+            },
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 13,
+              "ms": 376.489
+            }
+          ],
+          "successfulWrites": 2
+        },
+        {
+          "kind": "crossDomain",
+          "round": 2,
+          "responses": [
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 51,
+              "ms": 286.461
+            },
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 14,
+              "ms": 318.17
+            }
+          ],
+          "successfulWrites": 2
+        },
+        {
+          "kind": "crossDomain",
+          "round": 3,
+          "responses": [
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 52,
+              "ms": 299.981
+            },
+            {
+              "http": 200,
+              "code": 200,
+              "message": "success",
+              "id": 15,
+              "ms": 326.64
+            }
+          ],
+          "successfulWrites": 2
+        }
+      ]
+    },
+    {
+      "name": "旧版本真实复现退租过期预检",
+      "passed": true,
+      "actual": {
+        "ended": {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 3,
+          "ms": 1262.066,
+          "pendingRows": 1
+        },
+        "shortened": {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 4,
+          "ms": 1239.438,
+          "pendingRows": 1
+        }
+      }
+    },
+    {
+      "name": "修复后crossResource第1轮",
+      "passed": true,
+      "actual": {
+        "kind": "crossResource",
+        "round": 1,
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "id": 53,
+            "ms": 307.468
+          },
+          {
+            "http": 200,
+            "code": 5406,
+            "message": "该时间段您已有其他预约安排，请调整时间",
+            "id": null,
+            "ms": 314.72
+          }
+        ],
+        "successfulWrites": 1
+      }
+    },
+    {
+      "name": "修复后crossResource第2轮",
+      "passed": true,
+      "actual": {
+        "kind": "crossResource",
+        "round": 2,
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "id": 54,
+            "ms": 301.293
+          },
+          {
+            "http": 200,
+            "code": 5406,
+            "message": "该时间段您已有其他预约安排，请调整时间",
+            "id": null,
+            "ms": 307.124
+          }
+        ],
+        "successfulWrites": 1
+      }
+    },
+    {
+      "name": "修复后crossResource第3轮",
+      "passed": true,
+      "actual": {
+        "kind": "crossResource",
+        "round": 3,
+        "responses": [
+          {
+            "http": 200,
+            "code": 5406,
+            "message": "该时间段您已有其他预约安排，请调整时间",
+            "id": null,
+            "ms": 278.877
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "id": 55,
+            "ms": 273.075
+          }
+        ],
+        "successfulWrites": 1
+      }
+    },
+    {
+      "name": "修复后crossDomain第1轮",
+      "passed": true,
+      "actual": {
+        "kind": "crossDomain",
+        "round": 1,
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "id": 56,
+            "ms": 296.712
+          },
+          {
+            "http": 200,
+            "code": 5807,
+            "message": "该时间段您已有其他预约安排，请调整时间",
+            "id": null,
+            "ms": 308.889
+          }
+        ],
+        "successfulWrites": 1
+      }
+    },
+    {
+      "name": "修复后crossDomain第2轮",
+      "passed": true,
+      "actual": {
+        "kind": "crossDomain",
+        "round": 2,
+        "responses": [
+          {
+            "http": 200,
+            "code": 5406,
+            "message": "该时间段您已有其他预约安排，请调整时间",
+            "id": null,
+            "ms": 304.699
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "id": 16,
+            "ms": 301.506
+          }
+        ],
+        "successfulWrites": 1
+      }
+    },
+    {
+      "name": "修复后crossDomain第3轮",
+      "passed": true,
+      "actual": {
+        "kind": "crossDomain",
+        "round": 3,
+        "responses": [
+          {
+            "http": 200,
+            "code": 5406,
+            "message": "该时间段您已有其他预约安排，请调整时间",
+            "id": null,
+            "ms": 312.02
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "message": "success",
+            "id": 17,
+            "ms": 308.537
+          }
+        ],
+        "successfulWrites": 1
+      }
+    },
+    {
+      "name": "修复后退租锁内重检-ended",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5602,
+        "message": "租约状态已变化，请刷新后重试",
+        "id": null,
+        "ms": 1223.748,
+        "pendingRows": 0
+      }
+    },
+    {
+      "name": "修复后退租锁内重检-shortened",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 400,
+        "message": "租期已变化，退租日期须在当前租期范围内",
+        "id": null,
+        "ms": 1219.154,
+        "pendingRows": 0
+      }
+    },
+    {
+      "name": "不同居民同资源10路容量不超售",
+      "passed": true,
+      "actual": [
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 307.44
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 327.519
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 318.668
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 290.346
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 316.258
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 322.571
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 334.6
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 310.139
+        },
+        {
+          "http": 200,
+          "code": 5401,
+          "message": "时段 10:00~10:30 已约满",
+          "id": null,
+          "ms": 295.186
+        },
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 57,
+          "ms": 286.144
+        }
+      ]
+    },
+    {
+      "name": "首尾相接边界1",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success",
+        "id": 58,
+        "ms": 278.052
+      }
+    },
+    {
+      "name": "首尾相接边界2",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "message": "success",
+        "id": 59,
+        "ms": 277.275
+      }
+    }
+  ],
+  "baseline": [
+    {
+      "kind": "crossResource",
+      "round": 1,
+      "responses": [
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 44,
+          "ms": 775.82
+        },
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 45,
+          "ms": 776.297
+        }
+      ],
+      "successfulWrites": 2
+    },
+    {
+      "kind": "crossResource",
+      "round": 2,
+      "responses": [
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 47,
+          "ms": 314.916
+        },
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 46,
+          "ms": 315.148
+        }
+      ],
+      "successfulWrites": 2
+    },
+    {
+      "kind": "crossResource",
+      "round": 3,
+      "responses": [
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 49,
+          "ms": 307.996
+        },
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 48,
+          "ms": 293.3
+        }
+      ],
+      "successfulWrites": 2
+    },
+    {
+      "kind": "crossDomain",
+      "round": 1,
+      "responses": [
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 50,
+          "ms": 302.114
+        },
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 13,
+          "ms": 376.489
+        }
+      ],
+      "successfulWrites": 2
+    },
+    {
+      "kind": "crossDomain",
+      "round": 2,
+      "responses": [
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 51,
+          "ms": 286.461
+        },
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 14,
+          "ms": 318.17
+        }
+      ],
+      "successfulWrites": 2
+    },
+    {
+      "kind": "crossDomain",
+      "round": 3,
+      "responses": [
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 52,
+          "ms": 299.981
+        },
+        {
+          "http": 200,
+          "code": 200,
+          "message": "success",
+          "id": 15,
+          "ms": 326.64
+        }
+      ],
+      "successfulWrites": 2
+    }
+  ]
+}

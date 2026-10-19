@@ -157,6 +157,21 @@ public class LeaseMoveOutApplicationService {
             }
             /* 锁内事务提交（DEF-104）：落库与通知同事务，提交完成后才走出 finally 释放锁 */
             transactionTemplate.executeWithoutResult(status -> {
+                /* 与审核共用house→lease锁序；锁前预检只作早拒绝，写入依据当前锁读。
+                   等待期间租约结束、归属或租期变化时拒绝旧申请，不留悬空PENDING。 */
+                houseMapper.selectByIdForUpdate(lease.getHouseId());
+                LeaseRecord current = leaseMapper.selectByIdForUpdate(leaseId);
+                if (current == null) throw new ResourceNotFoundException("租住记录不存在");
+                if (!residentId.equals(current.getTenantId())) throw new ForbiddenException("无权对他人租约申请退租");
+                if (!LeaseStatus.ACTIVE.equals(current.getStatus())) {
+                    throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID, "租约状态已变化，请刷新后重试");
+                }
+                if (dto.getMoveOutDate().isBefore(current.getStartDate())
+                        || dto.getMoveOutDate().isAfter(current.getEndDate())) {
+                    throw new BusinessException(ErrorCode.INVALID_PARAM, "租期已变化，退租日期须在当前租期范围内");
+                }
+                application.setCommunityId(current.getCommunityId());
+                application.setHouseId(current.getHouseId());
                 moveOutMapper.insert(application);
                 for (Long adminId : boundAdminIds(lease.getCommunityId())) {
                     notificationService.createForUser(adminId, lease.getCommunityId(),

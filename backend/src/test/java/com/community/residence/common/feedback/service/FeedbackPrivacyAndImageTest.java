@@ -39,7 +39,8 @@ class FeedbackPrivacyAndImageTest {
  private final NotificationService notifications=mock(NotificationService.class);
  private final FeedbackService service=new FeedbackService(new com.community.residence.common.messaging.service.AfterCommitDeliveryService(), images,feedback,messages,mock(FeedbackAttachmentMapper.class),residents,mock(SysUserMapper.class),notifications,mock(FileUploadService.class),push,online);
  private Feedback item;
- @BeforeEach void before(){SecurityUtils.setAuthentication(new UserContext(1L,"测试账号","RESIDENT",Set.of()));item=new Feedback();item.setId(3L);item.setResidentId(1L);item.setCommunityId(8L);item.setStatus("PENDING");item.setTitle("测试反馈");when(feedback.selectById(3L)).thenReturn(item);}
+ @BeforeEach void before(){
+        org.mockito.Mockito.lenient().when(feedback.selectByIdForUpdate(org.mockito.ArgumentMatchers.anyLong())).thenAnswer(call -> feedback.selectById((Long) call.getArgument(0)));SecurityUtils.setAuthentication(new UserContext(1L,"测试账号","RESIDENT",Set.of()));item=new Feedback();item.setId(3L);item.setResidentId(1L);item.setCommunityId(8L);item.setStatus("PENDING");item.setTitle("测试反馈");when(feedback.selectById(3L)).thenReturn(item);}
  @AfterEach void after(){SecurityContextHolder.clearContext();}
  @Test void anonymousDetailsNeverExposeNameOrAccount(){item.setIsAnonymous(true);var result=service.getById(3L);assertThat(result.getResidentId()).isNull();assertThat(result.getResidentName()).isEqualTo("匿名居民");verifyNoInteractions(residents);}
  @Test void legacyUnknownChoiceIsConservativelyAnonymous(){var result=service.getById(3L);assertThat(result.getIsAnonymous()).isTrue();assertThat(result.getResidentId()).isNull();}

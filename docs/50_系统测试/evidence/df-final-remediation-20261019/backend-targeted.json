@@ -1,0 +1,1020 @@
+{
+  "suites": [
+    {
+      "class": "com.community.residence.common.agreement.service.AgreementConsentBoundaryTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "issueThenAcceptUsesActualResidentAction"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.auth.service.TokenBlacklistRedisOutageTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "validTokenUsesDatabaseDuringWrappedDriverFailure",
+        "revokedTokenRemainsRejectedDuringWrappedDriverFailure",
+        "unavailableDatabaseIsNeverTreatedAsValidAuthentication"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.auth.service.TokenRevisionFilterTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "blacklistedTokenCannotAuthenticate",
+        "malformedSignedRevisionCannotAuthenticate",
+        "residentTokenKeepsResidentScope",
+        "expiredSignedTokenCannotAuthenticate",
+        "unsignedForgeryCannotAuthenticate",
+        "legacyTokenUsesLegacyRevocationBranch",
+        "preChangeRevisionIsRejected",
+        "currentRevisionSignedTokenAuthenticates"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.auth.service.TokenRevocationFixTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "afterRevokedAt_valid",
+        "redisDown_dbFallback_sameSecondRevoked",
+        "sameSecondIssued_revoked",
+        "noRevocation_valid",
+        "beforeRevokedAt_revoked"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.config.ConversationSubscriptionInterceptorTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "subscribe_userSpaceParticipant_allowed",
+        "subscribe_stranger_rejected",
+        "subscribe_superAdminCollidingId_rejected",
+        "subscribe_residentParticipant_allowed",
+        "subscribe_otherTopic_passthrough",
+        "subscribe_unauthenticated_rejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.config.FeedbackSubscriptionInterceptorTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "subscribe_adminBoundCommunity_allowed",
+        "subscribe_adminUnboundCommunity_rejected",
+        "subscribe_superAdmin_allowed",
+        "subscribe_residentOwner_allowed",
+        "subscribe_staff_rejected",
+        "subscribe_otherTopic_passthrough",
+        "subscribe_residentOther_rejected",
+        "subscribe_missingFeedback_rejected",
+        "subscribe_unauthenticated_rejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.config.RedisCacheGuardTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "repeatedOutageSkipsConnectionAndRecoveryRetriesAfterCooldown",
+        "halfOpenAllowsOnlyOneProbeAndDoesNotBlockOtherThreads",
+        "commandErrorsAreNeitherHiddenNorOpenCircuit",
+        "timeoutsAreBoundedForActualRedissonSingleServer",
+        "templateSharesOutageAcrossGetExistsAndLua"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.config.RedisFailuresTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "redissonWrappedConnectionRefusedMayFallBack",
+        "serializationFailureIsNotSwallowed",
+        "malformedCommandIsNotAnAvailabilityFailure",
+        "wrappedTransportTimeoutMayFallBack",
+        "originalSpringConnectionFailureStillFallsBack"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.config.WebSocketAuthInterceptorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "preSend_blacklistedToken_rejected",
+        "preSend_invalidToken_rejected",
+        "preSend_missingHeader_rejected",
+        "preSend_validToken_setsPrincipal",
+        "preSend_nonConnectCommand_passesThrough"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.conversation.service.ConversationLeaseGroupEnsureTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "ensure_leaseWithoutResident_rejected",
+        "ensure_alreadyLinked_noUpdate",
+        "ensure_createsGroupAndBackfillsLink",
+        "ensure_leaseNotFound",
+        "ensure_idempotentWhenGroupExists"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.conversation.service.ConversationServiceTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "addParticipant_idempotent",
+        "unread_and_markRead",
+        "listMessages_access",
+        "sendMessage_push",
+        "createViewingGroup_participants",
+        "sendSystemMessage_closedConversationRejected",
+        "closeConversation_blocksSend",
+        "createLeaseGroup_duplicateKeyFallsBackToWinner",
+        "foreignMessageCannotAdvanceReadCursor",
+        "closeConversation_idempotent",
+        "joinWorkOrderGroup_closedConversationRejected",
+        "getById_participantOnly",
+        "createLeaseGroup_idempotent",
+        "ensureLeaseGroup_backfillsConversationIdViaConditionalUpdate",
+        "createLeaseGroup_participants",
+        "sendMessage_noPushWhenAllOffline",
+        "listMessages_notFound",
+        "createViewingGroup_idempotent",
+        "unreadExcludesSelfWithinIdentitySpaceNotOnlyNumericId",
+        "openDirect_belongCheck",
+        "addParticipant_duplicateKeySilentlyIgnored"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.feedback.service.FeedbackAttachmentTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "upload_residentOther_forbidden",
+        "delete_notFound_throws",
+        "upload_residentOwner_success",
+        "upload_admin_success",
+        "upload_closedFeedback_rejected",
+        "delete_residentOther_forbidden",
+        "delete_owner_success"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.feedback.service.FeedbackBatch3FixTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "close_pushesStatusPayload",
+        "close_bothOffline_noPush"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.feedback.service.FeedbackConversationBoundaryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "closedFeedbackRejectsBothSidesWithoutWritesOrNotifications(boolean)[1]",
+        "closedFeedbackRejectsBothSidesWithoutWritesOrNotifications(boolean)[2]",
+        "unboundCommunityAdminIsDeniedBeforeAcceptingFeedback",
+        "residentFollowupNotifiesOnlyExistingHandlerAndDoesNotAutoAccept(boolean)[1]",
+        "residentFollowupNotifiesOnlyExistingHandlerAndDoesNotAutoAccept(boolean)[2]"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.feedback.service.FeedbackPrivacyAndImageTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "imageListDoesOneBatchRead",
+        "imageIsARealMessageAndBroadcastHidesResidentIdentity",
+        "legacyUnknownChoiceIsConservativelyAnonymous",
+        "explicitNamedChoiceStillShowsName",
+        "anonymousDetailsNeverExposeNameOrAccount",
+        "createPersistsAnonymousChoice",
+        "anotherResidentCannotSendImage",
+        "closedFeedbackRejectsUploadBeforeFileWrite"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.feedback.service.FeedbackPushTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "sendMessage_residentOnline_pushes",
+        "sendMessage_bothOffline_noPush",
+        "sendMessage_redisDown_degrades",
+        "sendMessage_pushFailure_notPropagated"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.feedback.service.FeedbackServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "sendReadsLockedCurrentStateAfterConcurrentClosure",
+        "create_initialPending",
+        "sendMessage_closed_throws",
+        "sendMessage_adminFirstReply_autoAccepts",
+        "sendMessage_otherResidentFeedback_throws"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.mapper.ViewingLeaseLinkGuardTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "matchesResidentAndHouseListings",
+        "onlyFillsNullLink",
+        "doesNotTouchViewingStatus"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.BatchGenerateHousingTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "batchGenerate_filterByHouse",
+        "batchGenerate_skipListed",
+        "batchGenerate_foreignHouseRejected",
+        "batchGenerate_wholeCommunity",
+        "batchGenerate_filterByUnit",
+        "batchGenerate_usesLockedLatestLayout",
+        "batchGenerate_titleSuffix"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.BatchGenerateHousingTimeslotTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "singleInvalidCustomDoesNotCreateListing",
+        "batchGenerate_skippedHouse_noTimeslots",
+        "batchGenerate_customEmpty_rejected",
+        "batchGenerate_illegalTimeslotMode_rejected",
+        "batchGenerate_customStartNotBeforeEnd_rejected",
+        "batchGenerate_falseButIllegalMode_rejected",
+        "batchGenerate_customTimeslots_created",
+        "batchGenerate_createTimeslotsFalse_skips",
+        "batchGenerate_existingTimeslot_skipped",
+        "singleCreateReusesDefaultTemplates",
+        "batchGenerate_customIllegalDayOfWeek_rejected",
+        "batchGenerate_defaultTimeslots_created"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.HouseManageListTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "pageHouseManage_listingAll_conditions",
+        "pageHouseManage_coverImageAbsent",
+        "pageHouseManage_superAdminScopeNotInjected",
+        "pageHouseManage_listingInvalid_rejected",
+        "pageHouseManage_latestHousingWins",
+        "pageHouseManage_listingListed_exists",
+        "pageHouseManage_adminScopeInjectedByInterceptor",
+        "pageHouseManage_filterByBuilding",
+        "pageHouseManage_buildingWithoutUnit_emptyPage",
+        "pageHouseManage_assembleNamesAndHousing",
+        "pageHouseManage_listingUnlisted_notExists",
+        "pageHouseManage_coverImageFirstNonBlank"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.HousingAvailableSlotsTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "availableSlots_threeHourTemplate_slicedInto3",
+        "availableSlots_tailShorterThan60_dropped",
+        "availableSlots_twoTemplates_sortedByStart",
+        "availableSlots_expandsTemplateForDate",
+        "availableSlots_occupiedMarkedFull",
+        "availableSlots_noTemplateForDay_empty",
+        "availableSlots_templateShorterThan60_noSlice",
+        "availableSlots_adjacentBooking_notCounted",
+        "availableSlots_lateNightTemplate_noMidnightWrapLoop",
+        "availableSlots_templateEndBeyondMidnight_noSlice",
+        "availableSlots_cancelledNotCounted",
+        "availableSlots_expandsAcrossDateRange",
+        "availableSlots_crossSliceBooking_fillsBoth"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.HousingFilterTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "freeTextLayoutIsBoundNotConcatenated",
+        "page_combinedFilters_applied",
+        "page_invalidRentType_rejected",
+        "create_setsLayoutAndDefaultRentType",
+        "page_layoutFilter_applied",
+        "page_rentTypeFilter_applied",
+        "optionsUsePublicAvailabilityAndTrueHouseLayout"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.HousingOccupancyBoundaryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "occupiedDetailAndSlotsAreNotPublic",
+        "historicalOccupancyPreventsPhysicalDelete",
+        "explicitOfflineFilterCannotBypassPublicPredicate"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.HousingPastSlotFixTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_tomorrowSlot_ok",
+        "availableSlots_todayUpcomingSlot_returned",
+        "create_todayEndedSlot_rejected",
+        "availableSlots_todayEndedSlot_excluded",
+        "availableSlots_tomorrow_unaffected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.HousingTimeslotServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "invalidTimeDoesNotWrite",
+        "createPreservesHousingAndDefaultAvailability",
+        "overlappingSlotDoesNotWrite"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.HousingViewCountTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "getById_illegalDeltaText_treatedAsZero",
+        "getById_mergesPendingDelta",
+        "recordView_returnsDbPlusPendingDelta",
+        "page_emptyRecords_noRedisAccess",
+        "recordView_firstIncrement_returnsDbPlusOne",
+        "getById_redisFailure_fallsBackToDbValue",
+        "page_mergesPendingDeltasByMultiGet",
+        "page_multiGetFailure_fallsBackToDbValues",
+        "recordView_redisDown_writesDbAndReturnsNewValue"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingAppointmentConflictFixTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "overlap_contained_throws",
+        "overlap_contains_throws",
+        "concurrent_racesWindow_onlyOneSucceeds",
+        "adjacent_after_ok",
+        "overlap_backHalf_throws",
+        "adjacent_before_ok",
+        "duplicateKeyTranslated_toConflict",
+        "overlap_frontHalf_throws"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingAppointmentRegistrationOnlyTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "adminDetail_legacyGuestRecordWithinCommunityIsReadable",
+        "residentAndGuestCannotComplete",
+        "residentDetail_legacyGuestRecordIsNotClaimable",
+        "assignedStaffCanComplete",
+        "residentCreate_bindsResidentIdentity",
+        "residentDetail_otherResidentIsRejected",
+        "adminDetail_legacyGuestRecordOutsideCommunityIsRejected",
+        "staffCancel_isRejected",
+        "residentCancel_ownAppointmentSucceeds",
+        "staffCannotViolate",
+        "guestCreate_isRejectedBeforeWrite",
+        "residentCancel_otherResidentUsesForbiddenException",
+        "staffDetail_unassignedIsRejected",
+        "otherStaffCannotComplete",
+        "adminCompletionChecksCommunity"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingAssignTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "assign_adminWithoutCommunity_rejected",
+        "assign_adminWithCommunity_success",
+        "assign_reassign_overrides",
+        "assign_guestAppointment_onlyAssigneeNotified",
+        "assign_frozenAccount_rejected",
+        "assign_missingAccount_rejected",
+        "assign_success_notifiesBoth",
+        "assign_superAdmin_rejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingContinuousLimitTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_configuredLimit_enforced",
+        "create_exactlyLimit_ok",
+        "create_overLimit_rejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingConversationDefectFixTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "privateContextStillRejectsUnavailableLeaseOrAnotherTenant",
+        "createInConversation_housingOfLeaseHouse_accepted",
+        "listByLease_orderByDateThenIdDesc",
+        "createInConversation_activeGroup_resolvedHousing_proceeds",
+        "createInConversation_resolvedHousingMistargeted_rejected",
+        "createInConversation_closedGroup_rejected5604",
+        "createInConversation_housingOfOtherHouse_rejected",
+        "ambiguousLegacySourceRejectedWithoutGuessing",
+        "createInConversation_leaseMissing_throws404",
+        "suppliedDifferentSourceEvenInSameHouseIsRejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingMessageAccessTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "list_ownerResident_ok",
+        "list_assignedStaff_ok",
+        "send_ownerResident_pushesWebSocket",
+        "send_adminNotAssignee_forbidden",
+        "list_otherResident_forbidden",
+        "list_adminWithoutBinding_forbidden",
+        "list_unassignedAppointment_adminAndOwnerReadable",
+        "send_assignedStaff_ok",
+        "send_otherResident_forbidden",
+        "list_otherStaff_forbidden",
+        "send_bothOffline_noPush"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingNotificationFixTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "cancellingLeaseViewingDoesNotCloseParentLeaseConversation",
+        "guestAppointment_noNotification_noError",
+        "cancel_notifiesApplicant",
+        "residentCancel_notifiesBoundAdmins",
+        "complete_notifiesApplicant",
+        "confirm_notifiesApplicant",
+        "violate_notifiesAndRecords",
+        "create_notifiesBoundAdmins"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingScheduleConflictTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_crossHousingSameTime_throws5807",
+        "create_guest_rejected",
+        "create_cancelledOrViolatedNotConflicting",
+        "create_sameDayNonOverlap_ok",
+        "create_crossDomainResourceSameTime_throws5807"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingSlotCoverageTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_gapBetweenSegments_rejected",
+        "create_gapInsideRequest_rejected",
+        "create_adjacentSegmentsMerged_ok",
+        "create_slicedTemplate_mergedInterval_ok"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.housing.service.ViewingViolationDispositionTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "historicalGuestDoesNotCountOrFreezeOrNotifyResident",
+        "invalidThresholdFallsBackToThree(String)[1]",
+        "invalidThresholdFallsBackToThree(String)[2]",
+        "invalidThresholdFallsBackToThree(String)[3]",
+        "invalidThresholdFallsBackToThree(String)[4]",
+        "invalidThresholdFallsBackToThree(String)[5]",
+        "belowThresholdOnlyRecords",
+        "thresholdFreezesAndRevokesAndLeavesDisposition",
+        "duplicateMarkDoesNotAddAnotherViolation",
+        "frozenResidentDoesNotRevokeAgain"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.lease.service.LeaseMoveOutApplicationServiceTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "approve_fullCascade",
+        "create_pendingExists_rejected",
+        "approve_leaseNotActive_rejected",
+        "reject_keepsLeaseActive",
+        "create_nonActiveLease_rejected",
+        "createRechecksLeaseAfterWaitingAndRejectsEndedLease",
+        "approve_concurrentWinner_idempotent",
+        "create_notifiesAdminWithLeaseIdSourceId",
+        "rejectAlreadyRejectedIsIdempotent",
+        "rejectConcurrentWinnerIsIdempotent",
+        "create_ownActiveLease_pending",
+        "approve_alreadyApproved_idempotent",
+        "pageLoadsEachAssociationOnce",
+        "create_othersLease_forbidden",
+        "approveWinnerCommittedBeforeLeaseLock",
+        "reject_approvedApplication_rejected",
+        "approveAndReject_notifyWithLeaseIdSourceId",
+        "create_moveOutDateOutsideLeaseTerm_rejected"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.lease.service.LeaseServiceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "directLeaseMoveOutPassesExplicitConfirmation",
+        "updateStatus_illegalTransition_throws",
+        "editingLegacyLeaseDoesNotInventMonthsOrReplaceDatesWithToday",
+        "create_endBeforeStart_throws",
+        "updateLeaseStatusDto_patternAcceptsToSign",
+        "toVO_expiringFlag",
+        "directLeaseMoveOutCannotBypassDependentConfirmation",
+        "create_existingLease_throws",
+        "updateStatus_legalTransitions_pass",
+        "toVO_expiredFlag"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.lease.service.LeaseStateMachineFixTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "updateStatus_linearPath_ok",
+        "update_activeLease_ok",
+        "applyTransition_concurrentDrift_rejected",
+        "updateStatus_activeToArchived_throws",
+        "updateStatus_pendingDirectActive_throws",
+        "applyTransition_concurrentSameTarget_idempotentNoRepeatLog",
+        "updateStatus_pendingToSignThenActive_flipsHouseOnActiveOnly",
+        "update_archivedLease_throws",
+        "updateStatus_toSignRejected_ok"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.NotificationOwnerTypeCallSiteGuardTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "legacyEntry_notUsed",
+        "everyCallSite_declaresOwnerType"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.AfterCommitDeliveryTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "failedSendDoesNotTurnCommittedBusinessIntoFailure",
+        "outerRollbackDoesNotDeliverJoinedTransaction",
+        "exceptionRollsBackWithoutDelivery",
+        "nonTransactionalDeliveryIsImmediate",
+        "successfulCommitDeliversExactlyOnceAfterBody",
+        "localRollbackDoesNotDeliver"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.ChannelLevelsTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "updateChannelLevels_invalidChannel_rejected",
+        "readChannelLevels_parsesJson",
+        "create_withoutConfiguredChannels_logsWebsocketOnly",
+        "updateChannelLevels_allSevenLevels_accepted",
+        "create_brokenConfig_fallsBackToWebsocketOnly",
+        "readChannelLevels_missing_returnsEmpty",
+        "updateChannelLevels_unknownLevel_rejected",
+        "updateChannelLevels_valid_persisted",
+        "create_withConfiguredChannels_logsBoth"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.NotificationIdentitySpaceRegressionTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "markRead_crossIdentitySpace_forbidden",
+        "unread_collidingIds_seeOwnIdentitySpaceOnly",
+        "markRead_ownIdentitySpace_allowed",
+        "createForUser_notVisibleToCollidingResident",
+        "createForResident_notVisibleToCollidingSuperAdmin",
+        "pull_collidingIds_seeOwnIdentitySpaceOnly",
+        "pushSubject_collidingId_usesDistinctDestination",
+        "page_collidingIds_seeOwnIdentitySpaceOnly",
+        "queryCondition_differsByOwnerType_forCollidingId",
+        "markAllRead_scopesToOwnerType"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.NotificationSequenceRecoveryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "rapidOutageNotificationsRemainUniqueAndIncreasing",
+        "restartRestoresDatabaseCursorBeforeUsingFreshRedis",
+        "outageThenRecoveryNeverMovesCursorBackwards",
+        "commandErrorsAreNeverConvertedIntoSuccessfulNotifications"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.NotificationServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_pushFailure_notificationStillPersisted",
+        "createForResident_persistsResidentOwnerType",
+        "create_usesRedisSeq",
+        "create_redisDown_fallsBackToTimestamp",
+        "create_onlineUser_pushesToQueue",
+        "create_onlineResident_pushesToPrefixedQueue",
+        "markAllRead_scopesToCurrentUser"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.messaging.service.WebSocketSessionCountTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deregister_lastConnection_goesOffline",
+        "isOnline_legacyValue_treatedOnline",
+        "redisDown_degradesOffline",
+        "collidingIds_useDistinctSessionKeys",
+        "concurrent_doubleRegister_doubleDeregister_offlineOnlyAtLast",
+        "deregister_oneOfTwoConnections_staysOnline",
+        "register_incrementsAndRenewsTtl"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationConflictFixTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "finishedStatus_notOccupying",
+        "overlap_contained_throws",
+        "overlap_contains_throws",
+        "concurrent_racesWindow_onlyOneSucceeds",
+        "adjacent_after_ok",
+        "overlap_backHalf_throws",
+        "adjacent_before_ok",
+        "duplicateKeyTranslated_toConflict",
+        "overlap_frontHalf_throws"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationContactFallbackTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "explicitContactRemainsUnchanged",
+        "missingProfilePhoneFailsBeforeInsert",
+        "omittedContactUsesResidentPhone",
+        "blankContactUsesResidentPhone",
+        "missingResidentFailsBeforeInsert"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationContinuousLimitTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_configuredLimit_enforced",
+        "create_exactlyLimit_ok",
+        "create_overLimit_rejected",
+        "create_adjacentTemplatesMerged_ok"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationDateWindowFixTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_beyondSevenDays_rejected",
+        "create_todayFutureSlot_ok",
+        "create_pastDate_rejected",
+        "create_todayPastSlot_rejected",
+        "create_exactlySeventhDay_ok"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationSameDayFixTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "sameDay_adjacentSlot_ok",
+        "sameDay_overlappingMine_throws",
+        "sameDay_differentSlot_ok"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationScheduleConflictTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_crossResourceSameTime_throws5406",
+        "create_crossDomainViewingSameTime_throws5406",
+        "create_cancelledOrViolatedNotConflicting",
+        "create_sameDayNonOverlap_ok"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationServiceExtraTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "cancel_notOwner_throws",
+        "reject_pending_ok",
+        "confirm_excludesSelf",
+        "create_success",
+        "create_outsideTemplate_throws",
+        "availableSlots_expandsAndCounts"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "confirmUsesLockedCurrentStateAndCannotResurrectCancellation",
+        "complete_fromPending_throws",
+        "create_capacityFull_throws",
+        "create_duplicateDaily_throws",
+        "violate_writesViolationRecord",
+        "resourceViolationFreezesAndRevokesExistingTokensAtThreshold"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ResidentScheduleLockTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "unavailableLockNeverExecutesWrites",
+        "sharedResidentDateKeyAndAutoCommitRelease",
+        "commitKeepsLockThroughBusinessAndReleasesAfterwards",
+        "rollbackAlsoReleasesLock"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.SlotGridFixTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "create_multiUserWithinCapacity_ok",
+        "create_misalignedEnd_throws400",
+        "create_adjacentGrid_ok",
+        "create_slotUnit60_rejects30Align",
+        "concurrent_capacity3_fiveThreads_exactlyThreeSucceed",
+        "create_misalignedStart_throws400",
+        "availableSlots_gridBucketedAndSorted",
+        "create_legacyMisaligned_coversBothGrids",
+        "create_capacityExceeded_throws",
+        "create_alignedTo15Minutes_ok",
+        "create_multiGridRequest_anyFullGridRejects",
+        "availableSlots_fullGrid"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.resident.service.ResidenceApplicationLeaseLinkTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "approve_linksViewingsToNewLease",
+        "autoApprove_writesBackLeaseId",
+        "approve_writesBackLeaseId",
+        "withdraw_usesStrongLinkFirst",
+        "autoApprove_linksViewingsToNewLease",
+        "withdraw_noLeaseAtAll_noClose",
+        "withdraw_weakFallbackClosesGroup"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.resident.service.ResidenceApplicationServiceTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "withdraw_concurrentWinnerAlreadyWithdrawn_idempotent",
+        "withdraw_weakFallbackActiveLease_skipsGroupClose",
+        "withdraw_concurrentReviewed_throwsNotWithdrawable",
+        "withdraw_strongLinkLease_closesGroupRegardlessOfActive",
+        "wrongHouseOrSaleSourceIsRejected",
+        "tenantMissingSourceIsRejectedWithoutInsert",
+        "withdraw_reviewedApplication_rejected",
+        "approve_concurrentWinnerAlreadyApproved_idempotent",
+        "withdraw_pendingApplication_ok",
+        "approve_existingLease_throwsBeforeSideEffects",
+        "create_autoApproveCommunity_createsLeaseImmediately",
+        "approve_alreadyReviewed_throws",
+        "approve_tenant_flipsHouseAndCreatesLease",
+        "withdraw_othersApplication_forbidden",
+        "create_occupiedHouse_throws",
+        "create_otherPendingApplication_throws",
+        "create_manualApproveCommunity_staysPending",
+        "create_existingLease_throws",
+        "monthEndApprovalPreservesThirteenMonthsAndThreeMonthFirstPayment",
+        "create_duplicatePending_throws",
+        "explicitSourcePriceIsFrozenAtSubmission"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.workorder.service.WorkOrderR74IntakeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "intake_success",
+        "intakeConcurrentWinnerReturnsCurrentGroup",
+        "assign_joinsGroup",
+        "intakeConcurrentDifferentTargetStillConflicts",
+        "submit_notifiesAdminsAndSuperAdmins",
+        "close_requiresCompletedAndRecycles",
+        "intake_invalidState_conflict"
+      ]
+    },
+    {
+      "class": "com.community.residence.common.workorder.service.WorkOrderServiceTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "close_otherCommunityAdmin_throws",
+        "restoreClosedOrderKeepsClosedGroupReadOnly",
+        "confirmAndClose_withNullRemark_succeeds",
+        "residentCannotRestoreOrJoinAsAdministrator",
+        "restoreGroupOutsideManagedCommunityIsForbidden",
+        "restoreAssignedGroupOnlyWritesReferenceAndAddsCurrentAssignee",
+        "assign_nonStaff_throws",
+        "cancel_fromCompleted_throws",
+        "confirm_notOwner_throws",
+        "accept_notAssignee_throws",
+        "directAssignmentCreatesCommunicationGroupBeforeJoiningStaff",
+        "confirm_fromPending_throws",
+        "fullLifecycle_legalTransitions",
+        "restorePendingGroupIsRejectedWithoutChangingStatus"
+      ]
+    }
+  ],
+  "tests": 449,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "scope": "受影响非金融定向套件；覆盖Redis、认证、通知、预约、房源、退租，不代表全部写入口组合。",
+  "buildSucceeded": true,
+  "command": [
+    "cmd.exe",
+    "/d",
+    "/c",
+    "D:\\code\\community-residence-service-platform\\backend\\mvnw.cmd",
+    "--batch-mode",
+    "--no-transfer-progress",
+    "-Dtest=com.community.residence.common.agreement.service.AgreementConsentBoundaryTest,com.community.residence.common.auth.service.TokenBlacklistRedisOutageTest,com.community.residence.common.auth.service.TokenRevisionFilterTest,com.community.residence.common.auth.service.TokenRevocationFixTest,com.community.residence.common.config.ConversationSubscriptionInterceptorTest,com.community.residence.common.config.FeedbackSubscriptionInterceptorTest,com.community.residence.common.config.RedisCacheGuardTest,com.community.residence.common.config.RedisFailuresTest,com.community.residence.common.config.WebSocketAuthInterceptorTest,com.community.residence.common.conversation.service.ConversationLeaseGroupEnsureTest,com.community.residence.common.conversation.service.ConversationServiceTest,com.community.residence.common.feedback.service.FeedbackAttachmentTest,com.community.residence.common.feedback.service.FeedbackBatch3FixTest,com.community.residence.common.feedback.service.FeedbackConversationBoundaryTest,com.community.residence.common.feedback.service.FeedbackPrivacyAndImageTest,com.community.residence.common.feedback.service.FeedbackPushTest,com.community.residence.common.feedback.service.FeedbackServiceTest,com.community.residence.common.housing.mapper.ViewingLeaseLinkGuardTest,com.community.residence.common.housing.service.BatchGenerateHousingTest,com.community.residence.common.housing.service.BatchGenerateHousingTimeslotTest,com.community.residence.common.housing.service.HouseManageListTest,com.community.residence.common.housing.service.HousingAvailableSlotsTest,com.community.residence.common.housing.service.HousingFilterTest,com.community.residence.common.housing.service.HousingOccupancyBoundaryTest,com.community.residence.common.housing.service.HousingPastSlotFixTest,com.community.residence.common.housing.service.HousingTimeslotServiceTest,com.community.residence.common.housing.service.HousingViewCountTest,com.community.residence.common.housing.service.ViewingAppointmentConflictFixTest,com.community.residence.common.housing.service.ViewingAppointmentRegistrationOnlyTest,com.community.residence.common.housing.service.ViewingAssignTest,com.community.residence.common.housing.service.ViewingContinuousLimitTest,com.community.residence.common.housing.service.ViewingConversationDefectFixTest,com.community.residence.common.housing.service.ViewingMessageAccessTest,com.community.residence.common.housing.service.ViewingNotificationFixTest,com.community.residence.common.housing.service.ViewingScheduleConflictTest,com.community.residence.common.housing.service.ViewingSlotCoverageTest,com.community.residence.common.housing.service.ViewingViolationDispositionTest,com.community.residence.common.lease.service.LeaseMoveOutApplicationServiceTest,com.community.residence.common.lease.service.LeaseServiceTest,com.community.residence.common.lease.service.LeaseStateMachineFixTest,com.community.residence.common.messaging.NotificationOwnerTypeCallSiteGuardTest,com.community.residence.common.messaging.service.AfterCommitDeliveryTest,com.community.residence.common.messaging.service.ChannelLevelsTest,com.community.residence.common.messaging.service.NotificationIdentitySpaceRegressionTest,com.community.residence.common.messaging.service.NotificationSequenceRecoveryTest,com.community.residence.common.messaging.service.NotificationServiceTest,com.community.residence.common.messaging.service.WebSocketSessionCountTest,com.community.residence.common.reservation.service.ReservationConflictFixTest,com.community.residence.common.reservation.service.ReservationContactFallbackTest,com.community.residence.common.reservation.service.ReservationContinuousLimitTest,com.community.residence.common.reservation.service.ReservationDateWindowFixTest,com.community.residence.common.reservation.service.ReservationSameDayFixTest,com.community.residence.common.reservation.service.ReservationScheduleConflictTest,com.community.residence.common.reservation.service.ReservationServiceExtraTest,com.community.residence.common.reservation.service.ReservationServiceTest,com.community.residence.common.reservation.service.ResidentScheduleLockTest,com.community.residence.common.reservation.service.SlotGridFixTest,com.community.residence.common.resident.service.ResidenceApplicationLeaseLinkTest,com.community.residence.common.resident.service.ResidenceApplicationServiceTest,com.community.residence.common.workorder.service.WorkOrderR74IntakeTest,com.community.residence.common.workorder.service.WorkOrderServiceTest",
+    "package"
+  ],
+  "buildLogSHA256": "475b2f96cd09efb214cf8417aaae855c5c8ef8a18831936e7e37a9b9b55b7a54",
+  "jarSHA256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541"
+}

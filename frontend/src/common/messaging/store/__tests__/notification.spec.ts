@@ -45,4 +45,14 @@ describe('铃铛完整未读快照', () => {
   push(item(1,true)); push(item(2,false)); push(item(2,false)); expect(store.unreadCount).toBe(1)
   store.cleanup(); push(item(3,false)); expect(store.unreadCount).toBe(0)
  })
+ it('较小序号晚提交，游标已推进时仍从完整未读快照恢复', async () => {
+  const store = useNotificationStore()
+  api.pull.mockResolvedValueOnce({ notifications: [item(20)], latestSeq: 20 }).mockResolvedValueOnce({ notifications: [], latestSeq: 20 })
+  api.unread.mockResolvedValueOnce({ count: 1, notifications: [item(20)] }).mockResolvedValueOnce({ count: 2, notifications: [item(20), item(19)] })
+  await store.refreshBaseline(); await store.refreshBaseline()
+  expect(api.pull).toHaveBeenLastCalledWith(20)
+  expect(store.unread.map(n => n.id)).toEqual([20, 19])
+  expect(store.unreadCount).toBe(2)
+ })
+
 })

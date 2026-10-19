@@ -301,6 +301,7 @@ class WorkOrderStateMachineFixTest {
         winner.setCommunityId(1L);
         winner.setStatus("TO_ASSIGN");
         when(workOrderMapper.selectById(1L)).thenReturn(order, winner);
+        when(workOrderMapper.selectOne(any())).thenReturn(winner);
         when(workOrderMapper.update(any(WorkOrder.class), any())).thenReturn(0);
 
         try (MockedStatic<SecurityUtils> mocked = mockAdmin()) {

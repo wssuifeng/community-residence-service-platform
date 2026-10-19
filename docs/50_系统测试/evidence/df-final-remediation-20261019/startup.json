@@ -1,0 +1,16 @@
+{
+  "database": "community_residence_df_20261019",
+  "backendPid": 31144,
+  "frontendPid": 9432,
+  "redisPid": 27672,
+  "ports": [
+    8087,
+    5181,
+    6387
+  ],
+  "backendSource": "b086950 + df remediation worktree",
+  "sourceHead": "b0869504372e147e1ff6f94ce9a256571a4639c6",
+  "jarSHA256": "494d799d5da1170f1fbd574c9c2631c7811c097237e28507efd7460d456eb19b",
+  "normalServicesUntouched": true,
+  "paymentCommands": 0
+}

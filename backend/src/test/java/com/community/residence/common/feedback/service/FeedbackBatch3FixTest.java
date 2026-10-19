@@ -74,7 +74,7 @@ class FeedbackBatch3FixTest {
             mocked.when(com.community.residence.common.security.context.SecurityUtils::getUserId)
                     .thenReturn(5L);
             Feedback feedback = inSessionFeedback();
-            when(feedbackMapper.selectById(1L)).thenReturn(feedback);
+            when(feedbackMapper.selectByIdForUpdate(1L)).thenReturn(feedback);
             when(feedbackMapper.updateById(any(Feedback.class))).thenReturn(1);
             when(messageMapper.insert(any(FeedbackMessage.class))).thenReturn(1);
             when(webSocketSessionService.isResidentOnline(10L)).thenReturn(false);
@@ -91,7 +91,7 @@ class FeedbackBatch3FixTest {
 
     private void closeAndCapture() {
         Feedback feedback = inSessionFeedback();
-        when(feedbackMapper.selectById(1L)).thenReturn(feedback);
+        when(feedbackMapper.selectByIdForUpdate(1L)).thenReturn(feedback);
         when(feedbackMapper.updateById(any(Feedback.class))).thenReturn(1);
         when(messageMapper.insert(any(FeedbackMessage.class))).thenReturn(1);
         when(webSocketSessionService.isResidentOnline(10L)).thenReturn(true);

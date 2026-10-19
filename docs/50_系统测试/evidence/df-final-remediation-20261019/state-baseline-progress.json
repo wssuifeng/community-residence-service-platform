@@ -1,0 +1,172 @@
+{
+  "checks": [
+    {
+      "name": "资源预约旧状态覆盖-confirm",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "ms": 1304.977,
+        "finalState": "RESERVED"
+      }
+    },
+    {
+      "name": "资源预约旧状态覆盖-complete",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "ms": 1226.087,
+        "finalState": "COMPLETED"
+      }
+    },
+    {
+      "name": "看房确认不能覆盖已取消",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "ms": 1232.448,
+        "finalState": "RESERVED"
+      }
+    },
+    {
+      "name": "反馈闭合后迟到消息被拒",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 200,
+        "ms": 1232.276,
+        "newMessages": 1
+      }
+    },
+    {
+      "name": "同预约违约副作用只入账一次",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1601.699
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 388.465
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1085.424
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 210.69
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 562.626
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 903.107
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 731.364
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1259.504
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1775.67
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1431.043
+          }
+        ],
+        "violationRows": 10
+      }
+    },
+    {
+      "name": "反馈重复办结副作用只写一次",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 382.26
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 729.184
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 216.326
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 558.583
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 901.945
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1419.766
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1245.684
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1765.756
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1076.549
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 1595.319
+          }
+        ],
+        "closeMessages": 10
+      }
+    },
+    {
+      "name": "资源违约冻结吊销旧令牌",
+      "passed": true,
+      "actual": {
+        "residentState": "FROZEN",
+        "previousTokenHTTP": 200,
+        "previousTokenCode": 200,
+        "revocationRecords": 0
+      }
+    }
+  ]
+}

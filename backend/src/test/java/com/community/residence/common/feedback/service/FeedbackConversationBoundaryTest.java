@@ -48,7 +48,7 @@ class FeedbackConversationBoundaryTest {
 
     @ParameterizedTest @ValueSource(booleans = {true, false})
     void closedFeedbackRejectsBothSidesWithoutWritesOrNotifications(boolean resident) {
-        when(feedbackMapper.selectById(12L)).thenReturn(feedback("CLOSED", 9L));
+        when(feedbackMapper.selectByIdForUpdate(12L)).thenReturn(feedback("CLOSED", 9L));
         try (MockedStatic<SecurityUtils> identity = mockStatic(SecurityUtils.class)) {
             identity.when(() -> SecurityUtils.hasRole("RESIDENT")).thenReturn(resident);
             identity.when(SecurityUtils::getUserId).thenReturn(7L);
@@ -59,7 +59,7 @@ class FeedbackConversationBoundaryTest {
     }
 
     @Test void unboundCommunityAdminIsDeniedBeforeAcceptingFeedback() {
-        when(feedbackMapper.selectById(12L)).thenReturn(feedback("PENDING", null));
+        when(feedbackMapper.selectByIdForUpdate(12L)).thenReturn(feedback("PENDING", null));
         try (MockedStatic<SecurityUtils> identity = mockStatic(SecurityUtils.class)) {
             identity.when(() -> SecurityUtils.checkCommunityAccess(3L)).thenThrow(new ForbiddenException("社区无权限"));
             assertThatThrownBy(() -> service.sendMessage(12L, message())).isInstanceOf(ForbiddenException.class);
@@ -70,7 +70,7 @@ class FeedbackConversationBoundaryTest {
 
     @ParameterizedTest @ValueSource(booleans = {true, false})
     void residentFollowupNotifiesOnlyExistingHandlerAndDoesNotAutoAccept(boolean assigned) {
-        when(feedbackMapper.selectById(12L)).thenReturn(feedback(assigned ? "IN_SESSION" : "PENDING", assigned ? 9L : null));
+        when(feedbackMapper.selectByIdForUpdate(12L)).thenReturn(feedback(assigned ? "IN_SESSION" : "PENDING", assigned ? 9L : null));
         when(messageMapper.insert(any(FeedbackMessage.class))).thenAnswer(call -> {
             FeedbackMessage stored = call.getArgument(0);
             assertThat(stored.getSenderType()).isEqualTo("RESIDENT");

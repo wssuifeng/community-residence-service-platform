@@ -1,0 +1,172 @@
+{
+  "checks": [
+    {
+      "name": "资源预约旧状态覆盖-confirm",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5004,
+        "ms": 1233.255,
+        "finalState": "CANCELLED"
+      }
+    },
+    {
+      "name": "资源预约旧状态覆盖-complete",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5004,
+        "ms": 1215.676,
+        "finalState": "CANCELLED"
+      }
+    },
+    {
+      "name": "看房确认不能覆盖已取消",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5004,
+        "ms": 1217.312,
+        "finalState": "CANCELLED"
+      }
+    },
+    {
+      "name": "反馈闭合后迟到消息被拒",
+      "passed": true,
+      "actual": {
+        "http": 200,
+        "code": 5004,
+        "ms": 1224.073,
+        "newMessages": 0
+      }
+    },
+    {
+      "name": "同预约违约副作用只入账一次",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 275.988
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 279.193
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 271.128
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 269.268
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 280.16
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 276.163
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 276.823
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 272.005
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 273.561
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 278.911
+          }
+        ],
+        "violationRows": 1
+      }
+    },
+    {
+      "name": "反馈重复办结副作用只写一次",
+      "passed": true,
+      "actual": {
+        "responses": [
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 213.231
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 209.961
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 205.87
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 205.145
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 208.593
+          },
+          {
+            "http": 200,
+            "code": 200,
+            "ms": 201.011
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 203.428
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 203.811
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 209.719
+          },
+          {
+            "http": 200,
+            "code": 5004,
+            "ms": 208.201
+          }
+        ],
+        "closeMessages": 1
+      }
+    },
+    {
+      "name": "资源违约冻结吊销旧令牌",
+      "passed": true,
+      "actual": {
+        "residentState": "FROZEN",
+        "previousTokenHTTP": 401,
+        "previousTokenCode": 401,
+        "revocationRecords": 1
+      }
+    }
+  ]
+}

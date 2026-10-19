@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "name": "真实数据库先提交大序号",
+      "passed": true,
+      "actual": {
+        "cursor": 1792389090437,
+        "hasA": false,
+        "hasB": true
+      }
+    },
+    {
+      "name": "游标前移后较小序号由完整未读快照恢复",
+      "passed": true,
+      "actual": {
+        "strictDelta": 0,
+        "cursor": 1792389090437,
+        "hasA": true,
+        "hasB": true
+      }
+    }
+  ],
+  "passed": 2,
+  "failed": [],
+  "financialRequests": 0,
+  "scope": "真实MySQL事务交错＋当前前端store/API；严格seq增量仍可能越过晚提交小序号，完整未读快照可恢复，未声称仅靠增量可保证提交顺序。"
+}

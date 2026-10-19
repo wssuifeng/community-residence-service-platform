@@ -71,6 +71,7 @@ class ReservationServiceExtraTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(reservationMapper.selectByIdForUpdate(org.mockito.ArgumentMatchers.anyLong())).thenAnswer(call -> reservationMapper.selectById((Long) call.getArgument(0)));
         lenient().when(redissonClient.getLock(anyString())).thenReturn(lock);
         try {
             lenient().when(lock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);

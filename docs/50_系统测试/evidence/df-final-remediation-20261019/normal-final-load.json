@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-19",
+  "verifiedAt": "2026-10-19T15:50:39.342659+08:00",
+  "scope": "normal runtime final package read-only readiness check",
+  "backendPort": 8084,
+  "frontendPort": 5176,
+  "backendPid": 15212,
+  "frontendPid": 30092,
+  "backendJar": "output/runtime/df-closeout/df-final.jar",
+  "jarSHA256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "sourceHead": "b0869504372e147e1ff6f94ce9a256571a4639c6",
+  "schema": {
+    "flywayVersion": 43,
+    "businessTables": 61
+  },
+  "checks": [
+    {
+      "name": "后端8084仍由最终JAR进程提供",
+      "passed": true,
+      "observed": {
+        "pid": 15212,
+        "jar": "output/runtime/df-closeout/df-final.jar"
+      }
+    },
+    {
+      "name": "前端5176仍由当前Vite进程提供",
+      "passed": true,
+      "observed": {
+        "pid": 30092
+      }
+    },
+    {
+      "name": "OpenAPI只读核对返回HTTP 200",
+      "passed": true,
+      "observed": {
+        "url": "http://127.0.0.1:8084/v3/api-docs",
+        "status": 200
+      }
+    },
+    {
+      "name": "当前入口契约仍注册",
+      "passed": true,
+      "observed": {
+        "paths": [
+          "/api/v1/staff/workbench/summary",
+          "/api/v1/leases/my-summaries",
+          "/api/v1/conversation-inbox",
+          "/api/v1/work-orders/{id}",
+          "/api/v1/communities/{id}/houses-with-housing"
+        ]
+      }
+    },
+    {
+      "name": "前端登录文档只读核对返回HTTP 200",
+      "passed": true,
+      "observed": {
+        "url": "http://127.0.0.1:5176/auth/login",
+        "status": 200,
+        "containsAppRoot": true
+      }
+    },
+    {
+      "name": "Flyway迁移元数据只读查询成功",
+      "passed": true,
+      "observed": {
+        "flywayVersion": 43,
+        "businessTables": 61
+      }
+    },
+    {
+      "name": "正常运行环境未执行金融请求",
+      "passed": true,
+      "observed": {
+        "financialCommands": 0
+      }
+    },
+    {
+      "name": "本次核对未写入正常业务库、Redis、附件或浏览器",
+      "passed": true
+    }
+  ],
+  "financialCommands": 0,
+  "normalDataWrite": false,
+  "browserInteraction": false,
+  "serviceDisposition": "left running",
+  "pushPerformed": false
+}

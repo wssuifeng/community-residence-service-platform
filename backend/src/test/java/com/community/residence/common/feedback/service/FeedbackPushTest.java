@@ -54,6 +54,7 @@ class FeedbackPushTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(feedbackMapper.selectByIdForUpdate(org.mockito.ArgumentMatchers.anyLong())).thenAnswer(call -> feedbackMapper.selectById((Long) call.getArgument(0)));
         inSessionFeedback = new Feedback();
         inSessionFeedback.setId(1L);
         inSessionFeedback.setResidentId(10L);

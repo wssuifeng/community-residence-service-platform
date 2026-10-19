@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ReservationService 单元测试")
 class ReservationServiceTest {
+    @org.mockito.Mock private com.community.residence.common.auth.service.TokenRevocationService tokenRevocationService;
 
     @Mock
     private ResourceReservationMapper reservationMapper;
@@ -71,6 +72,7 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(reservationMapper.selectByIdForUpdate(org.mockito.ArgumentMatchers.anyLong())).thenAnswer(call -> reservationMapper.selectById((Long) call.getArgument(0)));
         lenient().when(redissonClient.getLock(anyString())).thenReturn(lock);
         try {
             lenient().when(lock.tryLock(anyLong(), any(TimeUnit.class))).thenReturn(true);
@@ -176,7 +178,7 @@ class ReservationServiceTest {
             when(reservationMapper.selectById(1L)).thenReturn(pendingReservation);
             when(reservationMapper.updateById(any(com.community.residence.common.reservation.entity.ResourceReservation.class))).thenReturn(1);
             when(violationRecordMapper.insert(any(ViolationRecord.class))).thenReturn(1);
-            when(violationRecordMapper.selectCount(any())).thenReturn(1L);
+            when(violationRecordMapper.selectIdsByUserIdForUpdate(any())).thenReturn(java.util.List.of(1L));
             org.mockito.Mockito.lenient().when(sysConfigService.getValue(any())).thenReturn("3");
             org.mockito.Mockito.lenient().when(residentMapper.selectById(1L))
                     .thenReturn(new com.community.residence.common.resident.entity.Resident());
@@ -207,4 +209,32 @@ class ReservationServiceTest {
         dto.setContactPhone("13800001111");
         return dto;
     }
+    @Test
+    void resourceViolationFreezesAndRevokesExistingTokensAtThreshold() {
+        try (var security = org.mockito.Mockito.mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
+            pendingReservation.setStatus("RESERVED");
+            when(reservationMapper.selectByIdForUpdate(1L)).thenReturn(pendingReservation);
+            var resident = new com.community.residence.common.resident.entity.Resident();
+            resident.setId(1L); resident.setStatus("ACTIVE");
+            when(residentMapper.selectByIdForUpdate(1L)).thenReturn(resident);
+            when(violationRecordMapper.selectIdsByUserIdForUpdate(1L)).thenReturn(java.util.List.of(1L,2L,3L));
+            reservationService.violate(1L, "第三次违约");
+            assertThat(resident.getStatus()).isEqualTo("FROZEN");
+            org.mockito.Mockito.verify(tokenRevocationService).revokeResident(1L);
+        }
+    }
+
+    @Test
+    void confirmUsesLockedCurrentStateAndCannotResurrectCancellation() {
+        try (var security = org.mockito.Mockito.mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
+            pendingReservation.setStatus("CANCELLED");
+            when(reservationMapper.selectByIdForUpdate(1L)).thenReturn(pendingReservation);
+            assertThatThrownBy(() -> reservationService.confirm(1L, "确认"))
+                    .isInstanceOf(BusinessException.class);
+            org.mockito.Mockito.verify(reservationMapper, org.mockito.Mockito.never())
+                    .updateById(any(com.community.residence.common.reservation.entity.ResourceReservation.class));
+            org.mockito.Mockito.verifyNoInteractions(notificationService);
+        }
+    }
+
 }

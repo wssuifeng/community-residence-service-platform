@@ -58,6 +58,7 @@ class FeedbackServiceTest {
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(feedbackMapper.selectByIdForUpdate(org.mockito.ArgumentMatchers.anyLong())).thenAnswer(call -> feedbackMapper.selectById((Long) call.getArgument(0)));
         pendingFeedback = new Feedback();
         pendingFeedback.setId(1L);
         pendingFeedback.setResidentId(1L);
@@ -158,4 +159,15 @@ class FeedbackServiceTest {
         dto.setContent("hello");
         return dto;
     }
+    @Test
+    void sendReadsLockedCurrentStateAfterConcurrentClosure() {
+        try (var security = org.mockito.Mockito.mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
+            security.when(() -> com.community.residence.common.security.context.SecurityUtils.hasRole("RESIDENT")).thenReturn(true);
+            security.when(com.community.residence.common.security.context.SecurityUtils::getUserId).thenReturn(1L);
+            when(feedbackMapper.selectByIdForUpdate(2L)).thenReturn(closedFeedback);
+            assertThatThrownBy(() -> feedbackService.sendMessage(2L, msgDto())).isInstanceOf(BusinessException.class);
+            org.mockito.Mockito.verifyNoInteractions(messageMapper, notificationService);
+        }
+    }
+
 }

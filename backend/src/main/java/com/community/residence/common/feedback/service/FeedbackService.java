@@ -114,7 +114,7 @@ public class FeedbackService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "STATUS", targetType = "FEEDBACK", targetId = "#id", content = "'反馈办结：' + #dto.result")
     public void close(Long id, CloseFeedbackDTO dto) {
-        Feedback feedback = requireFeedback(id);
+        Feedback feedback = requireFeedbackForUpdate(id);
         SecurityUtils.checkCommunityAccess(feedback.getCommunityId());
         validateTransition(feedback, "CLOSED");
         feedback.setStatus("CLOSED");
@@ -161,7 +161,7 @@ public class FeedbackService {
 
     /* 两种消息沿同一受理/关闭/鉴权/通知/推送流程，图片在消息提交前关联。 */
     private MessageVO send(Long feedbackId, SendMessageDTO dto, org.springframework.web.multipart.MultipartFile file) {
-        Feedback feedback = requireFeedback(feedbackId);
+        Feedback feedback = requireFeedbackForUpdate(feedbackId);
         boolean isAdminSide = !SecurityUtils.hasRole(RoleConstants.RESIDENT);
         if (isAdminSide) {
             SecurityUtils.checkCommunityAccess(feedback.getCommunityId());
@@ -262,7 +262,7 @@ public class FeedbackService {
      */
     @Transactional(rollbackFor = Exception.class)
     public AttachmentVO uploadAttachment(Long feedbackId, MultipartFile file) {
-        Feedback feedback = requireFeedback(feedbackId);
+        Feedback feedback = requireFeedbackForUpdate(feedbackId);
         checkWriteAccess(feedback);
         if ("CLOSED".equals(feedback.getStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "反馈已办结，不可上传附件");
@@ -285,7 +285,7 @@ public class FeedbackService {
         if (attachment == null) {
             throw new ResourceNotFoundException("附件不存在");
         }
-        Feedback feedback = requireFeedback(attachment.getFeedbackId());
+        Feedback feedback = requireFeedbackForUpdate(attachment.getFeedbackId());
         checkWriteAccess(feedback);
         if ("CLOSED".equals(feedback.getStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "反馈已办结，不可删除附件");
@@ -299,6 +299,12 @@ public class FeedbackService {
                 && !feedback.getResidentId().equals(SecurityUtils.getUserId())) {
             throw new ForbiddenException("仅可操作本人反馈的附件");
         }
+    }
+
+    private Feedback requireFeedbackForUpdate(Long id) {
+        Feedback row = feedbackMapper.selectByIdForUpdate(id);
+        if (row == null) throw new ResourceNotFoundException("反馈不存在");
+        return row;
     }
 
     public Feedback requireFeedback(Long id) {
