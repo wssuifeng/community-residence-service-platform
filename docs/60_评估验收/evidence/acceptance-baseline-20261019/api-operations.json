@@ -1,0 +1,3253 @@
+[
+  {
+    "id": "GET /api/v1/work-orders/{id}",
+    "method": "GET",
+    "path": "/api/v1/work-orders/{id}",
+    "operation_id": "getById",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/work-orders/{id}",
+    "method": "PUT",
+    "path": "/api/v1/work-orders/{id}",
+    "operation_id": "update",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/units/{id}",
+    "method": "GET",
+    "path": "/api/v1/units/{id}",
+    "operation_id": "getById_1",
+    "tags": [
+      "单元管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/units/{id}",
+    "method": "PUT",
+    "path": "/api/v1/units/{id}",
+    "operation_id": "update_1",
+    "tags": [
+      "单元管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/units/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/units/{id}",
+    "operation_id": "delete",
+    "tags": [
+      "单元管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/timeslots/{id}",
+    "method": "PUT",
+    "path": "/api/v1/timeslots/{id}",
+    "operation_id": "update_2",
+    "tags": [
+      "资源时段管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/timeslots/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/timeslots/{id}",
+    "operation_id": "delete_1",
+    "tags": [
+      "资源时段管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/sys-users/{id}",
+    "method": "GET",
+    "path": "/api/v1/sys-users/{id}",
+    "operation_id": "getById_2",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/sys-users/{id}",
+    "method": "PUT",
+    "path": "/api/v1/sys-users/{id}",
+    "operation_id": "update_3",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/staff-schedules/batch",
+    "method": "PUT",
+    "path": "/api/v1/staff-schedules/batch",
+    "operation_id": "batchSave",
+    "tags": [
+      "服务人员排班"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/staff-capabilities/{staffId}",
+    "method": "GET",
+    "path": "/api/v1/staff-capabilities/{staffId}",
+    "operation_id": "getById_3",
+    "tags": [
+      "服务人员能力绑定"
+    ],
+    "parameter_names": [
+      "staffId"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/staff-capabilities/{staffId}",
+    "method": "PUT",
+    "path": "/api/v1/staff-capabilities/{staffId}",
+    "operation_id": "save",
+    "tags": [
+      "服务人员能力绑定"
+    ],
+    "parameter_names": [
+      "staffId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/service-categories/{id}",
+    "method": "GET",
+    "path": "/api/v1/service-categories/{id}",
+    "operation_id": "getById_4",
+    "tags": [
+      "服务类别管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/service-categories/{id}",
+    "method": "PUT",
+    "path": "/api/v1/service-categories/{id}",
+    "operation_id": "update_4",
+    "tags": [
+      "服务类别管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/service-categories/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/service-categories/{id}",
+    "operation_id": "delete_2",
+    "tags": [
+      "服务类别管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/resources/{id}",
+    "method": "GET",
+    "path": "/api/v1/resources/{id}",
+    "operation_id": "getById_5",
+    "tags": [
+      "公共资源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/resources/{id}",
+    "method": "PUT",
+    "path": "/api/v1/resources/{id}",
+    "operation_id": "update_5",
+    "tags": [
+      "公共资源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/resources/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/resources/{id}",
+    "operation_id": "delete_3",
+    "tags": [
+      "公共资源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residents/profile",
+    "method": "GET",
+    "path": "/api/v1/residents/profile",
+    "operation_id": "profile",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PUT /api/v1/residents/profile",
+    "method": "PUT",
+    "path": "/api/v1/residents/profile",
+    "operation_id": "updateProfile",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/payment/channel-config/alipay",
+    "method": "GET",
+    "path": "/api/v1/payment/channel-config/alipay",
+    "operation_id": "get",
+    "tags": [
+      "支付渠道配置"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PUT /api/v1/payment/channel-config/alipay",
+    "method": "PUT",
+    "path": "/api/v1/payment/channel-config/alipay",
+    "operation_id": "save_1",
+    "tags": [
+      "支付渠道配置"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/notifications/channel-levels",
+    "method": "GET",
+    "path": "/api/v1/notifications/channel-levels",
+    "operation_id": "getChannelLevels",
+    "tags": [
+      "消息通知中心"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PUT /api/v1/notifications/channel-levels",
+    "method": "PUT",
+    "path": "/api/v1/notifications/channel-levels",
+    "operation_id": "updateChannelLevels",
+    "tags": [
+      "消息通知中心"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/notices/{id}",
+    "method": "GET",
+    "path": "/api/v1/notices/{id}",
+    "operation_id": "getById_6",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/notices/{id}",
+    "method": "PUT",
+    "path": "/api/v1/notices/{id}",
+    "operation_id": "update_6",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/notices/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/notices/{id}",
+    "operation_id": "delete_4",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{id}",
+    "method": "GET",
+    "path": "/api/v1/leases/{id}",
+    "operation_id": "getById_7",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/leases/{id}",
+    "method": "PUT",
+    "path": "/api/v1/leases/{id}",
+    "operation_id": "update_7",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/housings/{id}",
+    "method": "GET",
+    "path": "/api/v1/housings/{id}",
+    "operation_id": "getById_8",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/housings/{id}",
+    "method": "PUT",
+    "path": "/api/v1/housings/{id}",
+    "operation_id": "update_8",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/housings/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/housings/{id}",
+    "operation_id": "delete_5",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/housing-timeslots/{id}",
+    "method": "PUT",
+    "path": "/api/v1/housing-timeslots/{id}",
+    "operation_id": "update_9",
+    "tags": [
+      "房源时段管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/housing-timeslots/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/housing-timeslots/{id}",
+    "operation_id": "delete_6",
+    "tags": [
+      "房源时段管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/houses/{id}",
+    "method": "GET",
+    "path": "/api/v1/houses/{id}",
+    "operation_id": "getById_9",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/houses/{id}",
+    "method": "PUT",
+    "path": "/api/v1/houses/{id}",
+    "operation_id": "update_10",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/houses/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/houses/{id}",
+    "operation_id": "delete_7",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/configs/{key}",
+    "method": "GET",
+    "path": "/api/v1/configs/{key}",
+    "operation_id": "getByKey",
+    "tags": [
+      "全局配置管理"
+    ],
+    "parameter_names": [
+      "key"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/configs/{key}",
+    "method": "PUT",
+    "path": "/api/v1/configs/{key}",
+    "operation_id": "update_11",
+    "tags": [
+      "全局配置管理"
+    ],
+    "parameter_names": [
+      "key"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/{id}",
+    "method": "GET",
+    "path": "/api/v1/communities/{id}",
+    "operation_id": "getById_10",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/communities/{id}",
+    "method": "PUT",
+    "path": "/api/v1/communities/{id}",
+    "operation_id": "update_12",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/communities/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/communities/{id}",
+    "operation_id": "delete_8",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "id",
+      "confirmationVersion",
+      "confirmationName"
+    ]
+  },
+  {
+    "id": "GET /api/v1/buildings/{id}",
+    "method": "GET",
+    "path": "/api/v1/buildings/{id}",
+    "operation_id": "getById_11",
+    "tags": [
+      "楼栋管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/buildings/{id}",
+    "method": "PUT",
+    "path": "/api/v1/buildings/{id}",
+    "operation_id": "update_13",
+    "tags": [
+      "楼栋管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/buildings/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/buildings/{id}",
+    "operation_id": "delete_9",
+    "tags": [
+      "楼栋管理"
+    ],
+    "parameter_names": [
+      "id",
+      "cascade"
+    ]
+  },
+  {
+    "id": "GET /api/v1/agreement-templates/{id}",
+    "method": "GET",
+    "path": "/api/v1/agreement-templates/{id}",
+    "operation_id": "getById_12",
+    "tags": [
+      "租赁协议模板"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PUT /api/v1/agreement-templates/{id}",
+    "method": "PUT",
+    "path": "/api/v1/agreement-templates/{id}",
+    "operation_id": "update_14",
+    "tags": [
+      "租赁协议模板"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/agreement-templates/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/agreement-templates/{id}",
+    "operation_id": "delete_10",
+    "tags": [
+      "租赁协议模板"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/work-orders",
+    "method": "GET",
+    "path": "/api/v1/work-orders",
+    "operation_id": "page",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "statuses",
+      "priority",
+      "categoryId",
+      "keyword",
+      "startTime",
+      "endTime",
+      "assigneeId",
+      "sort"
+    ]
+  },
+  {
+    "id": "POST /api/v1/work-orders",
+    "method": "POST",
+    "path": "/api/v1/work-orders",
+    "operation_id": "create",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/work-orders/{orderId}/evaluation",
+    "method": "GET",
+    "path": "/api/v1/work-orders/{orderId}/evaluation",
+    "operation_id": "getByWorkOrder",
+    "tags": [
+      "评价管理"
+    ],
+    "parameter_names": [
+      "orderId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/work-orders/{orderId}/evaluation",
+    "method": "POST",
+    "path": "/api/v1/work-orders/{orderId}/evaluation",
+    "operation_id": "create_1",
+    "tags": [
+      "评价管理"
+    ],
+    "parameter_names": [
+      "orderId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/work-orders/{id}/conversation",
+    "method": "POST",
+    "path": "/api/v1/work-orders/{id}/conversation",
+    "operation_id": "ensureConversation",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/work-orders/{id}/attachments",
+    "method": "GET",
+    "path": "/api/v1/work-orders/{id}/attachments",
+    "operation_id": "attachments",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/work-orders/{id}/attachments",
+    "method": "POST",
+    "path": "/api/v1/work-orders/{id}/attachments",
+    "operation_id": "uploadAttachment",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/viewing-appointments",
+    "method": "GET",
+    "path": "/api/v1/viewing-appointments",
+    "operation_id": "page_1",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "housingId",
+      "startDate",
+      "endDate"
+    ]
+  },
+  {
+    "id": "POST /api/v1/viewing-appointments",
+    "method": "POST",
+    "path": "/api/v1/viewing-appointments",
+    "operation_id": "create_2",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/viewing-appointments/{id}/messages",
+    "method": "GET",
+    "path": "/api/v1/viewing-appointments/{id}/messages",
+    "operation_id": "messages",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/viewing-appointments/{id}/messages",
+    "method": "POST",
+    "path": "/api/v1/viewing-appointments/{id}/messages",
+    "operation_id": "sendMessage",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/viewing-appointments/{id}/messages/image",
+    "method": "POST",
+    "path": "/api/v1/viewing-appointments/{id}/messages/image",
+    "operation_id": "sendImage",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/upload",
+    "method": "POST",
+    "path": "/api/v1/upload",
+    "operation_id": "upload",
+    "tags": [
+      "文件上传"
+    ],
+    "parameter_names": [
+      "type"
+    ]
+  },
+  {
+    "id": "POST /api/v1/units",
+    "method": "POST",
+    "path": "/api/v1/units",
+    "operation_id": "create_3",
+    "tags": [
+      "单元管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/units/batch",
+    "method": "POST",
+    "path": "/api/v1/units/batch",
+    "operation_id": "batchCreate",
+    "tags": [
+      "单元管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/sys-users",
+    "method": "GET",
+    "path": "/api/v1/sys-users",
+    "operation_id": "page_2",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "role",
+      "status",
+      "keyword"
+    ]
+  },
+  {
+    "id": "POST /api/v1/sys-users",
+    "method": "POST",
+    "path": "/api/v1/sys-users",
+    "operation_id": "create_4",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/sys-users/{userId}/communities",
+    "method": "GET",
+    "path": "/api/v1/sys-users/{userId}/communities",
+    "operation_id": "listBoundCommunities",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": [
+      "userId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/sys-users/{userId}/communities",
+    "method": "POST",
+    "path": "/api/v1/sys-users/{userId}/communities",
+    "operation_id": "bindCommunity",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": [
+      "userId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/structures/batch-generate",
+    "method": "POST",
+    "path": "/api/v1/structures/batch-generate",
+    "operation_id": "batchGenerate",
+    "tags": [
+      "结构链批量生成"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/service-categories",
+    "method": "POST",
+    "path": "/api/v1/service-categories",
+    "operation_id": "create_5",
+    "tags": [
+      "服务类别管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/resources",
+    "method": "POST",
+    "path": "/api/v1/resources",
+    "operation_id": "create_6",
+    "tags": [
+      "公共资源管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/resources/{resourceId}/timeslots",
+    "method": "GET",
+    "path": "/api/v1/resources/{resourceId}/timeslots",
+    "operation_id": "pageByResource",
+    "tags": [
+      "资源时段管理"
+    ],
+    "parameter_names": [
+      "resourceId",
+      "page",
+      "size",
+      "dayOfWeek"
+    ]
+  },
+  {
+    "id": "POST /api/v1/resources/{resourceId}/timeslots",
+    "method": "POST",
+    "path": "/api/v1/resources/{resourceId}/timeslots",
+    "operation_id": "create_7",
+    "tags": [
+      "资源时段管理"
+    ],
+    "parameter_names": [
+      "resourceId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/resources/{resourceId}/timeslots/batch",
+    "method": "POST",
+    "path": "/api/v1/resources/{resourceId}/timeslots/batch",
+    "operation_id": "createBatch",
+    "tags": [
+      "资源时段管理"
+    ],
+    "parameter_names": [
+      "resourceId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/resource-reservations",
+    "method": "GET",
+    "path": "/api/v1/resource-reservations",
+    "operation_id": "page_3",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "resourceId",
+      "startDate",
+      "endDate"
+    ]
+  },
+  {
+    "id": "POST /api/v1/resource-reservations",
+    "method": "POST",
+    "path": "/api/v1/resource-reservations",
+    "operation_id": "create_8",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/residents/import",
+    "method": "POST",
+    "path": "/api/v1/residents/import",
+    "operation_id": "importCsv",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/residents/admin-create",
+    "method": "POST",
+    "path": "/api/v1/residents/admin-create",
+    "operation_id": "adminCreate",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/residence-relations",
+    "method": "POST",
+    "path": "/api/v1/residence-relations",
+    "operation_id": "adminCreate_1",
+    "tags": [
+      "居住关系管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/residence-applications",
+    "method": "GET",
+    "path": "/api/v1/residence-applications",
+    "operation_id": "page_4",
+    "tags": [
+      "入住申请管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status"
+    ]
+  },
+  {
+    "id": "POST /api/v1/residence-applications",
+    "method": "POST",
+    "path": "/api/v1/residence-applications",
+    "operation_id": "create_9",
+    "tags": [
+      "入住申请管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/notices",
+    "method": "GET",
+    "path": "/api/v1/notices",
+    "operation_id": "page_5",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "communityId",
+      "keyword",
+      "priority",
+      "isPinned",
+      "type"
+    ]
+  },
+  {
+    "id": "POST /api/v1/notices",
+    "method": "POST",
+    "path": "/api/v1/notices",
+    "operation_id": "create_10",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/notices/{id}/view",
+    "method": "POST",
+    "path": "/api/v1/notices/{id}/view",
+    "operation_id": "recordView",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "id",
+      "version"
+    ]
+  },
+  {
+    "id": "GET /api/v1/notices/{id}/revisions",
+    "method": "GET",
+    "path": "/api/v1/notices/{id}/revisions",
+    "operation_id": "list",
+    "tags": [
+      "公告修订"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/notices/{id}/revisions",
+    "method": "POST",
+    "path": "/api/v1/notices/{id}/revisions",
+    "operation_id": "revise",
+    "tags": [
+      "公告修订"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases",
+    "method": "GET",
+    "path": "/api/v1/leases",
+    "operation_id": "page_6",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "residentId",
+      "houseId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases",
+    "method": "POST",
+    "path": "/api/v1/leases",
+    "operation_id": "create_11",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/leases/{leaseId}/terms/{termId}/confirm",
+    "method": "POST",
+    "path": "/api/v1/leases/{leaseId}/terms/{termId}/confirm",
+    "operation_id": "confirm",
+    "tags": [
+      "租约合同段"
+    ],
+    "parameter_names": [
+      "leaseId",
+      "termId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{leaseId}/terms/{termId}/cancel",
+    "method": "POST",
+    "path": "/api/v1/leases/{leaseId}/terms/{termId}/cancel",
+    "operation_id": "cancel",
+    "tags": [
+      "租约合同段"
+    ],
+    "parameter_names": [
+      "leaseId",
+      "termId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{leaseId}/move-out-applications",
+    "method": "POST",
+    "path": "/api/v1/leases/{leaseId}/move-out-applications",
+    "operation_id": "create_12",
+    "tags": [
+      "退租申请"
+    ],
+    "parameter_names": [
+      "leaseId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{leaseId}/extensions",
+    "method": "GET",
+    "path": "/api/v1/leases/{leaseId}/extensions",
+    "operation_id": "list_1",
+    "tags": [
+      "租期延长"
+    ],
+    "parameter_names": [
+      "leaseId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{leaseId}/extensions",
+    "method": "POST",
+    "path": "/api/v1/leases/{leaseId}/extensions",
+    "operation_id": "apply",
+    "tags": [
+      "租期延长"
+    ],
+    "parameter_names": [
+      "leaseId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{leaseId}/extensions/{id}/withdraw",
+    "method": "POST",
+    "path": "/api/v1/leases/{leaseId}/extensions/{id}/withdraw",
+    "operation_id": "withdraw",
+    "tags": [
+      "租期延长"
+    ],
+    "parameter_names": [
+      "leaseId",
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{leaseId}/extensions/{id}/review",
+    "method": "POST",
+    "path": "/api/v1/leases/{leaseId}/extensions/{id}/review",
+    "operation_id": "review",
+    "tags": [
+      "租期延长"
+    ],
+    "parameter_names": [
+      "leaseId",
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{id}/rent-payments",
+    "method": "POST",
+    "path": "/api/v1/leases/{id}/rent-payments",
+    "operation_id": "rentPayment",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{id}/renew",
+    "method": "POST",
+    "path": "/api/v1/leases/{id}/renew",
+    "operation_id": "renew",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{id}/renew-payments",
+    "method": "POST",
+    "path": "/api/v1/leases/{id}/renew-payments",
+    "operation_id": "createRenewPayment",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{id}/first-payments",
+    "method": "POST",
+    "path": "/api/v1/leases/{id}/first-payments",
+    "operation_id": "createFirstPayment",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{id}/deposit-refunds",
+    "method": "GET",
+    "path": "/api/v1/leases/{id}/deposit-refunds",
+    "operation_id": "depositRefunds",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/leases/{id}/deposit-refunds",
+    "method": "POST",
+    "path": "/api/v1/leases/{id}/deposit-refunds",
+    "operation_id": "createDepositRefund",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/lease-agreements",
+    "method": "GET",
+    "path": "/api/v1/lease-agreements",
+    "operation_id": "listByLease",
+    "tags": [
+      "租赁协议"
+    ],
+    "parameter_names": [
+      "leaseId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/lease-agreements",
+    "method": "POST",
+    "path": "/api/v1/lease-agreements",
+    "operation_id": "create_13",
+    "tags": [
+      "租赁协议"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/lease-agreements/{id}/confirm",
+    "method": "POST",
+    "path": "/api/v1/lease-agreements/{id}/confirm",
+    "operation_id": "confirm_1",
+    "tags": [
+      "租赁协议"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/lease-agreements/{id}/cancel",
+    "method": "POST",
+    "path": "/api/v1/lease-agreements/{id}/cancel",
+    "operation_id": "cancel_1",
+    "tags": [
+      "租赁协议"
+    ],
+    "parameter_names": [
+      "id",
+      "reason"
+    ]
+  },
+  {
+    "id": "GET /api/v1/housings",
+    "method": "GET",
+    "path": "/api/v1/housings",
+    "operation_id": "page_7",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "communityId",
+      "status",
+      "minRent",
+      "maxRent",
+      "keyword",
+      "layout",
+      "rentType"
+    ]
+  },
+  {
+    "id": "POST /api/v1/housings",
+    "method": "POST",
+    "path": "/api/v1/housings",
+    "operation_id": "create_14",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/housings/{id}/view",
+    "method": "POST",
+    "path": "/api/v1/housings/{id}/view",
+    "operation_id": "recordView_1",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/housings/{housingId}/timeslots",
+    "method": "GET",
+    "path": "/api/v1/housings/{housingId}/timeslots",
+    "operation_id": "list_2",
+    "tags": [
+      "房源时段管理"
+    ],
+    "parameter_names": [
+      "housingId",
+      "dayOfWeek"
+    ]
+  },
+  {
+    "id": "POST /api/v1/housings/{housingId}/timeslots",
+    "method": "POST",
+    "path": "/api/v1/housings/{housingId}/timeslots",
+    "operation_id": "create_15",
+    "tags": [
+      "房源时段管理"
+    ],
+    "parameter_names": [
+      "housingId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/housings/batch-generate",
+    "method": "POST",
+    "path": "/api/v1/housings/batch-generate",
+    "operation_id": "batchGenerate_1",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/houses",
+    "method": "POST",
+    "path": "/api/v1/houses",
+    "operation_id": "create_16",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/houses/{houseId}/images",
+    "method": "GET",
+    "path": "/api/v1/houses/{houseId}/images",
+    "operation_id": "list_3",
+    "tags": [
+      "房屋相册"
+    ],
+    "parameter_names": [
+      "houseId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/houses/{houseId}/images",
+    "method": "POST",
+    "path": "/api/v1/houses/{houseId}/images",
+    "operation_id": "upload_1",
+    "tags": [
+      "房屋相册"
+    ],
+    "parameter_names": [
+      "houseId",
+      "kind"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/houses/{houseId}/images",
+    "method": "PATCH",
+    "path": "/api/v1/houses/{houseId}/images",
+    "operation_id": "reorder",
+    "tags": [
+      "房屋相册"
+    ],
+    "parameter_names": [
+      "houseId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/houses/batch",
+    "method": "POST",
+    "path": "/api/v1/houses/batch",
+    "operation_id": "batchCreate_1",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/feedbacks",
+    "method": "GET",
+    "path": "/api/v1/feedbacks",
+    "operation_id": "page_8",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "category",
+      "keyword"
+    ]
+  },
+  {
+    "id": "POST /api/v1/feedbacks",
+    "method": "POST",
+    "path": "/api/v1/feedbacks",
+    "operation_id": "create_17",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/feedbacks/{id}/messages",
+    "method": "GET",
+    "path": "/api/v1/feedbacks/{id}/messages",
+    "operation_id": "messages_1",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id",
+      "since"
+    ]
+  },
+  {
+    "id": "POST /api/v1/feedbacks/{id}/messages",
+    "method": "POST",
+    "path": "/api/v1/feedbacks/{id}/messages",
+    "operation_id": "sendMessage_1",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/feedbacks/{id}/messages/image",
+    "method": "POST",
+    "path": "/api/v1/feedbacks/{id}/messages/image",
+    "operation_id": "sendImage_1",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/feedbacks/{id}/attachments",
+    "method": "GET",
+    "path": "/api/v1/feedbacks/{id}/attachments",
+    "operation_id": "attachments_1",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/feedbacks/{id}/attachments",
+    "method": "POST",
+    "path": "/api/v1/feedbacks/{id}/attachments",
+    "operation_id": "uploadAttachment_1",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/evaluations/{evaluationId}/followup",
+    "method": "POST",
+    "path": "/api/v1/evaluations/{evaluationId}/followup",
+    "operation_id": "addFollowup",
+    "tags": [
+      "评价管理"
+    ],
+    "parameter_names": [
+      "evaluationId"
+    ]
+  },
+  {
+    "id": "POST /api/v1/conversations/{id}/viewing-appointments",
+    "method": "POST",
+    "path": "/api/v1/conversations/{id}/viewing-appointments",
+    "operation_id": "createViewingAppointment",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/conversations/{id}/read",
+    "method": "POST",
+    "path": "/api/v1/conversations/{id}/read",
+    "operation_id": "markRead",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/conversations/{id}/messages",
+    "method": "GET",
+    "path": "/api/v1/conversations/{id}/messages",
+    "operation_id": "messages_2",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/conversations/{id}/messages",
+    "method": "POST",
+    "path": "/api/v1/conversations/{id}/messages",
+    "operation_id": "sendMessage_2",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/conversations/{id}/messages/image",
+    "method": "POST",
+    "path": "/api/v1/conversations/{id}/messages/image",
+    "operation_id": "sendImage_2",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "POST /api/v1/conversations/lease-groups",
+    "method": "POST",
+    "path": "/api/v1/conversations/lease-groups",
+    "operation_id": "ensureLeaseGroup",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/conversations/direct",
+    "method": "POST",
+    "path": "/api/v1/conversations/direct",
+    "operation_id": "openDirect",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/conversation-inbox/FEEDBACK/{id}/read",
+    "method": "POST",
+    "path": "/api/v1/conversation-inbox/FEEDBACK/{id}/read",
+    "operation_id": "read",
+    "tags": [
+      "统一会话工作区"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities",
+    "method": "GET",
+    "path": "/api/v1/communities",
+    "operation_id": "page_9",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "keyword"
+    ]
+  },
+  {
+    "id": "POST /api/v1/communities",
+    "method": "POST",
+    "path": "/api/v1/communities",
+    "operation_id": "create_18",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/communities/batch-delete",
+    "method": "POST",
+    "path": "/api/v1/communities/batch-delete",
+    "operation_id": "batchDelete",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/buildings",
+    "method": "POST",
+    "path": "/api/v1/buildings",
+    "operation_id": "create_19",
+    "tags": [
+      "楼栋管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/buildings/batch",
+    "method": "POST",
+    "path": "/api/v1/buildings/batch",
+    "operation_id": "batchCreate_2",
+    "tags": [
+      "楼栋管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/auth/resident/register",
+    "method": "POST",
+    "path": "/api/v1/auth/resident/register",
+    "operation_id": "register",
+    "tags": [
+      "认证管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/auth/resident/logout",
+    "method": "POST",
+    "path": "/api/v1/auth/resident/logout",
+    "operation_id": "residentLogout",
+    "tags": [
+      "认证管理"
+    ],
+    "parameter_names": [
+      "Authorization"
+    ]
+  },
+  {
+    "id": "POST /api/v1/auth/resident/login",
+    "method": "POST",
+    "path": "/api/v1/auth/resident/login",
+    "operation_id": "residentLogin",
+    "tags": [
+      "认证管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "POST /api/v1/auth/renew",
+    "method": "POST",
+    "path": "/api/v1/auth/renew",
+    "operation_id": "renew_1",
+    "tags": [
+      "认证管理"
+    ],
+    "parameter_names": [
+      "Authorization"
+    ]
+  },
+  {
+    "id": "POST /api/v1/auth/admin/logout",
+    "method": "POST",
+    "path": "/api/v1/auth/admin/logout",
+    "operation_id": "adminLogout",
+    "tags": [
+      "认证管理"
+    ],
+    "parameter_names": [
+      "Authorization"
+    ]
+  },
+  {
+    "id": "POST /api/v1/auth/admin/login",
+    "method": "POST",
+    "path": "/api/v1/auth/admin/login",
+    "operation_id": "adminLogin",
+    "tags": [
+      "认证管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/agreement-templates",
+    "method": "GET",
+    "path": "/api/v1/agreement-templates",
+    "operation_id": "page_10",
+    "tags": [
+      "租赁协议模板"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "communityId",
+      "status"
+    ]
+  },
+  {
+    "id": "POST /api/v1/agreement-templates",
+    "method": "POST",
+    "path": "/api/v1/agreement-templates",
+    "operation_id": "create_20",
+    "tags": [
+      "租赁协议模板"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/return",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/return",
+    "operation_id": "returnBack",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/reject",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/reject",
+    "operation_id": "reject",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/process",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/process",
+    "operation_id": "process",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/intake",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/intake",
+    "operation_id": "intake",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/confirm",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/confirm",
+    "operation_id": "confirm_2",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/complete",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/complete",
+    "operation_id": "complete",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/close",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/close",
+    "operation_id": "close",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/cancel",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/cancel",
+    "operation_id": "cancel_2",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/assign",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/assign",
+    "operation_id": "assign",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/work-orders/{id}/accept",
+    "method": "PATCH",
+    "path": "/api/v1/work-orders/{id}/accept",
+    "operation_id": "accept",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/viewing-appointments/{id}/violate",
+    "method": "PATCH",
+    "path": "/api/v1/viewing-appointments/{id}/violate",
+    "operation_id": "violate",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/viewing-appointments/{id}/confirm",
+    "method": "PATCH",
+    "path": "/api/v1/viewing-appointments/{id}/confirm",
+    "operation_id": "confirm_3",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/viewing-appointments/{id}/complete",
+    "method": "PATCH",
+    "path": "/api/v1/viewing-appointments/{id}/complete",
+    "operation_id": "complete_1",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/viewing-appointments/{id}/cancel",
+    "method": "PATCH",
+    "path": "/api/v1/viewing-appointments/{id}/cancel",
+    "operation_id": "cancel_3",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/viewing-appointments/{id}/assign",
+    "method": "PATCH",
+    "path": "/api/v1/viewing-appointments/{id}/assign",
+    "operation_id": "assign_1",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/sys-users/{id}/status",
+    "method": "PATCH",
+    "path": "/api/v1/sys-users/{id}/status",
+    "operation_id": "updateStatus",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/sys-users/password",
+    "method": "PATCH",
+    "path": "/api/v1/sys-users/password",
+    "operation_id": "changePassword",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PATCH /api/v1/resource-reservations/{id}/violate",
+    "method": "PATCH",
+    "path": "/api/v1/resource-reservations/{id}/violate",
+    "operation_id": "violate_1",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/resource-reservations/{id}/reject",
+    "method": "PATCH",
+    "path": "/api/v1/resource-reservations/{id}/reject",
+    "operation_id": "reject_1",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/resource-reservations/{id}/confirm",
+    "method": "PATCH",
+    "path": "/api/v1/resource-reservations/{id}/confirm",
+    "operation_id": "confirm_4",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/resource-reservations/{id}/complete",
+    "method": "PATCH",
+    "path": "/api/v1/resource-reservations/{id}/complete",
+    "operation_id": "complete_2",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/resource-reservations/{id}/cancel",
+    "method": "PATCH",
+    "path": "/api/v1/resource-reservations/{id}/cancel",
+    "operation_id": "cancel_4",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/residents/{id}/status",
+    "method": "PATCH",
+    "path": "/api/v1/residents/{id}/status",
+    "operation_id": "updateStatus_1",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/residents/password",
+    "method": "PATCH",
+    "path": "/api/v1/residents/password",
+    "operation_id": "changePassword_1",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PATCH /api/v1/residence-relations/{id}/move-out",
+    "method": "PATCH",
+    "path": "/api/v1/residence-relations/{id}/move-out",
+    "operation_id": "moveOut",
+    "tags": [
+      "居住关系管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/residence-applications/{id}/withdraw",
+    "method": "PATCH",
+    "path": "/api/v1/residence-applications/{id}/withdraw",
+    "operation_id": "withdraw_1",
+    "tags": [
+      "入住申请管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/residence-applications/{id}/reject",
+    "method": "PATCH",
+    "path": "/api/v1/residence-applications/{id}/reject",
+    "operation_id": "reject_2",
+    "tags": [
+      "入住申请管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/residence-applications/{id}/approve",
+    "method": "PATCH",
+    "path": "/api/v1/residence-applications/{id}/approve",
+    "operation_id": "approve",
+    "tags": [
+      "入住申请管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/payment/orders/{paymentNo}/close",
+    "method": "PATCH",
+    "path": "/api/v1/payment/orders/{paymentNo}/close",
+    "operation_id": "closePayment",
+    "tags": [
+      "支付管理"
+    ],
+    "parameter_names": [
+      "paymentNo"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/notifications/{id}/read",
+    "method": "PATCH",
+    "path": "/api/v1/notifications/{id}/read",
+    "operation_id": "markRead_1",
+    "tags": [
+      "消息通知中心"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/notifications/read-all",
+    "method": "PATCH",
+    "path": "/api/v1/notifications/read-all",
+    "operation_id": "markAllRead",
+    "tags": [
+      "消息通知中心"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PATCH /api/v1/notices/{id}/withdraw",
+    "method": "PATCH",
+    "path": "/api/v1/notices/{id}/withdraw",
+    "operation_id": "withdraw_2",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/notices/{id}/publish",
+    "method": "PATCH",
+    "path": "/api/v1/notices/{id}/publish",
+    "operation_id": "publish",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/leases/{id}/status",
+    "method": "PATCH",
+    "path": "/api/v1/leases/{id}/status",
+    "operation_id": "updateStatus_2",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/lease-move-out-applications/{id}/reject",
+    "method": "PATCH",
+    "path": "/api/v1/lease-move-out-applications/{id}/reject",
+    "operation_id": "reject_3",
+    "tags": [
+      "退租申请"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/lease-move-out-applications/{id}/approve",
+    "method": "PATCH",
+    "path": "/api/v1/lease-move-out-applications/{id}/approve",
+    "operation_id": "approve_1",
+    "tags": [
+      "退租申请"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/housings/{id}/status",
+    "method": "PATCH",
+    "path": "/api/v1/housings/{id}/status",
+    "operation_id": "updateStatus_3",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/houses/{id}/status",
+    "method": "PATCH",
+    "path": "/api/v1/houses/{id}/status",
+    "operation_id": "updateStatus_4",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/houses/layout",
+    "method": "PATCH",
+    "path": "/api/v1/houses/layout",
+    "operation_id": "updateLayout",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PATCH /api/v1/houses/attributes",
+    "method": "PATCH",
+    "path": "/api/v1/houses/attributes",
+    "operation_id": "updateAttributes",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PATCH /api/v1/feedbacks/{id}/close",
+    "method": "PATCH",
+    "path": "/api/v1/feedbacks/{id}/close",
+    "operation_id": "close_1",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/communities/{id}/status",
+    "method": "PATCH",
+    "path": "/api/v1/communities/{id}/status",
+    "operation_id": "updateStatus_5",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "PATCH /api/v1/communities/batch-status",
+    "method": "PATCH",
+    "path": "/api/v1/communities/batch-status",
+    "operation_id": "batchUpdateStatus",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "PATCH /api/v1/agreement-templates/{id}/status",
+    "method": "PATCH",
+    "path": "/api/v1/agreement-templates/{id}/status",
+    "operation_id": "updateStatus_6",
+    "tags": [
+      "租赁协议模板"
+    ],
+    "parameter_names": [
+      "id",
+      "status"
+    ]
+  },
+  {
+    "id": "GET /api/v1/work-orders/{id}/timeline",
+    "method": "GET",
+    "path": "/api/v1/work-orders/{id}/timeline",
+    "operation_id": "timeline",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/work-orders/assignable-staff",
+    "method": "GET",
+    "path": "/api/v1/work-orders/assignable-staff",
+    "operation_id": "assignableStaff",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "communityId",
+      "categoryId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/viewing-appointments/{id}",
+    "method": "GET",
+    "path": "/api/v1/viewing-appointments/{id}",
+    "operation_id": "getById_13",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/viewing-appointments/assignable-assignees",
+    "method": "GET",
+    "path": "/api/v1/viewing-appointments/assignable-assignees",
+    "operation_id": "assignableAssignees",
+    "tags": [
+      "看房预约管理"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/units/{unitId}/houses",
+    "method": "GET",
+    "path": "/api/v1/units/{unitId}/houses",
+    "operation_id": "pageByUnit",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": [
+      "unitId",
+      "page",
+      "size",
+      "status"
+    ]
+  },
+  {
+    "id": "GET /api/v1/statistics/work-orders",
+    "method": "GET",
+    "path": "/api/v1/statistics/work-orders",
+    "operation_id": "workOrders",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/statistics/todos",
+    "method": "GET",
+    "path": "/api/v1/statistics/todos",
+    "operation_id": "todos",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/statistics/staff/trend",
+    "method": "GET",
+    "path": "/api/v1/statistics/staff/trend",
+    "operation_id": "staffTrend",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": [
+      "days"
+    ]
+  },
+  {
+    "id": "GET /api/v1/statistics/resources",
+    "method": "GET",
+    "path": "/api/v1/statistics/resources",
+    "operation_id": "resources",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/statistics/residents",
+    "method": "GET",
+    "path": "/api/v1/statistics/residents",
+    "operation_id": "residents",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/statistics/evaluations",
+    "method": "GET",
+    "path": "/api/v1/statistics/evaluations",
+    "operation_id": "statistics",
+    "tags": [
+      "评价管理"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/statistics/evaluations/aggregation",
+    "method": "GET",
+    "path": "/api/v1/statistics/evaluations/aggregation",
+    "operation_id": "evaluationAggregation",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/statistics/dashboard",
+    "method": "GET",
+    "path": "/api/v1/statistics/dashboard",
+    "operation_id": "dashboard",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/statistics/communities",
+    "method": "GET",
+    "path": "/api/v1/statistics/communities",
+    "operation_id": "communityOptions",
+    "tags": [
+      "运营统计"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/staff/workbench/summary",
+    "method": "GET",
+    "path": "/api/v1/staff/workbench/summary",
+    "operation_id": "summary",
+    "tags": [
+      "服务人员工作台"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/staff-schedules",
+    "method": "GET",
+    "path": "/api/v1/staff-schedules",
+    "operation_id": "list_4",
+    "tags": [
+      "服务人员排班"
+    ],
+    "parameter_names": [
+      "communityId",
+      "startDate",
+      "endDate",
+      "staffId"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/staff-schedules",
+    "method": "DELETE",
+    "path": "/api/v1/staff-schedules",
+    "operation_id": "clear",
+    "tags": [
+      "服务人员排班"
+    ],
+    "parameter_names": [
+      "dto"
+    ]
+  },
+  {
+    "id": "GET /api/v1/staff-capabilities",
+    "method": "GET",
+    "path": "/api/v1/staff-capabilities",
+    "operation_id": "page_11",
+    "tags": [
+      "服务人员能力绑定"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "communityId",
+      "categoryId",
+      "keyword"
+    ]
+  },
+  {
+    "id": "GET /api/v1/staff-capabilities/candidates",
+    "method": "GET",
+    "path": "/api/v1/staff-capabilities/candidates",
+    "operation_id": "candidates",
+    "tags": [
+      "服务人员能力绑定"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/resources/{resourceId}/available-slots",
+    "method": "GET",
+    "path": "/api/v1/resources/{resourceId}/available-slots",
+    "operation_id": "availableSlots",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "resourceId",
+      "startDate",
+      "endDate"
+    ]
+  },
+  {
+    "id": "GET /api/v1/resource-reservations/{id}",
+    "method": "GET",
+    "path": "/api/v1/resource-reservations/{id}",
+    "operation_id": "getById_14",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residents",
+    "method": "GET",
+    "path": "/api/v1/residents",
+    "operation_id": "page_12",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "keyword"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residents/{residentId}/violations",
+    "method": "GET",
+    "path": "/api/v1/residents/{residentId}/violations",
+    "operation_id": "violations",
+    "tags": [
+      "资源预约管理"
+    ],
+    "parameter_names": [
+      "residentId",
+      "page",
+      "size"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residents/{residentId}/residences",
+    "method": "GET",
+    "path": "/api/v1/residents/{residentId}/residences",
+    "operation_id": "pageByResident",
+    "tags": [
+      "居住关系管理"
+    ],
+    "parameter_names": [
+      "residentId",
+      "page",
+      "size",
+      "status"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residents/{id}",
+    "method": "GET",
+    "path": "/api/v1/residents/{id}",
+    "operation_id": "getById_15",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residents/co-resident-candidates",
+    "method": "GET",
+    "path": "/api/v1/residents/co-resident-candidates",
+    "operation_id": "coResidentCandidates",
+    "tags": [
+      "居民账号管理"
+    ],
+    "parameter_names": [
+      "houseId",
+      "keyword"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residence-relations/{id}/dependents",
+    "method": "GET",
+    "path": "/api/v1/residence-relations/{id}/dependents",
+    "operation_id": "dependents",
+    "tags": [
+      "居住关系管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/residence-applications/{id}",
+    "method": "GET",
+    "path": "/api/v1/residence-applications/{id}",
+    "operation_id": "getById_16",
+    "tags": [
+      "入住申请管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/payment/orders",
+    "method": "GET",
+    "path": "/api/v1/payment/orders",
+    "operation_id": "page_13",
+    "tags": [
+      "支付管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "channel"
+    ]
+  },
+  {
+    "id": "GET /api/v1/payment/orders/{paymentNo}",
+    "method": "GET",
+    "path": "/api/v1/payment/orders/{paymentNo}",
+    "operation_id": "getStatus",
+    "tags": [
+      "支付管理"
+    ],
+    "parameter_names": [
+      "paymentNo"
+    ]
+  },
+  {
+    "id": "GET /api/v1/payment/channels",
+    "method": "GET",
+    "path": "/api/v1/payment/channels",
+    "operation_id": "channels",
+    "tags": [
+      "支付管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/operation-logs",
+    "method": "GET",
+    "path": "/api/v1/operation-logs",
+    "operation_id": "page_14",
+    "tags": [
+      "操作日志"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "operatorId",
+      "operatorType",
+      "operationType",
+      "targetType",
+      "module",
+      "action",
+      "keyword",
+      "startTime",
+      "endTime"
+    ]
+  },
+  {
+    "id": "GET /api/v1/operation-logs/{id}",
+    "method": "GET",
+    "path": "/api/v1/operation-logs/{id}",
+    "operation_id": "getById_17",
+    "tags": [
+      "操作日志"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/notifications",
+    "method": "GET",
+    "path": "/api/v1/notifications",
+    "operation_id": "page_15",
+    "tags": [
+      "消息通知中心"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "isRead"
+    ]
+  },
+  {
+    "id": "GET /api/v1/notifications/unread",
+    "method": "GET",
+    "path": "/api/v1/notifications/unread",
+    "operation_id": "unread",
+    "tags": [
+      "消息通知中心"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/notifications/pull",
+    "method": "GET",
+    "path": "/api/v1/notifications/pull",
+    "operation_id": "pull",
+    "tags": [
+      "消息通知中心"
+    ],
+    "parameter_names": [
+      "sinceSeq"
+    ]
+  },
+  {
+    "id": "GET /api/v1/notices/{id}/viewers",
+    "method": "GET",
+    "path": "/api/v1/notices/{id}/viewers",
+    "operation_id": "viewers",
+    "tags": [
+      "公告管理"
+    ],
+    "parameter_names": [
+      "id",
+      "page",
+      "size"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{leaseId}/terms",
+    "method": "GET",
+    "path": "/api/v1/leases/{leaseId}/terms",
+    "operation_id": "list_5",
+    "tags": [
+      "租约合同段"
+    ],
+    "parameter_names": [
+      "leaseId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{id}/viewings",
+    "method": "GET",
+    "path": "/api/v1/leases/{id}/viewings",
+    "operation_id": "viewings",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{id}/rent-quote",
+    "method": "GET",
+    "path": "/api/v1/leases/{id}/rent-quote",
+    "operation_id": "quote",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id",
+      "purpose",
+      "months"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{id}/payments",
+    "method": "GET",
+    "path": "/api/v1/leases/{id}/payments",
+    "operation_id": "payments",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/{id}/changes",
+    "method": "GET",
+    "path": "/api/v1/leases/{id}/changes",
+    "operation_id": "changes",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/my-summaries",
+    "method": "GET",
+    "path": "/api/v1/leases/my-summaries",
+    "operation_id": "page_16",
+    "tags": [
+      "居民租约摘要"
+    ],
+    "parameter_names": [
+      "page",
+      "size"
+    ]
+  },
+  {
+    "id": "GET /api/v1/leases/expiring",
+    "method": "GET",
+    "path": "/api/v1/leases/expiring",
+    "operation_id": "expiring",
+    "tags": [
+      "租住管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "days"
+    ]
+  },
+  {
+    "id": "GET /api/v1/lease-move-out-applications",
+    "method": "GET",
+    "path": "/api/v1/lease-move-out-applications",
+    "operation_id": "page_17",
+    "tags": [
+      "退租申请"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "status",
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/lease-move-out-applications/mine",
+    "method": "GET",
+    "path": "/api/v1/lease-move-out-applications/mine",
+    "operation_id": "mine",
+    "tags": [
+      "退租申请"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/lease-extensions/pending",
+    "method": "GET",
+    "path": "/api/v1/lease-extensions/pending",
+    "operation_id": "pending",
+    "tags": [
+      "租期延长"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/lease-agreements/{id}",
+    "method": "GET",
+    "path": "/api/v1/lease-agreements/{id}",
+    "operation_id": "getById_18",
+    "tags": [
+      "租赁协议"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/housings/{id}/available-slots",
+    "method": "GET",
+    "path": "/api/v1/housings/{id}/available-slots",
+    "operation_id": "availableSlots_1",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "id",
+      "startDate",
+      "endDate"
+    ]
+  },
+  {
+    "id": "GET /api/v1/housings/filter-options",
+    "method": "GET",
+    "path": "/api/v1/housings/filter-options",
+    "operation_id": "filterOptions",
+    "tags": [
+      "房源管理"
+    ],
+    "parameter_names": [
+      "communityId",
+      "status",
+      "minRent",
+      "maxRent",
+      "keyword",
+      "rentType"
+    ]
+  },
+  {
+    "id": "GET /api/v1/houses/{id}/status-history",
+    "method": "GET",
+    "path": "/api/v1/houses/{id}/status-history",
+    "operation_id": "statusHistory",
+    "tags": [
+      "房屋管理"
+    ],
+    "parameter_names": [
+      "id",
+      "page",
+      "size"
+    ]
+  },
+  {
+    "id": "GET /api/v1/houses/{houseId}/residents",
+    "method": "GET",
+    "path": "/api/v1/houses/{houseId}/residents",
+    "operation_id": "pageByHouse",
+    "tags": [
+      "居住关系管理"
+    ],
+    "parameter_names": [
+      "houseId",
+      "page",
+      "size",
+      "status"
+    ]
+  },
+  {
+    "id": "GET /api/v1/feedbacks/{id}",
+    "method": "GET",
+    "path": "/api/v1/feedbacks/{id}",
+    "operation_id": "getById_19",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/evaluations",
+    "method": "GET",
+    "path": "/api/v1/evaluations",
+    "operation_id": "page_18",
+    "tags": [
+      "评价管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "minRating",
+      "maxRating"
+    ]
+  },
+  {
+    "id": "GET /api/v1/evaluations/{evaluationId}/followups",
+    "method": "GET",
+    "path": "/api/v1/evaluations/{evaluationId}/followups",
+    "operation_id": "followups",
+    "tags": [
+      "评价管理"
+    ],
+    "parameter_names": [
+      "evaluationId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/evaluations/unsatisfied",
+    "method": "GET",
+    "path": "/api/v1/evaluations/unsatisfied",
+    "operation_id": "unsatisfied",
+    "tags": [
+      "评价管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "hasFollowup"
+    ]
+  },
+  {
+    "id": "GET /api/v1/conversations",
+    "method": "GET",
+    "path": "/api/v1/conversations",
+    "operation_id": "page_19",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "type"
+    ]
+  },
+  {
+    "id": "GET /api/v1/conversations/{id}",
+    "method": "GET",
+    "path": "/api/v1/conversations/{id}",
+    "operation_id": "getById_20",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/conversations/{id}/viewing-slots",
+    "method": "GET",
+    "path": "/api/v1/conversations/{id}/viewing-slots",
+    "operation_id": "viewingSlots",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id",
+      "startDate",
+      "endDate"
+    ]
+  },
+  {
+    "id": "GET /api/v1/conversations/{id}/viewing-context",
+    "method": "GET",
+    "path": "/api/v1/conversations/{id}/viewing-context",
+    "operation_id": "viewingContext",
+    "tags": [
+      "多方会话"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/conversation-inbox",
+    "method": "GET",
+    "path": "/api/v1/conversation-inbox",
+    "operation_id": "page_20",
+    "tags": [
+      "统一会话工作区"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "type",
+      "keyword",
+      "unreadOnly"
+    ]
+  },
+  {
+    "id": "GET /api/v1/conversation-inbox/{source}/{id}/messages",
+    "method": "GET",
+    "path": "/api/v1/conversation-inbox/{source}/{id}/messages",
+    "operation_id": "messages_3",
+    "tags": [
+      "统一会话工作区"
+    ],
+    "parameter_names": [
+      "source",
+      "id",
+      "beforeId",
+      "afterId",
+      "size"
+    ]
+  },
+  {
+    "id": "GET /api/v1/configs",
+    "method": "GET",
+    "path": "/api/v1/configs",
+    "operation_id": "list_6",
+    "tags": [
+      "全局配置管理"
+    ],
+    "parameter_names": []
+  },
+  {
+    "id": "GET /api/v1/communities/{id}/houses-with-housing",
+    "method": "GET",
+    "path": "/api/v1/communities/{id}/houses-with-housing",
+    "operation_id": "housesWithHousing",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/{id}/deletion-impact",
+    "method": "GET",
+    "path": "/api/v1/communities/{id}/deletion-impact",
+    "operation_id": "deletionImpact",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/{communityId}/service-categories",
+    "method": "GET",
+    "path": "/api/v1/communities/{communityId}/service-categories",
+    "operation_id": "tree",
+    "tags": [
+      "服务类别管理"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/{communityId}/service-categories/all",
+    "method": "GET",
+    "path": "/api/v1/communities/{communityId}/service-categories/all",
+    "operation_id": "treeAll",
+    "tags": [
+      "服务类别管理"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/{communityId}/resources",
+    "method": "GET",
+    "path": "/api/v1/communities/{communityId}/resources",
+    "operation_id": "pageByCommunity",
+    "tags": [
+      "公共资源管理"
+    ],
+    "parameter_names": [
+      "communityId",
+      "page",
+      "size",
+      "type",
+      "status"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/{communityId}/buildings",
+    "method": "GET",
+    "path": "/api/v1/communities/{communityId}/buildings",
+    "operation_id": "pageByCommunity_1",
+    "tags": [
+      "楼栋管理"
+    ],
+    "parameter_names": [
+      "communityId",
+      "page",
+      "size",
+      "keyword"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/responsible-admins",
+    "method": "GET",
+    "path": "/api/v1/communities/responsible-admins",
+    "operation_id": "responsibleAdmins",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "communityId",
+      "page",
+      "size",
+      "keyword"
+    ]
+  },
+  {
+    "id": "GET /api/v1/communities/houses-manage",
+    "method": "GET",
+    "path": "/api/v1/communities/houses-manage",
+    "operation_id": "housesManage",
+    "tags": [
+      "社区管理"
+    ],
+    "parameter_names": [
+      "page",
+      "size",
+      "communityId",
+      "buildingId",
+      "unitId",
+      "keyword",
+      "listing"
+    ]
+  },
+  {
+    "id": "GET /api/v1/buildings/{buildingId}/units",
+    "method": "GET",
+    "path": "/api/v1/buildings/{buildingId}/units",
+    "operation_id": "pageByBuilding",
+    "tags": [
+      "单元管理"
+    ],
+    "parameter_names": [
+      "buildingId",
+      "page",
+      "size"
+    ]
+  },
+  {
+    "id": "GET /api/v1/agreement-templates/available",
+    "method": "GET",
+    "path": "/api/v1/agreement-templates/available",
+    "operation_id": "available",
+    "tags": [
+      "租赁协议模板"
+    ],
+    "parameter_names": [
+      "communityId"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/work-order-attachments/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/work-order-attachments/{id}",
+    "operation_id": "deleteAttachment",
+    "tags": [
+      "工单管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/sys-users/{userId}/communities/{communityId}",
+    "method": "DELETE",
+    "path": "/api/v1/sys-users/{userId}/communities/{communityId}",
+    "operation_id": "unbindCommunity",
+    "tags": [
+      "系统用户管理"
+    ],
+    "parameter_names": [
+      "userId",
+      "communityId"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/staff-schedules/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/staff-schedules/{id}",
+    "operation_id": "delete_11",
+    "tags": [
+      "服务人员排班"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/houses/{houseId}/images/{imageId}",
+    "method": "DELETE",
+    "path": "/api/v1/houses/{houseId}/images/{imageId}",
+    "operation_id": "remove",
+    "tags": [
+      "房屋相册"
+    ],
+    "parameter_names": [
+      "houseId",
+      "imageId"
+    ]
+  },
+  {
+    "id": "DELETE /api/v1/feedback-attachments/{id}",
+    "method": "DELETE",
+    "path": "/api/v1/feedback-attachments/{id}",
+    "operation_id": "deleteAttachment_1",
+    "tags": [
+      "反馈管理"
+    ],
+    "parameter_names": [
+      "id"
+    ]
+  }
+]

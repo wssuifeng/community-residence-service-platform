@@ -1,0 +1,253 @@
+{
+  "date": "2026-10-19T21:52:56.495044+08:00",
+  "scope": "C9需求验收首批；独立真实浏览器、正常统计页面只读观察",
+  "source_head": "d8e7da3947c300ab9f6a3b6e9474b80a11301899",
+  "observations": [
+    {
+      "headings": [
+        "运营看板",
+        "近 7 日工单趋势",
+        "工单状态分布",
+        "房屋状态",
+        "最新动态"
+      ],
+      "tabs": [
+        "概览",
+        "详细统计"
+      ],
+      "visibleButtons": [
+        {
+          "text": "概览",
+          "label": null,
+          "title": null
+        },
+        {
+          "text": "详细统计",
+          "label": null,
+          "title": null
+        },
+        {
+          "text": "查看全部",
+          "label": null,
+          "title": null
+        }
+      ],
+      "inputs": [
+        {
+          "type": "text",
+          "placeholder": "",
+          "label": "社区筛选"
+        }
+      ],
+      "chartCount": 4,
+      "visibleDatePickers": 0,
+      "exportControls": [],
+      "view": "概览",
+      "path": "/admin/dashboard",
+      "query": {},
+      "screenshot": "overview.png"
+    },
+    {
+      "headings": [
+        "运营看板",
+        "状态分布",
+        "优先级分布",
+        "状态占比",
+        "优先级分布"
+      ],
+      "tabs": [
+        "概览",
+        "详细统计",
+        "工单",
+        "居民",
+        "资源预约"
+      ],
+      "visibleButtons": [
+        {
+          "text": "概览",
+          "label": null,
+          "title": null
+        },
+        {
+          "text": "详细统计",
+          "label": null,
+          "title": null
+        }
+      ],
+      "inputs": [],
+      "chartCount": 2,
+      "visibleDatePickers": 0,
+      "exportControls": [],
+      "view": "详细统计/工单",
+      "path": "/admin/dashboard",
+      "query": {
+        "tab": "details"
+      },
+      "screenshot": "details-workorders.png"
+    },
+    {
+      "headings": [
+        "运营看板",
+        "账号状态分布",
+        "状态明细"
+      ],
+      "tabs": [
+        "概览",
+        "详细统计",
+        "工单",
+        "居民",
+        "资源预约"
+      ],
+      "visibleButtons": [
+        {
+          "text": "概览",
+          "label": null,
+          "title": null
+        },
+        {
+          "text": "详细统计",
+          "label": null,
+          "title": null
+        }
+      ],
+      "inputs": [],
+      "chartCount": 1,
+      "visibleDatePickers": 0,
+      "exportControls": [],
+      "view": "详细统计/居民",
+      "path": "/admin/dashboard",
+      "query": {
+        "tab": "details"
+      },
+      "screenshot": "details-residents.png"
+    },
+    {
+      "headings": [
+        "运营看板",
+        "预约状态分布",
+        "状态明细"
+      ],
+      "tabs": [
+        "概览",
+        "详细统计",
+        "工单",
+        "居民",
+        "资源预约"
+      ],
+      "visibleButtons": [
+        {
+          "text": "概览",
+          "label": null,
+          "title": null
+        },
+        {
+          "text": "详细统计",
+          "label": null,
+          "title": null
+        }
+      ],
+      "inputs": [],
+      "chartCount": 1,
+      "visibleDatePickers": 0,
+      "exportControls": [],
+      "view": "详细统计/资源预约",
+      "path": "/admin/dashboard",
+      "query": {
+        "tab": "details"
+      },
+      "screenshot": "details-resources.png"
+    }
+  ],
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities",
+      "query_parameter_names": [],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos",
+      "query_parameter_names": [],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard",
+      "query_parameter_names": [],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/work-orders",
+      "query_parameter_names": [],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos",
+      "query_parameter_names": [],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/residents",
+      "query_parameter_names": [],
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/resources",
+      "query_parameter_names": [],
+      "status": 200
+    }
+  ],
+  "blocked_requests": [],
+  "page_errors": [],
+  "financial_requests": 0,
+  "business_write_requests": 0,
+  "limitation": "本批不核对统计值与数据库明细、不验证全部角色授权、不重放金融；不属于质量评估或N8完整兼容性验收。",
+  "browser": {
+    "engine": "Chromium",
+    "channel": "msedge",
+    "version": "155.0.4283.62",
+    "viewport": {
+      "width": 1440,
+      "height": 1024
+    }
+  },
+  "authentication": "独立会话登录成功；凭据/令牌不保存",
+  "completed": true,
+  "requirements_observed": {
+    "R40_time_filter": "未观察到时间筛选入口；结合源码与OpenAPI参数记录判定",
+    "R42_image_export": "未观察到导出入口；结合EChart注册组件与页面源码判定",
+    "R41_data_reconciliation": "本批未执行，保持待验收"
+  },
+  "independent_context_closed": true,
+  "source_files": [
+    {
+      "path": "frontend/src/admin/statistics/views/DashboardTabView.vue",
+      "sha256": "dfe416a8400e42c1c744d7ddd6bfc1d976d21d0c943aed76dc3a4a6dbf07e818"
+    },
+    {
+      "path": "frontend/src/admin/statistics/views/DashboardOverview.vue",
+      "sha256": "617ed540b45b82fb8fe074f7ae0dfa4c7fc2028c703d36ed579ee45695ae9f5d"
+    },
+    {
+      "path": "frontend/src/admin/statistics/views/StatisticsView.vue",
+      "sha256": "e276d80db6b55d9d88fd991babea81eee027d8a9cef6ccdce6a82dbc4ceab4f8"
+    },
+    {
+      "path": "frontend/src/common/statistics/components/EChart.vue",
+      "sha256": "a2cbf926e88479530f88a4e2c1200795f18ed7747a1c565c9298ce62d3911aab"
+    },
+    {
+      "path": "frontend/src/common/statistics/api/statistics.ts",
+      "sha256": "0f51b2d16c62cf9b3d2589eb643f3d7ef55b39b4fea4bb7f758b28cf736cfaf4"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/statistics/controller/StatisticsController.java",
+      "sha256": "e282311d9f3748521da11793bd3b776e155787f8b37c74d12fe232e03656e9a6"
+    }
+  ]
+}

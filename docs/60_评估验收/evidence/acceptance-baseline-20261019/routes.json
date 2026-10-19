@@ -1,0 +1,1323 @@
+[
+  {
+    "id": "route-001",
+    "path": "/admin",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 50,
+    "component": "frontend/src/admin/layout/views/AdminLayout.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-002",
+    "path": "/admin/profile",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 54,
+    "component": "frontend/src/common/auth/views/SystemProfileView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-003",
+    "path": "/admin",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 55,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-004",
+    "path": "/admin/dashboard",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 59,
+    "component": "frontend/src/admin/statistics/views/DashboardTabView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-005",
+    "path": "/admin/community",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 60,
+    "component": "frontend/src/admin/community/views/CommunityStructureView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-006",
+    "path": "/admin/work-orders",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 61,
+    "component": "frontend/src/admin/workorder/views/WorkOrderListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-007",
+    "path": "/admin/residents",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 62,
+    "component": "frontend/src/admin/resident/views/ResidentManageView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-008",
+    "path": "/admin/housing-lease",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 64,
+    "component": "frontend/src/admin/lease/views/HousingLeaseHubView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-009",
+    "path": "/admin/notices",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 65,
+    "component": "frontend/src/admin/notice/views/NoticeManageView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-010",
+    "path": "/admin/feedbacks",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 66,
+    "component": "frontend/src/admin/feedback/views/FeedbackManageView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-011",
+    "path": "/admin/reservations",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 67,
+    "component": "frontend/src/admin/reservation/views/ReservationManageView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-012",
+    "path": "/admin/evaluations",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 68,
+    "component": "frontend/src/admin/evaluation/views/EvaluationManageView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-013",
+    "path": "/admin/system",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 69,
+    "component": "frontend/src/admin/auth/views/SystemManageView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-014",
+    "path": "/admin/staff-schedules",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 73,
+    "component": "frontend/src/admin/workorder/views/StaffScheduleView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-015",
+    "path": "/admin/staff-capabilities",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 74,
+    "component": "frontend/src/admin/workorder/views/StaffCapabilityView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-016",
+    "path": "/admin/communities/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 79,
+    "component": "frontend/src/admin/community/views/CommunityDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-017",
+    "path": "/admin/work-orders/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 80,
+    "component": "frontend/src/admin/workorder/views/WorkOrderDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-018",
+    "path": "/admin/leases/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 81,
+    "component": "frontend/src/admin/lease/views/LeaseDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-019",
+    "path": "/admin/residents/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 82,
+    "component": "frontend/src/admin/resident/views/ResidentDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-020",
+    "path": "/admin/housings/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 83,
+    "component": "frontend/src/admin/housing/views/HousingDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-021",
+    "path": "/admin/notifications",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 84,
+    "component": "frontend/src/admin/notification/views/NotificationListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-022",
+    "path": "/admin/conversations",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 86,
+    "component": "frontend/src/admin/conversation/views/ConversationListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-023",
+    "path": "/admin/conversations/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 87,
+    "component": "frontend/src/admin/conversation/views/ConversationListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-024",
+    "path": "/admin/statistics/dashboard",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 90,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-025",
+    "path": "/admin/statistics/details",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 91,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-026",
+    "path": "/admin/communities",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 92,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-027",
+    "path": "/admin/buildings",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 94,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-028",
+    "path": "/admin/units",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 95,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-029",
+    "path": "/admin/houses",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 96,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-030",
+    "path": "/admin/resources",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 97,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-031",
+    "path": "/admin/residence-applications",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 99,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-032",
+    "path": "/admin/residence-relations",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 100,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-033",
+    "path": "/admin/leases",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 103,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-034",
+    "path": "/admin/housings",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 110,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-035",
+    "path": "/admin/move-out-applications",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 116,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-036",
+    "path": "/admin/agreement-templates",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 117,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-037",
+    "path": "/admin/configs",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 119,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-038",
+    "path": "/admin/service-categories",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 120,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-039",
+    "path": "/admin/resource-reservations",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 121,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-040",
+    "path": "/admin/violations",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 122,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-041",
+    "path": "/admin/viewing-appointments",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 124,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-042",
+    "path": "/admin/notices/create",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 125,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-043",
+    "path": "/admin/notices/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 126,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-044",
+    "path": "/admin/feedbacks/:id",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 127,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-045",
+    "path": "/admin/evaluations/:id/followup",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 128,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-046",
+    "path": "/admin/sys-users",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 129,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-047",
+    "path": "/admin/sys-users/:id/communities",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 130,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-048",
+    "path": "/admin/operation-logs",
+    "portal": "admin",
+    "roles_candidate": [
+      "ADMIN",
+      "SUPER_ADMIN"
+    ],
+    "source": "frontend/src/admin/routes.ts",
+    "source_line": 131,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-049",
+    "path": "/resident",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 14,
+    "component": "frontend/src/resident/layout/views/ResidentLayout.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-050",
+    "path": "/resident",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 18,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-051",
+    "path": "/resident/home",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 19,
+    "component": "frontend/src/resident/workbench/views/HomeView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-052",
+    "path": "/resident/profile",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 20,
+    "component": "frontend/src/resident/resident/views/ProfileView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-053",
+    "path": "/resident/housing-lease",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 23,
+    "component": "frontend/src/resident/lease/views/HousingLeaseHubView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-054",
+    "path": "/resident/work-orders",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 28,
+    "component": "frontend/src/resident/workorder/views/WorkOrderListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-055",
+    "path": "/resident/work-orders/create",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 29,
+    "component": "frontend/src/resident/workorder/views/WorkOrderCreateView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-056",
+    "path": "/resident/work-orders/:id",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 30,
+    "component": "frontend/src/resident/workorder/views/WorkOrderDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-057",
+    "path": "/resident/feedbacks",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 31,
+    "component": "frontend/src/resident/feedback/views/FeedbackListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-058",
+    "path": "/resident/feedbacks/create",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 32,
+    "component": "frontend/src/resident/feedback/views/FeedbackCreateView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-059",
+    "path": "/resident/feedbacks/:id",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 33,
+    "component": "frontend/src/resident/feedback/views/FeedbackDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-060",
+    "path": "/resident/reservations",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 34,
+    "component": "frontend/src/resident/reservation/views/ReservationListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-061",
+    "path": "/resident/resources",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 35,
+    "component": "frontend/src/resident/reservation/views/ResourceListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-062",
+    "path": "/resident/resources/:id",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 36,
+    "component": "frontend/src/resident/reservation/views/ResourceDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-063",
+    "path": "/resident/reservations/create",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 37,
+    "component": "frontend/src/resident/reservation/views/ReservationCreateView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-064",
+    "path": "/resident/notices",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 38,
+    "component": "frontend/src/resident/notice/views/NoticeListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-065",
+    "path": "/resident/notices/:id",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 39,
+    "component": "frontend/src/resident/notice/views/NoticeDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-066",
+    "path": "/resident/notifications",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 40,
+    "component": "frontend/src/resident/messaging/views/NotificationListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-067",
+    "path": "/resident/conversations",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 42,
+    "component": "frontend/src/resident/conversation/views/ConversationDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-068",
+    "path": "/resident/conversations/:id",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 43,
+    "component": "frontend/src/resident/conversation/views/ConversationDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-069",
+    "path": "/resident/housings/:id",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 45,
+    "component": "frontend/src/resident/housing/views/HousingDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-070",
+    "path": "/resident/housings/:id/reserve",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 46,
+    "component": "frontend/src/resident/housing/views/HousingReservationView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-071",
+    "path": "/resident/housings/:id/apply",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 47,
+    "component": "frontend/src/resident/resident/views/ResidenceApplyView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-072",
+    "path": "/resident/viewing-appointments/:id",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 48,
+    "component": "frontend/src/resident/housing/views/ViewingAppointmentDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-073",
+    "path": "/resident/viewing-appointments",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 50,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-074",
+    "path": "/resident/reservations",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 50,
+    "component": null,
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-075",
+    "path": "/resident/leases",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 57,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-076",
+    "path": "/resident/housing-lease",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 59,
+    "component": null,
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-077",
+    "path": "/resident/housings",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 64,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-078",
+    "path": "/resident/housing-lease",
+    "portal": "resident",
+    "roles_candidate": [
+      "RESIDENT"
+    ],
+    "source": "frontend/src/resident/routes.ts",
+    "source_line": 65,
+    "component": null,
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-079",
+    "path": "/staff",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 7,
+    "component": "frontend/src/staff/layout/views/StaffLayout.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-080",
+    "path": "/staff/profile",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 11,
+    "component": "frontend/src/common/auth/views/SystemProfileView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-081",
+    "path": "/staff",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 12,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-082",
+    "path": "/staff/dashboard",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 13,
+    "component": "frontend/src/staff/workbench/views/DashboardView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-083",
+    "path": "/staff/work-orders",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 14,
+    "component": "frontend/src/staff/workorder/views/WorkOrderListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-084",
+    "path": "/staff/work-orders/:id",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 15,
+    "component": "frontend/src/staff/workorder/views/WorkOrderDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-085",
+    "path": "/staff/viewings",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 16,
+    "component": "frontend/src/staff/housing/views/ViewingsWorkbenchView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-086",
+    "path": "/staff/conversations",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 17,
+    "component": "frontend/src/staff/conversation/views/ConversationListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-087",
+    "path": "/staff/notifications",
+    "portal": "staff",
+    "roles_candidate": [
+      "STAFF"
+    ],
+    "source": "frontend/src/staff/routes.ts",
+    "source_line": 18,
+    "component": "frontend/src/staff/messaging/views/NotificationListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-088",
+    "path": "/guest",
+    "portal": "guest",
+    "roles_candidate": [
+      "GUEST"
+    ],
+    "source": "frontend/src/common/public/routes.ts",
+    "source_line": 5,
+    "component": "frontend/src/common/public/views/GuestLayout.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-089",
+    "path": "/guest",
+    "portal": "guest",
+    "roles_candidate": [
+      "GUEST"
+    ],
+    "source": "frontend/src/common/public/routes.ts",
+    "source_line": 8,
+    "component": null,
+    "redirect": true,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-090",
+    "path": "/guest/home",
+    "portal": "guest",
+    "roles_candidate": [
+      "GUEST"
+    ],
+    "source": "frontend/src/common/public/routes.ts",
+    "source_line": 9,
+    "component": "frontend/src/common/public/views/HomeView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-091",
+    "path": "/guest/housings",
+    "portal": "guest",
+    "roles_candidate": [
+      "GUEST"
+    ],
+    "source": "frontend/src/common/public/routes.ts",
+    "source_line": 10,
+    "component": "frontend/src/common/public/views/HousingListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-092",
+    "path": "/guest/housings/:id",
+    "portal": "guest",
+    "roles_candidate": [
+      "GUEST"
+    ],
+    "source": "frontend/src/common/public/routes.ts",
+    "source_line": 11,
+    "component": "frontend/src/common/public/views/HousingDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-093",
+    "path": "/guest/notices",
+    "portal": "guest",
+    "roles_candidate": [
+      "GUEST"
+    ],
+    "source": "frontend/src/common/public/routes.ts",
+    "source_line": 12,
+    "component": "frontend/src/common/public/views/NoticeListView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-094",
+    "path": "/guest/notices/:id",
+    "portal": "guest",
+    "roles_candidate": [
+      "GUEST"
+    ],
+    "source": "frontend/src/common/public/routes.ts",
+    "source_line": 13,
+    "component": "frontend/src/common/public/views/NoticeDetailView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-095",
+    "path": "/auth",
+    "portal": "auth",
+    "roles_candidate": [
+      "GUEST",
+      "RESIDENT",
+      "ADMIN",
+      "SUPER_ADMIN",
+      "STAFF"
+    ],
+    "source": "frontend/src/common/auth/routes.ts",
+    "source_line": 3,
+    "component": null,
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-096",
+    "path": "/auth/login",
+    "portal": "auth",
+    "roles_candidate": [
+      "GUEST",
+      "RESIDENT",
+      "ADMIN",
+      "SUPER_ADMIN",
+      "STAFF"
+    ],
+    "source": "frontend/src/common/auth/routes.ts",
+    "source_line": 5,
+    "component": "frontend/src/common/auth/views/LoginView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  },
+  {
+    "id": "route-097",
+    "path": "/auth/register",
+    "portal": "auth",
+    "roles_candidate": [
+      "GUEST",
+      "RESIDENT",
+      "ADMIN",
+      "SUPER_ADMIN",
+      "STAFF"
+    ],
+    "source": "frontend/src/common/auth/routes.ts",
+    "source_line": 6,
+    "component": "frontend/src/common/auth/views/RegisterView.vue",
+    "redirect": false,
+    "limitation": "静态路由登记，不证明运行可达或后端授权"
+  }
+]
