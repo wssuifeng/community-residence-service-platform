@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-19",
+  "scope": "参考验收与评估技能优化60阶段计划；仅文档结构与规则校验",
+  "baseline_commit": "1fa2b6719e4941ad3f5968c4b30cfed535e4f807",
+  "checks": {
+    "local_links_checked": 52,
+    "heading_anchors_checked": 7,
+    "phase60_markdown_files_checked": 6,
+    "work_groups_in_execution_order": 7,
+    "acceptance_before_quality": true,
+    "requirement_flow_counts": {
+      "R": 75,
+      "N": 10,
+      "E": 13
+    },
+    "acceptance_rows_identical_to_baseline": true,
+    "quality_dimension_count": 11,
+    "quality_dimension_ids": [
+      "60-04.1",
+      "60-04.2",
+      "60-04.3",
+      "60-04.4",
+      "60-05.1",
+      "60-05.2",
+      "60-05.3",
+      "60-05.4",
+      "60-06.1",
+      "60-06.2",
+      "60-06.3"
+    ],
+    "quality_results_remain_unexecuted": true,
+    "explicit_original_criteria_evidence_applicability_and_outcome_rules": true,
+    "quality_methods_and_report_format_documented": true,
+    "control_lines": 81,
+    "frozen_upstream_and_archive_unchanged": true,
+    "previous_verification_evidence_unchanged": true,
+    "requirement_source_sha256": "23ac1b5c86bd3e3f40358c8287d833a25570d3545ab13ae49eb09903fdcb204c",
+    "third_party_cache_files_ignored_and_untracked": 10,
+    "git_diff_check_exit": 0
+  },
+  "governance_audit": {
+    "exit_code": 1,
+    "complete": true,
+    "phase60_errors": 0,
+    "phase60_warnings": 0,
+    "global_baseline_errors": 1450,
+    "global_current_errors": 1450,
+    "business_acceptance": "not_evaluated",
+    "limitation": "全仓既有文档治理问题保留；本轮未扩修，不宣称全仓检查通过。"
+  },
+  "skill_source_fingerprints": [
+    {
+      "name": "spring-boot-acceptance",
+      "url": "https://api.github.com/repos/jabrena/plinth/contents/skills/323-frameworks-spring-boot-testing-acceptance-tests/SKILL.md",
+      "source_sha": "f658288decd920065d6c952f722418dca59f068d",
+      "sha256": "917c357f5ca21af761eb0571739d88bf7cfee0289a881f4b61e865fe50cbf25f"
+    },
+    {
+      "name": "verification-before-completion",
+      "url": "https://api.github.com/repos/obra/superpowers/contents/skills/verification-before-completion/SKILL.md",
+      "sha256": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3"
+    },
+    {
+      "name": "web-perf",
+      "url": "https://api.github.com/repos/cloudflare/skills/contents/skills/web-perf/SKILL.md",
+      "sha256": "79c531e95ca4d96a7de920c28c127c2c09ec55cd452a92222267d2954580be23"
+    },
+    {
+      "name": "webapp-testing",
+      "url": "https://api.github.com/repos/anthropics/skills/contents/skills/webapp-testing/SKILL.md",
+      "source_sha": "4726215301db64a0cc4d41fc3219c61f37a30f4a",
+      "sha256": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
+    },
+    {
+      "name": "web-design-guidelines",
+      "url": "https://api.github.com/repos/vercel-labs/agent-skills/contents/skills/web-design-guidelines/SKILL.md",
+      "source_sha": "ceae92ab319216a68274168fba9b63b998b65997",
+      "sha256": "f4647ca866a3accf763777f83e7682954f0187cd6bea7eea0399796652414e8f"
+    },
+    {
+      "url": "https://api.github.com/repos/vercel-labs/web-interface-guidelines/contents/command.md",
+      "sha256": "d246b026f4f29b5823a9cc857f9edf3d2507002e055e32040cadeaf3b38e0234"
+    }
+  ],
+  "business_tests_executed": false,
+  "financial_operations_executed": false,
+  "quality_assessments_executed": false,
+  "skills_installed": false,
+  "errors": [],
+  "passed": true
+}

@@ -66,3 +66,7 @@ output/db-backups/
 
 # 压测登录生成的Bearer令牌：由setUp现场生成，不是公开测试证据。
 docs/50_系统测试/scripts/tokens.csv
+
+# 60阶段技能检索的本地第三方原文/目录快照：仅供方法核对，不再发布到公开仓库。
+output/phase60-skill-reference-20261019.json
+output/phase60-reference-*-20261019.json
