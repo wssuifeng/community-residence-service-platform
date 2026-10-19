@@ -1,0 +1,91 @@
+{
+  "recordedAt": "2026-10-20T00:00:00+08:00",
+  "purpose": "60-02.1批次E功能需求验收：资源预约、房源展示、看房、连续时段和公共资源图片；不写正常库，不执行金融操作",
+  "gitHead": "008737b8e584a1dddc85c8ef97120920e68c348c",
+  "productBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productDiffFromBaseline": [],
+  "runtimeArtifact": {
+    "path": "output/runtime/df-closeout/df-final.jar",
+    "sha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+    "port": 8084
+  },
+  "sourceEvidence": {
+    "resourceTests": [
+      "TC-C1-017",
+      "TC-C7-001..024",
+      "TC-SP-023",
+      "TC-SP-025"
+    ],
+    "housingViewingTests": [
+      "TC-C12-001..022"
+    ],
+    "evidenceRefs": [
+      "A5",
+      "B3",
+      "BE",
+      "BF",
+      "BG",
+      "BH2",
+      "BH3",
+      "BL",
+      "BN",
+      "BP",
+      "BQ",
+      "BU",
+      "BX",
+      "WS1"
+    ],
+    "approvedReplacementCases": [
+      "TC-C12-015",
+      "TC-C12-016",
+      "TC-C12-023"
+    ],
+    "limitations": [
+      "E7 historical full-flow evidence only",
+      "E12 has current targeted nodes but no same-data full chain",
+      "TC-SP-025 remains an execution-evidence gap for the generic upload matrix; R75 resource-image specific evidence is present"
+    ]
+  },
+  "frontendSelectiveTest": {
+    "testFiles": 9,
+    "tests": 38,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "command": "npm run test -- --run src/admin/community/components/__tests__/PublicResourceImages.spec.ts src/resident/reservation/components/__tests__/ResourceImages.spec.ts src/common/housing/composables/__tests__/useHousingReservation.spec.ts src/common/public/views/__tests__/RegisteredViewingFlow.spec.ts src/staff/housing/views/__tests__/ViewingsWorkbenchView.spec.ts src/common/reservation/utils/__tests__/reservationQuota.spec.ts src/admin/housing/components/HousingTimeslotEntry.spec.ts src/admin/housing/components/housingWeekdayOptions.spec.ts src/common/community/components/__tests__/HouseImageDialog.spec.ts"
+  },
+  "backendSelectiveTest": {
+    "tests": 244,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "command": ".\\mvnw.cmd -Dtest=PublicResource*Test,ResourceTimeslot*Test,HouseImageServiceTest,FileUploadImageValidationTest,Housing*Test,Viewing*Test,Reservation*Test,BatchGenerateHousing*Test,HouseManageListTest test",
+    "skipReason": "两个数据库/环境型测试按既有假设跳过；无失败或错误"
+  },
+  "normalDatabaseWriteCount": 0,
+  "financialOperationCount": 0,
+  "conclusions": {
+    "passedR": [
+      "R5 reaffirmed",
+      "R32",
+      "R33",
+      "R34",
+      "R35",
+      "R36",
+      "R52",
+      "R53",
+      "R54",
+      "R55",
+      "R56",
+      "R57",
+      "R59",
+      "R60",
+      "R75"
+    ],
+    "evidenceGapFlows": [
+      "E7",
+      "E12"
+    ],
+    "gap": "G-013"
+  }
+}

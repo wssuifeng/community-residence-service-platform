@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-10-20T00:00:00+08:00",
+  "checks": {
+    "sourceReviewExists": true,
+    "recordCount": 10,
+    "passedN": 9,
+    "evidenceGapN": [
+      "N8"
+    ],
+    "gap": "G-015",
+    "qualityAssessmentStarted": false,
+    "normalDatabaseWriteCount": 0,
+    "financialOperationCount": 0,
+    "status": "PASS"
+  }
+}

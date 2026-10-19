@@ -1,0 +1,195 @@
+{
+  "recordedAt": "2026-10-20T00:00:00+08:00",
+  "purpose": "60-02.1批次D现行版本只读运行核对；不写正常业务数据，不执行金融操作",
+  "gitHead": "008737b8e584a1dddc85c8ef97120920e68c348c",
+  "productBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productDiffFromBaseline": [],
+  "runtimeArtifact": {
+    "path": "output/runtime/df-closeout/df-final.jar",
+    "sha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+    "port": 8084
+  },
+  "api": {
+    "status": 200,
+    "contentType": "application/json",
+    "bytes": 366551,
+    "openapi": "3.1.0",
+    "pathCount": 211,
+    "selectedPathCount": 30,
+    "selectedPaths": {
+      "/api/v1/notifications/channel-levels": [
+        "get",
+        "put"
+      ],
+      "/api/v1/notices/{id}": [
+        "delete",
+        "get",
+        "put"
+      ],
+      "/api/v1/notices": [
+        "get",
+        "post"
+      ],
+      "/api/v1/notices/{id}/view": [
+        "post"
+      ],
+      "/api/v1/notices/{id}/revisions": [
+        "get",
+        "post"
+      ],
+      "/api/v1/feedbacks": [
+        "get",
+        "post"
+      ],
+      "/api/v1/feedbacks/{id}/messages": [
+        "get",
+        "post"
+      ],
+      "/api/v1/feedbacks/{id}/messages/image": [
+        "post"
+      ],
+      "/api/v1/feedbacks/{id}/attachments": [
+        "get",
+        "post"
+      ],
+      "/api/v1/conversations/{id}/viewing-appointments": [
+        "post"
+      ],
+      "/api/v1/conversations/{id}/read": [
+        "post"
+      ],
+      "/api/v1/conversations/{id}/messages": [
+        "get",
+        "post"
+      ],
+      "/api/v1/conversations/{id}/messages/image": [
+        "post"
+      ],
+      "/api/v1/conversations/lease-groups": [
+        "post"
+      ],
+      "/api/v1/conversations/direct": [
+        "post"
+      ],
+      "/api/v1/notifications/{id}/read": [
+        "patch"
+      ],
+      "/api/v1/notifications/read-all": [
+        "patch"
+      ],
+      "/api/v1/notices/{id}/withdraw": [
+        "patch"
+      ],
+      "/api/v1/notices/{id}/publish": [
+        "patch"
+      ],
+      "/api/v1/feedbacks/{id}/close": [
+        "patch"
+      ],
+      "/api/v1/notifications": [
+        "get"
+      ],
+      "/api/v1/notifications/unread": [
+        "get"
+      ],
+      "/api/v1/notifications/pull": [
+        "get"
+      ],
+      "/api/v1/notices/{id}/viewers": [
+        "get"
+      ],
+      "/api/v1/feedbacks/{id}": [
+        "get"
+      ],
+      "/api/v1/conversations": [
+        "get"
+      ],
+      "/api/v1/conversations/{id}": [
+        "get"
+      ],
+      "/api/v1/conversations/{id}/viewing-slots": [
+        "get"
+      ],
+      "/api/v1/conversations/{id}/viewing-context": [
+        "get"
+      ],
+      "/api/v1/feedback-attachments/{id}": [
+        "delete"
+      ]
+    }
+  },
+  "endpoints": {
+    "backendOpenApi": {
+      "url": "http://localhost:8084/v3/api-docs",
+      "observation": {
+        "status": 200,
+        "contentType": "application/json",
+        "bytes": 366551
+      }
+    },
+    "backendHealth": {
+      "url": "http://localhost:8084/actuator/health",
+      "observation": {
+        "status": 401,
+        "contentType": "application/json;charset=UTF-8",
+        "bytes": 121
+      }
+    },
+    "publicNotices": {
+      "url": "http://localhost:8084/api/v1/notices",
+      "observation": {
+        "status": 200,
+        "contentType": "application/json",
+        "bytes": 2470
+      }
+    },
+    "unauthenticatedFeedbacks": {
+      "url": "http://localhost:8084/api/v1/feedbacks",
+      "observation": {
+        "status": 401,
+        "contentType": "application/json;charset=UTF-8",
+        "bytes": 120
+      }
+    },
+    "unauthenticatedNotifications": {
+      "url": "http://localhost:8084/api/v1/notifications/unread",
+      "observation": {
+        "status": 401,
+        "contentType": "application/json;charset=UTF-8",
+        "bytes": 121
+      }
+    },
+    "unauthenticatedConversations": {
+      "url": "http://localhost:8084/api/v1/conversations",
+      "observation": {
+        "status": 401,
+        "contentType": "application/json;charset=UTF-8",
+        "bytes": 121
+      }
+    },
+    "frontendRoot": {
+      "url": "http://localhost:5176/",
+      "observation": {
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 466
+      }
+    },
+    "frontendProxyPublicNotices": {
+      "url": "http://localhost:5176/api/v1/notices",
+      "observation": {
+        "status": 200,
+        "contentType": "application/json",
+        "bytes": 2472
+      }
+    }
+  },
+  "expectedBoundary": {
+    "publicNotices": "200",
+    "privateFeedbackNotificationsConversationsWithoutToken": "401",
+    "health": "401 in current security profile; this is an authentication boundary, not a startup failure",
+    "frontendRoot": "200"
+  },
+  "writeCount": 0,
+  "financialOperationCount": 0
+}

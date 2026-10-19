@@ -1,0 +1,431 @@
+{
+  "recordedAt": "2026-10-20T02:35:47.629167",
+  "jarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "normalDatabaseWrites": 0,
+  "financialOperations": 0,
+  "ids": {
+    "residentId": 219,
+    "houseId": 5175,
+    "noticeId": 9,
+    "notificationIds": [
+      1093
+    ]
+  },
+  "expiresAt": "2026-10-20T02:35:45",
+  "trace": [
+    {
+      "actor": "guest",
+      "step": "login admin1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            1,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "id": 2,
+          "realName": "社区管理员",
+          "role": "ADMIN",
+          "username": "admin1"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "E5 register isolated target resident",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/register",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "createdAt": null,
+        "email": null,
+        "id": 219,
+        "idCardMasked": null,
+        "phone": "13100937251",
+        "realName": "Acceptance Expiry Resident",
+        "status": "ACTIVE",
+        "username": "acc_expiry_937251"
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_expiry_937251",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 219,
+          "realName": "Acceptance Expiry Resident",
+          "role": "RESIDENT",
+          "username": "acc_expiry_937251"
+        }
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 create dedicated target house",
+      "method": "POST",
+      "path": "/api/v1/houses",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "area": 60,
+        "communityId": 15,
+        "createdAt": null,
+        "description": null,
+        "floor": 1,
+        "houseNumber": "E937251",
+        "id": 5175,
+        "layout": null,
+        "orientation": null,
+        "status": "VACANT",
+        "unitId": 13,
+        "unitName": null
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 establish target community relation",
+      "method": "POST",
+      "path": "/api/v1/residence-relations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "anchorRelationId": null,
+        "communityId": 15,
+        "createdAt": null,
+        "houseId": 5175,
+        "houseLocation": "A1U1E937251",
+        "id": 271,
+        "leaseId": null,
+        "moveInDate": "2026-10-20",
+        "moveOutDate": null,
+        "relationType": "OWNER",
+        "residentId": 219,
+        "residentName": "Acceptance Expiry Resident",
+        "residentPhone": "13100937251",
+        "residentUsername": "acc_expiry_937251",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 create expiring notice",
+      "method": "POST",
+      "path": "/api/v1/notices",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "bodyJson": null,
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "content": "isolated natural expiry",
+        "contentVersion": 1,
+        "createdAt": null,
+        "editedAt": null,
+        "editedBy": null,
+        "endTime": "2026-10-20T02:35:45",
+        "expireTime": "2026-10-20T02:35:45",
+        "id": 9,
+        "images": [],
+        "isPinned": 0,
+        "priority": "NORMAL",
+        "publishTime": "2026-10-20T02:35:37",
+        "publisherId": 2,
+        "publisherName": "社区管理员",
+        "status": "DRAFT",
+        "targets": [
+          {
+            "targetId": 15,
+            "targetName": "ACC-FLOW-34481",
+            "targetType": "COMMUNITY"
+          }
+        ],
+        "title": "AC expiry 937251",
+        "type": "ANNOUNCEMENT",
+        "viewCount": 0
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 publish same notice",
+      "method": "PATCH",
+      "path": "/api/v1/notices/9/publish",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "E5 resident sees same notice",
+      "method": "GET",
+      "path": "/api/v1/notices?communityId=15&page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "bodyJson": null,
+            "communityId": 15,
+            "communityName": "ACC-FLOW-34481",
+            "content": "notice cross-end evidence",
+            "contentVersion": 1,
+            "createdAt": "2026-10-20T02:30:37",
+            "editedAt": null,
+            "editedBy": null,
+            "endTime": "2026-10-27T02:30:37",
+            "expireTime": "2026-10-27T02:30:37",
+            "id": 7,
+            "images": [],
+            "isPinned": 1,
+            "priority": "NORMAL",
+            "publishTime": "2026-10-20T02:30:37",
+            "publisherId": 2,
+            "publisherName": "社区管理员",
+            "status": "PUBLISHED",
+            "targets": [
+              {
+                "targetId": 15,
+                "targetName": "ACC-FLOW-34481",
+                "targetType": "COMMUNITY"
+              }
+            ],
+            "title": "AC acceptance notice 34481",
+            "type": "ANNOUNCEMENT",
+            "viewCount": 1
+          },
+          {
+            "bodyJson": null,
+            "communityId": 15,
+            "communityName": "ACC-FLOW-34481",
+            "content": "isolated natural expiry",
+            "contentVersion": 1,
+            "createdAt": "2026-10-20T02:35:37",
+            "editedAt": null,
+            "editedBy": null,
+            "endTime": "2026-10-20T02:35:45",
+            "expireTime": "2026-10-20T02:35:45",
+            "id": 9,
+            "images": [],
+            "isPinned": 0,
+            "priority": "NORMAL",
+            "publishTime": "2026-10-20T02:35:37",
+            "publisherId": 2,
+            "publisherName": "社区管理员",
+            "status": "PUBLISHED",
+            "targets": [
+              {
+                "targetId": 15,
+                "targetName": "ACC-FLOW-34481",
+                "targetType": "COMMUNITY"
+              }
+            ],
+            "title": "AC expiry 937251",
+            "type": "ANNOUNCEMENT",
+            "viewCount": 0
+          }
+        ],
+        "total": 2,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "E5 record same notice read",
+      "method": "POST",
+      "path": "/api/v1/notices/9/view",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 verify same notice receipt",
+      "method": "GET",
+      "path": "/api/v1/notices/9/viewers?page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "residentId": 219,
+            "residentName": "Acceptance Expiry Resident",
+            "contentVersion": 1,
+            "viewedAt": "2026-10-20T02:35:37"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "E5 same notice notification",
+      "method": "GET",
+      "path": "/api/v1/notifications?page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "communityId": null,
+            "content": "新公告「AC expiry 937251」已发布，请查看",
+            "createdAt": "2026-10-20T02:35:37",
+            "id": 1093,
+            "isRead": 0,
+            "seq": 1792380990090,
+            "sourceId": 9,
+            "sourceType": "NOTICE",
+            "title": "社区公告",
+            "type": "NOTICE"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "acc_expiry_937251",
+      "step": "E5 expired notice hidden before task",
+      "method": "GET",
+      "path": "/api/v1/notices?communityId=15&page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "bodyJson": null,
+            "communityId": 15,
+            "communityName": "ACC-FLOW-34481",
+            "content": "notice cross-end evidence",
+            "contentVersion": 1,
+            "createdAt": "2026-10-20T02:30:37",
+            "editedAt": null,
+            "editedBy": null,
+            "endTime": "2026-10-27T02:30:37",
+            "expireTime": "2026-10-27T02:30:37",
+            "id": 7,
+            "images": [],
+            "isPinned": 1,
+            "priority": "NORMAL",
+            "publishTime": "2026-10-20T02:30:37",
+            "publisherId": 2,
+            "publisherName": "社区管理员",
+            "status": "PUBLISHED",
+            "targets": [
+              {
+                "targetId": 15,
+                "targetName": "ACC-FLOW-34481",
+                "targetType": "COMMUNITY"
+              }
+            ],
+            "title": "AC acceptance notice 34481",
+            "type": "ANNOUNCEMENT",
+            "viewCount": 1
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E5 archived notice remains readable",
+      "method": "GET",
+      "path": "/api/v1/notices/9",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "bodyJson": null,
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "content": "isolated natural expiry",
+        "contentVersion": 1,
+        "createdAt": "2026-10-20T02:35:37",
+        "editedAt": null,
+        "editedBy": null,
+        "endTime": "2026-10-20T02:35:45",
+        "expireTime": "2026-10-20T02:35:45",
+        "id": 9,
+        "images": [],
+        "isPinned": 0,
+        "priority": "NORMAL",
+        "publishTime": "2026-10-20T02:35:37",
+        "publisherId": 2,
+        "publisherName": "社区管理员",
+        "status": "WITHDRAWN",
+        "targets": [
+          {
+            "targetId": 15,
+            "targetName": "ACC-FLOW-34481",
+            "targetType": "COMMUNITY"
+          }
+        ],
+        "title": "AC expiry 937251",
+        "type": "ANNOUNCEMENT",
+        "viewCount": 1
+      }
+    }
+  ],
+  "taskLogs": [
+    [
+      "30",
+      "NoticeAutoOfflineTask",
+      "SUCCESS",
+      "2",
+      "2",
+      "0",
+      "2026-10-20 02:35:47",
+      "2026-10-20 02:35:47"
+    ]
+  ],
+  "assertions": {
+    "publishedAndVisible": true,
+    "sameNoticeNotified": true,
+    "sameNoticeReadReceipt": true,
+    "naturallyExpiredHidden": true,
+    "realTaskWithRealMapperWithdrawn": true,
+    "historyRetained": true,
+    "taskLoggedSuccess": true
+  },
+  "limitations": [
+    "Controlled invocation of the original task kernel, real MySQL mapper and isolated Redis lock; hourly cron delivery itself was not observed."
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-10-20T01:22:04+08:00",
+  "checks": {
+    "sourceReviewExists": true,
+    "batchRecordExists": true,
+    "ledgerRowsUpdated": true,
+    "gapRegisterIncludesG014": true,
+    "controllerIncludesBatchF": true,
+    "implementationPlanIncludesG014": true,
+    "frontendNonFinancial": {
+      "testFiles": 12,
+      "tests": 98,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "backendNonFinancial": {
+      "testClasses": 20,
+      "tests": 195,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "normalDatabaseWriteCount": 0,
+    "financialOperationCount": 0,
+    "batchFExpected": {
+      "passedR": [
+        "R13",
+        "R14",
+        "R15",
+        "R16",
+        "R61",
+        "R64",
+        "R66",
+        "R67",
+        "R68",
+        "R69",
+        "R70",
+        "R71",
+        "R72",
+        "R73"
+      ],
+      "evidenceGapFlows": [
+        "E3"
+      ],
+      "gap": "G-014",
+      "qualityAssessmentStarted": false
+    },
+    "status": "PASS"
+  }
+}

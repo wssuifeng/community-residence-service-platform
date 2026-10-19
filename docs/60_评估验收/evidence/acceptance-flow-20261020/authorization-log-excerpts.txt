@@ -1,0 +1,2 @@
+2026-10-20T02:30:57.246+08:00 ERROR 42016 --- [community-residence-service] [http-nio-8087-exec-6] c.c.r.c.w.e.GlobalExceptionHandler       : 越权尝试：uri=/api/v1/communities/1/buildings, ip=127.0.0.1, message=无权操作未绑定社区的数据
+2026-10-20T02:30:57.274+08:00 ERROR 42016 --- [community-residence-service] [http-nio-8087-exec-3] c.c.r.c.w.e.GlobalExceptionHandler       : 功能级越权尝试：uri=/api/v1/sys-users, ip=127.0.0.1, message=Access Denied

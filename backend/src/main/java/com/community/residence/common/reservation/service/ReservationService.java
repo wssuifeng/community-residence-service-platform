@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -312,13 +313,16 @@ public class ReservationService {
         log.info("预约已确认：reservationId={}, operator={}", id, SecurityUtils.getUserId());
     }
 
-    /* 完成预约：RESERVED → COMPLETED */
+    /* 完成预约：锁后校验状态及预约结束时刻，未结束时保持占用。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "STATUS", targetType = "RESOURCE_RESERVATION", targetId = "#id", content = "'预约完成登记'")
     public void complete(Long id, String remark) {
         ResourceReservation reservation = requireReservationForUpdate(id);
         SecurityUtils.checkCommunityAccess(reservation.getCommunityId());
         validateTransition(reservation, ReservationStatus.COMPLETED);
+        if (reservation.getReserveDate().atTime(reservation.getEndTime()).isAfter(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID, "预约时段尚未结束，不能登记完成");
+        }
         reservation.setStatus(ReservationStatus.COMPLETED);
         reservationMapper.updateById(reservation);
     }

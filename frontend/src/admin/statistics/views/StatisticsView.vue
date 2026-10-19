@@ -148,7 +148,7 @@ const resourceStatusOption = computed<ChartOption>(() => ({
             <div class="chart-card">
               <h3 class="panel-title">状态占比</h3>
               <EChart
-                :option="woStatusOption"
+                :option="woStatusOption" export-name="工单状态分布"
                 :is-empty="Object.keys(workOrderStats?.byStatus ?? {}).length === 0"
                 empty-text="暂无工单数据"
               />
@@ -156,7 +156,7 @@ const resourceStatusOption = computed<ChartOption>(() => ({
             <div class="chart-card">
               <h3 class="panel-title">优先级分布</h3>
               <EChart
-                :option="woPriorityOption"
+                :option="woPriorityOption" export-name="工单优先级分布"
                 :is-empty="Object.keys(workOrderStats?.byPriority ?? {}).length === 0"
                 empty-text="暂无优先级数据"
               />
@@ -176,7 +176,7 @@ const resourceStatusOption = computed<ChartOption>(() => ({
             <div class="chart-card">
               <h3 class="panel-title">账号状态分布</h3>
               <EChart
-                :option="residentStatusOption"
+                :option="residentStatusOption" export-name="居民状态分布"
                 :is-empty="Object.keys(residentStats?.byStatus ?? {}).length === 0"
                 empty-text="暂无居民数据"
               />
@@ -206,7 +206,7 @@ const resourceStatusOption = computed<ChartOption>(() => ({
             <div class="chart-card">
               <h3 class="panel-title">预约状态分布</h3>
               <EChart
-                :option="resourceStatusOption"
+                :option="resourceStatusOption" export-name="资源预约状态分布"
                 :is-empty="Object.keys(resourceStats?.byStatus ?? {}).length === 0"
                 empty-text="暂无预约数据"
               />

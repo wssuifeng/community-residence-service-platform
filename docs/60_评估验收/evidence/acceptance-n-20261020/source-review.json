@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-20T00:00:00+08:00",
+  "purpose": "60-02.2 N1-N10逐条需求验收；质量评估未启动，金融沿用户确认",
+  "gitHead": "008737b8e584a1dddc85c8ef97120920e68c348c",
+  "productBaseline": "95b2fe44954167de547d8b10f2cda869720c10c6",
+  "productDiffFromBaseline": [],
+  "runtimeArtifact": {
+    "path": "output/runtime/df-closeout/df-final.jar",
+    "sha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+    "port": 8084
+  },
+  "performanceEvidence": {
+    "httpThreads": 50,
+    "registeredResidents": 200,
+    "webSocketUsers": 50,
+    "baseAndBulkRounds": 2,
+    "allP95Within2s": true,
+    "allPushWithin3s": true,
+    "functionalErrors": 0,
+    "bulkCommunities": 5,
+    "bulkHouses": 5019,
+    "bulkWorkOrders": 10206,
+    "sources": [
+      "../50_系统测试/evidence/dc-targeted-closeout-20261019/performance.json",
+      "../50_系统测试/evidence/dc-targeted-closeout-20261019/bulk-data.json"
+    ]
+  },
+  "securityAndContractEvidence": {
+    "permissionChecks": 113,
+    "permissionFailures": 0,
+    "contractChecks": 11,
+    "contractFailures": 0,
+    "openApi": "3.1 / 211 paths / 266 operations",
+    "sources": [
+      "../50_系统测试/evidence/dc-targeted-closeout-20261019/permissions.json",
+      "../50_系统测试/evidence/dc-targeted-closeout-20261019/contracts.json"
+    ]
+  },
+  "compatibilityEvidence": {
+    "automatedBrowser": "Microsoft Edge headless",
+    "chromeFirefoxLatestTwoVersionEvidence": false,
+    "gap": "G-015"
+  },
+  "deploymentEvidence": {
+    "isolatedPackagingAndStartup": true,
+    "normalPorts": "8084/5176",
+    "migration": "V43/61",
+    "financialCommands": 0,
+    "source": "../50_系统测试/evidence/dc-targeted-closeout-20261019/startup.json"
+  },
+  "passedN": [
+    "N1",
+    "N2",
+    "N3",
+    "N4",
+    "N5",
+    "N6",
+    "N7",
+    "N9",
+    "N10"
+  ],
+  "evidenceGapN": [
+    "N8"
+  ],
+  "gap": "G-015",
+  "qualityAssessmentStarted": false,
+  "normalDatabaseWriteCount": 0,
+  "financialOperationCount": 0
+}

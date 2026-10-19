@@ -23,7 +23,7 @@ import { formatDateTime } from '@/common/web/utils/date'
 /**
  * 运营看板·概览 Tab（对照设计稿 design-mockups/admin/02-运营看板.png 重排）：
  * 第一行 4 统计卡 / 第二行 趋势折线 + 工单状态环图 / 第三行 房屋状态 + 最新动态。
- * 数据源裁决见各区块注释（无接口支撑的元素一律 MOCK 标注或换真实指标，不造假）。
+ * 卡片和趋势均使用真实统计数据；缺少历史对比数据时不显示环比。
  */
 
 use([CanvasRenderer, LineChart, PieChart, GridComponent, TooltipComponent])
@@ -49,59 +49,6 @@ const C = {
   c6: cssVar('--chart-c6'),
   danger: cssVar('--color-danger'),
   card: cssVar('--admin-card-bg')
-}
-
-/* ===========================================================================
- * 【MOCK 临时占位区块】2026-09-12 —— 后端接口就绪后请整块删除并改接真实数据
- * ───────────────────────────────────────────────────────────────────────────
- * 全局检索标识：MOCK（staff 工作台同款约定）
- *
- * 待补接口：统计卡「较上月」环比与迷你趋势线
- *   需要：按日聚合的历史快照序列（如 GET /api/v1/statistics/dashboard/trend?days=60，
- *         逐日工单量 / 待处理量 / 入住率 / 平均评分），前端据此算环比与迷你线。
- *   现状：StatisticsController 仅返回 workOrderTrend7d（近 7 日工单量，无更早历史），
- *         其余三项无按日序列，「较上月」无法计算。
- *   口径：趋势配色为纯方向语义——上升红、下降绿（staff 工作台先例；
- *         设计稿按指标好坏着色，以计划简报口径为准）。
- * =========================================================================== */
-const MOCK_TREND: Record<string, { delta: string; points: number[] }> = {
-  weekOrders: { delta: '+12.5%', points: [3, 4, 3, 5, 4, 6, 5, 7, 6] },
-  pending: { delta: '+28.6%', points: [9, 10, 8, 11, 10, 12, 11, 13, 12] },
-  occupancy: { delta: '+2.1%', points: [80, 81, 80, 82, 83, 82, 84, 85, 85] },
-  rating: { delta: '+0.3', points: [4.2, 4.3, 4.2, 4.4, 4.3, 4.5, 4.4, 4.6, 4.6] }
-}
-
-/* ===================== MOCK 区块结束 ===================== */
-
-/* 迷你趋势线：藏轴藏提示，只留描边 + 浅填充（staff 工作台同款做法） */
-function buildSpark(points: number[], color: string): ChartOption {
-  return {
-    tooltip: { show: false },
-    grid: { left: 0, right: 0, top: 6, bottom: 2 },
-    xAxis: { type: 'category', data: points.map((_, i) => i), show: false, boundaryGap: false },
-    yAxis: {
-      type: 'value',
-      show: false,
-      min: Math.min(...points) - 1,
-      max: Math.max(...points) + 1
-    },
-    series: [
-      {
-        type: 'line',
-        data: points,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { width: 2, color },
-        areaStyle: { color, opacity: 0.14 }
-      }
-    ]
-  }
-}
-
-/* 趋势线为 MOCK 静态数据，初始化构建一次即可；配色与卡片语义一致 */
-const SPARK_OPTIONS = {
-  weekOrders: buildSpark(MOCK_TREND.weekOrders.points, C.c1),
-  pending: buildSpark(MOCK_TREND.pending.points, C.c3)
 }
 
 /* ---------- 统计卡图标（24×24 stroke path，随语义色着色） ---------- */
@@ -402,7 +349,7 @@ function goActivityList(): void {
 
 <template>
   <section v-loading="loading" class="dashboard-overview">
-    <!-- 第一行：4 张等宽统计卡（数值真实 / 趋势 MOCK，见区块注释） -->
+    <!-- 当前统计值；未采集的历史对比不展示。 -->
     <div class="stat-row">
       <AdminStatCard
         label="近 7 日工单"
@@ -410,12 +357,7 @@ function goActivityList(): void {
         unit="单"
         :icon="ICONS.order"
         accent="primary"
-        :trend="`较上月 ${MOCK_TREND.weekOrders.delta}`"
-        trend-dir="up"
       >
-        <template #extra>
-          <div class="stat-spark"><EChart :option="SPARK_OPTIONS.weekOrders" :height="42" /></div>
-        </template>
       </AdminStatCard>
 
       <AdminStatCard
@@ -424,12 +366,7 @@ function goActivityList(): void {
         unit="单"
         :icon="ICONS.clock"
         accent="warning"
-        :trend="`较上月 ${MOCK_TREND.pending.delta}`"
-        trend-dir="up"
       >
-        <template #extra>
-          <div class="stat-spark"><EChart :option="SPARK_OPTIONS.pending" :height="42" /></div>
-        </template>
       </AdminStatCard>
 
       <AdminStatCard
@@ -438,11 +375,9 @@ function goActivityList(): void {
         unit="%"
         :icon="ICONS.home"
         accent="success"
-        :trend="`较上月 ${MOCK_TREND.occupancy.delta}`"
-        trend-dir="up"
       >
         <template #extra>
-          <!-- 迷你环为真实入住率（非 MOCK）：conic-gradient 按百分比着色 -->
+          <!-- 按实际已入住房屋占比绘制。 -->
           <span
             v-if="occupancyPercentNum !== null"
             class="occupancy-donut"
@@ -458,8 +393,6 @@ function goActivityList(): void {
         unit="分"
         :icon="ICONS.star"
         accent="warning"
-        :trend="`较上月 ${MOCK_TREND.rating.delta}`"
-        trend-dir="up"
       />
     </div>
 
@@ -477,7 +410,7 @@ function goActivityList(): void {
           </h3>
           <span class="legend-chip"><i />工单数量</span>
         </header>
-        <EChart :option="trendOption" :height="272" />
+        <EChart :option="trendOption" export-name="工单提交趋势" :height="272" />
       </article>
 
       <article class="panel">
@@ -495,7 +428,7 @@ function goActivityList(): void {
         <div class="donut-body">
           <div class="donut-wrap">
             <EChart
-              :option="statusOption"
+              :option="statusOption" export-name="工单状态分布"
               :height="236"
               :is-empty="statusItems.length === 0"
               empty-text="暂无工单数据"

@@ -1,0 +1,716 @@
+{
+  "recordedAt": "2026-10-20T02:31:04.020728",
+  "jarSha256": "b87c8d232151d02d70dfb31e001d801c6abb4df0b45e0a2e6b9ca4ec6ed3e541",
+  "normalDatabaseWrites": 0,
+  "financialOperations": 0,
+  "trace": [
+    {
+      "actor": "guest",
+      "step": "login superadmin",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 1,
+          "realName": "超级管理员",
+          "role": "SUPER_ADMIN",
+          "username": "superadmin"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login admin1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            1,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "id": 2,
+          "realName": "社区管理员",
+          "role": "ADMIN",
+          "username": "admin1"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login staff1",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 3,
+          "realName": "服务人员",
+          "role": "STAFF",
+          "username": "staff1"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_owner_34481",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 214,
+          "realName": "Acceptance Owner",
+          "role": "RESIDENT",
+          "username": "acc_owner_34481"
+        }
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_scope_649891",
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [
+            15
+          ],
+          "id": 25,
+          "realName": "Acceptance Scoped Admin",
+          "role": "ADMIN",
+          "username": "acc_scope_649891"
+        }
+      }
+    },
+    {
+      "actor": "acc_scope_649891",
+      "step": "E10b scoped admin creates community resident",
+      "method": "POST",
+      "path": "/api/v1/residents/admin-create",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "businessCode": null,
+        "houseId": null,
+        "relationId": null,
+        "residentId": 216,
+        "username": "acc_provision_662974"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "read synthetic viewing-house setup",
+      "method": "GET",
+      "path": "/api/v1/houses/5172/residents",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [],
+        "total": 0,
+        "page": 1,
+        "size": 20,
+        "pages": 0
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "prepare separate violation-test house",
+      "method": "POST",
+      "path": "/api/v1/houses",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "area": 60,
+        "communityId": 15,
+        "createdAt": null,
+        "description": null,
+        "floor": 1,
+        "houseNumber": "V662974",
+        "id": 5173,
+        "layout": null,
+        "orientation": null,
+        "status": "VACANT",
+        "unitId": 13,
+        "unitName": null
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "E12 guest browse same listing",
+      "method": "GET",
+      "path": "/api/v1/housings/4",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "applicationId": null,
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "createdAt": "2026-10-20T02:30:38",
+        "deposit": 8400.0,
+        "description": "viewing cross-end evidence",
+        "houseId": 5172,
+        "houseLocation": "A1U1103",
+        "id": 4,
+        "images": [],
+        "layout": "2B1L",
+        "leaseId": null,
+        "monthlyRent": 4200.0,
+        "occupancy": null,
+        "publishTime": "2026-10-20T02:30:38",
+        "rentType": "RENT",
+        "status": "AVAILABLE",
+        "title": "AC viewing listing 34481",
+        "viewCount": 1
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "E12 guest registers",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/register",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "createdAt": null,
+        "email": null,
+        "id": 217,
+        "idCardMasked": null,
+        "phone": "13200662974",
+        "realName": "Acceptance Violation Resident",
+        "status": "ACTIVE",
+        "username": "acc_violation_662974"
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_violation_662974",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 217,
+          "realName": "Acceptance Violation Resident",
+          "role": "RESIDENT",
+          "username": "acc_violation_662974"
+        }
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E7 prepare synthetic resident relation",
+      "method": "POST",
+      "path": "/api/v1/residence-relations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "anchorRelationId": null,
+        "communityId": 15,
+        "createdAt": null,
+        "houseId": 5173,
+        "houseLocation": "A1U1V662974",
+        "id": 269,
+        "leaseId": null,
+        "moveInDate": "2026-10-20",
+        "moveOutDate": null,
+        "relationType": "OWNER",
+        "residentId": 217,
+        "residentName": "Acceptance Violation Resident",
+        "residentPhone": "13200662974",
+        "residentUsername": "acc_violation_662974",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "actor": "guest",
+      "step": "login acc_violation_662974",
+      "method": "POST",
+      "path": "/api/v1/auth/resident/login",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "expiresIn": 129600,
+        "user": {
+          "boundCommunities": [],
+          "id": 217,
+          "realName": "Acceptance Violation Resident",
+          "role": "RESIDENT",
+          "username": "acc_violation_662974"
+        }
+      }
+    },
+    {
+      "actor": "acc_violation_662974",
+      "step": "E7 create violation branch 0",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13200662974",
+        "createdAt": null,
+        "endTime": "10:30:00",
+        "id": 13,
+        "purpose": "isolated violation branch",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "10:00:00",
+        "status": "PENDING",
+        "userId": 217,
+        "userName": "Acceptance Violation Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "confirm RESOURCE 0",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/13/confirm",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "violate RESOURCE 0",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/13/violate",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_violation_662974",
+      "step": "E12 registered resident books same listing",
+      "method": "POST",
+      "path": "/api/v1/viewing-appointments",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "appointmentDate": "2026-10-23",
+        "assigneeId": null,
+        "assigneeName": null,
+        "communityId": 15,
+        "contactPhone": "13200662974",
+        "conversationId": 72,
+        "createdAt": null,
+        "endTime": "15:00:00",
+        "housingId": 4,
+        "housingTitle": "AC viewing listing 34481",
+        "id": 22,
+        "leaseId": null,
+        "remark": null,
+        "startTime": "14:00:00",
+        "status": "TO_CONFIRM",
+        "userId": 217,
+        "visitorName": "Acceptance Violation Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "confirm VIEWING 1",
+      "method": "PATCH",
+      "path": "/api/v1/viewing-appointments/22/confirm",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E12 assign current staff",
+      "method": "PATCH",
+      "path": "/api/v1/viewing-appointments/22/assign",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "appointmentDate": "2026-10-23",
+        "assigneeId": 3,
+        "assigneeName": "服务人员",
+        "communityId": 15,
+        "contactPhone": "13200662974",
+        "conversationId": 72,
+        "createdAt": "2026-10-20T02:31:03",
+        "endTime": "15:00:00",
+        "housingId": 4,
+        "housingTitle": "AC viewing listing 34481",
+        "id": 22,
+        "leaseId": null,
+        "remark": null,
+        "startTime": "14:00:00",
+        "status": "RESERVED",
+        "userId": 217,
+        "visitorName": "Acceptance Violation Resident"
+      }
+    },
+    {
+      "actor": "staff1",
+      "step": "E12 viewing staff communication",
+      "method": "POST",
+      "path": "/api/v1/viewing-appointments/22/messages",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "appointmentId": 22,
+        "content": "viewing schedule acknowledged",
+        "createdAt": "2026-10-20T02:31:03.6716937",
+        "id": 4,
+        "image": null,
+        "messageType": "TEXT",
+        "senderId": 3,
+        "senderName": "服务人员"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "violate VIEWING 1",
+      "method": "PATCH",
+      "path": "/api/v1/viewing-appointments/22/violate",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "acc_violation_662974",
+      "step": "E7 create violation branch 2",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "communityId": 15,
+        "contactPhone": "13200662974",
+        "createdAt": null,
+        "endTime": "10:30:00",
+        "id": 14,
+        "purpose": "isolated violation branch",
+        "remark": null,
+        "reserveDate": "2026-10-23",
+        "resourceId": 9,
+        "resourceName": "AC-Room-34481",
+        "startTime": "10:00:00",
+        "status": "PENDING",
+        "userId": 217,
+        "userName": "Acceptance Violation Resident"
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "confirm RESOURCE 2",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/14/confirm",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "violate RESOURCE 2",
+      "method": "PATCH",
+      "path": "/api/v1/resource-reservations/14/violate",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E7 violation records retained",
+      "method": "GET",
+      "path": "/api/v1/residents/217/violations?page=1&size=100",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "residentId": 217,
+            "relatedId": 14,
+            "createdAt": "2026-10-20T02:31:03",
+            "violationType": "RESERVATION_NO_SHOW",
+            "id": 7,
+            "punishment": "记录违约",
+            "remark": "isolated violation disposition evidence"
+          },
+          {
+            "residentId": 217,
+            "relatedId": 22,
+            "createdAt": "2026-10-20T02:31:03",
+            "violationType": "VIEWING_NO_SHOW",
+            "id": 6,
+            "punishment": "记录违约",
+            "remark": "isolated violation disposition evidence"
+          },
+          {
+            "residentId": 217,
+            "relatedId": 13,
+            "createdAt": "2026-10-20T02:31:03",
+            "violationType": "RESERVATION_NO_SHOW",
+            "id": 5,
+            "punishment": "记录违约",
+            "remark": "isolated violation disposition evidence"
+          }
+        ],
+        "total": 3,
+        "page": 1,
+        "size": 100,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E7 frozen synthetic account",
+      "method": "GET",
+      "path": "/api/v1/residents/217",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "createdAt": "2026-10-20T02:31:03",
+        "email": null,
+        "id": 217,
+        "idCardMasked": null,
+        "phone": "13200662974",
+        "realName": "Acceptance Violation Resident",
+        "status": "FROZEN",
+        "username": "acc_violation_662974"
+      }
+    },
+    {
+      "actor": "acc_violation_662974",
+      "step": "E7 old token rejected after freeze",
+      "method": "POST",
+      "path": "/api/v1/resource-reservations",
+      "http": 401,
+      "code": 401,
+      "message": "未登录或令牌已失效",
+      "data": null
+    },
+    {
+      "actor": "acc_owner_34481",
+      "step": "E2 current relation before moveout",
+      "method": "GET",
+      "path": "/api/v1/residents/214/residences",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "anchorRelationId": null,
+            "communityId": 15,
+            "createdAt": "2026-10-20T02:30:36",
+            "houseId": 5170,
+            "houseLocation": "A1U1101",
+            "id": 268,
+            "leaseId": null,
+            "moveInDate": "2026-10-20",
+            "moveOutDate": null,
+            "relationType": "OWNER",
+            "residentId": 214,
+            "residentName": "Acceptance Owner",
+            "residentPhone": "13900034481",
+            "residentUsername": "acc_owner_34481",
+            "status": "ACTIVE"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 20,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E2 managed owner moveout",
+      "method": "PATCH",
+      "path": "/api/v1/residence-relations/268/move-out",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": null
+    },
+    {
+      "actor": "admin1",
+      "step": "E2 historical relation after moveout",
+      "method": "GET",
+      "path": "/api/v1/residents/214/residences",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "records": [
+          {
+            "anchorRelationId": null,
+            "communityId": 15,
+            "createdAt": "2026-10-20T02:30:36",
+            "houseId": 5170,
+            "houseLocation": "A1U1101",
+            "id": 268,
+            "leaseId": null,
+            "moveInDate": "2026-10-20",
+            "moveOutDate": "2026-10-20",
+            "relationType": "OWNER",
+            "residentId": 214,
+            "residentName": "Acceptance Owner",
+            "residentPhone": "13900034481",
+            "residentUsername": "acc_owner_34481",
+            "status": "MOVED_OUT"
+          }
+        ],
+        "total": 1,
+        "page": 1,
+        "size": 20,
+        "pages": 1
+      }
+    },
+    {
+      "actor": "admin1",
+      "step": "E2 vacant house after moveout",
+      "method": "GET",
+      "path": "/api/v1/houses/5170",
+      "http": 200,
+      "code": 200,
+      "message": "success",
+      "data": {
+        "area": 88.5,
+        "communityId": 15,
+        "createdAt": "2026-10-20T02:30:35",
+        "description": null,
+        "floor": 1,
+        "houseNumber": "101",
+        "id": 5170,
+        "layout": "2B1L",
+        "orientation": "SOUTH",
+        "status": "VACANT",
+        "unitId": 13,
+        "unitName": "U1"
+      }
+    }
+  ],
+  "ids": {
+    "provisionedResidentId": 216,
+    "violationResidentId": 217,
+    "violationRecords": [
+      {
+        "source": "RESOURCE",
+        "id": 13
+      },
+      {
+        "source": "VIEWING",
+        "id": 22
+      },
+      {
+        "source": "RESOURCE",
+        "id": 14
+      }
+    ],
+    "ownerRelationId": 268
+  },
+  "assertions": {
+    "scopedAdminProvisioning": true,
+    "anonymousToRegisteredSameListing": true,
+    "violationCountAtLeastThree": true,
+    "syntheticAccountFrozen": true,
+    "ownerRelationHistoryRetained": true,
+    "ownerHouseReleased": true,
+    "initializationStepsHaveLogs": true
+  },
+  "initializationLogs": [
+    [
+      "BUILDING",
+      "13",
+      "CREATE"
+    ],
+    [
+      "COMMUNITY",
+      "15",
+      "CREATE"
+    ],
+    [
+      "HOUSE",
+      "5170",
+      "CREATE"
+    ],
+    [
+      "HOUSE",
+      "5171",
+      "CREATE"
+    ],
+    [
+      "HOUSE",
+      "5172",
+      "CREATE"
+    ],
+    [
+      "PUBLIC_RESOURCE",
+      "9",
+      "CREATE"
+    ],
+    [
+      "RESOURCE_TIMESLOT",
+      "31",
+      "CREATE"
+    ],
+    [
+      "UNIT",
+      "13",
+      "CREATE"
+    ]
+  ],
+  "limitations": [
+    "Violation records deliberately use synthetic future reservations to verify current disposition behavior; they do not prove real-world use or no-show timing.",
+    "E2 owner branch only; tenant self-moveout, activation and E3 financial segments are not replayed."
+  ]
+}

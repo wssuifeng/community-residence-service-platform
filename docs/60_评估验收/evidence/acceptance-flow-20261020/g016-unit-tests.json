@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-20",
+  "command": "mvn -f backend/pom.xml -Dtest=Reservation*Test,ResourceReservationCurrentStateTransitionTest test",
+  "jdk": "17.0.4.1",
+  "redBeforeFix": {
+    "tests": 7,
+    "failures": 2,
+    "errors": 0,
+    "failedCases": [
+      "futureDayCannotComplete",
+      "todayBeforeEndCannotComplete"
+    ]
+  },
+  "afterFix": {
+    "tests": 49,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationCompletionTimeTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationConflictFixTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationContactFallbackTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationContinuousLimitTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationDateWindowFixTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationSameDayFixTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationScheduleConflictTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationServiceExtraTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "class": "com.community.residence.common.reservation.service.ReservationServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "productionChange": "ReservationService.complete checks reserveDate + endTime after row-lock/state/access checks."
+}
