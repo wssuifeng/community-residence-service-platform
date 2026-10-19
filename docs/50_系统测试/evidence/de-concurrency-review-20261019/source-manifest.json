@@ -1,0 +1,73 @@
+{
+  "sourceBase": "441f2954fda5fe6b89b4f220dc49843d41f17b27",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "275521193c567e0695b90ff691cabde29c3ff1fe50b832284ee691c9ddbfef81"
+    },
+    {
+      "path": "README.md",
+      "sha256": "a88a25884fb49489854f80a2066d26cb0b4e5145595b6387325f2e915e924024"
+    },
+    {
+      "path": "docs/00_总控.md",
+      "sha256": "b085ed1e5b958e9d7f9caddada6bd692a8e73d15cf950db633d468460058c326"
+    },
+    {
+      "path": "docs/50_系统测试/02_需求跟踪矩阵.md",
+      "sha256": "41100794c2391b19467a8293ccedc7a180cca9f3706e93da12fab0ed9bdb0aeb"
+    },
+    {
+      "path": "docs/50_系统测试/07_测试执行记录.md",
+      "sha256": "4fa330a07b94875641b0c52f398c62eac4304dde827ed4ada4480c7051c18bd9"
+    },
+    {
+      "path": "docs/50_系统测试/08_缺陷跟踪与回归.md",
+      "sha256": "43abc2764ff2a109e00af91c59a047743a1771f759108d90fc0e217b70833166"
+    },
+    {
+      "path": "docs/50_系统测试/09_测试评估与报告.md",
+      "sha256": "640601c654c16aa34a59ad6dd240cc5d2247064a766f903ae31f48b9ed273f61"
+    },
+    {
+      "path": "docs/50_系统测试/10_测试总结与归档.md",
+      "sha256": "eb0adea578bca1b8852ac80642bba73970efcf6a4b108540311ed428c2757b74"
+    },
+    {
+      "path": "docs/50_系统测试/11_测试执行入口.md",
+      "sha256": "4957c9135e07cc70ab6496ddcbdedb218c754ca9118d5d1b0341900c056df5a7"
+    },
+    {
+      "path": "docs/50_系统测试/39_最终用例与缺陷处置台账.md",
+      "sha256": "58dc78e90069626702f313789076dcde3e6c6cbba6a3b30fa979f6bc914da2ae"
+    },
+    {
+      "path": "docs/50_系统测试/40_并发与Redis故障复核.md",
+      "sha256": "8d30d37db9e45a7c3d01ba01c003b6946059330529313bf683749b26dd626456"
+    },
+    {
+      "path": "docs/50_系统测试/_中控.md",
+      "sha256": "7f35558bf0eb49e6a7e5ccb45c32a02b047d506b22f04274a1fa8e662207387e"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/de-concurrency-review-20261019/README.md",
+      "sha256": "9523d249d972eb4163c627d00cc35b63096a199da976314b87a3bba39bbe82ea"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/de-concurrency-review-20261019/review.json",
+      "sha256": "5a50cbae5a24eedc4263c8e36c2b56c4279a46908d4856110509ea32e3bfc823"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/de-concurrency-review-20261019/verify.py",
+      "sha256": "62a6b08cdd380adf26813d4775cd990215c7d5775bd22db4014735f6f1b08136"
+    },
+    {
+      "path": "docs/90_全局/决策日志.md",
+      "sha256": "fda9b2d129c3cdcf4798f239e7fdbababa813a3ae87ba36eeca7f316715a2c94"
+    },
+    {
+      "path": "docs/90_全局/长任务路线图.md",
+      "sha256": "5d09d63f449f3f5382e30bc5f5ec6124901a32cfa1bbd018b4aa1ac2c7ea8cab"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-19",
+  "sourceBase": "441f2954fda5fe6b89b4f220dc49843d41f17b27",
+  "mode": "已有故障记录复核＋定向源码审查；本轮未重新执行压力/故障/渠道测试",
+  "confirmedOpen": [
+    {
+      "id": "DEF-216",
+      "severity": "严重",
+      "status": "打开",
+      "title": "Redis故障时通知业务35.599秒超过前端15秒请求超时",
+      "evidence": [
+        "../dc-targeted-closeout-20261019/redis-fault.json",
+        "frontend/src/common/web/utils/request.ts",
+        "backend/src/main/java/com/community/residence/common/messaging/service/NotificationService.java",
+        "backend/src/main/java/com/community/residence/common/feedback/service/FeedbackService.java"
+      ],
+      "scope": "既有真实故障记录＋当前源码复核；上一批修复了异常降级/恢复游标，未整改故障等待耗时。测试脚本60秒等待下成功，不等同前端15秒内成功。"
+    },
+    {
+      "id": "DEF-217",
+      "severity": "一般",
+      "status": "打开",
+      "title": "前端通知补拉游标lastSeq与后端sinceSeq不一致",
+      "evidence": [
+        "frontend/src/common/messaging/api/notification.ts",
+        "backend/src/main/java/com/community/residence/common/messaging/controller/NotificationController.java",
+        "backend/src/main/java/com/community/residence/common/messaging/service/NotificationService.java"
+      ],
+      "scope": "代码契约已确认：现行http.get不重命名参数，后端缺省游标0，客户端每轮实际从零拉取；未虚构本轮浏览器/运行压测。"
+    }
+  ],
+  "riskCandidates": [
+    {
+      "key": "跨资源及跨域预约并发",
+      "priorDefect": "DEF-062",
+      "finding": "锁按资源/房源＋日期分开；同居民日程跨表检查未见共同的居民日期互斥。两个不同锁可能同时通过无冲突检查再分别落库。",
+      "proofLevel": "源码竞争窗口，尚未真实并发复现"
+    },
+    {
+      "key": "序号分配与提交次序",
+      "priorDefect": "DEF-215的并发边界",
+      "finding": "nextSeq只串行分配；较大seq事务先提交并被增量读取，较小seq随后提交，严格sinceSeq消费者可能越过后者。当前未读全量快照和DEF-217全量补拉会掩盖部分现象，不宣称现行UI必然永久丢消息。",
+      "proofLevel": "源码时序推演，尚未真实事务交错复现"
+    },
+    {
+      "key": "退租创建与状态变更交错",
+      "priorDefect": "DEF-104的跨动作边界",
+      "finding": "创建先在锁外读取租约状态和日期；租约锁仅在审核路径使用，创建的锁内事务未重新锁读租约。等待期间租约变化是否仍能提交旧申请需补验。",
+      "proofLevel": "源码窗口，尚未运行复现"
+    },
+    {
+      "key": "事务内Redis等待及提交后回调",
+      "priorDefect": "DEF-216相关放大路径",
+      "finding": "反馈事务调用通知序号、渠道配置和在线判定；序号Redis调用位于进程级synchronized中；afterCommit内直接执行回调。事务/连接/锁等待的确切耗时尚未分段量化，不宣称已发生数据库死锁。",
+      "proofLevel": "实现路径核实，负载影响待量化"
+    }
+  ],
+  "existingFinancialRetentions": [
+    {
+      "id": "DEF-073",
+      "meaning": "微信能力按用户既有裁决暂缓，不能当作已实现"
+    },
+    {
+      "id": "DEF-128",
+      "meaning": "既有修复缺逐项异常执行证据，不等同已证实当前仍有退款代码错误"
+    }
+  ],
+  "counts": {
+    "registeredDefects": 217,
+    "newConfirmedOpen": 2,
+    "priorRegistry": 215,
+    "cases": 305,
+    "rtmRows": 85,
+    "proposedAdoptionSeverityClosed": {
+      "致命": "8/8",
+      "严重": "51/52",
+      "一般": "113/116",
+      "轻微": "19/19"
+    },
+    "adoptionApproved": false
+  },
+  "normalRuntime": "上一批6处修复尚未加载正常8084/5176；本轮没有重启或更新正常服务，也未重新核查其PID/数据库，不将上一批时点证明改成本轮实时证明",
+  "financialRequests": 0,
+  "sourceMutations": false,
+  "wholeProjectConcurrencySafetyProven": false,
+  "sources": [
+    {
+      "path": "frontend/src/common/web/utils/request.ts",
+      "sha256": "1e64eb783102821dfc5f0f6e2169631e3d9a1d4f41b73243325e2dd7002db231"
+    },
+    {
+      "path": "frontend/src/common/messaging/api/notification.ts",
+      "sha256": "5faf83b10be9c8ece9a745937f81c666a764b21cf89402294bd929223a4b75a2"
+    },
+    {
+      "path": "frontend/src/common/messaging/store/notification.ts",
+      "sha256": "04e8778f6f70396d374d05004a5ec9b0e21f8de14fc78d93d60943df22881709"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/messaging/controller/NotificationController.java",
+      "sha256": "963263d97a912db0929c336edf6fb7cd35d89e60566da8f41600f2d164f67ca1"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/messaging/service/NotificationService.java",
+      "sha256": "6ff8f53d286c5c9075a0d64e2b868654f0044b57e9d6a22b5d2308e0edcfbc92"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/feedback/service/FeedbackService.java",
+      "sha256": "00b702eb1bb5a0d0cb9416a7f6b4f86c8e3add8d54406e33e48ff95ea69a5c2f"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/reservation/service/ReservationService.java",
+      "sha256": "19e5b8f4a5b70f76efc78e9d115822ed5fb840ca841ef4de4a0bf6bda56b4790"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/housing/service/ViewingAppointmentService.java",
+      "sha256": "631c7f447610d998767825443439f2b853ee4d17f00181266b9bf84277da7aad"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/lease/service/LeaseMoveOutApplicationService.java",
+      "sha256": "d5c504ca54043ca237f796551724217208b499c0ce7978cdb8666ca0ba4b82e4"
+    },
+    {
+      "path": "backend/src/main/java/com/community/residence/common/messaging/service/AfterCommitDeliveryService.java",
+      "sha256": "c7772480b15c72068931e8b14f566191ffc8052b484353f860084846e8886154"
+    },
+    {
+      "path": "backend/src/main/resources/application-dev.yml",
+      "sha256": "925d190da03ad5d2b90c094f6645707cb8402d2a15e1940c4666fabaec0e41dd"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis-fault.json",
+      "sha256": "1ab88d557e253f770e7dc5859d5e79a36642779c29a0805154091ae5c76048f5"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/redis_fault.py",
+      "sha256": "2b6d9f14ced106ab4df48437b38975e02be512eac214b8748940b867693b007a"
+    },
+    {
+      "path": "docs/50_系统测试/evidence/dc-targeted-closeout-20261019/performance.py",
+      "sha256": "0eff5decdbff114f886c7b976acbe924d87c31c07f10eed629845beb591367d7"
+    }
+  ]
+}
