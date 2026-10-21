@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { isValidUsername, USERNAME_HINT } from '@/common/auth/utils/username'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -41,6 +42,8 @@ const roleFilter = ref<SystemRole | ''>('')
 const statusFilter = ref<UserStatus | ''>('')
 
 /** 创建对话框 */
+const router = useRouter()
+const accountCreationRoles = computed(() => Object.fromEntries(Object.entries(systemRoleLabels).filter(([role]) => role !== 'STAFF')))
 const createVisible = ref(false)
 const createLoading = ref(false)
 const createFormRef = ref<FormInstance>()
@@ -50,7 +53,7 @@ const createForm = reactive<ICreateSysUserDTO>({
   realName: '',
   phone: '',
   email: '',
-  role: 'STAFF'
+  role: 'ADMIN'
 })
 
 /** 编辑对话框（不含用户名/密码） */
@@ -62,7 +65,7 @@ const editForm = reactive<IUpdateSysUserDTO>({
   realName: '',
   phone: '',
   email: '',
-  role: 'STAFF'
+  role: 'ADMIN'
 })
 
 /** 修改密码对话框 */
@@ -221,7 +224,7 @@ function openCreate(): void {
     realName: '',
     phone: '',
     email: '',
-    role: 'STAFF'
+    role: 'ADMIN'
   })
   createVisible.value = true
 }
@@ -473,6 +476,7 @@ onMounted(load)
 
     <!-- 创建用户 -->
     <el-dialog v-model="createVisible" title="创建用户" width="480px">
+      <p>服务人员账号请在 <el-button link type="primary" @click="router.push('/admin/staff-capabilities')">服务人员</el-button> 子页代建并绑定社区。</p>
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="100px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="createForm.username" :placeholder="USERNAME_HINT" maxlength="50" />
@@ -498,7 +502,7 @@ onMounted(load)
         <el-form-item label="角色" prop="role">
           <el-select v-model="createForm.role" style="width: 100%">
             <el-option
-              v-for="(label, value) in systemRoleLabels"
+              v-for="(label, value) in accountCreationRoles"
               :key="value"
               :label="label"
               :value="value"

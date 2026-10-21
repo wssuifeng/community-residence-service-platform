@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +31,14 @@ public class AdminStaffCapabilityController {
 
     private final StaffCapabilityService staffCapabilityService;
 
+    @Operation(summary = "代建服务人员账号", description = "固定STAFF，强制同事务绑定至少一个有效有权社区")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @PostMapping("/accounts")
+    public ApiResponse<StaffCapabilityVO> createAccount(
+            @RequestBody @Valid com.community.residence.common.workorder.dto.CreateStaffAccountDTO dto) {
+        return ApiResponse.success(staffCapabilityService.createAccount(dto));
+    }
+
     @Operation(summary = "服务人员能力列表", description = "分页；超管看全部 STAFF，社区管理员仅见绑定其社区的人员")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping
@@ -41,7 +50,7 @@ public class AdminStaffCapabilityController {
         return ApiResponse.success(staffCapabilityService.page(page, size, communityId, categoryId, keyword));
     }
 
-    @Operation(summary = "可绑定人员候选", description = "全量 STAFF 账号（id/姓名/用户名），供绑定选择；不做社区过滤")
+    @Operation(summary = "业务人员候选", description = "社区管理员仅见授权社区已绑定人员")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/candidates")
     public ApiResponse<List<StaffCandidateVO>> candidates() {
@@ -55,7 +64,7 @@ public class AdminStaffCapabilityController {
         return ApiResponse.success(staffCapabilityService.getById(staffId));
     }
 
-    @Operation(summary = "保存服务人员能力绑定", description = "全量覆盖式：先删后插；列表为空或不传表示清空该维度")
+    @Operation(summary = "保存服务人员能力绑定", description = "社区管理员仅覆盖自身授权社区及所属类别；保留其他社区绑定")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping("/{staffId}")
     public ApiResponse<StaffCapabilityVO> save(@PathVariable Long staffId,

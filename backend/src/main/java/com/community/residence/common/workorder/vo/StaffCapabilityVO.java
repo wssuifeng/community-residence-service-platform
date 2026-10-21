@@ -22,6 +22,9 @@ public class StaffCapabilityVO {
     @Schema(description = "手机号")
     private String phone;
 
+    @Schema(description = "业务联系邮箱")
+    private String email;
+
     @Schema(description = "账号状态：ACTIVE-正常, FROZEN-冻结")
     private String status;
 

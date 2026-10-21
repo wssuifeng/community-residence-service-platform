@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-10-20T14:58:23.5188813+08:00",
+  "target": "http://127.0.0.1:8087",
+  "scope": "isolated service only; no normal database writes",
+  "staffId": 4,
+  "baselineCommunities": [
+    1,
+    2
+  ],
+  "baselineCategoryIds": [],
+  "testCategory": {
+    "id": 8,
+    "name": "室内维修",
+    "communityId": 2
+  },
+  "adminDetail": {
+    "code": 200,
+    "communityIds": [
+      1
+    ],
+    "communityTwoCategoryVisible": false
+  },
+  "adminSave": {
+    "code": 200,
+    "ownCommunityIds": [
+      1
+    ]
+  },
+  "superAdminAfterSave": {
+    "code": 200,
+    "communitiesPreserved": true,
+    "externalCategoryPreserved": true,
+    "communityIds": [
+      1,
+      2
+    ],
+    "categoryIds": [
+      8
+    ]
+  },
+  "testDataRestored": true,
+  "finalCommunities": [
+    1,
+    2
+  ],
+  "finalCategoryIds": []
+}

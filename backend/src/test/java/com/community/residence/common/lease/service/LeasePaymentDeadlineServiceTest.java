@@ -21,6 +21,7 @@ class LeasePaymentDeadlineServiceTest {
     @Mock LeasePaymentMapper payments;
     @Mock ResidenceApplicationMapper applications;
     @Mock com.community.residence.common.community.mapper.HouseMapper houses;
+    @Mock com.community.residence.common.community.service.HouseStateService houseStateService;
     @Mock com.community.residence.common.resident.mapper.ResidenceRelationMapper relations;
     @InjectMocks LeasePaymentDeadlineService service;
     LeaseRecord lease;
@@ -104,11 +105,14 @@ class LeasePaymentDeadlineServiceTest {
         when(relations.selectCount(any())).thenReturn(1L);
         var house=new com.community.residence.common.community.entity.House();
         house.setId(50L);
-        house.setStatus("RESERVED");
-        when(houses.selectById(50L)).thenReturn(house);
+        house.setStatus("VACANT");
+        doAnswer(invocation -> {
+            house.setStatus("TENANT_OCCUPIED");
+            return null;
+        }).when(houseStateService).refresh(eq(50L), anyString());
         service.beginResidence(10L,now);
-        assertThat(house.getStatus()).isEqualTo("OCCUPIED");
-        verify(houses).updateById(house);
+        assertThat(house.getStatus()).isEqualTo("TENANT_OCCUPIED");
+        verify(houseStateService).refresh(eq(50L), anyString());
     }
     @Test void endedRelationCannotBeReoccupiedByDateTask() {
         lease.setStatus("ACTIVE");

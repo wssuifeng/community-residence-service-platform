@@ -31,6 +31,8 @@ use([CanvasRenderer, LineChart, PieChart, GridComponent, TooltipComponent])
 const props = defineProps<{
   /** 社区筛选：null/缺省 = 全部口径；父层切换时经 :key 重挂载整体刷新 */
   communityId?: number | null
+  startDate: string
+  endDate: string
 }>()
 
 const router = useRouter()
@@ -81,9 +83,11 @@ const loading = ref(false)
 async function load(): Promise<void> {
   loading.value = true
   try {
-    dashboard.value = await getDashboardStats(
-      typeof props.communityId === 'number' ? { communityId: props.communityId } : undefined
-    )
+    dashboard.value = await getDashboardStats({
+      ...(typeof props.communityId === 'number' ? { communityId: props.communityId } : {}),
+      startDate: props.startDate,
+      endDate: props.endDate
+    })
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载看板数据失败')
   } finally {
@@ -95,10 +99,8 @@ onMounted(load)
 
 /* ---------- 统计卡数值：全部走看板真实接口 ---------- */
 
-/* 设计稿「本月工单」无按月统计接口 → 用真实可得的近 7 日口径（趋势序列求和），标签如实标注 */
-const weekOrderCount = computed(() =>
-  Object.values(dashboard.value?.workOrderTrend7d ?? {}).reduce((sum, n) => sum + n, 0)
-)
+/* 工单量与筛选器使用同一期间口径，避免卡片标签和实际查询范围不一致。 */
+const periodOrderCount = computed(() => dashboard.value?.workOrderPeriodCount ?? 0)
 
 const pendingCount = computed(() => dashboard.value?.workOrderPending ?? 0)
 
@@ -122,17 +124,11 @@ const avgRating = computed(() => {
   return (weighted / total).toFixed(1)
 })
 
-/* ---------- 趋势折线：近 7 日真实数据（设计稿为 30 天，接口仅有 7 日序列，
-   已如实改标题并记入报告差异，不造假补齐 30 天） ---------- */
+/* ---------- 趋势折线：使用后端返回的所选日期范围，不在前端生成假日期 ---------- */
 
 const trendOption = computed<ChartOption>(() => {
   const trend = dashboard.value?.workOrderTrend7d ?? {}
-  const days: { date: string; count: number }[] = []
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(Date.now() - i * 86400000)
-    const key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
-    days.push({ date: key.slice(5), count: trend[key] ?? 0 })
-  }
+  const days = Object.entries(trend).map(([date, count]) => ({ date: date.slice(5), count }))
   return {
     color: [C.c1],
     tooltip: { trigger: 'axis' },
@@ -210,9 +206,10 @@ const statusOption = computed<ChartOption>(() => ({
    → 退化为单条总览（真实 houseStatusDistribution）+ 分状态明细行，记入报告差异 ---------- */
 
 const HOUSE_COLORS: Record<string, string> = {
-  OCCUPIED: C.c2,
+  OWNER_OCCUPIED: C.c2,
+  TENANT_OCCUPIED: C.c4,
   VACANT: C.c6,
-  RESERVED: C.c4,
+  INACTIVE: C.c5,
   MAINTENANCE: C.c3
 }
 
@@ -224,7 +221,7 @@ const houseItems = computed(() => {
     name: houseStatusLabels[key as HouseStatus] ?? key,
     value,
     color: HOUSE_COLORS[key] ?? C.c5,
-    pct: total ? Math.round((value / total) * 100) : 0
+    pct: total ? Number(((value / total) * 100).toFixed(1)) : 0
   }))
 })
 
@@ -352,8 +349,8 @@ function goActivityList(): void {
     <!-- 当前统计值；未采集的历史对比不展示。 -->
     <div class="stat-row">
       <AdminStatCard
-        label="近 7 日工单"
-        :value="weekOrderCount"
+        label="所选期间工单"
+        :value="periodOrderCount"
         unit="单"
         :icon="ICONS.order"
         accent="primary"
@@ -396,6 +393,34 @@ function goActivityList(): void {
       />
     </div>
 
+    <article class="panel period-panel">
+      <header class="panel-header">
+        <h3 class="panel-title">期间运营指标</h3>
+        <span class="panel-caption">{{ dashboard?.startDate }} 至 {{ dashboard?.endDate }}</span>
+      </header>
+      <div class="period-grid">
+        <div class="period-item"><span>期间工单量</span><strong>{{ dashboard?.workOrderPeriodCount ?? 0 }} 单</strong></div>
+        <div class="period-item"><span>工单完成率</span><strong>{{ dashboard?.workOrderCompletionRate?.toFixed(1) ?? '-' }}%</strong></div>
+        <div class="period-item"><span>平均处理时长</span><strong>{{ dashboard?.workOrderAvgProcessingHours?.toFixed(1) ?? '-' }} 小时</strong></div>
+        <div class="period-item"><span>入住 / 搬出</span><strong>{{ dashboard?.residentMoveInTotal ?? 0 }} / {{ dashboard?.residentMoveOutTotal ?? 0 }}</strong></div>
+        <div class="period-item"><span>期间资源预约</span><strong>{{ dashboard?.reservationPeriodTotal ?? 0 }} 次</strong></div>
+        <div class="period-item"><span>资源预约完成</span><strong>{{ dashboard?.reservationCompletedTotal ?? 0 }} 次</strong></div>
+        <div class="period-item"><span>资源预约完成率</span><strong>{{ dashboard?.reservationCompletionRate?.toFixed(1) ?? '-' }}%</strong></div>
+        <div class="period-item"><span>看房预约量</span><strong>{{ dashboard?.viewingPeriodTotal ?? 0 }} 次</strong></div>
+        <div class="period-item"><span>已完成带看</span><strong>{{ dashboard?.viewingCompletedTotal ?? 0 }} 次</strong></div>
+        <div class="period-item"><span>房源浏览量</span><strong>{{ dashboard?.housingViewPeriodTotal ?? 0 }} 次</strong></div>
+        <div class="period-item"><span>评价平均分</span><strong>{{ dashboard?.evaluationAvgRating?.toFixed(1) ?? '-' }} 分</strong></div>
+        <div class="period-item"><span>满意率</span><strong>{{ dashboard?.evaluationSatisfactionRate?.toFixed(1) ?? '-' }}%</strong></div>
+      </div>
+      <div class="staff-workload">
+        <span class="workload-label">服务人员工作量</span>
+        <span v-if="!dashboard?.staffWorkload?.length" class="workload-empty">当前期间暂无派单记录</span>
+        <span v-for="staff in dashboard?.staffWorkload ?? []" :key="staff.staffId" class="workload-chip">
+          {{ staff.name }} {{ staff.total }}（派单 {{ staff.assignedCount }} / 完成 {{ staff.completedCount }}）
+        </span>
+      </div>
+    </article>
+
     <!-- 第二行：趋势折线（2/3） + 工单状态环图（1/3） -->
     <div class="trend-row">
       <article class="panel">
@@ -406,9 +431,9 @@ function goActivityList(): void {
                 <path v-for="(d, i) in PANEL_ICONS.trend" :key="i" :d="d" />
               </svg>
             </span>
-            近 7 日工单趋势
+            {{ dashboard ? `${dashboard.startDate} 至 ${dashboard.endDate} 工单趋势` : '工单趋势' }}
           </h3>
-          <span class="legend-chip"><i />工单数量</span>
+          <span class="legend-chip"><i />新建工单</span>
         </header>
         <EChart :option="trendOption" export-name="工单提交趋势" :height="272" />
       </article>
@@ -464,7 +489,7 @@ function goActivityList(): void {
             房屋状态
           </h3>
           <span v-if="houseTotal > 0" class="house-summary">
-            已入住 {{ occupiedCount }} / 共 {{ houseTotal }} 套 · 入住率 {{ occupancyLabel }}%
+            已入住 {{ occupiedCount }} / 共 {{ houseTotal }} 套
           </span>
         </header>
 
@@ -487,7 +512,7 @@ function goActivityList(): void {
                 <div class="house-row-fill" :style="{ width: `${it.pct}%`, backgroundColor: it.color }" />
               </div>
               <b class="house-count">{{ it.value }} 套</b>
-              <span class="house-pct">{{ it.pct }}%</span>
+              <span class="house-pct">{{ it.pct.toFixed(1) }}%</span>
             </li>
           </ul>
         </template>
@@ -751,6 +776,67 @@ function goActivityList(): void {
   color: var(--color-text-secondary);
 }
 
+.period-panel {
+  padding: var(--spacing-lg);
+}
+
+.panel-caption {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
+.period-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-md);
+}
+
+.period-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.period-item span {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.period-item strong {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+}
+
+.staff-workload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.workload-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.workload-chip {
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+}
+
+.workload-empty {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-disabled);
+}
+
 .house-bar {
   display: flex;
   height: 14px;
@@ -907,6 +993,10 @@ function goActivityList(): void {
   .bottom-row {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .period-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 767px) {
@@ -916,6 +1006,10 @@ function goActivityList(): void {
 
   .donut-body {
     flex-direction: column;
+  }
+
+  .period-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

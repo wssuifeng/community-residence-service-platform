@@ -50,6 +50,8 @@ class StaffScheduleServiceTest {
     @Mock
     private CommunityMapper communityMapper;
 
+    @Mock private StaffCommunityAccessService staffCommunityAccessService;
+
     @InjectMocks
     private StaffScheduleService staffScheduleService;
 

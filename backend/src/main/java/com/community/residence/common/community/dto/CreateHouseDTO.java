@@ -43,8 +43,8 @@ public class CreateHouseDTO {
     @Size(max = 20, message = "朝向最多 20 字符")
     private String orientation;
 
-    @Schema(description = "状态：VACANT-空置, OCCUPIED-已入住, RESERVED-预留, MAINTENANCE-维护中")
-    @Pattern(regexp = "^(VACANT|OCCUPIED|RESERVED|MAINTENANCE)$", message = "房屋状态不合法")
+    @Schema(description = "状态：VACANT-空置, MAINTENANCE-维护中, INACTIVE-停用（入住由关系驱动）")
+    @Pattern(regexp = "^(VACANT|MAINTENANCE|INACTIVE)$", message = "房屋状态不合法")
     private String status;
 
     @Schema(description = "房屋描述")

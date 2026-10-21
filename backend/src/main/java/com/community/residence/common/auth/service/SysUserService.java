@@ -80,6 +80,20 @@ public class SysUserService {
         return SysUserVO.from(user);
     }
 
+    /* 专用人员业务资料编辑，不接受角色/密码/全局状态，权限由人员管理入口收敛。 */
+    @Transactional(rollbackFor = Exception.class)
+    public SysUser updateStaffProfile(Long id, String realName, String phone, String email) {
+        SysUser user = sysUserMapper.selectByIdForUpdate(id);
+        if (user == null || !RoleConstants.STAFF.equals(user.getRole())) {
+            throw new ResourceNotFoundException("服务人员不存在");
+        }
+        if (realName != null) user.setRealName(realName);
+        if (phone != null) { checkPhoneUnique(phone, id); user.setPhone(phone); }
+        if (email != null) user.setEmail(email);
+        sysUserMapper.updateById(user);
+        return user;
+    }
+
     /** 用户详情（ADMIN 角色附绑定社区列表） */
     public SysUserVO getById(Long id) {
         SysUserVO vo = SysUserVO.from(requireUser(id));

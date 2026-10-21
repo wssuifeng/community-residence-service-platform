@@ -1,0 +1,162 @@
+{
+  "recordedAt": "2026-10-20T19:48:00.6190422+08:00",
+  "environment": "community_residence_dc_20261019",
+  "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+  "fixture": {
+    "leaseId": 29,
+    "sqlState": "29\tMOVED_OUT\t15\t5171\t215\tPAID\tSIGNED\n272\tTENANT\t15\t5171\t215\t2026-10-20\t2026-10-20\t29\n5171\tVACANT\n7\tAPPROVED\t2026-10-20\t2\t2026-10-20 19:47:22",
+    "houseId": 5171,
+    "residentId": 215,
+    "setup": "隔离库将已签协议租约置为ACTIVE并补齐已缴押金与租客居住关系，仅用于验证首期完成后的非金融接续；未执行支付/查单/退款"
+  },
+  "residentView": {
+    "payments": [],
+    "moveOutApplications": [
+      {
+        "communityId": 15,
+        "communityName": "ACC-FLOW-34481",
+        "createdAt": "2026-10-20T19:47:21",
+        "houseId": 5171,
+        "houseLocation": "A1U1102",
+        "id": 7,
+        "leaseId": 29,
+        "moveOutDate": "2026-10-20",
+        "reason": "验收非金融接续",
+        "rejectReason": null,
+        "residentId": 215,
+        "residentName": "Acceptance Tenant",
+        "reviewTime": "2026-10-20T19:47:22",
+        "reviewerId": 2,
+        "reviewerName": "社区管理员",
+        "status": "APPROVED"
+      }
+    ],
+    "changes": [
+      {
+        "changeType": "STATUS",
+        "createdAt": "2026-10-20T19:47:21",
+        "fieldLabel": "租住状态",
+        "fieldName": "status",
+        "id": 35,
+        "newValue": "MOVED_OUT",
+        "oldValue": "ACTIVE",
+        "operatorId": 2,
+        "operatorName": "社区管理员",
+        "operatorType": "ADMIN",
+        "reason": "退租申请通过，居民于 2026-10-20 搬出"
+      },
+      {
+        "changeType": "AGREEMENT",
+        "createdAt": "2026-10-20T02:30:38",
+        "fieldLabel": "协议签约",
+        "fieldName": "agreementStatus",
+        "id": 34,
+        "newValue": "居民同意协议，双方确认完成",
+        "oldValue": null,
+        "operatorId": 215,
+        "operatorName": "Acceptance Tenant",
+        "operatorType": "RESIDENT",
+        "reason": "AC Agreement 34481（Acceptance Tenant）"
+      },
+      {
+        "changeType": "AGREEMENT",
+        "createdAt": "2026-10-20T02:30:38",
+        "fieldLabel": "协议签约",
+        "fieldName": "agreementStatus",
+        "id": 33,
+        "newValue": "管理方同意并发出协议",
+        "oldValue": null,
+        "operatorId": 2,
+        "operatorName": "社区管理员",
+        "operatorType": "ADMIN",
+        "reason": "AC Agreement 34481"
+      },
+      {
+        "changeType": "ATTRIBUTE",
+        "createdAt": "2026-10-20T02:30:38",
+        "fieldLabel": "后续缴租周期月数",
+        "fieldName": "paymentCycleMonths",
+        "id": 32,
+        "newValue": "1",
+        "oldValue": null,
+        "operatorId": 2,
+        "operatorName": "社区管理员",
+        "operatorType": "ADMIN",
+        "reason": "来源挂牌#5申请时价对照；审核备注：E3 approve"
+      },
+      {
+        "changeType": "ATTRIBUTE",
+        "createdAt": "2026-10-20T02:30:38",
+        "fieldLabel": "首期支付月数",
+        "fieldName": "firstPaymentMonths",
+        "id": 31,
+        "newValue": "1",
+        "oldValue": null,
+        "operatorId": 2,
+        "operatorName": "社区管理员",
+        "operatorType": "ADMIN",
+        "reason": "来源挂牌#5申请时价对照；审核备注：E3 approve"
+      },
+      {
+        "changeType": "ATTRIBUTE",
+        "createdAt": "2026-10-20T02:30:38",
+        "fieldLabel": "合同总月数",
+        "fieldName": "contractMonths",
+        "id": 30,
+        "newValue": "12",
+        "oldValue": null,
+        "operatorId": 2,
+        "operatorName": "社区管理员",
+        "operatorType": "ADMIN",
+        "reason": "来源挂牌#5申请时价对照；审核备注：E3 approve"
+      },
+      {
+        "changeType": "CREATE",
+        "createdAt": "2026-10-20T02:30:38",
+        "fieldLabel": "登记租约",
+        "fieldName": null,
+        "id": 29,
+        "newValue": "租期 2026-10-20 ~ 2027-10-19，月租 3600，押金 7200",
+        "oldValue": null,
+        "operatorId": 2,
+        "operatorName": "社区管理员",
+        "operatorType": "ADMIN",
+        "reason": "入住申请审批通过自动建立（待签约）"
+      }
+    ],
+    "lease": {
+      "agreementStatus": "SIGNED",
+      "communityId": 15,
+      "communityName": "ACC-FLOW-34481",
+      "contractMonths": 12,
+      "contractUrl": null,
+      "conversationId": 70,
+      "createdAt": "2026-10-20T02:30:38",
+      "deposit": 7200.0,
+      "depositStatus": "PAID",
+      "endDate": "2027-10-19",
+      "expiryFlag": null,
+      "firstPaymentMonths": 1,
+      "houseId": 5171,
+      "houseLocation": "A1U1102",
+      "id": 29,
+      "monthlyRent": 3600.0,
+      "paymentCycleMonths": 1,
+      "remark": "入住申请审批通过自动建立",
+      "startDate": "2026-10-20",
+      "status": "MOVED_OUT",
+      "tenantId": 215,
+      "tenantName": "Acceptance Tenant"
+    },
+    "depositRefunds": []
+  },
+  "assertions": {
+    "paymentEndpointReadable": true,
+    "leaseMovedOut": true,
+    "refundEndpointReadable": true,
+    "financialOperations": 0,
+    "timelineHasStatus": true,
+    "adminApproved": true,
+    "residentSubmitted": true
+  }
+}

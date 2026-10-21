@@ -98,6 +98,7 @@ public class ViewingAppointmentService {
     private final HousingTimeslotMapper timeslotMapper;
     private final ResidentMapper residentMapper;
     private final SysUserMapper sysUserMapper;
+    private final com.community.residence.common.workorder.service.StaffCommunityAccessService staffCommunityAccessService;
     private final com.community.residence.common.lease.mapper.LeaseRecordMapper leaseMapper;
     private final SysAdminCommunityMapper sysAdminCommunityMapper;
     private final SysConfigService sysConfigService;
@@ -600,6 +601,9 @@ public class ViewingAppointmentService {
             throw new BusinessException(ErrorCode.VIEWING_ASSIGNEE_INVALID,
                     "目标账号不可分配（仅启用状态的服务人员或社区管理员）");
         }
+        if (RoleConstants.STAFF.equals(assignee.getRole())) {
+            staffCommunityAccessService.requireBoundActiveForUpdate(assigneeId, appointment.getCommunityId());
+        }
         /* R59 管辖校验：ADMIN 带看人须管辖房源所在社区（STAFF 无社区绑定概念），
            防跨社区分配导致会话参与者越权读取非管辖社区预约信息 */
         if (RoleConstants.ADMIN.equals(assignee.getRole())
@@ -637,6 +641,7 @@ public class ViewingAppointmentService {
                 .eq(SysUser::getRole, RoleConstants.STAFF)
                 .eq(SysUser::getStatus, CommonStatus.ACTIVE)
                 .orderByAsc(SysUser::getId));
+        staff = staff.stream().filter(user -> staffCommunityAccessService.isBound(user.getId(), communityId)).toList();
         Set<Long> adminIds = Set.copyOf(sysAdminCommunityMapper.selectList(
                         new LambdaQueryWrapper<SysAdminCommunity>()
                                 .eq(SysAdminCommunity::getCommunityId, communityId))

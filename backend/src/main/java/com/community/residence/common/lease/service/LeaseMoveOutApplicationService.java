@@ -84,6 +84,7 @@ public class LeaseMoveOutApplicationService {
     private final LeaseMoveOutApplicationMapper moveOutMapper;
     private final LeaseRecordMapper leaseMapper;
     private final HouseMapper houseMapper;
+    private final com.community.residence.common.community.service.HouseStateService houseStateService;
     private final HousingMapper housingMapper;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
@@ -301,18 +302,7 @@ public class LeaseMoveOutApplicationService {
         changeLogService.logStatus(lease.getId(), from, LeaseStatus.MOVED_OUT,
                 "退租申请通过，居民于 " + application.getMoveOutDate() + " 搬出");
 
-        /* ④ 房屋置空置（本租约租客已迁出，房态释放回可申请） */
-        House house = houseMapper.selectById(application.getHouseId());
-        if (house == null) {
-            log.warn("退租通过但房屋不存在，跳过房态回置：houseId={}", application.getHouseId());
-        } else {
-            Long remaining = relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
-                    .eq(ResidenceRelation::getHouseId, application.getHouseId()).isNull(ResidenceRelation::getMoveOutDate));
-            house.setStatus(remaining != null && remaining > 0 ? HouseStatusConstant.OCCUPIED
-                    : leaseMapper.selectBlockingIdsForUpdate(application.getHouseId()).isEmpty()
-                        ? HouseStatusConstant.VACANT : HouseStatusConstant.RESERVED);
-            houseMapper.updateById(house);
-        }
+        houseStateService.refresh(application.getHouseId(), "退租申请通过后重算房屋状态");
 
         /* ⑤ 在架房源状态回收（housingStatus 可选，缺省 AVAILABLE；无挂牌记录跳过） */
         String housingStatus = StringUtils.hasText(dto.getHousingStatus())

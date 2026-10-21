@@ -1,0 +1,110 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-04~60-06",
+  "title": "11项质量评估汇总",
+  "status": "COMPLETED_WITH_LIMITATIONS",
+  "assessmentCount": 11,
+  "results": [
+    {
+      "task": "60-04.1",
+      "file": "frontend-visual.json",
+      "conclusion": "代表页面未见视觉阻断；2项体验不足+1项主观建议"
+    },
+    {
+      "task": "60-04.2",
+      "file": "frontend-interaction.json",
+      "conclusion": "代表链路可用；全角色错误态/键盘焦点覆盖不足"
+    },
+    {
+      "task": "60-04.3",
+      "file": "page-structure.json",
+      "conclusion": "代表页面结构清晰；全站状态矩阵未完成"
+    },
+    {
+      "task": "60-04.4",
+      "file": "frontend-performance.json",
+      "conclusion": "请求与错误表现稳定；页面绝对性能证据不足"
+    },
+    {
+      "task": "60-05.1",
+      "file": "backend-architecture.json",
+      "conclusion": "架构边界总体清晰；共享授权维护风险"
+    },
+    {
+      "task": "60-05.2",
+      "file": "backend-performance.json",
+      "conclusion": "既有量级证据可用；容量余量与长尾未充分测量"
+    },
+    {
+      "task": "60-05.3",
+      "file": "backend-security.json",
+      "conclusion": "未发现本轮可直接确认高危；部署头与依赖扫描受限"
+    },
+    {
+      "task": "60-05.4",
+      "file": "concurrency.json",
+      "conclusion": "已知并发缺陷在矩阵内修复；未覆盖全写入口/多实例"
+    },
+    {
+      "task": "60-06.1",
+      "file": "data-integrity.json",
+      "conclusion": "已验收核心流程未见新一致性问题；金融/长期漂移受限"
+    },
+    {
+      "task": "60-06.2",
+      "file": "recovery-stability.json",
+      "conclusion": "Redis恢复在既有范围通过；其他依赖未注入"
+    },
+    {
+      "task": "60-06.3",
+      "file": "maintainability-operations.json",
+      "conclusion": "开发测试定位链完整；生产运维能力待70验证"
+    }
+  ],
+  "qualityGaps": [
+    "QE-VIS-001",
+    "QE-VIS-002",
+    "QE-ARCH-001",
+    "QE-BEPERF-002",
+    "QE-SEC-001",
+    "QE-SEC-002",
+    "QE-CON-002",
+    "QE-MAINT-001",
+    "QE-VIS-003"
+  ],
+  "evidenceLimitations": [
+    "G-015/N8 Edge 154未运行",
+    "QE-INT-001",
+    "QE-INT-002",
+    "QE-PERF-001",
+    "QE-PERF-002",
+    "QE-BEPERF-001",
+    "QE-SEC-003",
+    "QE-CON-001",
+    "QE-DATA-001",
+    "QE-DATA-002",
+    "QE-REC-001",
+    "QE-REC-002",
+    "QE-MAINT-002"
+  ],
+  "financialRetest": false,
+  "notPhaseComplete": true,
+  "nextStep": "将质量差距和证据限制汇总进60-07；必要的既有需求缺陷才回写G清单。质量评估完成不等于60阶段完成，需用户审阅后再办理阶段收尾。"
+}

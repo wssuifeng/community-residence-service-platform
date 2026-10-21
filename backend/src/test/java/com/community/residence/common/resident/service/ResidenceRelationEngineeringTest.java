@@ -36,7 +36,8 @@ class ResidenceRelationEngineeringTest {
     private final HouseMapper houses=mock(HouseMapper.class);
     private final LeaseRecordMapper leases=mock(LeaseRecordMapper.class);
     private final com.community.residence.common.lease.service.LeaseService leaseService=mock(com.community.residence.common.lease.service.LeaseService.class);
-    private final ResidenceRelationService service=new ResidenceRelationService(new ResidenceDependencyService(relations), relations,mock(ResidentMapper.class),houses,mock(UnitMapper.class),mock(BuildingMapper.class),leases,leaseService,mock(ResidenceApplicationMapper.class));
+    private final com.community.residence.common.community.service.HouseStateService houseStates=mock(com.community.residence.common.community.service.HouseStateService.class);
+    private final ResidenceRelationService service=new ResidenceRelationService(new ResidenceDependencyService(relations), relations,mock(ResidentMapper.class),houses,houseStates,mock(UnitMapper.class),mock(BuildingMapper.class),leases,leaseService,mock(ResidenceApplicationMapper.class));
     @AfterEach void clear(){SecurityUtils.clear();}
     private ResidenceRelation relation(){var r=new ResidenceRelation();r.setId(1L);r.setResidentId(7L);r.setHouseId(3L);r.setCommunityId(5L);return r;}
     private MoveOutDTO dto(){var dto=new MoveOutDTO();dto.setMoveOutDate(LocalDate.of(2026,10,11));return dto;}
@@ -53,15 +54,16 @@ class ResidenceRelationEngineeringTest {
         SecurityUtils.setAuthentication(new UserContext(8L,"test","RESIDENT",Set.of()));
         assertThatThrownBy(()->service.pageByResident(7L,1,20,null)).isInstanceOf(ForbiddenException.class);verifyNoInteractions(relations);
     }
-    @Test void moveOutTerminatesActiveLeaseAndVacatesOnlyEmptyHouse(){
+    @Test void moveOutTerminatesActiveLeaseAndRecalculatesHouseState(){
         admin();var r=relation();when(relations.selectById(1L)).thenReturn(r);when(relations.selectCount(any())).thenReturn(0L);
         var lease=new LeaseRecord();lease.setId(20L);lease.setStatus("ACTIVE");when(leases.selectList(any())).thenReturn(List.of(lease));
-        var house=new House();house.setId(3L);house.setStatus("OCCUPIED");when(houses.selectById(3L)).thenReturn(house);
-        service.moveOut(1L,dto());assertThat(r.getMoveOutDate()).isEqualTo(dto().getMoveOutDate());assertThat(house.getStatus()).isEqualTo("VACANT");verify(leaseService).applyTransition(lease,"MOVED_OUT","居住关系迁出登记");
+        service.moveOut(1L,dto());assertThat(r.getMoveOutDate()).isEqualTo(dto().getMoveOutDate());
+        verify(leaseService).applyTransition(lease,"MOVED_OUT","居住关系迁出登记");
+        verify(houseStates).refresh(3L,"居住关系迁出后重算房屋状态");
     }
     @Test void remainingCohabitantKeepsHouseOccupied(){
         admin();when(relations.selectById(1L)).thenReturn(relation());when(relations.selectCount(any())).thenReturn(1L);when(leases.selectList(any())).thenReturn(List.of());
-        service.moveOut(1L,dto());verify(houses, never()).updateById(any(House.class));
+        service.moveOut(1L,dto());verify(houseStates).refresh(3L,"居住关系迁出后重算房屋状态");
     }
     @Test void repeatMoveOutDoesNotWriteAgain(){
         admin();var r=relation();r.setMoveOutDate(LocalDate.of(2026,10,10));when(relations.selectById(1L)).thenReturn(r);

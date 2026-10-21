@@ -50,8 +50,8 @@ public class AdminSysUserController {
         return ApiResponse.success(sysUserService.update(id, dto));
     }
 
-    @Operation(summary = "查询系统用户")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    @Operation(summary = "查询系统用户", description = "完整账号详情仅超级管理员")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/{id}")
     public ApiResponse<SysUserVO> getById(@PathVariable Long id) {
         return ApiResponse.success(sysUserService.getById(id));

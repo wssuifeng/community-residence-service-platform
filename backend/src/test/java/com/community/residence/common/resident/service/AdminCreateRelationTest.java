@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,8 @@ class AdminCreateRelationTest {
     private ResidentMapper residentMapper;
     @Mock
     private HouseMapper houseMapper;
+    @Mock
+    private com.community.residence.common.community.service.HouseStateService houseStateService;
     @Mock
     private UnitMapper unitMapper;
     @Mock
@@ -106,9 +109,7 @@ class AdminCreateRelationTest {
             RelationVO vo = relationService.adminCreate(dto());
 
             assertThat(vo.getRelationType()).isEqualTo("OWNER");
-            ArgumentCaptor<House> houseCaptor = ArgumentCaptor.forClass(House.class);
-            verify(houseMapper).updateById(houseCaptor.capture());
-            assertThat(houseCaptor.getValue().getStatus()).isEqualTo("OCCUPIED");
+            verify(houseStateService).refresh(eq(101L), eq("主居住关系登记"));
             ArgumentCaptor<ResidenceRelation> relationCaptor =
                     ArgumentCaptor.forClass(ResidenceRelation.class);
             verify(relationMapper).insert(relationCaptor.capture());

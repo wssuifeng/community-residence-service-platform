@@ -102,6 +102,8 @@ class WorkOrderR74IntakeTest {
     private StaffScheduleService staffScheduleService;
     @Mock
     private ConversationService conversationService;
+    @Mock
+    private StaffCommunityAccessService staffCommunityAccessService;
 
     @InjectMocks
     private WorkOrderService service;
@@ -139,6 +141,9 @@ class WorkOrderR74IntakeTest {
         lenient().when(conversationService.createWorkOrderGroup(anyLong(), anyLong(), anyLong(), anyLong(), anyString()))
                 .thenReturn(group);
         lenient().when(conversationService.findWorkOrderGroup(ORDER_ID)).thenReturn(group);
+        lenient().when(sysUserMapper.selectById(STAFF_ID)).thenReturn(staff(STAFF_ID, "STAFF", "服务人员"));
+        lenient().when(staffCommunityAccessService.requireBoundActiveForUpdate(anyLong(), anyLong()))
+                .thenAnswer(invocation -> sysUserMapper.selectById(invocation.getArgument(0)));
     }
 
     /** 社区绑定管理员 + 超管：两次 selectList 依次返回（notifySubmit 先社区后超管） */
@@ -151,6 +156,9 @@ class WorkOrderR74IntakeTest {
         SysUser boundAdmin = staff(BOUND_ADMIN_ID, "ADMIN", "陈国强");
         SysUser superAdmin = staff(SUPER_ADMIN_ID, "SUPER_ADMIN", "超管");
         when(sysUserMapper.selectList(any())).thenReturn(List.of(boundAdmin), List.of(superAdmin));
+        lenient().when(sysUserMapper.selectById(STAFF_ID)).thenReturn(staff(STAFF_ID, "STAFF", "服务人员"));
+        lenient().when(staffCommunityAccessService.requireBoundActiveForUpdate(anyLong(), anyLong()))
+                .thenAnswer(invocation -> sysUserMapper.selectById(invocation.getArgument(0)));
     }
 
     private SysUser staff(Long id, String role, String realName) {

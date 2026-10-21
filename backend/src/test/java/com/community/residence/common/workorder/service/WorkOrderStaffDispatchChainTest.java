@@ -42,6 +42,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +89,8 @@ class WorkOrderStaffDispatchChainTest {
     private com.community.residence.common.auth.mapper.SysAdminCommunityMapper sysAdminCommunityMapper;
     @Mock
     private com.community.residence.common.conversation.service.ConversationService conversationService;
+    @Mock
+    private StaffCommunityAccessService staffCommunityAccessService;
 
     @InjectMocks
     private WorkOrderService workOrderService;
@@ -123,6 +126,8 @@ class WorkOrderStaffDispatchChainTest {
         staff.setStatus("ACTIVE");
         staff.setRealName("刘伟民");
         when(sysUserMapper.selectById(STAFF_ID)).thenReturn(staff);
+        lenient().when(staffCommunityAccessService.requireBoundActiveForUpdate(anyLong(), anyLong()))
+                .thenAnswer(invocation -> sysUserMapper.selectById(invocation.getArgument(0)));
         when(residentMapper.selectById(1L)).thenReturn(null);
     }
 

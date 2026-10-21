@@ -125,6 +125,7 @@ public class WorkOrderService {
     private final FileUploadService fileUploadService;
     private final com.community.residence.common.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
     private final StaffCapabilityService staffCapabilityService;
+    private final StaffCommunityAccessService staffCommunityAccessService;
     private final StaffScheduleService staffScheduleService;
 
     /** 工单临时群聊（R74）：建群 / 派单入群 / 终审回收，复用既有会话三级模型 */
@@ -378,7 +379,7 @@ public class WorkOrderService {
     public void assign(Long id, AssignWorkOrderDTO dto) {
         WorkOrder order = requireOrder(id);
         SecurityUtils.checkCommunityAccess(order.getCommunityId());
-        SysUser assignee = sysUserMapper.selectById(dto.getAssigneeId());
+        SysUser assignee = staffCommunityAccessService.requireBoundActiveForUpdate(dto.getAssigneeId(), order.getCommunityId());
         if (assignee == null || !RoleConstants.STAFF.equals(assignee.getRole())) {
             throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "服务人员不存在");
         }
@@ -599,6 +600,7 @@ public class WorkOrderService {
      * ADMIN 未显式传社区时以其唯一绑定社区作为匹配社区。
      */
     public List<StaffOptionVO> assignableStaff(Long communityId, Long categoryId) {
+        if (communityId != null) SecurityUtils.checkCommunityAccess(communityId);
         List<SysUser> staffList = sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getRole, RoleConstants.STAFF)
                 .eq(SysUser::getStatus, CommonStatus.ACTIVE)
@@ -622,6 +624,10 @@ public class WorkOrderService {
 
         List<StaffOptionVO> options = new ArrayList<>(staffList.size());
         for (SysUser staff : staffList) {
+            List<Long> bindings = communityBindings.getOrDefault(staff.getId(), List.of());
+            if (matchCommunityId != null ? !bindings.contains(matchCommunityId)
+                    : (SecurityUtils.hasRole(RoleConstants.ADMIN)
+                        ? bindings.stream().noneMatch(SecurityUtils.getCommunityIds()::contains) : bindings.isEmpty())) continue;
             boolean matchedCommunity = matchCommunityId != null
                     && communityBindings.getOrDefault(staff.getId(), List.of()).contains(matchCommunityId);
             boolean matchedCategory = categoryId != null

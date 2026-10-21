@@ -50,7 +50,7 @@ public class HouseManageItemVO {
     @Schema(description = "户型（如 2室1厅1卫）")
     private String layout;
 
-    @Schema(description = "房屋状态：VACANT-空置, OCCUPIED-已入住, RESERVED-预留, MAINTENANCE-维护中")
+    @Schema(description = "房屋状态：VACANT-空置, OWNER_OCCUPIED-业主自住, TENANT_OCCUPIED-租客居住, MAINTENANCE-维护中, INACTIVE-停用")
     private String houseStatus;
 
     @Schema(description = "挂牌房源摘要；null=未挂牌")

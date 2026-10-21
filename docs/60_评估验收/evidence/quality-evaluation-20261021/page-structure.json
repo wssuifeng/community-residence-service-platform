@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-04.3",
+  "title": "页面结构与信息组织评估",
+  "status": "COMPLETED_LIMITED",
+  "scope": [
+    "游客、居民、服务人员、管理端路由登记",
+    "居民消息中心与三端姓名菜单",
+    "管理端看板/社区/工单代表页面",
+    "列表、详情、空态、无权限和错误态的源码/测试登记"
+  ],
+  "method": [
+    "读取路由与端内导航登记，抽查实际页面截图和页面标题",
+    "核对页面职责、导航返回、列表到详情、消息中心和个人中心命名",
+    "以已有组件测试和验收证据补充动态行为；未覆盖状态明确标注"
+  ],
+  "evidence": [
+    "../../../../frontend/src/router.ts",
+    "../../../../frontend/src/resident/routes.ts",
+    "../../../../frontend/src/staff/routes.ts",
+    "../../../../frontend/src/admin/routes.ts",
+    "acceptance-n8-matrix-20261020/chrome-155/*.png",
+    "../../../50_系统测试/evidence/cy-header-navigation-20261018"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "居民端路由包含notifications，服务人员端包含notifications和profile，管理端包含profile；前端路由守卫按角色校验并提供登录回跳/403。",
+      "impact": "端间入口边界明确，顶栏反馈已形成闭环。"
+    },
+    {
+      "kind": "strength",
+      "fact": "管理端租住/房源、工单等复合页面通过Tab/Hub组织，旧路径保留兼容跳转，降低历史入口断裂风险。",
+      "impact": "页面职责集中且兼容旧链接。"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-PAGE-001",
+      "fact": "本轮没有对所有路由逐一截图，也未对每个页面的加载中、空数据、网络失败、无权限、超长内容状态逐一运行。",
+      "classification": "证据限制",
+      "severity": "P2"
+    },
+    {
+      "kind": "suggestion",
+      "id": "QE-PAGE-002",
+      "fact": "后续可建立正式页面状态矩阵，将常见状态作为组件契约逐页登记。",
+      "classification": "超纲建议",
+      "severity": "P3"
+    }
+  ],
+  "conclusion": "页面结构和入口命名在代表范围内清晰；全站页面状态覆盖不足，归证据限制/后续改进，不判产品缺陷。"
+}

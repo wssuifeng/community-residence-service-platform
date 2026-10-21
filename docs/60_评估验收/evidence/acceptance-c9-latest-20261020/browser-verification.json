@@ -1,0 +1,145 @@
+{
+  "recordedAt": "2026-10-20T19:39:05.647179",
+  "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+  "browser": {
+    "family": "Microsoft Edge",
+    "version": "155.0.4283.62"
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=2&startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/work-orders?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    }
+  ],
+  "observations": [
+    {
+      "view": "overview",
+      "hasCommunityFilter": true,
+      "hasDateFilter": true
+    },
+    {
+      "view": "overview",
+      "pngDownloads": 2
+    },
+    {
+      "view": "details",
+      "hasCommunityFilter": true,
+      "hasDateFilter": true,
+      "exportButtons": 2
+    }
+  ],
+  "downloads": [
+    {
+      "file": "overview-1.png",
+      "bytes": 39477,
+      "sha256": "3f20b7a558c829ede8dbc16643bbd42c18775611b45c337ff26fb06e38a2cfeb"
+    },
+    {
+      "file": "overview-2.png",
+      "bytes": 13936,
+      "sha256": "2fc75671711a0015185c987a04ff57443492816beb906ed41a29a6e7b6e31f62"
+    }
+  ],
+  "pageErrors": [],
+  "financialOperations": 0
+}

@@ -2,6 +2,7 @@
 import { http } from '@/common/web/utils/request'
 import type { PageResult } from '@/common/web/types/api'
 import type {
+  ICreateStaffAccountDTO,
   IBatchSaveScheduleDTO,
   IBatchSaveScheduleResult,
   IClearScheduleParams,
@@ -62,4 +63,9 @@ export function clearStaffSchedules(params: IClearScheduleParams) {
       endDate: params.endDate
     }
   })
+}
+
+/** 代建服务人员并原子绑定授权社区。 */
+export function createStaffAccount(data: ICreateStaffAccountDTO) {
+  return http.post<IStaffCapability>('/staff-capabilities/accounts', data)
 }

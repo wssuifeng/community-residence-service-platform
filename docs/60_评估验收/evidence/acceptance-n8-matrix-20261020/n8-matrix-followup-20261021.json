@@ -1,0 +1,212 @@
+{
+  "recordedAt": "2026-10-21",
+  "task": "60-03",
+  "requirement": "N8: Chrome / Edge / Firefox latest two major versions normal use",
+  "officialStableMatrix": {
+    "Chrome": {
+      "currentMajor": "155.0.8059.84",
+      "previousMajor": "154.0.8037.92",
+      "source": "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json",
+      "previousVersionSource": "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
+    },
+    "Microsoft Edge": {
+      "currentMajor": "155.0.4283.62",
+      "previousMajor": "154.0.4258.62",
+      "source": "https://edgeupdates.microsoft.com/api/products?view=enterprise"
+    },
+    "Firefox": {
+      "currentMajor": "158.0.1",
+      "previousMajor": "157.0.1",
+      "currentVersionSource": "https://product-details.mozilla.org/1.0/firefox_versions.json",
+      "releaseArchiveSource": "https://archive.mozilla.org/pub/firefox/releases/"
+    }
+  },
+  "runtimeBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "isolatedDatabase": "community_residence_dc_20261019",
+    "flywayVersion": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD"
+  },
+  "smokePath": [
+    "administrator login",
+    "运营看板 /admin/dashboard?tab=overview",
+    "社区管理 /admin/community",
+    "工单 /admin/work-orders"
+  ],
+  "results": [
+    {
+      "browser": "Google Chrome",
+      "version": "154.0.8037.92",
+      "status": "SMOKE_PASS",
+      "recordedAt": "2026-10-20T23:57:15.947671+08:00",
+      "evidence": "chrome-154/verification.json",
+      "screenshots": ["chrome-154/dashboard.png", "chrome-154/community.png", "chrome-154/work-orders.png"],
+      "api": {
+        "requests": 59,
+        "responses": 57,
+        "responseStatuses": "57 x HTTP 200",
+        "nonAuthenticationWrites": 0,
+        "financialRequests": 0,
+        "serverErrors": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0
+      },
+      "package": {
+        "source": "https://storage-download.googleapis.com/chrome-for-testing-public/154.0.8037.92/win64/chrome-win64.zip",
+        "bytes": 205614867,
+        "sha256": "B897EF3601C947AC0620C784556DEC719AC602B0159CE105927ACF645EE0F598",
+        "zipEntries": 306,
+        "zipCrcCheck": "passed",
+        "browserBinarySha256": "F0B204CE7239E221F84C4030CD38E4B688AD05320ACC8373DA166F548BF57EB5",
+        "browserBinaryVersionMatched": true
+      }
+    },
+    {
+      "browser": "Google Chrome",
+      "version": "155.0.8059.84",
+      "status": "SMOKE_PASS",
+      "recordedAt": "2026-10-20T23:57:40.838864+08:00",
+      "evidence": "chrome-155/verification.json",
+      "screenshots": ["chrome-155/dashboard.png", "chrome-155/community.png", "chrome-155/work-orders.png"],
+      "api": {
+        "requests": 59,
+        "responses": 57,
+        "responseStatuses": "57 x HTTP 200",
+        "nonAuthenticationWrites": 0,
+        "financialRequests": 0,
+        "serverErrors": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0
+      },
+      "package": {
+        "source": "https://storage-download.googleapis.com/chrome-for-testing-public/155.0.8059.84/win64/chrome-win64.zip",
+        "bytes": 206114888,
+        "sha256": "507F2A031441D10C62B5E3D4E863F09AC1198A571C1419976CBD8387F639AFDE",
+        "zipEntries": 305,
+        "zipCrcCheck": "passed",
+        "browserBinarySha256": "A2AE305DA79E701AF793B667C1CA3D87383729040596264E52F51259D7966413",
+        "browserBinaryVersionMatched": true
+      }
+    },
+    {
+      "browser": "Microsoft Edge",
+      "version": "155.0.4283.62",
+      "status": "SMOKE_PASS",
+      "recordedAt": "2026-10-21T00:00:11.456649+08:00",
+      "evidence": "edge-155/verification.json",
+      "screenshots": ["edge-155/dashboard.png", "edge-155/community.png", "edge-155/work-orders.png"],
+      "api": {
+        "requests": 59,
+        "responses": 57,
+        "responseStatuses": "57 x HTTP 200",
+        "nonAuthenticationWrites": 0,
+        "financialRequests": 0,
+        "serverErrors": 0,
+        "pageErrors": 0,
+        "consoleErrors": 0
+      },
+      "hostBrowserBinary": {
+        "productVersion": "155.0.4283.62",
+        "sha256": "C2451A012FF88E82449834DE5B526EBB42B5A3FC25958D795910D2B172C975B6",
+        "authenticode": "valid",
+        "signer": "Microsoft Corporation"
+      }
+    },
+    {
+      "browser": "Mozilla Firefox",
+      "version": "157.0.1",
+      "status": "SMOKE_PASS_LIMITED_LOGGING",
+      "recordedAt": "2026-10-21T00:18:28.997725+08:00",
+      "evidence": "firefox-157/verification.json",
+      "screenshots": ["firefox-157/dashboard.png", "firefox-157/community.png", "firefox-157/work-orders.png"],
+      "browserBinary": {
+        "sha256": "F029827EC8841DFD36E75ACB95343F2669EB86C296EEDD49F0E48D80C2A7D514",
+        "productVersionMatched": true,
+        "authenticode": "valid",
+        "signer": "Mozilla Corporation"
+      },
+      "installerPackage": {
+        "sha256": "71DC620E7749BB65BE6DF67B99261A303805A804F9C787B76B81C095CFA7D9CA",
+        "sha512": "5e9cb7c6b8d00e2eb780350b03a4915f637dce4696205802535bad50b486cb8b4ee9afcfdcafd1b3bb75b31541c68db63a2e0da891c8b5b1248e3b681330ec57",
+        "officialSha512Matched": true,
+        "authenticode": "valid",
+        "signer": "Mozilla Corporation"
+      },
+      "driver": {
+        "version": "geckodriver 0.37.1",
+        "sha256": "E95B4EAC7960FFCD5ACBFD92BB7D49D48F99C1D01A20DDD297FEF8C80821020D"
+      },
+      "limitations": [
+        "The administrator login and three required pages loaded, and screenshots were captured.",
+        "Selenium/geckodriver did not expose WebDriver.get_log or cross-version request-method logging; browser-console and API-write absence are not asserted from this run.",
+        "No business form or financial action was submitted by the smoke script."
+      ]
+    },
+    {
+      "browser": "Mozilla Firefox",
+      "version": "158.0.1",
+      "status": "SMOKE_PASS_LIMITED_LOGGING",
+      "recordedAt": "2026-10-21T00:31:14.064216+08:00",
+      "evidence": "firefox-158/verification.json",
+      "screenshots": ["firefox-158/dashboard.png", "firefox-158/community.png", "firefox-158/work-orders.png"],
+      "browserBinary": {
+        "sha256": "76732D4E43C864194660C671C52ECF4BAD89E43B666D9A0ACF89CD4B692CED9B",
+        "productVersionMatched": true,
+        "authenticode": "valid",
+        "signer": "Mozilla Corporation"
+      },
+      "installerPackage": {
+        "sha256": "3259A2F8508E58CF2E383B6C99BFC64D6DDC86D1407B7C2F86F660AF955B5D10",
+        "sha512": "4cd87e51e033406ea5bdd4fbb969843b41365570c4e59e95610ed5074326221535279c616fba21ca5c89b0503843aa746f8a3a65a593221e77bef6a18ee38ac8",
+        "officialSha512Matched": true,
+        "authenticode": "valid",
+        "signer": "Mozilla Corporation"
+      },
+      "driver": {
+        "version": "geckodriver 0.37.1",
+        "sha256": "E95B4EAC7960FFCD5ACBFD92BB7D49D48F99C1D01A20DDD297FEF8C80821020D"
+      },
+      "limitations": [
+        "The administrator login and three required pages loaded, and screenshots were captured.",
+        "Selenium/geckodriver did not expose WebDriver.get_log or cross-version request-method logging; browser-console and API-write absence are not asserted from this run.",
+        "No business form or financial action was submitted by the smoke script."
+      ]
+    },
+    {
+      "browser": "Microsoft Edge",
+      "version": "154.0.4258.62",
+      "status": "NOT_RUN",
+      "package": {
+        "type": "Microsoft Edge Enterprise x64 MSI",
+        "bytes": 212787200,
+        "productVersionFromMsi": "154.0.4258.62",
+        "sha256": "6D493F4F5C3076EB80C173323A97546C7ECB9B9B3206150F255815549F35A497",
+        "officialMicrosoftSha256Matched": true,
+        "authenticode": "valid",
+        "signer": "Microsoft Corporation"
+      },
+      "acquisition": {
+        "administrativeImageExtraction": "completed in the N8 temporary directory; yielded MSI metadata and a signed Microsoft Edge Update Setup binary but no runnable msedge.exe",
+        "systemWideOrPerUserBrowserInstall": false,
+        "existingEdgeVersionBeforeAndAfter": "155.0.4283.62"
+      },
+      "reason": "No isolated runnable Edge 154 binary was available. Installing the MSI would alter the existing browser environment, so no installation was performed.",
+      "compatibilityConclusion": "NOT_ASSESSED"
+    }
+  ],
+  "summary": {
+    "matrixEntries": 6,
+    "smokeRunsWithPageEvidence": 5,
+    "notRun": 1,
+    "confirmedProductCompatibilityFailures": 0,
+    "n8Conclusion": "EVIDENCE_INSUFFICIENT",
+    "openGap": "G-015"
+  },
+  "limitations": [
+    "This is a read-only smoke path covering administrator login, dashboard, community management, and work-order list; it is not exhaustive browser conformance testing across all roles and routes.",
+    "Firefox browser-console and request-method telemetry is unavailable in these Selenium/geckodriver runs; no negative error or request claims are inferred from the missing logs.",
+    "Edge 154 was not executed. Its compatibility remains unassessed; the missing run is an evidence gap, not a confirmed product defect.",
+    "No financial operation was performed. Existing user confirmation for the financial special case remains unchanged."
+  ]
+}

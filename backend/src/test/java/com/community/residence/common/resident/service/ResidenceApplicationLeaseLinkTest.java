@@ -76,6 +76,8 @@ class ResidenceApplicationLeaseLinkTest {
     @Mock
     private HouseMapper houseMapper;
     @Mock
+    private com.community.residence.common.community.service.HouseStateService houseStateService;
+    @Mock
     private UnitMapper unitMapper;
     @Mock
     private BuildingMapper buildingMapper;

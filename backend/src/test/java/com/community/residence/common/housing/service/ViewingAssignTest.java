@@ -17,6 +17,7 @@ import com.community.residence.common.messaging.service.NotificationService;
 import com.community.residence.common.reservation.mapper.ViolationRecordMapper;
 import com.community.residence.common.resident.entity.Resident;
 import com.community.residence.common.resident.mapper.ResidentMapper;
+import com.community.residence.common.workorder.service.StaffCommunityAccessService;
 import com.community.residence.common.auth.service.SysConfigService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -88,6 +89,8 @@ class ViewingAssignTest {
     private com.community.residence.common.conversation.service.ConversationService conversationService;
     @Mock
     private com.community.residence.common.lease.mapper.LeaseRecordMapper leaseMapper;
+    @Mock
+    private StaffCommunityAccessService staffCommunityAccessService;
 
     @InjectMocks
     private ViewingAppointmentService service;
@@ -121,6 +124,8 @@ class ViewingAssignTest {
         staff.setRole("STAFF");
         staff.setStatus("ACTIVE");
         lenient().when(sysUserMapper.selectById(2L)).thenReturn(staff);
+        lenient().when(staffCommunityAccessService.requireBoundActiveForUpdate(anyLong(), anyLong()))
+                .thenAnswer(invocation -> sysUserMapper.selectById(invocation.getArgument(0)));
 
         Housing housing = new Housing();
         housing.setId(1L);

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import StaffAccountCreateDialog from '@/admin/workorder/components/StaffAccountCreateDialog.vue'
 import AdminPageHeader from '@/admin/layout/views/AdminPageHeader.vue'
 import StatusTag from '@/common/web/components/StatusTag.vue'
 import Pagination from '@/common/web/components/Pagination.vue'
@@ -23,6 +24,7 @@ import { useUserStore } from '@/common/auth/store/user'
  */
 
 const userStore = useUserStore()
+const createVisible = ref(false)
 
 /** 社区标签折叠阈值：超过 2 个折叠为 +N，避免多绑定人员撑坏表格列宽 */
 const COMMUNITY_TAG_LIMIT = 2
@@ -48,7 +50,7 @@ async function loadCommunities(): Promise<void> {
   try {
     const result = await getCommunityList({ page: 1, size: 100 })
     const bound = boundCommunityIds.value
-    communities.value = bound.length > 0 ? result.records.filter((item) => bound.includes(item.id)) : result.records
+    communities.value = userStore.user?.role === 'ADMIN' ? result.records.filter((item) => bound.includes(item.id)) : result.records
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '社区列表加载失败')
   }
@@ -143,7 +145,7 @@ function handleSizeChange(): void {
 const drawerVisible = ref(false)
 const editing = ref<IStaffCapability | null>(null)
 const detailLoading = ref(false)
-const form = ref<{ communityIds: number[]; categoryIds: number[] }>({ communityIds: [], categoryIds: [] })
+const form = ref<{ realName: string; phone: string; email: string; communityIds: number[]; categoryIds: number[] }>({ realName: '', phone: '', email: '', communityIds: [], categoryIds: [] })
 const saving = ref(false)
 
 /** 抽屉内可选类别：来自已勾选社区的服务类别树（未选社区则不给选项并提示） */
@@ -178,14 +180,15 @@ async function openDrawer(row: IStaffCapability): Promise<void> {
   editing.value = row
   drawerVisible.value = true
   detailLoading.value = true
-  form.value = { communityIds: [...row.communityIds], categoryIds: [...row.categoryIds] }
+  form.value = { realName: row.realName, phone: row.phone ?? '', email: row.email ?? '', communityIds: [...row.communityIds], categoryIds: [...row.categoryIds] }
   try {
     const detail = await getStaffCapability(row.staffId)
     editing.value = detail
-    form.value = { communityIds: [...detail.communityIds], categoryIds: [...detail.categoryIds] }
+    form.value = { realName: detail.realName, phone: detail.phone ?? '', email: detail.email ?? '', communityIds: [...detail.communityIds], categoryIds: [...detail.categoryIds] }
     await loadDrawerCategories()
   } catch (error) {
-    /* 详情失败保留列表行数据，至少能继续编辑已知绑定 */
+    editing.value = null
+    /* 无最新详情时不允许写入旧绑定。 */
     drawerCategoryOptions.value = []
     ElMessage.error(error instanceof Error ? error.message : '能力详情加载失败')
   } finally {
@@ -199,6 +202,7 @@ async function handleSave(): Promise<void> {
   saving.value = true
   try {
     const result = await saveStaffCapability(target.staffId, {
+      realName: form.value.realName, phone: form.value.phone, email: form.value.email,
       communityIds: form.value.communityIds,
       categoryIds: form.value.categoryIds
     })
@@ -235,16 +239,15 @@ onMounted(async () => {
   <section class="staff-capability">
     <AdminPageHeader
       title="服务人员"
-      :subtitle="`物业长期对接人员：绑定常驻社区与擅长的服务类别后，派单时会被优先推荐（当前 ${total} 人）`"
-    />
+      :subtitle="`管理服务人员资料与社区绑定（当前 ${total} 人）`"
+    ><el-button type="primary" @click="createVisible = true">代建服务人员账号</el-button></AdminPageHeader>
 
     <p class="page-note">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="12" cy="12" r="9" />
         <path d="M12 11v5.5M12 7.8v.2" />
       </svg>
-      常驻社区决定派单推荐档位（常驻本社区优先），擅长服务类别决定同类工单优先派给谁；
-      两者都显示在派单候选清单上，供调度判断。账号本身在「系统管理 · 用户」中创建。
+      服务人员须绑定目标社区后才能派单或排班，擅长类别用于社区内推荐。代建账号必须选择社区；社区管理员仅管理自己授权范围内的绑定。
     </p>
 
     <FilterPanel resettable @reset="handleReset">
@@ -323,8 +326,7 @@ onMounted(async () => {
         <template #empty>
           <el-empty :description="hasFilter ? '暂无符合条件的服务人员' : '暂无服务人员账号'" :image-size="80">
             <p v-if="!hasFilter" class="empty-tip">
-              服务人员为系统用户中角色为「服务人员」的账号，请先在「系统管理 · 用户」中创建；
-              若已创建，请检查账号状态是否为正常，以及是否已通过本页绑定社区。
+              可在本页代建服务人员账号；已有账号可在本页绑定授权社区与擅长类别。
             </p>
           </el-empty>
         </template>
@@ -417,9 +419,10 @@ onMounted(async () => {
 
       <template #footer>
         <el-button @click="drawerVisible = false">取消</el-button>
-        <el-button type="primary" :loading="saving" :disabled="detailLoading" @click="handleSave">保存绑定</el-button>
+        <el-button type="primary" :loading="saving" :disabled="detailLoading || !editing" @click="handleSave">保存绑定</el-button>
       </template>
     </el-drawer>
+    <StaffAccountCreateDialog v-model="createVisible" :communities="communities" @created="fetchList" />
   </section>
 </template>
 

@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-10-20",
+  "requirement": "N8: Chrome / Edge / Firefox latest two major versions normal use",
+  "officialStableMatrix": {
+    "Chrome": {
+      "currentMajor": "155.0.8059.84",
+      "previousMajor": "154.0.8037.92",
+      "sources": [
+        "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json",
+        "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
+      ]
+    },
+    "Microsoft Edge": {
+      "currentMajor": "155.0.4283.62",
+      "previousMajor": "154.0.4258.62",
+      "source": "https://edgeupdates.microsoft.com/api/products?view=enterprise"
+    },
+    "Firefox": {
+      "currentMajor": "158.0.1",
+      "previousMajor": "157.0.1",
+      "sources": [
+        "https://product-details.mozilla.org/1.0/firefox_versions.json",
+        "https://archive.mozilla.org/pub/firefox/releases/158.0.1/",
+        "https://archive.mozilla.org/pub/firefox/releases/157.0.1/"
+      ]
+    }
+  },
+  "hostInventory": {
+    "Microsoft Edge": {
+      "installed": true,
+      "version": "155.0.4283.62",
+      "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    },
+    "Google Chrome": {
+      "installed": false,
+      "checkedStandardPathsAndUninstallRegistry": true
+    },
+    "Mozilla Firefox": {
+      "installed": false,
+      "checkedStandardPathsAndUninstallRegistry": true
+    },
+    "EdgeWebView2": "155.0.4283.62; not counted as a desktop browser"
+  },
+  "runtimeEvidence": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "isolatedDatabase": "community_residence_dc_20261019",
+    "flywayVersion": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "edge155CurrentRuntimeChecks": [
+      "evidence/acceptance-c9-latest-20261020/final-export-verification.json",
+      "evidence/acceptance-c9-latest-20261020/latest-ui-verification.json"
+    ]
+  },
+  "acquisitionAttempt": {
+    "systemWideInstall": false,
+    "largeOfficialPackageTransfersCompleted": false,
+    "rangeProbe": "10 MiB request timed out after 60 seconds with 3,510,705 bytes received",
+    "browserCompatibilityRunsForUnavailableVersions": 0,
+    "partialDownloadsInstalled": false,
+    "temporaryDirectory": "C:\\Users\\17841\\AppData\\Local\\Temp\\community-residence-n8-matrix-20261020"
+  },
+  "conclusion": {
+    "status": "EVIDENCE_INSUFFICIENT",
+    "gap": "G-015",
+    "reason": "Only current-major Microsoft Edge is installed and exercised. Chrome 154/155, Edge 154, and Firefox 157/158 were not run.",
+    "productCompatibilityFailureConfirmed": false,
+    "scopeChanged": false
+  }
+}

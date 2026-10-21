@@ -64,6 +64,8 @@ class WorkOrderServiceTest {
     @Mock
     private StaffScheduleService staffScheduleService;
 
+    @Mock private StaffCommunityAccessService staffCommunityAccessService;
+
     @InjectMocks
     private WorkOrderService workOrderService;
 
@@ -113,7 +115,7 @@ class WorkOrderServiceTest {
             staff.setRole("STAFF");
             staff.setStatus("ACTIVE");
             staff.setRealName("Wang");
-            when(sysUserMapper.selectById(9L)).thenReturn(staff);
+            when(staffCommunityAccessService.requireBoundActiveForUpdate(9L, 1L)).thenReturn(staff);
             workOrderService.assign(1L, assignDto(9L));
             assertThat(order.getStatus()).isEqualTo("ASSIGNED");
 
@@ -277,7 +279,7 @@ class WorkOrderServiceTest {
             admin.setId(2L);
             admin.setRole("ADMIN");
             admin.setStatus("ACTIVE");
-            when(sysUserMapper.selectById(2L)).thenReturn(admin);
+            when(staffCommunityAccessService.requireBoundActiveForUpdate(2L, 1L)).thenThrow(new BusinessException(com.community.residence.common.web.constant.ErrorCode.DATA_NOT_FOUND, "服务人员不存在"));
 
             assertThatThrownBy(() -> workOrderService.assign(1L, assignDto(2L)))
                     .isInstanceOf(BusinessException.class)
@@ -291,7 +293,7 @@ class WorkOrderServiceTest {
             security.when(SecurityUtils::getUserId).thenReturn(2L);
             when(workOrderMapper.selectById(1L)).thenReturn(order);
             SysUser staff = new SysUser(); staff.setId(9L); staff.setRole("STAFF"); staff.setStatus("ACTIVE");
-            when(sysUserMapper.selectById(9L)).thenReturn(staff);
+            when(staffCommunityAccessService.requireBoundActiveForUpdate(9L, 1L)).thenReturn(staff);
             workOrderService.assign(1L, assignDto(9L));
             var calls = org.mockito.Mockito.inOrder(conversationService);
             calls.verify(conversationService).createWorkOrderGroup(1L, 1L, 1L, 2L, order.getOrderNo());

@@ -13,7 +13,7 @@ import org.apache.ibatis.annotations.Update;
 public interface HouseMapper extends BaseMapper<House> {
 
     /* 写入入住申请/租约前锁定房屋行，串行化同房屋的竞争性业务操作。 */
-    @Select("SELECT * FROM house WHERE id = #{id} AND is_deleted = 0 FOR UPDATE")
+    @Select("SELECT id, unit_id, community_id, house_number, floor, area, layout, orientation, status, description, is_deleted, deleted_at, created_at, updated_at FROM house WHERE id = #{id} AND is_deleted = 0 FOR UPDATE")
     House selectByIdForUpdate(@Param("id") Long id);
 
     @Update("UPDATE house SET is_deleted = 1, deleted_at = NOW() WHERE id = #{id} AND is_deleted = 0")

@@ -14,9 +14,12 @@ Temp/
 # 本地凭据文件（DB/JWT/支付密钥；由 .env.example 复制而来，禁止入库）
 .env
 .env.local
+.env.docker
+!.env.cloud.example
 
 # 上传文件运行时目录（FileUploadService 本地存储，不入库）
 backend/uploads/
+uploads/
 
 # IDE
 .idea/
@@ -63,6 +66,10 @@ output/runtime/
 
 # 本机数据库恢复备份：包含账号/业务数据和可能的配置密文，不作为公开测试证据。
 output/db-backups/
+
+# 本地浏览器/评估运行产物：正式测试证据统一放入 docs/**/evidence/，不提交工作区临时输出。
+output/**
+.playwright-cli/
 
 # 压测登录生成的Bearer令牌：由setUp现场生成，不是公开测试证据。
 docs/50_系统测试/scripts/tokens.csv

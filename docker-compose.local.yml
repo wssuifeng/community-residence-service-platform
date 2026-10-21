@@ -1,0 +1,77 @@
+name: community-residence-local
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-community_residence}
+      MYSQL_USER: ${MYSQL_APP_USER:-community}
+      MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD:?MYSQL_APP_PASSWORD is required}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:${MYSQL_HOST_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    image: community-residence-backend:local
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/backend.artifact.Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-community_residence}?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_APP_USER:-community}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_APP_PASSWORD:?MYSQL_APP_PASSWORD is required}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      UPLOAD_DIR: /app/uploads
+      APP_LOG_LEVEL: ${APP_LOG_LEVEL:-INFO}
+    volumes:
+      - ./uploads:/app/uploads
+    ports:
+      - "127.0.0.1:${BACKEND_HOST_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    image: community-residence-frontend:local
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/frontend.artifact.Dockerfile
+    ports:
+      - "127.0.0.1:${FRONTEND_HOST_PORT:-8088}:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  redis_data:

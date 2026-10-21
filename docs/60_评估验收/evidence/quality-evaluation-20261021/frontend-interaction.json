@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-04.2",
+  "title": "前端交互评估",
+  "status": "COMPLETED_LIMITED",
+  "scope": [
+    "登录/角色首页跳转",
+    "管理端看板、社区管理、工单调度",
+    "居民端消息中心、姓名菜单、返回首页入口（沿既有cy证据）",
+    "关键危险操作和表单校验以既有单测/验收证据辅助"
+  ],
+  "method": [
+    "基于实际路由与既有隔离浏览器证据走查入口可发现性、操作反馈、权限路由、重复提交和错误边界",
+    "检查前端路由守卫与后端权限注解的一致性",
+    "不把源码静态检查替代所有真实用户体验测试"
+  ],
+  "evidence": [
+    "../acceptance-n8-matrix-20261020/chrome-155/verification.json",
+    "../acceptance-n8-matrix-20261020/firefox-157/verification.json",
+    "../acceptance-c9-latest-20261020/runtime-process-confirmation.json",
+    "../acceptance-n8-matrix-20261020/n8-matrix-followup-20261021.json",
+    "../acceptance-flow-20261020.json"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "管理员只读冒烟可完成登录、运营看板、社区管理和工单列表进入；代表Chrome/Edge页面无页面错误、控制台错误和服务器错误。",
+      "impact": "核心只读导航链路可用。"
+    },
+    {
+      "kind": "strength",
+      "fact": "路由守卫按角色进入对应首页；三端顶栏已有消息中心/个人中心/返回首页/退出登录入口的实现与既有定向证据。",
+      "impact": "身份相关入口闭环清晰。"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-INT-001",
+      "fact": "本轮未对全部角色、全部表单、键盘焦点顺序、断网重试、重复点击和所有错误态进行完整真人/浏览器交互覆盖。",
+      "classification": "证据限制",
+      "severity": "P2"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-INT-002",
+      "fact": "Firefox两版本的Selenium运行无法提供浏览器日志和请求方法日志，因此只能确认页面加载和截图，不能据此断言无控制台错误或无非认证写请求。",
+      "classification": "证据限制",
+      "severity": "P2"
+    }
+  ],
+  "conclusion": "已完成代表任务交互评估；未见代表链路阻断。键盘/焦点、全角色错误恢复和Edge 154仍为未覆盖项，不能宣称全量交互通过。"
+}

@@ -25,6 +25,7 @@ import com.community.residence.common.lease.mapper.LeaseRecordMapper;
 import com.community.residence.common.reservation.entity.ResourceReservation;
 import com.community.residence.common.reservation.mapper.ResourceReservationMapper;
 import com.community.residence.common.resident.entity.Resident;
+import com.community.residence.common.resident.entity.ResidenceRelation;
 import com.community.residence.common.resident.mapper.ResidentMapper;
 import com.community.residence.common.workorder.entity.ServiceCategory;
 import com.community.residence.common.workorder.entity.StaffCommunity;
@@ -61,6 +62,10 @@ class NontransactionStatisticsCoverageTest {
  @Mock ResidentMapper residentMapper; @Mock WorkOrderMapper workOrderMapper; @Mock WorkOrderAssignmentMapper assignmentMapper; @Mock WorkOrderProcessMapper processMapper;
  @Mock ServiceCategoryMapper serviceCategoryMapper; @Mock SysUserMapper sysUserMapper; @Mock WorkOrderEvaluationMapper evaluationMapper;
  @Mock ResourceReservationMapper reservationMapper; @Mock LeaseRecordMapper leaseMapper;
+ @Mock com.community.residence.common.resident.mapper.ResidenceRelationMapper residenceRelationMapper;
+ @Mock com.community.residence.common.housing.mapper.HousingMapper housingMapper;
+ @Mock com.community.residence.common.housing.mapper.ViewingAppointmentMapper viewingAppointmentMapper;
+ @Mock com.community.residence.common.statistics.mapper.StatisticsSnapshotMapper statisticsSnapshotMapper;
  @InjectMocks StatisticsService service;
  @ParameterizedTest @CsvSource({"-4,1","1,1","7,7","90,90","999,90"})
  void emptyTrendClampsWindow(int input,int expected) {
@@ -80,7 +85,10 @@ class NontransactionStatisticsCoverageTest {
   assertThat(r.get("byStatus")).isEqualTo(Map.of("PENDING",1L,"CLOSED",1L));assertThat(r.get("byPriority")).isEqualTo(Map.of("NORMAL",1L,"URGENT",1L));
  }
  @Test void residentAndResourceDistributionsIncludeEmptyResult() {
-  Resident a=new Resident();a.setStatus("ACTIVE");Resident b=new Resident();b.setStatus("FROZEN");when(residentMapper.selectList(any())).thenReturn(List.of(a,b));
+  Resident a=new Resident();a.setId(1L);a.setStatus("ACTIVE");Resident b=new Resident();b.setId(2L);b.setStatus("FROZEN");
+  ResidenceRelation relationA=new ResidenceRelation();relationA.setResidentId(1L);ResidenceRelation relationB=new ResidenceRelation();relationB.setResidentId(2L);
+  when(residenceRelationMapper.selectList(any())).thenReturn(List.of(relationA, relationB));
+  when(residentMapper.selectBatchIds(any())).thenReturn(List.of(a,b));
   assertThat(service.residentStatistics().get("byStatus")).isEqualTo(Map.of("ACTIVE",1L,"FROZEN",1L));
   ResourceReservation x=new ResourceReservation();x.setStatus("CONFIRMED");when(reservationMapper.selectList(any())).thenReturn(List.of(x));
   assertThat(service.reservationStatistics(null).get("byStatus")).isEqualTo(Map.of("CONFIRMED",1L));
@@ -91,21 +99,23 @@ class NontransactionStatisticsCoverageTest {
   assertThat(service.communityOptions()).containsExactly(Map.of("id",8L,"name","后端社区名"));
  }
  @Test void emptyDashboardExposesZeroCounts() {
-  stubDashboard();when(houseMapper.selectCount(any())).thenReturn(0L);Map<String,Object> r=service.dashboard(null);
-  assertThat(r.get("houseCount")).isEqualTo(0L);assertThat(r.get("occupiedHouseCount")).isEqualTo(0L);assertThat((Map<?,?>)r.get("ratingDistribution")).isEmpty();assertThat((Map<?,?>)r.get("workOrderTrend7d")).isEmpty();
+  stubDashboard();Map<String,Object> r=service.dashboard(null);
+  assertThat(r.get("houseCount")).isEqualTo(0);assertThat(r.get("occupiedHouseCount")).isEqualTo(0L);assertThat((Map<?,?>)r.get("ratingDistribution")).isEmpty();assertThat(((Map<?,?>)r.get("workOrderTrend7d")).values()).allMatch(value -> value.equals(0L));
  }
  @Test void dashboardUsesCountsAndRows() {
-  stubDashboard();when(houseMapper.selectCount(any())).thenReturn(4L,1L,2L);
+   stubDashboard();
   WorkOrder o=new WorkOrder();o.setStatus("PENDING");o.setCreatedAt(LocalDate.now().atTime(10,0));when(workOrderMapper.selectList(any())).thenReturn(List.of(o));
-  House h=new House();h.setStatus("VACANT");when(houseMapper.selectList(any())).thenReturn(List.of(h));
+   House occupied=new House();occupied.setStatus("TENANT_OCCUPIED");House h1=new House();h1.setStatus("VACANT");House h2=new House();h2.setStatus("VACANT");House h3=new House();h3.setStatus("VACANT");when(houseMapper.selectList(any())).thenReturn(List.of(occupied,h1,h2,h3));
   WorkOrderEvaluation e=new WorkOrderEvaluation();e.setRating(2);when(evaluationMapper.selectList(any())).thenReturn(List.of(e));Map<String,Object> r=service.dashboard(3L);
-  assertThat(r.get("houseCount")).isEqualTo(4L);assertThat(r.get("occupiedHouseCount")).isEqualTo(1L);assertThat(r.get("workOrderStatusDistribution")).isEqualTo(Map.of("PENDING",1L));
-  assertThat(r.get("houseStatusDistribution")).isEqualTo(Map.of("VACANT",1L));assertThat(r.get("ratingDistribution")).isEqualTo(Map.of(2,1L));
+   assertThat(r.get("houseCount")).isEqualTo(4);assertThat(r.get("occupiedHouseCount")).isEqualTo(1L);assertThat(r.get("workOrderStatusDistribution")).isEqualTo(Map.of("PENDING",1L));
+   assertThat(r.get("houseStatusDistribution")).isEqualTo(Map.of("VACANT",3L,"TENANT_OCCUPIED",1L));assertThat(r.get("ratingDistribution")).isEqualTo(Map.of(2,1L));
  }
  private void stubDashboard() {
   lenient().when(communityMapper.selectCount(any())).thenReturn(1L);lenient().when(buildingMapper.selectCount(any())).thenReturn(1L);
   lenient().when(houseMapper.selectList(any())).thenReturn(List.of());lenient().when(residentMapper.selectCount(any())).thenReturn(0L);
   lenient().when(leaseMapper.selectCount(any())).thenReturn(0L);lenient().when(workOrderMapper.selectCount(any())).thenReturn(0L);lenient().when(workOrderMapper.selectList(any())).thenReturn(List.of());
-  lenient().when(reservationMapper.selectCount(any())).thenReturn(0L);lenient().when(evaluationMapper.selectCount(any())).thenReturn(0L);lenient().when(evaluationMapper.selectList(any())).thenReturn(List.of());
+   lenient().when(reservationMapper.selectCount(any())).thenReturn(0L);lenient().when(evaluationMapper.selectCount(any())).thenReturn(0L);lenient().when(evaluationMapper.selectList(any())).thenReturn(List.of());
+   lenient().when(residenceRelationMapper.selectList(any())).thenReturn(List.of());lenient().when(viewingAppointmentMapper.selectList(any())).thenReturn(List.of());
+   lenient().when(statisticsSnapshotMapper.selectHousingViews(any(), any(), any())).thenReturn(List.of());
  }
 }

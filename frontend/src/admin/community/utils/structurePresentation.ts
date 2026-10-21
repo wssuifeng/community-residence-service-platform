@@ -25,19 +25,20 @@ export const ACTION_ICONS = {
 }
 
 export const HOUSE_BLOCK_CLASS: Record<HouseStatus, string> = {
-  OCCUPIED: 'is-occupied',
+  OWNER_OCCUPIED: 'is-occupied',
+  TENANT_OCCUPIED: 'is-rented',
   VACANT: 'is-vacant',
-  RESERVED: 'is-reserved',
+  INACTIVE: 'is-inactive',
   MAINTENANCE: 'is-maintenance'
 }
 
-export const LEGEND_ITEMS = (['OCCUPIED', 'VACANT', 'RESERVED', 'MAINTENANCE'] as HouseStatus[]).map(
+export const LEGEND_ITEMS = (['OWNER_OCCUPIED', 'TENANT_OCCUPIED', 'VACANT', 'MAINTENANCE', 'INACTIVE'] as HouseStatus[]).map(
   (value) => ({ value, label: houseStatusLabels[value] })
 )
 
 export function houseStatusTagType(status: HouseStatus): 'info' | 'completed' | 'pending' | 'processing' {
-  if (status === 'OCCUPIED') return 'completed'
-  if (status === 'RESERVED') return 'pending'
+  if (status === 'OWNER_OCCUPIED' || status === 'TENANT_OCCUPIED') return 'completed'
+  if (status === 'INACTIVE') return 'pending'
   if (status === 'MAINTENANCE') return 'processing'
   return 'info'
 }

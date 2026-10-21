@@ -1,0 +1,13 @@
+{
+  "verifiedAt": "2026-10-20T06:58:43.184150+00:00",
+  "frontend": "http://127.0.0.1:5182",
+  "role": "SUPER_ADMIN",
+  "browser": "Chromium",
+  "browserVersion": "151.0.7922.34",
+  "path": "/admin/staff-capabilities",
+  "pageLoaded": true,
+  "createStaffAccountActionVisible": true,
+  "screenshot": "superadmin-staff-capabilities.png",
+  "screenshotBytes": 71442,
+  "title": "服务人员 · 社区居住服务管理系统"
+}

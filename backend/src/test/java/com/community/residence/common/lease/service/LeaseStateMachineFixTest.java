@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,8 @@ class LeaseStateMachineFixTest {
     private ResidentMapper residentMapper;
     @Mock
     private HouseMapper houseMapper;
+    @Mock
+    private com.community.residence.common.community.service.HouseStateService houseStateService;
     @Mock
     private UnitMapper unitMapper;
     @Mock
@@ -152,8 +155,10 @@ class LeaseStateMachineFixTest {
             org.mockito.Mockito.lenient().when(leaseMapper.selectByIdForUpdate(2L)).thenReturn(pendingLease);
             when(leaseMapper.update(any(LeaseRecord.class), any())).thenReturn(1);
             when(houseMapper.selectById(5L)).thenReturn(house);
-            when(houseMapper.updateById(any(com.community.residence.common.community.entity.House.class)))
-                    .thenReturn(1);
+            org.mockito.Mockito.doAnswer(invocation -> {
+                house.setStatus("TENANT_OCCUPIED");
+                return null;
+            }).when(houseStateService).refresh(eq(5L), anyString());
 
             UpdateLeaseStatusDTO dto = new UpdateLeaseStatusDTO();
             dto.setStatus("TO_SIGN");
@@ -165,8 +170,8 @@ class LeaseStateMachineFixTest {
             pendingLease.setAgreementStatus("SIGNED");
             leaseService.applyTransition(pendingLease, "ACTIVE", "居民已同意具体协议");
             assertThat(pendingLease.getStatus()).isEqualTo("ACTIVE");
-            assertThat(house.getStatus()).isEqualTo("OCCUPIED");
-            verify(houseMapper).updateById(any(com.community.residence.common.community.entity.House.class));
+            assertThat(house.getStatus()).isEqualTo("TENANT_OCCUPIED");
+            verify(houseStateService).refresh(eq(5L), anyString());
         }
     }
 

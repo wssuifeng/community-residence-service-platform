@@ -1,0 +1,69 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-05.1",
+  "title": "后端架构评估",
+  "status": "COMPLETED",
+  "scope": [
+    "按端入口与common共享模块",
+    "Controller-Service-Mapper边界、权限、事务、通知/上传/调度共享能力",
+    "代表链路：管理员统计、社区/房屋状态、服务人员派单、预约并发、通知提交"
+  ],
+  "method": [
+    "静态检查当前包结构、Controller注解、Service事务和Mapper SQL",
+    "对照50结构归属规则与锁事务矩阵，分析一条规则修改的影响范围",
+    "不按目录名称单独推断业务权限"
+  ],
+  "evidence": [
+    "../../../../backend/src/main/java/com/community/residence",
+    "../../../../backend/src/main/java/com/community/residence/admin/statistics/controller/AdminStatisticsController.java",
+    "../../../../backend/src/main/java/com/community/residence/common/statistics/service/StatisticsService.java",
+    "../../../../backend/src/main/java/com/community/residence/common/config/SecurityConfig.java",
+    "../../../50_系统测试/36_前后端项目结构与归属规则.md",
+    "../../../50_系统测试/锁与事务并发复核矩阵.md"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "端专属Controller位于admin/resident/staff，共享规则和模型集中于common；当前仍保持Controller→Service→Mapper主链路。",
+      "impact": "跨端规则复用和职责定位较清楚。"
+    },
+    {
+      "kind": "strength",
+      "fact": "权限由Spring Security方法级注解与业务范围校验共同承担；预约、状态流转和退租入口有明确锁/行锁/事务边界记录。",
+      "impact": "核心一致性和权限边界不是由前端隐藏按钮单独承担。"
+    },
+    {
+      "kind": "risk",
+      "id": "QE-ARCH-001",
+      "fact": "部分共享Controller按角色开放多个端，业务范围校验分散在Service；随着端专属入口继续增加，权限规则维护和契约漂移风险上升。",
+      "classification": "不足",
+      "severity": "P2",
+      "recommendation": "保留共享Controller，但将角色/本人/社区/参与者范围校验汇总为可复用授权策略并建立代表契约测试。"
+    },
+    {
+      "kind": "suggestion",
+      "id": "QE-ARCH-002",
+      "fact": "当前单体架构符合项目规模和论文范围；不建议以评估结论为由改成微服务。",
+      "classification": "超纲建议",
+      "severity": "P3"
+    }
+  ],
+  "conclusion": "架构边界总体清晰，存在中等维护风险；无需因本项自动重构，列入质量改进候选。"
+}

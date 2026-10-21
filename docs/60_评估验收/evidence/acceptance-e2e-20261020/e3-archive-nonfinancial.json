@@ -1,0 +1,90 @@
+{
+  "recordedAt": "2026-10-20T21:14:29+08:00",
+  "scope": "E3 non-financial move-out archive continuation",
+  "environment": "community_residence_dc_20261019",
+  "runtime": {
+    "backend": "http://127.0.0.1:8087",
+    "frontend": "http://127.0.0.1:5182",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD"
+  },
+  "fixtureBoundary": "The same isolated lease 29 was prepared as ACTIVE with PAID deposit and an active tenant relation in the earlier non-financial continuation evidence. No payment, query, refund, or channel configuration operation was executed in this retest.",
+  "actions": [
+    {
+      "actor": "admin1",
+      "method": "PATCH",
+      "path": "/api/v1/leases/29/status",
+      "body": "{status: ARCHIVED}",
+      "before": "MOVED_OUT",
+      "after": "ARCHIVED",
+      "http": 200,
+      "code": 200
+    },
+    {
+      "actor": "resident215",
+      "method": "GET",
+      "path": "/api/v1/leases/29",
+      "http": 200,
+      "code": 200,
+      "status": "ARCHIVED"
+    },
+    {
+      "actor": "resident215",
+      "method": "GET",
+      "path": "/api/v1/leases/29/changes",
+      "http": 200,
+      "code": 200,
+      "timelineStatusTransition": "MOVED_OUT -> ARCHIVED",
+      "changeEntryCount": 8
+    },
+    {
+      "actor": "resident215",
+      "method": "GET",
+      "path": "/api/v1/lease-move-out-applications/mine",
+      "http": 200,
+      "code": 200,
+      "applicationId": 7,
+      "status": "APPROVED"
+    },
+    {
+      "actor": "resident215",
+      "method": "GET",
+      "path": "/api/v1/residents/215/residences",
+      "http": 200,
+      "code": 200,
+      "relationId": 272,
+      "relationStatus": "MOVED_OUT",
+      "moveOutDate": "2026-10-20"
+    },
+    {
+      "actor": "admin1",
+      "method": "GET",
+      "path": "/api/v1/houses/5171",
+      "http": 200,
+      "code": 200,
+      "houseStatus": "VACANT"
+    },
+    {
+      "actor": "resident215",
+      "method": "GET",
+      "path": "/api/v1/conversations/70",
+      "http": 200,
+      "code": 200,
+      "conversationStatus": "CLOSED"
+    }
+  ],
+  "assertions": {
+    "archiveTransitionAccepted": true,
+    "residentCanReadArchivedLease": true,
+    "timelineContainsMoveoutAndArchive": true,
+    "approvedMoveOutApplicationReadable": true,
+    "tenantRelationTerminated": true,
+    "houseReleased": true,
+    "leaseConversationClosed": true,
+    "financialOperations": 0,
+    "normalDatabaseWrites": 0
+  },
+  "limitations": [
+    "This evidence verifies the post-payment non-financial continuation only.",
+    "The financial activation and refund nodes remain adopted from the user's confirmed availability boundary and were not replayed by AI."
+  ]
+}

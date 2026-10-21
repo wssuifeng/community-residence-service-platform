@@ -88,6 +88,8 @@ class WorkOrderBatch3FixTest {
             when(sysUserMapper.selectList(any())).thenReturn(List.of(
                     staff(1L, "张服务", "STAFF", "ACTIVE"),
                     staff(2L, "李服务", "STAFF", "ACTIVE")));
+            when(staffCapabilityService.communityIdsByStaff(any()))
+                    .thenReturn(java.util.Map.of(1L, List.of(1L), 2L, List.of(1L)));
 
             List<StaffOptionVO> options = workOrderService.assignableStaff(null, null);
 
@@ -109,18 +111,17 @@ class WorkOrderBatch3FixTest {
             when(sysUserMapper.selectList(any())).thenReturn(List.of(
                     staff(1L, "新人甲", "STAFF", "ACTIVE"),
                     staff(2L, "熟手乙", "STAFF", "ACTIVE")));
-            /* 熟手乙常驻 1 号社区（V19 绑定表已由派单流水回填），新人甲无绑定 */
+             /* 熟手乙常驻 1 号社区，新人甲未绑定目标社区，当前规则只返回可派单范围内人员 */
             when(staffCapabilityService.communityIdsByStaff(any()))
                     .thenReturn(java.util.Map.of(2L, List.of(1L)));
 
             List<StaffOptionVO> options = workOrderService.assignableStaff(null, null);
 
-            /* 熟手乙档位 2 优先，但新人甲仍在列表（R20 仅要求启用状态，不硬过滤） */
-            assertThat(options).hasSize(2);
+             /* 社区管理员只能对绑定社区的服务人员派单 */
+             assertThat(options).hasSize(1);
             assertThat(options.get(0).getId()).isEqualTo(2L);
             assertThat(options.get(0).getRecommendLevel()).isEqualTo(2);
             assertThat(options.get(0).getMatchedCommunity()).isTrue();
-            assertThat(options.get(1).getRecommendLevel()).isEqualTo(4);
         }
     }
 

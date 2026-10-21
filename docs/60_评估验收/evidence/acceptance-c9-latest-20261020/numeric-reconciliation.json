@@ -1,0 +1,124 @@
+{
+  "api": {
+    "resources": {
+      "total": 0,
+      "endDate": "2026-10-01",
+      "completed": 0,
+      "startDate": "2026-10-01",
+      "byStatus": {}
+    },
+    "workOrders": {
+      "total": 6,
+      "byPriority": {
+        "NORMAL": 6
+      },
+      "endDate": "2026-10-01",
+      "averageProcessingHours": 0.0,
+      "completed": 0,
+      "completionRate": 0.0,
+      "startDate": "2026-10-01",
+      "byStatus": {
+        "COMPLETED": 6
+      }
+    },
+    "dashboard": {
+      "startDate": "2026-10-01",
+      "endDate": "2026-10-01",
+      "communityCount": 1,
+      "buildingCount": 1,
+      "houseCount": 1001,
+      "occupiedHouseCount": 1,
+      "residentCount": 1,
+      "activeLeaseCount": 0,
+      "expiringLeaseCount": 0,
+      "workOrderTotal": 2000,
+      "workOrderPending": 0,
+      "workOrderProcessing": 0,
+      "workOrderCompleted": 2000,
+      "reservationTotal": 0,
+      "reservationPending": 0,
+      "violationCount": 0,
+      "evaluationTotal": 0,
+      "workOrderPeriodCount": 6,
+      "workOrderPeriodCompletedCount": 0,
+      "workOrderCompletionRate": 0.0,
+      "workOrderAvgProcessingHours": 0.0,
+      "residentMoveInTotal": 0,
+      "residentMoveOutTotal": 0,
+      "reservationPeriodTotal": 0,
+      "reservationCompletedTotal": 0,
+      "reservationCompletionRate": 0.0,
+      "viewingPeriodTotal": 0,
+      "viewingCompletedTotal": 0,
+      "housingViewPeriodTotal": 0,
+      "housingViewTrend": {
+        "2026-10-01": 0
+      },
+      "evaluationPeriodTotal": 0,
+      "evaluationAvgRating": 0.0,
+      "evaluationSatisfactionRate": 0.0,
+      "staffWorkload": [],
+      "workOrderTrend7d": {
+        "2026-10-01": 6
+      },
+      "workOrderStatusDistribution": {
+        "COMPLETED": 2000
+      },
+      "houseStatusDistribution": {
+        "OWNER_OCCUPIED": 1,
+        "VACANT": 1000
+      },
+      "ratingDistribution": {}
+    },
+    "residents": {
+      "total": 1,
+      "moveOutTotal": 0,
+      "endDate": "2026-10-01",
+      "moveInTotal": 0,
+      "startDate": "2026-10-01",
+      "byStatus": {
+        "ACTIVE": 1
+      }
+    }
+  },
+  "sqlExpected": {
+    "workOrderPeriodCount": 6,
+    "workOrderCompletedCount": 0,
+    "avgProcessingHours": 0.0,
+    "resourceTotal": 0,
+    "resourceCompleted": 0,
+    "residentMoveIn": 0,
+    "residentMoveOut": 0,
+    "currentResident": 1,
+    "houses": 1001,
+    "periodStatus": {
+      "COMPLETED": 6
+    },
+    "periodPriority": {
+      "NORMAL": 6
+    },
+    "viewings": 0,
+    "evaluations": 0
+  },
+  "checks": {
+    "averageProcessingHours": true,
+    "viewing": true,
+    "workOrderPeriodCount": true,
+    "residents": true,
+    "houseSnapshot": true,
+    "resources": true,
+    "workOrderCompleted": true,
+    "workOrderDistribution": true,
+    "workOrderPriorityDistribution": true,
+    "all": true
+  },
+  "financialOperations": 0,
+  "recordedAt": "2026-10-20T19:40:49.996891+08:00",
+  "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+  "database": "community_residence_dc_20261019",
+  "range": {
+    "startDate": "2026-10-01",
+    "endDate": "2026-10-01",
+    "communityId": 2
+  }
+}

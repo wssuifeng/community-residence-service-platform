@@ -89,6 +89,8 @@ class LeaseMoveOutApplicationServiceTest {
     @Mock
     private HouseMapper houseMapper;
     @Mock
+    private com.community.residence.common.community.service.HouseStateService houseStateService;
+    @Mock
     private HousingMapper housingMapper;
     @Mock
     private UnitMapper unitMapper;
@@ -158,6 +160,10 @@ class LeaseMoveOutApplicationServiceTest {
         house.setId(5L);
         house.setCommunityId(3L);
         house.setStatus("OCCUPIED");
+        org.mockito.Mockito.doAnswer(invocation -> {
+            house.setStatus("VACANT");
+            return null;
+        }).when(houseStateService).refresh(eq(5L), anyString());
 
         when(leaseMapper.selectById(LEASE_ID)).thenReturn(activeLease);
         when(leaseMapper.selectByIdForUpdate(LEASE_ID)).thenReturn(activeLease);

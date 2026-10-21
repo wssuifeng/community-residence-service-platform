@@ -14,6 +14,7 @@ import java.time.*;
 @Service @RequiredArgsConstructor
 public class LeasePaymentDeadlineService {
     private final LeaseService leaseService;
+    private final com.community.residence.common.community.service.HouseStateService houseStateService;
     private final LeaseRecordMapper leases;
     private final LeasePaymentMapper payments;
     private final ResidenceApplicationMapper applications;
@@ -55,10 +56,6 @@ public class LeasePaymentDeadlineService {
         var lease=leaseService.lockForSettlement(leaseId);
         if(!"ACTIVE".equals(lease.getStatus())||lease.getStartDate()==null||lease.getStartDate().isAfter(now.toLocalDate()))return;
         if(relations.selectCount(new LambdaQueryWrapper<com.community.residence.common.resident.entity.ResidenceRelation>().eq(com.community.residence.common.resident.entity.ResidenceRelation::getLeaseId,leaseId).isNull(com.community.residence.common.resident.entity.ResidenceRelation::getMoveOutDate))<1)return;
-        var house=houses.selectById(lease.getHouseId());
-        if(house!=null&&"RESERVED".equals(house.getStatus())){
-            house.setStatus("OCCUPIED");
-            houses.updateById(house);
-        }
+        houseStateService.refresh(lease.getHouseId(), "已生效租约到达入住日期");
     }
 }

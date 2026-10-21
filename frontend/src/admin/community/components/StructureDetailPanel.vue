@@ -2,7 +2,7 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import StatusTag from '@/common/web/components/StatusTag.vue'
 import { getHouseStatusHistory } from '@/common/community/api/community'
-import { houseStatusLabels, type IHouseStatusHistory } from '@/common/community/types/community'
+import { houseStatusLabels, houseHistoryStatusLabels, type IHouseStatusHistory } from '@/common/community/types/community'
 import { getHouseResidentList, getResident } from '@/common/resident/api/resident'
 import { relationTypeLabels, residenceRelationStatusLabels, type IHouseResident, type IResident } from '@/common/resident/types/resident'
 import { formatDateTime } from '@/common/web/utils/date'
@@ -187,9 +187,9 @@ onBeforeUnmount(() => { houseHistorySeq++; houseResidentsSeq++ })
         <ul v-if="houseHistory.length > 0" class="info-history-list">
           <li v-for="item in houseHistory" :key="item.id" class="info-history-item">
             <span class="info-history-status">
-              {{ item.oldStatus ? houseStatusLabels[item.oldStatus] : '初始' }}
+              {{ item.oldStatus ? houseHistoryStatusLabels[item.oldStatus] ?? item.oldStatus : '初始' }}
               →
-              {{ houseStatusLabels[item.newStatus] }}
+              {{ houseHistoryStatusLabels[item.newStatus] ?? item.newStatus }}
             </span>
             <span class="info-history-meta">
               {{ formatDateTime(item.createdAt) }} · {{ item.operatorName }}

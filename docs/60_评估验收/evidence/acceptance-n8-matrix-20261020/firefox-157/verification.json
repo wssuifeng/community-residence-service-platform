@@ -1,0 +1,54 @@
+{
+  "recordedAt": "2026-10-21T00:18:28.997725+08:00",
+  "requirement": "N8 pinned browser normal-use smoke path",
+  "browser": {
+    "label": "firefox-157",
+    "family": "Mozilla Firefox",
+    "productVersion": "157.0.1",
+    "executable": "C:\\Users\\17841\\AppData\\Local\\Temp\\community-residence-n8-matrix-20261020\\verified-browsers\\firefox-157\\core\\firefox.exe",
+    "automation": "Selenium WebDriver controlling the specified vendor browser binary",
+    "driver": "geckodriver 0.37.1 (300705c65d1b 2026-07-17 09:25 +0000)"
+  },
+  "runtime": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD"
+  },
+  "observations": [
+    {
+      "page": "dashboard",
+      "route": "/admin/dashboard?tab=overview",
+      "requiredText": "运营看板",
+      "bodyCharacters": 1020,
+      "screenshot": "dashboard.png",
+      "screenshotBytes": 77168
+    },
+    {
+      "page": "community",
+      "route": "/admin/community",
+      "requiredText": "社区管理",
+      "bodyCharacters": 1094,
+      "screenshot": "community.png",
+      "screenshotBytes": 107220
+    },
+    {
+      "page": "work-orders",
+      "route": "/admin/work-orders",
+      "requiredText": "工单",
+      "bodyCharacters": 2478,
+      "screenshot": "work-orders.png",
+      "screenshotBytes": 135404
+    }
+  ],
+  "browserLogs": [
+    {
+      "level": "UNAVAILABLE",
+      "message": "'WebDriver' object has no attribute 'get_log'"
+    }
+  ],
+  "severeBrowserLogs": [],
+  "limitations": [
+    "Read-only administrator login, dashboard, community, and work-order list smoke path; not exhaustive browser conformance testing.",
+    "No business forms or financial actions were submitted. Selenium/geckodriver did not expose a cross-version request-method log in this run."
+  ]
+}

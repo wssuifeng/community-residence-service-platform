@@ -1,6 +1,6 @@
-﻿# AGENTS.md · 社区居住服务管理系统
+# AGENTS.md · 社区居住服务管理系统
 
-> **2026-10-20第六阶段执行入口**：先验收需求实现、再评估质量。98对象首轮判定及[整改复验](docs/60_评估验收/需求整改与复验记录.md)已回写：75R为71通过/3未通过/1证据不足（R41），10N为9通过/N8证据不足，13E为10通过/1未通过/2证据不足。G-002导出、G-004固定占位、G-016预约提前完成已修复，E5到期任务补证关闭G-012；正常8084已加载预约修复包。剩余C9筛选/指标/数值补证、R4/R46口径冲突及E2/E3/N8缺口继续60-03；11项质量评估未启动，金融沿用户确认不复测。
+> **2026-10-22当前执行入口**：60评估验收与70部署运行均已收尾，用户确认评估验收报告无阻塞项。70阶段本地Compose四服务、干净演示库V45、中国香港ECS首次Compose部署、域名Nginx HTTP/HTTPS、WebSocket和部署级图片上传均已验证；当前部署细节见 `docs/70_部署运行/_中控.md`。提交前最终验证：后端全量测试 `1254` 项，失败 `0`、错误 `0`、跳过 `1`；前端类型检查与构建通过；接口契约基线已同步。本机`uploads/`未自动上云，云端图片留在独立`cloud_uploads`卷。费用告警及云端数据库/上传卷备份恢复演练按用户裁决不执行，不构成阶段阻塞。ECS Docker服务已设为开机自启，Compose服务使用`restart: unless-stopped`；金融沿用户确认不复测。
 
 > **2026-10-19当前交接入口（df）**：50阶段已完成DEF-216～223修复及受影响回归，最终后端449/449（代码层全量1231项，失败/错误0，跳过1）、前端38/38；Redis故障12/12、状态竞态7/7、跨入口并发13/13、通知提交2/2通过。50交接是60需求验收输入，不能代替需求通过；第六阶段最新结论见上条及60中控。金融本人确认、不复测；不把定向证据扩写为305 TC整册重放或全项目写入口穷举安全证明；论文按整体首个大版本完成后启动。
 
@@ -124,7 +124,7 @@
     - Lombok；
   - 前端（`frontend/`，npm + Vite + TypeScript；2026-09-07 用户定案引入 TS，
     版本同步更新，见决策日志）：
-    - Vue 3.5.42、Vite 8.2.2、@vitejs/plugin-vue 6.0.8；
+    - Vue 3.5.42、Vite 8.3.4、@vitejs/plugin-vue 6.0.8；
     - TypeScript 5.9.3 + vue-tsc 3.3.11（构建期 `vue-tsc --noEmit` 类型检查；
       TS 7 新编译器 tsgo 待 vue-tsc 生态跟进，暂不采用）；
     - 组件策略（2026-09-06 用户两次澄清定案）：**自写为主，Element Plus
@@ -177,7 +177,7 @@
   |------|---------|------|
   | 环境准备 | MySQL 9.6、Redis 7、JDK 17、Node.js 20+ | Vite 8 要求 Node 20.19+ / 22.12+（当前验证于 Node 24） |
   | 环境变量配置 | `export DB_PASSWORD="your_password"` + `export JWT_SECRET="your_secret_key"`（≥32 字符）(Linux/Mac)；Windows 用 `set` | 数据库密码必需；JWT 密钥 dev 未设置时用仅限本机的默认值（生产 profile 拒绝默认密钥，见架构设计 §7）；Redis 可选 `REDIS_HOST/REDIS_PORT/REDIS_PASSWORD`（默认 localhost:6379 无密码） |
-  | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway 随后端启动自动执行 **源码V1~V43共43个迁移、61张业务表（另含Flyway历史表）；2026-10-17 cm已将正常开发库升至V43/61，正常8084/5176**，无需手动跑脚本：V1（40 张表 DDL）+ V2（初始数据）+ V3（超管账号 superadmin / Admin@123456，生产首登必改）+ V4/V5（house 户型朝向字段、看房游客支持）+ V6（五角色演示种子）+ V7（种子社区默认服务类别目录 7 类，R17）+ V8（日志留存配置 log.retention_days=730）+ V9（公告置顶/多目标定向列 + 房源租售类型与户型列）+ V10~V11（预约并发唯一约束 + C2 时段栅格 slot_unit）+ V12（公告表单字段 priority/type）+ V13（公告 GUEST 游客可见目标，R12/DEF-046）+ V14（带看人列与看房沟通消息表，R59）+ V15（租约续约支付单表 lease_payment，R61）+ V16（多方会话三表与看房群聊回填，R63）+ V17（房号同单元唯一 uk_unit_house_number，R62 补）+ V18（社区自动审批两列 + 租约签约状态列 + 租约变更历史/协议模板/租约协议三表，R64/R62 补）+ V19（人员常驻社区/擅长类别/排班三表 + 存量派单回填，R65）+ V20（租住签约闭环 R66~R71，新表 lease_move_out_application——表数 51→52）+ V21（通知归属身份空间分离 DEF-067，表数不变）+ V22（押金状态列 deposit_status + 押金退还单表 lease_deposit_refund，R72——表数 52→53）+ V23（工单群聊 conversation 增 WORK_ORDER_GROUP 类型，R74）+ V24（会话参与者身份空间列 + 复合唯一键 + 存量回填，DEF-098）+ V25（押金状态存量回填）+ V26（入住申请-租约强关联 lease_id + 回填，DEF-080）+ V27（会话 (type, related_id) 唯一键 uk_conversation_type_related，OCR DEF-106，表数不变）+ V28（V21/V26 存量回填修正，仅改数据不改结构，OCR DEF-109/DEF-120）+ V29（公共资源图片）+ V30（独立支付渠道配置表，默认停用）+ V31（单栋楼层边界、删除房间数/旧联系人列、户型与责任人ADMIN账号引用）+ V32（租住申请来源价快照/正式关系租约关联）+ V33（责任人/手工社区授权来源）+ V34（三层结构业务编号）+ V35（依赖主居住关系及有效关系唯一约束）+ V36（协议业务消息类型与快照引用）+ V37（统一图片消息关联/真实公告图/匿名选择）+ V38（只初始化整个目录为空的社区服务类别）+ V39（真实房屋相册house_image）+ V40（租约合同段lease_contract_term、独立首付/周期及支付快照/截止/异常字段）+ V41（租期延长申请及跨段缴租快照）+ V42（公告结构化正文/修订历史/版本阅读）+ V43（反馈独立已读游标）；连接配置在 `backend/src/main/resources/application-dev.yml`（密码读取 `DB_PASSWORD` 环境变量，可由仓库根 `.env` 提供） |
+    | 数据库初始化 | 建库 `CREATE DATABASE community_residence DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` | Flyway随后端启动自动执行源码V1~V45共45个迁移、61张业务表（另含Flyway历史表）；正常本机开发端口以当前环境为准，容器演示端口见docs/70_部署运行/本地容器化部署.md。V1~V43历史迁移逐项说明见决策日志与数据库迁移文件；V44/V45分别为房屋居住状态、统计快照指标唯一约束 |
   | 支付渠道配置（支付宝程序内管理） | 超管进入「系统管理 → 全局配置」，完整填写支付宝 APPID / 应用公钥 / 应用私钥 / 支付宝公钥；私钥留空保留、明确操作更换/清除。服务器加密密钥独立文件默认 `${user.home}/.community-residence/payment/master.key`（可选 `PAYMENT_CONFIG_KEY_FILE` 仅指定路径）。微信仍使用 `PAYMENT_WECHAT_*` 凭据 | 2026-10-11 R61 v1.14：支付宝凭据由独立 `payment_channel_config` 表管理，旧 `PAYMENT_ALIPAY_*` 不再作为渠道来源；V30初始沙箱/停用；当前超管可在程序内开关启用，保存只离线校验。AI交易暂缓不应硬停用产品，不自动迁移 `.env`。私钥不可回读，备份加密密钥须与数据库分离。步骤见 README「支付渠道配置」 |
   | 后端启动 | `cd backend && ./mvnw spring-boot:run` | 端口 8080；默认激活 dev profile；接口文档 http://localhost:8080/swagger-ui.html（已放行） |
   | 前端启动 | `cd frontend && npm install && npm run dev` | 开发服务器 http://localhost:5173；`/api`、`/ws` 经 Vite proxy 转发到后端 8080 |

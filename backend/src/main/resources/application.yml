@@ -2,7 +2,7 @@ spring:
   application:
     name: community-residence-service
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   # 本地凭据文件：把仓库根目录的 .env 当 properties 读入 Environment，
   # 使 `./mvnw spring-boot:run` 无需手工 export（模板见仓库根 .env.example）。
   # optional: 文件不存在不报错；同时导入 ../.env 以覆盖在 backend/ 下启动的情形。

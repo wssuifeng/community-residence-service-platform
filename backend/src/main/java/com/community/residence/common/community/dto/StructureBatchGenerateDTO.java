@@ -84,7 +84,7 @@ public class StructureBatchGenerateDTO {
     private String skipItems;
 
     @Schema(description = "房屋状态（可空=默认 VACANT；VACANT/OCCUPIED/RESERVED/MAINTENANCE）")
-    @Pattern(regexp = "^(VACANT|OCCUPIED|RESERVED|MAINTENANCE)$", message = "房屋状态不合法")
+    @Pattern(regexp = "^(VACANT|MAINTENANCE|INACTIVE)$", message = "房屋状态不合法")
     private String houseStatus;
 
     @Schema(description = "建筑面积（生成房屋时必填，全部房屋统一）")

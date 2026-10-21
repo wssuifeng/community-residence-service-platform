@@ -5,6 +5,7 @@ import com.community.residence.common.housing.entity.Housing;
 import com.community.residence.common.housing.mapper.HousingMapper;
 import com.community.residence.common.housing.service.HousingService;
 import com.community.residence.common.schedule.service.TaskLogService;
+import com.community.residence.common.statistics.mapper.StatisticsSnapshotMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -16,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,6 +39,7 @@ public class HousingViewFlushTask {
     private final StringRedisTemplate redisTemplate;
     private final TaskLogService taskLogService;
     private final RedissonClient redissonClient;
+    private final StatisticsSnapshotMapper statisticsSnapshotMapper;
 
     @Scheduled(cron = "0 */5 * * * *")
     public void execute() {
@@ -86,6 +89,9 @@ public class HousingViewFlushTask {
      * @return true = 回写成功或计数可安全丢弃；false = 回写失败，计数已还原回 Redis
      */
     private boolean flushOne(String key) {
+        if (key.startsWith(HousingService.DAILY_VIEW_COUNT_KEY_PREFIX)) {
+            return flushDailyOne(key);
+        }
         String deltaText = redisTemplate.opsForValue().getAndDelete(key);
         if (deltaText == null) {
             return true;
@@ -115,6 +121,47 @@ public class HousingViewFlushTask {
             return true;
         } catch (Exception e) {
             log.error("浏览计数回写失败，计数还原回 Redis 待重试：key={}, delta={}", key, delta, e);
+            redisTemplate.opsForValue().increment(key, delta);
+            return false;
+        }
+    }
+
+    private boolean flushDailyOne(String key) {
+        String deltaText = redisTemplate.opsForValue().getAndDelete(key);
+        if (deltaText == null) return true;
+        long delta;
+        try {
+            delta = Long.parseLong(deltaText);
+        } catch (NumberFormatException e) {
+            log.warn("日浏览计数键值非法，丢弃：key={}, value={}", key, deltaText);
+            return true;
+        }
+        if (delta <= 0) return true;
+        String suffix = key.substring(HousingService.DAILY_VIEW_COUNT_KEY_PREFIX.length());
+        int separator = suffix.indexOf(':');
+        if (separator <= 0 || separator == suffix.length() - 1) {
+            log.warn("日浏览计数键名非法，丢弃：key={}", key);
+            return true;
+        }
+        Long housingId;
+        LocalDate snapshotDate;
+        try {
+            housingId = Long.parseLong(suffix.substring(0, separator));
+            snapshotDate = LocalDate.parse(suffix.substring(separator + 1));
+        } catch (RuntimeException e) {
+            log.warn("日浏览计数键名非法，丢弃：key={}", key);
+            return true;
+        }
+        try {
+            Long communityId = housingMapper.selectCommunityIdById(housingId);
+            if (communityId == null) {
+                log.info("房源已删除，日浏览计数丢弃：housingId={}, delta={}", housingId, delta);
+                return true;
+            }
+            statisticsSnapshotMapper.incrementHousingViews(communityId, snapshotDate, delta);
+            return true;
+        } catch (Exception e) {
+            log.error("日浏览统计回写失败，计数还原回 Redis 待重试：key={}, delta={}", key, delta, e);
             redisTemplate.opsForValue().increment(key, delta);
             return false;
         }

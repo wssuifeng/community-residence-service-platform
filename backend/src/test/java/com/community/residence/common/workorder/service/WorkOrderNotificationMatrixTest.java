@@ -131,6 +131,8 @@ class WorkOrderNotificationMatrixTest {
     private StaffScheduleService staffScheduleService;
     @Mock
     private ConversationService conversationService;
+    @Mock
+    private StaffCommunityAccessService staffCommunityAccessService;
 
     @InjectMocks
     private WorkOrderService service;
@@ -176,6 +178,9 @@ class WorkOrderNotificationMatrixTest {
         /* 调用序：社区绑定管理员查询 → 超管查询（仅事件 1 走第二步） */
         lenient().when(sysUserMapper.selectList(any()))
                 .thenReturn(List.of(boundAdmin), List.of(superAdmin));
+        lenient().when(sysUserMapper.selectById(STAFF_ID)).thenReturn(sysUser(STAFF_ID, "STAFF"));
+        lenient().when(staffCommunityAccessService.requireBoundActiveForUpdate(anyLong(), anyLong()))
+                .thenAnswer(invocation -> sysUserMapper.selectById(invocation.getArgument(0)));
     }
 
     private SysUser sysUser(Long id, String role) {

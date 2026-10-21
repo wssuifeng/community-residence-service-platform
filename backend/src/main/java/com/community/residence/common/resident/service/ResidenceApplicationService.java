@@ -74,6 +74,7 @@ public class ResidenceApplicationService {
     private final ResidenceRelationMapper relationMapper;
     private final ResidentMapper residentMapper;
     private final HouseMapper houseMapper;
+    private final com.community.residence.common.community.service.HouseStateService houseStateService;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final LeaseRecordMapper leaseRecordMapper;
@@ -177,7 +178,7 @@ public class ResidenceApplicationService {
         /* 先锁定房屋，再抢占申请终态：提交申请与管理员审批共用同一房屋锁，
            避免审批已将申请改为 APPROVED、但租约尚未写入时被另一请求插入第二条申请。 */
         House house = lockHouse(application.getHouseId());
-        if (house == null || HouseStatusConstant.OCCUPIED.equals(house.getStatus())) {
+        if (house == null || !HouseStatusConstant.VACANT.equals(house.getStatus())) {
             throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT, "房屋已被入住，无法通过申请");
         }
         ensureApprovalAvailable(application);
@@ -299,6 +300,7 @@ public class ResidenceApplicationService {
         application.setReviewTime(LocalDateTime.now());
         application.setReviewRemark(reviewRemark);
         applicationMapper.updateById(application);
+        houseStateService.refresh(application.getHouseId(), "入住申请通过后重算房屋状态");
         log.info("入住申请审批内核完成：applicationId={}, relationId={}, reviewer={}",
                 application.getId(), relation == null ? null : relation.getId(), reviewerId);
     }

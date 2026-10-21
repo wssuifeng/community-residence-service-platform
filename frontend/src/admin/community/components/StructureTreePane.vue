@@ -48,7 +48,7 @@ import type {
   IHouse,
   IUnit
 } from '@/common/community/types/community'
-import { communityStatusLabels, houseStatusLabels } from '@/common/community/types/community'
+import { communityStatusLabels, houseStatusLabels, manualHouseStatusLabels } from '@/common/community/types/community'
 import type { CommunityStatus, HouseStatus } from '@/common/community/types/community'
 import { getDashboardStats } from '@/common/statistics/api/statistics'
 import { loadAllPages, mapLimited } from '@/admin/community/utils/structureData'
@@ -417,7 +417,7 @@ const floorOptions = computed(() =>
 )
 
 const statusOptions = computed(() =>
-  (['VACANT', 'OCCUPIED', 'RESERVED', 'MAINTENANCE'] as HouseStatus[]).map((value) => ({
+  (['OWNER_OCCUPIED', 'TENANT_OCCUPIED', 'VACANT', 'MAINTENANCE', 'INACTIVE'] as HouseStatus[]).map((value) => ({
     value,
     label: houseStatusLabels[value],
     count: scopeEntries.value.filter(
@@ -428,7 +428,7 @@ const statusOptions = computed(() =>
 
 const scopeSummary = computed(() => {
   const entries = filteredEntries.value
-  const occupied = entries.filter((entry) => entry.house.status === 'OCCUPIED').length
+  const occupied = entries.filter((entry) => ['OWNER_OCCUPIED', 'TENANT_OCCUPIED'].includes(entry.house.status)).length
   const vacant = entries.filter((entry) => entry.house.status === 'VACANT').length
   return { total: entries.length, occupied, vacant }
 })
@@ -2104,7 +2104,19 @@ onMounted(async () => {
         <el-form-item label="房屋状态" prop="status">
           <el-select v-model="statusForm.status" style="width: 100%">
             <el-option
-              v-for="(label, value) in houseStatusLabels"
+              v-if="statusForm.status === 'OWNER_OCCUPIED'"
+              label="业主自住（由有效主居住关系决定）"
+              value="OWNER_OCCUPIED"
+              disabled
+            />
+            <el-option
+              v-if="statusForm.status === 'TENANT_OCCUPIED'"
+              label="租客居住（由有效主居住关系决定）"
+              value="TENANT_OCCUPIED"
+              disabled
+            />
+            <el-option
+              v-for="(label, value) in manualHouseStatusLabels"
               :key="value"
               :label="label"
               :value="value"
@@ -3302,4 +3314,7 @@ onMounted(async () => {
   }
 }
 
+
+.house-block.is-rented { background: var(--color-primary-bg); color: var(--color-primary); }
+.house-block.is-inactive { background: var(--color-bg-hover); color: var(--color-text-disabled); opacity: .65; }
 </style>

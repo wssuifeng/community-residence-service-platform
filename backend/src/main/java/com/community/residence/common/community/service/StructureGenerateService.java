@@ -222,6 +222,7 @@ public class StructureGenerateService {
         vo.setDedupedCount(plan.deduped);
         String houseStatus = StringUtils.hasText(dto.getHouseStatus())
                 ? dto.getHouseStatus() : HouseStatusConstant.VACANT;
+        if (!HouseStatusConstant.isManual(houseStatus)) throw new BusinessException(ErrorCode.INVALID_PARAM, "新房仅可设置空置、维护中或停用");
         Set<String> batchBuildingNames = new HashSet<>();
         int buildings = 0;
         int units = 0;

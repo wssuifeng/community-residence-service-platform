@@ -1,0 +1,70 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。",
+    "项目文档治理审计在2026-10-21报告既有文档骨架/历史链接错误，结果非本轮质量评估新增缺陷；本轮仅将审计结果留证，不对历史归档与其他阶段文档做范围外修复。"
+  ],
+  "task": "60-06.3",
+  "title": "可维护性与运行排障能力评估",
+  "status": "COMPLETED_LIMITED",
+  "scope": [
+    "目录/层次、统一响应与OpenAPI、Flyway、任务日志、操作日志、启动材料、构建与测试入口",
+    "从50真实异常与60运行指纹材料追踪定位链路"
+  ],
+  "method": [
+    "以真实DEF-216～223和N8运行指纹为样例，从入口→日志/证据→代码→回归记录走查",
+    "检查类型检查、构建、迁移、日志留痕、运行版本指纹和文档交接材料",
+    "不把文档存在等同为生产运维成熟"
+  ],
+  "evidence": [
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/final-summary.json",
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/normal-final-load.json",
+    "../../../50_系统测试/36_前后端项目结构与归属规则.md",
+    "../../../../README.md",
+    "../../../../AGENTS.md",
+    "../../../../backend/src/main/resources/db/migration",
+    "docs-audit-20261021.json"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "本轮可沿DEF-216～223从故障证据、代码修复、定向回归到最终运行指纹追踪；Flyway为数据库结构来源，OpenAPI为接口契约入口。",
+      "impact": "开发测试环境的定位与变更追踪能力较完整。"
+    },
+    {
+      "kind": "strength",
+      "fact": "后端全量代码层回归1231项失败/错误0、跳过1，前端定向测试38/38，typecheck/build通过；这些是工程证据，不替代需求或生产运维验收。",
+      "impact": "修改后验证路径清楚。"
+    },
+    {
+      "kind": "risk",
+      "id": "QE-MAINT-001",
+      "fact": "当前评估材料仍分散在50/60多份文档和证据目录，非熟悉人员需要跨文档定位同一问题。",
+      "classification": "不足",
+      "severity": "P2",
+      "recommendation": "60-07保留一个索引化评估汇总，并在70交接中固定运行与回退入口。"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-MAINT-002",
+      "fact": "未验证生产日志聚合、告警、备份恢复、密钥轮换、发布回滚和SLO监控。",
+      "classification": "证据限制",
+      "severity": "P1"
+    }
+  ],
+  "conclusion": "源码与开发测试阶段的可维护性证据较好；生产排障与运营能力仍待70部署运行阶段验证。"
+}

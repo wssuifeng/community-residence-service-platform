@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { batchGenerateStructure } from '@/common/community/api/community'
 import type { ICommunity, IStructureBatchGenerateResult } from '@/common/community/types/community'
-import { houseStatusLabels } from '@/common/community/types/community'
+import { manualHouseStatusLabels } from '@/common/community/types/community'
 import type { HouseStatus } from '@/common/community/types/community'
 import { SKIP_SYNTAX_HINT, planHouseRows } from '@/admin/community/utils/structureBatch'
 
@@ -503,7 +503,7 @@ watch(
             <el-form-item label="初始状态">
               <el-select v-model="form.houseStatus" :disabled="!buildsHouses" style="width: 100%">
                 <el-option
-                  v-for="(label, value) in houseStatusLabels"
+                  v-for="(label, value) in manualHouseStatusLabels"
                   :key="value"
                   :label="label"
                   :value="value"

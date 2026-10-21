@@ -1,0 +1,93 @@
+{
+  "recordedAt": "2026-10-20T12:39:26.899673+00:00",
+  "runtime": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087"
+  },
+  "browser": {
+    "family": "Microsoft Edge",
+    "version": "155.0.4283.62"
+  },
+  "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+  "requiredLabels": [
+    "期间工单量",
+    "工单完成率",
+    "平均处理时长",
+    "入住 / 搬出",
+    "期间资源预约",
+    "资源预约完成",
+    "看房预约量",
+    "已完成带看",
+    "房源浏览量",
+    "评价平均分",
+    "满意率",
+    "服务人员工作量"
+  ],
+  "missingLabels": [],
+  "periodPanelText": "期间运营指标\n2026-09-21 至 2026-10-20\n期间工单量\n1089 单\n工单完成率\n0.6%\n平均处理时长\n0.0 小时\n入住 / 搬出\n212 / 4\n期间资源预约\n4 次\n资源预约完成\n1 次\n资源预约完成率\n25.0%\n看房预约量\n2 次\n已完成带看\n0 次\n房源浏览量\n0 次\n评价平均分\n4.0 分\n满意率\n66.7%\n服务人员工作量\n服务人员 17（派单 13 / 完成 4）\nAcceptance Staff 1 2（派单 1 / 完成 1）\nAcceptance Staff 1 2（派单 1 / 完成 1）",
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/work-orders?startDate=2026-09-21&endDate=2026-10-20"
+    }
+  ],
+  "pageErrors": [],
+  "financialOperations": 0,
+  "normalDatabaseWrites": 0
+}
