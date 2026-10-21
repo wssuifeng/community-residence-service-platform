@@ -1,0 +1,366 @@
+{
+  "recordedAt": "2026-10-21",
+  "browser": {
+    "family": "Microsoft Edge",
+    "productVersion": "155.0.4283.62",
+    "headless": true,
+    "userProfile": "Playwright isolated temporary profile"
+  },
+  "runtime": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD"
+  },
+  "pages": [
+    {
+      "role": "admin",
+      "route": "/admin/dashboard?tab=overview",
+      "viewport": "1440x900",
+      "result": {
+        "title": "运营看板 · 社区居住服务管理系统",
+        "heading": "运营看板",
+        "bodyChars": 1048,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1716
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "admin-dashboard-1440x900.png"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/dashboard?tab=overview",
+      "viewport": "1024x768",
+      "result": {
+        "title": "运营看板 · 社区居住服务管理系统",
+        "heading": "运营看板",
+        "bodyChars": 993,
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "document": {
+          "width": 1024,
+          "height": 2720
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "admin-dashboard-1024x768.png"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/dashboard?tab=overview",
+      "viewport": "768x1024",
+      "result": {
+        "title": "运营看板 · 社区居住服务管理系统",
+        "heading": "运营看板",
+        "bodyChars": 993,
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "document": {
+          "width": 768,
+          "height": 2756
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "admin-dashboard-768x1024.png"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/community",
+      "viewport": "1440x900",
+      "result": {
+        "title": "社区管理 · 社区居住服务管理系统",
+        "heading": "社区管理",
+        "bodyChars": 1204,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1380
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "admin-community-1440x900.png"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/work-orders",
+      "viewport": "1440x900",
+      "result": {
+        "title": "工单调度 · 社区居住服务管理系统",
+        "heading": "工单调度",
+        "bodyChars": 2556,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1014
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "admin-work-orders-1440x900.png"
+    },
+    {
+      "role": "admin",
+      "route": "/admin/staff-capabilities",
+      "viewport": "1440x900",
+      "result": {
+        "title": "服务人员 · 社区居住服务管理系统",
+        "heading": "服务人员",
+        "bodyChars": 1158,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1087
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "admin-staff-capabilities-1440x900.png"
+    },
+    {
+      "role": "resident",
+      "route": "/resident/home",
+      "viewport": "1440x900",
+      "result": {
+        "title": "首页 · 社区居住服务管理系统",
+        "heading": "夜深了，演示居民",
+        "bodyChars": 446,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 924
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "resident-home-1440x900.png"
+    },
+    {
+      "role": "resident",
+      "route": "/resident/home",
+      "viewport": "1024x768",
+      "result": {
+        "title": "首页 · 社区居住服务管理系统",
+        "heading": "夜深了，演示居民",
+        "bodyChars": 446,
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "document": {
+          "width": 1024,
+          "height": 924
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "resident-home-1024x768.png"
+    },
+    {
+      "role": "resident",
+      "route": "/resident/home",
+      "viewport": "768x1024",
+      "result": {
+        "title": "首页 · 社区居住服务管理系统",
+        "heading": "夜深了，演示居民",
+        "bodyChars": 446,
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "document": {
+          "width": 768,
+          "height": 1317
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "resident-home-768x1024.png"
+    },
+    {
+      "role": "resident",
+      "route": "/resident/notifications",
+      "viewport": "1440x900",
+      "result": {
+        "title": "消息中心 · 社区居住服务管理系统",
+        "heading": "消息中心",
+        "bodyChars": 957,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1791
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "resident-notifications-1440x900.png"
+    },
+    {
+      "role": "resident",
+      "route": "/resident/reservations",
+      "viewport": "1440x900",
+      "result": {
+        "title": "我的预约 · 社区居住服务管理系统",
+        "heading": "我的预约",
+        "bodyChars": 422,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 900
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": false
+      },
+      "screenshot": "resident-reservations-1440x900.png"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "1440x900",
+      "result": {
+        "title": "工作台首页 · 社区居住服务管理系统",
+        "heading": "当前工单",
+        "bodyChars": 913,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1821
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "staff-dashboard-1440x900.png"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "1024x768",
+      "result": {
+        "title": "工作台首页 · 社区居住服务管理系统",
+        "heading": "当前工单",
+        "bodyChars": 913,
+        "viewport": {
+          "width": 1024,
+          "height": 768
+        },
+        "document": {
+          "width": 1024,
+          "height": 1973
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "staff-dashboard-1024x768.png"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/dashboard",
+      "viewport": "768x1024",
+      "result": {
+        "title": "工作台首页 · 社区居住服务管理系统",
+        "heading": "当前工单",
+        "bodyChars": 913,
+        "viewport": {
+          "width": 768,
+          "height": 1024
+        },
+        "document": {
+          "width": 768,
+          "height": 2609
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "staff-dashboard-768x1024.png"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/work-orders",
+      "viewport": "1440x900",
+      "result": {
+        "title": "工单列表 · 社区居住服务管理系统",
+        "heading": "工单列表",
+        "bodyChars": 541,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1195
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "staff-work-orders-1440x900.png"
+    },
+    {
+      "role": "staff",
+      "route": "/staff/notifications",
+      "viewport": "1440x900",
+      "result": {
+        "title": "消息中心 · 社区居住服务管理系统",
+        "heading": "消息中心",
+        "bodyChars": 1046,
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "document": {
+          "width": 1440,
+          "height": 1776
+        },
+        "horizontalOverflow": false,
+        "verticalOverflow": true
+      },
+      "screenshot": "staff-notifications-1440x900.png"
+    }
+  ],
+  "apiMethods": {
+    "GET": 194,
+    "POST": 3
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "nonAuthenticationWrites": [],
+  "failedResponses": [],
+  "limitations": [
+    "只读浏览与独立登录；未提交业务表单、未操作金融页面或渠道。",
+    "管理端/服务人员/居民主页面覆盖1440、1024、768代表视口；其他抽查页面覆盖1440。",
+    "这是质量评估证据，不替代N8六版本浏览器验收矩阵。"
+  ]
+}

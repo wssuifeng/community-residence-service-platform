@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-05.3",
+  "title": "安全性评估",
+  "status": "COMPLETED_LIMITED",
+  "scope": [
+    "认证/令牌吊销/角色权限/社区与本人数据范围",
+    "HTTP Controller方法授权、WebSocket订阅、上传和公告正文图片来源校验",
+    "前端会话存储与不可信内容渲染风险"
+  ],
+  "method": [
+    "对照已执行N4/N5/N6权限与令牌证据；静态抽查Spring Security、Controller注解、上传服务和Vue安全规范",
+    "使用适用的OWASP/Spring官方安全要求作为检查参考；不把工具扫描替代业务授权结论",
+    "依赖漏洞数据库未完成在线审计，需单列限制"
+  ],
+  "evidence": [
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/final-summary.json",
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/backend-targeted.json",
+    "../../../../backend/src/main/java/com/community/residence/common/config/SecurityConfig.java",
+    "../../../../backend/src/main/java/com/community/residence/common/upload/service/FileUploadService.java",
+    "../../../../frontend/src/common/auth/utils/auth.ts",
+    "../../../../frontend/src/common/notice/components/NoticeEditor.vue"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "N5权限专项113/113通过；Controller普遍使用@PreAuthorize；文件上传限制类型/大小并对图片做内容读取校验；前端令牌使用sessionStorage，不使用localStorage。",
+      "impact": "身份与基础输入边界已有多层防护。"
+    },
+    {
+      "kind": "risk",
+      "id": "QE-SEC-001",
+      "fact": "SecurityConfig显式禁用CSRF；当前认证使用Bearer token并由后端过滤器校验，若未来引入Cookie认证或浏览器凭据自动发送，需要重新启用并配置CSRF防护。",
+      "classification": "不足",
+      "severity": "P2",
+      "recommendation": "在部署文档固定Bearer-only边界；若改Cookie会话，必须补CSRF与SameSite策略。"
+    },
+    {
+      "kind": "risk",
+      "id": "QE-SEC-002",
+      "fact": "生产环境安全响应头、CSP、反点击劫持和HTTPS终止配置不在当前仓库可见范围；不能由本轮源码审查证明已部署。",
+      "classification": "证据限制",
+      "severity": "P1",
+      "recommendation": "70部署阶段核对响应头、TLS、CSP和上传静态资源隔离。"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-SEC-003",
+      "fact": "npm audit因当前npm registry镜像不支持advisories bulk接口返回404，本轮未得到依赖漏洞清单；backend依赖未执行在线漏洞扫描。",
+      "classification": "证据限制",
+      "severity": "P1"
+    }
+  ],
+  "conclusion": "未发现本轮静态抽查可直接确认的高危漏洞；安全评估受运行/依赖/部署边界限制，不能宣称生产安全审计通过。"
+}

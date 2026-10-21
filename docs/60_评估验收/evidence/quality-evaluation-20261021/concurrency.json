@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-05.4",
+  "title": "并发评估",
+  "status": "COMPLETED_LIMITED",
+  "scope": [
+    "预约、退租、状态流转、通知提交、Redis故障恢复、工单条件更新",
+    "已知锁/行锁/事务矩阵与真实交错证据"
+  ],
+  "method": [
+    "复用50阶段真实复现旧缺陷和修复后交错证据",
+    "分别判断正确性和处理能力，核对锁顺序、事务提交、失败重试和提交后通知",
+    "不将定向矩阵外推为全写入口穷举"
+  ],
+  "evidence": [
+    "../../../50_系统测试/锁与事务并发复核矩阵.md",
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/concurrency.json",
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/redis-fault.json",
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/notification-order.json"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "跨入口并发13/13、状态竞态7/7、Redis故障12/12、通知提交乱序2/2通过；预约超售、旧状态覆盖、迟到写入和35.6秒Redis故障等待问题均在定向范围内收敛。",
+      "impact": "已知高风险并发缺陷已修复并验证。"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-CON-001",
+      "fact": "未覆盖全项目所有HTTP写入口组合、生产多实例容量、数据库死锁注入、真实支付异常和所有外部回调时序。",
+      "classification": "证据限制",
+      "severity": "P1"
+    },
+    {
+      "kind": "risk",
+      "id": "QE-CON-002",
+      "fact": "通知增量严格seq在晚提交小序号时仍需要完整未读快照恢复，增量本身不能保证提交顺序。该行为已在现有设计和证据中记录，不是本轮新缺陷。",
+      "classification": "不足",
+      "severity": "P2"
+    }
+  ],
+  "conclusion": "已知并发缺陷修复可靠性在既有矩阵内有证据；全局并发正确性与容量仍有限制，不宣称全站无潜在并发缺陷。"
+}

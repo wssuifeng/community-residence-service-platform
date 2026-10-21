@@ -55,6 +55,8 @@ class LeaseServiceTest {
     @Mock private com.community.residence.common.agreement.mapper.LeaseAgreementMapper agreementMapper;
     @Mock private com.community.residence.common.conversation.service.ConversationService conversationService;
     @Mock private com.community.residence.common.resident.service.ResidenceDependencyService residenceDependencyService;
+    @Mock private com.community.residence.common.community.service.HouseStateService houseStateService;
+
     @InjectMocks
     private LeaseService leaseService;
 

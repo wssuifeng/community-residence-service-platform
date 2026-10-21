@@ -1,0 +1,67 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-05.2",
+  "title": "后端性能评估",
+  "status": "COMPLETED_LIMITED",
+  "scope": [
+    "N1/N2/N7历史量化证据",
+    "统计、社区结构、工单列表、预约/通知代表查询",
+    "SQL分页、索引、连接池、Redis与锁/事务边界"
+  ],
+  "method": [
+    "核对50阶段压测数据、数据规模、请求错误和环境；静态检查代表Mapper SQL与索引",
+    "将历史需求阈值与质量诊断分开；不以已有P95直接推出所有入口性能"
+  ],
+  "evidence": [
+    "../../../50_系统测试/09_测试评估与报告.md",
+    "../../../50_系统测试/锁与事务并发复核矩阵.md",
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/redis-fault.json",
+    "../../../../backend/src/main/resources/db/migration",
+    "../../../../backend/src/main/java/com/community/residence/common/statistics",
+    "../../../../backend/src/main/java/com/community/residence/common/workorder"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "N1/N2/N7已有代表性量化证据；N7样本包含5社区、5019套房屋、10206条工单，7类查询P95为5～11ms且无错误。",
+      "impact": "既定需求量级下代表查询有证据支撑。"
+    },
+    {
+      "kind": "strength",
+      "fact": "Redis故障修复后故障写入轮次最大910.97ms，故障短路与恢复证据通过；不再复现原约35.6秒请求。",
+      "impact": "已知故障性能回归已收敛。"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-BEPERF-001",
+      "fact": "本轮未在隔离环境重新进行大规模压测、SQL EXPLAIN、连接池耗尽和数据库锁等待测量；金融入口未测。",
+      "classification": "证据限制",
+      "severity": "P1"
+    },
+    {
+      "kind": "risk",
+      "id": "QE-BEPERF-002",
+      "fact": "Druid连接池max-active=20、max-wait=30000ms是开发配置；在更高并发或复杂写事务下的容量余量未由本轮证据证明。",
+      "classification": "不足",
+      "severity": "P2"
+    }
+  ],
+  "conclusion": "历史需求性能证据与已知Redis故障修复可采用；质量层面的容量余量和长尾性能仍证据不足，不判“后端性能无问题”。"
+}

@@ -38,6 +38,8 @@ class HouseServiceTest {
     @Mock
     private ResidenceRelationMapper residenceRelationMapper;
 
+    @Mock private HouseStateService houseStateService;
+
     @InjectMocks
     private HouseService houseService;
 
@@ -60,23 +62,23 @@ class HouseServiceTest {
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
             mocked.when(com.community.residence.common.security.context.SecurityUtils::getUserId)
                     .thenReturn(42L);
-            when(houseMapper.selectById(1L)).thenReturn(house);
+            when(houseMapper.selectByIdForUpdate(1L)).thenReturn(house);
             when(houseMapper.updateById(any(House.class))).thenReturn(1);
 
             UpdateHouseStatusDTO dto = new UpdateHouseStatusDTO();
-            dto.setStatus("OCCUPIED");
-            dto.setRemark("tenant moved in");
+            dto.setStatus("MAINTENANCE");
+            dto.setRemark("临时维护");
             houseService.updateStatus(1L, dto);
 
-            assertThat(house.getStatus()).isEqualTo("OCCUPIED");
+            assertThat(house.getStatus()).isEqualTo("MAINTENANCE");
             ArgumentCaptor<HouseStatusHistory> captor =
                     ArgumentCaptor.forClass(HouseStatusHistory.class);
             verify(historyMapper).insert(captor.capture());
             HouseStatusHistory history = captor.getValue();
             assertThat(history.getOldStatus()).isEqualTo("VACANT");
-            assertThat(history.getNewStatus()).isEqualTo("OCCUPIED");
+            assertThat(history.getNewStatus()).isEqualTo("MAINTENANCE");
             assertThat(history.getOperatorId()).isEqualTo(42L);
-            assertThat(history.getRemark()).isEqualTo("tenant moved in");
+            assertThat(history.getRemark()).isEqualTo("临时维护");
         }
     }
 
@@ -85,7 +87,7 @@ class HouseServiceTest {
     void updateStatus_sameStatus_noHistory() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
-            when(houseMapper.selectById(1L)).thenReturn(house);
+            when(houseMapper.selectByIdForUpdate(1L)).thenReturn(house);
 
             UpdateHouseStatusDTO dto = new UpdateHouseStatusDTO();
             dto.setStatus("VACANT");

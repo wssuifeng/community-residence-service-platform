@@ -1,6 +1,6 @@
-﻿# 社区居住服务管理系统（community-residence-service-platform）
+# 社区居住服务管理系统（community-residence-service-platform）
 
-> **2026-10-20第六阶段执行入口**：先验收需求实现、再评估质量。98对象首轮判定及[整改复验](docs/60_评估验收/需求整改与复验记录.md)已回写：75R为71通过/3未通过/1证据不足（R41），10N为9通过/N8证据不足，13E为10通过/1未通过/2证据不足。G-002导出、G-004固定占位、G-016预约提前完成已修复，E5到期任务补证关闭G-012；正常8084已加载预约修复包。剩余C9筛选/指标/数值补证、R4/R46口径冲突及E2/E3/N8缺口继续60-03；11项质量评估未启动，金融沿用户确认不复测。
+> **2026-10-22部署运行入口**：60评估验收与70部署运行均已收尾，用户抽查评估验收报告确认没有阻塞项。70阶段本地 Compose、V45 干净演示库、中国香港 ECS、域名 Nginx HTTP/HTTPS、WebSocket 和部署级图片上传均已验证；提交前后端最终验证也已完成：后端全量测试 `1254` 项，失败 `0`、错误 `0`、跳过 `1`，前端类型检查与构建通过，接口契约基线已同步。当前前端 `http://localhost:18088`、后端 `http://localhost:18080`，云端入口和镜像细节见 `docs/70_部署运行/_中控.md`。`uploads/`保留在本机，不自动进入镜像、Git或云端；云端图片为独立演示数据。费用告警及云端数据库/上传卷备份恢复演练按用户裁决不执行，不构成阶段阻塞；ECS Docker服务已设为开机自启，Compose服务使用 `restart: unless-stopped`。金融沿用户确认不复测。
 
 > **2026-10-19 df最终收尾**：DEF-216～223已修复并完成受影响回归；最终后端449/449、前端38/38，Redis故障12/12、状态竞态7/7、跨入口并发13/13、通知提交2/2通过。最终证据见[df证据](docs/50_系统测试/evidence/df-final-remediation-20261019/README.md)。50阶段已收尾，当前指针进入60评估验收；金融沿用户确认不复测，论文仍按整体首个大版本完成后启动。
 
@@ -30,6 +30,32 @@
 
 ## 怎么跑
 
+**本地容器环境（当前70阶段主入口）**：前端 Nginx、后端 Spring Boot、MySQL、Redis 由 Docker Compose 编排；Compose 从本机生成的后端 JAR 与前端 `dist/` 打包，宿主机 `uploads/` 通过 bind mount 提供图片，不进入镜像和 Git。
+
+```powershell
+Copy-Item .env.docker.example .env.docker
+# 编辑 .env.docker，至少修改 MYSQL_APP_PASSWORD、MYSQL_ROOT_PASSWORD、JWT_SECRET
+Push-Location backend
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-17.0.4.1' # 指向本机 JDK 17
+.\mvnw.cmd -B -DskipTests package
+Pop-Location
+Push-Location frontend
+npm ci
+npm run build
+Pop-Location
+docker compose --env-file .env.docker -f docker-compose.local.yml config
+docker compose --env-file .env.docker -f docker-compose.local.yml build
+docker compose --env-file .env.docker -f docker-compose.local.yml up -d
+```
+
+默认前端入口为 `http://localhost:8088`；当前机器因端口冲突在 `.env.docker` 中改为 `http://localhost:18088`。后端 OpenAPI 默认端口8080、当前为18080。MySQL/Redis/后端/前端发布端口均绑定 `127.0.0.1`。停止服务：
+
+```powershell
+docker compose --env-file .env.docker -f docker-compose.local.yml down
+```
+
+完整步骤见 [`docs/70_部署运行/本地容器化部署.md`](docs/70_部署运行/本地容器化部署.md)；演示账号和图片边界见 [`docs/70_部署运行/演示环境使用说明.md`](docs/70_部署运行/演示环境使用说明.md)。
+
 **前端**：居民/管理/服务人员/游客四端入口，Vue＋TypeScript、API封装、上传与实时通知。页面及覆盖清单以当前router与50证据为准，不用历史页面数量推断全部操作通过。
 
 ```bash
@@ -54,7 +80,7 @@ export JWT_SECRET="your_jwt_secret_key"    # JWT 签名密钥（≥32 字符；d
 # set JWT_SECRET=your_jwt_secret_key
 
 cd backend
-./mvnw spring-boot:run   # 默认端口 8080；Flyway 按库中历史补齐 V1~V43（61 张业务表，另有 Flyway 历史表）
+./mvnw spring-boot:run   # 默认端口 8080；Flyway 按库中历史补齐 V1~V45（61 张业务表，另有 Flyway 历史表）
                          # + 种子超管（superadmin / Admin@123456，生产首登必改）；
                          # 接口文档 http://localhost:8080/swagger-ui.html
 ```

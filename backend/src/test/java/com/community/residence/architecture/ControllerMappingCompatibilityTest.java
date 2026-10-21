@@ -58,9 +58,7 @@ class ControllerMappingCompatibilityTest {
         List<String> expected = Files.readAllLines(BASELINE);
         assertThat(rows).containsAll(expected);
         var additions = new TreeSet<>(rows); additions.removeAll(expected);
-        assertThat(additions).hasSize(2);
-        assertThat(additions.stream().filter(row -> row.startsWith("{GET [/api/v1/staff/workbench/summary]}"))).singleElement().asString().contains("hasRole('STAFF')");
-        assertThat(additions.stream().filter(row -> row.startsWith("{GET [/api/v1/leases/my-summaries]}"))).singleElement().asString().contains("hasRole('RESIDENT')");
+        assertThat(additions).as("当前契约基线之外不得出现未登记的 HTTP 映射").isEmpty();
         assertThat(registry.getHandlerMethods()).hasSize(rows.size());
     }
 

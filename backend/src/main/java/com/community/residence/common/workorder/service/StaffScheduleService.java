@@ -55,6 +55,7 @@ public class StaffScheduleService {
 
     private final StaffScheduleMapper staffScheduleMapper;
     private final SysUserMapper sysUserMapper;
+    private final StaffCommunityAccessService staffCommunityAccessService;
     private final CommunityMapper communityMapper;
 
     /* 排班列表：按社区+日期范围查询（communityId 为空时不额外收敛，ADMIN 由
@@ -93,6 +94,9 @@ public class StaffScheduleService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "服务人员不能为空");
         }
         requireStaffAccounts(staffIds);
+        for (Long staffId : staffIds.stream().sorted().toList()) {
+            staffCommunityAccessService.requireBoundActiveForUpdate(staffId, dto.getCommunityId());
+        }
         List<LocalDate> dates = parseDates(dto.getDates());
         String shiftType = dto.getShiftType();
         if (!ShiftType.isValid(shiftType)) {

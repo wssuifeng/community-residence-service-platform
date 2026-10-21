@@ -231,7 +231,7 @@ class StructureGenerateServiceTest {
         StructureBatchGenerateDTO dto = houseDto(1, 1, 2, 2, 3);
         dto.setHouseNumberPrefix("A-");
         dto.setDescription("批量生成");
-        dto.setHouseStatus("RESERVED");
+         dto.setHouseStatus("VACANT");
         when(buildingMapper.selectList(any())).thenReturn(List.of());
         stubBuildingInsert(10L);
         stubUnitInsert(100L);
@@ -262,7 +262,7 @@ class StructureGenerateServiceTest {
         assertThat(firstUnitHouses.get(0).getUnitId()).isEqualTo(100L);
         assertThat(firstUnitHouses.get(0).getArea()).isEqualByComparingTo("80.5");
         assertThat(firstUnitHouses.get(0).getDescription()).isEqualTo("批量生成");
-        assertThat(firstUnitHouses.get(0).getStatus()).isEqualTo("RESERVED");
+         assertThat(firstUnitHouses.get(0).getStatus()).isEqualTo("VACANT");
     }
 
     @Test

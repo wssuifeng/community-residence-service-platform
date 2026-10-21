@@ -82,6 +82,7 @@ class LeaseSigningClosureTest {
     @Mock private com.community.residence.common.resident.mapper.ResidenceRelationMapper relationMapper;
     @Mock private com.community.residence.common.agreement.mapper.LeaseAgreementMapper agreementMapper;
     @Mock private com.community.residence.common.conversation.service.ConversationService conversationService;
+    @Mock private com.community.residence.common.community.service.HouseStateService houseStateService;
     @InjectMocks
     private LeaseService leaseService;
 
@@ -144,6 +145,7 @@ class LeaseSigningClosureTest {
                 org.mockito.Mockito.mock(com.community.residence.common.housing.mapper.HousingTimeslotMapper.class),
                 residentMapper,
                 org.mockito.Mockito.mock(com.community.residence.common.auth.mapper.SysUserMapper.class),
+                org.mockito.Mockito.mock(com.community.residence.common.workorder.service.StaffCommunityAccessService.class),
                 leaseMapper,
                 sysAdminCommunityMapper,
                 org.mockito.Mockito.mock(com.community.residence.common.auth.service.SysConfigService.class),
@@ -180,10 +182,9 @@ class LeaseSigningClosureTest {
     }
 
     @Test
-    @DisplayName("状态流转到已生效：房屋置已入住（TO_SIGN → ACTIVE 联动）")
-    void applyTransition_toActive_marksHouseOccupied() {
+    @DisplayName("状态流转到已生效：重算正式居住关系对应的房屋状态")
+    void applyTransition_toActive_recalculatesHouseState() {
         House house = new House();
-        house.setStatus("VACANT");
         house.setId(5L);
         house.setCommunityId(3L);
         house.setStatus("VACANT");
@@ -194,7 +195,7 @@ class LeaseSigningClosureTest {
             leaseService.applyTransition(toSignLease, "ACTIVE", "协议双方确认完成");
 
             assertThat(toSignLease.getStatus()).isEqualTo("ACTIVE");
-            assertThat(house.getStatus()).isEqualTo("OCCUPIED");
+            verify(houseStateService).refresh(5L, "首期成功且主租客关系生效");
             verify(changeLogService).logStatus(LEASE_ID, "TO_SIGN", "ACTIVE", "协议双方确认完成");
         }
     }

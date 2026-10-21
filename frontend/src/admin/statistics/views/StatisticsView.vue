@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 import EChart, { type ChartOption } from '@/common/statistics/components/EChart.vue'
 import StatCard from '@/common/web/components/StatCard.vue'
 import { getWorkOrderStats, getResidentStats, getResourceStats } from '@/common/statistics/api/statistics'
+import type { StatisticsQuery } from '@/common/statistics/types/statistics'
 import { workOrderStatusLabels } from '@/common/workorder/types/workorder'
 import { residentStatusLabels } from '@/common/resident/types/resident'
 import { reservationStatusLabels } from '@/common/reservation/types/reservation'
@@ -15,6 +16,12 @@ import type { IWorkOrderStats, IResidentStats, IResourceStats } from '@/common/s
  */
 type TabName = 'workorder' | 'resident' | 'resource'
 
+const props = defineProps<{
+  communityId: number | null
+  startDate: string
+  endDate: string
+}>()
+
 const activeTab = ref<TabName>('workorder')
 const loaded = ref<Set<TabName>>(new Set())
 
@@ -22,14 +29,19 @@ const workOrderStats = ref<IWorkOrderStats | null>(null)
 const residentStats = ref<IResidentStats | null>(null)
 const resourceStats = ref<IResourceStats | null>(null)
 const loading = ref(false)
+const query = computed<StatisticsQuery>(() => ({
+  ...(typeof props.communityId === 'number' ? { communityId: props.communityId } : {}),
+  startDate: props.startDate,
+  endDate: props.endDate
+}))
 
 async function loadTab(tab: TabName): Promise<void> {
   if (loaded.value.has(tab)) return
   loading.value = true
   try {
-    if (tab === 'workorder') workOrderStats.value = await getWorkOrderStats()
-    else if (tab === 'resident') residentStats.value = await getResidentStats()
-    else resourceStats.value = await getResourceStats()
+    if (tab === 'workorder') workOrderStats.value = await getWorkOrderStats(query.value)
+    else if (tab === 'resident') residentStats.value = await getResidentStats(query.value)
+    else resourceStats.value = await getResourceStats(query.value)
     loaded.value.add(tab)
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : '加载统计数据失败')
@@ -118,7 +130,10 @@ const resourceStatusOption = computed<ChartOption>(() => ({
       <el-tab-pane label="工单" name="workorder">
         <div v-loading="loading && activeTab === 'workorder'">
           <div class="stat-grid">
-            <StatCard label="工单总数" :value="workOrderStats?.total ?? '-'" unit="单" type="primary" />
+            <StatCard label="期间工单" :value="workOrderStats?.total ?? '-'" unit="单" type="primary" />
+            <StatCard label="工单完成" :value="workOrderStats?.completed ?? '-'" unit="单" type="success" />
+            <StatCard label="期间完成率" :value="`${(workOrderStats?.completionRate ?? 0).toFixed(1)}%`" type="warning" />
+            <StatCard label="平均处理时长" :value="(workOrderStats?.averageProcessingHours ?? 0).toFixed(1)" unit="小时" />
           </div>
 
           <div class="dual-panel">
@@ -169,7 +184,9 @@ const resourceStatusOption = computed<ChartOption>(() => ({
       <el-tab-pane label="居民" name="resident">
         <div v-loading="loading && activeTab === 'resident'">
           <div class="stat-grid">
-            <StatCard label="居民总数" :value="residentStats?.total ?? '-'" unit="人" type="primary" />
+            <StatCard label="当前居民" :value="residentStats?.total ?? '-'" unit="人" type="primary" />
+            <StatCard label="期间入住" :value="residentStats?.moveInTotal ?? '-'" unit="人次" type="success" />
+            <StatCard label="期间搬出" :value="residentStats?.moveOutTotal ?? '-'" unit="人次" type="warning" />
           </div>
 
           <div class="chart-grid">
@@ -199,7 +216,8 @@ const resourceStatusOption = computed<ChartOption>(() => ({
       <el-tab-pane label="资源预约" name="resource">
         <div v-loading="loading && activeTab === 'resource'">
           <div class="stat-grid">
-            <StatCard label="预约总量" :value="resourceStats?.total ?? '-'" unit="次" type="primary" />
+            <StatCard label="期间预约" :value="resourceStats?.total ?? '-'" unit="次" type="primary" />
+            <StatCard label="期间完成" :value="resourceStats?.completed ?? '-'" unit="次" type="success" />
           </div>
 
           <div class="chart-grid">

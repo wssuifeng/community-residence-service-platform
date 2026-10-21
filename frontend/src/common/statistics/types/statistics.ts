@@ -9,6 +9,8 @@ import type { PageQuery } from '@/common/web/types/api'
 
 /** 看板聚合数据（后端 StatisticsService.dashboard，扁平键） */
 export interface IDashboardStats {
+  startDate: string
+  endDate: string
   communityCount: number
   buildingCount: number
   houseCount: number
@@ -32,11 +34,39 @@ export interface IDashboardStats {
   houseStatusDistribution: Record<string, number>
   /** 评价分档分布：评分（数字字符串键）→ 数量 */
   ratingDistribution: Record<string, number>
+  workOrderPeriodCount: number
+  workOrderPeriodCompletedCount: number
+  workOrderCompletionRate: number
+  workOrderAvgProcessingHours: number
+  residentMoveInTotal: number
+  residentMoveOutTotal: number
+  reservationPeriodTotal: number
+  reservationCompletedTotal: number
+  reservationCompletionRate: number
+  viewingPeriodTotal: number
+  viewingCompletedTotal: number
+  housingViewPeriodTotal: number
+  housingViewTrend: Record<string, number>
+  evaluationPeriodTotal: number
+  evaluationAvgRating: number
+  evaluationSatisfactionRate: number
+  staffWorkload: Array<{
+    staffId: number
+    name: string
+    assignedCount: number
+    completedCount: number
+    total: number
+  }>
 }
 
 /** 工单统计（专项，后端 workOrderStatistics） */
 export interface IWorkOrderStats {
   total: number
+  completed: number
+  completionRate: number
+  averageProcessingHours: number
+  startDate: string
+  endDate: string
   byStatus: Record<string, number>
   byPriority: Record<string, number>
 }
@@ -44,12 +74,19 @@ export interface IWorkOrderStats {
 /** 居民统计（专项，后端 residentStatistics） */
 export interface IResidentStats {
   total: number
+  moveInTotal: number
+  moveOutTotal: number
+  startDate: string
+  endDate: string
   byStatus: Record<string, number>
 }
 
 /** 资源预约统计（专项，后端 reservationStatistics） */
 export interface IResourceStats {
   total: number
+  completed: number
+  startDate: string
+  endDate: string
   byStatus: Record<string, number>
 }
 
@@ -62,6 +99,8 @@ export interface ICommunityOption {
 /** 统计查询参数（communityId 可选过滤） */
 export interface StatisticsQuery {
   communityId?: number
+  startDate?: string
+  endDate?: string
 }
 
 /** 兼容导出：旧分页查询参数类型占位（后端统计接口无分页） */

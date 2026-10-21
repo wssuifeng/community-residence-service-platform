@@ -25,8 +25,8 @@ export function getWorkOrderStats(query?: StatisticsQuery) {
 }
 
 /** 居民统计（接口设计.md 9.9.1.3） */
-export function getResidentStats() {
-  return http.get<IResidentStats>('/statistics/residents')
+export function getResidentStats(query?: StatisticsQuery) {
+  return http.get<IResidentStats>('/statistics/residents', query)
 }
 
 /** 资源预约统计（接口设计.md 9.9.1.4） */

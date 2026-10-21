@@ -1,0 +1,30 @@
+{
+  "recordedAt": "2026-10-21",
+  "command": "npm audit --registry=https://registry.npmjs.org",
+  "registry": "https://registry.npmjs.org",
+  "result": "found 0 vulnerabilities",
+  "vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "resolvedPackages": {
+    "vite": "8.3.4",
+    "source-map-js": "1.2.2",
+    "follow-redirects": "1.16.1"
+  },
+  "runtime": {
+    "node": "v24.12.0",
+    "npm": "11.6.2"
+  },
+  "regression": {
+    "frontendTestFilesPassed": 78,
+    "frontendTestsPassed": 445,
+    "frontendTestsFailed": 0,
+    "productionBuild": "passed"
+  },
+  "scope": "Lockfile dependency audit and frontend regression only; no backend, database, payment, refund, or channel operation was performed."
+}

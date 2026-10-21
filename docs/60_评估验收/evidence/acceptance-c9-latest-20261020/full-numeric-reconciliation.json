@@ -1,0 +1,188 @@
+{
+  "recordedAt": "2026-10-20T12:52:11.415421+00:00",
+  "runtime": {
+    "backend": "http://127.0.0.1:8087",
+    "jarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD"
+  },
+  "database": "community_residence_dc_20261019",
+  "filter": {
+    "communityId": 2,
+    "startDate": "2026-10-01",
+    "endDate": "2026-10-01"
+  },
+  "checkedMetrics": 30,
+  "allPassed": true,
+  "checks": {
+    "communityCount": {
+      "passed": true,
+      "expected": 1,
+      "actual": 1
+    },
+    "buildingCount": {
+      "passed": true,
+      "expected": 1,
+      "actual": 1
+    },
+    "houseCount": {
+      "passed": true,
+      "expected": 1001,
+      "actual": 1001
+    },
+    "occupiedHouseCount": {
+      "passed": true,
+      "expected": 1,
+      "actual": 1
+    },
+    "residentCount": {
+      "passed": true,
+      "expected": 1,
+      "actual": 1
+    },
+    "activeLeaseCount": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "workOrderTotal": {
+      "passed": true,
+      "expected": 2000,
+      "actual": 2000
+    },
+    "workOrderPending": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "workOrderProcessing": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "workOrderCompleted": {
+      "passed": true,
+      "expected": 2000,
+      "actual": 2000
+    },
+    "workOrderPeriodCount": {
+      "passed": true,
+      "expected": 6,
+      "actual": 6
+    },
+    "workOrderPeriodCompletedCount": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "residentMoveInTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "residentMoveOutTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "reservationPeriodTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "reservationCompletedTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "viewingPeriodTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "viewingCompletedTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "housingViewPeriodTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "evaluationPeriodTotal": {
+      "passed": true,
+      "expected": 0,
+      "actual": 0
+    },
+    "workOrderStatusDistribution": {
+      "passed": true,
+      "expected": {
+        "COMPLETED": 2000
+      },
+      "actual": {
+        "COMPLETED": 2000
+      }
+    },
+    "houseStatusDistribution": {
+      "passed": true,
+      "expected": {
+        "OWNER_OCCUPIED": 1,
+        "VACANT": 1000
+      },
+      "actual": {
+        "OWNER_OCCUPIED": 1,
+        "VACANT": 1000
+      }
+    },
+    "ratingDistribution": {
+      "passed": true,
+      "expected": {},
+      "actual": {}
+    },
+    "housingViewTrend": {
+      "passed": true,
+      "expected": {
+        "2026-10-01": 0
+      },
+      "actual": {
+        "2026-10-01": 0
+      }
+    },
+    "workOrderAvgProcessingHours": {
+      "passed": true,
+      "expected": 0.0,
+      "actual": 0.0
+    },
+    "workOrderCompletionRate": {
+      "passed": true,
+      "expected": 0.0,
+      "actual": 0.0
+    },
+    "reservationCompletionRate": {
+      "passed": true,
+      "expected": 0.0,
+      "actual": 0.0
+    },
+    "evaluationAvgRating": {
+      "passed": true,
+      "expected": 0.0,
+      "actual": 0.0
+    },
+    "evaluationSatisfactionRate": {
+      "passed": true,
+      "expected": 0.0,
+      "actual": 0.0
+    },
+    "staffWorkload": {
+      "passed": true,
+      "expected": [],
+      "actual": []
+    }
+  },
+  "financialOperations": 0,
+  "businessWrites": 0,
+  "normalDatabaseWrites": 0,
+  "limitations": [
+    "Current snapshot values and period-event values are compared according to the fields' distinct backend semantics.",
+    "This is a fixed isolated sample, not an exhaustive proof over all communities, dates, or every database row."
+  ]
+}

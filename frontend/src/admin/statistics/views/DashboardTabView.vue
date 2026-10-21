@@ -42,9 +42,24 @@ function switchTab(tab: TabName): void {
 
 const communityOptions = ref<ICommunityOption[]>([])
 const selectedCommunityId = ref<number | null>(null)
+const dateRange = ref<[string, string]>(defaultDateRange())
 /* 等下拉口径就绪再挂概览面板，避免 ADMIN 首屏按全量口径多拉一次 */
 const filterReady = ref(false)
 const isSuperAdmin = computed(() => userStore.role === 'SUPER_ADMIN')
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function defaultDateRange(): [string, string] {
+  const end = new Date()
+  const start = new Date(end)
+  start.setDate(end.getDate() - 29)
+  return [formatDate(start), formatDate(end)]
+}
 
 onMounted(async () => {
   try {
@@ -64,7 +79,7 @@ onMounted(async () => {
   <div class="admin-page">
     <AdminPageHeader title="运营看板" subtitle="全社区运营数据总览">
       <el-select
-        v-if="activeTab === 'overview'"
+        v-if="filterReady"
         v-model="selectedCommunityId"
         clearable
         placeholder="全部社区"
@@ -78,6 +93,18 @@ onMounted(async () => {
           :value="community.id"
         />
       </el-select>
+      <el-date-picker
+        v-if="filterReady"
+        v-model="dateRange"
+        type="daterange"
+        value-format="YYYY-MM-DD"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        unlink-panels
+        class="date-filter"
+        aria-label="统计日期范围"
+      />
     </AdminPageHeader>
 
     <!-- 白卡 Tab 条：观感与 staff 工单列表一致（激活蓝字 + 底部 2px 下划线） -->
@@ -107,16 +134,35 @@ onMounted(async () => {
     <!-- :key 绑定社区筛选：切换/清空即重挂载概览面板整体刷新 -->
     <DashboardOverview
       v-if="filterReady && activeTab === 'overview'"
-      :key="String(selectedCommunityId)"
+      :key="`${String(selectedCommunityId)}-${dateRange.join('-')}`"
       :community-id="selectedCommunityId"
+      :start-date="dateRange[0]"
+      :end-date="dateRange[1]"
     />
-    <StatisticsView v-else-if="activeTab === 'details'" />
+    <StatisticsView
+      v-else-if="activeTab === 'details'"
+      :key="`${String(selectedCommunityId)}-${dateRange.join('-')}`"
+      :community-id="selectedCommunityId"
+      :start-date="dateRange[0]"
+      :end-date="dateRange[1]"
+    />
   </div>
 </template>
 
 <style scoped>
 .community-filter {
   width: 200px;
+}
+
+.date-filter {
+  width: 270px;
+}
+
+@media (max-width: 767px) {
+  .community-filter,
+  .date-filter {
+    width: 100%;
+  }
 }
 
 .tab-bar {

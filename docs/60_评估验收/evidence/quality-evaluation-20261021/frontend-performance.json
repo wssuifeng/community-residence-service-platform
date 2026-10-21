@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-10-21",
+  "assessmentBaseline": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "database": "community_residence_dc_20261019",
+    "flyway": "V45",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "normalPorts": "8084/5176 not listening",
+    "financialOperations": 0,
+    "edge154": "not run; G-015 remains open"
+  },
+  "limitations": [
+    "本轮是基于当前最终隔离版本的暂定质量评估，不表示整体需求验收已通过。",
+    "N8/G-015仍有Edge 154运行证据缺口；Edge 154兼容性未评估。",
+    "金融专项沿用户确认，不执行支付、查单、退款或渠道配置写入。",
+    "本轮不操作用户浏览器、不改变正常开发库；动态写入、压测和故障注入未在正常环境执行。",
+    "未检查或工具无法观测的内容明确列为限制，不能据此推断不存在问题。"
+  ],
+  "task": "60-04.4",
+  "title": "前端性能评估",
+  "status": "COMPLETED_LIMITED",
+  "scope": [
+    "最终隔离Vite运行版本的管理员看板、社区、工单列表",
+    "网络请求数量/状态、页面错误、构建与依赖体量",
+    "已有N1/N2/N7与C9固定样本性能证据的适用性核对"
+  ],
+  "method": [
+    "采用既有浏览器verification请求与响应记录；核对页面请求是否出现明显重复错误、5xx或页面异常",
+    "读取生产构建命令和源码，不以开发模式截图冒充生产性能",
+    "未在正常库执行压测；无既定前端阈值的指标只作诊断"
+  ],
+  "evidence": [
+    "../acceptance-n8-matrix-20261020/chrome-155/verification.json",
+    "../../../50_系统测试/evidence/df-final-remediation-20261019/final-summary.json",
+    "../acceptance-c9-latest-20261020/latest-ui-verification.json",
+    "../../../../frontend/package.json"
+  ],
+  "observations": [
+    {
+      "kind": "strength",
+      "fact": "Chrome 155代表页面共记录59个请求、57个HTTP 200响应，页面错误/控制台错误/服务器错误均为0；读操作未发现非认证写入。",
+      "impact": "代表只读链路运行稳定。"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-PERF-001",
+      "fact": "N8 verification未记录浏览器导航耗时、LCP/INP/CLS、JS资源体积或冷/热缓存重复测量，因此无法给出页面进入或交互响应的绝对性能结论。",
+      "classification": "证据限制",
+      "severity": "P1"
+    },
+    {
+      "kind": "limitation",
+      "id": "QE-PERF-002",
+      "fact": "当前前端为Vite开发服务器5182，不能将开发服务器请求量和性能直接等同生产构建表现；已知typecheck/build通过，但本轮未用独立静态生产服务器复测。",
+      "classification": "证据限制",
+      "severity": "P1"
+    },
+    {
+      "kind": "suggestion",
+      "id": "QE-PERF-003",
+      "fact": "应在后续质量批次固定生产构建、设备、网络、缓存状态和重复次数，补充导航、Web Vitals、长列表和图表渲染测量。",
+      "classification": "超纲建议",
+      "severity": "P2"
+    }
+  ],
+  "conclusion": "性能评估已完成当前可执行范围，但绝对页面性能证据不足；不得写成前端性能达标或无性能问题。"
+}

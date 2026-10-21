@@ -42,6 +42,7 @@ public class ResidenceRelationService {
     private final ResidenceRelationMapper relationMapper;
     private final ResidentMapper residentMapper;
     private final HouseMapper houseMapper;
+    private final com.community.residence.common.community.service.HouseStateService houseStateService;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final LeaseRecordMapper leaseRecordMapper;
@@ -119,18 +120,7 @@ public class ResidenceRelationService {
         relationMapper.updateById(relation);
         activeLeases.forEach(lease -> leaseService.applyTransition(lease, "MOVED_OUT", "居住关系迁出登记"));
 
-        /* 房屋无其他在住居民时回翻为空置 */
-        Long livingCount = relationMapper.selectCount(new LambdaQueryWrapper<ResidenceRelation>()
-                .eq(ResidenceRelation::getHouseId, relation.getHouseId())
-                .isNull(ResidenceRelation::getMoveOutDate));
-        if (livingCount == 0) {
-            House house = houseMapper.selectById(relation.getHouseId());
-            if (house != null) {
-                house.setStatus(leaseRecordMapper.selectBlockingIdsForUpdate(relation.getHouseId()).isEmpty()
-                        ? HouseStatusConstant.VACANT : HouseStatusConstant.RESERVED);
-                houseMapper.updateById(house);
-            }
-        }
+        houseStateService.refresh(relation.getHouseId(), "居住关系迁出后重算房屋状态");
         log.info("居民已迁出：relationId={}, residentId={}, houseId={}, operator={}",
                 id, relation.getResidentId(), relation.getHouseId(), SecurityUtils.getUserId());
         return relation;
@@ -193,8 +183,7 @@ public class ResidenceRelationService {
         relation.setIsPrimary(1);
         relationMapper.insert(relation);
 
-        house.setStatus(HouseStatusConstant.OCCUPIED);
-        houseMapper.updateById(house);
+        houseStateService.refresh(house.getId(), "主居住关系登记");
 
         log.info("管理员直建居住关系：relationId={}, residentId={}, houseId={}, operator={}, remark={}",
                 relation.getId(), dto.getResidentId(), dto.getHouseId(),
@@ -204,7 +193,7 @@ public class ResidenceRelationService {
 
     /* 同住登记必须有实际有效主关系；不以is_primary猜户主，不生成租约或支付单。 */
     private RelationVO registerDependent(com.community.residence.common.resident.dto.AdminCreateRelationDTO dto, House house) {
-        if (!HouseStatusConstant.OCCUPIED.equals(house.getStatus())) throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT,"同住登记只能选择已入住且有有效主居住关系的房屋");
+        if (!HouseStatusConstant.isOccupied(house.getStatus())) throw new BusinessException(ErrorCode.HOUSE_NOT_VACANT,"同住登记只能选择已入住且有有效主居住关系的房屋");
         var candidates = relationMapper.selectList(new LambdaQueryWrapper<ResidenceRelation>()
                 .eq(ResidenceRelation::getHouseId,house.getId()).isNull(ResidenceRelation::getMoveOutDate)
                 .isNull(ResidenceRelation::getAnchorRelationId).in(ResidenceRelation::getRelationType,"OWNER","TENANT").last("FOR UPDATE"));

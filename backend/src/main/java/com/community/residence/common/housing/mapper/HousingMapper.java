@@ -7,6 +7,9 @@ import org.apache.ibatis.annotations.Mapper;
 /** 房源数据访问 */
 @Mapper
 public interface HousingMapper extends BaseMapper<Housing> {
+    @org.apache.ibatis.annotations.Select("SELECT community_id FROM housing WHERE id = #{id}")
+    Long selectCommunityIdById(@org.apache.ibatis.annotations.Param("id") Long id);
+
     /* 外层仅挂牌主表，避免动态条件歧义；相关子查询取房屋权威户型。 */
     @org.apache.ibatis.annotations.Select("SELECT DISTINCT (SELECT hh.layout FROM house hh WHERE hh.id=housing.house_id AND hh.is_deleted=0) AS layout FROM housing ${ew.customSqlSegment}")
     java.util.List<String> selectHouseLayouts(@org.apache.ibatis.annotations.Param("ew")
@@ -49,7 +52,7 @@ public interface HousingMapper extends BaseMapper<Housing> {
     @org.apache.ibatis.annotations.Select("<script>SELECT housing.id, CASE "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='ACTIVE' AND l.start_date &lt;= CURDATE()) "
         + "OR EXISTS (SELECT 1 FROM residence_relation r WHERE r.house_id=housing.house_id AND r.move_out_date IS NULL AND r.move_in_date &lt;= CURDATE()) "
-        + "OR EXISTS (SELECT 1 FROM house h WHERE h.id=housing.house_id AND h.status='OCCUPIED') THEN 'OCCUPIED' "
+        + "OR EXISTS (SELECT 1 FROM house h WHERE h.id=housing.house_id AND h.status IN ('OWNER_OCCUPIED','TENANT_OCCUPIED')) THEN 'OCCUPIED' "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='ACTIVE' AND l.start_date &gt; CURDATE()) THEN 'WAITING_MOVE_IN' "
         + "WHEN housing.rent_type='SALE' THEN 'FREE' "
         + "WHEN EXISTS (SELECT 1 FROM lease_record l WHERE l.house_id=housing.house_id AND l.status='TO_SIGN' AND l.agreement_status='SIGNED') THEN 'WAITING_FIRST_PAYMENT' "

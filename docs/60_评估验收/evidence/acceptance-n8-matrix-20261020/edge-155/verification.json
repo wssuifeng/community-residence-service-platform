@@ -1,0 +1,519 @@
+{
+  "recordedAt": "2026-10-21T00:00:11.456649+08:00",
+  "requirement": "N8 pinned browser normal-use smoke path",
+  "browser": {
+    "label": "edge-155",
+    "family": "Microsoft Edge",
+    "productVersion": "155.0.4283.62",
+    "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "automation": "Playwright controlling the specified vendor browser binary"
+  },
+  "runtime": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087",
+    "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD"
+  },
+  "observations": [
+    {
+      "page": "dashboard",
+      "route": "/admin/dashboard?tab=overview",
+      "requiredText": "运营看板",
+      "bodyCharacters": 1048,
+      "screenshot": "dashboard.png",
+      "screenshotBytes": 168230
+    },
+    {
+      "page": "community",
+      "route": "/admin/community",
+      "requiredText": "社区管理",
+      "bodyCharacters": 1204,
+      "screenshot": "community.png",
+      "screenshotBytes": 160866
+    },
+    {
+      "page": "work-orders",
+      "route": "/admin/work-orders",
+      "requiredText": "工单",
+      "bodyCharacters": 2556,
+      "screenshot": "work-orders.png",
+      "screenshotBytes": 178948
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?startDate=2026-09-22&endDate=2026-10-21"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities?page=1&size=10"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/15/buildings?page=1&size=100"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=15"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=15"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=14"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=13"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=12"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=11"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=10"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=9"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=8"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=7"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/buildings/13/units?page=1&size=100"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/units/13/houses?page=1&size=100"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=PENDING&page=1&size=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=TO_ASSIGN&page=1&size=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=ASSIGNED&page=1&size=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=ACCEPTED&page=1&size=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=IN_PROGRESS&page=1&size=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=TO_CONFIRM&page=1&size=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=COMPLETED&page=1&size=6"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/work-orders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities?page=1&size=100"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders/assignable-staff"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/15/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/14/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/13/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/12/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/11/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/10/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/9/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/8/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/7/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/6/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/5/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/4/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/3/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/2/service-categories"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/communities/1/service-categories"
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "path": "/api/v1/auth/admin/login"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?startDate=2026-09-22&endDate=2026-10-21"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities?page=1&size=10"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/15/buildings?page=1&size=100"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=11"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=12"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=14"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=15"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=13"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=10"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=9"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=8"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=7"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/buildings/13/units?page=1&size=100"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/dashboard?communityId=15"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/units/13/houses?page=1&size=100"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=IN_PROGRESS&page=1&size=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=TO_CONFIRM&page=1&size=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=TO_ASSIGN&page=1&size=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=PENDING&page=1&size=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=ASSIGNED&page=1&size=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=ACCEPTED&page=1&size=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders?sort=DEFAULT&status=COMPLETED&page=1&size=6"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities?page=1&size=100"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/statistics/work-orders"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/work-orders/assignable-staff"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/15/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/14/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/13/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/12/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/11/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/10/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/9/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/8/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/7/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/6/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/4/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/5/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/3/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/2/service-categories"
+    },
+    {
+      "status": 200,
+      "path": "/api/v1/communities/1/service-categories"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "nonAuthWrites": [],
+  "financialRequests": [],
+  "serverErrors": [],
+  "limitations": [
+    "Read-only administrator login, dashboard, community, and work-order list smoke path; not exhaustive browser conformance testing.",
+    "The administrator login POST is excluded from business-write checks."
+  ]
+}

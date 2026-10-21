@@ -73,6 +73,7 @@ public class LeaseService {
     private final LeaseRecordMapper leaseMapper;
     private final ResidentMapper residentMapper;
     private final HouseMapper houseMapper;
+    private final com.community.residence.common.community.service.HouseStateService houseStateService;
     private final UnitMapper unitMapper;
     private final BuildingMapper buildingMapper;
     private final com.community.residence.common.community.mapper.CommunityMapper communityMapper;
@@ -322,21 +323,13 @@ public class LeaseService {
             relation.setRelationType("TENANT"); relation.setMoveInDate(lease.getStartDate()); relation.setIsPrimary(1);
             relationMapper.insert(relation);
             if(lease.getStartDate()!=null&&lease.getStartDate().isAfter(LocalDate.now())){
-                House reserved=houseMapper.selectById(lease.getHouseId());reserved.setStatus(HouseStatusConstant.RESERVED);houseMapper.updateById(reserved);
+                houseStateService.refresh(lease.getHouseId(), "首期成功生效，尚未到入住日期");
             }else markHouseOccupied(lease.getHouseId());
             conversationService.sendSystemMessage(lease.getConversationId(), "协议已确认且首期费用支付成功，租约及正式居住关系已生效。");
         } else if (LeaseStatus.MOVED_OUT.equals(target)) {
             lockHouse(lease.getHouseId());
             endLeaseResidence(lease, confirmDependents);
-            Long remaining = relationMapper.selectCount(new LambdaQueryWrapper<com.community.residence.common.resident.entity.ResidenceRelation>()
-                .eq(com.community.residence.common.resident.entity.ResidenceRelation::getHouseId, lease.getHouseId())
-                .isNull(com.community.residence.common.resident.entity.ResidenceRelation::getMoveOutDate));
-            House house = houseMapper.selectById(lease.getHouseId());
-            if (house != null && (remaining == null || remaining == 0)) {
-                house.setStatus(leaseMapper.selectBlockingIdsForUpdate(lease.getHouseId()).isEmpty()
-                        ? HouseStatusConstant.VACANT : HouseStatusConstant.RESERVED);
-                houseMapper.updateById(house);
-            }
+            houseStateService.refresh(lease.getHouseId(), "租约迁出后重算房屋状态");
             conversationService.closeLeaseGroup(lease.getId());
         } else if (LeaseStatus.REJECTED.equals(target)) {
             agreementMapper.update(null, new LambdaUpdateWrapper<com.community.residence.common.agreement.entity.LeaseAgreement>()
@@ -371,8 +364,7 @@ public class LeaseService {
         if (house == null) {
             throw new ResourceNotFoundException("租约房屋不存在，不能建立正式居住关系");
         }
-        house.setStatus(HouseStatusConstant.OCCUPIED);
-        houseMapper.updateById(house);
+        houseStateService.refresh(houseId, "首期成功且主租客关系生效");
     }
 
     /* 本地结算先锁房屋再锁租约，与申请/取消保持同序；渠道调用不持有这些锁。 */

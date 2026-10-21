@@ -13,15 +13,19 @@ export const communityStatusLabels: Record<CommunityStatus, string> = {
 }
 
 /** 房屋状态（接口设计.md 9.1.4.6） */
-export type HouseStatus = 'VACANT' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE'
+export type HouseStatus = 'VACANT' | 'OWNER_OCCUPIED' | 'TENANT_OCCUPIED' | 'MAINTENANCE' | 'INACTIVE'
 
 /** 房屋状态中文标签 */
 export const houseStatusLabels: Record<HouseStatus, string> = {
   VACANT: '空置',
-  OCCUPIED: '已入住',
-  RESERVED: '预留',
-  MAINTENANCE: '维护中'
+  OWNER_OCCUPIED: '业主自住',
+  TENANT_OCCUPIED: '租客居住',
+  MAINTENANCE: '维护中',
+  INACTIVE: '停用'
 }
+
+export const manualHouseStatusLabels = { VACANT: '空置', MAINTENANCE: '维护中', INACTIVE: '停用' } as const
+export const houseHistoryStatusLabels: Record<string, string> = { ...houseStatusLabels, OCCUPIED: '已入住（历史）', RESERVED: '预留（历史）' }
 
 /** 房屋属性类型（接口设计.md 9.1.4.1，文档示例值 APARTMENT） */
 export type PropertyType = 'APARTMENT'

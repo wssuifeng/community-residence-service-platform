@@ -1,0 +1,38 @@
+{
+  "verifiedAt": "2026-10-20T23:01:57.3254340+08:00",
+  "scope": "Read-only process, port, and file fingerprint inspection; no application requests were sent.",
+  "backend": {
+    "pid": 5956,
+    "port": 8087,
+    "database": "community_residence_dc_20261019",
+    "javaExecutable": "C:/Program Files/Java/jdk-17.0.4.1/bin/java.exe",
+    "jar": "backend/target/residence-backend-0.1.0-SNAPSHOT.jar",
+    "jarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+    "matchesFinalAcceptanceEvidence": true
+  },
+  "frontend": {
+    "pid": 17216,
+    "host": "127.0.0.1",
+    "port": 5182,
+    "runtime": "Vite",
+    "sourceFingerprintsMatchFinalAcceptanceEvidence": true,
+    "checkedSources": [
+      "frontend/src/common/statistics/components/EChart.vue",
+      "frontend/src/admin/statistics/views/DashboardOverview.vue",
+      "frontend/src/admin/statistics/views/StatisticsView.vue"
+    ]
+  },
+  "normalPorts": {
+    "8084": "NOT_LISTENING",
+    "5176": "NOT_LISTENING"
+  },
+  "sideEffects": {
+    "applicationRequests": 0,
+    "businessWrites": 0,
+    "financialOperations": 0
+  },
+  "limitations": [
+    "This confirms the process and source fingerprints at the recorded time; it does not rerun functional acceptance checks.",
+    "Process IDs are a point-in-time snapshot and may change after restart."
+  ]
+}

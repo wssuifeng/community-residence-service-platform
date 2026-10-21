@@ -5,7 +5,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import HouseAttributesDialog from '@/admin/community/components/HouseAttributesDialog.vue'
 import { createHouse, updateHouse } from '@/common/community/api/community'
 import type { IHouse, IHouseDTO, HouseStatus } from '@/common/community/types/community'
-import { houseStatusLabels } from '@/common/community/types/community'
+import { manualHouseStatusLabels } from '@/common/community/types/community'
 
 /**
  * 房屋新建/编辑小对话框（第三轮 C4，结构总览网格便捷操作用）：
@@ -145,7 +145,7 @@ async function handleSubmit(): Promise<void> {
       <el-form-item v-if="!isEdit" label="房屋状态">
         <el-select v-model="form.status" style="width: 100%">
           <el-option
-            v-for="(label, value) in houseStatusLabels"
+            v-for="(label, value) in manualHouseStatusLabels"
             :key="value"
             :label="label"
             :value="value"

@@ -11,6 +11,10 @@ import com.community.residence.common.community.entity.House;
 import com.community.residence.common.community.mapper.BuildingMapper;
 import com.community.residence.common.community.mapper.CommunityMapper;
 import com.community.residence.common.community.mapper.HouseMapper;
+import com.community.residence.common.housing.entity.Housing;
+import com.community.residence.common.housing.entity.ViewingAppointment;
+import com.community.residence.common.housing.mapper.HousingMapper;
+import com.community.residence.common.housing.mapper.ViewingAppointmentMapper;
 import com.community.residence.common.evaluation.entity.WorkOrderEvaluation;
 import com.community.residence.common.evaluation.mapper.WorkOrderEvaluationMapper;
 import com.community.residence.common.lease.entity.LeaseRecord;
@@ -18,7 +22,11 @@ import com.community.residence.common.lease.mapper.LeaseRecordMapper;
 import com.community.residence.common.reservation.entity.ResourceReservation;
 import com.community.residence.common.reservation.mapper.ResourceReservationMapper;
 import com.community.residence.common.resident.entity.Resident;
+import com.community.residence.common.resident.entity.ResidenceRelation;
 import com.community.residence.common.resident.mapper.ResidentMapper;
+import com.community.residence.common.resident.mapper.ResidenceRelationMapper;
+import com.community.residence.common.statistics.entity.StatisticsSnapshot;
+import com.community.residence.common.statistics.mapper.StatisticsSnapshotMapper;
 import com.community.residence.common.workorder.entity.WorkOrder;
 import com.community.residence.common.workorder.entity.WorkOrderProcess;
 import com.community.residence.common.workorder.mapper.WorkOrderProcessMapper;
@@ -34,8 +42,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +61,10 @@ public class StatisticsService {
     private final CommunityMapper communityMapper;
     private final BuildingMapper buildingMapper;
     private final HouseMapper houseMapper;
+    private final HousingMapper housingMapper;
+    private final ViewingAppointmentMapper viewingAppointmentMapper;
     private final ResidentMapper residentMapper;
+    private final ResidenceRelationMapper residenceRelationMapper;
     private final WorkOrderMapper workOrderMapper;
     private final WorkOrderAssignmentMapper assignmentMapper;
     private final WorkOrderProcessMapper processMapper;
@@ -59,100 +73,195 @@ public class StatisticsService {
     private final WorkOrderEvaluationMapper evaluationMapper;
     private final ResourceReservationMapper reservationMapper;
     private final LeaseRecordMapper leaseMapper;
+    private final StatisticsSnapshotMapper statisticsSnapshotMapper;
 
-    /** 运营看板：16 个统计卡片 + 4 个图表数据（ADMIN，拦截器过滤社区范围） */
+    /** Backward-compatible dashboard entry: defaults to the last 30 calendar days. */
     public Map<String, Object> dashboard(Long communityId) {
-        Map<String, Object> result = new HashMap<>();
+        return dashboard(communityId, StatisticsDateRange.resolve(null, null, LocalDate.now()));
+    }
 
-        /* ---- 基础卡片 ---- */
-        result.put("communityCount", communityMapper.selectCount(null));
+    /** C9 dashboard: current snapshots are separated from events in the selected period. */
+    public Map<String, Object> dashboard(Long communityId, StatisticsDateRange range) {
+        LocalDateTime start = range.startDate().atStartOfDay();
+        LocalDateTime end = range.endExclusive().atStartOfDay();
+        List<WorkOrder> allOrders = workOrderMapper.selectList(new LambdaQueryWrapper<WorkOrder>()
+                .eq(communityId != null, WorkOrder::getCommunityId, communityId));
+        List<WorkOrder> periodOrders = allOrders.stream()
+                .filter(order -> inRange(order.getCreatedAt(), start, end)).toList();
+        Set<Long> periodOrderIds = periodOrders.stream().map(WorkOrder::getId)
+                .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        List<House> houses = houseMapper.selectList(new LambdaQueryWrapper<House>()
+                .eq(communityId != null, House::getCommunityId, communityId));
+        List<LeaseRecord> activeLeases = leaseMapper.selectList(new LambdaQueryWrapper<LeaseRecord>()
+                .eq(communityId != null, LeaseRecord::getCommunityId, communityId)
+                .eq(LeaseRecord::getStatus, "ACTIVE"));
+        List<ResidenceRelation> relations = residenceRelationMapper.selectList(
+                new LambdaQueryWrapper<ResidenceRelation>()
+                        .eq(communityId != null, ResidenceRelation::getCommunityId, communityId));
+        Set<Long> currentResidents = relations.stream()
+                .filter(relation -> relation.getMoveOutDate() == null)
+                .map(ResidenceRelation::getResidentId).filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<String, Long> houseStatusDist = houses.stream().collect(Collectors.groupingBy(
+                House::getStatus, LinkedHashMap::new, Collectors.counting()));
+        Map<String, Long> orderStatusDist = allOrders.stream().collect(Collectors.groupingBy(
+                WorkOrder::getStatus, LinkedHashMap::new, Collectors.counting()));
+        List<WorkOrderProcess> completionEvents = periodOrderIds.isEmpty() ? List.of()
+                : processMapper.selectList(new LambdaQueryWrapper<WorkOrderProcess>()
+                        .in(WorkOrderProcess::getWorkOrderId, periodOrderIds)
+                        .eq(WorkOrderProcess::getOperatorType, RoleConstants.STAFF)
+                        .eq(WorkOrderProcess::getAction, WorkOrderProcessAction.COMPLETE)
+                        .eq(WorkOrderProcess::getNewStatus, WorkOrderStatus.TO_CONFIRM)
+                        .ge(WorkOrderProcess::getCreatedAt, start)
+                        .lt(WorkOrderProcess::getCreatedAt, end));
+        Set<Long> completedPeriodIds = completionEvents.stream().map(WorkOrderProcess::getWorkOrderId)
+                .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+        Map<Long, LocalDateTime> firstCompletionByOrder = new HashMap<>();
+        for (WorkOrderProcess event : completionEvents) {
+            if (event.getWorkOrderId() == null || event.getCreatedAt() == null) continue;
+            firstCompletionByOrder.merge(event.getWorkOrderId(), event.getCreatedAt(),
+                    (left, right) -> left.isBefore(right) ? left : right);
+        }
+        double avgProcessingHours = periodOrders.stream()
+                .filter(order -> order.getId() != null && order.getCreatedAt() != null
+                        && firstCompletionByOrder.containsKey(order.getId()))
+                .mapToDouble(order -> java.time.Duration.between(order.getCreatedAt(),
+                        firstCompletionByOrder.get(order.getId())).toMinutes() / 60.0)
+                .average().orElse(0.0);
+
+        List<ResourceReservation> periodReservations = reservationMapper.selectList(
+                new LambdaQueryWrapper<ResourceReservation>()
+                        .eq(communityId != null, ResourceReservation::getCommunityId, communityId)
+                        .ge(ResourceReservation::getReserveDate, range.startDate())
+                        .le(ResourceReservation::getReserveDate, range.endDate()));
+        List<ViewingAppointment> periodViewings = viewingAppointmentMapper.selectList(
+                new LambdaQueryWrapper<ViewingAppointment>()
+                        .eq(communityId != null, ViewingAppointment::getCommunityId, communityId)
+                        .ge(ViewingAppointment::getAppointmentDate, range.startDate())
+                        .le(ViewingAppointment::getAppointmentDate, range.endDate()));
+        List<WorkOrderEvaluation> periodEvaluations = evaluationMapper.selectList(
+                new LambdaQueryWrapper<WorkOrderEvaluation>()
+                        .eq(communityId != null, WorkOrderEvaluation::getCommunityId, communityId)
+                        .ge(WorkOrderEvaluation::getCreatedAt, start)
+                        .lt(WorkOrderEvaluation::getCreatedAt, end));
+        Map<Integer, Long> ratingDist = periodEvaluations.stream().collect(Collectors.groupingBy(
+                WorkOrderEvaluation::getRating, LinkedHashMap::new, Collectors.counting()));
+        double avgRating = periodEvaluations.stream().mapToInt(WorkOrderEvaluation::getRating)
+                .average().orElse(0.0);
+        double satisfactionRate = periodEvaluations.isEmpty() ? 0.0
+                : periodEvaluations.stream().filter(e -> Integer.valueOf(1).equals(e.getIsSatisfied())).count()
+                * 100.0 / periodEvaluations.size();
+
+        Map<String, Long> orderTrend = emptyDailyEvents(range);
+        periodOrders.forEach(order -> addDailyEvent(orderTrend, order.getCreatedAt()));
+        Map<String, Long> viewTrend = emptyDailyEvents(range);
+        if (statisticsSnapshotMapper != null) {
+            for (StatisticsSnapshot snapshot : statisticsSnapshotMapper.selectHousingViews(
+                    communityId, range.startDate(), range.endExclusive())) {
+                if (snapshot.getSnapshotDate() != null) {
+                    viewTrend.merge(snapshot.getSnapshotDate().toString(),
+                            snapshot.getMetricValue() == null ? 0L : snapshot.getMetricValue(), Long::sum);
+                }
+            }
+        }
+
+        List<ResidenceRelation> scopedRelations = relations;
+        long moveIn = scopedRelations.stream().filter(r -> range.contains(r.getMoveInDate())).count();
+        long moveOut = scopedRelations.stream().filter(r -> range.contains(r.getMoveOutDate())).count();
+        long reservationCompleted = periodReservations.stream()
+                .filter(r -> "COMPLETED".equals(r.getStatus())).count();
+        long viewingCompleted = periodViewings.stream()
+                .filter(v -> "COMPLETED".equals(v.getStatus())).count();
+
+        Map<String, Long> assignedByStaff = new HashMap<>();
+        Map<String, Long> submittedByStaff = new HashMap<>();
+        List<WorkOrderAssignment> assignments = periodOrderIds.isEmpty() ? List.of()
+                : assignmentMapper.selectList(new LambdaQueryWrapper<WorkOrderAssignment>()
+                        .in(WorkOrderAssignment::getWorkOrderId, periodOrderIds)
+                        .ge(WorkOrderAssignment::getAssignTime, start)
+                        .lt(WorkOrderAssignment::getAssignTime, end));
+        assignments.forEach(a -> increment(assignedByStaff, a.getAssigneeId()));
+        completionEvents.forEach(e -> increment(submittedByStaff, e.getOperatorId()));
+        Set<Long> staffIds = new HashSet<>();
+        assignedByStaff.keySet().forEach(id -> staffIds.add(Long.valueOf(id)));
+        submittedByStaff.keySet().forEach(id -> staffIds.add(Long.valueOf(id)));
+        Map<Long, String> staffNames = staffIds.isEmpty() ? Map.of() : sysUserMapper.selectBatchIds(staffIds).stream()
+                .collect(Collectors.toMap(com.community.residence.common.auth.entity.SysUser::getId,
+                        com.community.residence.common.auth.entity.SysUser::getRealName));
+        List<Map<String, Object>> staffWorkload = staffIds.stream().map(id -> {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("staffId", id);
+            row.put("name", staffNames.getOrDefault(id, "未知服务人员"));
+            row.put("assignedCount", assignedByStaff.getOrDefault(String.valueOf(id), 0L));
+            row.put("completedCount", submittedByStaff.getOrDefault(String.valueOf(id), 0L));
+            row.put("total", assignedByStaff.getOrDefault(String.valueOf(id), 0L)
+                    + submittedByStaff.getOrDefault(String.valueOf(id), 0L));
+            return row;
+        }).sorted((a, b) -> Long.compare((Long) b.get("total"), (Long) a.get("total"))).toList();
+
+        result.put("startDate", range.startDate().toString());
+        result.put("endDate", range.endDate().toString());
+        result.put("communityCount", communityId == null ? communityMapper.selectCount(null) : 1L);
         result.put("buildingCount", buildingMapper.selectCount(new LambdaQueryWrapper<Building>()
                 .eq(communityId != null, Building::getCommunityId, communityId)));
-        result.put("houseCount", houseMapper.selectCount(new LambdaQueryWrapper<House>()
-                .eq(communityId != null, House::getCommunityId, communityId)));
-        result.put("occupiedHouseCount", houseMapper.selectCount(new LambdaQueryWrapper<House>()
-                .eq(communityId != null, House::getCommunityId, communityId)
-                .eq(House::getStatus, "OCCUPIED")));
-        result.put("residentCount", residentMapper.selectCount(null));
-        result.put("activeLeaseCount", leaseMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
-                .eq(communityId != null, LeaseRecord::getCommunityId, communityId)
-                .eq(LeaseRecord::getStatus, "ACTIVE")));
-        result.put("expiringLeaseCount", leaseMapper.selectCount(new LambdaQueryWrapper<LeaseRecord>()
-                .eq(communityId != null, LeaseRecord::getCommunityId, communityId)
-                .eq(LeaseRecord::getStatus, "ACTIVE")
-                .between(LeaseRecord::getEndDate, LocalDate.now(), LocalDate.now().plusDays(30))));
-
-        /* ---- 工单卡片 ---- */
-        result.put("workOrderTotal", workOrderMapper.selectCount(new LambdaQueryWrapper<WorkOrder>()
-                .eq(communityId != null, WorkOrder::getCommunityId, communityId)));
-        result.put("workOrderPending", workOrderMapper.selectCount(new LambdaQueryWrapper<WorkOrder>()
-                .eq(communityId != null, WorkOrder::getCommunityId, communityId)
-                .in(WorkOrder::getStatus, WorkOrderStatus.PENDING, WorkOrderStatus.TO_ASSIGN)));
-        result.put("workOrderProcessing", workOrderMapper.selectCount(new LambdaQueryWrapper<WorkOrder>()
-                .eq(communityId != null, WorkOrder::getCommunityId, communityId)
-                .in(WorkOrder::getStatus, WorkOrderStatus.ASSIGNED, WorkOrderStatus.ACCEPTED,
-                        WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM)));
-        result.put("workOrderCompleted", workOrderMapper.selectCount(new LambdaQueryWrapper<WorkOrder>()
-                .eq(communityId != null, WorkOrder::getCommunityId, communityId)
-                .in(WorkOrder::getStatus, WorkOrderStatus.COMPLETED, WorkOrderStatus.CLOSED)));
-
-        /* ---- 预约与评价卡片 ---- */
-        result.put("reservationTotal", reservationMapper.selectCount(
-                new LambdaQueryWrapper<ResourceReservation>()
-                        .eq(communityId != null, ResourceReservation::getCommunityId, communityId)));
-        result.put("reservationPending", reservationMapper.selectCount(
-                new LambdaQueryWrapper<ResourceReservation>()
-                        .eq(communityId != null, ResourceReservation::getCommunityId, communityId)
-                        .eq(ResourceReservation::getStatus, "PENDING")));
-        result.put("violationCount", reservationMapper.selectCount(
-                new LambdaQueryWrapper<ResourceReservation>()
-                        .eq(communityId != null, ResourceReservation::getCommunityId, communityId)
-                        .eq(ResourceReservation::getStatus, "VIOLATED")));
-
-        /* ---- 图表 1：近 7 日工单提交趋势 ---- */
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        List<WorkOrder> recentOrders = workOrderMapper.selectList(new LambdaQueryWrapper<WorkOrder>()
-                .eq(communityId != null, WorkOrder::getCommunityId, communityId)
-                .ge(WorkOrder::getCreatedAt, sevenDaysAgo));
-        Map<String, Long> orderTrend = recentOrders.stream().collect(Collectors.groupingBy(
-                o -> o.getCreatedAt().toLocalDate().toString(), Collectors.counting()));
+        result.put("houseCount", houses.size());
+        result.put("occupiedHouseCount", houses.stream().filter(h -> "OWNER_OCCUPIED".equals(h.getStatus())
+                || "TENANT_OCCUPIED".equals(h.getStatus())).count());
+        result.put("residentCount", currentResidents.size());
+        result.put("activeLeaseCount", activeLeases.size());
+        result.put("expiringLeaseCount", activeLeases.stream().filter(l -> l.getEndDate() != null
+                && !l.getEndDate().isBefore(LocalDate.now()) && !l.getEndDate().isAfter(LocalDate.now().plusDays(30))).count());
+        result.put("workOrderTotal", allOrders.size());
+        result.put("workOrderPending", allOrders.stream().filter(o -> WorkOrderStatus.PENDING.equals(o.getStatus())
+                || WorkOrderStatus.TO_ASSIGN.equals(o.getStatus())).count());
+        result.put("workOrderProcessing", allOrders.stream().filter(o -> Set.of(WorkOrderStatus.ASSIGNED,
+                WorkOrderStatus.ACCEPTED, WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM).contains(o.getStatus())).count());
+        result.put("workOrderCompleted", allOrders.stream().filter(o -> WorkOrderStatus.COMPLETED.equals(o.getStatus())
+                || WorkOrderStatus.CLOSED.equals(o.getStatus())).count());
+        result.put("reservationTotal", periodReservations.size());
+        result.put("reservationPending", periodReservations.stream().filter(r -> "PENDING".equals(r.getStatus())).count());
+        result.put("violationCount", periodReservations.stream().filter(r -> "VIOLATED".equals(r.getStatus())).count());
+        result.put("evaluationTotal", periodEvaluations.size());
+        result.put("workOrderPeriodCount", periodOrders.size());
+        result.put("workOrderPeriodCompletedCount", completedPeriodIds.size());
+        result.put("workOrderCompletionRate", periodOrders.isEmpty() ? 0.0 : completedPeriodIds.size() * 100.0 / periodOrders.size());
+        result.put("workOrderAvgProcessingHours", avgProcessingHours);
+        result.put("residentMoveInTotal", moveIn);
+        result.put("residentMoveOutTotal", moveOut);
+        result.put("reservationPeriodTotal", periodReservations.size());
+        result.put("reservationCompletedTotal", reservationCompleted);
+        result.put("reservationCompletionRate", periodReservations.isEmpty() ? 0.0 : reservationCompleted * 100.0 / periodReservations.size());
+        result.put("viewingPeriodTotal", periodViewings.size());
+        result.put("viewingCompletedTotal", viewingCompleted);
+        result.put("housingViewPeriodTotal", viewTrend.values().stream().mapToLong(Long::longValue).sum());
+        result.put("housingViewTrend", viewTrend);
+        result.put("evaluationPeriodTotal", periodEvaluations.size());
+        result.put("evaluationAvgRating", avgRating);
+        result.put("evaluationSatisfactionRate", satisfactionRate);
+        result.put("staffWorkload", staffWorkload);
         result.put("workOrderTrend7d", orderTrend);
-
-        /* ---- 图表 2：工单状态分布（饼图） ---- */
-        Map<String, Long> orderStatusDist = workOrderMapper.selectList(
-                        new LambdaQueryWrapper<WorkOrder>()
-                                .eq(communityId != null, WorkOrder::getCommunityId, communityId))
-                .stream().collect(Collectors.groupingBy(WorkOrder::getStatus, Collectors.counting()));
         result.put("workOrderStatusDistribution", orderStatusDist);
-
-        /* ---- 图表 3：房屋状态分布（饼图） ---- */
-        Map<String, Long> houseStatusDist = houseMapper.selectList(
-                        new LambdaQueryWrapper<House>()
-                                .eq(communityId != null, House::getCommunityId, communityId))
-                .stream().collect(Collectors.groupingBy(House::getStatus, Collectors.counting()));
         result.put("houseStatusDistribution", houseStatusDist);
-
-        /* ---- 图表 4：评价分档分布（柱状） ---- */
-        Map<Integer, Long> ratingDist = evaluationMapper.selectList(
-                        new LambdaQueryWrapper<WorkOrderEvaluation>()
-                                .eq(communityId != null, WorkOrderEvaluation::getCommunityId, communityId))
-                .stream().collect(Collectors.groupingBy(WorkOrderEvaluation::getRating, Collectors.counting()));
         result.put("ratingDistribution", ratingDist);
-
-        /* ---- 评价总览 ---- */
-        result.put("evaluationTotal", evaluationMapper.selectCount(
-                new LambdaQueryWrapper<WorkOrderEvaluation>()
-                        .eq(communityId != null, WorkOrderEvaluation::getCommunityId, communityId)));
-
         return result;
     }
 
     /** 评价满意度双维度聚合（R39，DEF-022）：按服务人员（最新派单）/ 按服务类别分组。
         输出行：dimension 键（staffId/categoryId）+ 名称 + 评价数/平均分/满意率 */
     public Map<String, Object> evaluationAggregation(Long communityId) {
+        return evaluationAggregation(communityId,
+                StatisticsDateRange.resolve(null, null, LocalDate.now()));
+    }
+
+    public Map<String, Object> evaluationAggregation(Long communityId, StatisticsDateRange range) {
         List<WorkOrderEvaluation> evaluations = evaluationMapper.selectList(
                 new LambdaQueryWrapper<WorkOrderEvaluation>()
-                        .eq(communityId != null, WorkOrderEvaluation::getCommunityId, communityId));
+                        .eq(communityId != null, WorkOrderEvaluation::getCommunityId, communityId)
+                        .ge(WorkOrderEvaluation::getCreatedAt, range.startDate().atStartOfDay())
+                        .lt(WorkOrderEvaluation::getCreatedAt, range.endExclusive().atStartOfDay()));
 
         /* 工单 → 类别 与 工单 → 最新派单服务人员 的映射（一次载入） */
         List<Long> orderIds = evaluations.stream().map(WorkOrderEvaluation::getWorkOrderId).toList();
@@ -210,10 +319,47 @@ public class StatisticsService {
 
     /** 工单统计（专项）：状态分布 + 优先级分布 */
     public Map<String, Object> workOrderStatistics(Long communityId) {
+        return workOrderStatistics(communityId,
+                StatisticsDateRange.resolve(null, null, LocalDate.now()));
+    }
+
+    public Map<String, Object> workOrderStatistics(Long communityId, StatisticsDateRange range) {
         List<WorkOrder> orders = workOrderMapper.selectList(new LambdaQueryWrapper<WorkOrder>()
-                .eq(communityId != null, WorkOrder::getCommunityId, communityId));
+                .eq(communityId != null, WorkOrder::getCommunityId, communityId)
+                .ge(WorkOrder::getCreatedAt, range.startDate().atStartOfDay())
+                .lt(WorkOrder::getCreatedAt, range.endExclusive().atStartOfDay()));
+        Set<Long> orderIds = orders.stream().map(WorkOrder::getId)
+                .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+        List<WorkOrderProcess> completionEvents = orderIds.isEmpty() ? List.of()
+                : processMapper.selectList(new LambdaQueryWrapper<WorkOrderProcess>()
+                        .in(WorkOrderProcess::getWorkOrderId, orderIds)
+                        .eq(WorkOrderProcess::getOperatorType, RoleConstants.STAFF)
+                        .eq(WorkOrderProcess::getAction, WorkOrderProcessAction.COMPLETE)
+                        .eq(WorkOrderProcess::getNewStatus, WorkOrderStatus.TO_CONFIRM)
+                        .ge(WorkOrderProcess::getCreatedAt, range.startDate().atStartOfDay())
+                        .lt(WorkOrderProcess::getCreatedAt, range.endExclusive().atStartOfDay()));
+        Set<Long> completedIds = completionEvents.stream().map(WorkOrderProcess::getWorkOrderId)
+                .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+        Map<Long, LocalDateTime> firstCompletion = new HashMap<>();
+        completionEvents.forEach(event -> {
+            if (event.getWorkOrderId() != null && event.getCreatedAt() != null) {
+                firstCompletion.merge(event.getWorkOrderId(), event.getCreatedAt(),
+                        (left, right) -> left.isBefore(right) ? left : right);
+            }
+        });
+        double averageProcessingHours = orders.stream()
+                .filter(order -> order.getId() != null && order.getCreatedAt() != null
+                        && firstCompletion.containsKey(order.getId()))
+                .mapToDouble(order -> java.time.Duration.between(order.getCreatedAt(),
+                        firstCompletion.get(order.getId())).toMinutes() / 60.0)
+                .average().orElse(0.0);
         Map<String, Object> result = new HashMap<>();
         result.put("total", orders.size());
+        result.put("completed", completedIds.size());
+        result.put("completionRate", orders.isEmpty() ? 0.0 : completedIds.size() * 100.0 / orders.size());
+        result.put("averageProcessingHours", averageProcessingHours);
+        result.put("startDate", range.startDate().toString());
+        result.put("endDate", range.endDate().toString());
         result.put("byStatus", orders.stream().collect(
                 Collectors.groupingBy(WorkOrder::getStatus, Collectors.counting())));
         result.put("byPriority", orders.stream().collect(
@@ -223,9 +369,25 @@ public class StatisticsService {
 
     /** 居民统计（专项）：总量与状态分布 */
     public Map<String, Object> residentStatistics() {
-        List<Resident> residents = residentMapper.selectList(null);
+        return residentStatistics(null, StatisticsDateRange.resolve(null, null, LocalDate.now()));
+    }
+
+    public Map<String, Object> residentStatistics(Long communityId, StatisticsDateRange range) {
+        List<ResidenceRelation> relations = residenceRelationMapper.selectList(new LambdaQueryWrapper<ResidenceRelation>()
+                .eq(communityId != null, ResidenceRelation::getCommunityId, communityId));
+        Set<Long> residentIds = relations.stream().map(ResidenceRelation::getResidentId)
+                .filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+        List<Resident> residents = residentIds.isEmpty() ? List.of() : residentMapper.selectBatchIds(residentIds);
+        long current = relations.stream().filter(relation -> relation.getMoveOutDate() == null)
+                .map(ResidenceRelation::getResidentId).filter(java.util.Objects::nonNull).distinct().count();
+        long moveIn = relations.stream().filter(relation -> range.contains(relation.getMoveInDate())).count();
+        long moveOut = relations.stream().filter(relation -> range.contains(relation.getMoveOutDate())).count();
         Map<String, Object> result = new HashMap<>();
-        result.put("total", residents.size());
+        result.put("total", current);
+        result.put("moveInTotal", moveIn);
+        result.put("moveOutTotal", moveOut);
+        result.put("startDate", range.startDate().toString());
+        result.put("endDate", range.endDate().toString());
         result.put("byStatus", residents.stream().collect(
                 Collectors.groupingBy(Resident::getStatus, Collectors.counting())));
         return result;
@@ -233,14 +395,46 @@ public class StatisticsService {
 
     /** 资源预约统计（专项）：状态分布 */
     public Map<String, Object> reservationStatistics(Long communityId) {
+        return reservationStatistics(communityId,
+                StatisticsDateRange.resolve(null, null, LocalDate.now()));
+    }
+
+    public Map<String, Object> reservationStatistics(Long communityId, StatisticsDateRange range) {
         List<ResourceReservation> reservations = reservationMapper.selectList(
                 new LambdaQueryWrapper<ResourceReservation>()
-                        .eq(communityId != null, ResourceReservation::getCommunityId, communityId));
+                        .eq(communityId != null, ResourceReservation::getCommunityId, communityId)
+                        .ge(ResourceReservation::getReserveDate, range.startDate())
+                        .le(ResourceReservation::getReserveDate, range.endDate()));
         Map<String, Object> result = new HashMap<>();
         result.put("total", reservations.size());
+        result.put("completed", reservations.stream().filter(r -> "COMPLETED".equals(r.getStatus())).count());
+        result.put("startDate", range.startDate().toString());
+        result.put("endDate", range.endDate().toString());
         result.put("byStatus", reservations.stream().collect(
                 Collectors.groupingBy(ResourceReservation::getStatus, Collectors.counting())));
         return result;
+    }
+
+    private Map<String, Long> emptyDailyEvents(StatisticsDateRange range) {
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (LocalDate date = range.startDate(); !date.isAfter(range.endDate()); date = date.plusDays(1)) {
+            result.put(date.toString(), 0L);
+        }
+        return result;
+    }
+
+    private boolean inRange(LocalDateTime occurredAt, LocalDateTime start, LocalDateTime end) {
+        return occurredAt != null && !occurredAt.isBefore(start) && occurredAt.isBefore(end);
+    }
+
+    private void increment(Map<String, Long> counts, Long id) {
+        if (id != null) counts.merge(id.toString(), 1L, Long::sum);
+    }
+
+    private void addDailyEvent(Map<String, Long> events, LocalDateTime occurredAt) {
+        if (occurredAt != null) {
+            events.computeIfPresent(occurredAt.toLocalDate().toString(), (day, count) -> count + 1L);
+        }
     }
 
     /** 社区列表（看板社区筛选下拉） */
@@ -282,11 +476,12 @@ public class StatisticsService {
         submissions.forEach(event -> referencedIds.add(event.getWorkOrderId()));
         java.util.Set<Long> visibleIds = referencedIds.isEmpty() ? java.util.Set.of()
                 : workOrderMapper.selectList(new LambdaQueryWrapper<WorkOrder>()
-                        .select(WorkOrder::getId).in(WorkOrder::getId, referencedIds))
+                        .in(WorkOrder::getId, referencedIds))
                         .stream().map(WorkOrder::getId).collect(Collectors.toSet());
 
-        Map<String, Long> assignedTrend = emptyDailyEvents(startDate, window);
-        Map<String, Long> submittedTrend = emptyDailyEvents(startDate, window);
+        StatisticsDateRange range = StatisticsDateRange.resolve(startDate, today, today);
+        Map<String, Long> assignedTrend = emptyDailyEvents(range);
+        Map<String, Long> submittedTrend = emptyDailyEvents(range);
         for (WorkOrderAssignment event : assignments) {
             if (visibleIds.contains(event.getWorkOrderId())) {
                 addDailyEvent(assignedTrend, event.getAssignTime());
@@ -309,17 +504,4 @@ public class StatisticsService {
         return result;
     }
 
-    private Map<String, Long> emptyDailyEvents(LocalDate start, int window) {
-        Map<String, Long> result = new java.util.LinkedHashMap<>();
-        for (int i = 0; i < window; i++) {
-            result.put(start.plusDays(i).toString(), 0L);
-        }
-        return result;
-    }
-
-    private void addDailyEvent(Map<String, Long> events, LocalDateTime occurredAt) {
-        if (occurredAt != null) {
-            events.computeIfPresent(occurredAt.toLocalDate().toString(), (day, count) -> count + 1L);
-        }
-    }
 }

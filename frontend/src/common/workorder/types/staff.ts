@@ -48,6 +48,7 @@ export interface IStaffCapability {
   username: string
   realName: string
   phone?: string
+  email?: string
   /** 账号状态：可见值以 sys_user.status 为准 */
   status?: string
   /** 常驻社区ID列表 */
@@ -62,6 +63,9 @@ export interface IStaffCapability {
 
 /** 能力绑定保存请求（PUT /staff-capabilities/{staffId}，全量覆盖式：空数组=清空该维度） */
 export interface ISaveStaffCapabilityDTO {
+  realName?: string
+  phone?: string
+  email?: string
   communityIds?: number[]
   categoryIds?: number[]
 }
@@ -136,4 +140,16 @@ export interface IClearScheduleParams {
   staffIds?: number[]
   startDate: string
   endDate: string
+}
+
+/** 专用代建入口；后端仍独立约束固定STAFF及至少一个有效社区。 */
+export interface ICreateStaffAccountDTO {
+  username: string
+  password: string
+  realName: string
+  phone: string
+  email?: string
+  role: 'STAFF'
+  communityIds: number[]
+  categoryIds?: number[]
 }

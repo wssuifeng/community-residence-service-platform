@@ -1,0 +1,66 @@
+{
+  "recordedAt": "2026-10-20T19:43:43.537986",
+  "backendJarSha256": "F435478ABF19618DD01DA7C72D5CCB86FD5258211D7FFEB70049263AA31C20DD",
+  "browser": {
+    "family": "Microsoft Edge",
+    "version": "155.0.4283.62"
+  },
+  "statisticsRequests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?communityId=2&startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/work-orders?communityId=2&startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/residents?communityId=2&startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/resources?communityId=2&startDate=2026-09-21&endDate=2026-10-20"
+    }
+  ],
+  "detailsTabs": [
+    {
+      "label": "工单",
+      "exportButtons": 2
+    },
+    {
+      "label": "居民",
+      "exportButtons": 1
+    },
+    {
+      "label": "资源预约",
+      "exportButtons": 0
+    }
+  ],
+  "pageErrors": [],
+  "financialOperations": 0
+}

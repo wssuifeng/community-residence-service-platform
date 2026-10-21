@@ -1,0 +1,41 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://mysql:3306/community_residence?characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:community}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    druid:
+      initial-size: ${DB_POOL_INITIAL_SIZE:5}
+      min-idle: ${DB_POOL_MIN_IDLE:5}
+      max-active: ${DB_POOL_MAX_ACTIVE:20}
+      max-wait: ${DB_POOL_MAX_WAIT:30000}
+      validation-query: SELECT 1
+      test-while-idle: true
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      database: ${SPRING_DATA_REDIS_DATABASE:0}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT:3000}
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
+          max-idle: ${REDIS_POOL_MAX_IDLE:8}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
+          max-wait: ${REDIS_POOL_MAX_WAIT:-1}
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET}
+
+upload:
+  dir: ${UPLOAD_DIR:/app/uploads}
+
+logging:
+  level:
+    com.community.residence: ${APP_LOG_LEVEL:INFO}

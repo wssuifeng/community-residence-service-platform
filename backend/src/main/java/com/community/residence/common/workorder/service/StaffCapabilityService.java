@@ -48,6 +48,7 @@ import java.util.Set;
 public class StaffCapabilityService {
 
     private final SysUserMapper sysUserMapper;
+    private final com.community.residence.common.auth.service.SysUserService sysUserService;
     private final StaffCommunityMapper staffCommunityMapper;
     private final StaffServiceCategoryMapper staffServiceCategoryMapper;
     private final CommunityMapper communityMapper;
@@ -84,55 +85,93 @@ public class StaffCapabilityService {
         return assemble(List.of(staff)).get(0);
     }
 
-    /* 全量覆盖式保存绑定：先删后插同一事务。校验约束——
-       staffId 须为存在且角色 STAFF 的账号；communityIds 须逐个通过社区归属校验
-       （ADMIN 限绑定社区，SUPER_ADMIN 不限）且真实存在；categoryIds 须真实存在 */
+    /* 代建固定STAFF：先校验社区，再在同一外层事务创建账号和绑定；任一失败全部回滚。 */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "STAFF_CAPABILITY", targetId = "#staffId", content = "'保存服务人员能力绑定'")
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "CREATE", targetType = "STAFF_ACCOUNT", targetId = "#result.staffId", content = "'代建服务人员账号'" )
+    public StaffCapabilityVO createAccount(com.community.residence.common.workorder.dto.CreateStaffAccountDTO dto) {
+        List<Long> communities = normalizeIds(dto.getCommunityIds());
+        if (communities.isEmpty() || !RoleConstants.STAFF.equals(dto.getRole())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "代建必须选择社区且角色只能为STAFF");
+        }
+        validateBindings(communities, normalizeIds(dto.getCategoryIds()), true);
+        var account = new com.community.residence.common.auth.dto.CreateSysUserDTO();
+        account.setUsername(dto.getUsername()); account.setPassword(dto.getPassword());
+        account.setRealName(dto.getRealName()); account.setPhone(dto.getPhone()); account.setEmail(dto.getEmail());
+        account.setRole(RoleConstants.STAFF);
+        Long staffId = sysUserService.create(account).getId();
+        var bindings = new SaveStaffCapabilityDTO();
+        bindings.setCommunityIds(communities); bindings.setCategoryIds(dto.getCategoryIds());
+        persistBindings(staffId, bindings);
+        return getById(staffId);
+    }
+
+    /* 管理员仅覆盖自身授权社区和这些社区的类别；人员锁与派单/排班校验串行。 */
+    @Transactional(rollbackFor = Exception.class)
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "STAFF_CAPABILITY", targetId = "#staffId", content = "'保存服务人员业务资料和绑定'")
     public StaffCapabilityVO save(Long staffId, SaveStaffCapabilityDTO dto) {
-        SysUser staff = requireStaff(staffId);
-        List<Long> communityIds = normalizeIds(dto == null ? null : dto.getCommunityIds());
-        List<Long> categoryIds = normalizeIds(dto == null ? null : dto.getCategoryIds());
-
-        for (Long communityId : communityIds) {
-            SecurityUtils.checkCommunityAccess(communityId);
-            if (communityMapper.selectById(communityId) == null) {
-                throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "社区不存在：" + communityId);
-            }
+        SysUser staff = sysUserMapper.selectByIdForUpdate(staffId);
+        if (staff == null || !RoleConstants.STAFF.equals(staff.getRole())
+                || (SecurityUtils.hasRole(RoleConstants.ADMIN) && !inAdminScope(staffId))) {
+            throw new ResourceNotFoundException("服务人员不存在");
         }
-        for (Long categoryId : categoryIds) {
-            if (categoryMapper.selectById(categoryId) == null) {
-                throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "服务类别不存在：" + categoryId);
-            }
+        persistBindings(staffId, dto);
+        if (dto.getRealName() != null || dto.getPhone() != null || dto.getEmail() != null) {
+            staff = sysUserService.updateStaffProfile(staffId, dto.getRealName(), dto.getPhone(), dto.getEmail());
         }
-
-        staffCommunityMapper.delete(new LambdaQueryWrapper<StaffCommunity>()
-                .eq(StaffCommunity::getStaffId, staffId));
-        staffServiceCategoryMapper.delete(new LambdaQueryWrapper<StaffServiceCategory>()
-                .eq(StaffServiceCategory::getStaffId, staffId));
-        for (Long communityId : communityIds) {
-            StaffCommunity binding = new StaffCommunity();
-            binding.setStaffId(staffId);
-            binding.setCommunityId(communityId);
-            staffCommunityMapper.insert(binding);
-        }
-        for (Long categoryId : categoryIds) {
-            StaffServiceCategory binding = new StaffServiceCategory();
-            binding.setStaffId(staffId);
-            binding.setCategoryId(categoryId);
-            staffServiceCategoryMapper.insert(binding);
-        }
-        log.info("服务人员能力绑定已保存：staffId={}, communities={}, categories={}, operator={}",
-                staffId, communityIds, categoryIds, SecurityUtils.getUserId());
         return assemble(List.of(staff)).get(0);
     }
 
-    /** 可绑定人员候选池：全量 STAFF（仅功能级权限，不做社区过滤，供绑定下拉选择） */
+    private void validateBindings(List<Long> communities, List<Long> categories, boolean creating) {
+        for (Long id : communities) {
+            SecurityUtils.checkCommunityAccess(id);
+            Community community = communityMapper.selectById(id);
+            if (community == null || (creating && !"ACTIVE".equals(community.getStatus()))) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "请选择有效运营社区");
+            }
+        }
+        for (Long id : categories) {
+            ServiceCategory category = categoryMapper.selectById(id);
+            if (category == null || !communities.contains(category.getCommunityId())) {
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "服务类别须属于所选社区");
+            }
+        }
+    }
+
+    private void persistBindings(Long staffId, SaveStaffCapabilityDTO dto) {
+        List<Long> communities = normalizeIds(dto.getCommunityIds());
+        List<Long> categories = normalizeIds(dto.getCategoryIds());
+        validateBindings(communities, categories, false);
+        boolean admin = SecurityUtils.hasRole(RoleConstants.ADMIN);
+        Set<Long> scope = SecurityUtils.getCommunityIds();
+        if (admin && scope.isEmpty()) throw new BusinessException(ErrorCode.INVALID_PARAM, "没有可管理社区");
+        staffCommunityMapper.delete(new LambdaQueryWrapper<StaffCommunity>()
+                .eq(StaffCommunity::getStaffId, staffId).in(admin, StaffCommunity::getCommunityId, scope));
+        var categoryDelete = new LambdaQueryWrapper<StaffServiceCategory>().eq(StaffServiceCategory::getStaffId, staffId);
+        if (admin) {
+            List<Long> scopedCategories = categoryMapper.selectList(new LambdaQueryWrapper<ServiceCategory>()
+                    .in(ServiceCategory::getCommunityId, scope)).stream().map(ServiceCategory::getId).toList();
+            if (!scopedCategories.isEmpty()) staffServiceCategoryMapper.delete(categoryDelete.in(StaffServiceCategory::getCategoryId, scopedCategories));
+        } else {
+            staffServiceCategoryMapper.delete(categoryDelete);
+        }
+        for (Long id : communities) {
+            StaffCommunity binding = new StaffCommunity(); binding.setStaffId(staffId); binding.setCommunityId(id);
+            staffCommunityMapper.insert(binding);
+        }
+        for (Long id : categories) {
+            StaffServiceCategory binding = new StaffServiceCategory(); binding.setStaffId(staffId); binding.setCategoryId(id);
+            staffServiceCategoryMapper.insert(binding);
+        }
+    }
+
+    /** 业务人员候选：管理员仅见其授权社区内人员，超管可见全部。 */
     public List<StaffCandidateVO> candidates() {
+        List<Long> ids = resolveScopeIds(null, null);
+        if (ids != null && ids.isEmpty()) return List.of();
         return sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>()
-                        .eq(SysUser::getRole, RoleConstants.STAFF)
-                        .orderByAsc(SysUser::getId))
-                .stream().map(StaffCandidateVO::from).toList();
+                .eq(SysUser::getRole, RoleConstants.STAFF)
+                .in(ids != null, SysUser::getId, ids == null ? List.of() : ids)
+                .orderByAsc(SysUser::getId)).stream().map(StaffCandidateVO::from).toList();
     }
 
     /** 批量取人员的常驻社区 ID（单次批量查询，避免逐人查询；无绑定的人不出现在 Map 中） */
@@ -150,11 +189,16 @@ public class StaffCapabilityService {
             return Map.of();
         }
         Map<Long, List<Long>> result = new LinkedHashMap<>();
+        Set<Long> allowedCategoryIds = SecurityUtils.hasRole(RoleConstants.ADMIN)
+                ? categoryMapper.selectList(new LambdaQueryWrapper<ServiceCategory>()
+                    .in(!SecurityUtils.getCommunityIds().isEmpty(), ServiceCategory::getCommunityId, SecurityUtils.getCommunityIds()))
+                    .stream().map(ServiceCategory::getId).collect(java.util.stream.Collectors.toSet()) : null;
         for (StaffServiceCategory row : staffServiceCategoryMapper.selectList(
                 new LambdaQueryWrapper<StaffServiceCategory>()
                         .in(StaffServiceCategory::getStaffId, staffIds)
                         .orderByAsc(StaffServiceCategory::getId))) {
-            result.computeIfAbsent(row.getStaffId(), k -> new ArrayList<>()).add(row.getCategoryId());
+            if (allowedCategoryIds == null || allowedCategoryIds.contains(row.getCategoryId()))
+                result.computeIfAbsent(row.getStaffId(), k -> new ArrayList<>()).add(row.getCategoryId());
         }
         return result;
     }
@@ -229,6 +273,7 @@ public class StaffCapabilityService {
         }
         return staffCommunityMapper.selectList(new LambdaQueryWrapper<StaffCommunity>()
                 .in(StaffCommunity::getStaffId, staffIds)
+                .in(SecurityUtils.hasRole(RoleConstants.ADMIN), StaffCommunity::getCommunityId, SecurityUtils.getCommunityIds())
                 .orderByAsc(StaffCommunity::getId));
     }
 
@@ -277,6 +322,7 @@ public class StaffCapabilityService {
             vo.setUsername(staff.getUsername());
             vo.setRealName(staff.getRealName());
             vo.setPhone(staff.getPhone());
+            vo.setEmail(staff.getEmail());
             vo.setStatus(staff.getStatus());
             vo.setCommunityIds(boundCommunities);
             vo.setCommunityNames(boundCommunities.stream()

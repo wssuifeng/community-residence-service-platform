@@ -107,16 +107,16 @@ class WorkOrderDispatchTest {
 
             List<StaffOptionVO> options = workOrderService.assignableStaff(1L, 5L);
 
-            assertThat(options).extracting(StaffOptionVO::getId).containsExactly(1L, 2L, 3L, 4L);
+            assertThat(options).extracting(StaffOptionVO::getId).containsExactly(1L, 2L);
             assertThat(options).extracting(StaffOptionVO::getRecommendLevel)
-                    .containsExactly(1, 2, 3, 4);
+                    .containsExactly(1, 2);
             assertThat(options).extracting(StaffOptionVO::getMatchedCommunity)
-                    .containsExactly(true, true, false, false);
+                    .containsExactly(true, true);
             assertThat(options).extracting(StaffOptionVO::getMatchedCategory)
-                    .containsExactly(true, false, true, false);
+                    .containsExactly(true, false);
             assertThat(options.get(0).getCommunityNames()).isEqualTo("幸福社区");
             assertThat(options.get(0).getTodayShiftLabel()).isNull();
-            assertThat(options.get(2).getTodayShiftLabel()).isEqualTo("早班");
+            assertThat(options).allSatisfy(vo -> assertThat(vo.getTodayShiftLabel()).isNull());
             assertThat(options).allSatisfy(vo -> assertThat(vo.getActiveOrderCount()).isEqualTo(0));
         }
     }
@@ -127,6 +127,8 @@ class WorkOrderDispatchTest {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             when(sysUserMapper.selectList(any())).thenReturn(List.of(
                     staff(1L, "忙碌甲"), staff(2L, "空闲乙")));
+            when(staffCapabilityService.communityIdsByStaff(any()))
+                    .thenReturn(Map.of(1L, List.of(1L), 2L, List.of(1L)));
             /* 调用 1：按处理人取涉及工单；调用 2：未完结工单取每单最新派单（计数） */
             when(assignmentMapper.selectList(any())).thenReturn(
                     List.of(assignment(10L, 1L), assignment(11L, 1L)),

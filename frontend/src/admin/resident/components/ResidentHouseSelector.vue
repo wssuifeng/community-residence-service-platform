@@ -43,7 +43,10 @@ async function loadHouses(id: number | undefined) {
   loading.value.houses = false
   if (!id) return
   loading.value.houses = true
-  try { houses.value = await loadAllPages(q => getHouseList(id, { ...q, status: props.allowOccupied ? 'OCCUPIED' : 'VACANT' }), () => version === houseRequest) }
+  try {
+    const result = await loadAllPages(q => getHouseList(id, { ...q, status: props.allowOccupied ? undefined : 'VACANT' }), () => version === houseRequest)
+    houses.value = props.allowOccupied ? result.filter(item => ['OWNER_OCCUPIED', 'TENANT_OCCUPIED'].includes(item.status)) : result
+  }
   catch (e) { if (!(e instanceof StaleStructureLoad) && version === houseRequest) error.value = e instanceof Error ? e.message : '房屋加载失败' }
   finally { if (version === houseRequest) loading.value.houses = false }
 }

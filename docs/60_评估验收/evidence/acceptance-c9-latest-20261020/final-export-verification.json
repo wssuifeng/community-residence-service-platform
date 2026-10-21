@@ -1,0 +1,206 @@
+{
+  "recordedAt": "2026-10-20T22:24:41.490971+08:00",
+  "runtime": {
+    "frontend": "http://127.0.0.1:5182",
+    "backend": "http://127.0.0.1:8087"
+  },
+  "browser": {
+    "family": "Microsoft Edge",
+    "productVersion": "155.0.4283.62",
+    "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "engineVersion": "155.0.4283.62"
+  },
+  "backendJarSha256": "f435478abf19618dd01da7c72d5ccb86fd5258211d7ffeb70049263aa31c20dd",
+  "frontendSources": {
+    "frontend/src/common/statistics/components/EChart.vue": "1216a17b4af30abf926200ba7dbb876a6efec58f65a3a02d10f595b77b6722dc",
+    "frontend/src/admin/statistics/views/DashboardOverview.vue": "55bd6f571ad8d8ead6713a424307ce448297010303985ea85ff348d415e77d0a",
+    "frontend/src/admin/statistics/views/StatisticsView.vue": "e07d85a5a226c8d2223e008d20b98405435d67ee394b1c6e4e41edf830029a65"
+  },
+  "observations": [
+    {
+      "view": "overview",
+      "exportButtons": 2,
+      "pngDownloads": 2
+    },
+    {
+      "view": "workorder",
+      "exportButtons": 2,
+      "pngDownloads": 2
+    },
+    {
+      "view": "resident",
+      "exportButtons": 1,
+      "pngDownloads": 1
+    },
+    {
+      "view": "resource",
+      "exportButtons": 1,
+      "pngDownloads": 1
+    }
+  ],
+  "downloadCount": 6,
+  "downloads": [
+    {
+      "view": "overview",
+      "label": "工单提交趋势导出图片",
+      "file": "overview-1.png",
+      "suggestedFilename": "工单提交趋势.png",
+      "size": [
+        1444,
+        544
+      ],
+      "bytes": 47457,
+      "sha256": "888d9979d546fc9e5042978b32b75756f1e84990e5ec9ecbe64ac6b80e7f338d"
+    },
+    {
+      "view": "overview",
+      "label": "工单状态分布导出图片",
+      "file": "overview-2.png",
+      "suggestedFilename": "工单状态分布.png",
+      "size": [
+        316,
+        472
+      ],
+      "bytes": 15419,
+      "sha256": "281e8be4549f3f9d3697e8b36894ae3ae2b3f50bc1945ed2bbcd6baf0637eefe"
+    },
+    {
+      "view": "workorder",
+      "label": "工单状态分布导出图片",
+      "file": "workorder-1.png",
+      "suggestedFilename": "工单状态分布.png",
+      "size": [
+        1276,
+        640
+      ],
+      "bytes": 44174,
+      "sha256": "1b53db4f38936ef897fbb7cadcba8e73a31071b1146a3bded5e64cd0c5dfe244"
+    },
+    {
+      "view": "workorder",
+      "label": "工单优先级分布导出图片",
+      "file": "workorder-2.png",
+      "suggestedFilename": "工单优先级分布.png",
+      "size": [
+        820,
+        640
+      ],
+      "bytes": 29115,
+      "sha256": "21de5805ac774e6d15ddcc43f3676f0e3f80a69544d04ec629b6de91e9dc390a"
+    },
+    {
+      "view": "resident",
+      "label": "居民状态分布导出图片",
+      "file": "resident-1.png",
+      "suggestedFilename": "居民状态分布.png",
+      "size": [
+        1276,
+        640
+      ],
+      "bytes": 39010,
+      "sha256": "652f419836f12c9249caca5459fca022d9e14c408ba5806148e73e590d9f0be2"
+    },
+    {
+      "view": "resource",
+      "label": "资源预约状态分布导出图片",
+      "file": "resource-1.png",
+      "suggestedFilename": "资源预约状态分布.png",
+      "size": [
+        1276,
+        640
+      ],
+      "bytes": 44351,
+      "sha256": "7630a12a105e26e2f2f7fe44daef91946b394915126f05073ae2a20e5e32277c"
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/admin/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/dashboard?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/work-orders?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notices?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/resource-reservations?page=1&size=5"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/pull?sinceSeq=0"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/todos"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/work-orders?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/communities"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/residents?startDate=2026-09-21&endDate=2026-10-20"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/statistics/resources?startDate=2026-09-21&endDate=2026-10-20"
+    }
+  ],
+  "pageErrors": [],
+  "businessWrites": 0,
+  "financialOperations": 0,
+  "normalDatabaseWrites": 0,
+  "limitations": [
+    "Read-only final-runtime chart export check; does not satisfy the N8 multi-browser matrix.",
+    "Numeric comparison remains limited to the fixed sample in full-numeric-reconciliation.json."
+  ]
+}

@@ -38,6 +38,7 @@ import com.community.residence.common.housing.vo.HouseHousingTreeVO;
 import com.community.residence.common.housing.vo.UnitHousingTreeVO;
 import com.community.residence.common.reservation.service.SlotGrids;
 import com.community.residence.common.reservation.vo.AvailableSlotVO;
+import com.community.residence.common.statistics.mapper.StatisticsSnapshotMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -72,6 +73,9 @@ public class HousingService {
 
     /** 浏览计数 Redis 键前缀（架构设计.md §3.3.1，HousingViewFlushTask 每 5 分钟回写） */
     public static final String VIEW_COUNT_KEY_PREFIX = "housing:view:";
+
+    /** 日浏览计数键前缀：按房源与本地日累计，回写时进入 statistics_snapshot，用于运营看板区间统计 */
+    public static final String DAILY_VIEW_COUNT_KEY_PREFIX = VIEW_COUNT_KEY_PREFIX + "daily:";
 
     /** 看房切片粒度（分钟，DEF-061：V6 模板为 3~4 小时长段，整段暴露导致只能约整段
         且超 R60 连续上限，对齐 C7 Slot Grid 口径栅格化；housing_timeslot 无 slot_unit 列，
@@ -108,6 +112,7 @@ public class HousingService {
     private final CommunityMapper communityMapper;
     private final HousingTimeslotMapper timeslotMapper;
     private final ViewingAppointmentMapper appointmentMapper;
+    private final StatisticsSnapshotMapper statisticsSnapshotMapper;
     private final CommunityService communityService;
     private final StringRedisTemplate redisTemplate;
 
@@ -266,6 +271,7 @@ public class HousingService {
         }
         try {
             Long increment = redisTemplate.opsForValue().increment(VIEW_COUNT_KEY_PREFIX + id);
+            redisTemplate.opsForValue().increment(DAILY_VIEW_COUNT_KEY_PREFIX + id + ":" + LocalDate.now(), 1L);
             return (long) effectiveViewCount(housing.getViewCount(), increment);
         } catch (DataAccessException e) {
             RedisFailures.rethrowUnlessUnavailable(e);
@@ -273,6 +279,11 @@ public class HousingService {
             housingMapper.update(null, new LambdaUpdateWrapper<Housing>()
                     .eq(Housing::getId, id)
                     .setSql("view_count = view_count + 1"));
+            try {
+                statisticsSnapshotMapper.incrementHousingViews(housing.getCommunityId(), LocalDate.now(), 1L);
+            } catch (Exception statsError) {
+                log.error("Redis降级期间日浏览统计写入失败：housingId={}", id, statsError);
+            }
             /* 直写分支回读数据库新值（并发累加下回读比本地 +1 更准；回读失败退回 +1） */
             Housing latest = housingMapper.selectById(id);
             return latest != null

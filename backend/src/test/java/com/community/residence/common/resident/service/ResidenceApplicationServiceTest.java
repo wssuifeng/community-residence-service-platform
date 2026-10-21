@@ -80,6 +80,8 @@ class ResidenceApplicationServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock private com.community.residence.common.community.service.HouseStateService houseStateService;
+
     @InjectMocks
     private ResidenceApplicationService applicationService;
 

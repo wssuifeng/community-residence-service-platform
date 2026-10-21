@@ -160,7 +160,7 @@ public class ResidentService {
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
         String term=keyword==null?"":keyword.trim();
         if(term.isEmpty()) return java.util.List.of();
-        if(!"OCCUPIED".equals(house.getStatus())) throw new BusinessException(ErrorCode.INVALID_PARAM,"请先选择有效主居住关系的房屋");
+        if(!com.community.residence.common.community.constant.HouseStatusConstant.isOccupied(house.getStatus())) throw new BusinessException(ErrorCode.INVALID_PARAM,"请先选择有效主居住关系的房屋");
         return residentMapper.selectList(new LambdaQueryWrapper<Resident>().eq(Resident::getStatus,"ACTIVE")
                 .and(w->w.eq(Resident::getUsername,term).or().eq(Resident::getPhone,term))).stream().map(r->{
                     var item=new com.community.residence.common.resident.vo.CoResidentCandidateVO();

@@ -78,6 +78,8 @@ class WorkOrderStateMachineFixTest {
     private StaffCapabilityService staffCapabilityService;
     @Mock
     private StaffScheduleService staffScheduleService;
+    @Mock
+    private StaffCommunityAccessService staffCommunityAccessService;
 
     @InjectMocks
     private WorkOrderService service;
@@ -94,6 +96,8 @@ class WorkOrderStateMachineFixTest {
         order.setStatus("PENDING");
         /* requireOrder 统一放行（各用例自行设置 order.status） */
         lenient().when(workOrderMapper.selectById(1L)).thenReturn(order);
+        lenient().when(staffCommunityAccessService.requireBoundActiveForUpdate(anyLong(), anyLong()))
+                .thenAnswer(invocation -> sysUserMapper.selectById(invocation.getArgument(0)));
     }
 
     @Test

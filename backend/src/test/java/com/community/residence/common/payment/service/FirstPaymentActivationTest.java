@@ -28,6 +28,7 @@ import com.community.residence.common.community.mapper.CommunityMapper;
 import com.community.residence.common.community.mapper.HouseImageMapper;
 import com.community.residence.common.community.mapper.HouseMapper;
 import com.community.residence.common.community.mapper.HouseStatusHistoryMapper;
+import com.community.residence.common.community.service.HouseStateService;
 import com.community.residence.common.community.mapper.PublicResourceMapper;
 import com.community.residence.common.community.mapper.ResourceTimeslotMapper;
 import com.community.residence.common.community.mapper.StructureBusinessCodeMapper;
@@ -63,6 +64,7 @@ class FirstPaymentActivationTest {
     @Mock LeaseRecordMapper leaseMapper;
     @Mock ResidentMapper residentMapper;
     @Mock HouseMapper houseMapper;
+    @Mock HouseStateService houseStateService;
     @Mock UnitMapper unitMapper;
     @Mock BuildingMapper buildingMapper;
     @Mock CommunityMapper communityMapper;
@@ -81,7 +83,8 @@ class FirstPaymentActivationTest {
         for (Class<?> type : new Class<?>[]{LeaseRecord.class, LeasePayment.class, ResidenceRelation.class}) {
             com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(new org.apache.ibatis.builder.MapperBuilderAssistant(new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""), type);
         }
-        LeaseService leases = new LeaseService(new com.community.residence.common.resident.service.ResidenceDependencyService(relationMapper), leaseMapper, residentMapper, houseMapper, unitMapper, buildingMapper,
+        LeaseService leases = new LeaseService(new com.community.residence.common.resident.service.ResidenceDependencyService(relationMapper), leaseMapper, residentMapper, houseMapper,
+            houseStateService, unitMapper, buildingMapper,
             communityMapper, changeLogService, payments, relationMapper, agreementMapper, conversationService);
         service = new PaymentService(payments, leaseMapper, admins, notifications, new PaymentProperties(), mock(PaymentChannelClient.class), mock(PaymentChannelClient.class));
         service.setSettlementInfrastructure(transactions, leases);
@@ -105,8 +108,9 @@ class FirstPaymentActivationTest {
     private ChannelTradeResult confirmed() { return new ChannelTradeResult("MEMORY-ONLY", LocalDateTime.now()); }
     @Test void firstSuccessActivatesAndLinksRelationWithoutExtendingLease() {
         LocalDate end = lease.getEndDate(); service.settleSuccess(payment, confirmed());
-        assertThat(payment.getStatus()).isEqualTo("SUCCESS"); assertThat(lease.getStatus()).isEqualTo("ACTIVE"); assertThat(house.getStatus()).isEqualTo("OCCUPIED"); assertThat(lease.getEndDate()).isEqualTo(end);
+        assertThat(payment.getStatus()).isEqualTo("SUCCESS"); assertThat(lease.getStatus()).isEqualTo("ACTIVE"); assertThat(lease.getEndDate()).isEqualTo(end);
         ArgumentCaptor<ResidenceRelation> capture = ArgumentCaptor.forClass(ResidenceRelation.class); verify(relationMapper).insert(capture.capture()); assertThat(capture.getValue().getLeaseId()).isEqualTo(7L); assertThat(capture.getValue().getResidentId()).isEqualTo(8L);
+        verify(houseStateService).refresh(9L, "首期成功且主租客关系生效");
         var order = inOrder(houseMapper, leaseMapper, payments); order.verify(houseMapper).selectByIdForUpdate(9L); order.verify(leaseMapper).selectByIdForUpdate(7L); order.verify(payments).selectByIdForUpdate(10L); verify(transactions).commit(any());
     }
     @Test void repeatedSuccessDoesNotDuplicateRelation() {

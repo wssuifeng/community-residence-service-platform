@@ -1,0 +1,82 @@
+{
+  "recordedAt": "2026-10-21",
+  "method": "Local Vite app with synthetic API responses; no backend, database, or financial endpoint used.",
+  "checks": [
+    {
+      "viewport": 768,
+      "document": 768,
+      "body": 768,
+      "horizontalOverflow": false,
+      "periodLabelPresent": true,
+      "smallOccupancyShare": "0.2%"
+    },
+    {
+      "viewport": 1024,
+      "document": 1024,
+      "body": 1024,
+      "horizontalOverflow": false,
+      "periodLabelPresent": true,
+      "smallOccupancyShare": "0.2%"
+    },
+    {
+      "viewport": 1440,
+      "document": 1440,
+      "body": 1440,
+      "horizontalOverflow": false,
+      "periodLabelPresent": true,
+      "smallOccupancyShare": "0.2%"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: net::ERR_FAILED",
+      "location": {
+        "url": "http://127.0.0.1:5183/ws/info?t=1792549559697",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "text": "Failed to load resource: net::ERR_FAILED",
+      "location": {
+        "url": "http://127.0.0.1:5183/ws/info?t=1792549560996",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "text": "Failed to load resource: net::ERR_FAILED",
+      "location": {
+        "url": "http://127.0.0.1:5183/ws/info?t=1792549562228",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [
+    {
+      "url": "http://127.0.0.1:5183/ws/info?t=1792549559697",
+      "failure": "net::ERR_FAILED"
+    },
+    {
+      "url": "http://127.0.0.1:5183/ws/info?t=1792549560996",
+      "failure": "net::ERR_FAILED"
+    },
+    {
+      "url": "http://127.0.0.1:5183/ws/info?t=1792549562228",
+      "failure": "net::ERR_FAILED"
+    }
+  ],
+  "expectedExclusions": {
+    "websocketRequestFailures": 3,
+    "reason": "WebSocket endpoint is intentionally unavailable in this synthetic frontend-only check."
+  },
+  "passed": true
+}

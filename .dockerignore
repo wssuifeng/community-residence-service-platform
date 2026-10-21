@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.docker.example
+uploads/
+backend/uploads/
+frontend/node_modules/
+backend/target/**
+!backend/target/residence-backend-0.1.0-SNAPSHOT.jar
+node_modules/
+output/
+Temp/
+.playwright-cli/
+*.log
+docs/90_全局/参考资料/

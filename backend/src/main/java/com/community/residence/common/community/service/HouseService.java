@@ -35,6 +35,7 @@ import java.util.List;
 public class HouseService {
 
     private final HouseMapper houseMapper;
+    private final HouseStateService houseStateService;
     private final UnitMapper unitMapper;
     private final HouseStatusHistoryMapper historyMapper;
     private final ResidenceRelationMapper residenceRelationMapper;
@@ -52,6 +53,7 @@ public class HouseService {
         house.setUnitId(unit.getId());
         house.setCommunityId(unit.getCommunityId());
         applyDto(house, dto);
+        requireInitialStatus(dto.getStatus());
         house.setStatus(StringUtils.hasText(dto.getStatus()) ? dto.getStatus() : HouseStatusConstant.VACANT);
         houseMapper.insert(house);
         return HouseVO.from(house);
@@ -86,7 +88,12 @@ public class HouseService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "已创建房屋的楼层只读，不能通过编辑修改");
         }
         buildingBoundaryService.validateFloor(requireUnit(house.getUnitId()), dto.getFloor());
+        house = houseMapper.selectByIdForUpdate(id);
         requireHouseNumberAvailable(house.getUnitId(), dto.getHouseNumber(), house.getId());
+        if (StringUtils.hasText(dto.getStatus()) && !dto.getStatus().equals(house.getStatus())) {
+            UpdateHouseStatusDTO state = new UpdateHouseStatusDTO(); state.setStatus(dto.getStatus());
+            state.setRemark("编辑房屋状态"); updateStatus(id, state); house.setStatus(dto.getStatus());
+        }
         applyDto(house, dto);
         houseMapper.updateById(house);
         houseLayoutService.synchronize(house.getId(), house.getLayout());
@@ -135,8 +142,10 @@ public class HouseService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "STATUS", targetType = "HOUSE", targetId = "#id", content = "'房屋状态变更为 ' + #dto.status")
     public void updateStatus(Long id, UpdateHouseStatusDTO dto) {
-        House house = requireHouse(id);
+        House house = houseMapper.selectByIdForUpdate(id);
+        if (house == null) throw new ResourceNotFoundException("房屋不存在");
         SecurityUtils.checkCommunityAccess(house.getCommunityId());
+        houseStateService.validateManual(house, dto.getStatus());
         String oldStatus = house.getStatus();
         if (oldStatus.equals(dto.getStatus())) {
             return;
@@ -172,6 +181,12 @@ public class HouseService {
             throw new ResourceNotFoundException("房屋不存在");
         }
         return house;
+    }
+
+    private void requireInitialStatus(String status) {
+        if (StringUtils.hasText(status) && !HouseStatusConstant.isManual(status)) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "新房仅可设置空置、维护中或停用");
+        }
     }
 
     private void applyDto(House house, CreateHouseDTO dto) {
@@ -251,6 +266,7 @@ public class HouseService {
                 House house = new House();
                 house.setUnitId(unit.getId());
                 house.setCommunityId(unit.getCommunityId());
+                requireInitialStatus(item.getStatus());
                 applyDto(house, item);
                 house.setStatus(StringUtils.hasText(item.getStatus())
                         ? item.getStatus() : HouseStatusConstant.VACANT);

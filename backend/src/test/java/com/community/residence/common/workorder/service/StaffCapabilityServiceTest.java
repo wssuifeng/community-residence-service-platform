@@ -93,6 +93,7 @@ class StaffCapabilityServiceTest {
         ServiceCategory category = new ServiceCategory();
         category.setId(id);
         category.setName(name);
+        category.setCommunityId(1L);
         return category;
     }
 
@@ -118,7 +119,7 @@ class StaffCapabilityServiceTest {
     @DisplayName("保存绑定：全量覆盖（先删后插），返回最新常驻社区与擅长类别")
     void save_fullOverwrite_deletesThenInserts() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
-            when(sysUserMapper.selectById(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
+            when(sysUserMapper.selectByIdForUpdate(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
             when(communityMapper.selectById(1L)).thenReturn(community(1L, "幸福社区"));
             when(communityMapper.selectById(2L)).thenReturn(community(2L, "和平社区"));
             when(categoryMapper.selectById(5L)).thenReturn(category(5L, "水电维修"));
@@ -152,7 +153,7 @@ class StaffCapabilityServiceTest {
     @DisplayName("保存绑定：列表为空/不传 → 清空对应维度绑定（只删不插）")
     void save_emptyLists_clearsBindings() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
-            when(sysUserMapper.selectById(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
+            when(sysUserMapper.selectByIdForUpdate(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
             SaveStaffCapabilityDTO dto = new SaveStaffCapabilityDTO();
 
             StaffCapabilityVO vo = staffCapabilityService.save(7L, dto);
@@ -170,7 +171,7 @@ class StaffCapabilityServiceTest {
     @DisplayName("保存绑定：staffId 不存在 → 404")
     void save_missingStaff_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
-            when(sysUserMapper.selectById(7L)).thenReturn(null);
+            when(sysUserMapper.selectByIdForUpdate(7L)).thenReturn(null);
 
             assertThatThrownBy(() -> staffCapabilityService.save(7L, new SaveStaffCapabilityDTO()))
                     .isInstanceOf(ResourceNotFoundException.class)
@@ -182,7 +183,7 @@ class StaffCapabilityServiceTest {
     @DisplayName("保存绑定：staffId 非 STAFF 角色 → 404（不可绑定管理员）")
     void save_nonStaffUser_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
-            when(sysUserMapper.selectById(9L)).thenReturn(staff(9L, RoleConstants.ADMIN));
+            when(sysUserMapper.selectByIdForUpdate(9L)).thenReturn(staff(9L, RoleConstants.ADMIN));
 
             assertThatThrownBy(() -> staffCapabilityService.save(9L, new SaveStaffCapabilityDTO()))
                     .isInstanceOf(ResourceNotFoundException.class);
@@ -194,7 +195,7 @@ class StaffCapabilityServiceTest {
     @DisplayName("保存绑定：社区不存在（或不在管理员可访问范围）→ 5003，整批拒绝")
     void save_unknownCommunity_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
-            when(sysUserMapper.selectById(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
+            when(sysUserMapper.selectByIdForUpdate(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
             when(communityMapper.selectById(99L)).thenReturn(null);
             SaveStaffCapabilityDTO dto = new SaveStaffCapabilityDTO();
             dto.setCommunityIds(List.of(99L));
@@ -202,8 +203,8 @@ class StaffCapabilityServiceTest {
             assertThatThrownBy(() -> staffCapabilityService.save(7L, dto))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
-                            .isEqualTo(ErrorCode.DATA_NOT_FOUND))
-                    .hasMessageContaining("社区不存在");
+                            .isEqualTo(ErrorCode.INVALID_PARAM))
+                    .hasMessageContaining("请选择有效运营社区");
             verify(staffCommunityMapper, never()).delete(any());
         }
     }
@@ -212,14 +213,14 @@ class StaffCapabilityServiceTest {
     @DisplayName("保存绑定：服务类别不存在 → 5003，整批拒绝")
     void save_unknownCategory_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
-            when(sysUserMapper.selectById(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
+            when(sysUserMapper.selectByIdForUpdate(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
             when(categoryMapper.selectById(99L)).thenReturn(null);
             SaveStaffCapabilityDTO dto = new SaveStaffCapabilityDTO();
             dto.setCategoryIds(List.of(99L));
 
             assertThatThrownBy(() -> staffCapabilityService.save(7L, dto))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("服务类别不存在");
+                    .hasMessageContaining("服务类别须属于所选社区");
             verify(staffServiceCategoryMapper, never()).delete(any());
         }
     }
