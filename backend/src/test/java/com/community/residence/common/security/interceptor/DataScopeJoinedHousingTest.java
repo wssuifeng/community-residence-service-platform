@@ -11,7 +11,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
 
-/** JOIN加锁与社区查询必须限定主表，不放宽原有数据权限。 */
+/** JOIN加锁与小区查询必须限定主表，不放宽原有数据权限。 */
 class DataScopeJoinedHousingTest {
     private String rewrite(String sql, Set<Long> scope) throws Exception {
         var configuration = new MybatisConfiguration();

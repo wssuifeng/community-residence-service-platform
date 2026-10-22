@@ -11,7 +11,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-/** 房屋创建/更新请求（更新接口复用本 DTO；社区ID 由单元推导） */
+/** 房屋创建/更新请求（更新接口复用本 DTO；小区ID 由单元推导） */
 @Data
 @Schema(description = "房屋创建/更新请求")
 public class CreateHouseDTO {

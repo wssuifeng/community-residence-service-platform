@@ -9,7 +9,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** 房源信息（housing 表；游客端展示主体，浏览计数直接累加） */
+/** 房源信息（housing 表；未登录公开页面展示主体，浏览计数直接累加） */
 @Data
 @TableName("housing")
 @Schema(description = "房源信息")
@@ -19,7 +19,7 @@ public class Housing {
     @Schema(description = "房源ID")
     private Long id;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "关联房屋ID")

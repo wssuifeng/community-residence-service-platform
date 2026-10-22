@@ -90,7 +90,7 @@ export interface IResourceStats {
   byStatus: Record<string, number>
 }
 
-/** 看板社区筛选下拉项（后端 communityOptions） */
+/** 看板小区筛选下拉项（后端 communityOptions） */
 export interface ICommunityOption {
   id: number
   name: string

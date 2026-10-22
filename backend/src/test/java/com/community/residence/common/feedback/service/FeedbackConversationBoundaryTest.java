@@ -61,7 +61,7 @@ class FeedbackConversationBoundaryTest {
     @Test void unboundCommunityAdminIsDeniedBeforeAcceptingFeedback() {
         when(feedbackMapper.selectByIdForUpdate(12L)).thenReturn(feedback("PENDING", null));
         try (MockedStatic<SecurityUtils> identity = mockStatic(SecurityUtils.class)) {
-            identity.when(() -> SecurityUtils.checkCommunityAccess(3L)).thenThrow(new ForbiddenException("社区无权限"));
+            identity.when(() -> SecurityUtils.checkCommunityAccess(3L)).thenThrow(new ForbiddenException("小区无权限"));
             assertThatThrownBy(() -> service.sendMessage(12L, message())).isInstanceOf(ForbiddenException.class);
             verify(feedbackMapper, never()).updateById(any(Feedback.class));
             verifyNoInteractions(messageMapper, notificationService, messagingTemplate, webSocketSessionService);

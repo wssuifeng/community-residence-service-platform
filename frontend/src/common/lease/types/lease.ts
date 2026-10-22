@@ -157,7 +157,7 @@ export interface ILeaseRecord {
   id: number
   /** 租客ID */
   tenantId: number
-  /** 社区名称（居民端租约卡片按社区分组展示，后端 LeaseVO 2026-09-20 补） */
+  /** 小区名称（居民端租约卡片按小区分组展示，后端 LeaseVO 2026-09-20 补） */
   communityName?: string
   /** 租客姓名 */
   tenantName: string
@@ -236,7 +236,7 @@ export interface ILeaseChange {
   createdAt: string
 }
 
-/** 创建/更新租住记录请求（后端 CreateLeaseDTO；社区归属由房屋推导，更新不允许变更房屋） */
+/** 创建/更新租住记录请求（后端 CreateLeaseDTO；小区归属由房屋推导，更新不允许变更房屋） */
 export interface ILeaseRecordDTO {
   contractMonths?: number
   firstPaymentMonths?: number
@@ -403,7 +403,7 @@ export interface ICreateMoveOutApplicationDTO {
   reason?: string
 }
 
-/** 退租申请分页查询参数（GET /lease-move-out-applications，管理端按社区数据权限） */
+/** 退租申请分页查询参数（GET /lease-move-out-applications，管理端按小区数据权限） */
 export interface IMoveOutApplicationQuery extends PageQuery {
   status?: MoveOutApplicationStatus
   communityId?: number

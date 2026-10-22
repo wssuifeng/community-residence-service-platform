@@ -7,8 +7,8 @@ import { getResponsibleAdmins } from '@/common/community/api/community'
 vi.mock('@/common/community/api/community', () => ({
   getResponsibleAdmins: vi.fn(), createCommunity: vi.fn(), updateCommunity: vi.fn()
 }))
-const community = { id: 1, name: '测试社区', address: '测试地址', responsibleAdminId: 2,
-  contactPerson: '其他社区管理员', contactPhone: '13800000000' } as any
+const community = { id: 1, name: '测试小区', address: '测试地址', responsibleAdminId: 2,
+  contactPerson: '其他小区管理员', contactPhone: '13800000000' } as any
 const dialogStub = { template: '<div><slot /><slot name="footer" /></div>' }
 async function open() {
   const wrapper = mount(CommunityEditDialog, { props: { modelValue: false, community },
@@ -17,21 +17,21 @@ async function open() {
   await flushPromises()
   return wrapper
 }
-describe('社区责任人回显', () => {
+describe('小区责任人回显', () => {
   beforeEach(() => vi.clearAllMocks())
-  it('未加载到的当前责任人不伪造本社区绑定', async () => {
+  it('未加载到的当前责任人不伪造本小区绑定', async () => {
     vi.mocked(getResponsibleAdmins).mockResolvedValue({ records: [], total: 0 } as any)
     const wrapper = await open()
     const groups = wrapper.findAllComponents({ name: 'ElOptionGroup' })
     const current = groups.find(item => item.props('label') === '当前责任人')!
     expect(current.findComponent({ name: 'ElOption' }).props('value')).toBe(2)
-    const bound = groups.find(item => item.props('label') === '已绑定本社区')!
+    const bound = groups.find(item => item.props('label') === '已绑定本小区')!
     expect(bound.findAllComponents({ name: 'ElOption' })).toHaveLength(0)
     wrapper.unmount()
   })
   it('候选返回真实绑定状态后取消临时回显分组', async () => {
     vi.mocked(getResponsibleAdmins).mockResolvedValue({ records: [
-      { id: 2, realName: '其他社区管理员', phone: '13800000000', boundToCommunity: false }
+      { id: 2, realName: '其他小区管理员', phone: '13800000000', boundToCommunity: false }
     ], total: 1 } as any)
     const wrapper = await open()
     expect(wrapper.findAllComponents({ name: 'ElOptionGroup' }).map(item => item.props('label')))

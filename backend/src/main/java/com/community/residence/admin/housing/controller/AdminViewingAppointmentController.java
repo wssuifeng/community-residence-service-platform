@@ -31,7 +31,7 @@ public class AdminViewingAppointmentController {
     private final ViewingAppointmentService appointmentService;
 
     @Operation(summary = "分配带看人",
-            description = "R59：将预约分配给启用状态的服务人员/社区管理员（禁超管），重复分配覆盖；成功后双方收到通知")
+            description = "R59：将预约分配给启用状态的服务人员/小区管理员（禁超管），重复分配覆盖；成功后双方收到通知")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/assign")
     public ApiResponse<ViewingAppointmentVO> assign(@PathVariable Long id,
@@ -40,7 +40,7 @@ public class AdminViewingAppointmentController {
     }
 
     @Operation(summary = "带看人候选列表",
-            description = "R59：启用状态服务人员全量 + 管辖该社区的启用社区管理员；ADMIN 仅可查其绑定社区")
+            description = "R59：启用状态服务人员全量 + 管辖该小区的启用小区管理员；ADMIN 仅可查其绑定小区")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/assignable-assignees")
     public ApiResponse<List<AssigneeOptionVO>> assignableAssignees(@RequestParam Long communityId) {

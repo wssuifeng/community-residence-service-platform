@@ -33,7 +33,7 @@ onMounted(()=>emit('element',element.value));onBeforeUnmount(()=>emit('element',
 
             <div v-else-if="gridGroups.length === 0" class="grid-state">
               <template v-if="houseCount === 0">
-                <p class="state-title">该社区还没有房屋</p>
+                <p class="state-title">该小区还没有房屋</p>
                 <p class="state-text">
                   用上方「批量建房」一次生成 楼栋 → 单元 → 房屋；也可在单元列头点「＋」单独添加。
                 </p>

@@ -116,19 +116,19 @@ class StaffCapabilityServiceTest {
     }
 
     @Test
-    @DisplayName("保存绑定：全量覆盖（先删后插），返回最新常驻社区与擅长类别")
+    @DisplayName("保存绑定：全量覆盖（先删后插），返回最新常驻小区与擅长类别")
     void save_fullOverwrite_deletesThenInserts() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             when(sysUserMapper.selectByIdForUpdate(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
-            when(communityMapper.selectById(1L)).thenReturn(community(1L, "幸福社区"));
-            when(communityMapper.selectById(2L)).thenReturn(community(2L, "和平社区"));
+            when(communityMapper.selectById(1L)).thenReturn(community(1L, "幸福小区"));
+            when(communityMapper.selectById(2L)).thenReturn(community(2L, "和平小区"));
             when(categoryMapper.selectById(5L)).thenReturn(category(5L, "水电维修"));
             when(staffCommunityMapper.selectList(any())).thenReturn(List.of(
                     communityBinding(7L, 1L), communityBinding(7L, 2L)));
             when(staffServiceCategoryMapper.selectList(any())).thenReturn(List.of(
                     categoryBinding(7L, 5L)));
             when(communityMapper.selectList(any())).thenReturn(List.of(
-                    community(1L, "幸福社区"), community(2L, "和平社区")));
+                    community(1L, "幸福小区"), community(2L, "和平小区")));
             when(categoryMapper.selectList(any())).thenReturn(List.of(category(5L, "水电维修")));
 
             SaveStaffCapabilityDTO dto = new SaveStaffCapabilityDTO();
@@ -143,7 +143,7 @@ class StaffCapabilityServiceTest {
             verify(staffServiceCategoryMapper).insert(any(StaffServiceCategory.class));
             assertThat(vo.getStaffId()).isEqualTo(7L);
             assertThat(vo.getCommunityIds()).containsExactly(1L, 2L);
-            assertThat(vo.getCommunityNames()).containsExactly("幸福社区", "和平社区");
+            assertThat(vo.getCommunityNames()).containsExactly("幸福小区", "和平小区");
             assertThat(vo.getCategoryIds()).containsExactly(5L);
             assertThat(vo.getCategoryNames()).containsExactly("水电维修");
         }
@@ -192,7 +192,7 @@ class StaffCapabilityServiceTest {
     }
 
     @Test
-    @DisplayName("保存绑定：社区不存在（或不在管理员可访问范围）→ 5003，整批拒绝")
+    @DisplayName("保存绑定：小区不存在（或不在管理员可访问范围）→ 5003，整批拒绝")
     void save_unknownCommunity_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             when(sysUserMapper.selectByIdForUpdate(7L)).thenReturn(staff(7L, RoleConstants.STAFF));
@@ -204,7 +204,7 @@ class StaffCapabilityServiceTest {
                     .isInstanceOf(BusinessException.class)
                     .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
                             .isEqualTo(ErrorCode.INVALID_PARAM))
-                    .hasMessageContaining("请选择有效运营社区");
+                    .hasMessageContaining("请选择有效运营小区");
             verify(staffCommunityMapper, never()).delete(any());
         }
     }
@@ -220,13 +220,13 @@ class StaffCapabilityServiceTest {
 
             assertThatThrownBy(() -> staffCapabilityService.save(7L, dto))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("服务类别须属于所选社区");
+                    .hasMessageContaining("服务类别须属于所选小区");
             verify(staffServiceCategoryMapper, never()).delete(any());
         }
     }
 
     @Test
-    @DisplayName("能力列表：ADMIN 未绑定社区 → 空页且不执行人员分页查询")
+    @DisplayName("能力列表：ADMIN 未绑定小区 → 空页且不执行人员分页查询")
     void page_adminWithoutBoundCommunity_returnsEmpty() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             mocked.when(() -> com.community.residence.common.security.context.SecurityUtils
@@ -242,14 +242,14 @@ class StaffCapabilityServiceTest {
     }
 
     @Test
-    @DisplayName("能力列表：ADMIN 仅见绑定其绑定社区的人员（未绑定本社区者不出现）")
+    @DisplayName("能力列表：ADMIN 仅见绑定其绑定小区的人员（未绑定本小区者不出现）")
     void page_adminScopedToBoundCommunityStaff() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             mocked.when(() -> com.community.residence.common.security.context.SecurityUtils
                     .hasRole(RoleConstants.ADMIN)).thenReturn(true);
             mocked.when(com.community.residence.common.security.context.SecurityUtils::getCommunityIds)
                     .thenReturn(Set.of(1L));
-            /* staff_community 中只有 2 号人员绑定了 1 号社区 */
+            /* staff_community 中只有 2 号人员绑定了 1 号小区 */
             when(staffCommunityMapper.selectList(any())).thenReturn(List.of(communityBinding(2L, 1L)));
             when(sysUserMapper.selectPage(any(), any())).thenAnswer(inv -> {
                 Page<SysUser> p = inv.getArgument(0);
@@ -273,7 +273,7 @@ class StaffCapabilityServiceTest {
     }
 
     @Test
-    @DisplayName("能力列表：超管不带筛选 → 全部 STAFF（未绑定任何社区者也返回）")
+    @DisplayName("能力列表：超管不带筛选 → 全部 STAFF（未绑定任何小区者也返回）")
     void page_superAdmin_returnsAllStaff() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             mocked.when(() -> com.community.residence.common.security.context.SecurityUtils
@@ -293,7 +293,7 @@ class StaffCapabilityServiceTest {
     }
 
     @Test
-    @DisplayName("能力详情：社区管理员查看绑定社区外人员 → 404")
+    @DisplayName("能力详情：小区管理员查看绑定小区外人员 → 404")
     void getById_outsideAdminScope_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             mocked.when(() -> com.community.residence.common.security.context.SecurityUtils
@@ -309,7 +309,7 @@ class StaffCapabilityServiceTest {
     }
 
     @Test
-    @DisplayName("候选人员池：全量 STAFF（id/姓名/用户名），不做社区过滤")
+    @DisplayName("候选人员池：全量 STAFF（id/姓名/用户名），不做小区过滤")
     void candidates_returnsAllStaff() {
         when(sysUserMapper.selectList(any())).thenReturn(List.of(
                 staff(1L, RoleConstants.STAFF), staff(2L, RoleConstants.STAFF)));
@@ -323,17 +323,17 @@ class StaffCapabilityServiceTest {
     }
 
     @Test
-    @DisplayName("批量取绑定：常驻社区 ID 映射与名称拼接（无绑定人员不在结果中）")
+    @DisplayName("批量取绑定：常驻小区 ID 映射与名称拼接（无绑定人员不在结果中）")
     void communityNamesByStaff_groupsBindings() {
         when(staffCommunityMapper.selectList(any())).thenReturn(List.of(
                 communityBinding(1L, 1L), communityBinding(1L, 2L)));
         when(communityMapper.selectList(any())).thenReturn(List.of(
-                community(1L, "幸福社区"), community(2L, "和平社区")));
+                community(1L, "幸福小区"), community(2L, "和平小区")));
 
         Map<Long, List<Long>> ids = staffCapabilityService.communityIdsByStaff(List.of(1L, 2L));
         Map<Long, String> names = staffCapabilityService.communityNamesByStaff(List.of(1L, 2L));
 
         assertThat(ids).containsEntry(1L, List.of(1L, 2L)).doesNotContainKey(2L);
-        assertThat(names).containsEntry(1L, "幸福社区，和平社区").doesNotContainKey(2L);
+        assertThat(names).containsEntry(1L, "幸福小区，和平小区").doesNotContainKey(2L);
     }
 }

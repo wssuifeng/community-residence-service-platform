@@ -54,9 +54,9 @@ import java.util.stream.Collectors;
 
 /**
  * 多方会话业务逻辑（R63）：会话/参与者/消息三级模型。
- * 看房预约群聊（预约居民 + 该社区启用管理员 + 带看人，建群/入群由
+ * 看房预约群聊（预约居民 + 该小区启用管理员 + 带看人，建群/入群由
  * ViewingAppointmentService 调 createViewingGroup/addParticipant）+
- * 居民-社区管理员直通（openDirect 幂等）。未读 = COUNT(消息 id > 已读游标)。
+ * 居民-小区管理员直通（openDirect 幂等）。未读 = COUNT(消息 id > 已读游标)。
  * 发消息后 WS 广播 /topic/conversation/{id}（复制 R59 pushMessage 模式：
  * 全员离线不推送、推送失败不回滚 WARN，HTTP 轮询兜底；订阅鉴权见
  * ConversationSubscriptionInterceptor）。非参与者一律 ForbiddenException。
@@ -95,8 +95,8 @@ public class ConversationService {
 
     /**
      * 看房预约建群（R63，ViewingAppointmentService 创建预约后调用）：
-     * 居民 user_id 为空（游客预约）返回 null 不建群；入群=预约居民 +
-     * 该社区启用 ADMIN（sys_admin_community 绑定 + sys_user 启用）。
+     * 居民 user_id 为空（历史匿名预约）返回 null 不建群；入群=预约居民 +
+     * 该小区启用 ADMIN（sys_admin_community 绑定 + sys_user 启用）。
      * 幂等：同 related_id 的 VIEWING_GROUP 已存在直接返回。
      * 标题=「看房沟通·{housingTitle}」，口径同 V16 存量回填。
      */
@@ -127,7 +127,7 @@ public class ConversationService {
 
     /**
      * 租约群聊建群（R68，入住申请审核通过后由 ResidenceApplicationService 调用）：
-     * 参与者 = 申请居民 + 该社区全部启用 ADMIN；related_id = 租约 ID。
+     * 参与者 = 申请居民 + 该小区全部启用 ADMIN；related_id = 租约 ID。
      * 幂等：同 related_id 的 LEASE_GROUP 已存在直接返回（同一租约不重复建群）；
      * 库级唯一键 uk_conversation_type_related（V27）+ 撞键重查兜底先查后插的
      * 并发窗口（DEF-106）；居民账号为空（无居民身份的历史数据）时不建群。
@@ -169,7 +169,7 @@ public class ConversationService {
             addParticipant(conversation.getId(), NotificationOwnerType.USER, admin.getId());
         }
         if (admins.isEmpty()) {
-            log.warn("租约群聊创建时社区无启用管理员（居民单方会话）：communityId={}, leaseId={}",
+            log.warn("租约群聊创建时小区无启用管理员（居民单方会话）：communityId={}, leaseId={}",
                     communityId, leaseId);
         }
         return conversation;
@@ -487,18 +487,18 @@ public class ConversationService {
     }
 
     /**
-     * 居民-社区管理员直通会话（R63/DEF-076，幂等）：同（DIRECT，社区，居民）已存在
-     * 直接返回；不存在则建会话并拉入该居民 + 该社区全部启用 ADMIN。
+     * 居民-小区管理员直通会话（R63/DEF-076，幂等）：同（DIRECT，小区，居民）已存在
+     * 直接返回；不存在则建会话并拉入该居民 + 该小区全部启用 ADMIN。
      * 发起人两种：居民本人（residentId = 当前登录居民）与**管理方代居民发起**
      * （管理端会话中心「开启会话」，residentId = 指定居民，DEF-076 补齐管理端缺口）；
      * 两入口幂等键一致，谁先发起都命中同一条会话。
-     * 居民须属于该社区（在住居住关系或生效租约），防跨社区直通。
+     * 居民须属于该小区（在住居住关系或生效租约），防跨小区直通。
      */
     @Transactional(rollbackFor = Exception.class)
     public ConversationVO openDirect(Long communityId, Long residentId) {
         Long callerId = SecurityUtils.getUserId();
         /* 身份空间分派（DEF-075/DEF-076）：仅当调用方**明确是管理方**（ADMIN/SUPER_ADMIN 且非居民）
-           才走「代居民发起」，须显式指定 residentId 并校验社区归属；
+           才走「代居民发起」，须显式指定 residentId 并校验小区归属；
            其余（居民本人入口，含未标注角色的内部调用）一律取当前登录主体为居民对象 */
         boolean adminInitiated = !SecurityUtils.hasRole(RoleConstants.RESIDENT)
                 && (SecurityUtils.hasRole(RoleConstants.ADMIN)
@@ -523,7 +523,7 @@ public class ConversationService {
            后续用当前读，避免等待父锁前形成的可重复读快照漏掉另一事务刚提交的会话。 */
         residentMapper.selectByIdForUpdate(residentId);
 
-        /* 幂等命中：该居民（居民身份空间）参与的 DIRECT 会话中找该社区的一条 */
+        /* 幂等命中：该居民（居民身份空间）参与的 DIRECT 会话中找该小区的一条 */
         List<Long> mine = participantMapper.selectList(
                         new LambdaQueryWrapper<ConversationParticipant>()
                                 .eq(ConversationParticipant::getOwnerType, NotificationOwnerType.RESIDENT)
@@ -551,12 +551,12 @@ public class ConversationService {
                 .eq(LeaseRecord::getCommunityId, communityId)
                 .eq(LeaseRecord::getStatus, "ACTIVE"));
         if ((relationCount == null ? 0 : relationCount) == 0 && (leaseCount == null ? 0 : leaseCount) == 0) {
-            throw new ForbiddenException("您不属于该社区，无法发起直通会话");
+            throw new ForbiddenException("您不属于该小区，无法发起直通会话");
         }
 
         Conversation conversation = new Conversation();
         conversation.setType(ConversationType.DIRECT);
-        conversation.setTitle("社区直通会话");
+        conversation.setTitle("小区直通会话");
         conversation.setCommunityId(communityId);
         conversation.setStatus(ConversationStatus.ACTIVE);
         conversationMapper.insert(conversation);
@@ -566,7 +566,7 @@ public class ConversationService {
             addParticipant(conversation.getId(), NotificationOwnerType.USER, admin.getId());
         }
         if (admins.isEmpty()) {
-            log.warn("直通会话创建时社区无启用管理员（居民单方会话）：communityId={}, residentId={}",
+            log.warn("直通会话创建时小区无启用管理员（居民单方会话）：communityId={}, residentId={}",
                     communityId, residentId);
         }
         return toVO(conversation, callerSpace, callerId);
@@ -882,7 +882,7 @@ public class ConversationService {
         return profiles;
     }
 
-    /* 社区启用 ADMIN 清单（建群/直通入群口径，与 V16 存量回填一致） */
+    /* 小区启用 ADMIN 清单（建群/直通入群口径，与 V16 存量回填一致） */
     private List<SysUser> activeCommunityAdmins(Long communityId) {
         List<Long> adminIds = sysAdminCommunityMapper.selectList(
                         new LambdaQueryWrapper<SysAdminCommunity>()

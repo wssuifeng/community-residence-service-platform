@@ -20,7 +20,7 @@ import type { GenerateRow } from '@/admin/community/utils/structureBatch'
  * 分区布局（目标单元/生成规则/公共属性 + 预览），遵守大表单治理原则。
  */
 const props = defineProps<{
-  /** 社区下拉选项（父层已加载） */
+  /** 小区下拉选项（父层已加载） */
   communities: ICommunity[]
   /** 打开时按当前筛选预选三级上下文（可为空） */
   initialCommunityId?: number | ''
@@ -342,10 +342,10 @@ async function handleSubmit(): Promise<void> {
   <el-dialog v-model="visible" title="批量生成房屋" width="680px" :close-on-click-modal="false">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="96px">
       <div class="batch-section">目标单元</div>
-      <el-form-item label="所属社区">
+      <el-form-item label="所属小区">
         <el-select
           v-model="formCommunityId"
-          placeholder="请选择社区"
+          placeholder="请选择小区"
           style="width: 100%"
           @change="handleFormCommunityChange"
         >

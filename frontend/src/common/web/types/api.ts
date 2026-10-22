@@ -23,8 +23,8 @@ export interface PageQuery {
   sortOrder?: 'ASC' | 'DESC'
 }
 
-/** 角色（接口设计.md §7.1 五角色） */
-export type Role = 'GUEST' | 'RESIDENT' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN'
+/** 账号角色；未登录公开访问不属于角色 */
+export type Role = 'RESIDENT' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN'
 
 /** 通用键值对 */
 export type RecordData = Record<string, unknown>

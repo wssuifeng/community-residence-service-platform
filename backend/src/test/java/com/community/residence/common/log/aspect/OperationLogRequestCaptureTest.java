@@ -31,7 +31,7 @@ class OperationLogRequestCaptureTest {
         public void resident(AdminCreateResidentDTO dto) { }
         @OperationLog(operationType="STATUS", targetType="RESIDENCE_RELATION", content="'迁出'")
         public void move(Long id, MoveOutDTO dto) { }
-        @OperationLog(operationType="UPDATE", targetType="COMMUNITY", content="'绑定社区'")
+        @OperationLog(operationType="UPDATE", targetType="COMMUNITY", content="'绑定小区'")
         public void bind(Long id, SaveStaffCapabilityDTO dto) { }
         @OperationLog(operationType="UPDATE", targetType="COMMUNITY", content="'未知对象'")
         public void unknown(Long id, Object dto) { }

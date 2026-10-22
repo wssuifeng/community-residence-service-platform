@@ -137,7 +137,7 @@ class HousingPastSlotFixTest {
     /* ---- 展示侧：availableSlots 过滤 ---- */
 
     @Test
-    @DisplayName("今日已结束时段（end<=now）不返回——原样返回导致游客可约已过去时段")
+    @DisplayName("今日已结束时段（end<=now）不返回——原样返回导致未登录公开访问可约已过去时段")
     void availableSlots_todayEndedSlot_excluded() {
         LocalTime now = LocalTime.now();
         assumeThat(now.getHour()).as("跨午夜时段用例不稳定，01:00 前跳过").isGreaterThanOrEqualTo(1);
@@ -199,7 +199,7 @@ class HousingPastSlotFixTest {
         dto.setStartTime(now.minusMinutes(45));
         dto.setEndTime(now.minusMinutes(15));
         dto.setContactPhone("13800001111");
-        dto.setVisitorName("游客甲");
+        dto.setVisitorName("未登录访问者甲");
         when(timeslotMapper.selectList(any())).thenReturn(List.of(
                 slot(dto.getAppointmentDate().getDayOfWeek().getValue(),
                         dto.getStartTime().minusMinutes(30), dto.getEndTime().plusMinutes(30))));
@@ -234,7 +234,7 @@ class HousingPastSlotFixTest {
         dto.setStartTime(LocalTime.of(9, 0));
         dto.setEndTime(LocalTime.of(10, 0));
         dto.setContactPhone("13800001111");
-        dto.setVisitorName("游客甲");
+        dto.setVisitorName("未登录访问者甲");
 
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUser).thenReturn(

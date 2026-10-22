@@ -437,7 +437,7 @@ public class StatisticsService {
         }
     }
 
-    /** 社区列表（看板社区筛选下拉） */
+    /** 小区列表（看板小区筛选下拉） */
     public List<Map<String, Object>> communityOptions() {
         return communityMapper.selectList(null).stream()
                 .map(c -> Map.<String, Object>of("id", c.getId(), "name", c.getName()))

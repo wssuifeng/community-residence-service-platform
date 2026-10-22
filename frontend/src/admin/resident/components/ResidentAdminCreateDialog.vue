@@ -47,7 +47,7 @@ const form = reactive({
 
 /* 校验口径与后端 AdminCreateResidentDTO 注解逐条对齐 */
 const rules: FormRules = {
-  communityId: [{ required: true, message: '请选择所属社区', trigger: 'change' }],
+  communityId: [{ required: true, message: '请选择所属小区', trigger: 'change' }],
   realName: [
     { required: true, message: '请输入真实姓名', trigger: 'blur' },
     { max: 50, message: '真实姓名最多 50 字符', trigger: 'blur' }
@@ -68,13 +68,13 @@ const rules: FormRules = {
   ]
 }
 
-/* 社区下拉：ADMIN 数据级权限由后端限定（仅返回绑定社区），前端全量渲染 */
+/* 小区下拉：ADMIN 数据级权限由后端限定（仅返回绑定小区），前端全量渲染 */
 async function loadCommunities(): Promise<void> {
   communityLoadError.value = ''
   try {
     communities.value = await loadAllPages(query => getCommunityList(query))
   } catch (error) {
-    communityLoadError.value = error instanceof Error ? error.message : '社区加载失败，请重试'
+    communityLoadError.value = error instanceof Error ? error.message : '小区加载失败，请重试'
     communities.value = []
   }
 }
@@ -158,15 +158,15 @@ async function copyText(text: string): Promise<void> {
         <el-button text type="primary" size="small" @click="copyText(result.initialPassword)">复制</el-button>
       </div>
       <p class="result-hint">居民首次登录后建议尽快修改密码。</p>
-      <el-alert :type="result.relationId ? 'success' : 'info'" :closable="false" :title="result.relationId ? `居住关系已登记：关系ID ${result.relationId}，房屋ID ${result.houseId}` : '仅创建账号，尚未登记居住关系；所选社区不是账号的居住归属。'" />
+      <el-alert :type="result.relationId ? 'success' : 'info'" :closable="false" :title="result.relationId ? `居住关系已登记：关系ID ${result.relationId}，房屋ID ${result.houseId}` : '仅创建账号，尚未登记居住关系；所选小区不是账号的居住归属。'" />
     </div>
 
     <!-- 表单段 -->
     <el-form v-else ref="formRef" class="resident-form" :model="form" :rules="rules" label-width="88px">
-      <el-form-item label="所属社区" prop="communityId">
+      <el-form-item label="所属小区" prop="communityId">
         <el-select
           v-model="form.communityId"
-          placeholder="请选择社区（仅可选您管理的社区）"
+          placeholder="请选择小区（仅可选您管理的小区）"
           style="width: 100%"
         >
           <el-option
@@ -177,9 +177,9 @@ async function copyText(text: string): Promise<void> {
           />
         </el-select>
       </el-form-item>
-      <el-alert v-if="communityLoadError" :title="communityLoadError" type="error" :closable="false" /><el-button v-if="communityLoadError" text @click="loadCommunities">重新加载社区</el-button>
+      <el-alert v-if="communityLoadError" :title="communityLoadError" type="error" :closable="false" /><el-button v-if="communityLoadError" text @click="loadCommunities">重新加载小区</el-button>
       <el-form-item label="登记关系"><el-switch v-model="createRelation" active-text="同时登记居住关系" inactive-text="仅建账号" /></el-form-item>
-      <el-alert v-if="!createRelation" type="info" :closable="false" title="仅建账号：社区用于权限校验，不代表已入住或已有居住关系。" />
+      <el-alert v-if="!createRelation" type="info" :closable="false" title="仅建账号：小区用于权限校验，不代表已入住或已有居住关系。" />
       <el-form-item label="真实姓名" prop="realName">
         <el-input v-model="form.realName" placeholder="居民真实姓名" maxlength="50" />
       </el-form-item>

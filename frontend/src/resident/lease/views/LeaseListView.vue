@@ -39,7 +39,7 @@ import type { LeaseAgreementSignStatus } from '@/common/agreement/types/agreemen
 
 /**
  * 我的租约（R61 v1.4 / R66~R71 批次 f / R72~R73 批次 h）：租住签约闭环的居民侧主入口。
- * 「租约｜租约明细」双 tab。租约 tab 按「社区 + 房屋」分组为卡片：
+ * 「租约｜租约明细」双 tab。租约 tab 按「小区 + 房屋」分组为卡片：
  * 组内取当前租约（在租优先、其次待签约、再次起始日期最新）作主卡，
  * 其余折叠为「历史租约 N 条」（同一房屋多次租住不再重复铺开）。
  *
@@ -343,7 +343,7 @@ interface LeaseGroup {
 }
 
 /**
- * 按「社区 + 房屋」分组（服务端分页口径内分组：同屋记录跨页时历史折叠
+ * 按「小区 + 房屋」分组（服务端分页口径内分组：同屋记录跨页时历史折叠
  * 仅覆盖当前页，居民租约量级下单页 100 条内完整呈现）
  */
 const leaseGroups = computed<LeaseGroup[]>(() => {
@@ -746,7 +746,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 租约 tab：社区+房屋分组卡片，同屋历史折叠 -->
+    <!-- 租约 tab：小区+房屋分组卡片，同屋历史折叠 -->
     <template v-if="tab === 'lease'">
       <div v-loading="loading" class="lease-board">
         <div v-if="isEmpty" class="empty-state">
@@ -761,14 +761,14 @@ onMounted(() => {
           class="lease-card"
           :class="{ 'is-focused': isFocused(group.current) }"
         >
-          <!-- 社区徽章行 -->
+          <!-- 小区徽章行 -->
           <div class="card-community">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 21h18" />
               <path d="M5 21V7l7-4 7 4v14" />
               <path d="M9 21v-6h6v6" />
             </svg>
-            <span class="community-name">{{ group.communityName || '社区信息待完善' }}</span>
+            <span class="community-name">{{ group.communityName || '小区信息待完善' }}</span>
           </div>
 
           <!-- 当前租约主行 -->
@@ -990,7 +990,7 @@ onMounted(() => {
                 押金退还记录暂不可用，请稍后刷新
               </p>
               <p v-else-if="refundsOf(group.current.id).length === 0" class="payments-empty">
-                暂无押金退还记录：退租审核通过后由社区管理方发起原路退还
+                暂无押金退还记录：退租审核通过后由小区管理方发起原路退还
               </p>
               <ul v-else class="refund-list">
                 <li v-for="item in refundsOf(group.current.id)" :key="item.id" class="refund-item">
@@ -1041,7 +1041,7 @@ onMounted(() => {
             <div v-if="group.current.conversationId" class="lease-chat-entry">
               <h3 class="payments-title">租约群聊</h3>
               <p class="chat-entry-note">
-                与社区管理方（派单后含服务人员）在本租约的沟通群内留言，消息实时同步。
+                与小区管理方（派单后含服务人员）在本租约的沟通群内留言，消息实时同步。
               </p>
               <el-button type="primary" round size="small" @click.stop="openLeaseChat(group.current)">
                 进入租约群聊
@@ -1160,7 +1160,7 @@ onMounted(() => {
               抵扣说明：{{ depositOffsetRemark(detailLease) }}
             </p>
             <p class="deposit-note">
-              押金退还由社区管理方发起原路退回；平台不托管押金资金、不计息、不垫付。
+              押金退还由小区管理方发起原路退回；平台不托管押金资金、不计息、不垫付。
             </p>
           </div>
 
@@ -1172,7 +1172,7 @@ onMounted(() => {
               押金退还记录暂不可用，请稍后刷新
             </p>
             <p v-else-if="refundsOf(detailLease.id).length === 0" class="payments-empty">
-              暂无押金退还记录：退租审核通过后由社区管理方发起原路退还
+              暂无押金退还记录：退租审核通过后由小区管理方发起原路退还
             </p>
             <ul v-else class="refund-list">
               <li v-for="item in refundsOf(detailLease.id)" :key="item.id" class="refund-item">
@@ -1317,7 +1317,7 @@ onMounted(() => {
   box-shadow: 0 0 0 3px var(--color-primary-bg);
 }
 
-/* 社区徽章行：小图标 + 社区名（解决租约不显示社区信息） */
+/* 小区徽章行：小图标 + 小区名（解决租约不显示小区信息） */
 .card-community {
   display: flex;
   align-items: center;

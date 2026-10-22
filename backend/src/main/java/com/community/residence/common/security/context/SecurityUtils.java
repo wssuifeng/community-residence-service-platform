@@ -20,7 +20,7 @@ public final class SecurityUtils {
     private SecurityUtils() {
     }
 
-    /** 写入认证信息（JwtAuthenticationFilter 调用）；communityIds 为 ADMIN 绑定社区集合 */
+    /** 写入认证信息（JwtAuthenticationFilter 调用）；communityIds 为 ADMIN 绑定小区集合 */
     public static void setAuthentication(UserContext context) {
         List<SimpleGrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority(ROLE_PREFIX + context.getRole()));
@@ -60,21 +60,21 @@ public final class SecurityUtils {
         return false;
     }
 
-    /** ADMIN 绑定社区集合（数据级权限过滤用）；非 ADMIN 返回空集合 */
+    /** ADMIN 绑定小区集合（数据级权限过滤用）；非 ADMIN 返回空集合 */
     public static Set<Long> getCommunityIds() {
         UserContext user = getUser();
         return user != null && user.getCommunityIds() != null ? user.getCommunityIds() : Set.of();
     }
 
     /**
-     * 写路径社区归属校验：DataScopeInterceptor 仅改写 SELECT，INSERT/UPDATE 不拦截，
-     * 故写操作前须显式校验社区归属。SUPER_ADMIN 放行；未登录（公开路径）放行；
-     * 社区管理员操作未绑定社区的数据时抛 ForbiddenException。
+     * 写路径小区归属校验：DataScopeInterceptor 仅改写 SELECT，INSERT/UPDATE 不拦截，
+     * 故写操作前须显式校验小区归属。SUPER_ADMIN 放行；未登录（公开路径）放行；
+     * 小区管理员操作未绑定小区的数据时抛 ForbiddenException。
      */
     public static void checkCommunityAccess(Long communityId) {
         UserContext user = getUser();
         if (user != null && user.isCommunityAdmin() && !getCommunityIds().contains(communityId)) {
-            throw new ForbiddenException("无权操作未绑定社区的数据");
+            throw new ForbiddenException("无权操作未绑定小区的数据");
         }
     }
 

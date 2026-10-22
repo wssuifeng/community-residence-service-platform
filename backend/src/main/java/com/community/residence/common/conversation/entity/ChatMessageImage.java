@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 @Data @TableName("chat_message_image") @Schema(description="消息图片关联，权限由所属业务会话验证")
 public class ChatMessageImage {
  @TableId(type=IdType.AUTO) @Schema(description="图片记录ID") private Long id;
- @Schema(description="社区ID，供级联清理") private Long communityId;
+ @Schema(description="小区ID，供级联清理") private Long communityId;
  @Schema(description="消息空间FEEDBACK/CONVERSATION/VIEWING") private String messageScope;
  @Schema(description="对应空间内消息ID") private Long messageId;
  @Schema(description="平台上传路径") private String fileUrl;

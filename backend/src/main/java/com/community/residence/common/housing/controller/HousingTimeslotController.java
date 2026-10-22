@@ -22,7 +22,7 @@ public class HousingTimeslotController {
     private final com.community.residence.common.housing.service.HousingTimeslotService housingTimeslotService;
 
 
-    @Operation(summary = "房源时段列表", description = "公开；仅可见挂牌可读，管理端按社区权限维护")
+    @Operation(summary = "房源时段列表", description = "公开；仅可见挂牌可读，管理端按小区权限维护")
     @GetMapping("/housings/{housingId}/timeslots")
     public ApiResponse<List<HousingTimeslot>> list(@PathVariable Long housingId,
                                                    @RequestParam(required = false) Integer dayOfWeek) {

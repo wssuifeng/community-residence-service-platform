@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/** 单元节点（R62 房源社区一体化树） */
+/** 单元节点（R62 房源小区一体化树） */
 @Data
 @Schema(description = "单元节点（含房屋房源树）")
 public class UnitHousingTreeVO {

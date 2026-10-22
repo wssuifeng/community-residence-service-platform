@@ -13,11 +13,11 @@ vi.mock('@/common/lease/api/lease', () => ({ getLeaseList: vi.fn() }))
 vi.mock('@/common/conversation/components/ConversationPane.vue', () => ({ default: defineComponent({ props: ['source','id'], template: '<div class="pane">{{source}}:{{id}}</div>' }) }))
 const user = reactive({ role: 'ADMIN', user: { id: 1, role: 'ADMIN' } })
 vi.mock('@/common/auth/store/user', () => ({ useUserStore: () => user }))
-const row = (source = 'CONVERSATION', id = 1) => ({ source, id, title: `${source}会话`, type: source === 'FEEDBACK' ? 'FEEDBACK' : 'WORK_ORDER_GROUP', status: 'ACTIVE', communityName: '测试社区', unreadCount: 2, activityAt: '2026-10-17T10:00:00' })
+const row = (source = 'CONVERSATION', id = 1) => ({ source, id, title: `${source}会话`, type: source === 'FEEDBACK' ? 'FEEDBACK' : 'WORK_ORDER_GROUP', status: 'ACTIVE', communityName: '测试小区', unreadCount: 2, activityAt: '2026-10-17T10:00:00' })
 let wrapper: VueWrapper, router: Router
 beforeEach(() => {
  api.list.mockResolvedValue({ records: [row(), row('FEEDBACK')], total: 2, page: 1, size: 30, pages: 1 }); api.direct.mockResolvedValue({ id: 9 });
- api.communities.mockResolvedValue({ records: [{ id: 1, name: '测试社区' }] }); api.residents.mockResolvedValue({ records: [{ id: 2, realName: '测试居民', username: '居民2' }] }); user.role = 'ADMIN'
+ api.communities.mockResolvedValue({ records: [{ id: 1, name: '测试小区' }] }); api.residents.mockResolvedValue({ records: [{ id: 2, realName: '测试居民', username: '居民2' }] }); user.role = 'ADMIN'
 })
 afterEach(() => { wrapper?.unmount(); vi.clearAllMocks(); document.body.innerHTML = '' })
 async function render(path = '/admin/conversations') {

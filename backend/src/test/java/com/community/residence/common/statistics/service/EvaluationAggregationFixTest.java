@@ -119,7 +119,7 @@ class EvaluationAggregationFixTest {
     }
 
     @Test
-    @DisplayName("社区过滤与空数据：无评价时两维度均为空列表")
+    @DisplayName("小区过滤与空数据：无评价时两维度均为空列表")
     void aggregation_empty() {
         lenient().when(evaluationMapper.selectList(any())).thenReturn(List.of());
 

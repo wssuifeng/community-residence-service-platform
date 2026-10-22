@@ -93,7 +93,7 @@ public class AgreementService {
 
     /* ==================== 模板维护 ==================== */
 
-    /** 模板分页：超管看全局 + 全部社区；社区管理员看全局 + 本社区（可见性在查询层显式约束） */
+    /** 模板分页：超管看全局 + 全部小区；小区管理员看全局 + 本小区（可见性在查询层显式约束） */
     public PageVO<AgreementTemplateVO> pageTemplates(long page, long size, Long communityId, String status) {
         LambdaQueryWrapper<AgreementTemplate> wrapper = new LambdaQueryWrapper<AgreementTemplate>()
                 .eq(communityId != null, AgreementTemplate::getCommunityId, communityId)
@@ -123,8 +123,8 @@ public class AgreementService {
     }
 
     /**
-     * 该租约可用模板清单：本社区模板 + 全局模板，默认模板排最前。
-     * 供管理端「发起协议」弹窗选择，避免前端拿到跨社区模板。
+     * 该租约可用模板清单：本小区模板 + 全局模板，默认模板排最前。
+     * 供管理端「发起协议」弹窗选择，避免前端拿到跨小区模板。
      */
     public List<AgreementTemplateVO> availableTemplates(Long communityId) {
         List<AgreementTemplate> templates = templateMapper.selectList(new LambdaQueryWrapper<AgreementTemplate>()
@@ -217,7 +217,7 @@ public class AgreementService {
             throw new BusinessException(ErrorCode.OPERATION_FAILED, "未找到可用协议模板，请先在协议模板中配置并设为默认");
         }
         if (template.getCommunityId() != null && !template.getCommunityId().equals(lease.getCommunityId())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "模板不属于该租约所在社区");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "模板不属于该租约所在小区");
         }
 
         if (!"ACTIVE".equals(template.getStatus())) {
@@ -365,7 +365,7 @@ public class AgreementService {
         Community community = communityMapper.selectById(lease.getCommunityId());
         Resident tenant = residentMapper.selectById(lease.getTenantId());
         String text = templateContent;
-        text = replace(text, community != null ? community.getName() : null, "社区名称", "communityName");
+        text = replace(text, community != null ? community.getName() : null, "小区名称", "communityName");
         text = replace(text, houseLocation, "房屋位置", "houseLocation");
         text = replace(text, house != null ? house.getHouseNumber() : null, "房号", "houseNumber");
         text = replace(text, house != null ? String.valueOf(house.getFloor()) : null, "楼层", "floor");
@@ -408,7 +408,7 @@ public class AgreementService {
         return (building != null ? building.getName() : "") + unit.getName() + house.getHouseNumber();
     }
 
-    /* 协议确认通知：居民与社区绑定启用管理员均使用各自身份空间收件；
+    /* 协议确认通知：居民与小区绑定启用管理员均使用各自身份空间收件；
        管理方通知不能依赖页面待办刷新，否则居民先确认后管理端无法收到状态事件。 */
     private void notifyCounterpart(LeaseAgreement agreement, LeaseRecord lease) {
         String location = houseLocation(lease);
@@ -419,8 +419,8 @@ public class AgreementService {
                 "租约 #" + lease.getId() + "（" + location + "）居民已同意协议，待首期费用支付成功后正式生效", agreement.getId());
     }
 
-    /* 协议事件的管理方收件人：与承租确认、到期提醒共用社区绑定管理员口径，
-       只投递启用的 ADMIN，不把 SUPER_ADMIN 混入社区管理员身份集合。 */
+    /* 协议事件的管理方收件人：与承租确认、到期提醒共用小区绑定管理员口径，
+       只投递启用的 ADMIN，不把 SUPER_ADMIN 混入小区管理员身份集合。 */
     private void notifyCommunityAdmins(LeaseRecord lease, String title, String content, Long agreementId) {
         List<SysAdminCommunity> bindings = sysAdminCommunityMapper.selectList(
                 new LambdaQueryWrapper<SysAdminCommunity>()
@@ -491,7 +491,7 @@ public class AgreementService {
         template.setRemark(dto.getRemark());
     }
 
-    /* 默认模板同范围内唯一：设置新默认时清除同社区（含全局）范围内其他默认标记 */
+    /* 默认模板同范围内唯一：设置新默认时清除同小区（含全局）范围内其他默认标记 */
     private void applyDefaultFlag(AgreementTemplate template, Integer isDefault) {
         if (isDefault == null || isDefault != 1) {
             if (template.getIsDefault() == null) {
@@ -514,7 +514,7 @@ public class AgreementService {
         templateMapper.updateById(template);
     }
 
-    /* 全局模板仅超管可维护；社区模板限本社区管理员（超管放行） */
+    /* 全局模板仅超管可维护；小区模板限本小区管理员（超管放行） */
     private void checkTemplateWriteAccess(Long communityId) {
         if (communityId == null) {
             if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {

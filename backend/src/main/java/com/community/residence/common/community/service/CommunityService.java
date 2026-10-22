@@ -23,8 +23,8 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 /**
- * 社区业务逻辑：全局运营主体的增删改查与停用/启用。
- * 社区表是数据级权限锚点（ADMIN 按 id IN 绑定社区过滤，由拦截器处理）。
+ * 小区业务逻辑：全局运营主体的增删改查与停用/启用。
+ * 小区表是数据级权限锚点（ADMIN 按 id IN 绑定小区过滤，由拦截器处理）。
  */
 @Slf4j
 @Service
@@ -44,9 +44,9 @@ public class CommunityService {
     /* V22 新增表的级联清理依赖（外键指向 lease_record，R72 押金退还记录；
        无 community_id，按 leaseIds 批删且须早于租约物理删除） */
 
-    /** 创建社区（仅超管，功能级权限在 Controller 声明） */
+    /** 创建小区（仅超管，功能级权限在 Controller 声明） */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.common.log.annotation.OperationLog(operationType = "CREATE", targetType = "COMMUNITY", targetId = "#result.id", content = "'创建社区：' + #dto.name")
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "CREATE", targetType = "COMMUNITY", targetId = "#result.id", content = "'创建小区：' + #dto.name")
     public CommunityVO create(CreateCommunityDTO dto) {
         Community community = new Community();
         applyDto(community, dto);
@@ -64,9 +64,9 @@ public class CommunityService {
         return CommunityVO.from(community);
     }
 
-    /** 更新社区基本信息（超管全局；社区管理员限绑定社区） */
+    /** 更新小区基本信息（超管全局；小区管理员限绑定小区） */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "COMMUNITY", targetId = "#id", content = "'更新社区：' + #dto.name")
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "COMMUNITY", targetId = "#id", content = "'更新小区：' + #dto.name")
     public CommunityVO update(Long id, CreateCommunityDTO dto) {
         structureBusinessCodeService.lockExistingCommunity(id);
         Community community = requireCommunity(id);
@@ -79,7 +79,7 @@ public class CommunityService {
         return CommunityVO.from(community);
     }
 
-    /** 授权来源修改与责任人保存共用社区锁，避免互相覆盖手工授权来源。 */
+    /** 授权来源修改与责任人保存共用小区锁，避免互相覆盖手工授权来源。 */
     public Community lockForAuthorization(Long id) {
         structureBusinessCodeService.lockExistingCommunity(id);
         return requireCommunity(id);
@@ -89,7 +89,7 @@ public class CommunityService {
         return CommunityVO.from(requireCommunity(id));
     }
 
-    /** 社区分页列表（公开；ADMIN 由拦截器自动过滤绑定社区） */
+    /** 小区分页列表（公开；ADMIN 由拦截器自动过滤绑定小区） */
     public PageVO<CommunityVO> page(long page, long size, String status, String keyword) {
         LambdaQueryWrapper<Community> wrapper = new LambdaQueryWrapper<Community>()
                 .eq(StringUtils.hasText(status), Community::getStatus, status)
@@ -103,28 +103,28 @@ public class CommunityService {
         return PageVO.of(result.convert(CommunityVO::from));
     }
 
-    /** 停用/启用社区（仅超管；停用后该社区下所有写业务被 COMMUNITY_INACTIVE 拦截） */
+    /** 停用/启用小区（仅超管；停用后该小区下所有写业务被 COMMUNITY_INACTIVE 拦截） */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.common.log.annotation.OperationLog(operationType = "STATUS", targetType = "COMMUNITY", targetId = "#id", content = "'社区状态变更为 ' + #status")
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "STATUS", targetType = "COMMUNITY", targetId = "#id", content = "'小区状态变更为 ' + #status")
     public void updateStatus(Long id, String status) {
         Community community = requireCommunity(id);
         community.setStatus(status);
         communityMapper.updateById(community);
-        log.info("社区状态变更：communityId={}, status={}, operator={}",
+        log.info("小区状态变更：communityId={}, status={}, operator={}",
                 id, status, SecurityUtils.getUser() != null ? SecurityUtils.getUserId() : "system");
     }
 
-    /** 按ID取社区，不存在抛 404；供本模块与其他模块校验引用 */
+    /** 按ID取小区，不存在抛 404；供本模块与其他模块校验引用 */
     public Community requireCommunity(Long id) {
         Community community = communityMapper.selectById(id);
         if (community == null) {
-            throw new ResourceNotFoundException("社区不存在");
+            throw new ResourceNotFoundException("小区不存在");
         }
         communityResponsibleService.fillContacts(java.util.List.of(community));
         return community;
     }
 
-    /** 引用校验：社区必须存在且运营中（楼栋/资源等子资源创建时调用） */
+    /** 引用校验：小区必须存在且运营中（楼栋/资源等子资源创建时调用） */
     public Community requireActiveCommunity(Long id) {
         Community community = requireCommunity(id);
         if (!CommonStatus.ACTIVE.equals(community.getStatus())) {

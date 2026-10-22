@@ -30,7 +30,7 @@
         "path": "community",
         "name": "AdminCommunity",
         "meta": {
-          "title": "社区管理"
+          "title": "小区管理"
         }
       },
       {
@@ -107,7 +107,7 @@
         "path": "communities/:id",
         "name": "AdminCommunityDetail",
         "meta": {
-          "title": "社区详情"
+          "title": "小区详情"
         }
       },
       {

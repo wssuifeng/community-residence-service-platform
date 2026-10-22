@@ -23,7 +23,7 @@ public class House {
     @Schema(description = "所属单元ID")
     private Long unitId;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "房号")

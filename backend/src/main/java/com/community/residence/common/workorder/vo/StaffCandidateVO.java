@@ -4,7 +4,7 @@ import com.community.residence.common.auth.entity.SysUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-/** 可绑定服务人员候选（能力绑定的人员选择池；不做社区过滤，仅功能级权限） */
+/** 可绑定服务人员候选（能力绑定的人员选择池；不做小区过滤，仅功能级权限） */
 @Data
 @Schema(description = "可绑定服务人员候选")
 public class StaffCandidateVO {

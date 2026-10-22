@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** 楼栋管理控制器（接口设计.md 9.1.2） */
-@Tag(name = "楼栋管理", description = "社区楼栋信息管理接口")
+@Tag(name = "楼栋管理", description = "小区楼栋信息管理接口")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class BuildingController {
         return ApiResponse.success(buildingService.getById(id));
     }
 
-    @Operation(summary = "社区楼栋列表（分页）")
+    @Operation(summary = "小区楼栋列表（分页）")
     @GetMapping("/communities/{communityId}/buildings")
     public ApiResponse<PageVO<BuildingVO>> pageByCommunity(@PathVariable Long communityId,
                                                            @RequestParam(defaultValue = "1") long page,

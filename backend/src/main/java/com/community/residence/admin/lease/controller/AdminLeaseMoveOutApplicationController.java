@@ -33,7 +33,7 @@ public class AdminLeaseMoveOutApplicationController {
     private final LeaseMoveOutApplicationService moveOutApplicationService;
 
     @Operation(summary = "退租申请列表（分页）",
-            description = "ADMIN/SUPER_ADMIN，按社区数据权限过滤；status 可选 PENDING/APPROVED/REJECTED")
+            description = "ADMIN/SUPER_ADMIN，按小区数据权限过滤；status 可选 PENDING/APPROVED/REJECTED")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/api/v1/lease-move-out-applications")
     public ApiResponse<PageVO<LeaseMoveOutApplicationVO>> page(

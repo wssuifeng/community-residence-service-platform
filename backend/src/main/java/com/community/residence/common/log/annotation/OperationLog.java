@@ -26,9 +26,9 @@ public @interface OperationLog {
      */
     String targetId() default "";
 
-    /** 所属社区 ID 的 SpEL 表达式；留空则记当前用户绑定社区（无绑定则空） */
+    /** 所属小区 ID 的 SpEL 表达式；留空则记当前用户绑定小区（无绑定则空） */
     String communityId() default "";
 
-    /** 日志内容描述（支持 SpEL 模板，如 "'更新社区：' + #dto.name"）；留空则拼方法签名 */
+    /** 日志内容描述（支持 SpEL 模板，如 "'更新小区：' + #dto.name"）；留空则拼方法签名 */
     String content() default "";
 }

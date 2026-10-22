@@ -28,7 +28,7 @@ public class ServiceCategoryController {
         return ApiResponse.success(categoryService.getById(id));
     }
 
-    @Operation(summary = "社区服务类别树", description = "公开；居民提交工单时选择；已过滤停用类别（R17/DEF-041）")
+    @Operation(summary = "小区服务类别树", description = "公开；居民提交工单时选择；已过滤停用类别（R17/DEF-041）")
     @GetMapping("/communities/{communityId}/service-categories")
     public ApiResponse<List<CategoryVO>> tree(@PathVariable Long communityId) {
         return ApiResponse.success(categoryService.treeByCommunity(communityId));

@@ -11,8 +11,8 @@ import lombok.Data;
 @Schema(description = "创建/更新服务类别请求")
 public class CreateCategoryDTO {
 
-    @Schema(description = "所属社区ID")
-    @NotNull(message = "所属社区不能为空")
+    @Schema(description = "所属小区ID")
+    @NotNull(message = "所属小区不能为空")
     private Long communityId;
 
     @Schema(description = "类别名称")

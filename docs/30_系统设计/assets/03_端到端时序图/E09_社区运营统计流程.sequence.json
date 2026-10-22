@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "sequence",
   "meta": {
-    "title": "E9：社区运营统计流程",
+    "title": "E9：小区运营统计流程",
     "locale": "zh-CN",
     "output": "E09_社区运营统计流程时序图.html",
     "quality_profile": "showcase",
@@ -15,7 +15,7 @@
     { "id": "redis", "type": "database", "label": "Redis", "sublabel": "缓存/计数" }
   ],
   "messages": [
-    { "id": "dashboard", "from": "admin", "to": "backend", "y": 190, "label": "GET /api/v1/statistics/dashboard", "note": "打开运营看板（选择社区/时间范围）", "variant": "emphasis" },
+    { "id": "dashboard", "from": "admin", "to": "backend", "y": 190, "label": "GET /api/v1/statistics/dashboard", "note": "打开运营看板（选择小区/时间范围）", "variant": "emphasis" },
     { "id": "cache-read", "from": "backend", "to": "redis", "y": 234, "label": "查询 Redis 缓存" },
     { "id": "agg-house", "from": "backend", "to": "db", "y": 292, "label": "聚合查询：房屋状态分布" },
     { "id": "agg-resident", "from": "backend", "to": "db", "y": 336, "label": "聚合查询：居民与入住/搬出量" },
@@ -45,7 +45,7 @@
       "title": "聚合与缓存",
       "items": [
         "房屋/居住/工单/工作量/满意度/预约量多维度聚合",
-        "支持按社区与时间范围筛选（R40），结果写缓存（TTL）",
+        "支持按小区与时间范围筛选（R40），结果写缓存（TTL）",
         "图表以 ECharts 渲染，支持导出图片（R42）"
       ]
     },

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-/** 看房预约（viewing_appointment 表；V5 起支持游客预约：user_id 可空 + visitor 信息） */
+/** 看房预约（viewing_appointment 表；V5 起支持历史匿名预约：user_id 可空 + visitor 信息） */
 @Data
 @TableName("viewing_appointment")
 @Schema(description = "看房预约")
@@ -20,19 +20,19 @@ public class ViewingAppointment {
     @Schema(description = "预约ID")
     private Long id;
 
-    @Schema(description = "预约人ID（游客预约为空）")
+    @Schema(description = "预约人ID（历史匿名预约为空）")
     private Long userId;
 
-    @Schema(description = "游客姓名（游客预约时填写）")
+    @Schema(description = "历史匿名预约姓名，仅用于存量数据兼容")
     private String visitorName;
 
-    @Schema(description = "游客手机号（游客预约时填写）")
+    @Schema(description = "历史匿名预约手机号，仅用于存量数据兼容")
     private String visitorPhone;
 
     @Schema(description = "带看人ID（sys_user，null=未分配；R59）")
     private Long assignedStaffId;
 
-    @Schema(description = "关联会话ID（R63 看房群聊；游客预约为空）")
+    @Schema(description = "关联会话ID（R63 看房群聊；历史匿名预约为空）")
     private Long conversationId;
 
     @Schema(description = "所属租约ID（R69 会话内发起时写入；房源页发起为空）")
@@ -41,7 +41,7 @@ public class ViewingAppointment {
     @Schema(description = "房源ID")
     private Long housingId;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "预约日期")

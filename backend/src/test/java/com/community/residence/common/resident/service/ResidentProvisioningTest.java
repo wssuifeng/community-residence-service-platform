@@ -60,7 +60,7 @@ class ResidentProvisioningTest {
         AdminCreateResidentDTO d = new AdminCreateResidentDTO(); d.setCommunityId(3L); d.setRealName("测试居民"); d.setPhone("13900000011"); d.setEmail("resident@example.com"); d.setHouseId(5L); d.setRelationType("OWNER"); d.setMoveInDate(LocalDate.now()); return d;
     }
     private ByteArrayInputStream csv(String data) {
-        return new ByteArrayInputStream(("社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注\n"+data).getBytes(StandardCharsets.UTF_8));
+        return new ByteArrayInputStream(("小区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注\n"+data).getBytes(StandardCharsets.UTF_8));
     }
     @Test void accountAndRelationAndEmailUseOneProvisioningPath() {
         try (MockedStatic<SecurityUtils> ignored = mockStatic(SecurityUtils.class)) {

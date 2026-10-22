@@ -4,8 +4,8 @@ defineProps<{ impacts: CommunityDeletionImpact[] }>()
 </script>
 
 <template>
-  <section class="deletion-impact" aria-label="社区删除影响">
-    <div class="risk-heading"><span class="risk-icon" aria-hidden="true">!</span><div><strong>此操作无法撤回</strong><p>请先核对社区和关联记录，再继续确认名称。</p><p class="retention-brief">账号本身保留 · 不自动退租或退款</p></div></div>
+  <section class="deletion-impact" aria-label="小区删除影响">
+    <div class="risk-heading"><span class="risk-icon" aria-hidden="true">!</span><div><strong>此操作无法撤回</strong><p>请先核对小区和关联记录，再继续确认名称。</p><p class="retention-brief">账号本身保留 · 不自动退租或退款</p></div></div>
     <article v-for="impact in impacts" :key="impact.communityId" class="community-impact">
       <h3>{{ impact.communityName }}</h3>
       <dl class="impact-grid">
@@ -17,7 +17,7 @@ defineProps<{ impacts: CommunityDeletionImpact[] }>()
         <div><dt>退款记录</dt><dd>{{ impact.refunds }}<small>条</small></dd></div>
       </dl>
     </article>
-    <div class="deletion-consequences"><strong>将永久删除</strong><p>社区下的楼栋、单元、房屋、公共资源、挂牌及关联业务记录，包含有效居住关系、进行中租约和支付退款记录。</p></div>
+    <div class="deletion-consequences"><strong>将永久删除</strong><p>小区下的楼栋、单元、房屋、公共资源、挂牌及关联业务记录，包含有效居住关系、进行中租约和支付退款记录。</p></div>
     <div class="retention-note"><span>账号本身保留</span><p>删除不等于退租或退款，也不会自动退还任何资金。</p></div>
   </section>
 </template>

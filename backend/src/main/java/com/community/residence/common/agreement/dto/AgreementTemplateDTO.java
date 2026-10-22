@@ -10,7 +10,7 @@ import lombok.Data;
 @Schema(description = "租赁协议模板创建/更新请求")
 public class AgreementTemplateDTO {
 
-    @Schema(description = "归属社区ID：为空表示全局通用模板（仅超管可维护）")
+    @Schema(description = "归属小区ID：为空表示全局通用模板（仅超管可维护）")
     private Long communityId;
 
     @Schema(description = "模板名称")
@@ -18,7 +18,7 @@ public class AgreementTemplateDTO {
     @Size(max = 100, message = "模板名称最多 100 字符")
     private String name;
 
-    @Schema(description = "协议正文，支持 {{变量}} 占位：{{社区名称}} {{房屋位置}} {{房号}} {{租客姓名}} "
+    @Schema(description = "协议正文，支持 {{变量}} 占位：{{小区名称}} {{房屋位置}} {{房号}} {{租客姓名}} "
             + "{{租期开始}} {{租期结束}} {{月租金}} {{押金}} {{签约日期}}；为空时正文以模板附件为准")
     @Size(max = 20000, message = "协议正文过长")
     private String content;

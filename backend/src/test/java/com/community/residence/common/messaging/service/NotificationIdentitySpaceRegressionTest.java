@@ -65,7 +65,7 @@ class NotificationIdentitySpaceRegressionTest {
     private static final Pattern PLACEHOLDER = Pattern.compile("MPGENVAL(\\d+)");
 
     private static final String RESIDENT_ONLY_TITLE = "首期费用支付成功";
-    private static final String USER_ONLY_TITLE = "社区租约首期费用到账";
+    private static final String USER_ONLY_TITLE = "小区租约首期费用到账";
 
     @Mock
     private NotificationMapper notificationMapper;
@@ -89,7 +89,7 @@ class NotificationIdentitySpaceRegressionTest {
         table = new ArrayList<>(List.of(
                 row(17L, 101L, NotificationOwnerType.RESIDENT, COLLIDING_ID, RESIDENT_ONLY_TITLE),
                 row(18L, 102L, NotificationOwnerType.USER, COLLIDING_ID, USER_ONLY_TITLE),
-                row(19L, 103L, NotificationOwnerType.USER, 2L, "社区租约续约成功"),
+                row(19L, 103L, NotificationOwnerType.USER, 2L, "小区租约续约成功"),
                 row(20L, 104L, NotificationOwnerType.RESIDENT, 2L, "续租支付成功")));
 
         lenient().when(redisTemplate.execute(org.mockito.ArgumentMatchers.any(org.springframework.data.redis.core.script.RedisScript.class), org.mockito.ArgumentMatchers.anyList(), anyString())).thenAnswer(call -> Math.max(900L, Long.parseLong(call.getArgument(2)) + 1));

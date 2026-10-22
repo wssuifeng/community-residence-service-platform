@@ -28,7 +28,7 @@ public class Notification {
             + "与 userId 组成唯一收件人身份（DEF-067 身份空间分离）")
     private String ownerType;
 
-    @Schema(description = "所属社区ID（可选）")
+    @Schema(description = "所属小区ID（可选）")
     private Long communityId;
 
     @Schema(description = "通知标题")

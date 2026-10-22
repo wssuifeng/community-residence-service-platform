@@ -35,8 +35,8 @@ import { formatDateTime } from '@/common/web/utils/date'
  * 饱和度底色 + 待审核黄标）+ 日详情面板（当日时段卡 + 预约卡 + 五动作）。
  * 点日格经 ?date=YYYY-MM-DD 深链承载选中日；?tab=reservations|violations 契约不变；
  * 旧 ?week= 深链迁移映射为该周周一的 ?date=（周视图已退役）。
- * 数据决策：资源下拉聚合全部社区资源（本页无社区筛选能力，沿用任务 9 现状，
- * 重名资源以「名称（社区名）」消歧）；月范围 available-slots + reservations 一次拉取
+ * 数据决策：资源下拉聚合全部小区资源（本页无小区筛选能力，沿用任务 9 现状，
+ * 重名资源以「名称（小区名）」消歧）；月范围 available-slots + reservations 一次拉取
  * （实测 44 条时段 6.2KB + 预约约 1KB，无需分周懒加载）；日格占用数取 listReservations
  * 时段额度口径——分母累加每个栅格容量，分子累加后端currentBookings，预约条数单独展示；日详情保留每段占用。
  */
@@ -175,7 +175,7 @@ const selectedResource = computed(
   () => resources.value.find((item) => item.id === resourceId.value) ?? null
 )
 
-/** 跨社区聚合时重名资源以「名称（社区名）」消歧 */
+/** 跨小区聚合时重名资源以「名称（小区名）」消歧 */
 const duplicatedNames = computed(() => {
   const counts = new Map<string, number>()
   for (const item of resources.value) {

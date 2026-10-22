@@ -9,7 +9,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/** 创建租住记录请求（管理员登记；社区归属由房屋推导） */
+/** 创建租住记录请求（管理员登记；小区归属由房屋推导） */
 @Data
 @Schema(description = "创建租住记录请求")
 public class CreateLeaseDTO {

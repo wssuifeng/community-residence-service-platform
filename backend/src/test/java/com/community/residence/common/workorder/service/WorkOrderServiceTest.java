@@ -254,18 +254,18 @@ class WorkOrderServiceTest {
     }
 
     @Test
-    @DisplayName("DEF-A 权限不变：关闭工单仍先做社区数据权限校验（跨界管理员被拒）")
+    @DisplayName("DEF-A 权限不变：关闭工单仍先做小区数据权限校验（跨界管理员被拒）")
     void close_otherCommunityAdmin_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
             order.setStatus(WorkOrderStatus.COMPLETED);
             when(workOrderMapper.selectById(1L)).thenReturn(order);
             mocked.when(() -> com.community.residence.common.security.context.SecurityUtils.checkCommunityAccess(1L))
-                    .thenThrow(new com.community.residence.common.web.exception.ForbiddenException("无权操作其他社区数据"));
+                    .thenThrow(new com.community.residence.common.web.exception.ForbiddenException("无权操作其他小区数据"));
 
             assertThatThrownBy(() -> workOrderService.close(1L, null))
                     .isInstanceOf(com.community.residence.common.web.exception.ForbiddenException.class)
-                    .hasMessageContaining("无权操作其他社区数据");
+                    .hasMessageContaining("无权操作其他小区数据");
         }
     }
 
@@ -366,7 +366,7 @@ class WorkOrderServiceTest {
         try (var security = mockStatic(SecurityUtils.class)) {
             security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
             security.when(() -> SecurityUtils.checkCommunityAccess(1L)).thenThrow(
-                    new com.community.residence.common.web.exception.ForbiddenException("无权操作未绑定社区的数据"));
+                    new com.community.residence.common.web.exception.ForbiddenException("无权操作未绑定小区的数据"));
             when(workOrderMapper.selectById(1L)).thenReturn(order);
             assertThatThrownBy(() -> workOrderService.ensureConversation(1L))
                     .isInstanceOf(com.community.residence.common.web.exception.ForbiddenException.class);

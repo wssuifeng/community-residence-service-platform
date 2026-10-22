@@ -107,7 +107,7 @@ class LeaseExpiryReminderTaskTest {
         assertThat(captor.getValue().getLeaseId()).isEqualTo(1L);
         verify(notificationService).createForResident(eq(100L), eq(1L), eq("租住即将到期"),
                 anyString(), eq("LEASE"), eq("LEASE_RECORD"), eq(1L));
-        verify(notificationService).createForUser(eq(9L), eq(1L), eq("社区租住即将到期"),
+        verify(notificationService).createForUser(eq(9L), eq(1L), eq("小区租住即将到期"),
                 anyString(), eq("LEASE"), eq("LEASE_RECORD"), eq(1L));
         verify(taskLogService).record(anyString(), any(), anyLong(), eq(1), eq(1), eq(0), isNull());
     }

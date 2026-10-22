@@ -14,7 +14,7 @@ public class CreateAgreementDTO {
     @NotNull(message = "租住记录ID不能为空")
     private Long leaseId;
 
-    @Schema(description = "协议模板ID；为空时取该社区默认模板")
+    @Schema(description = "协议模板ID；为空时取该小区默认模板")
     private Long templateId;
 
     @Schema(description = "协议标题；为空时按「房屋位置 租赁协议」生成")

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "社区居住服务管理系统 - 前端（居民端/游客端/服务人员端/管理端）",
+  "description": "社区居住服务管理系统 - 前端（居民端/未登录公开信息页/服务人员端/管理端）",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",

@@ -177,7 +177,7 @@ class ViewingAppointmentConflictFixTest {
                 mocked.when(() -> com.community.residence.common.security.context.SecurityUtils.hasRole("RESIDENT"))
                         .thenReturn(true);
                 var dto = dto(A_START, A_END);
-                dto.setVisitorName("游客" + (long) Thread.currentThread().getId());
+                dto.setVisitorName("未登录访问者" + (long) Thread.currentThread().getId());
                 try {
                     service.create(dto);
                     success.incrementAndGet();
@@ -256,7 +256,7 @@ class ViewingAppointmentConflictFixTest {
         dto.setStartTime(start);
         dto.setEndTime(end);
         dto.setContactPhone("13800001111");
-        dto.setVisitorName("游客甲");
+        dto.setVisitorName("未登录访问者甲");
         return dto;
     }
 

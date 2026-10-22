@@ -26,7 +26,7 @@ public class LeaseController {
     private final com.community.residence.common.housing.service.ViewingAppointmentService viewingAppointmentService;
     private final com.community.residence.common.lease.service.DepositRefundService depositRefundService;
 
-    /** 押金退还记录（R72 §9.20.2）：居民限本人租约、管理端限绑定社区；按发起时间倒序，只读 */
+    /** 押金退还记录（R72 §9.20.2）：居民限本人租约、管理端限绑定小区；按发起时间倒序，只读 */
     @Operation(summary = "押金退还记录", description = "该租约押金退还指令与渠道结果（含失败原因），"
             + "居民限本人租约；供「我的租约」押金明细与租约明细时间线")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
@@ -38,7 +38,7 @@ public class LeaseController {
 
     /**
      * 承租确认（R67，接口设计.md 9.19）：仅租约本人、仅待签约状态；
-     * 幂等且不覆盖首次留痕（tenant_confirm_at/by 只写一次），确认后通知本社区管理方。
+     * 幂等且不覆盖首次留痕（tenant_confirm_at/by 只写一次），确认后通知本小区管理方。
      */
     @Operation(summary = "租约关联看房预约列表", description = "会话内发起的看房预约按 lease_id 归属，居民限本人租约")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")

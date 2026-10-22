@@ -18,7 +18,7 @@ public class ServiceCategory {
     @Schema(description = "类别ID")
     private Long id;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "类别名称")

@@ -10,9 +10,9 @@ import { formatDateTime } from '@/common/web/utils/date'
 import StatusTag from '@/common/web/components/StatusTag.vue'
 
 /**
- * 社区绑定抽屉（原 /admin/sys-users/:id/communities 独立页收编，对照 design-mockups/admin/11 任务 12）：
- * 用户信息摘要 + 已绑定社区列表（解绑）+ 绑定新社区（下拉选未绑定社区）。
- * 按传入用户打开，绑定/解绑成功后 emit('changed') 由列表刷新绑定社区列。
+ * 小区绑定抽屉（原 /admin/sys-users/:id/communities 独立页收编，对照 design-mockups/admin/11 任务 12）：
+ * 用户信息摘要 + 已绑定小区列表（解绑）+ 绑定新小区（下拉选未绑定小区）。
+ * 按传入用户打开，绑定/解绑成功后 emit('changed') 由列表刷新绑定小区列。
  * 后端契约：绑定仅对 ADMIN 角色生效（SysUserService 校验 BIND_ROLE_INVALID），非 ADMIN 行隐藏绑定面板。
  */
 const props = defineProps<{
@@ -23,7 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  /** 绑定/解绑成功，通知列表刷新绑定社区列 */
+  /** 绑定/解绑成功，通知列表刷新绑定小区列 */
   changed: []
 }>()
 
@@ -50,7 +50,7 @@ const user = ref<ISysUser | null>(null)
 const bindings = ref<IUserCommunityBinding[]>([])
 const loading = ref(false)
 
-/** 可选社区（分页递归拉全量启用社区，过滤已绑定） */
+/** 可选小区（分页递归拉全量启用小区，过滤已绑定） */
 const allCommunities = ref<ICommunity[]>([])
 const communityLoading = ref(false)
 const selectedCommunityId = ref<number | ''>('')
@@ -58,12 +58,12 @@ const bindLoading = ref(false)
 
 const COMMUNITY_PAGE_SIZE = 50
 
-/** 仅 ADMIN 角色可绑定社区（后端 SysUserService 校验，其余角色绑定必失败） */
+/** 仅 ADMIN 角色可绑定小区（后端 SysUserService 校验，其余角色绑定必失败） */
 const canBind = computed(() => user.value?.role === 'ADMIN')
 
 const boundIds = computed(() => new Set(bindings.value.map((item) => item.communityId)))
 
-/** 未绑定的启用社区 */
+/** 未绑定的启用小区 */
 const unboundCommunities = computed(() =>
   allCommunities.value.filter(
     (item) => item.status === 'ACTIVE' && !boundIds.value.has(item.id)
@@ -97,7 +97,7 @@ async function loadBindings(): Promise<void> {
   }
 }
 
-/** 递归翻页拉取社区全量（数量有限，一次会话内拉全以便过滤已绑定项） */
+/** 递归翻页拉取小区全量（数量有限，一次会话内拉全以便过滤已绑定项） */
 async function loadCommunities(page = 1): Promise<void> {
   communityLoading.value = true
   try {
@@ -111,7 +111,7 @@ async function loadCommunities(page = 1): Promise<void> {
       await loadCommunities(page + 1)
     }
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '社区列表加载失败')
+    ElMessage.error(error instanceof Error ? error.message : '小区列表加载失败')
   } finally {
     communityLoading.value = false
   }
@@ -120,15 +120,15 @@ async function loadCommunities(page = 1): Promise<void> {
 async function handleBind(): Promise<void> {
   if (!props.userId) return
   if (selectedCommunityId.value === '') {
-    ElMessage.warning('请选择要绑定的社区')
+    ElMessage.warning('请选择要绑定的小区')
     return
   }
   const communityId = selectedCommunityId.value
   const community = allCommunities.value.find((item) => item.id === communityId)
   try {
     await ElMessageBox.confirm(
-      `确定将用户「${user.value?.realName ?? user.value?.username ?? props.userId}」绑定到社区「${community?.name ?? communityId}」？`,
-      '绑定社区',
+      `确定将用户「${user.value?.realName ?? user.value?.username ?? props.userId}」绑定到小区「${community?.name ?? communityId}」？`,
+      '绑定小区',
       { type: 'info', confirmButtonText: '绑定', cancelButtonText: '取消' }
     )
   } catch {
@@ -137,7 +137,7 @@ async function handleBind(): Promise<void> {
   bindLoading.value = true
   try {
     await bindCommunity(props.userId, communityId)
-    ElMessage.success('社区绑定成功')
+    ElMessage.success('小区绑定成功')
     selectedCommunityId.value = ''
     loadBindings()
     emit('changed')
@@ -152,8 +152,8 @@ async function handleUnbind(row: IUserCommunityBinding): Promise<void> {
   if (!props.userId) return
   try {
     await ElMessageBox.confirm(
-      `确定解绑社区「${row.communityName}」？解绑后该用户不再管理此社区。`,
-      '解绑社区',
+      `确定解绑小区「${row.communityName}」？解绑后该用户不再管理此小区。`,
+      '解绑小区',
       { type: 'warning', confirmButtonText: '解绑', cancelButtonText: '取消' }
     )
   } catch {
@@ -161,7 +161,7 @@ async function handleUnbind(row: IUserCommunityBinding): Promise<void> {
   }
   try {
     await unbindCommunity(props.userId, row.communityId)
-    ElMessage.success('社区已解绑')
+    ElMessage.success('小区已解绑')
     loadBindings()
     emit('changed')
   } catch (error) {
@@ -171,7 +171,7 @@ async function handleUnbind(row: IUserCommunityBinding): Promise<void> {
 </script>
 
 <template>
-  <el-drawer v-model="visible" title="社区绑定管理" size="640px" class="community-drawer">
+  <el-drawer v-model="visible" title="小区绑定管理" size="640px" class="community-drawer">
     <div class="drawer-body">
       <!-- 用户信息摘要 -->
       <el-descriptions v-if="user" :column="2" border class="user-summary">
@@ -187,21 +187,21 @@ async function handleUnbind(row: IUserCommunityBinding): Promise<void> {
         <el-descriptions-item label="创建时间">{{ formatDateTime(user.createdAt) }}</el-descriptions-item>
       </el-descriptions>
 
-      <!-- 绑定新社区（仅 ADMIN 角色可绑定，后端对其他角色拒绝） -->
+      <!-- 绑定新小区（仅 ADMIN 角色可绑定，后端对其他角色拒绝） -->
       <el-alert
         v-if="user && !canBind"
         type="info"
         :closable="false"
         show-icon
-        title="仅社区管理员角色支持绑定社区"
+        title="仅小区管理员角色支持绑定小区"
       />
       <template v-else>
         <div class="bind-panel">
-          <span class="bind-label">绑定新社区</span>
+          <span class="bind-label">绑定新小区</span>
           <el-select
             v-model="selectedCommunityId"
             :loading="communityLoading"
-            placeholder="选择未绑定的社区"
+            placeholder="选择未绑定的小区"
             class="bind-select"
             clearable
           >
@@ -214,14 +214,14 @@ async function handleUnbind(row: IUserCommunityBinding): Promise<void> {
           </el-select>
           <el-button v-permission="['SUPER_ADMIN']" type="primary" :loading="bindLoading" @click="handleBind">绑定</el-button>
           <span v-if="!communityLoading && unboundCommunities.length === 0" class="bind-empty">
-            暂无可绑定的社区
+            暂无可绑定的小区
           </span>
         </div>
 
-        <!-- 已绑定社区列表 -->
+        <!-- 已绑定小区列表 -->
         <el-table v-loading="loading" :data="bindings">
-          <el-table-column prop="communityName" label="社区名称" min-width="140" show-overflow-tooltip />
-          <el-table-column label="社区地址" min-width="180" show-overflow-tooltip>
+          <el-table-column prop="communityName" label="小区名称" min-width="140" show-overflow-tooltip />
+          <el-table-column label="小区地址" min-width="180" show-overflow-tooltip>
             <template #default="{ row }">{{ row.communityAddress || '-' }}</template>
           </el-table-column>
           <el-table-column label="绑定时间" width="150">
@@ -233,7 +233,7 @@ async function handleUnbind(row: IUserCommunityBinding): Promise<void> {
             </template>
           </el-table-column>
           <template #empty>
-            <el-empty description="暂未绑定社区" :image-size="70" />
+            <el-empty description="暂未绑定小区" :image-size="70" />
           </template>
         </el-table>
       </template>

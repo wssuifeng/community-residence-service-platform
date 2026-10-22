@@ -168,14 +168,14 @@ class WorkOrderNotificationMatrixTest {
                 .thenReturn(group);
         lenient().when(conversationService.findWorkOrderGroup(ORDER_ID)).thenReturn(group);
 
-        /* 该社区绑定启用管理员（「相关管理员」＝ sys_admin_community 绑定的启用 ADMIN） */
+        /* 该小区绑定启用管理员（「相关管理员」＝ sys_admin_community 绑定的启用 ADMIN） */
         SysAdminCommunity binding = new SysAdminCommunity();
         binding.setCommunityId(COMMUNITY_ID);
         binding.setAdminId(BOUND_ADMIN_ID);
         lenient().when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of(binding));
         SysUser boundAdmin = sysUser(BOUND_ADMIN_ID, "ADMIN");
         SysUser superAdmin = sysUser(SUPER_ADMIN_ID, "SUPER_ADMIN");
-        /* 调用序：社区绑定管理员查询 → 超管查询（仅事件 1 走第二步） */
+        /* 调用序：小区绑定管理员查询 → 超管查询（仅事件 1 走第二步） */
         lenient().when(sysUserMapper.selectList(any()))
                 .thenReturn(List.of(boundAdmin), List.of(superAdmin));
         lenient().when(sysUserMapper.selectById(STAFF_ID)).thenReturn(sysUser(STAFF_ID, "STAFF"));
@@ -229,7 +229,7 @@ class WorkOrderNotificationMatrixTest {
     /* ── 事件 1 提交 → 相关管理员 ✅ + 超管 ✅；居民 —、服务人员 — ───────────── */
 
     @Test
-    @DisplayName("事件1 提交：必须收到 = 该社区绑定管理员 + 超管；居民/服务人员不收")
+    @DisplayName("事件1 提交：必须收到 = 该小区绑定管理员 + 超管；居民/服务人员不收")
     void event1_submit() {
         ServiceCategory category = new ServiceCategory();
         category.setId(1L);

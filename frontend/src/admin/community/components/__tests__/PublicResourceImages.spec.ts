@@ -34,7 +34,7 @@ async function mountPage(): Promise<VueWrapper> {
   return wrapper
 }
 
-/** 选中「所属社区」筛选（同时触发资源列表加载，列表区才渲染） */
+/** 选中「所属小区」筛选（同时触发资源列表加载，列表区才渲染） */
 async function selectCommunity(wrapper: VueWrapper, communityId = 1): Promise<void> {
   const select = wrapper.findAllComponents({ name: 'ElSelect' })[0]
   select.vm.$emit('update:modelValue', communityId)
@@ -76,7 +76,7 @@ describe('管理端公共资源图片 · 表单（PublicResourceListView）', ()
     await createButton!.trigger('click')
     await flushPromises()
 
-    await wrapper.find('input[placeholder="如：篮球场"]').setValue('社区图书馆')
+    await wrapper.find('input[placeholder="如：篮球场"]').setValue('小区图书馆')
     expect(wrapper.find('textarea[placeholder^="图片地址"]').exists()).toBe(false)
     const input = wrapper.find('input[type="file"]')
     Object.defineProperty(input.element, 'files', { configurable: true, value: [new File(['image'], 'lib-1.png'), new File(['image'], 'lib-2.png')] })
@@ -85,7 +85,7 @@ describe('管理端公共资源图片 · 表单（PublicResourceListView）', ()
 
     await submitDialog(wrapper)
 
-    const created = backend().state.resources.find((item) => item.name === '社区图书馆')
+    const created = backend().state.resources.find((item) => item.name === '小区图书馆')
     expect(created, '资源未创建').toBeTruthy()
     expect(created!.images).toEqual(['/uploads/lib-1.png', '/uploads/lib-2.png'])
   })

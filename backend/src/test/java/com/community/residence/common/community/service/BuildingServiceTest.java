@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-/** 楼栋业务逻辑测试：删除保护（有单元不可删）、跨社区迁移拒绝 */
+/** 楼栋业务逻辑测试：删除保护（有单元不可删）、跨小区迁移拒绝 */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("BuildingService 单元测试")
 class BuildingServiceTest {
@@ -79,7 +79,7 @@ class BuildingServiceTest {
     }
 
     @Test
-    @DisplayName("更新楼栋：不允许变更所属社区")
+    @DisplayName("更新楼栋：不允许变更所属小区")
     void update_changeCommunity_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
@@ -91,12 +91,12 @@ class BuildingServiceTest {
 
             assertThatThrownBy(() -> buildingService.update(1L, dto))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("不允许变更所属社区");
+                    .hasMessageContaining("不允许变更所属小区");
         }
     }
 
     @Test
-    @DisplayName("创建楼栋：社区须为运营中（停用社区拒绝）")
+    @DisplayName("创建楼栋：小区须为运营中（停用小区拒绝）")
     void create_inactiveCommunity_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {

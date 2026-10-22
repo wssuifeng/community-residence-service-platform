@@ -85,7 +85,7 @@ export function listLeasePayments(id: number) {
 /* ------------------------- R72 押金退还（V22 押金状态与在线退还） ------------------------- */
 
 /**
- * 发起押金退还（R72，接口设计 §9.20.1）：**管理端专属**（ADMIN 限绑定社区 / SUPER_ADMIN），
+ * 发起押金退还（R72，接口设计 §9.20.1）：**管理端专属**（ADMIN 限绑定小区 / SUPER_ADMIN），
  * 居民不可发起——故调用方只有管理端页面与其押金退还弹窗。
  *
  * 契约要点（前端不得替代服务端判定，只做前置提示）：
@@ -101,7 +101,7 @@ export function createDepositRefund(id: number, data: ICreateDepositRefundDTO) {
   return http.post<IDepositRefund>(`/leases/${id}/deposit-refunds`, data)
 }
 
-/** 押金退还记录（R72 §9.20.2）：居民限本人租约 / 管理端限绑定社区，按发起时间降序、不分页 */
+/** 押金退还记录（R72 §9.20.2）：居民限本人租约 / 管理端限绑定小区，按发起时间降序、不分页 */
 export function listDepositRefunds(id: number) {
   return http.get<IDepositRefund[]>(`/leases/${id}/deposit-refunds`)
 }

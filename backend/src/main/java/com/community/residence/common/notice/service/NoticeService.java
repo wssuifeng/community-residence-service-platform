@@ -67,9 +67,9 @@ public class NoticeService {
             "NOT EXISTS (SELECT 1 FROM notice_target nt WHERE nt.notice_id = notice.id)";
 
     /**
-     * 游客可见过滤（DEF-046）：无任何 COMMUNITY/BUILDING 定向行（纯广播）
-     * 或存在 GUEST 目标行（管理端显式开放游客，如使用教程）；社区/楼栋定向
-     * 公告对游客不可见。GUEST 行本身不影响"广播"判定（纯 GUEST 公告两类口径均命中）。
+     * 未登录公开访问过滤（DEF-046）：无 COMMUNITY/BUILDING 定向行（纯广播），
+     * 或存在 GUEST 目标行（表示无需居住关系可见）；小区/楼栋定向公告默认不公开。
+     * GUEST 行本身不影响"广播"判定（纯 GUEST 公告两类口径均命中）。
      */
     private static final String GUEST_VISIBLE_FILTER_SQL =
             "(NOT EXISTS (SELECT 1 FROM notice_target nt WHERE nt.notice_id = notice.id "
@@ -89,7 +89,7 @@ public class NoticeService {
     private final HouseMapper houseMapper;
     private final UnitMapper unitMapper;
 
-    /* 创建公告：初始 DRAFT；多社区/楼栋定向逐项写 notice_target（R25 v1.2），
+    /* 创建公告：初始 DRAFT；多小区/楼栋定向逐项写 notice_target（R25 v1.2），
        ADMIN 逐项目标校验绑定范围；无目标为全系统广播（仅超管） */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "CREATE", targetType = "NOTICE", targetId = "#result.id", content = "'创建公告：' + #dto.title")
@@ -97,7 +97,7 @@ public class NoticeService {
         List<NoticeServiceTarget> targets = resolveTargets(dto);
         if (targets.isEmpty()) {
             if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "社区管理员必须指定目标社区");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "小区管理员必须指定目标小区");
             }
         }
 
@@ -140,7 +140,7 @@ public class NoticeService {
         List<NoticeServiceTarget> targets = resolveTargets(dto);
         if (targets.isEmpty()) {
             if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "社区管理员必须指定目标社区");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "小区管理员必须指定目标小区");
             }
         }
         for (NoticeServiceTarget target : targets) {
@@ -211,8 +211,8 @@ public class NoticeService {
         return List.of();
     }
 
-    /* 逐项目标校验：类型合法（COMMUNITY/BUILDING/GUEST）、社区运营中、ADMIN 限绑定范围（R24 v1.2）。
-       GUEST（DEF-046 游客可见）属全局级操作仅超管（定义 v1.3 权责：全平台游客触达），
+    /* 逐项目标校验：类型合法（COMMUNITY/BUILDING/GUEST）、小区运营中、ADMIN 限绑定范围（R24 v1.2）。
+       GUEST 表示无需居住关系可见，属于全局级操作，仅超管可设置（定义 v1.3 权责），
        ADMIN 设置 403 拒绝并留应用日志 */
     private void checkTargetAccess(NoticeServiceTarget target) {
         if ("GUEST".equals(target.type())) {
@@ -220,8 +220,8 @@ public class NoticeService {
                 throw new BusinessException(ErrorCode.INVALID_PARAM, "GUEST 目标不携带目标ID");
             }
             if (!SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
-                log.warn("拒绝非超管设置游客可见公告目标：operatorId={}", SecurityUtils.getUserId());
-                throw new ForbiddenException("游客可见目标仅超级管理员可设置");
+                log.warn("拒绝非超管设置无需居住关系可见公告目标：operatorId={}", SecurityUtils.getUserId());
+                throw new ForbiddenException("GUEST 公告目标仅超级管理员可设置");
             }
             return;
         }
@@ -235,7 +235,7 @@ public class NoticeService {
             communityService.requireActiveCommunity(target.id());
             SecurityUtils.checkCommunityAccess(target.id());
         } else {
-            /* BUILDING 目标：经楼栋归属社区校验（building.community_id） */
+            /* BUILDING 目标：经楼栋归属小区校验（building.community_id） */
             com.community.residence.common.community.entity.Building building =
                     buildingMapper.selectById(target.id());
             if (building == null) {
@@ -270,9 +270,9 @@ public class NoticeService {
 
     /**
      * 公告详情：普通访问仅 PUBLISHED 且未过期；
-     * 居民限本人社区定向公告与全系统广播（R25 范围外不可见，DEF-003）；
-     * 游客/未登录限纯广播 + GUEST 显式可见（DEF-046，与列表同口径）；
-     * ADMIN 越绑定社区按数据不可见 404（与写路径 403 区分口径）。
+     * 居民限本人小区定向公告与全系统广播（R25 范围外不可见，DEF-003）；
+     * 未登录公开访问限纯广播 + GUEST 目标（表示无需居住关系可见，DEF-046，与列表同口径）；
+     * ADMIN 越绑定小区按数据不可见 404（与写路径 403 区分口径）。
      */
     public NoticeVO getById(Long id) {
         Notice notice = requireNotice(id);
@@ -280,7 +280,7 @@ public class NoticeService {
             return toVO(notice);
         }
         if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
-            /* 数据级读过滤：任一目标（社区/楼栋归属社区）落在绑定集合内才可见 */
+            /* 数据级读过滤：任一目标（小区/楼栋归属小区）落在绑定集合内才可见 */
             if (resolveNoticeCommunityIds(notice.getId()).stream()
                     .noneMatch(SecurityUtils.getCommunityIds()::contains)) {
                 throw new ResourceNotFoundException("公告不存在");
@@ -291,16 +291,16 @@ public class NoticeService {
             checkResidentVisibility(notice, SecurityUtils.getUserId());
         } else if (!NoticeStatus.PUBLISHED.equals(notice.getStatus()) || isExpired(notice)
                 || !visibleToGuest(notice.getId())) {
-            /* 游客/未登录（DEF-046）：公开口径加可见性维度（纯广播 OR GUEST 目标） */
+            /* 未登录公开访问（DEF-046）：公开口径加可见性维度（纯广播 OR GUEST 目标） */
             throw new ResourceNotFoundException("公告不存在或已下线");
         }
         return toVO(notice);
     }
 
     /**
-     * 公告分页列表：匿名/普通用户仅 PUBLISHED 且未过期，游客另限纯广播 +
-     * GUEST 显式可见（DEF-046）；居民限本人社区定向 + 全系统广播（DEF-003）；
-     * 管理端角色返回全部状态（ADMIN 限绑定社区，BUILDING 目标按楼栋归属社区过滤）。
+     * 公告分页列表：未登录公开访问仅 PUBLISHED 且未过期，并限纯广播 + GUEST 目标；
+     * 居民限本人小区定向 + 全系统广播（DEF-003）；
+     * 管理端角色返回全部状态（ADMIN 限绑定小区，BUILDING 目标按楼栋归属小区过滤）。
      */
     public PageVO<NoticeVO> page(long page, long size, Long communityId, String keyword,
                                  String priority, Integer isPinned, String type) {
@@ -327,7 +327,7 @@ public class NoticeService {
         if (communityId != null) {
             wrapper.in(Notice::getId, resolveNoticeIdsByCommunity(communityId, wrapper));
         }
-        /* ADMIN 限绑定社区公告（经 notice_target 过滤）；SUPER_ADMIN 不过滤 */
+        /* ADMIN 限绑定小区公告（经 notice_target 过滤）；SUPER_ADMIN 不过滤 */
         if (SecurityUtils.hasRole(RoleConstants.ADMIN)) {
             List<Long> boundNoticeIds = targetedNoticeIdsForCommunities(new ArrayList<>(SecurityUtils.getCommunityIds()));
             if (boundNoticeIds.isEmpty()) {
@@ -335,7 +335,7 @@ public class NoticeService {
             }
             wrapper.in(Notice::getId, boundNoticeIds);
         } else if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
-            /* 居民只看本人当前居住关系命中的社区/楼栋定向公告 + 全系统广播。 */
+            /* 居民只看本人当前居住关系命中的小区/楼栋定向公告 + 全系统广播。 */
             List<Long> visibleIds = targetedNoticeIdsForResident(SecurityUtils.getUserId());
             if (visibleIds.isEmpty()) {
                 wrapper.apply(BROADCAST_FILTER_SQL);
@@ -344,8 +344,8 @@ public class NoticeService {
                         .or().apply(BROADCAST_FILTER_SQL));
             }
         } else {
-            /* 游客/匿名（DEF-046）：仅纯广播 + 显式开放游客（GUEST 目标）的公告，
-               社区/楼栋定向公告不可见（原全量 PUBLISHED 口径过宽，用户手测裁决） */
+            /* 未登录公开访问（DEF-046）：仅纯广播或带 GUEST 目标的公告，
+               小区/楼栋定向公告不可见（原全量 PUBLISHED 口径过宽，用户手测裁决） */
             wrapper.apply(GUEST_VISIBLE_FILTER_SQL);
         }
 
@@ -370,7 +370,7 @@ public class NoticeService {
         if(noticeMapper.updateLifecycle(notice,"DRAFT")!=1)throw new BusinessException(ErrorCode.STATE_TRANSITION_INVALID,"公告状态已改变，请重新读取");
 
         for (Long residentId : noticeTargetResidentIds(notice.getId())) {
-            notificationService.createForResident(residentId, null, "社区公告",
+            notificationService.createForResident(residentId, null, "小区公告",
                     "新公告「" + notice.getTitle() + "」已发布，请查看",
                     "NOTICE", "NOTICE", notice.getId());
         }
@@ -378,7 +378,7 @@ public class NoticeService {
                 id, publishTime, SecurityUtils.getUserId(), noticeTargetResidentIds(id).size());
     }
 
-    /** 公告目标居民：按当前有效居住关系匹配社区/楼栋；纯 GUEST 不触达居民；无目标才广播全体 ACTIVE 居民。 */
+    /** 公告目标居民：按当前有效居住关系匹配小区/楼栋；纯 GUEST 不触达居民；无目标才广播全体 ACTIVE 居民。 */
     private List<Long> noticeTargetResidentIds(Long noticeId) {
         List<NoticeTarget> targets = noticeTargetMapper.selectList(
                 new LambdaQueryWrapper<NoticeTarget>()
@@ -485,8 +485,8 @@ public class NoticeService {
         }
     }
 
-    /* 管理权限：SUPER_ADMIN 全局；ADMIN 限公告目标社区在绑定集合内（无目标的广播仅超管管理）。
-       目标社区含 BUILDING 目标经归属社区解析（楼栋定向公告的管理范围与其归属社区一致） */
+    /* 管理权限：SUPER_ADMIN 全局；ADMIN 限公告目标小区在绑定集合内（无目标的广播仅超管管理）。
+       目标小区含 BUILDING 目标经归属小区解析（楼栋定向公告的管理范围与其归属小区一致） */
     public void checkManageAccess(Notice notice) {
         if (SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
             return;
@@ -497,7 +497,7 @@ public class NoticeService {
         }
     }
 
-    /** 公告全部目标归属社区：COMMUNITY 目标直取 + BUILDING 目标经 building.community_id 解析 */
+    /** 公告全部目标归属小区：COMMUNITY 目标直取 + BUILDING 目标经 building.community_id 解析 */
     private List<Long> resolveNoticeCommunityIds(Long noticeId) {
         List<NoticeTarget> targets = noticeTargetMapper.selectList(
                 new LambdaQueryWrapper<NoticeTarget>()
@@ -519,7 +519,7 @@ public class NoticeService {
         return communityIds.stream().distinct().toList();
     }
 
-    /** 居民当前有效居住范围：从居住关系沿房屋 → 单元 → 楼栋解析，避免楼栋定向降级为社区定向。 */
+    /** 居民当前有效居住范围：从居住关系沿房屋 → 单元 → 楼栋解析，避免楼栋定向降级为小区定向。 */
     private ResidentScope residentScope(Long residentId) {
         List<ResidenceRelation> relations = residenceRelationMapper.selectList(
                 new LambdaQueryWrapper<ResidenceRelation>()
@@ -541,7 +541,7 @@ public class NoticeService {
         return new ResidentScope(communityIds, buildingIds);
     }
 
-    /** 公告对居民可见：无目标=广播；COMMUNITY 匹配社区；BUILDING 必须匹配当前楼栋；GUEST-only 不可见。 */
+    /** 公告对居民可见：无目标=广播；COMMUNITY 匹配小区；BUILDING 必须匹配当前楼栋；GUEST-only 不可见。 */
     private boolean visibleToResident(Notice notice, Long residentId) {
         List<NoticeTarget> targets = noticeTargetMapper.selectList(
                 new LambdaQueryWrapper<NoticeTarget>().eq(NoticeTarget::getNoticeId, notice.getId()));
@@ -556,7 +556,7 @@ public class NoticeService {
                         && scope.buildingIds().contains(target.getTargetId()));
     }
 
-    /** 居民公告列表可见的定向公告 ID，按本人当前社区/楼栋范围匹配。 */
+    /** 居民公告列表可见的定向公告 ID，按本人当前小区/楼栋范围匹配。 */
     private List<Long> targetedNoticeIdsForResident(Long residentId) {
         ResidentScope scope = residentScope(residentId);
         if (scope.communityIds().isEmpty() && scope.buildingIds().isEmpty()) {
@@ -622,7 +622,7 @@ public class NoticeService {
                         entry -> unitBuildings.get(entry.getValue())));
     }
 
-    /** 公告对游客可见（DEF-046）：无 COMMUNITY/BUILDING 定向行（纯广播）或存在 GUEST 目标行；
+    /** 公告可被未登录公开访问（DEF-046）：无 COMMUNITY/BUILDING 定向行（纯广播）或存在 GUEST 目标行；
      *  与列表 GUEST_VISIBLE_FILTER_SQL 同口径（详情与列表一致，防直连详情绕过） */
     private boolean visibleToGuest(Long noticeId) {
         List<NoticeTarget> targets = noticeTargetMapper.selectList(
@@ -635,7 +635,7 @@ public class NoticeService {
         return !hasScopedTarget || hasGuestTarget;
     }
 
-    /** 社区集合可见的定向公告 ID（COMMUNITY 目标 + BUILDING 目标归属社区在集合内） */
+    /** 小区集合可见的定向公告 ID（COMMUNITY 目标 + BUILDING 目标归属小区在集合内） */
     private List<Long> targetedNoticeIdsForCommunities(List<Long> communityIds) {
         if (communityIds.isEmpty()) {
             return List.of();
@@ -658,7 +658,7 @@ public class NoticeService {
                 .distinct().toList();
     }
 
-    /** 按社区取公告 ID 集合；为空时经 wrapper 注入恒假条件（in 空集合会生成非法 SQL） */
+    /** 按小区取公告 ID 集合；为空时经 wrapper 注入恒假条件（in 空集合会生成非法 SQL） */
     private List<Long> resolveNoticeIdsByCommunity(Long communityId, LambdaQueryWrapper<Notice> wrapper) {
         List<Long> noticeIds = targetedNoticeIdsForCommunities(List.of(communityId));
         if (noticeIds.isEmpty()) {
@@ -705,7 +705,7 @@ public class NoticeService {
         return vo;
     }
 
-    /** 公告关联社区可能已被删除（社区删除受保护，理论不发生，防御式处理） */
+    /** 公告关联小区可能已被删除（小区删除受保护，理论不发生，防御式处理） */
     private Community communityMapperQuiet(Long communityId) {
         try {
             return communityService.requireCommunity(communityId);

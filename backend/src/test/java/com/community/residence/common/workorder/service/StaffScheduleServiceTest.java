@@ -67,7 +67,7 @@ class StaffScheduleServiceTest {
     private void givenCommunity() {
         Community community = new Community();
         community.setId(1L);
-        community.setName("幸福社区");
+        community.setName("幸福小区");
         when(communityMapper.selectById(1L)).thenReturn(community);
     }
 
@@ -98,7 +98,7 @@ class StaffScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("批量保存：同社区同人同日已存在 → 覆盖更新（不新增），saved 计一条")
+    @DisplayName("批量保存：同小区同人同日已存在 → 覆盖更新（不新增），saved 计一条")
     void batchSave_existingRow_overwritten() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             givenCommunity();
@@ -268,7 +268,7 @@ class StaffScheduleServiceTest {
     }
 
     @Test
-    @DisplayName("排班列表：装配人员姓名、社区名称与班次标签")
+    @DisplayName("排班列表：装配人员姓名、小区名称与班次标签")
     void list_assemblesNamesAndShiftLabel() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             StaffSchedule row = schedule(1L, 7L, LocalDate.of(2026, 9, 21));
@@ -279,7 +279,7 @@ class StaffScheduleServiceTest {
             when(sysUserMapper.selectList(any())).thenReturn(List.of(staffOf(7L)));
             Community community = new Community();
             community.setId(1L);
-            community.setName("幸福社区");
+            community.setName("幸福小区");
             when(communityMapper.selectList(any())).thenReturn(List.of(community));
 
             List<StaffScheduleVO> records = staffScheduleService.list(1L,
@@ -287,13 +287,13 @@ class StaffScheduleServiceTest {
 
             assertThat(records).hasSize(1);
             assertThat(records.get(0).getStaffName()).isEqualTo("张服务");
-            assertThat(records.get(0).getCommunityName()).isEqualTo("幸福社区");
+            assertThat(records.get(0).getCommunityName()).isEqualTo("幸福小区");
             assertThat(records.get(0).getShiftLabel()).isEqualTo("晚班");
         }
     }
 
     @Test
-    @DisplayName("清空排班：按社区+日期范围（可带人员筛选）删除，返回清除条数")
+    @DisplayName("清空排班：按小区+日期范围（可带人员筛选）删除，返回清除条数")
     void clear_deletesRange() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockSecurity()) {
             when(staffScheduleMapper.delete(any())).thenReturn(3);

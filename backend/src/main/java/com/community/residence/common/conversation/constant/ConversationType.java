@@ -5,7 +5,7 @@ package com.community.residence.common.conversation.constant;
  * VIEWING_GROUP 挂看房预约（related_id=viewing_appointment.id），
  * LEASE_GROUP 挂租约（related_id=lease_record.id，R68），
  * WORK_ORDER_GROUP 挂工单（related_id=work_order.id，R74），
- * DIRECT 为居民-社区管理员直通（related_id 空，幂等由应用层按参与者+社区判定）。
+ * DIRECT 为居民-小区管理员直通（related_id 空，幂等由应用层按参与者+小区判定）。
  */
 public final class ConversationType {
 

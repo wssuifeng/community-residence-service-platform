@@ -19,8 +19,8 @@ public class AdminCreateResidentDTO {
     private Long anchorRelationId;
 
 
-    @Schema(description = "所属社区ID（数据级权限锚点，ADMIN 限绑定社区）")
-    @NotNull(message = "所属社区不能为空")
+    @Schema(description = "所属小区ID（数据级权限锚点，ADMIN 限绑定小区）")
+    @NotNull(message = "所属小区不能为空")
     private Long communityId;
 
     @Schema(description = "真实姓名")

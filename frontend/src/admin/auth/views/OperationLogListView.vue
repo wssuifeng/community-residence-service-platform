@@ -22,7 +22,7 @@ const operatorTypeLabels: Record<string, string> = {
 /** 常见模块中文标签（后端 module 为英文标识，仅做展示翻译，未知值原样展示） */
 const moduleLabels: Record<string, string> = {
   AUTH: '认证',
-  COMMUNITY: '社区',
+  COMMUNITY: '小区',
   RESIDENT: '居民',
   LEASE: '租住',
   WORK_ORDER: '工单',

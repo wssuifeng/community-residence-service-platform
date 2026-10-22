@@ -22,8 +22,8 @@ import type { Role } from '@/common/web/types/api'
  */
 const props = withDefaults(
   defineProps<{
-    /** 当前端角色，决定通知点击后的跳转前缀 */
-    role: Role
+    /** 当前账号角色；未登录状态无通知导航语境 */
+    role: Role | null
   }>(),
   { role: 'RESIDENT' }
 )

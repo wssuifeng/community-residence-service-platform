@@ -15,8 +15,8 @@ import java.util.List;
 @Schema(description = "排班批量设置请求")
 public class BatchSaveScheduleDTO {
 
-    @Schema(description = "排班社区ID")
-    @NotNull(message = "社区不能为空")
+    @Schema(description = "排班小区ID")
+    @NotNull(message = "小区不能为空")
     private Long communityId;
 
     @Schema(description = "服务人员ID列表")

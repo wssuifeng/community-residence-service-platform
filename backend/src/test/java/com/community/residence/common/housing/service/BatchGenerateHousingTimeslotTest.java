@@ -309,7 +309,7 @@ class BatchGenerateHousingTimeslotTest {
             org.mockito.Mockito.when(houseMapper.selectByIdForUpdate(house1.getId())).thenReturn(house1);
             org.mockito.Mockito.when(housingMapper.selectCount(any())).thenReturn(0L);
             org.mockito.Mockito.doAnswer(i -> {((Housing)i.getArgument(0)).setId(900L);return 1;}).when(housingMapper).insert(any(Housing.class));
-            var community=new com.community.residence.common.community.entity.Community();community.setName("合成社区");
+            var community=new com.community.residence.common.community.entity.Community();community.setName("合成小区");
             org.mockito.Mockito.when(communityService.requireCommunity(1L)).thenReturn(community);
             housingService.create(dto);
             verify(timeslotMapper, times(10)).insert(any(HousingTimeslot.class));

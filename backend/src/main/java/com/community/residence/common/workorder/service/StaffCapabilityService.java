@@ -37,9 +37,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 服务人员能力绑定业务逻辑（V19，C4 物业调度）：人员-常驻社区 + 人员-擅长服务类别。
+ * 服务人员能力绑定业务逻辑（V19，C4 物业调度）：人员-常驻小区 + 人员-擅长服务类别。
  * 服务人员即 sys_user 中 role=STAFF 的账号，无独立人员表；sys_user 在数据级权限
- * 拦截器 SKIP_TABLES 中，故 ADMIN 的可见范围（限绑定社区内已绑定人员）在本层
+ * 拦截器 SKIP_TABLES 中，故 ADMIN 的可见范围（限绑定小区内已绑定人员）在本层
  * 经 staff_community 显式收敛，不依赖拦截器。
  */
 @Slf4j
@@ -54,9 +54,9 @@ public class StaffCapabilityService {
     private final CommunityMapper communityMapper;
     private final ServiceCategoryMapper categoryMapper;
 
-    /* 人员能力列表：SUPER_ADMIN 看全部 STAFF；ADMIN 只看绑定了其绑定社区的人员
+    /* 人员能力列表：SUPER_ADMIN 看全部 STAFF；ADMIN 只看绑定了其绑定小区的人员
        （经 staff_community 显式收敛）。communityId/categoryId/keyword 为可选筛选，
-       关键词为空时不额外收敛，未绑定任何社区的 STAFF 在超管视图下照常可见 */
+       关键词为空时不额外收敛，未绑定任何小区的 STAFF 在超管视图下照常可见 */
     public PageVO<StaffCapabilityVO> page(long page, long size, Long communityId,
                                           Long categoryId, String keyword) {
         List<Long> scopedStaffIds = resolveScopeIds(communityId, categoryId);
@@ -76,7 +76,7 @@ public class StaffCapabilityService {
                 result.getTotal(), result.getCurrent(), result.getSize());
     }
 
-    /** 人员能力详情：ADMIN 限绑定社区内已绑定人员（范围外 404） */
+    /** 人员能力详情：ADMIN 限绑定小区内已绑定人员（范围外 404） */
     public StaffCapabilityVO getById(Long staffId) {
         SysUser staff = requireStaff(staffId);
         if (SecurityUtils.hasRole(RoleConstants.ADMIN) && !inAdminScope(staffId)) {
@@ -85,13 +85,13 @@ public class StaffCapabilityService {
         return assemble(List.of(staff)).get(0);
     }
 
-    /* 代建固定STAFF：先校验社区，再在同一外层事务创建账号和绑定；任一失败全部回滚。 */
+    /* 代建固定STAFF：先校验小区，再在同一外层事务创建账号和绑定；任一失败全部回滚。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "CREATE", targetType = "STAFF_ACCOUNT", targetId = "#result.staffId", content = "'代建服务人员账号'" )
     public StaffCapabilityVO createAccount(com.community.residence.common.workorder.dto.CreateStaffAccountDTO dto) {
         List<Long> communities = normalizeIds(dto.getCommunityIds());
         if (communities.isEmpty() || !RoleConstants.STAFF.equals(dto.getRole())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "代建必须选择社区且角色只能为STAFF");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "代建必须选择小区且角色只能为STAFF");
         }
         validateBindings(communities, normalizeIds(dto.getCategoryIds()), true);
         var account = new com.community.residence.common.auth.dto.CreateSysUserDTO();
@@ -105,7 +105,7 @@ public class StaffCapabilityService {
         return getById(staffId);
     }
 
-    /* 管理员仅覆盖自身授权社区和这些社区的类别；人员锁与派单/排班校验串行。 */
+    /* 管理员仅覆盖自身授权小区和这些小区的类别；人员锁与派单/排班校验串行。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "STAFF_CAPABILITY", targetId = "#staffId", content = "'保存服务人员业务资料和绑定'")
     public StaffCapabilityVO save(Long staffId, SaveStaffCapabilityDTO dto) {
@@ -126,13 +126,13 @@ public class StaffCapabilityService {
             SecurityUtils.checkCommunityAccess(id);
             Community community = communityMapper.selectById(id);
             if (community == null || (creating && !"ACTIVE".equals(community.getStatus()))) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "请选择有效运营社区");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "请选择有效运营小区");
             }
         }
         for (Long id : categories) {
             ServiceCategory category = categoryMapper.selectById(id);
             if (category == null || !communities.contains(category.getCommunityId())) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "服务类别须属于所选社区");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "服务类别须属于所选小区");
             }
         }
     }
@@ -143,7 +143,7 @@ public class StaffCapabilityService {
         validateBindings(communities, categories, false);
         boolean admin = SecurityUtils.hasRole(RoleConstants.ADMIN);
         Set<Long> scope = SecurityUtils.getCommunityIds();
-        if (admin && scope.isEmpty()) throw new BusinessException(ErrorCode.INVALID_PARAM, "没有可管理社区");
+        if (admin && scope.isEmpty()) throw new BusinessException(ErrorCode.INVALID_PARAM, "没有可管理小区");
         staffCommunityMapper.delete(new LambdaQueryWrapper<StaffCommunity>()
                 .eq(StaffCommunity::getStaffId, staffId).in(admin, StaffCommunity::getCommunityId, scope));
         var categoryDelete = new LambdaQueryWrapper<StaffServiceCategory>().eq(StaffServiceCategory::getStaffId, staffId);
@@ -164,7 +164,7 @@ public class StaffCapabilityService {
         }
     }
 
-    /** 业务人员候选：管理员仅见其授权社区内人员，超管可见全部。 */
+    /** 业务人员候选：管理员仅见其授权小区内人员，超管可见全部。 */
     public List<StaffCandidateVO> candidates() {
         List<Long> ids = resolveScopeIds(null, null);
         if (ids != null && ids.isEmpty()) return List.of();
@@ -174,7 +174,7 @@ public class StaffCapabilityService {
                 .orderByAsc(SysUser::getId)).stream().map(StaffCandidateVO::from).toList();
     }
 
-    /** 批量取人员的常驻社区 ID（单次批量查询，避免逐人查询；无绑定的人不出现在 Map 中） */
+    /** 批量取人员的常驻小区 ID（单次批量查询，避免逐人查询；无绑定的人不出现在 Map 中） */
     public Map<Long, List<Long>> communityIdsByStaff(Collection<Long> staffIds) {
         Map<Long, List<Long>> result = new LinkedHashMap<>();
         for (StaffCommunity row : listStaffCommunity(staffIds)) {
@@ -203,7 +203,7 @@ public class StaffCapabilityService {
         return result;
     }
 
-    /** 批量取人员常驻社区名称（逗号拼接，按绑定顺序；用于派单候选的归属提示） */
+    /** 批量取人员常驻小区名称（逗号拼接，按绑定顺序；用于派单候选的归属提示） */
     public Map<Long, String> communityNamesByStaff(Collection<Long> staffIds) {
         Map<Long, List<Long>> bound = communityIdsByStaff(staffIds);
         if (bound.isEmpty()) {
@@ -228,7 +228,7 @@ public class StaffCapabilityService {
         return staff;
     }
 
-    /* 分页收敛条件合并：ADMIN 绑定社区范围 ∩ communityId 筛选 ∩ categoryId 筛选；
+    /* 分页收敛条件合并：ADMIN 绑定小区范围 ∩ communityId 筛选 ∩ categoryId 筛选；
        三者皆无则返回 null（不额外收敛） */
     private List<Long> resolveScopeIds(Long communityId, Long categoryId) {
         List<Long> scoped = null;
@@ -250,13 +250,13 @@ public class StaffCapabilityService {
         return scoped;
     }
 
-    /* ADMIN 视角下人员是否在可见范围内（绑定了其任一绑定社区） */
+    /* ADMIN 视角下人员是否在可见范围内（绑定了其任一绑定小区） */
     private boolean inAdminScope(Long staffId) {
         Set<Long> bound = SecurityUtils.getCommunityIds();
         return bound != null && !bound.isEmpty() && staffIdsBoundTo(bound).contains(staffId);
     }
 
-    /* 指定社区集合内已绑定的人员 ID（staff_community 为 ADMIN 可见性唯一来源） */
+    /* 指定小区集合内已绑定的人员 ID（staff_community 为 ADMIN 可见性唯一来源） */
     private List<Long> staffIdsBoundTo(Collection<Long> communityIds) {
         if (communityIds == null || communityIds.isEmpty()) {
             return List.of();
@@ -301,7 +301,7 @@ public class StaffCapabilityService {
         return names;
     }
 
-    /* 组装能力视图：社区/类别绑定与名称三次批量查询（社区、类别、名称），无逐人查询 */
+    /* 组装能力视图：小区/类别绑定与名称三次批量查询（小区、类别、名称），无逐人查询 */
     private List<StaffCapabilityVO> assemble(List<SysUser> staffList) {
         List<Long> staffIds = staffList.stream().map(SysUser::getId).toList();
         Map<Long, List<Long>> communityBindings = communityIdsByStaff(staffIds);

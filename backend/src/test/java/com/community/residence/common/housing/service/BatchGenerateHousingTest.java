@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * R62 批量挂牌细粒度回归：楼栋/单元/房屋三级收窄、标题后缀、
- * 跨社区 ID 拒绝、幂等跳过（既有在架房源）。
+ * 跨小区 ID 拒绝、幂等跳过（既有在架房源）。
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -144,7 +144,7 @@ class BatchGenerateHousingTest {
     }
 
     @Test
-    @DisplayName("整社区挂牌：全部无房源房屋生成 AVAILABLE")
+    @DisplayName("整小区挂牌：全部无房源房屋生成 AVAILABLE")
     void batchGenerate_wholeCommunity() {
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUser)
@@ -212,7 +212,7 @@ class BatchGenerateHousingTest {
     }
 
     @Test
-    @DisplayName("跨社区房屋 ID：拒绝（不落任何房源）")
+    @DisplayName("跨小区房屋 ID：拒绝（不落任何房源）")
     void batchGenerate_foreignHouseRejected() {
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUser)
@@ -226,7 +226,7 @@ class BatchGenerateHousingTest {
                     .isInstanceOf(BusinessException.class)
                     .satisfies(e -> assertThat(((BusinessException) e).getErrorCode())
                             .isEqualTo(ErrorCode.INVALID_PARAM))
-                    .hasMessageContaining("不属于该社区");
+                    .hasMessageContaining("不属于该小区");
             verify(housingMapper, never()).insert(any(Housing.class));
         }
     }

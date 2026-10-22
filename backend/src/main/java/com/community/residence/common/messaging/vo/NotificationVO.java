@@ -17,7 +17,7 @@ public class NotificationVO {
     @Schema(description = "全局递增序号（增量拉取游标）")
     private Long seq;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "通知标题")

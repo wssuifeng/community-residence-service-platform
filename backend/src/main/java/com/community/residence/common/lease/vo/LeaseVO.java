@@ -19,13 +19,13 @@ public class LeaseVO {
     @Schema(description = "租客ID")
     private Long tenantId;
 
-    @Schema(description = "社区名称（居民端租约卡片展示）")
+    @Schema(description = "小区名称（居民端租约卡片展示）")
     private String communityName;
 
     @Schema(description = "租客姓名")
     private String tenantName;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "房屋ID")

@@ -58,7 +58,7 @@ export interface IResourceReservation {
   residentName?: string
   resourceId: number
   resourceName: string
-  /** 后端实际返回：所属社区 ID */
+  /** 后端实际返回：所属小区 ID */
   communityId: number
   timeslotId?: number
   /** 接口文档字段；后端实际返回 reserveDate（漂移命名），读取侧优先用 reserveDate */

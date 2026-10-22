@@ -1,7 +1,7 @@
 /** R63 多方会话类型定义（v1.5：conversation/participant/message 三级模型） */
 import type { PageQuery } from '@/common/web/types/api'
 
-/** 会话类型：看房预约群聊 / 租约群聊（R68 审核通过自动建群）/ 居民-社区管理员直通 /
+/** 会话类型：看房预约群聊 / 租约群聊（R68 审核通过自动建群）/ 居民-小区管理员直通 /
  *  工单临时群聊（R74 管理端受理后同事务建群，终审关闭时回收为只读） */
 export type ConversationType = 'VIEWING_GROUP' | 'LEASE_GROUP' | 'DIRECT' | 'WORK_ORDER_GROUP'
 
@@ -29,7 +29,7 @@ export type ConversationRole = 'RESIDENT' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN'
 export const conversationRoleLabels: Record<ConversationRole, string> = {
   RESIDENT: '居民',
   STAFF: '服务人员',
-  ADMIN: '社区管理员',
+  ADMIN: '小区管理员',
   SUPER_ADMIN: '超级管理员'
 }
 
@@ -82,7 +82,7 @@ export interface IConversation {
   participants?: IConversationParticipant[]
 }
 
-/** 创建/获取直通会话请求（居民端：与本社区管理员；DEF-076 管理端可代居民发起） */
+/** 创建/获取直通会话请求（居民端：与本小区管理员；DEF-076 管理端可代居民发起） */
 export interface IDirectConversationDTO {
   communityId: number
   /**
@@ -99,7 +99,7 @@ export interface IConversationMessageDTO {
 
 /**
  * 会话内发起看房预约请求（R69/V20：POST /conversations/{id}/viewing-appointments）。
- * 字段与房源页预约完全同构，但**不带 leaseId 或游客身份字段**——所属租约由会话 relatedId 推导，
+ * 字段与房源页预约完全同构，但**不带 leaseId 或未登录访问者身份字段**——所属租约由会话 relatedId 推导，
  * 联系人身份由当前居民 JWT 确定，前端自行填写会造成越权关联。
  */
 export interface ConversationViewingCreateDTO {

@@ -7,7 +7,7 @@ import { getNotice, listNotices, recordNoticeView } from '@/common/notice/api/no
 import type { INotice } from '@/common/notice/types/notice'
 import { formatDateTime } from '@/common/web/utils/date'
 
-/** 居民端公告详情：与游客端同语言（加宽阅读容器 + 封面 + 上一篇/下一篇）+ 查看回执 */
+/** 居民端公告详情：与未登录公开页面同语言（加宽阅读容器 + 封面 + 上一篇/下一篇）+ 查看回执 */
 const route = useRoute()
 const router = useRouter()
 
@@ -61,7 +61,7 @@ useLiveRefresh(async()=>{if(!notice.value)return;const oldVersion=notice.value.c
   <section class="notice-detail">
     <nav class="page-nav">
       <div class="breadcrumb">
-        <router-link to="/resident/notices">社区公告</router-link>
+        <router-link to="/resident/notices">小区公告</router-link>
         <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current">公告详情</span>
       </div>
@@ -84,7 +84,7 @@ useLiveRefresh(async()=>{if(!notice.value)return;const oldVersion=notice.value.c
         <span class="meta-dot">·</span>
         <span>阅读 {{ notice.viewCount }}</span>
         <span class="meta-dot">·</span>
-        <span>{{ notice.communityName ?? '全社区' }}</span>
+        <span>{{ notice.communityName ?? '全小区' }}</span>
       </div>
 
       <div class="article-divider"></div>

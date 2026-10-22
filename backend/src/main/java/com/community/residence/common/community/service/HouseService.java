@@ -126,7 +126,7 @@ public class HouseService {
         return vo;
     }
 
-    /** 单元下房屋分页列表（公开；ADMIN 限绑定社区） */
+    /** 单元下房屋分页列表（公开；ADMIN 限绑定小区） */
     public PageVO<HouseVO> pageByUnit(Long unitId, long page, long size, String status) {
         Unit unit = requireUnit(unitId);
         SecurityUtils.checkCommunityAccess(unit.getCommunityId());

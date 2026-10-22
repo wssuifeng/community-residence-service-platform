@@ -100,7 +100,7 @@ class WorkOrderBatch3FixTest {
     }
 
     @Test
-    @DisplayName("V19：常驻本社区的人员优先（staff_community 绑定档位），范围外 STAFF 仍可选")
+    @DisplayName("V19：常驻本小区的人员优先（staff_community 绑定档位），范围外 STAFF 仍可选")
     void assignableStaff_communityBoundFirst() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
@@ -111,13 +111,13 @@ class WorkOrderBatch3FixTest {
             when(sysUserMapper.selectList(any())).thenReturn(List.of(
                     staff(1L, "新人甲", "STAFF", "ACTIVE"),
                     staff(2L, "熟手乙", "STAFF", "ACTIVE")));
-             /* 熟手乙常驻 1 号社区，新人甲未绑定目标社区，当前规则只返回可派单范围内人员 */
+             /* 熟手乙常驻 1 号小区，新人甲未绑定目标小区，当前规则只返回可派单范围内人员 */
             when(staffCapabilityService.communityIdsByStaff(any()))
                     .thenReturn(java.util.Map.of(2L, List.of(1L)));
 
             List<StaffOptionVO> options = workOrderService.assignableStaff(null, null);
 
-             /* 社区管理员只能对绑定社区的服务人员派单 */
+             /* 小区管理员只能对绑定小区的服务人员派单 */
              assertThat(options).hasSize(1);
             assertThat(options.get(0).getId()).isEqualTo(2L);
             assertThat(options.get(0).getRecommendLevel()).isEqualTo(2);

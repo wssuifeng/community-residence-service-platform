@@ -12,12 +12,12 @@ import type {
 
 /* ---------------------------------- 协议模板 ---------------------------------- */
 
-/** 协议模板分页列表（社区管理员可见全局模板与本社区模板） */
+/** 协议模板分页列表（小区管理员可见全局模板与本小区模板） */
 export function listAgreementTemplates(params: IAgreementTemplateQuery) {
   return http.get<PageResult<IAgreementTemplate>>('/agreement-templates', params)
 }
 
-/** 某社区可用的协议模板清单（本社区模板 + 全局模板，默认模板排最前） */
+/** 某小区可用的协议模板清单（本小区模板 + 全局模板，默认模板排最前） */
 export function listAvailableAgreementTemplates(communityId: number) {
   return http.get<IAgreementTemplate[]>('/agreement-templates/available', { communityId })
 }

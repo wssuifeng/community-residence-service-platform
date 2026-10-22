@@ -46,7 +46,7 @@ import org.springframework.stereotype.Service;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** 待办由实际业务状态计算；社区管理员查询仍经数据级权限拦截，无跨社区数字泄漏。 */
+/** 待办由实际业务状态计算；小区管理员查询仍经数据级权限拦截，无跨小区数字泄漏。 */
 @Service @RequiredArgsConstructor
 public class AdminTodoService {
  private final WorkOrderMapper orders;

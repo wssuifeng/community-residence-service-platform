@@ -38,7 +38,7 @@ public class ServiceCategoryService {
         if (dto.getParentId() != null) {
             ServiceCategory parent = requireCategory(dto.getParentId());
             if (!parent.getCommunityId().equals(dto.getCommunityId())) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "父类别不属于该社区");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "父类别不属于该小区");
             }
             if (parent.getParentId() != null) {
                 throw new BusinessException(ErrorCode.INVALID_PARAM, "仅支持二级分类");
@@ -56,7 +56,7 @@ public class ServiceCategoryService {
         ServiceCategory category = requireCategory(id);
         SecurityUtils.checkCommunityAccess(category.getCommunityId());
         if (!category.getCommunityId().equals(dto.getCommunityId())) {
-            throw new BusinessException(ErrorCode.OPERATION_FAILED, "类别不允许变更所属社区");
+            throw new BusinessException(ErrorCode.OPERATION_FAILED, "类别不允许变更所属小区");
         }
         applyDto(category, dto);
         if (dto.getIsActive() != null) {
@@ -90,7 +90,7 @@ public class ServiceCategoryService {
     }
 
     /**
-     * 社区类别树（公开；居民端提交工单时选择类别）。
+     * 小区类别树（公开；居民端提交工单时选择类别）。
      * DEF-041：过滤停用类别（R17「停用类别不再出现在提交选项」）——
      * 停用父类别连同其子类别整体不出树（子类挂靠停用父类，选项语义随父类失效）。
      */

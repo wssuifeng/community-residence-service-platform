@@ -8,7 +8,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/** 公告目标范围（notice_target 表：COMMUNITY-按社区, BUILDING-按楼栋定向, GUEST-游客可见） */
+/** 公告目标范围（notice_target 表：COMMUNITY-按小区, BUILDING-按楼栋定向, GUEST-无需居住关系可见） */
 @Data
 @TableName("notice_target")
 @Schema(description = "公告目标范围")
@@ -21,7 +21,7 @@ public class NoticeTarget {
     @Schema(description = "公告ID")
     private Long noticeId;
 
-    @Schema(description = "目标类型：COMMUNITY-社区, BUILDING-楼栋, GUEST-游客可见（DEF-046）")
+    @Schema(description = "目标类型：COMMUNITY-小区, BUILDING-楼栋, GUEST-无需居住关系可见（DEF-046）")
     private String targetType;
 
     @Schema(description = "目标ID（GUEST 行固定 0）")
