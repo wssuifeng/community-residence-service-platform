@@ -34,13 +34,13 @@ function pending(path:string):number{
 
 /** 角色过滤后的菜单（超管独占项对 ADMIN 隐藏，UI设计.md §10.1） */
 const visibleItems = computed(() =>
-  menuItems.filter((item) => !item.roles || item.roles.includes(userStore.role))
+  menuItems.filter((item) => !item.roles || (userStore.role !== null && item.roles.includes(userStore.role)))
 )
 
 function isActive(path: string): boolean {
   // 前缀匹配，覆盖详情下钻（/admin/work-orders/:id、/admin/residents/:id、/admin/leases/:id）
   if (route.path === path || route.path.startsWith(`${path}/`)) return true
-  // 社区详情挂在 /admin/communities/:id（复数段），与菜单路径 /admin/community 不同段，单独归入点亮
+  // 小区详情挂在 /admin/communities/:id（复数段），与菜单路径 /admin/community 不同段，单独归入点亮
   if (path === '/admin/community') return route.path.startsWith('/admin/communities/')
   // 合并项：旧一级路径与未挂在 Hub 路径下的下钻详情（租约/房源/看房预约/协议模板）一并点亮
   const item = menuItems.find((menu) => menu.path === path)

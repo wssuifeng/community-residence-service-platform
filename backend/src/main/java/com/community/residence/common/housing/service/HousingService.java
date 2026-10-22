@@ -59,13 +59,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/** 房源业务逻辑：上架管理 + 游客浏览（游客只见可租/已预订房源） */
+/** 房源业务逻辑：上架管理 + 公开浏览（未登录访问仅展示可租/已预订房源） */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class HousingService {
 
-    /** 游客可见的房源状态（已出租/下线不展示） */
+    /** 公开浏览可见的房源状态（已出租/下线不展示） */
     private static final List<String> PUBLIC_STATUS = List.of("AVAILABLE", "RESERVED");
 
     /** 未完成看房预约状态集合（删除保护判定） */
@@ -116,7 +116,7 @@ public class HousingService {
     private final CommunityService communityService;
     private final StringRedisTemplate redisTemplate;
 
-    /* 上架房源：锁定房屋后读取最新户型，与房屋户型修改串行；社区由房屋推导。 */
+    /* 上架房源：锁定房屋后读取最新户型，与房屋户型修改串行；小区由房屋推导。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "CREATE", targetType = "HOUSING", targetId = "#result.id", content = "'创建房源：' + #dto.title")
     public HousingVO create(CreateHousingDTO dto) {
@@ -188,7 +188,7 @@ public class HousingService {
         log.info("房源已删除：housingId={}, operator={}", id, SecurityUtils.getUserId());
     }
 
-    /** 房源详情（公开；游客访问已出租/下线房源返回 404） */
+    /** 房源详情（公开；未登录访问已出租/下线房源返回 404） */
     public HousingVO getById(Long id) {
         Housing housing = requireHousing(id);
         if (!isManager() && housingMapper.publicAvailabilityCount(id) == 0) {
@@ -199,7 +199,7 @@ public class HousingService {
         return vo;
     }
 
-    /** 房源分页列表（公开；游客默认只见可租/已预订） */
+    /** 房源分页列表（公开；未登录访问默认只见可租/已预订） */
     public PageVO<HousingVO> page(long page, long size, Long communityId, String status,
                                   BigDecimal minRent, BigDecimal maxRent, String keyword,
                                   String layout, String rentType) {
@@ -444,12 +444,12 @@ public class HousingService {
     }
 
     /**
-     * 按（社区/楼栋/单元/房屋）批量挂牌（R62）：为**无在架房源**的房屋按默认参数批量
+     * 按（小区/楼栋/单元/房屋）批量挂牌（R62）：为**无在架房源**的房屋按默认参数批量
      * 生成 AVAILABLE 房源（title=「{楼栋}{单元}{房号}·精装房源[·后缀]」、月租/押金/
      * 租售类型参数化、户型冗余自 house.layout）；幂等口径与单套挂牌一致——存在非
      * OFFLINE 房源的房屋跳过（仅 OFFLINE 下架记录的房屋可重新生成在架房源）。
-     * 粒度收窄链：houseIds > unitIds > buildingIds > 整个社区（叠加时逐级过滤取交集）；
-     * 越权/跨社区 ID 一律拒绝。ADMIN 限绑定社区（checkCommunityAccess）。
+     * 粒度收窄链：houseIds > unitIds > buildingIds > 整个小区（叠加时逐级过滤取交集）；
+     * 越权/跨小区 ID 一律拒绝。ADMIN 限绑定小区（checkCommunityAccess）。
      * 可同时为**本次新建**房源建立可预约看房时段（createTimeslots 缺省 true，
      * timeslotMode 缺省 DEFAULT=周一至周五 09:00-12:00 + 14:00-18:00）；跳过的房屋不建时段。
      */
@@ -466,7 +466,7 @@ public class HousingService {
                 .eq(House::getCommunityId, dto.getCommunityId())
                 .orderByAsc(House::getId));
 
-        /* 细粒度收窄：楼栋/单元/房屋三级过滤（逐级取交集）；跨社区 ID 拒绝 */
+        /* 细粒度收窄：楼栋/单元/房屋三级过滤（逐级取交集）；跨小区 ID 拒绝 */
         Set<Long> allowedUnitIds = null;
         if (dto.getBuildingIds() != null && !dto.getBuildingIds().isEmpty()) {
             Set<Long> found = buildingMapper.selectList(new LambdaQueryWrapper<Building>()
@@ -474,7 +474,7 @@ public class HousingService {
                             .in(Building::getId, dto.getBuildingIds()))
                     .stream().map(Building::getId).collect(java.util.stream.Collectors.toSet());
             if (!found.containsAll(dto.getBuildingIds())) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该社区的楼栋");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该小区的楼栋");
             }
             allowedUnitIds = unitMapper.selectList(new LambdaQueryWrapper<Unit>()
                             .in(Unit::getBuildingId, dto.getBuildingIds()))
@@ -486,9 +486,9 @@ public class HousingService {
                             .in(Unit::getId, dto.getUnitIds()))
                     .stream().map(Unit::getId).collect(java.util.stream.Collectors.toSet());
             if (!found.containsAll(dto.getUnitIds())) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该社区的单元");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该小区的单元");
             }
-            /* 过滤集取请求集本身（已校验全部属于该社区），不依赖查询返回集的范围 */
+            /* 过滤集取请求集本身（已校验全部属于该小区），不依赖查询返回集的范围 */
             Set<Long> requested = new java.util.HashSet<>(dto.getUnitIds());
             allowedUnitIds = allowedUnitIds == null ? requested : intersect(allowedUnitIds, requested);
         }
@@ -499,7 +499,7 @@ public class HousingService {
                             .in(House::getId, dto.getHouseIds()))
                     .stream().map(House::getId).collect(java.util.stream.Collectors.toSet());
             if (!found.containsAll(dto.getHouseIds())) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该社区的房屋");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "存在不属于该小区的房屋");
             }
             allowedHouseIds = new java.util.HashSet<>(dto.getHouseIds());
         }
@@ -521,7 +521,7 @@ public class HousingService {
                         .ne(Housing::getStatus, "OFFLINE"))
                 .stream().map(Housing::getHouseId).collect(java.util.stream.Collectors.toSet());
 
-        /* 标题需要 楼栋/单元 名称：批量装载本社区结构映射（避免逐房查询） */
+        /* 标题需要 楼栋/单元 名称：批量装载本小区结构映射（避免逐房查询） */
         Map<Long, Unit> unitsById = unitMapper.selectList(new LambdaQueryWrapper<Unit>()
                         .eq(Unit::getCommunityId, dto.getCommunityId()))
                 .stream().collect(java.util.stream.Collectors.toMap(Unit::getId, u -> u));
@@ -693,8 +693,8 @@ public class HousingService {
     }
 
     /**
-     * 房源社区一体化树（R62）：楼栋→单元→房屋层级，房屋节点内嵌房源摘要
-     * （未挂牌为 null）。ADMIN 限绑定社区（checkCommunityAccess）；层级按
+     * 房源小区一体化树（R62）：楼栋→单元→房屋层级，房屋节点内嵌房源摘要
+     * （未挂牌为 null）。ADMIN 限绑定小区（checkCommunityAccess）；层级按
      * id 升序稳定输出。每房屋取**最新一条**房源（id 最大；一房多挂牌仅在
      * 历史下架场景出现，最新记录反映当前挂牌状态）。
      */
@@ -765,12 +765,12 @@ public class HousingService {
     /**
      * 房屋管理分页列表（接口设计.md 9.15.3）：房屋为主线，挂牌信息为可选子对象
      * （未挂牌 housing 为 null），供管理端「房屋与房源」带图卡片 + 筛选布局使用。
-     * 过滤：社区（空=全部管辖社区）/楼栋/单元/房号关键字 + 挂牌三态
+     * 过滤：小区（空=全部管辖小区）/楼栋/单元/房号关键字 + 挂牌三态
      * （all 全部，listed 存在 housing 记录，unlisted 无 housing 记录——NOT EXISTS
      * 子查询随分页下推到 SQL，不做页内内存过滤，total 保持全集口径）。
-     * 稳定分页排序：社区 → 单元 → 房号 升序。
+     * 稳定分页排序：小区 → 单元 → 房号 升序。
      * 数据范围：house 表含 community_id 且不在 DataScopeInterceptor 跳过名单，
-     * ADMIN 绑定社区过滤由拦截器在 SQL 层注入（未绑定传越权 communityId 得空页）。
+     * ADMIN 绑定小区过滤由拦截器在 SQL 层注入（未绑定传越权 communityId 得空页）。
      */
     public PageVO<HouseManageItemVO> pageHouseManage(Long communityId, Long buildingId, Long unitId,
                                                      String keyword, String listing, long page, long size) {
@@ -808,7 +808,7 @@ public class HousingService {
     }
 
     /**
-     * 房屋管理列表装配：单元/楼栋/社区名称与挂牌房源均按主键批量取回（各一条查询，
+     * 房屋管理列表装配：单元/楼栋/小区名称与挂牌房源均按主键批量取回（各一条查询，
      * 无逐行查询即无 N+1）；同一房屋多条挂牌记录取 id 最大者（与一体化树同口径）。
      */
     private List<HouseManageItemVO> assembleManageItems(List<House> houses) {

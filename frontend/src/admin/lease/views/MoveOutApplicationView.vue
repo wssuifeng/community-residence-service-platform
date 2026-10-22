@@ -32,7 +32,7 @@ import { formatDate, formatDateTime } from '@/common/web/utils/date'
  *
  * 口径：
  * - Tab 与 status 透传后端筛选（服务端分页），非客户端分组——退租申请是待办队列，
- *   数据量随社区增长，全量拉取不成立；
+ *   数据量随小区增长，全量拉取不成立；
  * - 通过时要求管理方选择房源回收方式（在架 / 下架），对应后端 housingStatus；
  * - 驳回理由必填（后端同样强校验），通过/驳回均由后端联动租约→已搬出、居住关系终止、
  *   房屋置空置，前端不做本地状态预判。
@@ -59,7 +59,7 @@ const total = ref(0)
 const loading = ref(false)
 const query = reactive({ page: 1, size: 10 })
 
-/* 社区筛选：后端按社区数据权限收敛，此处仅提供显式收窄（VO 只带 communityId） */
+/* 小区筛选：后端按小区数据权限收敛，此处仅提供显式收窄（VO 只带 communityId） */
 const communityId = ref<number | undefined>(undefined)
 const communityOptions = ref<{ id: number; name: string }[]>([])
 const communityNames = ref<Record<number, string>>({})
@@ -86,7 +86,7 @@ function leaseNo(row: IMoveOutApplication): string {
 }
 
 function communityName(row: IMoveOutApplication): string {
-  return communityNames.value[row.communityId] ?? `社区 #${row.communityId}`
+  return communityNames.value[row.communityId] ?? `小区 #${row.communityId}`
 }
 
 function switchTab(next: TabName): void {
@@ -123,7 +123,7 @@ async function loadCommunities(): Promise<void> {
     communityNames.value = map
     communityOptions.value = result.records.map((item) => ({ id: item.id, name: item.name }))
   } catch {
-    /* 社区映射失败不阻塞列表，社区名显示占位符 */
+    /* 小区映射失败不阻塞列表，小区名显示占位符 */
   }
 }
 
@@ -323,7 +323,7 @@ useLiveRefresh(() => load(), ['lease'])
     </nav>
 
     <FilterPanel resettable @reset="resetFilters">
-      <el-select v-model="communityId" placeholder="全部社区" clearable filterable class="filter-select">
+      <el-select v-model="communityId" placeholder="全部小区" clearable filterable class="filter-select">
         <el-option v-for="item in communityOptions" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
       <SearchBar v-model="keyword" placeholder="本页内搜索租客/房号/租约号…" />

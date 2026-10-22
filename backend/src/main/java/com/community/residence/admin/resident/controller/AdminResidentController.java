@@ -60,7 +60,7 @@ public class AdminResidentController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "代建居民账号", description = "R8 v1.2；初始密码服务端生成（手机号后 6 位）明文仅本次返回；ADMIN 限绑定社区")
+    @Operation(summary = "代建居民账号", description = "R8 v1.2；初始密码服务端生成（手机号后 6 位）明文仅本次返回；ADMIN 限绑定小区")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/admin-create")
     public ApiResponse<AdminCreateResidentVO> adminCreate(@RequestBody @Valid AdminCreateResidentDTO dto) {

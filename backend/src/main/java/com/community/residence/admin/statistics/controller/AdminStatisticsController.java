@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /** 运营统计控制器：看板与专项统计（接口设计.md 9.9） */
-@Tag(name = "运营统计", description = "社区运营看板与统计接口")
+@Tag(name = "运营统计", description = "小区运营看板与统计接口")
 @RestController
 @RequestMapping("/api/v1/statistics")
 @RequiredArgsConstructor
@@ -27,7 +27,7 @@ public class AdminStatisticsController {
     private final StatisticsService statisticsService;
     private final com.community.residence.common.statistics.service.AdminTodoService adminTodoService;
 
-    @Operation(summary = "运营看板", description = "统计卡片 + 图表数据；社区管理员自动限定绑定社区")
+    @Operation(summary = "运营看板", description = "统计卡片 + 图表数据；小区管理员自动限定绑定小区")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/dashboard")
     public ApiResponse<Map<String, Object>> dashboard(
@@ -82,13 +82,13 @@ public class AdminStatisticsController {
                 StatisticsDateRange.resolve(startDate, endDate, LocalDate.now())));
     }
 
-    @Operation(summary = "社区选项列表", description = "看板社区筛选下拉")
+    @Operation(summary = "小区选项列表", description = "看板小区筛选下拉")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/communities")
     public ApiResponse<List<Map<String, Object>>> communityOptions() {
         return ApiResponse.success(statisticsService.communityOptions());
     }
-    @Operation(summary = "管理员待办汇总", description = "仅可管理社区的真实待处理数量，不含交易查单")
+    @Operation(summary = "管理员待办汇总", description = "仅可管理小区的真实待处理数量，不含交易查单")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @GetMapping("/todos")
     public ApiResponse<Map<String,Long>> todos(){return ApiResponse.success(adminTodoService.summary());}

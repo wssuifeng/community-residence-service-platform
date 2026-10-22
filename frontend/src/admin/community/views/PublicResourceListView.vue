@@ -52,7 +52,7 @@ function hm(time?: string): string {
   return time ? time.slice(0, 5) : '--'
 }
 
-/** 公共资源管理：社区筛选 + 表格 CRUD + 可预约时段配置（列出/新增/删除） */
+/** 公共资源管理：小区筛选 + 表格 CRUD + 可预约时段配置（列出/新增/删除） */
 const resources = ref<IPublicResource[]>([])
 const communities = ref<ICommunity[]>([])
 const loading = ref(false)
@@ -162,7 +162,7 @@ function firstImage(row: IPublicResource): string | undefined {
 }
 
 const rules: FormRules = {
-  communityId: [{ required: true, message: '请选择所属社区', trigger: 'change' }],
+  communityId: [{ required: true, message: '请选择所属小区', trigger: 'change' }],
   name: [{ required: true, message: '请输入资源名称', trigger: 'blur' }],
   type: [{ required: true, message: '请选择资源类型', trigger: 'change' }]
 }
@@ -355,14 +355,14 @@ onMounted(() => {
     </div>
 
     <FilterPanel resettable @reset="handleReset">
-      <span class="filter-label">所属社区</span>
+      <span class="filter-label">所属小区</span>
       <el-select
         v-model="communityFilter"
-        placeholder="请选择社区"
+        placeholder="请选择小区"
         style="width: 200px"
         @change="handleCommunityChange"
       >
-        <el-option label="全部社区" value="" />
+        <el-option label="全部小区" value="" />
         <el-option
           v-for="item in communities"
           :key="item.id"
@@ -389,7 +389,7 @@ onMounted(() => {
 
     <el-alert
       v-if="communityFilter === ''"
-      title="请先选择社区查看公共资源"
+      title="请先选择小区查看公共资源"
       type="info"
       :closable="false"
       class="empty-hint"
@@ -404,7 +404,7 @@ onMounted(() => {
           </template>
         </el-table-column>
         <el-table-column prop="name" label="资源名称" min-width="140" show-overflow-tooltip />
-        <el-table-column prop="communityName" label="所属社区" min-width="130" show-overflow-tooltip />
+        <el-table-column prop="communityName" label="所属小区" min-width="130" show-overflow-tooltip />
         <el-table-column label="类型" width="100">
           <template #default="{ row }">{{ resourceTypeLabels[row.type as ResourceType] }}</template>
         </el-table-column>
@@ -459,8 +459,8 @@ onMounted(() => {
       destroy-on-close
     >
       <el-form ref="formRef" class="resource-form" :model="form" :rules="rules" label-width="100px" :disabled="saving">
-        <el-form-item label="所属社区" prop="communityId">
-          <el-select v-model="form.communityId" placeholder="请选择社区" style="width: 100%">
+        <el-form-item label="所属小区" prop="communityId">
+          <el-select v-model="form.communityId" placeholder="请选择小区" style="width: 100%">
             <el-option
               v-for="item in communities"
               :key="item.id"

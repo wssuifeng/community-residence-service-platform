@@ -9,7 +9,7 @@ vi.mock('vue-router',()=>({useRouter:()=>({push:vi.fn()})}))
 vi.mock('@/common/community/api/community',()=>({getCommunityList:vi.fn(),getBuildingList:vi.fn(),getUnitList:vi.fn()}))
 vi.mock('@/common/housing/api/housing',()=>({getHousingDetail:vi.fn(),updateHousing:vi.fn(),createHousing:vi.fn(),updateHousingStatus:vi.fn()}))
 vi.mock('@/common/web/utils/request',()=>({http:{get:vi.fn(),post:vi.fn()}}))
-const record={houseId:1,communityId:1,communityName:'合成社区',buildingName:'一栋',unitName:'一单元',houseNumber:'101',floor:1,houseStatus:'VACANT',housing:{id:2,title:'合成挂牌',status:'AVAILABLE',monthlyRent:1000,deposit:2000,rentType:'RENT',occupancy:'FREE'}}
+const record={houseId:1,communityId:1,communityName:'合成小区',buildingName:'一栋',unitName:'一单元',houseNumber:'101',floor:1,houseStatus:'VACANT',housing:{id:2,title:'合成挂牌',status:'AVAILABLE',monthlyRent:1000,deposit:2000,rentType:'RENT',occupancy:'FREE'}}
 async function open(){const w=mount(HousesWithHousingView,{global:{plugins:[ElementPlus],directives:{permission:()=>{}},stubs:{ElDialog:{props:['modelValue'],template:'<div v-if="modelValue"><slot /><slot name="footer" /></div>'}}}});await flushPromises();await w.findAll('button').find(b=>b.text()==='编辑房源')!.trigger('click');return w}
 function save(w:ReturnType<typeof mount>){return w.findAll('button').find(b=>b.text()==='保存')!}
 describe('挂牌编辑加载门禁',()=>{

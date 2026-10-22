@@ -13,8 +13,8 @@ import lombok.Data;
 @Schema(description = "楼栋创建/更新请求")
 public class CreateBuildingDTO {
 
-    @Schema(description = "所属社区ID")
-    @NotNull(message = "所属社区不能为空")
+    @Schema(description = "所属小区ID")
+    @NotNull(message = "所属小区不能为空")
     private Long communityId;
 
     @Schema(description = "楼栋名称")

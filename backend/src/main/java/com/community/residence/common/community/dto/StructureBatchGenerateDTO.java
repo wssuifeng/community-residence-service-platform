@@ -12,7 +12,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 /**
- * 结构链一次性批量生成请求（C1）：一次调用生成 社区 → 楼栋 → 单元 → 房屋
+ * 结构链一次性批量生成请求（C1）：一次调用生成 小区 → 楼栋 → 单元 → 房屋
  * 整条链，替代前端逐层循环单建（楼栋一次一栋、房屋逐条请求）。
  * 楼栋名 = buildingNamePrefix + 序号 + buildingNameSuffix；
  * 单元名 = unitNamePrefix + 序号 + unitNameSuffix（缺省后缀「单元」，如 1单元）；
@@ -22,8 +22,8 @@ import java.math.BigDecimal;
 @Schema(description = "结构链批量生成请求")
 public class StructureBatchGenerateDTO {
 
-    @Schema(description = "所属社区ID")
-    @NotNull(message = "所属社区不能为空")
+    @Schema(description = "所属小区ID")
+    @NotNull(message = "所属小区不能为空")
     private Long communityId;
 
     @Schema(description = "楼栋名前缀（可空，如 C10）")

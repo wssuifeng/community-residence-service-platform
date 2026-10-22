@@ -16,8 +16,8 @@ import java.util.List;
 @Schema(description = "楼栋批量创建请求")
 public class BatchCreateBuildingsDTO {
 
-    @Schema(description = "所属社区ID")
-    @NotNull(message = "所属社区不能为空")
+    @Schema(description = "所属小区ID")
+    @NotNull(message = "所属小区不能为空")
     private Long communityId;
 
     @Schema(description = "楼栋列表（上限 100，字段校验逐行执行）")

@@ -26,7 +26,7 @@ public class EvaluationVO {
     @Schema(description = "评价人姓名")
     private String residentName;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "评分：1-5星")

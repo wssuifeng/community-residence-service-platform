@@ -58,7 +58,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 房屋管理分页列表（接口设计.md 9.15.3）回归：筛选条件装配（社区/楼栋/单元/
+ * 房屋管理分页列表（接口设计.md 9.15.3）回归：筛选条件装配（小区/楼栋/单元/
  * 房号关键字 + 挂牌三态）、批量装配（名称与挂牌摘要一次取回）、
  * coverImage 取首图、未挂牌行为 null、ADMIN 数据范围的拦截器注入。
  */
@@ -178,7 +178,7 @@ class HouseManageListTest {
     /* ---- 筛选条件装配 ---- */
 
     @Test
-    @DisplayName("listing=all：不加挂牌子查询；社区/单元/房号关键字/排序条件齐备")
+    @DisplayName("listing=all：不加挂牌子查询；小区/单元/房号关键字/排序条件齐备")
     void pageHouseManage_listingAll_conditions() {
         housingService.pageHouseManage(1L, null, 200L, "101", null, 1, 20);
 
@@ -247,7 +247,7 @@ class HouseManageListTest {
     /* ---- 装配 ---- */
 
     @Test
-    @DisplayName("装配：社区/楼栋/单元名称与挂牌摘要一次批量取回（各一条查询，无 N+1）")
+    @DisplayName("装配：小区/楼栋/单元名称与挂牌摘要一次批量取回（各一条查询，无 N+1）")
     void pageHouseManage_assembleNamesAndHousing() {
         when(housingMapper.selectList(any())).thenReturn(List.of(
                 housing(500L, 1000L, "/uploads/a.png,/uploads/b.png")));
@@ -274,7 +274,7 @@ class HouseManageListTest {
         /* 未挂牌房屋 housing 为 null */
         assertThat(result.getRecords().get(1).getHousing()).isNull();
 
-        /* 装配批量查询各一次：单元/楼栋/社区/房源（逐行查询即 N+1） */
+        /* 装配批量查询各一次：单元/楼栋/小区/房源（逐行查询即 N+1） */
         verify(unitMapper, times(1)).selectList(any());
         verify(buildingMapper, times(1)).selectList(any());
         verify(communityMapper, times(1)).selectList(any());
@@ -323,10 +323,10 @@ class HouseManageListTest {
         assertThat(item.getHousing().getCoverImage()).isEqualTo("/uploads/new.png");
     }
 
-    /* ---- 数据级权限：ADMIN 绑定社区由拦截器注入 ---- */
+    /* ---- 数据级权限：ADMIN 绑定小区由拦截器注入 ---- */
 
     @Test
-    @DisplayName("ADMIN 数据范围：服务生成的 SQL 经 DataScopeInterceptor 注入绑定社区过滤")
+    @DisplayName("ADMIN 数据范围：服务生成的 SQL 经 DataScopeInterceptor 注入绑定小区过滤")
     void pageHouseManage_adminScopeInjectedByInterceptor() throws Exception {
         housingService.pageHouseManage(null, null, null, null, "unlisted", 1, 20);
         String sql = "SELECT id, unit_id, community_id, house_number, status FROM house WHERE (is_deleted = 0) AND "
@@ -341,13 +341,13 @@ class HouseManageListTest {
             new DataScopeInterceptor().beforeQuery(null, ms, null, null, null, boundSql);
         }
 
-        /* house 表带 community_id 且不在跳过名单：where 被追加绑定社区过滤 */
+        /* house 表带 community_id 且不在跳过名单：where 被追加绑定小区过滤 */
         assertThat(boundSql.getSql()).contains("community_id IN (1)");
         assertThat(boundSql.getSql()).contains("NOT EXISTS");
     }
 
     @Test
-    @DisplayName("SUPER_ADMIN：拦截器不改写 SQL（全社区可见）")
+    @DisplayName("SUPER_ADMIN：拦截器不改写 SQL（全小区可见）")
     void pageHouseManage_superAdminScopeNotInjected() throws Exception {
         String sql = "SELECT id, community_id FROM house WHERE (is_deleted = 0)";
         BoundSql boundSql = new BoundSql(new Configuration(), sql, List.of(), null);

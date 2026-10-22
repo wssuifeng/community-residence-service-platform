@@ -38,7 +38,7 @@ public class StructureBusinessCodeService {
     public House resolve(String code) {
         String[] parts = code == null ? new String[0] : code.trim().split("-", -1);
         if (parts.length != 4 || java.util.Arrays.stream(parts).anyMatch(String::isBlank))
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "房屋业务编号必须为社区-楼栋-单元-房屋号四段");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "房屋业务编号必须为小区-楼栋-单元-房屋号四段");
         House house = mapper.resolve(parts[0], parts[1], parts[2], unescape(parts[3]));
         if (house == null) throw new BusinessException(ErrorCode.INVALID_PARAM, "房屋业务编号不存在或结构已变更，请查看当前业务编号");
         SecurityUtils.checkCommunityAccess(house.getCommunityId());

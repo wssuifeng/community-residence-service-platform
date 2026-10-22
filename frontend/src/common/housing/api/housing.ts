@@ -90,12 +90,12 @@ export function violateViewingAppointment(id: number, data: ViewingAppointmentRe
   return http.patch<null>(`/viewing-appointments/${id}/violate`, data)
 }
 
-/** 分配带看人（R59，v1.3；ADMIN/SUPER_ADMIN，目标为启用状态的服务人员或社区管理员） */
+/** 分配带看人（R59，v1.3；ADMIN/SUPER_ADMIN，目标为启用状态的服务人员或小区管理员） */
 export function assignViewingAppointment(id: number, data: ViewingAppointmentAssignDTO) {
   return http.patch<IViewingAppointment>(`/viewing-appointments/${id}/assign`, data)
 }
 
-/** 带看人候选列表（R59；ADMIN/SUPER_ADMIN，STAFF 全量 + 管辖该社区的启用 ADMIN） */
+/** 带看人候选列表（R59；ADMIN/SUPER_ADMIN，STAFF 全量 + 管辖该小区的启用 ADMIN） */
 export function listAssignableAssignees(communityId: number) {
   return http.get<IViewingAssigneeOption[]>('/viewing-appointments/assignable-assignees', { communityId })
 }
@@ -140,7 +140,7 @@ export function getHousingFilterOptions(query?: Omit<HousingListQuery, 'page' | 
   return http.get<string[]>('/housings/filter-options', query)
 }
 
-/** 真实房屋位置与ID对照，范围由后台社区权限限定。 */
+/** 真实房屋位置与ID对照，范围由后台小区权限限定。 */
 export function listHouseManage(query: { page?: number; size?: number; communityId?: number; buildingId?: number; unitId?: number; keyword?: string; listing?: string }) {
   return http.get<PageResult<import('@/common/housing/types/housing').HouseManageItem>>('/communities/houses-manage', query)
 }

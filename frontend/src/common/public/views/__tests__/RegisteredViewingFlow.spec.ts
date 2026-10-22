@@ -100,7 +100,7 @@ afterEach(() => {
 })
 
 describe('方案 B · 看房预约入口与居民身份', () => {
-  it('游客只读浏览时段，点击预约跳登录并携带预约页回跳地址', async () => {
+  it('未登录访问只读浏览时段，点击预约跳登录并携带预约页回跳地址', async () => {
     sessionStorage.clear()
     const router = buildRouter()
     const wrapper = await mountAt(router, '/guest/housings/1', HousingDetailView)
@@ -116,14 +116,14 @@ describe('方案 B · 看房预约入口与居民身份', () => {
 })
 
 describe('方案 B · 居民预约表单', () => {
-  it('预约页不展示游客字段，提交 DTO 只携带居民身份契约', async () => {
+  it('预约页不展示未登录访问者字段，提交 DTO 只携带居民身份契约', async () => {
     fakeLogin('RESIDENT', { id: 1 })
     const router = buildRouter()
     const wrapper = await mountAt(router, '/resident/housings/1/reserve', HousingReservationView)
 
     const initialText = wrapper.text()
-    expect(initialText).not.toContain('游客姓名')
-    expect(initialText).not.toContain('游客人数')
+    expect(initialText).not.toContain('历史匿名预约姓名')
+    expect(initialText).not.toContain('匿名预约人数')
     expect(initialText).not.toContain('短信验证码')
 
     const availableDay = wrapper.findAll('button.calendar-cell').find((button) => !button.classes('is-off') && !button.classes('is-blank'))
@@ -138,8 +138,8 @@ describe('方案 B · 居民预约表单', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('确认看房预约')
-    expect(wrapper.text()).not.toContain('游客姓名')
-    expect(wrapper.text()).not.toContain('游客人数')
+    expect(wrapper.text()).not.toContain('历史匿名预约姓名')
+    expect(wrapper.text()).not.toContain('匿名预约人数')
     await wrapper.findAll('button').find((button) => button.text() === '提交预约')!.trigger('click')
     await flushPromises()
 

@@ -12,9 +12,9 @@ import AdminPageHeader from '@/admin/layout/views/AdminPageHeader.vue'
 import CommunityEditDialog from '@/admin/community/components/CommunityEditDialog.vue'
 
 /**
- * 社区详情（隐藏下钻）：基本信息 + 该社区楼栋列表（任务 3 换壳美化：
+ * 小区详情（隐藏下钻）：基本信息 + 该小区楼栋列表（任务 3 换壳美化：
  * AdminPageHeader + 白卡 token，数据绑定零删减；编辑对话框收编为共用
- * CommunityEditDialog，返回目标为社区管理页）。
+ * CommunityEditDialog，返回目标为小区管理页）。
  */
 const route = useRoute()
 const router = useRouter()
@@ -28,18 +28,18 @@ async function loadCommunity(): Promise<void> {
   try {
     community.value = await getCommunity(communityId)
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '加载社区详情失败')
+    ElMessage.error(error instanceof Error ? error.message : '加载小区详情失败')
   } finally {
     loading.value = false
   }
 }
 
-/* 面包屑返回：社区管理页（本页的上级页面） */
+/* 面包屑返回：小区管理页（本页的上级页面） */
 function goBack(): void {
   router.push({ name: 'AdminCommunity' })
 }
 
-/* 楼栋入口：直达社区管理页并选中本社区（?communityId= 由社区列表消费） */
+/* 楼栋入口：直达小区管理页并选中本小区（?communityId= 由小区列表消费） */
 function goBuildings(): void {
   router.push({
     name: 'AdminCommunity',
@@ -95,11 +95,11 @@ onMounted(() => {
         <path d="M19 12H5" />
         <path d="M12 19l-7-7 7-7" />
       </svg>
-      返回社区管理
+      返回小区管理
     </button>
 
-    <AdminPageHeader :title="community?.name ?? '社区详情'" subtitle="社区基础信息与楼栋结构">
-      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openEdit">编辑社区</el-button>
+    <AdminPageHeader :title="community?.name ?? '小区详情'" subtitle="小区基础信息与楼栋结构">
+      <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openEdit">编辑小区</el-button>
     </AdminPageHeader>
 
     <article class="panel">
@@ -107,14 +107,14 @@ onMounted(() => {
         <h3 class="panel-title">基本信息</h3>
       </header>
       <el-descriptions v-if="community" :column="2" border>
-        <el-descriptions-item label="社区名称">{{ community.name }}</el-descriptions-item>
+        <el-descriptions-item label="小区名称">{{ community.name }}</el-descriptions-item>
         <el-descriptions-item label="状态">
           <StatusTag
             :label="communityStatusLabels[community.status]"
             :type="community.status === 'ACTIVE' ? 'completed' : 'canceled'"
           />
         </el-descriptions-item>
-        <el-descriptions-item label="社区地址" :span="2">{{ community.address }}</el-descriptions-item>
+        <el-descriptions-item label="小区地址" :span="2">{{ community.address }}</el-descriptions-item>
         <el-descriptions-item label="联系人">{{ community.contactPerson || '-' }}</el-descriptions-item>
         <el-descriptions-item label="联系电话">{{ community.contactPhone || '-' }}</el-descriptions-item>
         <el-descriptions-item label="入住申请" :span="2">
@@ -126,14 +126,14 @@ onMounted(() => {
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ formatDateTime(community.createdAt) }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ formatDateTime(community.updatedAt) }}</el-descriptions-item>
-        <el-descriptions-item label="社区简介" :span="2">{{ community.description || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="小区简介" :span="2">{{ community.description || '-' }}</el-descriptions-item>
       </el-descriptions>
     </article>
 
     <article class="panel">
       <header class="panel-header">
         <h3 class="panel-title">楼栋列表</h3>
-        <el-button type="primary" link @click="goBuildings">前往社区结构 →</el-button>
+        <el-button type="primary" link @click="goBuildings">前往小区结构 →</el-button>
       </header>
       <el-table v-loading="buildingsLoading" :data="buildings" border>
         <el-table-column prop="id" label="ID" width="64" />

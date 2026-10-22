@@ -103,7 +103,7 @@ export interface IUpdateResidentStatusDTO {
 export interface IAdminCreateResidentDTO {
   anchorRelationId?: number | null
   leaseId?: number | null
-  /** 所属社区 ID（数据级权限锚点，ADMIN 限绑定社区） */
+  /** 所属小区 ID（数据级权限锚点，ADMIN 限绑定小区） */
   communityId: number
   /** 真实姓名（≤50 字符） */
   realName: string
@@ -183,9 +183,9 @@ export interface IResidenceApplication {
   reviewTime?: string
   /*
    * 申请 → 租约 → 会话一跳可达（**V26 强关联**，取代 DEF-079 弱关联猜测）：
-   * 后端新增 `residence_application.lease_id`，在**审批通过（含社区自动审批）时写死**，
+   * 后端新增 `residence_application.lease_id`，在**审批通过（含小区自动审批）时写死**，
    * VO 的 `leaseId` **直接取该列**——只有 `APPROVED` 且真实关联时才有值；
-   * **为空即"无关联"，后端不回退按（居民/社区/房屋）猜最新租约**（避免同屋多租约指错）。
+   * **为空即"无关联"，后端不回退按（居民/小区/房屋）猜最新租约**（避免同屋多租约指错）。
    * 故 UI 只在 `APPROVED && leaseId` 时给深链，为空一律中性兜底、不出死链。
    */
   /** 审批通过时生成的租约 ID（V26 强关联；为空表示无关联） */

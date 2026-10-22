@@ -25,7 +25,7 @@ public class LeaseMoveOutApplication {
     @Schema(description = "申请人居民ID")
     private Long residentId;
 
-    @Schema(description = "所属社区ID（数据级权限锚点）")
+    @Schema(description = "所属小区ID（数据级权限锚点）")
     private Long communityId;
 
     @Schema(description = "房屋ID")

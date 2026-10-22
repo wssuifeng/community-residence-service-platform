@@ -11,8 +11,8 @@ public class ConversationInboxVO {
  @Schema(description="原会话类型或FEEDBACK") private String type;
  @Schema(description="标题") private String title;
  @Schema(description="原业务状态") private String status;
- @Schema(description="所属社区ID") private Long communityId;
- @Schema(description="所属社区名称") private String communityName;
+ @Schema(description="所属小区ID") private Long communityId;
+ @Schema(description="所属小区名称") private String communityName;
  @Schema(description="原业务ID") private Long relatedId;
  @Schema(description="房屋四段编号；非房屋业务为空") private String houseCode;
  @Schema(description="反馈对端安全称呼，匿名不含身份") private String residentLabel;

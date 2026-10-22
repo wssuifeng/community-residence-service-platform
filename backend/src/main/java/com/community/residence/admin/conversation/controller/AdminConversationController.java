@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-/** 多方会话控制器：看房预约群聊 + 居民-社区管理员直通（接口设计.md 9.14，R63） */
-@Tag(name = "多方会话", description = "看房预约群聊与居民-社区管理员直通会话接口")
+/** 多方会话控制器：看房预约群聊 + 居民-小区管理员直通（接口设计.md 9.14，R63） */
+@Tag(name = "多方会话", description = "看房预约群聊与居民-小区管理员直通会话接口")
 @RestController
 @RequestMapping("/api/v1/conversations")
 @RequiredArgsConstructor

@@ -4,7 +4,7 @@ import type { Role, PageQuery } from '@/common/web/types/api'
 export type SystemRole = Extract<Role, 'ADMIN' | 'STAFF' | 'SUPER_ADMIN'>
 
 export const systemRoleLabels: Record<SystemRole, string> = {
-  ADMIN: '社区管理员',
+  ADMIN: '小区管理员',
   STAFF: '服务人员',
   SUPER_ADMIN: '超级管理员'
 }
@@ -17,7 +17,7 @@ export const userStatusLabels: Record<UserStatus, string> = {
   FROZEN: '已冻结'
 }
 
-/** 绑定社区摘要（接口设计.md 9.10.1.5） */
+/** 绑定小区摘要（接口设计.md 9.10.1.5） */
 export interface IBoundCommunity {
   communityId: number
   communityName: string
@@ -73,7 +73,7 @@ export interface ISysUserQuery extends PageQuery {
   keyword?: string
 }
 
-/** 管理员绑定社区项（接口设计.md 9.10.2.3） */
+/** 管理员绑定小区项（接口设计.md 9.10.2.3） */
 export interface IUserCommunityBinding {
   communityId: number
   communityName: string
@@ -81,7 +81,7 @@ export interface IUserCommunityBinding {
   boundAt: string
 }
 
-/** 绑定社区响应（接口设计.md 9.10.2.1） */
+/** 绑定小区响应（接口设计.md 9.10.2.1） */
 export interface IUserCommunityBindingResult {
   userId: number
   userName: string

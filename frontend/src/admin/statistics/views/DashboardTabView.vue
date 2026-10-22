@@ -34,10 +34,10 @@ function switchTab(tab: TabName): void {
   router.replace({ query: { ...route.query, tab } })
 }
 
-/* ---------- 社区筛选（P2 既有能力沿用，不下拉造假）：
-   SUPER_ADMIN 跨社区切换；ADMIN 仅绑定社区（后端数据级权限保证），
-   默认选中首个绑定社区使卡片与图表带社区过滤口径。
-   筛选仅作用于概览 Tab——详细统计的三个专项接口未接社区参数（StatisticsView 零改动），
+/* ---------- 小区筛选（P2 既有能力沿用，不下拉造假）：
+   SUPER_ADMIN 跨小区切换；ADMIN 仅绑定小区（后端数据级权限保证），
+   默认选中首个绑定小区使卡片与图表带小区过滤口径。
+   筛选仅作用于概览 Tab——详细统计的三个专项接口未接小区参数（StatisticsView 零改动），
    故 details Tab 下隐藏筛选，避免「控件不生效」的假交互 ---------- */
 
 const communityOptions = ref<ICommunityOption[]>([])
@@ -77,14 +77,14 @@ onMounted(async () => {
 
 <template>
   <div class="admin-page">
-    <AdminPageHeader title="运营看板" subtitle="全社区运营数据总览">
+    <AdminPageHeader title="运营看板" subtitle="全小区运营数据总览">
       <el-select
         v-if="filterReady"
         v-model="selectedCommunityId"
         clearable
-        placeholder="全部社区"
+        placeholder="全部小区"
         class="community-filter"
-        aria-label="社区筛选"
+        aria-label="小区筛选"
       >
         <el-option
           v-for="community in communityOptions"
@@ -131,7 +131,7 @@ onMounted(async () => {
       </button>
     </nav>
 
-    <!-- :key 绑定社区筛选：切换/清空即重挂载概览面板整体刷新 -->
+    <!-- :key 绑定小区筛选：切换/清空即重挂载概览面板整体刷新 -->
     <DashboardOverview
       v-if="filterReady && activeTab === 'overview'"
       :key="`${String(selectedCommunityId)}-${dateRange.join('-')}`"

@@ -13,8 +13,8 @@ import { useUserStore } from '@/common/auth/store/user'
 /**
  * 人员排班（V19，C4 物业自身排班管理）：
  * 以「服务人员 × 一周七天」的网格编辑班次，是工单派单候选「今日班次」标签的数据来源。
- * 排班一人一社区一天一条，批量保存为覆盖式（同人同社区同日再存即更新），因此本页所有写操作
- * 只需带上 社区 + 人员 + 日期 + 班次，无需前端拼装差异集。
+ * 排班一人一小区一天一条，批量保存为覆盖式（同人同小区同日再存即更新），因此本页所有写操作
+ * 只需带上 小区 + 人员 + 日期 + 班次，无需前端拼装差异集。
  */
 
 const userStore = useUserStore()
@@ -73,7 +73,7 @@ const weekRange = computed(() => {
 
 const isCurrentWeek = computed(() => toDateStr(weekStart.value) === toDateStr(startOfWeek(new Date())))
 
-/** 排班索引：staffId + 日期 → 记录（一人一社区一天一条，可直接当 key） */
+/** 排班索引：staffId + 日期 → 记录（一人一小区一天一条，可直接当 key） */
 const scheduleIndex = computed(() => {
   const map = new Map<string, IStaffSchedule>()
   for (const item of schedules.value) {
@@ -138,17 +138,17 @@ async function loadCommunities(): Promise<void> {
     const page = await getCommunityList({ page: 1, size: 100 })
     communities.value = page.records
     const bound = userStore.user?.boundCommunities ?? []
-    /* 管理员只管绑定社区：优先取绑定社区，超管回落全量列表首项 */
+    /* 管理员只管绑定小区：优先取绑定小区，超管回落全量列表首项 */
     if (bound.length > 0) {
       communityId.value = bound[0]
     } else if (page.records.length > 0) {
       communityId.value = page.records[0].id
     }
     if (communityId.value === null) {
-      ElMessage.warning('暂无可管理的社区，请先创建社区或绑定社区')
+      ElMessage.warning('暂无可管理的小区，请先创建小区或绑定小区')
     }
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '社区列表加载失败')
+    ElMessage.error(error instanceof Error ? error.message : '小区列表加载失败')
   }
 }
 
@@ -377,12 +377,12 @@ async function saveBatch(): Promise<void> {
   }
 }
 
-/** 清空本周：不带 staffIds 即该社区全部人员（后端语义），用于重排整周 */
+/** 清空本周：不带 staffIds 即该小区全部人员（后端语义），用于重排整周 */
 async function clearWeek(): Promise<void> {
   if (!communityId.value) return
   try {
     await ElMessageBox.confirm(
-      `确认清空 ${weekRange.value} 该社区全部服务人员的排班吗？清空后工单派单候选将显示「未排班」。`,
+      `确认清空 ${weekRange.value} 该小区全部服务人员的排班吗？清空后工单派单候选将显示「未排班」。`,
       '清空本周排班',
       { confirmButtonText: '确认清空', cancelButtonText: '取消', type: 'warning' }
     )
@@ -423,7 +423,7 @@ onMounted(async () => {
     <div class="toolbar">
       <el-select
         v-model="communityId"
-        placeholder="选择社区"
+        placeholder="选择小区"
         filterable
         class="community-select"
         @change="loadWeek"
@@ -465,14 +465,14 @@ onMounted(async () => {
         v-if="!communityId"
         type="warning"
         :closable="false"
-        title="请先选择社区"
-        description="排班以社区为范围，选定社区后才能列出该社区的服务人员。"
+        title="请先选择小区"
+        description="排班以小区为范围，选定小区后才能列出该小区的服务人员。"
         show-icon
       />
 
-      <el-empty v-else-if="!loading && staffRows.length === 0" description="该社区暂无服务人员">
+      <el-empty v-else-if="!loading && staffRows.length === 0" description="该小区暂无服务人员">
         <p class="empty-tip">
-          服务人员为系统用户中角色为「服务人员」的账号，且需在「服务人员」页绑定常驻社区后才会出现在排班表。
+          服务人员为系统用户中角色为「服务人员」的账号，且需在「服务人员」页绑定常驻小区后才会出现在排班表。
         </p>
         <router-link class="empty-link" to="/admin/staff-capabilities">前往「服务人员」页绑定人员</router-link>
       </el-empty>

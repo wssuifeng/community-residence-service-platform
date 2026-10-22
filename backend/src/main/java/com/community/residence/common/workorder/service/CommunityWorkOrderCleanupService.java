@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
-/** 社区删除时的workorder域清理；参加管理端协调事务，不能独立提交。 */
+/** 小区删除时的workorder域清理；参加管理端协调事务，不能独立提交。 */
 @Service
 @RequiredArgsConstructor
 @org.springframework.transaction.annotation.Transactional(propagation=org.springframework.transaction.annotation.Propagation.MANDATORY,rollbackFor=Exception.class)
@@ -35,7 +35,7 @@ public class CommunityWorkOrderCleanupService {
     private final StaffScheduleMapper staffScheduleMapper;
     private final StaffServiceCategoryMapper staffServiceCategoryMapper;
     private final com.community.residence.common.evaluation.service.CommunityEvaluationCleanupService evaluationCleanup;
-    /* 按原级联顺序清理本域，所有条件来自已确认社区或其受限关联ID。 */
+    /* 按原级联顺序清理本域，所有条件来自已确认小区或其受限关联ID。 */
     public void removeOrders(Long id) {
         /* ---- 工单链（V1 #15~18 + #27/28）：附件/处理记录/派单 → 评价/跟进 → 工单 → 服务类别 ---- */
         List<Long> orderIds = workOrderMapper.selectList(
@@ -63,7 +63,7 @@ public class CommunityWorkOrderCleanupService {
                 .eq(ServiceCategory::getCommunityId, id));
 
     }
-    /* 按原级联顺序清理本域，所有条件来自已确认社区或其受限关联ID。 */
+    /* 按原级联顺序清理本域，所有条件来自已确认小区或其受限关联ID。 */
     public void removeStaffBindings(Long id) {
         /* V19 人员绑定/排班 + V18 协议模板：直接以 community_id 归属 */
         staffCommunityMapper.delete(new LambdaQueryWrapper<StaffCommunity>()

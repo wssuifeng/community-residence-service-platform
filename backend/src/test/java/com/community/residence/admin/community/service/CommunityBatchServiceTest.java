@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 社区批量管理测试：逐社区独立事务的部分成功语义（一个失败不影响其余）、
+ * 小区批量管理测试：逐小区独立事务的部分成功语义（一个失败不影响其余）、
  * 失败项原因与名称回填、状态白名单校验、批次上限与空列表保护。
  * CommunityService 为 mock（其级联删除本身由 CommunityCascadeDeleteTest 覆盖）。
  */
@@ -48,12 +48,12 @@ class CommunityBatchServiceTest {
     /* ---- 批量删除 ---- */
 
     @Test
-    @DisplayName("批量删除部分成功：不存在的社区失败，其余社区仍删除（逐社区独立事务）")
+    @DisplayName("批量删除部分成功：不存在的小区失败，其余小区仍删除（逐小区独立事务）")
     void batchDelete_partialSuccess() {
         /* lenient：同一方法在批内以其他 ID 被调用，避免 strict-stubs 的参数不匹配判定 */
-        lenient().doThrow(new ResourceNotFoundException("社区不存在"))
+        lenient().doThrow(new ResourceNotFoundException("小区不存在"))
                 .when(deletionService).deleteConfirmed(2L, null, null);
-        when(communityService.getById(2L)).thenThrow(new ResourceNotFoundException("社区不存在"));
+        when(communityService.getById(2L)).thenThrow(new ResourceNotFoundException("小区不存在"));
 
         BatchOperationResultVO vo = communityBatchService.batchDelete(idsDto(1L, 2L, 3L));
 
@@ -61,18 +61,18 @@ class CommunityBatchServiceTest {
         assertThat(vo.getFailures()).hasSize(1);
         assertThat(vo.getFailures().get(0).getId()).isEqualTo(2L);
         assertThat(vo.getFailures().get(0).getName()).isNull();
-        assertThat(vo.getFailures().get(0).getReason()).isEqualTo("社区不存在");
+        assertThat(vo.getFailures().get(0).getReason()).isEqualTo("小区不存在");
         verify(deletionService, times(3)).deleteConfirmed(org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.isNull());
     }
 
     @Test
-    @DisplayName("批量删除失败项回填社区名称：业务失败但社区仍存在时带上名称")
+    @DisplayName("批量删除失败项回填小区名称：业务失败但小区仍存在时带上名称")
     void batchDelete_failureCarriesCommunityName() {
         lenient().doThrow(new BusinessException(ErrorCode.OPERATION_FAILED, "级联删除失败"))
                 .when(deletionService).deleteConfirmed(2L, null, null);
         CommunityVO community = new CommunityVO();
         community.setId(2L);
-        community.setName("退场社区");
+        community.setName("退场小区");
         when(communityService.getById(2L)).thenReturn(community);
 
         BatchOperationResultVO vo = communityBatchService.batchDelete(idsDto(1L, 2L));
@@ -80,7 +80,7 @@ class CommunityBatchServiceTest {
         assertThat(vo.getSuccessIds()).containsExactly(1L);
         assertThat(vo.getFailures()).hasSize(1);
         assertThat(vo.getFailures().get(0).getId()).isEqualTo(2L);
-        assertThat(vo.getFailures().get(0).getName()).isEqualTo("退场社区");
+        assertThat(vo.getFailures().get(0).getName()).isEqualTo("退场小区");
         assertThat(vo.getFailures().get(0).getReason()).isEqualTo("级联删除失败");
     }
 
@@ -132,18 +132,18 @@ class CommunityBatchServiceTest {
     }
 
     @Test
-    @DisplayName("批量状态变更部分成功：不存在的社区记失败，其余照常停用")
+    @DisplayName("批量状态变更部分成功：不存在的小区记失败，其余照常停用")
     void batchStatus_partialSuccess() {
-        lenient().doThrow(new ResourceNotFoundException("社区不存在"))
+        lenient().doThrow(new ResourceNotFoundException("小区不存在"))
                 .when(communityService).updateStatus(2L, "INACTIVE");
-        when(communityService.getById(2L)).thenThrow(new ResourceNotFoundException("社区不存在"));
+        when(communityService.getById(2L)).thenThrow(new ResourceNotFoundException("小区不存在"));
 
         BatchOperationResultVO vo = communityBatchService.batchUpdateStatus(
                 statusDto("INACTIVE", 1L, 2L, 3L));
 
         assertThat(vo.getSuccessIds()).containsExactly(1L, 3L);
         assertThat(vo.getFailures()).hasSize(1);
-        assertThat(vo.getFailures().get(0).getReason()).isEqualTo("社区不存在");
+        assertThat(vo.getFailures().get(0).getReason()).isEqualTo("小区不存在");
         verify(communityService).updateStatus(1L, "INACTIVE");
         verify(communityService).updateStatus(3L, "INACTIVE");
     }

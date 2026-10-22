@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-/** 服务人员排班（staff_schedule 表；一人一社区一天一条，shift_type 见 ShiftType，
+/** 服务人员排班（staff_schedule 表；一人一小区一天一条，shift_type 见 ShiftType，
     start_time/end_time 为班次时间快照，REST 休息为空） */
 @Data
 @TableName("staff_schedule")
@@ -24,7 +24,7 @@ public class StaffSchedule {
     @Schema(description = "服务人员用户ID")
     private Long staffId;
 
-    @Schema(description = "排班社区ID")
+    @Schema(description = "排班小区ID")
     private Long communityId;
 
     @Schema(description = "排班日期")

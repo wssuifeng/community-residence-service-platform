@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * 数据级权限拦截器（架构设计.md §3.2 第二层，JSqlParser 4.6 API）：
- * ADMIN → 强制注入 community_id IN (绑定社区)；SUPER_ADMIN → 不注入；
+ * ADMIN → 强制注入 community_id IN (绑定小区)；SUPER_ADMIN → 不注入；
  * RESIDENT/STAFF 的个人维度过滤涉及具体表语义（resident_id/assignee_id），
  * 由对应模块查询显式约束，不在本拦截器盲注（避免误伤无该列的表）。
  * 未登录（公开接口）不注入。SQL 解析失败视为权限不可判定，拒绝查询。
@@ -49,9 +49,9 @@ public class DataScopeInterceptor implements InnerInterceptor {
             "notification", "notification_channel_log",
             "housing_timeslot", "sys_task_log",
             "lease_payment",
-            /* 全局支付配置无社区列；管理接口由超管鉴权，运行期渠道门控内部读取。 */
+            /* 全局支付配置无小区列；管理接口由超管鉴权，运行期渠道门控内部读取。 */
             "payment_channel_config",
-            /* 子表不含社区列：相册经房屋、合同段经租约父级显式鉴权。 */
+            /* 子表不含小区列：相册经房屋、合同段经租约父级显式鉴权。 */
             "house_image", "lease_contract_term", "notice_revision", "notice_version_view",
             "conversation", "conversation_participant", "conversation_message",
             /* V18/V19：协议模板需同时可见全局模板（community_id 为空），
@@ -59,10 +59,10 @@ public class DataScopeInterceptor implements InnerInterceptor {
                三者均由业务层显式约束可见性 */
             "agreement_template", "lease_change_log", "staff_service_category",
             /* V22 押金退还记录（R72）：无 community_id 列（数据权限经 lease_id 归属校验），
-               漏登记时 ADMIN 查询会被注入 community_id → BadSqlGrammar 500（社区管理员必炸） */
+               漏登记时 ADMIN 查询会被注入 community_id → BadSqlGrammar 500（小区管理员必炸） */
             "lease_deposit_refund",
             /* C10 拉黑审计日志：同样无 community_id 列（超管专属，ADMIN 当前不查询），
-               同型潜在缺陷一并收口——该表本无社区归属列，登记 SKIP 不削弱数据权限 */
+               同型潜在缺陷一并收口——该表本无小区归属列，登记 SKIP 不削弱数据权限 */
             "sys_blacklist_log");
 
     @Override
@@ -97,7 +97,7 @@ public class DataScopeInterceptor implements InnerInterceptor {
                     items.add(new LongValue(id));
                 }
             } else {
-                // ADMIN 未绑定任何社区：恒假条件，杜绝越权看到全量数据
+                // ADMIN 未绑定任何小区：恒假条件，杜绝越权看到全量数据
                 items.add(new StringValue("__NO_COMMUNITY__"));
             }
             in.setRightExpression(items);

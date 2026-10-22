@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-/** 社区业务逻辑测试：创建默认状态、停用社区引用拦截、不存在 404 */
+/** 小区业务逻辑测试：创建默认状态、停用小区引用拦截、不存在 404 */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommunityService 单元测试")
 class CommunityServiceTest {
@@ -49,7 +49,7 @@ class CommunityServiceTest {
     }
 
     @Test
-    @DisplayName("创建社区：默认 ACTIVE 状态并写入名称地址")
+    @DisplayName("创建小区：默认 ACTIVE 状态并写入名称地址")
     void create_shouldSetActiveStatus() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
@@ -69,16 +69,16 @@ class CommunityServiceTest {
     }
 
     @Test
-    @DisplayName("查询社区不存在：抛 404 ResourceNotFoundException")
+    @DisplayName("查询小区不存在：抛 404 ResourceNotFoundException")
     void getById_notFound_throws() {
         when(communityMapper.selectById(999L)).thenReturn(null);
         assertThatThrownBy(() -> communityService.getById(999L))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("社区不存在");
+                .hasMessageContaining("小区不存在");
     }
 
     @Test
-    @DisplayName("引用校验：停用社区不可创建子资源（COMMUNITY_INACTIVE 5101）")
+    @DisplayName("引用校验：停用小区不可创建子资源（COMMUNITY_INACTIVE 5101）")
     void requireActiveCommunity_inactive_throws() {
         community.setStatus(CommonStatus.INACTIVE);
         when(communityMapper.selectById(anyLong())).thenReturn(community);
@@ -89,7 +89,7 @@ class CommunityServiceTest {
     }
 
     @Test
-    @DisplayName("更新社区状态：INACTIVE 写入并留痕操作人")
+    @DisplayName("更新小区状态：INACTIVE 写入并留痕操作人")
     void updateStatus_writesNewStatus() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
@@ -105,7 +105,7 @@ class CommunityServiceTest {
     }
 
     @Test
-    @DisplayName("更新社区：不存在抛 404")
+    @DisplayName("更新小区：不存在抛 404")
     void update_notFound_throws() {
         when(communityMapper.selectById(anyLong())).thenReturn(null);
         CreateCommunityDTO dto = new CreateCommunityDTO();

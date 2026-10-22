@@ -88,7 +88,7 @@ class HousingViewCountTest {
     private void stubCommunity() {
         Community community = new Community();
         community.setId(7L);
-        community.setName("测试社区");
+        community.setName("测试小区");
         lenient().when(communityService.requireCommunity(7L)).thenReturn(community);
     }
 

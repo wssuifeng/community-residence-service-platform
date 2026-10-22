@@ -30,7 +30,7 @@ public class CommunityResponsibleService {
     private final com.community.residence.common.auth.service.AdminCommunityCacheService adminCommunityCacheService;
     private final com.community.residence.common.auth.service.TokenRevocationService tokenRevocationService;
 
-    /* 社区保存已获得本社区行锁；只维护责任人来源，保留超管手工来源。变更有效权限才吊销令牌。 */
+    /* 小区保存已获得本小区行锁；只维护责任人来源，保留超管手工来源。变更有效权限才吊销令牌。 */
     public void synchronizeBinding(Long communityId, Long responsibleId) {
         var bindings = bindingMapper.selectList(new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.community.residence.common.auth.entity.SysAdminCommunity>()
                 .eq(com.community.residence.common.auth.entity.SysAdminCommunity::getCommunityId, communityId));
@@ -75,7 +75,7 @@ public class CommunityResponsibleService {
         }
         SysUser user = sysUserMapper.selectByIdForUpdate(id);
         if (user == null || !"ADMIN".equals(user.getRole())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "社区责任人必须是系统内的ADMIN管理员账号");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "小区责任人必须是系统内的ADMIN管理员账号");
         }
     }
 
@@ -86,7 +86,7 @@ public class CommunityResponsibleService {
         }
         sysUserMapper.selectByIdForUpdate(id);
         if (communityMapper.selectResponsibleReferenceForUpdate(id) != null) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "该账号仍是社区责任人，请先更换或解除责任人再修改角色");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "该账号仍是小区责任人，请先更换或解除责任人再修改角色");
         }
     }
 
@@ -105,10 +105,10 @@ public class CommunityResponsibleService {
 
     public PageVO<ResponsibleAdminVO> candidates(Long communityId, long page, long size, String keyword) {
         if (!SecurityUtils.hasRole("ADMIN") && !SecurityUtils.hasRole("SUPER_ADMIN")) {
-            throw new ForbiddenException("仅管理员可选择社区责任人");
+            throw new ForbiddenException("仅管理员可选择小区责任人");
         }
         if (SecurityUtils.hasRole("ADMIN") && communityId == null) {
-            throw new ForbiddenException("请选择可管理的社区");
+            throw new ForbiddenException("请选择可管理的小区");
         }
         if (communityId != null) {
             SecurityUtils.checkCommunityAccess(communityId);

@@ -20,7 +20,7 @@ public class UserContext {
     private String username;
     private String role;
 
-    /** ADMIN 绑定社区 ID 集合（登录时按需加载，数据级权限过滤用）；其余角色为空 */
+    /** ADMIN 绑定小区 ID 集合（登录时按需加载，数据级权限过滤用）；其余角色为空 */
     private Set<Long> communityIds;
 
     public boolean isSuperAdmin() {

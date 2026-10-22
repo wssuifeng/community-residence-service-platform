@@ -23,7 +23,7 @@ public class WorkOrderVO {
     @Schema(description = "提交人姓名")
     private String residentName;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "服务类别ID")

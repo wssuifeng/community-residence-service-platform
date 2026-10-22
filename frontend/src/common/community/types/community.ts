@@ -1,12 +1,12 @@
-/** C1 社区基础信息管理类型定义（接口设计.md §9.1） */
+/** C1 小区基础信息管理类型定义（接口设计.md §9.1） */
 import type { PageQuery } from '@/common/web/types/api'
 
 /* ---------------------------------- 状态枚举 ---------------------------------- */
 
-/** 社区状态（接口设计.md 9.1.1） */
+/** 小区状态（接口设计.md 9.1.1） */
 export type CommunityStatus = 'ACTIVE' | 'INACTIVE'
 
-/** 社区状态中文标签 */
+/** 小区状态中文标签 */
 export const communityStatusLabels: Record<CommunityStatus, string> = {
   ACTIVE: '运营中',
   INACTIVE: '已停用'
@@ -62,9 +62,9 @@ export const resourceStatusLabels: Record<ResourceStatus, string> = {
   AVAILABLE: '可用'
 }
 
-/* ---------------------------------- 社区 ---------------------------------- */
+/* ---------------------------------- 小区 ---------------------------------- */
 
-/** 社区实体（接口设计.md 9.1.1.1 响应） */
+/** 小区实体（接口设计.md 9.1.1.1 响应） */
 export interface ICommunity {
   businessCode?: string
   responsibleAdminId?: number | null
@@ -83,7 +83,7 @@ export interface ICommunity {
   updatedAt: string
 }
 
-/** 创建社区请求（接口设计.md 9.1.1.1 请求体） */
+/** 创建小区请求（接口设计.md 9.1.1.1 请求体） */
 export interface ICreateCommunityDTO {
   businessCode?: string
   name: string
@@ -96,15 +96,15 @@ export interface ICreateCommunityDTO {
   defaultLeaseMonths?: number
 }
 
-/** 更新社区请求（接口设计.md 9.1.1.2，请求体同创建） */
+/** 更新小区请求（接口设计.md 9.1.1.2，请求体同创建） */
 export type IUpdateCommunityDTO = ICreateCommunityDTO
 
-/** 更新社区状态请求（接口设计.md 9.1.1.5 请求体） */
+/** 更新小区状态请求（接口设计.md 9.1.1.5 请求体） */
 export interface IUpdateCommunityStatusDTO {
   status: CommunityStatus
 }
 
-/** 社区列表查询参数（接口设计.md 9.1.1.4） */
+/** 小区列表查询参数（接口设计.md 9.1.1.4） */
 export interface ICommunityQuery extends PageQuery {
   status?: CommunityStatus
   keyword?: string
@@ -292,11 +292,11 @@ export type IUpdateTimeslotDTO = ICreateTimeslotDTO
 /** 资源时段列表查询参数（后端按资源分页，无额外过滤参数） */
 export type ITimeslotQuery = PageQuery
 
-/* ==================== 批量管理社区（V19 批次，仅超管） ==================== */
+/* ==================== 批量管理小区（V19 批次，仅超管） ==================== */
 
 /** 批量操作失败项 */
 export interface IBatchFailure {
-  /** 社区ID（结构批量生成时可能为空） */
+  /** 小区ID（结构批量生成时可能为空） */
   id?: number
   name?: string
   reason: string
@@ -313,7 +313,7 @@ export interface IBatchOperationResult {
 
 /**
  * 逐层批量创建结果（后端 BatchCreateResultVO）。
- * 语义与社区批量操作不同：**逐行独立、不整体回滚**，按行号给出成功 ID 或失败原因；
+ * 语义与小区批量操作不同：**逐行独立、不整体回滚**，按行号给出成功 ID 或失败原因；
  * rowNo 为 1 起的提交顺序，与前端生成的名称/房号清单一一对应。
  */
 export interface IBatchCreateRow {
@@ -397,5 +397,5 @@ export interface IStructureBatchGenerateResult {
   failures: IBatchFailure[]
 }
 
-/** 社区责任人候选，不含凭据。 */
+/** 小区责任人候选，不含凭据。 */
 export interface IResponsibleAdmin { id: number; realName: string; phone: string; boundToCommunity: boolean }

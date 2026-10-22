@@ -116,7 +116,7 @@ class NotificationOwnerTypeCallSiteGuardTest {
                         "notificationService.createForUser(adminId", 1));
         expected.put("com/community/residence/common/schedule/task/LogRetentionCleanTask.java",
                 calls("notificationService.createForUser(admin.getId()", 1));
-        /* R74 工单链路：提交→社区绑定管理员+超管（adminId）、受理/派单/接单/开始处理/提交结果/
+        /* R74 工单链路：提交→小区绑定管理员+超管（adminId）、受理/派单/接单/开始处理/提交结果/
            终审关闭→居民提交人（order.getResidentId()）+ 相关管理员（adminId） */
         expected.put("com/community/residence/common/workorder/service/WorkOrderService.java",
                 calls("notificationService.createForUser(dto.getAssigneeId()", 1,

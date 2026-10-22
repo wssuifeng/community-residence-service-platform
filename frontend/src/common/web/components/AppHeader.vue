@@ -8,6 +8,7 @@ import { residentLogout, adminLogout } from '@/common/auth/api/auth'
 import { markNotificationRead } from '@/common/messaging/api/notification'
 import { notificationTarget } from '@/common/messaging/utils/notificationNav'
 import AppLogo from '@/common/web/components/AppLogo.vue'
+import type { Role } from '@/common/web/types/api'
 
 /**
  * 顶部导航栏（三端通用，UI设计.md §2）：Logo + 导航菜单 + 通知铃铛 + 用户下拉
@@ -20,7 +21,7 @@ defineProps<{
    * 如「租住与房源」需覆盖 /resident/housings/:id 等 Hub 之外的子页）。
    */
   items?: { label: string; to: string; activeMatch?: string[] }[]
-  /** 未登录态是否追加「注册」按钮（游客端对齐设计稿；默认不展示，其他端不受影响） */
+  /** 未登录态是否追加「注册」按钮（未登录公开页面对齐设计稿；默认不展示，其他端不受影响） */
   showRegister?: boolean
 }>()
 
@@ -29,18 +30,18 @@ const router = useRouter()
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 
-const roleLabels: Record<string, string> = {
+const roleLabels: Partial<Record<Role, string>> = {
   RESIDENT: '居民',
   STAFF: '服务人员',
-  ADMIN: '社区管理员',
+  ADMIN: '小区管理员',
   SUPER_ADMIN: '超级管理员'
 }
 
 const realName = computed(() => userStore.user?.realName ?? '未登录')
-const roleLabel = computed(() => roleLabels[userStore.role] ?? '')
-const portalBase = computed(() => userStore.role === 'RESIDENT' ? '/resident' : userStore.role === 'STAFF' ? '/staff' : '/admin')
+const roleLabel = computed(() => userStore.role ? roleLabels[userStore.role] ?? '' : '')
+const portalBase = computed(() => userStore.role === 'RESIDENT' ? '/resident' : userStore.role === 'STAFF' ? '/staff' : userStore.role ? '/admin' : '/guest')
 const profilePath = computed(() => `${portalBase.value}/profile`)
-const homePath = computed(() => userStore.role === 'RESIDENT' ? '/resident/home' : `${portalBase.value}/dashboard`)
+const homePath = computed(() => userStore.role === 'RESIDENT' ? '/resident/home' : userStore.role ? `${portalBase.value}/dashboard` : '/guest/home')
 
 async function handleLogout(): Promise<void> {
   try {
@@ -109,7 +110,7 @@ async function handleBellItemClick(item: {
       <slot name="menu-toggle" />
       <router-link to="/" class="app-header-logo">
         <AppLogo :size="22" />
-        <span>社区居住服务</span>
+        <span>小区居住服务</span>
       </router-link>
 
       <nav class="app-header-nav" aria-label="主导航">
@@ -405,7 +406,7 @@ async function handleBellItemClick(item: {
 <style>
 /* 管理端宿主（.admin-layout）内容区为全宽，头部同步放开 1200px 限宽，
    使右侧用户集群贴近视口右缘（验收反馈：集群偏左、右侧大片空白）；
-   居民端/服务人员端/游客端内容列仍为 1200px 居中，维持与内容对齐。
+   居民端/服务人员端/未登录公开页面内容列仍为 1200px 居中，维持与内容对齐。
    说明：scoped 规则无法向祖先方向匹配，故用非 scoped 块并提升特异性压过上面的限宽规则 */
 .admin-layout .app-header .app-header-inner {
   max-width: none;

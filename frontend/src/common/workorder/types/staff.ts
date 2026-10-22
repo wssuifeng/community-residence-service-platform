@@ -1,5 +1,5 @@
 /**
- * C4 服务人员能力与排班类型定义（V19：服务人员-常驻社区绑定、擅长服务类别、排班）
+ * C4 服务人员能力与排班类型定义（V19：服务人员-常驻小区绑定、擅长服务类别、排班）
  * 对齐后端 StaffCapabilityController / StaffScheduleController 实测契约。
  * 服务人员 = sys_user 中 role='STAFF' 的账号，无独立 staff 表。
  */
@@ -42,7 +42,7 @@ export const shiftTypeColors: Record<ShiftType, { bg: string; fg: string }> = {
 
 /* ------------------------------- 服务人员能力 ------------------------------- */
 
-/** 服务人员能力档案（常驻社区 + 擅长服务类别） */
+/** 服务人员能力档案（常驻小区 + 擅长服务类别） */
 export interface IStaffCapability {
   staffId: number
   username: string
@@ -51,9 +51,9 @@ export interface IStaffCapability {
   email?: string
   /** 账号状态：可见值以 sys_user.status 为准 */
   status?: string
-  /** 常驻社区ID列表 */
+  /** 常驻小区ID列表 */
   communityIds: number[]
-  /** 常驻社区名称列表（与 communityIds 同序） */
+  /** 常驻小区名称列表（与 communityIds 同序） */
   communityNames: string[]
   /** 擅长服务类别ID列表 */
   categoryIds: number[]
@@ -87,7 +87,7 @@ export interface IStaffCandidate {
 
 /* ---------------------------------- 排班 ---------------------------------- */
 
-/** 排班记录（GET /staff-schedules；一人一社区一天一条） */
+/** 排班记录（GET /staff-schedules；一人一小区一天一条） */
 export interface IStaffSchedule {
   id: number
   staffId: number
@@ -115,7 +115,7 @@ export interface IStaffScheduleQuery {
   staffId?: number
 }
 
-/** 排班批量设置请求（PUT /staff-schedules/batch；同 staff+社区+日期已存在则覆盖） */
+/** 排班批量设置请求（PUT /staff-schedules/batch；同 staff+小区+日期已存在则覆盖） */
 export interface IBatchSaveScheduleDTO {
   communityId: number
   staffIds: number[]
@@ -136,13 +136,13 @@ export interface IBatchSaveScheduleResult {
 /** 排班范围清空参数（DELETE /staff-schedules） */
 export interface IClearScheduleParams {
   communityId: number
-  /** 为空表示该社区全部人员 */
+  /** 为空表示该小区全部人员 */
   staffIds?: number[]
   startDate: string
   endDate: string
 }
 
-/** 专用代建入口；后端仍独立约束固定STAFF及至少一个有效社区。 */
+/** 专用代建入口；后端仍独立约束固定STAFF及至少一个有效小区。 */
 export interface ICreateStaffAccountDTO {
   username: string
   password: string

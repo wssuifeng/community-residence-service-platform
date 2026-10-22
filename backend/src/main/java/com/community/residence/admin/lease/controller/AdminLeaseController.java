@@ -34,7 +34,7 @@ public class AdminLeaseController {
     private final com.community.residence.common.lease.service.DepositRefundService depositRefundService;
 
     /**
-     * 发起押金退还（R72，接口设计.md §9.20.1）：社区管理员发起**原渠道原路退回**——
+     * 发起押金退还（R72，接口设计.md §9.20.1）：小区管理员发起**原渠道原路退回**——
      * 金额可空（空 = 全额：实缴押金 − 已成功退还金额，服务端计算）、
      * `outRequestNo` 为幂等键（同号重复提交返回既有结果，同号内容不一致 5706）；
      * 门禁：租约须已搬出（或退租申请已通过，否则 5602）、押金状态须「已缴」（否则 5703）、

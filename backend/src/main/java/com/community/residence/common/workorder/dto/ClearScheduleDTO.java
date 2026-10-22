@@ -8,13 +8,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import java.util.List;
 
-/** 排班范围清空请求（DELETE 查询参数绑定；staffIds 为空表示清空该社区范围内全部人员） */
+/** 排班范围清空请求（DELETE 查询参数绑定；staffIds 为空表示清空该小区范围内全部人员） */
 @Data
 @Schema(description = "排班范围清空请求")
 public class ClearScheduleDTO {
 
-    @Schema(description = "排班社区ID")
-    @NotNull(message = "社区不能为空")
+    @Schema(description = "排班小区ID")
+    @NotNull(message = "小区不能为空")
     private Long communityId;
 
     @Schema(description = "服务人员ID列表（可空=全部人员；逗号分隔传参）")

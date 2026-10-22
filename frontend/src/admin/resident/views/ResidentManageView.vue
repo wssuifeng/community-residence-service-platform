@@ -162,7 +162,7 @@ function refreshAfterMutation(): void {
       中完成
     </p>
 
-    <!-- 白卡 Tab 条：观感与运营看板/社区结构一致（激活蓝字 + 底部 2px 下划线） -->
+    <!-- 白卡 Tab 条：观感与运营看板/小区结构一致（激活蓝字 + 底部 2px 下划线） -->
     <nav class="tab-bar" role="tablist" aria-label="居民管理视图切换">
       <button
         type="button"

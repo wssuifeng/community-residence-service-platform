@@ -43,17 +43,17 @@ export function changePassword(data: IChangePasswordDTO) {
   return http.patch<null>('/sys-users/password', data)
 }
 
-/** 9.10.2.1 绑定社区 */
+/** 9.10.2.1 绑定小区 */
 export function bindCommunity(userId: number, communityId: number) {
   return http.post<IUserCommunityBindingResult>(`/sys-users/${userId}/communities`, { communityId })
 }
 
-/** 9.10.2.2 解绑社区 */
+/** 9.10.2.2 解绑小区 */
 export function unbindCommunity(userId: number, communityId: number) {
   return http.delete<null>(`/sys-users/${userId}/communities/${communityId}`)
 }
 
-/** 9.10.2.3 管理员绑定社区列表 */
+/** 9.10.2.3 管理员绑定小区列表 */
 export function getUserCommunities(userId: number) {
   return http.get<IUserCommunityBinding[]>(`/sys-users/${userId}/communities`)
 }

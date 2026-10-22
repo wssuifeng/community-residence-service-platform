@@ -5,14 +5,14 @@ import NoticeBody from '@/common/notice/components/NoticeBody.vue'
 import { EditorContent } from '@tiptap/vue-3'
 import { legacyNoticeDocument } from '@/common/notice/utils/noticeDocument'
 vi.mock('@/common/upload/api/upload',()=>({uploadFile:vi.fn().mockResolvedValue({fileUrl:'/uploads/editor-photo.png'})}))
-const doc={type:'doc',content:[{type:'paragraph',content:[{type:'text',text:'社区通知'}]}]}
+const doc={type:'doc',content:[{type:'paragraph',content:[{type:'text',text:'小区通知'}]}]}
 describe('公告正文主编辑器与共用渲染',()=>{
  it('以真实可编辑文档替代纯文本输入，保留加粗/居中/列表结构',async()=>{
   const w=mount(NoticeEditor,{props:{modelValue:JSON.stringify(doc)},attachTo:document.body});await flushPromises()
   expect(w.find('[contenteditable="true"]').exists()).toBe(true);expect(w.find('textarea').exists()).toBe(false)
   const editor=w.getComponent(EditorContent).props('editor')!;editor.commands.setTextSelection({from:1,to:5});editor.chain().toggleBold().setTextAlign('center').run();await flushPromises()
   const result=String(w.emitted('update:modelValue')?.at(-1)?.[0]);expect(result).toContain('bold');expect(result).toContain('center')
-  const body=mount(NoticeBody,{props:{bodyJson:result}});expect(body.find('strong').text()).toBe('社区通知');expect(body.find('p').attributes('style')).toContain('center');body.unmount();w.unmount()
+  const body=mount(NoticeBody,{props:{bodyJson:result}});expect(body.find('strong').text()).toBe('小区通知');expect(body.find('p').attributes('style')).toContain('center');body.unmount();w.unmount()
  })
  it('安全渲染拒绝脚本节点，文字不作为HTML执行，旧纯文本图片仍兼容',()=>{
   const w=mount(NoticeBody,{props:{bodyJson:JSON.stringify({type:'doc',content:[{type:'script',text:'evil'},{type:'paragraph',content:[{type:'text',text:'<img onerror="evil">'}]},{type:'image',attrs:{src:'javascript:evil',widthPercent:100}}]})}})

@@ -121,7 +121,7 @@ class ResidenceApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("提交申请：社区开启自动通过时提交即生成「待签约」租约并建租约群聊")
+    @DisplayName("提交申请：小区开启自动通过时提交即生成「待签约」租约并建租约群聊")
     void create_autoApproveCommunity_createsLeaseImmediately() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
@@ -146,7 +146,7 @@ class ResidenceApplicationServiceTest {
 
             applicationService.create(dto);
 
-            /* 租约按社区默认租期（3 个月）生成，租金/押金取房源挂牌值；
+            /* 租约按小区默认租期（3 个月）生成，租金/押金取房源挂牌值；
                R66 v1.8：审核通过只到待签约（ACTIVE 由协议双方确认联动） */
             ArgumentCaptor<LeaseRecord> leaseCaptor = ArgumentCaptor.forClass(LeaseRecord.class);
             verify(leaseRecordMapper).insert(leaseCaptor.capture());
@@ -182,7 +182,7 @@ class ResidenceApplicationServiceTest {
     }
 
     @Test
-    @DisplayName("提交申请：社区未开启自动通过时保持待审核（不生成租约）")
+    @DisplayName("提交申请：小区未开启自动通过时保持待审核（不生成租约）")
     void create_manualApproveCommunity_staysPending() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {

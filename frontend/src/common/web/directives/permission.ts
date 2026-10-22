@@ -4,7 +4,7 @@ import { hasRole } from '@/common/routing/utils/permission'
 import type { Role } from '@/common/web/types/api'
 
 /**
- * v-permission 按钮级权限指令（UI设计.md §10.2）：
+ * v-permission 按钮级账号角色权限指令（UI设计.md §10.2）：
  * 无权限的按钮直接从 DOM 移除（不显示禁用态，§6.2.2）
  * 用法：v-permission="['SUPER_ADMIN']" 或单角色简写 v-permission="'ADMIN'"
  */

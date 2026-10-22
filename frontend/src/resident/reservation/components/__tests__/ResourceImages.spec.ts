@@ -22,7 +22,7 @@ vi.mock('@/common/housing/api/housing', async () => (await import('@/test/fakeBa
 
 const backend = () => getFakeBackend()
 
-/** 生效居住关系（居民端资源页的社区来源：无此关系则显示引导空态） */
+/** 生效居住关系（居民端资源页的小区来源：无此关系则显示引导空态） */
 function seedActiveRelation(): void {
   backend().state.residenceRelations.push({
     id: 1,

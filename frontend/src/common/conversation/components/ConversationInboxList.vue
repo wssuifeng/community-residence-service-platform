@@ -6,7 +6,7 @@ const emit = defineEmits<{ select: [item: ConversationInboxItem]; 'update:keywor
 </script>
 <template>
  <aside class="inbox-list" aria-label="会话列表">
-  <div class="inbox-search"><label class="sr-only" for="conversation-search">搜索会话标题、社区或房屋编号</label><input id="conversation-search" :value="keyword" type="search" maxlength="100" placeholder="搜索会话、社区、房屋编号" @input="emit('update:keyword', ($event.target as HTMLInputElement).value)" /></div>
+  <div class="inbox-search"><label class="sr-only" for="conversation-search">搜索会话标题、小区或房屋编号</label><input id="conversation-search" :value="keyword" type="search" maxlength="100" placeholder="搜索会话、小区、房屋编号" @input="emit('update:keyword', ($event.target as HTMLInputElement).value)" /></div>
   <div class="inbox-filters"><button type="button" :class="{ active: !unreadOnly }" :aria-pressed="!unreadOnly" @click="emit('update:unreadOnly', false)">全部</button><button type="button" :class="{ active: unreadOnly }" :aria-pressed="unreadOnly" @click="emit('update:unreadOnly', true)">未读</button><span>最近消息优先</span></div>
   <div class="inbox-rows" tabindex="0">
    <p v-if="error" class="list-state" role="alert">{{ error }}<button type="button" @click="emit('retry')">重试</button></p>

@@ -18,7 +18,7 @@ public class AgreementTemplate {
     @Schema(description = "模板ID")
     private Long id;
 
-    @Schema(description = "所属社区ID（为空=全局通用模板，各社区可用）")
+    @Schema(description = "所属小区ID（为空=全局通用模板，各小区可用）")
     private Long communityId;
 
     @Schema(description = "模板名称")

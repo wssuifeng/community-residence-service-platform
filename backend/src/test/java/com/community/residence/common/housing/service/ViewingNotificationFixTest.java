@@ -100,7 +100,7 @@ class ViewingNotificationFixTest {
     }
 
     @Test
-    @DisplayName("创建：社区绑定管理员收到新看房预约通知")
+    @DisplayName("创建：小区绑定管理员收到新看房预约通知")
     void create_notifiesBoundAdmins() {
         Housing housing = new Housing();
         housing.setId(1L);
@@ -214,7 +214,7 @@ class ViewingNotificationFixTest {
     }
 
     @Test
-    @DisplayName("游客预约（无 userId）：通知跳过不报错（R55 口径内边界）")
+    @DisplayName("历史匿名预约（无 userId）：通知跳过不报错（R55 口径内边界）")
     void guestAppointment_noNotification_noError() {
         appointment.setUserId(null);
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked = mockAdmin()) {

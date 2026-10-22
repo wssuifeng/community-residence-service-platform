@@ -29,8 +29,8 @@ import SysUserCommunityDrawer from '@/admin/auth/components/SysUserCommunityDraw
 
 /**
  * 系统用户列表 Tab（对照 design-mockups/admin/11，任务 12 换壳）：
- * 角色/状态筛选 + 关键词搜索 + 创建/编辑/冻结解冻/改密 + 社区绑定抽屉。
- * 本 Tab 仅超级管理员渲染（容器控制），行点击或绑定社区 chips 打开抽屉。
+ * 角色/状态筛选 + 关键词搜索 + 创建/编辑/冻结解冻/改密 + 小区绑定抽屉。
+ * 本 Tab 仅超级管理员渲染（容器控制），行点击或绑定小区 chips 打开抽屉。
  */
 const users = ref<ISysUser[]>([])
 const loading = ref(false)
@@ -78,11 +78,11 @@ const passwordForm = reactive({
   confirmPassword: ''
 })
 
-/** 社区绑定抽屉（按行用户打开） */
+/** 小区绑定抽屉（按行用户打开） */
 const drawerVisible = ref(false)
 const drawerUserId = ref<number | null>(null)
 
-/** 绑定社区列（真实推导）：列表接口不返回绑定（SysUserVO 仅详情返回），
+/** 绑定小区列（真实推导）：列表接口不返回绑定（SysUserVO 仅详情返回），
  * 对当前页 ADMIN 角色行并发拉取真实绑定补齐；STAFF/SUPER_ADMIN 后端不支持绑定，展示 — */
 const bindingMap = ref<Record<number, IBoundCommunity[]>>({})
 
@@ -141,7 +141,7 @@ const passwordRules: FormRules = {
   ]
 }
 
-/** 角色胶囊语义色：超级管理员紫 / 社区管理员蓝 / 服务人员绿（紫取自任务 2 图表色板 --chart-c4，不新造色） */
+/** 角色胶囊语义色：超级管理员紫 / 小区管理员蓝 / 服务人员绿（紫取自任务 2 图表色板 --chart-c4，不新造色） */
 function rolePillClass(role: SystemRole): string {
   if (role === 'SUPER_ADMIN') return 'is-super'
   if (role === 'ADMIN') return 'is-admin'
@@ -349,7 +349,7 @@ async function handleChangePassword(): Promise<void> {
   }
 }
 
-/** 行点击或绑定社区 chips → 绑定抽屉（操作列按钮已 stop 冒泡） */
+/** 行点击或绑定小区 chips → 绑定抽屉（操作列按钮已 stop 冒泡） */
 function openCommunityDrawer(row: ISysUser): void {
   drawerUserId.value = row.id
   drawerVisible.value = true
@@ -408,7 +408,7 @@ onMounted(load)
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="绑定社区" min-width="190">
+        <el-table-column label="绑定小区" min-width="190">
           <template #default="{ row }">
             <div
               v-if="(bindingMap[row.id]?.length ?? 0) > 0"
@@ -420,7 +420,7 @@ onMounted(load)
                 :key="community.communityId"
                 type="button"
                 class="community-chip"
-                title="打开社区绑定管理"
+                title="打开小区绑定管理"
                 @click.stop="openCommunityDrawer(row)"
               >
                 {{ community.communityName }}
@@ -447,7 +447,7 @@ onMounted(load)
         <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
             <el-button v-permission="['SUPER_ADMIN']" link type="primary" size="small" @click.stop="openEdit(row)">编辑</el-button>
-            <el-button link type="primary" size="small" @click.stop="openCommunityDrawer(row)">社区绑定</el-button>
+            <el-button link type="primary" size="small" @click.stop="openCommunityDrawer(row)">小区绑定</el-button>
             <el-button
               v-permission="['SUPER_ADMIN']"
               link
@@ -476,7 +476,7 @@ onMounted(load)
 
     <!-- 创建用户 -->
     <el-dialog v-model="createVisible" title="创建用户" width="480px">
-      <p>服务人员账号请在 <el-button link type="primary" @click="router.push('/admin/staff-capabilities')">服务人员</el-button> 子页代建并绑定社区。</p>
+      <p>服务人员账号请在 <el-button link type="primary" @click="router.push('/admin/staff-capabilities')">服务人员</el-button> 子页代建并绑定小区。</p>
       <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="100px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="createForm.username" :placeholder="USERNAME_HINT" maxlength="50" />
@@ -564,7 +564,7 @@ onMounted(load)
       </template>
     </el-dialog>
 
-    <!-- 社区绑定抽屉 -->
+    <!-- 小区绑定抽屉 -->
     <SysUserCommunityDrawer
       v-model="drawerVisible"
       :user-id="drawerUserId"
@@ -646,7 +646,7 @@ onMounted(load)
   white-space: nowrap;
 }
 
-/* 角色胶囊：语义 token 色对（超级管理员紫=--chart-c4 / 社区管理员蓝=primary / 服务人员绿=success） */
+/* 角色胶囊：语义 token 色对（超级管理员紫=--chart-c4 / 小区管理员蓝=primary / 服务人员绿=success） */
 .role-pill {
   display: inline-flex;
   align-items: center;
@@ -673,7 +673,7 @@ onMounted(load)
   background-color: var(--color-success-soft);
 }
 
-/* 绑定社区 chips：点击打开绑定抽屉 */
+/* 绑定小区 chips：点击打开绑定抽屉 */
 .community-chips {
   display: flex;
   align-items: center;

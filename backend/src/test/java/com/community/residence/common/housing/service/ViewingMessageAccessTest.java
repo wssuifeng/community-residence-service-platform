@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * R59 带看会话消息回归：可读=预约居民/带看人/社区 ADMIN/SUPER_ADMIN，
+ * R59 带看会话消息回归：可读=预约居民/带看人/小区 ADMIN/SUPER_ADMIN，
  * 可发=仅预约居民或带看人（管理员可读不可发，除非本人即带看人）；
  * 非参与者 403 100% 拒绝；发送后 WS 推送 /topic/appointment/{id}
  * （载荷 {type:'APPOINTMENT_MESSAGE', data}，复制 R30 模式）。
@@ -151,7 +151,7 @@ class ViewingMessageAccessTest {
     }
 
     @Test
-    @DisplayName("未绑定社区的 ADMIN 读：403")
+    @DisplayName("未绑定小区的 ADMIN 读：403")
     void list_adminWithoutBinding_forbidden() {
         try (MockedStatic<SecurityUtils> mocked = mockUser(8L, "ADMIN", Set.of())) {
             assertThatThrownBy(() -> service.listMessages(APPOINTMENT_ID))
@@ -185,7 +185,7 @@ class ViewingMessageAccessTest {
     }
 
     @Test
-    @DisplayName("未分配预约：社区 ADMIN 可读（空列表），预约居民可读（空列表）")
+    @DisplayName("未分配预约：小区 ADMIN 可读（空列表），预约居民可读（空列表）")
     void list_unassignedAppointment_adminAndOwnerReadable() {
         appointment.setAssignedStaffId(null);
         when(messageMapper.selectList(any())).thenReturn(List.of());

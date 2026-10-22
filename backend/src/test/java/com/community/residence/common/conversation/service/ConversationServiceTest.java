@@ -60,8 +60,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * R63 多方会话回归：建群入群（居民+社区管理员+带看人幂等）、非参与者 403、
- * 未读游标与 markRead 只前移、直通幂等与社区归属校验、发送后 WS 推送；
+ * R63 多方会话回归：建群入群（居民+小区管理员+带看人幂等）、非参与者 403、
+ * 未读游标与 markRead 只前移、直通幂等与小区归属校验、发送后 WS 推送；
  * OCR 静态评审（DEF-106/DEF-119，2026-09-23）：并发建群撞唯一键重查回退、
  * 租约会话回链条件更新、入群撞键幂等忽略、关闭态 join/系统留痕拒绝 5604。
  */
@@ -139,7 +139,7 @@ class ConversationServiceTest {
     }
 
     @Test
-    @DisplayName("看房建群：居民 + 社区启用管理员入群；游客预约（userId=null）不建群")
+    @DisplayName("看房建群：居民 + 小区启用管理员入群；历史匿名预约（userId=null）不建群")
     void createViewingGroup_participants() {
         lenient().when(conversationMapper.selectOne(any())).thenReturn(null);
         lenient().when(sysAdminCommunityMapper.selectList(any()))
@@ -163,7 +163,7 @@ class ConversationServiceTest {
                 .extracting(ConversationParticipant::getUserId)
                 .containsExactlyInAnyOrder(RESIDENT_USER_ID, ADMIN_ID);
 
-        /* 游客预约不建群 */
+        /* 历史匿名预约不建群 */
         assertThat(service.createViewingGroup(24L, 1L, null, "测试房源")).isNull();
         verify(conversationMapper, org.mockito.Mockito.times(1)).insert(any(Conversation.class));
     }
@@ -302,7 +302,7 @@ class ConversationServiceTest {
     }
 
     @Test
-    @DisplayName("直通会话：居民不属于社区 403；属于则建群并拉入管理员")
+    @DisplayName("直通会话：居民不属于小区 403；属于则建群并拉入管理员")
     void openDirect_belongCheck() {
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUserId).thenReturn(RESIDENT_USER_ID);
@@ -313,9 +313,9 @@ class ConversationServiceTest {
             lenient().when(leaseRecordMapper.selectCount(any())).thenReturn(0L);
             assertThatThrownBy(() -> service.openDirect(1L))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("不属于该社区");
+                    .hasMessageContaining("不属于该小区");
 
-            /* 有生效租约 → 建群，居民 + 社区管理员入群 */
+            /* 有生效租约 → 建群，居民 + 小区管理员入群 */
             lenient().when(leaseRecordMapper.selectCount(any())).thenReturn(1L);
             lenient().when(conversationMapper.selectOne(any())).thenReturn(null);
             lenient().when(sysAdminCommunityMapper.selectList(any()))
@@ -339,7 +339,7 @@ class ConversationServiceTest {
     /* ---------- R68 租约群聊生命周期 ---------- */
 
     @Test
-    @DisplayName("租约建群：参与者=居民+社区启用管理员，类型 LEASE_GROUP、related_id=租约ID")
+    @DisplayName("租约建群：参与者=居民+小区启用管理员，类型 LEASE_GROUP、related_id=租约ID")
     void createLeaseGroup_participants() {
         lenient().when(conversationMapper.selectOne(any())).thenReturn(null);
         lenient().when(sysAdminCommunityMapper.selectList(any()))
@@ -352,7 +352,7 @@ class ConversationServiceTest {
         lenient().when(sysUserMapper.selectList(any())).thenReturn(List.of(admin));
         lenient().when(participantMapper.exists(any())).thenReturn(false);
 
-        Conversation created = service.createLeaseGroup(88L, 1L, RESIDENT_USER_ID, "租约沟通·演示社区1栋101");
+        Conversation created = service.createLeaseGroup(88L, 1L, RESIDENT_USER_ID, "租约沟通·演示小区1栋101");
 
         assertThat(created.getType()).isEqualTo("LEASE_GROUP");
         assertThat(created.getStatus()).isEqualTo("ACTIVE");

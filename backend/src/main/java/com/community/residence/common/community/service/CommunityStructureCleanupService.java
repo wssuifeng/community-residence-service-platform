@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 社区删除时的community域清理；参加管理端协调事务，不能独立提交。 */
+/** 小区删除时的community域清理；参加管理端协调事务，不能独立提交。 */
 @Service
 @RequiredArgsConstructor
 @org.springframework.transaction.annotation.Transactional(propagation=org.springframework.transaction.annotation.Propagation.MANDATORY,rollbackFor=Exception.class)
@@ -23,7 +23,7 @@ public class CommunityStructureCleanupService {
     private final HouseStatusHistoryMapper houseStatusHistoryMapper;
     private final PublicResourceMapper publicResourceMapper;
     private final ResourceTimeslotMapper resourceTimeslotMapper;
-    /* 按原级联顺序清理本域，所有条件来自已确认社区或其受限关联ID。 */
+    /* 按原级联顺序清理本域，所有条件来自已确认小区或其受限关联ID。 */
     public void removeStructures(Long id) {
         /* ---- C1 结构（V1 #2~7）：房屋状态历史 → 资源时段 → 房屋 → 单元 → 楼栋 → 资源
                 （四张结构表带 @TableLogic 软删除，级联须物理删除以解除 FK 引用，R6 物理删除语义） ---- */

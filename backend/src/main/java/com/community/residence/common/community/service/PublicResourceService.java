@@ -52,7 +52,7 @@ public class PublicResourceService {
     public ResourceVO update(Long id, CreateResourceDTO dto) {
         PublicResource resource = requireResource(id);
         if (!resource.getCommunityId().equals(dto.getCommunityId())) {
-            throw new BusinessException(ErrorCode.OPERATION_FAILED, "资源不允许变更所属社区");
+            throw new BusinessException(ErrorCode.OPERATION_FAILED, "资源不允许变更所属小区");
         }
         SecurityUtils.checkCommunityAccess(resource.getCommunityId());
         validateSlotUnit(dto.getSlotUnit());
@@ -81,7 +81,7 @@ public class PublicResourceService {
         return fillCommunityName(ResourceVO.from(requireResource(id)));
     }
 
-    /** 社区下资源分页列表（公开；游客浏览；ADMIN 限绑定社区） */
+    /** 小区下资源分页列表（公开；公开浏览；ADMIN 限绑定小区） */
     public PageVO<ResourceVO> pageByCommunity(Long communityId, long page, long size,
                                               String type, String status) {
         SecurityUtils.checkCommunityAccess(communityId);

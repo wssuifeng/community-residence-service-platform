@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/** 单元业务逻辑：社区下四级结构的第三级，社区ID 由楼栋推导冗余存储 */
+/** 单元业务逻辑：小区下四级结构的第三级，小区ID 由楼栋推导冗余存储 */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -90,7 +90,7 @@ public class UnitService {
         return vo;
     }
 
-    /** 楼栋下单元分页列表（公开；ADMIN 限绑定社区） */
+    /** 楼栋下单元分页列表（公开；ADMIN 限绑定小区） */
     public PageVO<UnitVO> pageByBuilding(Long buildingId, long page, long size) {
         Building building = requireBuilding(buildingId);
         SecurityUtils.checkCommunityAccess(building.getCommunityId());

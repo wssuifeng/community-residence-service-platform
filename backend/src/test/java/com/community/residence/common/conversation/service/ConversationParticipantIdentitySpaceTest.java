@@ -298,7 +298,7 @@ class ConversationParticipantIdentitySpaceTest {
         systemUser1.setRole("SUPER_ADMIN");
         SysUser admin1 = new SysUser();
         admin1.setId(ADMIN_ID);
-        admin1.setRealName("社区管理员");
+        admin1.setRealName("小区管理员");
         admin1.setRole("ADMIN");
         /* 两表都存在 id=1（撞号），断言的正是"不得跨空间取 sys_user" */
         when(sysUserMapper.selectBatchIds(any())).thenReturn(List.of(systemUser1, admin1));
@@ -315,7 +315,7 @@ class ConversationParticipantIdentitySpaceTest {
             ConversationParticipantVO admin = vo.getParticipants().stream()
                     .filter(p -> NotificationOwnerType.USER.equals(p.getOwnerType()))
                     .findFirst().orElseThrow();
-            assertThat(admin.getName()).isEqualTo("社区管理员");
+            assertThat(admin.getName()).isEqualTo("小区管理员");
             /* 展示里不得出现"撞号者"超级管理员 */
             assertThat(vo.getParticipants()).extracting(ConversationParticipantVO::getName)
                     .doesNotContain("超级管理员");

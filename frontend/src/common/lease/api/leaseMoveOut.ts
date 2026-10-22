@@ -22,7 +22,7 @@ export function createMoveOutApplication(leaseId: number, data: ICreateMoveOutAp
   return http.post<IMoveOutApplication>(`/leases/${leaseId}/move-out-applications`, data)
 }
 
-/** 退租申请分页列表（管理端，按社区数据权限；居民侧经租约详情查看） */
+/** 退租申请分页列表（管理端，按小区数据权限；居民侧经租约详情查看） */
 export function listMoveOutApplications(params: IMoveOutApplicationQuery) {
   return http.get<PageResult<IMoveOutApplication>>('/lease-move-out-applications', params)
 }

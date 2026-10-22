@@ -71,7 +71,7 @@ function lease(): ILeaseRecord {
   return {
     id: 4,
     communityId: 1,
-    communityName: '演示社区',
+    communityName: '演示小区',
     houseId: 3,
     houseLocation: '3 号楼1 单元101',
     tenantName: '演示居民',

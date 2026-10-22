@@ -82,19 +82,19 @@ describe('弹窗蒙层点击不关闭（长表单防误关）', () => {
     expect(wrapper.text()).toContain('新建协议模板')
 
     /* 填入长表单内容 */
-    await wrapper.find('input[placeholder^="如：社区房屋租赁协议"]').setValue('社区房屋租赁协议（标准版）')
-    await wrapper.find('textarea.content-input').setValue('甲方（出租方）：{{社区名称}}\n乙方（承租方）：{{居民姓名}}')
+    await wrapper.find('input[placeholder^="如：小区房屋租赁协议"]').setValue('小区房屋租赁协议（标准版）')
+    await wrapper.find('textarea.content-input').setValue('甲方（出租方）：{{小区名称}}\n乙方（承租方）：{{居民姓名}}')
     await flushPromises()
 
     /* 点击蒙层：弹窗必须保持打开，输入必须还在 */
     await clickMask(wrapper)
 
     expect(wrapper.find('.el-dialog').isVisible()).toBe(true)
-    expect((wrapper.find('input[placeholder^="如：社区房屋租赁协议"]').element as HTMLInputElement).value).toBe(
-      '社区房屋租赁协议（标准版）'
+    expect((wrapper.find('input[placeholder^="如：小区房屋租赁协议"]').element as HTMLInputElement).value).toBe(
+      '小区房屋租赁协议（标准版）'
     )
     expect((wrapper.find('textarea.content-input').element as HTMLTextAreaElement).value).toContain(
-      '{{社区名称}}'
+      '{{小区名称}}'
     )
   })
 })

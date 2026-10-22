@@ -13,7 +13,7 @@
     { "id": "terminal", "label": "终态" }
   ],
   "states": [
-    { "id": "PENDING", "type": "start", "label": "待确认", "sublabel": "游客/居民提交预约", "lane": "main", "col": 0, "step": "01" },
+    { "id": "PENDING", "type": "start", "label": "待确认", "sublabel": "居民账号提交预约", "lane": "main", "col": 0, "step": "01" },
     { "id": "CONFIRMED", "type": "active", "label": "已预约", "sublabel": "管理员确认", "lane": "main", "col": 1, "step": "02" },
     { "id": "COMPLETED", "type": "success", "label": "已完成", "sublabel": "带看完成登记", "lane": "main", "col": 2, "step": "03", "tag": "终态" },
     { "id": "CANCELED", "type": "failure", "label": "已取消", "sublabel": "用户取消", "lane": "terminal", "col": 0, "tag": "终态" },

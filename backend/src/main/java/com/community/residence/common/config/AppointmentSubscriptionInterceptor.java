@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 /**
  * 看房会话订阅鉴权拦截器（R59，复制 R30 FeedbackSubscriptionInterceptor 模式）：
  * /topic/appointment/{appointmentId} 仅会话相关方可订阅——预约居民、带看人
- * （assigned_staff_id，STAFF/ADMIN 皆可）、该房源所在社区的 ADMIN（sys_admin_community
+ * （assigned_staff_id，STAFF/ADMIN 皆可）、该房源所在小区的 ADMIN（sys_admin_community
  * 实时查询，WS 连接不缓存绑定）、SUPER_ADMIN 放行；非参与者订阅即拒。
  * 口径与 HTTP 读路径（ViewingAppointmentService#checkMessageReadAccess）一致。
  * Principal 由 WebSocketAuthInterceptor 在 CONNECT 帧注入。
@@ -81,7 +81,7 @@ public class AppointmentSubscriptionInterceptor implements ChannelInterceptor {
     }
 
     /* 订阅权限与 HTTP 读路径同口径（checkMessageReadAccess）：预约居民、带看人、
-       社区 ADMIN（按绑定实时查）、SUPER_ADMIN 放行 */
+       小区 ADMIN（按绑定实时查）、SUPER_ADMIN 放行 */
     private boolean hasSubscriptionAccess(Long appointmentId, Long userId, String role) {
         ViewingAppointment appointment = appointmentMapper.selectById(appointmentId);
         if (appointment == null) {

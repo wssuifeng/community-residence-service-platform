@@ -67,7 +67,7 @@ function lease(overrides: Partial<ILeaseRecord> = {}): ILeaseRecord {
   return {
     id: 1,
     communityId: 1,
-    communityName: '演示社区',
+    communityName: '演示小区',
     houseId: 1,
     houseLocation: '1 号楼1 单元101',
     tenantName: '演示居民',
@@ -438,7 +438,7 @@ describe('LeaseListView · 押金退还记录（R72）', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('暂无押金退还记录')
-    expect(wrapper.text()).toContain('退租审核通过后由社区管理方发起原路退还')
+    expect(wrapper.text()).toContain('退租审核通过后由小区管理方发起原路退还')
   })
 })
 

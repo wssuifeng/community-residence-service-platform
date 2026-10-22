@@ -6,15 +6,15 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/** 社区信息响应 */
+/** 小区信息响应 */
 @Data
-@Schema(description = "社区信息")
+@Schema(description = "小区信息")
 public class CommunityVO {
 
-    @Schema(description = "社区ID")
+    @Schema(description = "小区ID")
     private Long id;
 
-    @Schema(description = "社区名称")
+    @Schema(description = "小区名称")
     private String name;
 
     @Schema(description = "本级业务编号，与内部主键分离")
@@ -29,10 +29,10 @@ public class CommunityVO {
     @Schema(description = "联系人")
     private String contactPerson;
 
-    @Schema(description = "社区责任人系统账号ID")
+    @Schema(description = "小区责任人系统账号ID")
     private Long responsibleAdminId;
 
-    @Schema(description = "社区简介")
+    @Schema(description = "小区简介")
     private String description;
 
     @Schema(description = "状态：ACTIVE-运营中, INACTIVE-已停用")

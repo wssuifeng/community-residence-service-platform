@@ -56,7 +56,7 @@ const priorityOptions = (Object.keys(workOrderPriorityLabels) as WorkOrderPriori
   label: workOrderPriorityLabels[value]
 }))
 
-/* 居民端社区归属从本人 ACTIVE 居住关系推导（登录响应 boundCommunities 对居民恒为空）；
+/* 居民端小区归属从本人 ACTIVE 居住关系推导（登录响应 boundCommunities 对居民恒为空）；
    顺带取房屋位置预填服务地址 */
 const communityId = ref<number | null>(null)
 
@@ -76,7 +76,7 @@ async function loadCategories(): Promise<void> {
   categoryError.value = ''
   await loadCommunityId()
   if (!communityId.value) {
-    ElMessage.error('未获取到所属社区信息，请重新登录后再试')
+    ElMessage.error('未获取到所属小区信息，请重新登录后再试')
     return
   }
   categoryLoading.value = true
@@ -188,7 +188,7 @@ onMounted(() => {
       <el-form class="create-form" label-position="top" @submit.prevent>
         <el-form-item label="服务类别" required>
           <p v-if="!categoryLoading && flatCategoryOptions.length === 0" class="category-empty" role="status">
-            {{ categoryError || (communityId ? '当前社区尚未配置启用的服务类别，请联系社区管理员配置后提交。' : '尚无有效居住关系，暂不能提交本社区工单。') }}
+            {{ categoryError || (communityId ? '当前小区尚未配置启用的服务类别，请联系小区管理员配置后提交。' : '尚无有效居住关系，暂不能提交本小区工单。') }}
             <el-button text @click="loadCategories">重新加载</el-button>
           </p>
           <div v-loading="categoryLoading" class="category-cards">

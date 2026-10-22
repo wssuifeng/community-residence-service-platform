@@ -16,7 +16,7 @@ public interface BuildingMapper extends BaseMapper<Building> {
     @Update("UPDATE building SET is_deleted = 1, deleted_at = NOW() WHERE id = #{id} AND is_deleted = 0")
     int softDeleteById(@Param("id") Long id);
 
-    /* 物理删除（社区级联删除 R1/R6 v1.1 专用：绕过 @TableLogic，消除 community FK 引用） */
+    /* 物理删除（小区级联删除 R1/R6 v1.1 专用：绕过 @TableLogic，消除 community FK 引用） */
     @Delete("DELETE FROM building WHERE community_id = #{communityId}")
     int physicalDeleteByCommunityId(@Param("communityId") Long communityId);
 

@@ -12,7 +12,7 @@ import javax.sql.DataSource;
 import java.util.*;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
-/** 真实Spring事务代理＋替身连接；域清理失败时只能回滚整个社区事务。 */
+/** 真实Spring事务代理＋替身连接；域清理失败时只能回滚整个小区事务。 */
 class CommunityDeletionTransactionTest {
  @AfterEach void clear(){SecurityUtils.clear();}
  @Test void midwayFailureRollsBackAndNeverDeletesParentOrCommits() throws Exception {
@@ -22,7 +22,7 @@ class CommunityDeletionTransactionTest {
   }
   var objects=new HashMap<Class<?>,Object>();
   var mapper=mock(CommunityMapper.class);objects.put(CommunityMapper.class,mapper);
-  var community=new Community();community.setId(9L);community.setName("事务社区");when(mapper.selectById(9L)).thenReturn(community);
+  var community=new Community();community.setId(9L);community.setName("事务小区");when(mapper.selectById(9L)).thenReturn(community);
   var houses=mock(HouseMapper.class);objects.put(HouseMapper.class,houses);when(houses.physicalDeleteByCommunityId(9L)).thenThrow(new IllegalStateException("synthetic failure"));
   var target=DeletionTestAssembly.get(CommunityDeletionService.class,objects);
   var source=mock(DataSource.class);var connection=mock(Connection.class);when(source.getConnection()).thenReturn(connection);when(connection.getAutoCommit()).thenReturn(true);

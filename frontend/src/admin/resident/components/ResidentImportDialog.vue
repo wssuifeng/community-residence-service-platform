@@ -34,7 +34,7 @@ const result = ref<IResidentImportVO | null>(null)
 const canUpload = computed(() => selectedFile.value !== null && !uploading.value)
 
 function downloadTemplate(): void {
-  if (!referenceCommunity.value) { ElMessage.warning('请先选择操作社区'); return }
+  if (!referenceCommunity.value) { ElMessage.warning('请先选择操作小区'); return }
   const content = `${CSV_HEADERS}\n,示例姓名,13800138000,,示例住户,,,,\n`
   const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -72,7 +72,7 @@ async function loadCommunities(): Promise<void> {
     communities.value = await loadAllPages(getCommunityList, () => visible.value)
     if (communities.value.length === 1) { referenceCommunity.value = communities.value[0]!.id; await loadReference() }
   } catch(error) {
-    if (!(error instanceof StaleStructureLoad)) referenceError.value = error instanceof Error ? error.message : '社区加载失败'
+    if (!(error instanceof StaleStructureLoad)) referenceError.value = error instanceof Error ? error.message : '小区加载失败'
   }
 }
 
@@ -140,20 +140,20 @@ watch(visible, (value) => {
       <el-button text type="primary" @click="downloadTemplate">下载导入模板</el-button>
       <span class="toolbar-hint">CSV（UTF-8 / Excel GBK / 带BOM UTF-16），表头：{{ CSV_HEADERS }}；选填项可留空</span>
     </div>
-    <el-alert type="info" :closable="false" title="房屋编号必须为社区-楼栋-单元-房屋号四段；登记关系时同时填写类型与入住日期，仅建账号时三项留空。查看下方业务编号，无需填写内部ID。旧模板继续兼容，每行独立事务，不另建租约。" />
+    <el-alert type="info" :closable="false" title="房屋编号必须为小区-楼栋-单元-房屋号四段；登记关系时同时填写类型与入住日期，仅建账号时三项留空。查看下方业务编号，无需填写内部ID。旧模板继续兼容，每行独立事务，不另建租约。" />
     <div class="import-reference">
-      <el-select v-model="referenceCommunity" placeholder="选择操作社区" style="width: 300px; max-width: 100%" @change="loadReference">
-        <el-option v-for="community in communities" :key="community.id" :value="community.id" :label="`${community.name} · 社区编号 ${community.businessCode ?? '未设置'}`" />
+      <el-select v-model="referenceCommunity" placeholder="选择操作小区" style="width: 300px; max-width: 100%" @change="loadReference">
+        <el-option v-for="community in communities" :key="community.id" :value="community.id" :label="`${community.name} · 小区编号 ${community.businessCode ?? '未设置'}`" />
       </el-select>
       <el-button :disabled="!referenceRows.length || referenceLoading || !!referenceError" @click="referenceVisible = !referenceVisible">查看结构业务编号</el-button>
       <el-alert v-if="referenceError" type="error" :closable="false" :title="referenceError" />
-      <p>按社区、楼栋、单元、房屋编号排序；完整四段编号精准定位房屋。OWNER/TENANT仅空置房可直录，FAMILY/CO_RESIDENT须依赖已入住房屋的有效主关系。此处仅查看，不提供数据导出。</p>
+      <p>按小区、楼栋、单元、房屋编号排序；完整四段编号精准定位房屋。OWNER/TENANT仅空置房可直录，FAMILY/CO_RESIDENT须依赖已入住房屋的有效主关系。此处仅查看，不提供数据导出。</p>
       <el-table v-if="referenceCommunity && referenceVisible" v-loading="referenceLoading" :data="referenceRows" size="small" max-height="220">
         <el-table-column prop="buildingName" label="楼栋" min-width="100" />
         <el-table-column prop="unitName" label="单元" min-width="100" />
         <el-table-column prop="floor" label="楼层" width="70" />
         <el-table-column prop="houseNumber" label="房号" min-width="90" />
-        <el-table-column prop="communityCode" label="社区编号" min-width="90" />
+        <el-table-column prop="communityCode" label="小区编号" min-width="90" />
         <el-table-column prop="buildingCode" label="楼栋编号" min-width="90" />
         <el-table-column prop="unitCode" label="单元编号" min-width="90" />
         <el-table-column prop="businessCode" label="房屋业务编号" min-width="160" />

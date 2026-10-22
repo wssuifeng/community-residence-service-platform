@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
 /**
  * 入住申请 `lease_id` 写回回归（V26 / DEF-080）：
  * ①**常规审批**（`approve`）通过后，申请上的 `lease_id` = 本次新建租约 id；
- * ②**社区自动审批**（`community.auto_approve_residence=1`，与人工审批共用 `applyApproval` 内核）
+ * ②**小区自动审批**（`community.auto_approve_residence=1`，与人工审批共用 `applyApproval` 内核）
  *   同样写回——两条链路都必须覆盖；
  * ③**撤回**路径：强关联优先，缺失时允许弱关联兜底并关闭群聊（仅该副作用路径）。
  */
@@ -184,7 +184,7 @@ class ResidenceApplicationLeaseLinkTest {
     }
 
     @Test
-    @DisplayName("②社区自动审批：同一内核，lease_id 同样写回（旁路覆盖）")
+    @DisplayName("②小区自动审批：同一内核，lease_id 同样写回（旁路覆盖）")
     void autoApprove_writesBackLeaseId() {
         Community community = new Community();
         community.setId(COMMUNITY_ID);
@@ -228,7 +228,7 @@ class ResidenceApplicationLeaseLinkTest {
     }
 
     @Test
-    @DisplayName("④′同一条指向修正覆盖社区自动审批链路（与人工审批共用内核）")
+    @DisplayName("④′同一条指向修正覆盖小区自动审批链路（与人工审批共用内核）")
     void autoApprove_linksViewingsToNewLease() {
         Community community = new Community();
         community.setId(COMMUNITY_ID);

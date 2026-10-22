@@ -706,11 +706,11 @@ describe('模拟 E2E · CF-E11 通知身份空间隔离', () => {
  * ==========================================================================*/
 
 describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', () => {
-  it('CF-E5 公告定向：居民可见本社区公告，游客仅可见含 GUEST 目标的公告；过期自动下线', async () => {
+  it('CF-E5 公告定向：居民可见本小区公告，未登录公开访问仅可见无需居住关系可见公告；过期自动下线', async () => {
     backend().state.notices.push(
       {
         id: 1,
-        title: '社区停水通知',
+        title: '小区停水通知',
         content: '本周六停水',
         status: 'PUBLISHED',
         noticeType: 'ANNOUNCEMENT',
@@ -738,18 +738,18 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
       }
     )
 
-    /* 游客端：仅 GUEST 目标可见（不得泄露社区内部公告） */
-    actAs('GUEST', 0)
+    /* 未登录公开页面：只显示配置为无需居住关系可见的公告 */
+    actAs(null)
     await mountPage(GuestNoticeListView, '/guest/notices')
     expect(pageText()).toContain('对外招租公告')
-    expect(pageText()).not.toContain('社区停水通知')
+    expect(pageText()).not.toContain('小区停水通知')
     document.body.innerHTML = ''
 
-    /* 居民端：本社区公告可见（经 api 列表口径） */
+    /* 居民端：本小区公告可见（经 api 列表口径） */
     actAs('RESIDENT', 1)
     const noticeApi = await import('@/common/notice/api/notice')
     const residentNotices = await noticeApi.listNotices({ page: 1, size: 20 })
-    expect(residentNotices.records.map((item) => item.title)).toContain('社区停水通知')
+    expect(residentNotices.records.map((item) => item.title)).toContain('小区停水通知')
 
     /* 有效期止自动下线（定时任务） */
     backend().state.notices[0].expireTime = '2020-01-01'
@@ -938,12 +938,12 @@ describe('模拟 E2E · 延展业务（公告/反馈/预约/评价/工单）', (
  * 其余端到端流程：E1 结构初始化 / E9 看板数据核对 / E10 越权拒绝 / E12 看房预约
  * ==========================================================================*/
 
-describe('模拟 E2E · CF-E1 社区初始化与结构配置', () => {
-  it('CF-E1 超管建「社区→楼栋→单元→房屋→公共资源→时段」四级结构，逐级可读', async () => {
+describe('模拟 E2E · CF-E1 小区初始化与结构配置', () => {
+  it('CF-E1 超管建「小区→楼栋→单元→房屋→公共资源→时段」四级结构，逐级可读', async () => {
     const communityApi = await import('@/common/community/api/community')
     actAs('SUPER_ADMIN', 1)
 
-    const community = (await communityApi.createCommunity({ name: '二期社区' } as never)) as { id: number }
+    const community = (await communityApi.createCommunity({ name: '二期小区' } as never)) as { id: number }
     const building = (await communityApi.createBuilding({
       communityId: community.id,
       buildingNumber: '1'
@@ -960,7 +960,7 @@ describe('模拟 E2E · CF-E1 社区初始化与结构配置', () => {
     } as never)) as { id: number }
     const resource = (await communityApi.createResource({
       communityId: community.id,
-      name: '社区活动室'
+      name: '小区活动室'
     } as never)) as { id: number }
     await communityApi.createTimeslot(resource.id, {
       slotDate: localToday(),
@@ -1049,7 +1049,7 @@ describe('模拟 E2E · CF-E10 权限与越权拒绝', () => {
 })
 
 describe('模拟 E2E · CF-E12 房源上架与注册居民看房预约', () => {
-  it('CF-E12 房源上架 → 游客浏览 → 居民预约（待确认）→ 管理方确认（已预约）→ 完成；违约分支留痕', async () => {
+  it('CF-E12 房源上架 → 公开浏览 → 居民预约（待确认）→ 管理方确认（已预约）→ 完成；违约分支留痕', async () => {
     const housingApi = await import('@/common/housing/api/housing')
     const communityApi = await import('@/common/community/api/community')
 
@@ -1070,8 +1070,8 @@ describe('模拟 E2E · CF-E12 房源上架与注册居民看房预约', () => {
     } as never)) as { id: number }
     expect(backend().state.housings.some((item) => item.id === housing.id)).toBe(true)
 
-    /* 游客只读浏览，创建预约必须被拒绝 */
-    actAs('GUEST', 0)
+    /* 未登录访问只读浏览，创建预约必须被拒绝 */
+    actAs(null)
     const slots = await housingApi.listViewingAvailableSlots(housing.id, {} as never)
     expect(Array.isArray(slots)).toBe(true)
     await expect(housingApi.createViewingAppointment({

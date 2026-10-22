@@ -8,10 +8,10 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/** 服务人员常驻社区绑定（staff_community 表，多对多；V19 派单候选第一档依据） */
+/** 服务人员常驻小区绑定（staff_community 表，多对多；V19 派单候选第一档依据） */
 @Data
 @TableName("staff_community")
-@Schema(description = "服务人员常驻社区绑定")
+@Schema(description = "服务人员常驻小区绑定")
 public class StaffCommunity {
 
     @TableId(type = IdType.AUTO)
@@ -21,7 +21,7 @@ public class StaffCommunity {
     @Schema(description = "服务人员用户ID（sys_user.role=STAFF）")
     private Long staffId;
 
-    @Schema(description = "常驻社区ID")
+    @Schema(description = "常驻小区ID")
     private Long communityId;
 
     @Schema(description = "绑定时间")

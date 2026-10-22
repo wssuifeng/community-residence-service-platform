@@ -26,7 +26,7 @@ import { housingStatusLabels } from '@/common/housing/types/housing'
 import type { ICommunity, IBuilding, IUnit, IHouse } from '@/common/community/types/community'
 
 /**
- * 房源列表（管理端 Tab 内容）：摄影卡片网格 + 社区/状态/关键字筛选 + 分页 + 新建/编辑对话框。
+ * 房源列表（管理端 Tab 内容）：摄影卡片网格 + 小区/状态/关键字筛选 + 分页 + 新建/编辑对话框。
  * 上下架切换、删除、时段入口经卡片操作行；对照设计稿 09-房源管理。
  * 保存载荷对齐后端 CreateHousingDTO（押金字段 deposit；图片独立在房屋相册维护）；
  * 房源创建后/状态变更后 emit changed 供容器刷新统计卡。
@@ -82,7 +82,7 @@ async function loadCommunities(): Promise<void> {
     const result = await getCommunityList({ page: 1, size: 100 })
     communities.value = result.records
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '加载社区列表失败')
+    ElMessage.error(error instanceof Error ? error.message : '加载小区列表失败')
   }
 }
 
@@ -141,7 +141,7 @@ const emptyForm = (): HousingSaveDTO => ({
 const form = reactive<HousingSaveDTO>(emptyForm())
 const albumVisible = ref(false)
 
-/* 级联选择：社区 → 楼栋 → 单元 → 房屋（仅新建模式） */
+/* 级联选择：小区 → 楼栋 → 单元 → 房屋（仅新建模式） */
 const cascade = reactive({
   communityId: undefined as number | undefined,
   buildingId: undefined as number | undefined,
@@ -342,7 +342,7 @@ onMounted(() => {
     <FilterPanel resettable @reset="handleReset">
       <el-select
         v-model="query.communityId"
-        placeholder="全部社区"
+        placeholder="全部小区"
         clearable
         style="width: 180px"
         @change="query.page = 1; loadList()"
@@ -448,7 +448,7 @@ onMounted(() => {
           <div v-else class="cascade">
             <el-select
               :model-value="cascade.communityId"
-              placeholder="社区"
+              placeholder="小区"
               style="width: 140px"
               @change="handleFormCommunityChange"
             >

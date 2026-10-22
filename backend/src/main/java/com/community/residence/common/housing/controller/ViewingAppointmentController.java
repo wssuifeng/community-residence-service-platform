@@ -34,7 +34,7 @@ public class ViewingAppointmentController {
 
     private final ViewingAppointmentService appointmentService;
 
-    @Operation(summary = "查询预约详情", description = "居民仅可查看本人；服务人员仅可查看被分配预约；管理端按社区范围查看")
+    @Operation(summary = "查询预约详情", description = "居民仅可查看本人；服务人员仅可查看被分配预约；管理端按小区范围查看")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}")
     public ApiResponse<ViewingAppointmentVO> getById(@PathVariable Long id) {
@@ -43,7 +43,7 @@ public class ViewingAppointmentController {
 
     @Operation(summary = "会话消息列表（R59 旧口径，保留兼容）",
             description = "已被 R63 多方会话取代（GET /conversations/{conversationId}/messages）；"
-                    + "R59：预约居民/带看人/社区管理员可读，时间正序非分页；非参与者 403")
+                    + "R59：预约居民/带看人/小区管理员可读，时间正序非分页；非参与者 403")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/{id}/messages")
     public ApiResponse<List<ViewingMessageVO>> messages(@PathVariable Long id) {
@@ -61,7 +61,7 @@ public class ViewingAppointmentController {
     }
 
     @Operation(summary = "预约列表（分页）",
-            description = "居民只看本人预约；服务人员看被分配的预约（我的带看，R59）；管理端按社区或全局范围查询，游客无预约列表权限")
+            description = "居民只看本人预约；服务人员看被分配的预约（我的带看，R59）；管理端按小区或全局范围查询，未登录公开访问无预约列表权限")
     @PreAuthorize("hasAnyRole('RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @GetMapping
     public ApiResponse<PageVO<ViewingAppointmentVO>> page(
@@ -74,7 +74,7 @@ public class ViewingAppointmentController {
         return ApiResponse.success(appointmentService.page(page, size, status, housingId, startDate, endDate));
     }
 
-    @Operation(summary = "完成预约", description = "已预约 → 已完成；STAFF仅本人被分配预约，管理员按社区范围")
+    @Operation(summary = "完成预约", description = "已预约 → 已完成；STAFF仅本人被分配预约，管理员按小区范围")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/complete")
     public ApiResponse<Void> complete(@PathVariable Long id, @RequestBody @Valid ReservationActionDTO dto) {
@@ -82,7 +82,7 @@ public class ViewingAppointmentController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "取消预约", description = "居民本人或管理端取消；服务人员与游客无权取消")
+    @Operation(summary = "取消预约", description = "居民本人或管理端取消；服务人员与未登录公开访问无权取消")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")
     @PatchMapping("/{id}/cancel")
     public ApiResponse<Void> cancel(@PathVariable Long id, @RequestBody @Valid ReservationActionDTO dto) {

@@ -101,7 +101,7 @@ class ViewingAppointmentRegistrationOnlyTest {
     }
 
     @Test
-    @DisplayName("未认证游客不能创建预约，服务层拒绝在房源查询前生效")
+    @DisplayName("未认证未登录访问者不能创建预约，服务层拒绝在房源查询前生效")
     void guestCreate_isRejectedBeforeWrite() {
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUser).thenReturn(null);
@@ -116,7 +116,7 @@ class ViewingAppointmentRegistrationOnlyTest {
     }
 
     @Test
-    @DisplayName("居民创建预约绑定 JWT 身份，不消费游客姓名字段")
+    @DisplayName("居民创建预约绑定 JWT 身份，不消费历史匿名预约姓名字段")
     void residentCreate_bindsResidentIdentity() {
         Housing housing = housing();
         Resident resident = new Resident();
@@ -154,7 +154,7 @@ class ViewingAppointmentRegistrationOnlyTest {
     }
 
     @Test
-    @DisplayName("居民不能查询历史游客预约（userId 为空）")
+    @DisplayName("居民不能查询历史匿名预约（userId 为空）")
     void residentDetail_legacyGuestRecordIsNotClaimable() {
         ViewingAppointment appointment = appointment();
         appointment.setUserId(null);
@@ -169,7 +169,7 @@ class ViewingAppointmentRegistrationOnlyTest {
     }
 
     @Test
-    @DisplayName("管理端可在绑定社区范围内读取历史游客预约")
+    @DisplayName("管理端可在绑定小区范围内读取历史匿名预约")
     void adminDetail_legacyGuestRecordWithinCommunityIsReadable() {
         ViewingAppointment appointment = appointment();
         appointment.setUserId(null);
@@ -185,7 +185,7 @@ class ViewingAppointmentRegistrationOnlyTest {
     }
 
     @Test
-    @DisplayName("管理端读取历史游客预约时仍校验社区范围")
+    @DisplayName("管理端读取历史匿名预约时仍校验小区范围")
     void adminDetail_legacyGuestRecordOutsideCommunityIsRejected() {
         ViewingAppointment appointment = appointment();
         appointment.setUserId(null);
@@ -193,10 +193,10 @@ class ViewingAppointmentRegistrationOnlyTest {
 
         try (MockedStatic<SecurityUtils> mocked = adminIdentity(9L, Set.of())) {
             mocked.when(() -> SecurityUtils.checkCommunityAccess(appointment.getCommunityId()))
-                    .thenThrow(new ForbiddenException("无权操作未绑定社区的数据"));
+                    .thenThrow(new ForbiddenException("无权操作未绑定小区的数据"));
             assertThatThrownBy(() -> service.getById(1L))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("未绑定社区");
+                    .hasMessageContaining("未绑定小区");
         }
     }
 
@@ -241,16 +241,25 @@ class ViewingAppointmentRegistrationOnlyTest {
     }
 
     @Test
-    @DisplayName("居民与游客不能借同ID登记完成")
-    void residentAndGuestCannotComplete() {
+    @DisplayName("居民不能借同ID登记完成")
+    void residentCannotComplete() {
         ViewingAppointment item = appointment(); item.setStatus("RESERVED"); item.setAssignedStaffId(12L);
         when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(item);
-        for (String role : List.of(RoleConstants.RESIDENT, RoleConstants.GUEST)) {
-            try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
-                mocked.when(() -> SecurityUtils.hasRole(role)).thenReturn(true);
-                mocked.when(SecurityUtils::getUserId).thenReturn(12L);
-                assertThatThrownBy(() -> service.complete(1L, "同号越权")).isInstanceOf(ForbiddenException.class);
-            }
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            mocked.when(() -> SecurityUtils.hasRole(RoleConstants.RESIDENT)).thenReturn(true);
+            mocked.when(SecurityUtils::getUserId).thenReturn(12L);
+            assertThatThrownBy(() -> service.complete(1L, "同号越权")).isInstanceOf(ForbiddenException.class);
+        }
+        verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
+    }
+
+    @Test
+    @DisplayName("未登录公开访问不能借同ID登记完成")
+    void unauthenticatedCannotComplete() {
+        ViewingAppointment item = appointment(); item.setStatus("RESERVED"); item.setAssignedStaffId(12L);
+        when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(item);
+        try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
+            assertThatThrownBy(() -> service.complete(1L, "匿名越权")).isInstanceOf(ForbiddenException.class);
         }
         verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
     }
@@ -265,14 +274,14 @@ class ViewingAppointmentRegistrationOnlyTest {
     }
 
     @Test
-    @DisplayName("完成时管理端继续校验社区范围")
+    @DisplayName("完成时管理端继续校验小区范围")
     void adminCompletionChecksCommunity() {
         ViewingAppointment item = appointment(); item.setStatus("RESERVED");
         when(appointmentMapper.selectByIdForUpdate(1L)).thenReturn(item);
         try (MockedStatic<SecurityUtils> mocked = adminIdentity(9L, Set.of())) {
             mocked.when(() -> SecurityUtils.checkCommunityAccess(item.getCommunityId()))
-                    .thenThrow(new ForbiddenException("未绑定社区"));
-            assertThatThrownBy(() -> service.complete(1L, "越社区")).isInstanceOf(ForbiddenException.class);
+                    .thenThrow(new ForbiddenException("未绑定小区"));
+            assertThatThrownBy(() -> service.complete(1L, "越小区")).isInstanceOf(ForbiddenException.class);
             verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
         }
     }
@@ -285,7 +294,7 @@ class ViewingAppointmentRegistrationOnlyTest {
         try (MockedStatic<SecurityUtils> mocked = staffIdentity(12L)) {
             assertThatThrownBy(() -> service.cancel(1L, "不应允许"))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("服务人员与游客无权取消");
+                    .hasMessageContaining("服务人员与未登录公开访问无权取消");
         }
         verify(appointmentMapper, never()).updateById(any(ViewingAppointment.class));
     }

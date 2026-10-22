@@ -47,8 +47,8 @@ public enum ErrorCode {
     DATA_NOT_FOUND(5003, "数据不存在"),
     STATE_TRANSITION_INVALID(5004, "状态流转非法"),
 
-    /* ---- 社区管理 5101~5199 ---- */
-    COMMUNITY_INACTIVE(5101, "社区已停用"),
+    /* ---- 小区管理 5101~5199 ---- */
+    COMMUNITY_INACTIVE(5101, "小区已停用"),
     BUILDING_REFERENCED(5102, "楼栋被引用，无法删除"),
     UNIT_REFERENCED(5103, "单元下存在房屋，无法删除"),
     HOUSE_HAS_RESIDENT(5104, "房屋存在在住居民，无法删除"),
@@ -98,7 +98,7 @@ public enum ErrorCode {
 
     /* ---- 权限管理 5701~5702（C10，既有契约不得改号） ---- */
     SELF_FREEZE_FORBIDDEN(5701, "不可冻结自己的账号"),
-    BIND_ROLE_INVALID(5702, "仅社区管理员可绑定社区"),
+    BIND_ROLE_INVALID(5702, "仅小区管理员可绑定小区"),
 
     /* ---- 押金退还 5703~5706（R72） ----
        段位裁决（2026-09-22，用户口径）：接口设计 v1.5 §3.2 原把 5701~5799 整段划给押金退还，

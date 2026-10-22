@@ -67,7 +67,7 @@ public class OperationLogVO {
     @Schema(description = "操作人类型：RESIDENT-居民, ADMIN-管理员, STAFF-服务人员")
     private String operatorType;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "操作类型")

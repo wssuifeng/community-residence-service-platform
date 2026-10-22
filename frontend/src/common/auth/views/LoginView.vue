@@ -72,11 +72,11 @@ async function handleLogin(): Promise<void> {
       <img
         class="login-brand-image"
         src="/images/login-brand-panel.png"
-        alt="暮色下的社区花园"
+        alt="暮色下的小区花园"
       />
       <div class="login-brand-copy">
-        <h1>社区居住服务</h1>
-        <p>房屋、工单、公告、预约，一个入口打理社区生活</p>
+        <h1>小区居住服务</h1>
+        <p>房屋、工单、公告、预约，一个入口打理小区生活</p>
       </div>
     </div>
 

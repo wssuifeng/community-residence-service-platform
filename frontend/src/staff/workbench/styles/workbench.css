@@ -282,7 +282,11 @@
 }
 
 :where(.staff-dashboard) .side-col > .panel {
-  flex: 1;
+  flex: 0 0 auto;
+}
+
+:where(.staff-dashboard) .side-col > .msg-panel {
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -518,24 +522,6 @@
 
 :where(.staff-dashboard) .dot.is-todo {
   background-color: var(--color-warning);
-}
-
-:where(.staff-dashboard) .progress-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: var(--spacing-md);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-bg-hover);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-}
-
-:where(.staff-dashboard) .progress-footer em {
-  font-style: normal;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
 }
 
 /* ---------- 最新消息 ---------- */

@@ -68,7 +68,7 @@ describe('服务人员端工单详情 · R74 工单临时群聊面板', () => {
     const groupId = backend().state.conversations[0].id
 
     actAs('STAFF', 1)
-    /* 服务人员视角看得到该单（假后端未派单时按其社区口径放行），但会话不可见 */
+    /* 服务人员视角看得到该单（假后端未派单时按其小区口径放行），但会话不可见 */
     const wrapper = await mountDetail()
 
     expect(wrapper.text()).toContain('厨房水龙头持续漏水')

@@ -34,7 +34,7 @@ export function getResourceStats(query?: StatisticsQuery) {
   return http.get<IResourceStats>('/statistics/resources', query)
 }
 
-/** 看板社区筛选下拉（后端补充端点） */
+/** 看板小区筛选下拉（后端补充端点） */
 export function getCommunityOptions() {
   return http.get<ICommunityOption[]>('/statistics/communities')
 }

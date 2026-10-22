@@ -2,7 +2,7 @@
 import type { IBatchFailure } from '@/common/community/types/community'
 
 /**
- * 批量操作结果对话框（社区批量启用/停用/删除与结构批量生成共用）。
+ * 批量操作结果对话框（小区批量启用/停用/删除与结构批量生成共用）。
  * 契约：后端批量端点均为「部分成功」语义——不为全有或全无，
  * 因此结果必须同时呈现成功量与被拒明细（逐条原因），不允许只报成功/失败。
  * 纯展示组件：不持有业务逻辑，文案与计数由调用方传入。
@@ -10,7 +10,7 @@ import type { IBatchFailure } from '@/common/community/types/community'
 defineProps<{
   /** 成功数量（大字呈现，是本对话框的视觉重心） */
   successCount: number
-  /** 成功量词与动作（如「个社区已停用」「栋楼栋、12 个单元、48 套房屋」） */
+  /** 成功量词与动作（如「个小区已停用」「栋楼栋、12 个单元、48 套房屋」） */
   successText: string
   /** 逐条失败明细（name 为空时以 ID 兜底展示） */
   failures: IBatchFailure[]
@@ -22,7 +22,7 @@ defineProps<{
 
 const visible = defineModel<boolean>({ required: true })
 
-/** 失败项展示名：后端 name 可空（结构生成按层级上报时为楼栋/单元位置名，社区批量时必填） */
+/** 失败项展示名：后端 name 可空（结构生成按层级上报时为楼栋/单元位置名，小区批量时必填） */
 function failureName(item: IBatchFailure): string {
   if (item.name) return item.name
   if (item.id != null) return `ID ${item.id}`

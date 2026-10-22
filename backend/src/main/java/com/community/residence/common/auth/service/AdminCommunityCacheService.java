@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 管理员绑定社区缓存（架构设计.md §3.2 权限数据存储策略）：
+ * 管理员绑定小区缓存（架构设计.md §3.2 权限数据存储策略）：
  * DB（sys_admin_community）为权威来源，Redis 缓存 TTL 2h 独立于 Access Token 有效期，过期从DB重建；
  * 绑定变更时由变更接口删除缓存并吊销令牌。
  */
@@ -29,7 +29,7 @@ public class AdminCommunityCacheService {
     private final StringRedisTemplate redisTemplate;
 
     /**
-     * 读取管理员绑定社区集合：Redis 未命中查库回种；Redis 不可用直接查库。
+     * 读取管理员绑定小区集合：Redis 未命中查库回种；Redis 不可用直接查库。
      */
     public Set<Long> getCommunityIds(Long adminId) {
         String key = KEY_PREFIX + adminId + KEY_SUFFIX;
@@ -44,7 +44,7 @@ public class AdminCommunityCacheService {
             }
         } catch (DataAccessException e) {
             RedisFailures.rethrowUnlessUnavailable(e);
-            log.warn("Redis 不可用，绑定社区直查 DB：adminId={}", adminId);
+            log.warn("Redis 不可用，绑定小区直查 DB：adminId={}", adminId);
             return Set.copyOf(adminCommunityMapper.selectCommunityIdsByAdminId(adminId));
         }
 
@@ -72,7 +72,7 @@ public class AdminCommunityCacheService {
             redisTemplate.delete(KEY_PREFIX + adminId + KEY_SUFFIX);
         } catch (DataAccessException e) {
             RedisFailures.rethrowUnlessUnavailable(e);
-            log.warn("Redis 不可用，绑定社区缓存未清理（2h TTL 自然过期）：adminId={}", adminId);
+            log.warn("Redis 不可用，绑定小区缓存未清理（2h TTL 自然过期）：adminId={}", adminId);
         }
     }
 }

@@ -1,8 +1,10 @@
-# UI 设计 · v1.5
+# UI 设计 · v1.6
 
-> 文档版本：v1.5
+> 文档版本：v1.6
 > 创建日期：2026-09-06
-> 设计依据：需求规格说明（20 包，**v1.12 / R1~R75**）、接口设计（30 包，**v1.7**）、架构设计（30 包）
+> 设计依据：需求规格说明（20 包，**v1.24 / R1~R75**）、接口设计（30 包，**v1.7及2026-10-22术语补正**）、架构设计（30 包）
+>
+> **v1.6 现行用语（2026-10-22）**：未登录公开页面是公开信息入口，不是独立角色或账号；现行账号角色为居民、服务人员、小区管理员、超级管理员；业务对象称“小区”。`/guest` 为历史兼容路由，公告目标 `GUEST` 为既有数据/API标识，管理界面称“无需居住关系可见”。未登录用户可以浏览公开内容，但看房预约必须登录居民账号；居民账号没有有效居住关系时，不自动获得居住私有数据权限。
 >
 > **v1.1 变更（2026-09-21，批次 f · 租住签约闭环）**：
 > ①**居民端新增一级「租住与房源」`/resident/housing-lease`**（R66~R71 签约闭环双 Tab Hub），
@@ -25,7 +27,7 @@
 > 子组件由 20 → **21**，**功能视图仍 69**；时间线为**既有页面内区块升级**、
 > **不新增页面**；§13.1 需求覆盖标题由「R1~R71」更正为 **R1~R73** 并补 R72/R73 映射行。
 >
-> **v1.5 变更（2026-10-08，方案 B：看房预约注册居民化）**：游客房源详情保留房源与可预约时段浏览，预约入口改为“登录 / 注册后预约看房”并携带回跳地址；居民预约页只提交当前居民身份与可选联系信息，不显示游客姓名/游客手机号字段；预约列表、详情与取消均为登录居民本人或管理端权限。
+> **历史变更记录（v1.5，2026-10-08，方案 B：看房预约注册居民化）**：当时文档以“游客”称呼未登录公开访问者（不是独立账号角色）；房源详情保留公开浏览与可预约时段查看，预约入口改为“登录 / 注册后预约看房”并携带回跳地址；居民预约页只提交当前居民身份与可选联系信息，历史匿名预约字段不再用于新预约；预约列表、详情与取消均为登录居民本人或管理端权限。当前术语与角色以本文 v1.6 说明为准。
 >
 > **v1.4 变更（2026-09-22，工单完整业务链路 · R74，用户裁决 + DEF-071 / DEF-072）**：
 > ①**管理端工单列表（§4.3.4）与工单详情（§4.3.5）新增「受理」入口**——**`PENDING`（待受理）可见**，
@@ -69,10 +71,11 @@
 
 ### 1.1 设计目标
 
-为社区居住服务管理系统设计三端界面：
+为社区居住服务管理系统设计三个登录端界面及未登录公开信息入口：
 1. **居民端**：面向居民的消费者界面，强调美观与易用性
 2. **服务人员工作台**：面向服务人员的任务处理界面，强调效率与清晰度
-3. **管理员后台**：面向社区管理员与超级管理员的管理界面，强调功能全面与数据可视化
+3. **管理员后台**：面向小区管理员与超级管理员的管理界面，强调功能全面与数据可视化
+4. **未登录公开信息入口**：浏览公开公告、房源及可预约时段；不构成独立账号或角色
 
 ### 1.2 设计原则
 
@@ -291,18 +294,18 @@
 
 ---
 
-### 3.2 游客端路由树
+### 3.2 未登录公开信息路由树（兼容路由 `/guest`）
 
 **路由前缀**：`/guest`
 
 | 路由路径 | 页面名称 | 权限 | 说明 |
 |---------|---------|------|------|
-| `/guest/home` | 首页 | GUEST | 公开公告 + 房源推荐 |
-| `/guest/housings` | 房源浏览 | GUEST | 房源列表 + 详情 |
-| `/guest/housings/:id` | 房源详情 | GUEST | 房源信息 + 可预约时段浏览；点击预约需注册并登录居民账号 |
-| `/guest/notices` | 公开公告 | GUEST | 公告列表 + 详情 |
-| `/auth/login` | 登录 | GUEST | 居民登录 / 管理员登录切换 |
-| `/auth/register` | 注册 | GUEST | 自助注册（可全局关闭） |
+| `/guest/home` | 公开首页 | 未登录可访问 | 公开公告 + 房源推荐；`/guest`为历史兼容路由，不代表角色 |
+| `/guest/housings` | 房源浏览 | 未登录可访问 | 房源列表 + 详情 |
+| `/guest/housings/:id` | 房源详情 | 未登录可访问 | 房源信息 + 可预约时段浏览；点击预约需注册并登录居民账号 |
+| `/guest/notices` | 公开公告 | 未登录可访问 | 公告列表 + 详情 |
+| `/auth/login` | 登录 | 未登录可访问 | 居民登录 / 管理员登录切换 |
+| `/auth/register` | 注册 | 未登录可访问 | 自助注册（可全局关闭） |
 
 ---
 
@@ -324,12 +327,12 @@
 
 **路由前缀**：`/admin`
 
-#### 3.4.1 社区管理（C1）
+#### 3.4.1 小区管理（C1）
 
 | 路由路径 | 页面名称 | 权限 | 说明 |
 |---------|---------|------|------|
-| `/admin/communities` | 社区列表 | ADMIN/SUPER_ADMIN | 社区 CRUD（新建限超管） |
-| `/admin/communities/:id` | 社区详情 | ADMIN/SUPER_ADMIN | 基本信息 + 楼栋列表 |
+| `/admin/communities` | 小区列表 | ADMIN/SUPER_ADMIN | 小区 CRUD（新建限超管） |
+| `/admin/communities/:id` | 小区详情 | ADMIN/SUPER_ADMIN | 基本信息 + 楼栋列表 |
 | `/admin/buildings` | 楼栋管理 | ADMIN | 楼栋 CRUD + 单元管理 |
 | `/admin/units` | 单元管理 | ADMIN | 单元 CRUD + 房屋管理 |
 | `/admin/houses` | 房屋管理 | ADMIN | 房屋 CRUD + 状态变更 + 历史 |
@@ -363,7 +366,7 @@ tab 状态写入 URL query、`v-show` 保挂载、子视图 query 原样透传�
 |-----|------|---------|---------------|
 | `applications` | **入住申请**（**默认 tab**） | `admin/resident/ResidenceApplicationListView.vue`（**v1.2 从「居民」页迁出**） | ADMIN / SUPER_ADMIN |
 | `leases` | **租约管理** | `admin/lease/LeaseListView.vue`（状态含「待签约 / 已生效」+ 协议确认进度 + 字段级变更历史 + 到期提醒） | ADMIN / SUPER_ADMIN |
-| `housings` | **房源管理** | `admin/housing/HousingManageView.vue`（既有房源页；规格允许「既有房源页组件」或社区一体化页 `HousesWithHousingView.vue` 二选一，**实施采用既有房源页**）；看房预约为其页内分区 `?view=viewings` | ADMIN / SUPER_ADMIN |
+| `housings` | **房源管理** | `admin/housing/HousingManageView.vue`（既有房源页；规格允许「既有房源页组件」或小区一体化页 `HousesWithHousingView.vue` 二选一，**实施采用既有房源页**）；看房预约为其页内分区 `?view=viewings` | ADMIN / SUPER_ADMIN |
 | `moveout` | **退租申请** | `admin/lease/MoveOutApplicationView.vue`（R70 审核，按申请 ID 倒序、最新在前；**v1.3 增押金状态列与「发起押金退还」入口（R72）**：审核通过后可按实缴押金发起**原渠道原路退款**，弹窗内金额可改（默认全额）、渠道只读、退还结果与**失败原因**可见并可重试，见接口设计 §9.20.1） | ADMIN / SUPER_ADMIN |
 | `agreements` | **协议模板** | `admin/lease/AgreementTemplateView.vue`（R64；正文 `{{变量}}` + 模板附件 + 默认模板 + 启停） | **仅 SUPER_ADMIN / ADMIN**（全局模板 `communityId` 为空时仅超管可维护）。**角色不可见时该取值按「非法」处理回落 `applications`**——手工拼 query 也进不去 |
 
@@ -405,8 +408,8 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 |---------|---------|------|------|
 | `/admin/work-orders` | 工单调度 | ADMIN | 全部工单 + 筛选 + **调度标记与等待时长**（R65）+ 派单（四档推荐）+ **受理（`PENDING` 可见，R74）** + **终审结束（`COMPLETED` 可见；原「关闭」按钮改文案，R74）** |
 | `/admin/work-orders/:id` | 工单详情 | ADMIN | 时间线 + **受理（R74）** + 派单 + 驳回 + **终审结束（R74）** + **工单临时群聊面板（复用 `ConversationChat`，R74）**（隐藏下钻路由） |
-| **`/admin/staff-schedules`** | **人员排班** | ADMIN/SUPER_ADMIN | **回写补录**（V19/R65）：五班次排班（一人一社区一天一条）+ 批量保存/清空 |
-| **`/admin/staff-capabilities`** | **服务人员** | ADMIN/SUPER_ADMIN | **回写补录**（V19/R65）：服务人员常驻社区 / 擅长服务类别双向绑定（全量覆盖式保存） |
+| **`/admin/staff-schedules`** | **人员排班** | ADMIN/SUPER_ADMIN | **回写补录**（V19/R65）：五班次排班（一人一小区一天一条）+ 批量保存/清空 |
+| **`/admin/staff-capabilities`** | **服务人员** | ADMIN/SUPER_ADMIN | **回写补录**（V19/R65）：服务人员常驻小区 / 擅长服务类别双向绑定（全量覆盖式保存） |
 | `/admin/service-categories` | 服务类别 | ADMIN | **旧路径兼容** → `/admin/work-orders`（类别维护入口已并入调度工作台） |
 
 ---
@@ -465,7 +468,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 |---------|---------|------|------|
 | `/admin/system` | 系统管理 | ADMIN/SUPER_ADMIN | **Tab 容器**：系统用户（超管独占）/ 全局配置（超管独占）/ 操作日志（ADMIN 可见）；侧栏项按角色过滤 |
 | `/admin/sys-users` | 系统用户 | SUPER_ADMIN | **旧路径兼容** → `/admin/system?tab=users`；管理员 + 服务人员 CRUD |
-| `/admin/sys-users/:id/communities` | 社区绑定 | SUPER_ADMIN | **旧路径兼容** → `/admin/system?tab=users`（绑定抽屉在页内弹出） |
+| `/admin/sys-users/:id/communities` | 小区绑定 | SUPER_ADMIN | **旧路径兼容** → `/admin/system?tab=users`（绑定抽屉在页内弹出） |
 | `/admin/operation-logs` | 操作日志 | ADMIN/SUPER_ADMIN | **旧路径兼容** → `/admin/system?tab=logs`；日志查询 + 筛选 |
 
 ---
@@ -494,15 +497,15 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 ---
 
-#### 3.4.13 社区结构一体化（C1/C12 · v1.1 回写补录）
+#### 3.4.13 小区结构一体化（C1/C12 · v1.1 回写补录）
 
 | 路由路径 | 页面名称 | 权限 | 说明 |
 |---------|---------|------|------|
-| `/admin/community` | 社区管理 | ADMIN/SUPER_ADMIN | **Tab 容器**：社区列表 + **结构树（楼栋/单元/房屋）** + 房屋房源一体化页 + 公共资源；含结构链一次性批量生成 |
-| **`/admin/community/houses-with-housing`**（`?tab=houses`） | **房屋与房源一体化页** | ADMIN/SUPER_ADMIN | **回写补录**（R62）：社区结构内直接管理房屋房源挂牌（楼栋左竖线层级 / 单元小标签 / 房屋五列行 + 房源状态徽章）+ **批量挂牌**（整社区 / 按单元层级筛选）+ 房屋筛选（楼栋/单元/房号/房源状态）+ 侧栏固定 |
-| `/admin/communities` | 社区列表 | ADMIN/SUPER_ADMIN | **旧路径兼容** → `/admin/community` |
-| `/admin/communities/:id` | 社区详情 | ADMIN/SUPER_ADMIN | 社区基本信息 + 楼栋列表（隐藏下钻路由） |
-| `/admin/buildings` · `/admin/units` | 楼栋 / 单元管理 | ADMIN | **旧路径兼容** → `/admin/community?tab=tree`（透传原 query 预选社区） |
+| `/admin/community` | 小区管理 | ADMIN/SUPER_ADMIN | **Tab 容器**：小区列表 + **结构树（楼栋/单元/房屋）** + 房屋房源一体化页 + 公共资源；含结构链一次性批量生成 |
+| **`/admin/community/houses-with-housing`**（`?tab=houses`） | **房屋与房源一体化页** | ADMIN/SUPER_ADMIN | **回写补录**（R62）：小区结构内直接管理房屋房源挂牌（楼栋左竖线层级 / 单元小标签 / 房屋五列行 + 房源状态徽章）+ **批量挂牌**（整小区 / 按单元层级筛选）+ 房屋筛选（楼栋/单元/房号/房源状态）+ 侧栏固定 |
+| `/admin/communities` | 小区列表 | ADMIN/SUPER_ADMIN | **旧路径兼容** → `/admin/community` |
+| `/admin/communities/:id` | 小区详情 | ADMIN/SUPER_ADMIN | 小区基本信息 + 楼栋列表（隐藏下钻路由） |
+| `/admin/buildings` · `/admin/units` | 楼栋 / 单元管理 | ADMIN | **旧路径兼容** → `/admin/community?tab=tree`（透传原 query 预选小区） |
 | `/admin/houses` | 房屋管理 | ADMIN | **旧路径兼容** → `/admin/community?tab=houses` |
 | `/admin/resources` | 公共资源 | ADMIN | **旧路径兼容** → `/admin/community?tab=resources` |
 
@@ -529,7 +532,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 >   `leases`、`housings`、`move-out-applications`、`agreement-templates`
 >   （另 `/admin/residents?tab=applications` 由原入住申请 tab 改指 Hub，
 >   属页内 query 兼容、不新增路由条目）
-> - **侧栏菜单名（`AppSidebar`，14 项）**：看板 / 社区管理 / 工单调度 / 人员排班 /
+> - **侧栏菜单名（`AppSidebar`，14 项）**：看板 / 小区管理 / 工单调度 / 人员排班 /
 >   服务人员 / 居民 / **租住与房源** / 公告 / 反馈 / 预约 / 评价 / 消息中心 / 会话 / 系统
 >   （合并前实存 **17 项**：另有 `租住` / `退租申请` / `协议模板` / `房源` 四项，
 >   **17 − 4 + 1 = 14**；「协议模板」原为按角色过滤项，现降为 Hub 内 tab 级过滤）
@@ -658,7 +661,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 **核心元素**：
 - **房源图片**：多图轮播（主图 + 细节图）
 - **信息卡片**：
-  - 房源标题 + 社区名称
+  - 房源标题 + 小区名称
   - 面积 + 户型 + 朝向 + 楼层
   - 租金 + 押金 + 物业费
   - 房源描述
@@ -666,15 +669,15 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 - **时段选择**：
   - 日期选择器
   - 可预约时段列表（单选）
-- **预约入口**：游客显示「登录 / 注册后预约看房」；居民显示「预约看房」；其他角色显示「请使用居民账号登录」
+- **预约入口**：未登录时显示「登录 / 注册后预约看房」；已登录居民显示「预约看房」；其他角色显示「请使用居民账号登录」
 - **可预约时段**：公开只读展示，不直接创建预约
 
 **交互**：
 - 轮播图片切换
 - 选择日期后加载可预约时段
-- 游客点击预约入口跳转 `/auth/login?redirect=<当前房源详情>`，登录后回到原详情页；未登录不调用预约创建接口
+- 未登录用户点击预约入口跳转 `/auth/login?redirect=<当前房源详情>`，以居民账号登录后回到原详情页；未登录状态不调用预约创建接口
 - 居民点击预约入口进入三步预约页（选择日期 → 选择连续时段 → 确认提交）
-- 居民预约页以当前账号实名为联系人，联系电话可从居民档案带出并允许修正；不展示游客姓名、游客人数或短信验证码输入
+- 居民预约页以当前账号实名为联系人，联系电话可从居民档案带出并允许修正；不提供匿名预约联系人字段或短信验证码输入
 
 ---
 
@@ -732,16 +735,16 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 ### 4.3 管理员后台核心页面
 
-#### 4.3.1 社区列表（/admin/communities）
+#### 4.3.1 小区列表（/admin/communities）
 
 **布局**：左侧边栏 + 顶部操作栏 + 数据表格 + 分页
 
 **核心元素**：
 - **操作栏**：
-  - 新建社区按钮（仅超管可见）
+  - 新建小区按钮（仅超管可见）
   - 搜索框（关键词搜索）
 - **数据表格**：
-  - 列：社区名称、地址、联系方式、状态、楼栋数、居民数、操作
+  - 列：小区名称、地址、联系方式、状态、楼栋数、居民数、操作
   - 操作列：查看、编辑、停用（仅超管）
 - **分页**：页码 + 每页条数
 
@@ -759,10 +762,10 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 **核心元素**：
 - **筛选栏**：
   - 状态筛选（全部/正常/已冻结）
-  - 社区筛选（社区管理员自动限定绑定社区）
+  - 小区筛选（小区管理员自动限定绑定小区）
   - 关键词搜索（姓名/手机号）
 - **数据表格**：
-  - 列：姓名、手机号、证件号、社区、房屋、状态、注册时间、操作
+  - 列：姓名、手机号、证件号、小区、房屋、状态、注册时间、操作
   - 操作列：查看详情、冻结/解冻
 - **分页**
 
@@ -771,7 +774,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 - 点击姓名进入居民详情页
 - 冻结/解冻二次确认后执行
 
-**代建/导入增量（R8 v1.16，2026-10-11）**：代建默认“同时登记居住关系”，社区→楼栋→单元→空置房屋级联，录入关系类型/入住日期/备注及邮箱；完整分页，切换上级清下级并拒绝迟到响应。可明确切换“仅建账号”，说明社区只用于鉴权。失败保留表单；成功显示真实关系ID/房屋ID或仅账号，初始密码仅本次展示。弹窗按视口限宽，长表单内部滚动。导入提供十列CSV、旧四列兼容提示和逐行关系结果；保存成功刷新居民及居住关系Tab。完整功能见50/15。
+**代建/导入增量（R8 v1.16，2026-10-11）**：代建默认“同时登记居住关系”，小区→楼栋→单元→空置房屋级联，录入关系类型/入住日期/备注及邮箱；完整分页，切换上级清下级并拒绝迟到响应。可明确切换“仅建账号”，说明小区只用于鉴权。失败保留表单；成功显示真实关系ID/房屋ID或仅账号，初始密码仅本次展示。弹窗按视口限宽，长表单内部滚动。导入提供十列CSV、旧四列兼容提示和逐行关系结果；保存成功刷新居民及居住关系Tab。完整功能见50/15。
 
 ---
 
@@ -782,10 +785,10 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 **核心元素**：
 - **筛选栏**：
   - 状态筛选（全部/待审核/已通过/已驳回）
-  - 社区筛选
+  - 小区筛选
   - 日期范围筛选
 - **数据表格**：
-  - 列：申请人、社区、房屋、关系类型、居住起止、申请时间、状态、操作
+  - 列：申请人、小区、房屋、关系类型、居住起止、申请时间、状态、操作
   - 操作列：审批（待审核）、查看详情
 - **分页**
 
@@ -809,7 +812,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
   - 列：工单号、类别、标题、提交人、提交时间、状态、当前处理人、操作
   - 操作列：**受理（`PENDING` 待受理可见）**、派单（待派单）、查看详情
   - **「受理」入口（v1.4 落定，R74）**：直连接口设计 §9.21.1 新增端点
-    `PATCH /api/v1/work-orders/{id}/intake`（权限 = 本社区管理员 / 超管）；
+    `PATCH /api/v1/work-orders/{id}/intake`（权限 = 本小区管理员 / 超管）；
     **受理成功后同一事务自动建立工单临时群聊**（居民提交人 + 受理管理员入群），
     列表因此新增「群聊」标识或入口列（有 `conversationId` 即显示）；
   - **「终审结束」入口不在此列表**（在详情页，见 §4.3.5；`COMPLETED` 可见）
@@ -890,8 +893,8 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 - **发布设置**：
   - 目标范围：
     - 全系统广播（仅超管可选）
-    - 社区勾选（多选，社区管理员限定绑定社区）
-    - 楼栋勾选（多选，属于已选社区）
+    - 小区勾选（多选，小区管理员限定绑定小区）
+    - 楼栋勾选（多选，属于已选小区）
   - 是否置顶（开关）
   - 有效期：生效时间 + 失效时间（日期时间选择器）
 - **操作按钮**：
@@ -899,7 +902,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
   - 发布
 
 **交互**：
-- 选择社区后加载对应楼栋
+- 选择小区后加载对应楼栋
 - 保存草稿/发布前校验必填项
 - 发布后跳转公告列表并显示成功提示
 
@@ -933,11 +936,11 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 **核心元素**：
 - **顶部筛选**：
-  - 社区筛选（社区管理员自动限定绑定社区，超管可选全部/单个社区）
+  - 小区筛选（小区管理员自动限定绑定小区，超管可选全部/单个小区）
   - 时间范围筛选（今日/本周/本月/自定义）
 - **统计卡片**（4 行 × 4 列）：
-  - **第一行（社区运营）**：
-    - 总社区数 + 活跃社区数
+  - **第一行（小区运营）**：
+    - 总小区数 + 活跃小区数
     - 总楼栋数 + 总房屋数
     - 总居民数 + 入住率
     - 租住记录数 + 即将到期数
@@ -976,7 +979,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 - **筛选栏**：
   - 操作人筛选（下拉框）
   - 操作类型筛选（创建/更新/删除/审批/状态变更）
-  - 模块筛选（社区/居民/工单/公告/反馈等）
+  - 模块筛选（小区/居民/工单/公告/反馈等）
   - 日期范围筛选
   - 关键词搜索
 - **数据表格**：
@@ -1022,15 +1025,15 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 | WorkOrderCard | 居民端/服务人员端 | 工单卡片（列表展示） |
 | WorkOrderTimeline | 三端通用 | 工单时间线（状态流转历史） |
 | FeedbackChat | 居民端/管理端 | 反馈会话组件（消息列表 + 输入框） |
-| NoticeCard | 居民端/游客端 | 公告卡片（列表展示） |
-| HousingCard | 居民端/游客端 | 房源卡片（列表展示） |
+| NoticeCard | 居民端/未登录公开信息入口 | 公告卡片（列表展示） |
+| HousingCard | 居民端/未登录公开信息入口 | 房源卡片（列表展示） |
 | StatisticCard | 管理端 | 统计卡片（数值 + 图标 + 趋势） |
 | StatusTag | 三端通用 | 状态标签（工单/租住/预约/反馈状态） |
 | ImageUploader | 三端通用 | 图片上传组件（多图 + 预览） |
 | FileUploader | 三端通用 | 文件上传组件（文档 + 附件列表） |
 | TimeSlotPicker | 居民端/管理端 | 时段选择器（预约时段选择） |
-| CommunitySelector | 管理端 | 社区选择器（级联：社区 → 楼栋） |
-| RangePicker | 管理端 | 范围选择器（目标范围：社区 + 楼栋多选） |
+| CommunitySelector | 管理端 | 小区选择器（级联：小区 → 楼栋） |
+| RangePicker | 管理端 | 范围选择器（目标范围：小区 + 楼栋多选） |
 | RichEditor | 管理端 | 富文本编辑器（公告正文） |
 | ChartCard | 管理端 | 图表卡片（ECharts 图表容器） |
 
@@ -1309,20 +1312,20 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 | 菜单路径 | 角色权限 | 说明 |
 |---------|---------|------|
 | /resident/* | RESIDENT | 居民端全部菜单（**v1.1 起 8 项**，含新增一级「租住与房源」`/resident/housing-lease`） |
-| /guest/* | GUEST | 游客端全部菜单 |
+| /guest/* | 未登录可访问 | 公开信息页面；路由元数据 `GUEST` 仅为历史兼容标识 |
 | /staff/* | STAFF | 服务人员工作台全部菜单（**含「我的带看」`/staff/viewings`**） |
-| `/admin/community, /admin/communities` | ADMIN/SUPER_ADMIN | 社区管理（**批量删除 / 批量启停 / 结构链批量生成限超管**） |
+| `/admin/community, /admin/communities` | ADMIN/SUPER_ADMIN | 小区管理（**批量删除 / 批量启停 / 结构链批量生成限超管**） |
 | `/admin/system, /admin/configs, /admin/sys-users` | SUPER_ADMIN | 系统管理（用户 / 全局配置，超管独占；操作日志对 ADMIN 开放） |
 | **`/admin/housing-lease`** | ADMIN/SUPER_ADMIN | **v1.2 新增「租住与房源」Hub**（侧栏唯一入口，承载 `applications` / `leases` / `housings` / `moveout` / `agreements` 五个 tab）；**`applications` 为默认 tab** |
 | `/admin/housing-lease?tab=agreements`（旧路径 `/admin/agreement-templates`） | **SUPER_ADMIN / ADMIN** | 协议模板 tab（**tab 级角色过滤**；**全局模板 `communityId` 为空时仅超管可维护**） |
 | `/admin/*` | ADMIN/SUPER_ADMIN | 其他管理端菜单 |
 
 > **居民端导航（v1.1，9 项 → 8 项）**：首页 / 租住与房源（**新**）/ 我的工单 / 我的反馈 /
-> 我的预约 / 公共资源 / 社区公告 / 消息中心 / 个人中心——原「我的租约」「房源」
+> 我的预约 / 公共资源 / 小区公告 / 消息中心 / 个人中心——原「我的租约」「房源」
 > 两个顶级项合并进「租住与房源」（v1.1 双 Tab；**v1.2 增至三 Tab**：
 > `?tab=lease` / `?tab=housing` / **`?tab=application`**）。
 >
-> **管理端侧栏（v1.2，17 项 → 14 项）**：看板 / 社区管理 / 工单调度 / 人员排班 / 服务人员 /
+> **管理端侧栏（v1.2，17 项 → 14 项）**：看板 / 小区管理 / 工单调度 / 人员排班 / 服务人员 /
 > 居民 / **租住与房源（新）** / 公告 / 反馈 / 预约 / 评价 / 消息中心 / 会话 / 系统——
 > 原「租住」「房源」「退租申请」「协议模板」四个一级项合并进「租住与房源」Hub 的
 > 五个 tab（`agreements` tab 仅 SUPER_ADMIN/ADMIN 可见，见 §3.4.3）。
@@ -1331,28 +1334,28 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 | 按钮 | 角色权限 | 说明 |
 |------|---------|------|
-| 新建社区 / 批量删除 / 批量启停 | SUPER_ADMIN | 社区列表与结构页按钮 |
+| 新建小区 / 批量删除 / 批量启停 | SUPER_ADMIN | 小区列表与结构页按钮 |
 | 全局配置 / 系统用户 | SUPER_ADMIN | 系统管理页内 Tab |
 | 全系统广播 | SUPER_ADMIN | 公告目标范围选项 |
-| 绑定社区 | SUPER_ADMIN | 管理员绑定社区按钮 |
+| 绑定小区 | SUPER_ADMIN | 管理员绑定小区按钮 |
 | 派单 / **分配带看人** | ADMIN | 工单操作列派单按钮 / 看房预约分配带看人（R59） |
-| **受理** | ADMIN（限绑定社区）/ SUPER_ADMIN | **工单列表与工单详情按钮，仅 `PENDING` 待受理可见**（R74，v1.4）；受理成功 → `TO_ASSIGN` 并自动建立工单临时群聊 |
-| **终审结束** | ADMIN（限绑定社区）/ SUPER_ADMIN | **工单详情按钮，仅 `COMPLETED` 已完成可见**（R74，v1.4）；复用既有「关闭工单」按钮改文案 / 改前置，成功后 → `CLOSED` 并触发会话资源回收 |
+| **受理** | ADMIN（限绑定小区）/ SUPER_ADMIN | **工单列表与工单详情按钮，仅 `PENDING` 待受理可见**（R74，v1.4）；受理成功 → `TO_ASSIGN` 并自动建立工单临时群聊 |
+| **终审结束** | ADMIN（限绑定小区）/ SUPER_ADMIN | **工单详情按钮，仅 `COMPLETED` 已完成可见**（R74，v1.4）；复用既有「关闭工单」按钮改文案 / 改前置，成功后 → `CLOSED` 并触发会话资源回收 |
 | **同意并发出协议** | ADMIN/SUPER_ADMIN | 仅 TO_SIGN 租约详情；发出即记录管理方同意，居民同意前不生效 |
 | **同意协议 / 申请退租 / 支付首期费用** | RESIDENT（限本人租约） | 协议同意只在正文内；管理端不可代居民同意。退租与支付保持原入口 |
 | **协议在线确认** | RESIDENT / ADMIN / SUPER_ADMIN | 按当前身份落居民方或管理方（R64） |
 | 接单 | STAFF | 工单详情接单按钮 |
-| **看房登记完成** | STAFF（限被分配人）/ ADMIN（社区范围）/ SUPER_ADMIN | 「我的带看」仅RESERVED显示完成；完成备注必填，成功刷新状态。违约/冻结不向STAFF显示，仅管理端处置（2026-10-12用户采纳19） |
+| **看房登记完成** | STAFF（限被分配人）/ ADMIN（小区范围）/ SUPER_ADMIN | 「我的带看」仅RESERVED显示完成；完成备注必填，成功刷新状态。违约/冻结不向STAFF显示，仅管理端处置（2026-10-12用户采纳19） |
 | 提交工单 | RESIDENT | 居民端提交工单按钮 |
 
 ### 10.3 数据过滤
 
 | 数据类型 | 过滤规则 | 说明 |
 |---------|---------|------|
-| 社区数据 | 社区管理员限绑定社区 | MyBatis-Plus 拦截器注入 `WHERE community_id IN (...)` |
+| 小区数据 | 小区管理员限绑定小区 | MyBatis-Plus 拦截器注入 `WHERE community_id IN (...)` |
 | 个人数据 | 居民限本人 | 拦截器注入 `WHERE resident_id = 当前用户ID` |
 | 工单数据 | 服务人员限本人派单 | 拦截器注入 `WHERE assignee_id = 当前用户ID` |
-| 公告数据 | 按目标范围过滤 | 拦截器注入 `WHERE 社区/楼栋在目标范围内` |
+| 公告数据 | 按目标范围过滤 | 拦截器注入 `WHERE 小区/楼栋在目标范围内` |
 
 ---
 
@@ -1424,12 +1427,12 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 ### 12.2 页面清单
 
-> **计数口径（v1.2 重述，2026-09-21 批次 g 后，可复现）**：
+> **历史计数口径（v1.2 重述，2026-09-21 批次 g 后，可复现；仅记录当时目录统计，不代表当前源码页面数）**：
 > `frontend/src/views/` 下共 **98 个 `.vue`**（v1.1 时点 95 + **押金子组件 `DepositRefundDialog.vue` 1 个** + **批次 g 新增 2 个页面文件**：
 > 管理端「租住与房源」Hub 容器页 `admin/lease/HousingLeaseHubView.vue` + 居民端
 > **独立页面组件** `resident/ResidenceApplicationListView.vue`「入住申请」），
 > 扣除四类非功能视图后得**功能视图 69 个**：
-> ①各端布局壳 **4**（`AdminLayout` / `ResidentLayout` / `StaffLayout` / `GuestLayout`）；
+> ①各端布局壳 **4**（`AdminLayout` / `ResidentLayout` / `StaffLayout` / `GuestLayout`，其中 `GuestLayout` 对应未登录公开信息入口及兼容路由）；
 > ②全局错误页 **2**（`ForbiddenView` / `NotFoundView`）；③登录注册 **2**（`auth/`）；
 > ④弹窗 / 抽屉 / 面板等子组件 **20**（`*Dialog` 13 / `*Drawer` 4 / `*Pane` 1 /
 > `*Card` 1 / `*Header` 1 / `*Step` 0——`AdminPageHeader`、`WorkOrderDispatchCard`、
@@ -1453,20 +1456,20 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 > 注意：`NotificationList` / `ConversationChat` / `AgreementSignPanel` 等位于
 > `components/business/`，**不占 `views/` 计数**。
 >
-> **v1.4：工单链路改造未新增页面，计数保持「98 个 `.vue` / 子组件 21 / 功能视图 69」**——
+> **v1.4 时点：工单链路改造未新增页面，计数保持「98 个 `.vue` / 子组件 21 / 功能视图 69」**——
 > 管理端「受理」入口（§4.3.4 / §4.3.5）与「终审结束」入口（§4.3.5，复用既有
 > 「关闭工单」按钮改文案 / 改前置）均为**既有页面内的按钮与前置变更**；
 > 三端工单详情的**临时群聊面板**（§4.1.3 / §4.2.2 / §4.3.5）**复用既有会话业务组件
 > `ConversationChat`**（位于 `components/business/`，**不占 `views/` 计数**）。
 > **理由：复用既有页面与业务组件，未新增页面** ⇒ 97 / 69 与各端分布（居民端 24 /
-> 游客端 5 / 服务人员端 5 / 管理端 35）**均不变**。
+> 未登录公开信息页面 5 / 服务人员端 5 / 管理端 35）**均不变**。
 
 | 端 | 页面数量 | 核心页面 |
 |----|---------|---------|
 | 居民端 | **24** | 首页、个人中心、工单列表/详情/创建、反馈列表/详情/创建、预约列表/创建、公共资源列表/详情、公告列表/详情、消息中心、沟通会话、房源列表/详情/预约/申请租住、**租住与房源 Hub（v1.1 新增容器页）**、**入住申请列表（v1.2 新增独立页 `ResidenceApplicationListView.vue`）**、我的租约、看房预约详情 |
-| 游客端 | **5** | 首页、房源列表、房源详情、公告列表、公告详情 |
+| 未登录公开信息入口 | **5（历史统计）** | 首页、房源列表、房源详情、公告列表、公告详情 |
 | 服务人员端 | **5** | 工作台首页、工单列表、工单详情、我的带看、消息中心 |
-| 管理端 | **35** | 运营看板、社区结构（含房屋房源一体化页）、工单调度/详情、人员排班、服务人员能力、居民管理/详情、**租住与房源 Hub（v1.2 新增容器页）**、租住管理/租约详情/退租申请审核/协议模板、公告管理、反馈管理、预约管理、房源管理/详情、评价管理、会话、通知列表、系统管理（用户/配置/日志） |
+| 管理端 | **35** | 运营看板、小区结构（含房屋房源一体化页）、工单调度/详情、人员排班、服务人员能力、居民管理/详情、**租住与房源 Hub（v1.2 新增容器页）**、租住管理/租约详情/退租申请审核/协议模板、公告管理、反馈管理、预约管理、房源管理/详情、评价管理、会话、通知列表、系统管理（用户/配置/日志） |
 | **合计** | **69** | 12 个业务模块 + 横切（权限/通知） |
 
 ### 12.3 组件清单
@@ -1484,13 +1487,13 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 | 需求编号 | 对应页面/组件 | 说明 |
 |---------|-------------|------|
-| R1 | /admin/community（`/admin/communities`） | 多社区管理（新建限超管；批量删除/启停限超管） |
+| R1 | /admin/community（`/admin/communities`） | 多小区管理（新建限超管；批量删除/启停限超管） |
 | R2~R6 | /admin/community?tab=tree, /admin/community?tab=houses, /admin/community?tab=resources | 楼栋/单元/房屋/资源管理 + 删除保护 + 结构链一次性批量生成 |
 | R7 | /admin/system?tab=configs | 注册方式全局开关（超管独占） |
 | R8 | /admin/residents（代建 + CSV 导入弹窗） | 管理员代建居民账号 |
 | R9~R10 | /admin/housing-lease?tab=applications, /admin/residents?tab=relations | 入住申请审批 + 搬出登记（**R66 起审批通过 → 待签约 + 租约群聊**；**v1.2：入住申请审核入口由「居民」页 tab 迁至 Hub 默认 tab**） |
 | R11 | /admin/residents?tab=relations | 居住关系台账（双向查询） |
-| R12 | /guest/* | 公开信息子集控制（游客可见范围） |
+| R12 | /guest/*（兼容路由） | 公开信息子集控制（未登录公开访问可见范围） |
 | R13~R16 | /admin/housing-lease?tab=leases, /admin/leases/:id | 租住登记 + 状态自动判定 + 到期提醒 + 归档（**v1.2 起列表 canonical 为 Hub `leases` tab；`/admin/leases` 仍可经 redirect 落地**） |
 | R17~R23 | /admin/work-orders, /resident/work-orders, /staff/work-orders | 服务类别（并入调度工作台）+ 工单全流程 |
 | R24~R27 | /admin/notices | 公告发布 + 定向 + 置顶 + 有效期 + 查看记录 |
@@ -1500,14 +1503,14 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 | R41~R45 | /admin/dashboard | 运营看板（多维度统计卡片 + 图表，Tab 化） |
 | R46~R47 | /admin/system?tab=users, /admin/system?tab=logs | 系统用户管理 + 操作日志 |
 | R48~R52 | /resident/notifications, /staff/notifications, /admin/notifications | 通知中心 + WebSocket 推送 + 增量补拉 |
-| R53~R57 | /resident/housing-lease?tab=housing, /admin/housing-lease?tab=housings, /admin/housings?tab=viewings | 房源管理 + 看房预约（游客浏览、居民账号预约）（**v1.2 起管理端 canonical 为 Hub `housings` tab**） |
+| R53~R57 | /resident/housing-lease?tab=housing, /admin/housing-lease?tab=housings, /admin/housings?tab=viewings | 房源管理 + 看房预约（未登录公开浏览、已登录居民账号预约）（**v1.2 起管理端 canonical 为 Hub `housings` tab**） |
 | R58 | /admin/system?tab=configs | 日志留存配置（`log.retention_days` 读回显 730） |
 | R59 | /staff/viewings（我的带看）, /admin/housings?tab=viewings, /resident/viewing-appointments/:id | 带看人分配 + 带看沟通会话（「我的带看」工作台） |
 | R60 | /resident/reservations/create, /resident/housing-lease?tab=housing | 连续时段预约（多段合并提交） |
 | R61 | /resident/housing-lease?tab=lease（续租 + 支付记录） | 租约续期与双渠道在线支付 |
-| R62 | /admin/community?tab=houses（一体化页批量挂牌） | 房源社区一体化管理与全社区开放 |
+| R62 | /admin/community?tab=houses（一体化页批量挂牌） | 房源与小区一体化管理与全小区开放 |
 | R63 | /resident/conversations/:id, /admin/conversations, /resident/notifications?tab=chat | 多方会话群聊与居民-管理员直通 |
-| R62 补 | /admin/community（社区表单自动审批开关 + 默认租期） | 社区级入住申请自动通过 |
+| R62 补 | /admin/community（小区表单自动审批开关 + 默认租期） | 小区级入住申请自动通过 |
 | R64 | /admin/housing-lease?tab=agreements, 协议签约面板（`AgreementSignPanel`，居民/管理端共用） | 租赁协议轻量版（模板 + 快照 + 双方在线确认）（**v1.2 起模板 canonical 为 Hub `agreements` tab，旧路径 `/admin/agreement-templates` redirect**） |
 | R65 | /admin/staff-schedules, /admin/staff-capabilities, /admin/work-orders（调度标记） | 工单调度与人员排班 |
 | **R66** | **/resident/housing-lease?tab=lease（我的租约·待签约）+ /resident/housings/:id/apply + /admin/housing-lease?tab=leases + 租约群聊** | **租住申请与签约闭环**：申请 → 审核通过（待签约 + 建群）→ 协议确认 → 首期成功 → 生效；申请可撤回；「同意并发出协议」无承租前置（**v1.2：申请审核入口迁至 Hub `applications` tab**） |
@@ -1526,7 +1529,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 | 需求编号 | UI 设计落地 | 说明 |
 |---------|-----------|------|
-| N1 | 菜单权限 + 按钮权限 + 数据过滤 | 五角色权限映射（§10） |
+| N1 | 菜单权限 + 按钮权限 + 数据过滤 | 四类账号角色权限映射及未登录公开白名单（§10） |
 | N2 | 响应式布局 + 骨架屏 + 懒加载 | 并发性能优化（§6.5） |
 | N3 | 性能关键路径标注 | 登录/工单/公告/通知接口响应时间目标 |
 | N4 | 密码输入隐藏 + HTTPS + JWT | 安全性设计 |
@@ -1543,7 +1546,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 | 流程编号 | 对应页面链 | 说明 |
 |---------|----------|------|
-| E1 | /admin/community → /admin/community?tab=tree → ?tab=houses → ?tab=resources | 社区初始化 |
+| E1 | /admin/community → /admin/community?tab=tree → ?tab=houses → ?tab=resources | 小区初始化 |
 | E2 | /auth/register → /resident/profile → /admin/housing-lease?tab=applications | 居民注册与入住申请（**v1.2：管理端审核入口迁至 Hub 默认 tab**） |
 | E3 | /resident/housings/:id/apply → /admin/housing-lease?tab=applications → /resident/housing-lease?tab=lease（待签约 + 查看协议）→ /resident/conversations/:id（租约群聊）→ 协议签约面板（管理方发出即同意 → 居民正文同意）→ 待首期费用 → 首期成功/已生效 → 定时任务到期提醒 → /resident/notifications | 租住登记与到期提醒（**v1.1 补入 v1.8 签约闭环环节；v1.2 管理端审核入口改指 Hub**） |
 | E4 | /resident/work-orders/create → /admin/work-orders → /staff/work-orders → /resident/work-orders/:id | 工单全流程 |
@@ -1553,8 +1556,8 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 | E8 | /resident/work-orders/:id → /admin/evaluations | 服务评价与跟进 |
 | E9 | 定时任务 → /resident/notifications | 租期到期提醒 |
 | E10 | /admin/reservations?tab=violations | 违约处置 |
-| E10b | /guest/housings/:id → /admin/housings?tab=viewings | 游客看房预约 |
-| E11 | /admin/system?tab=users → 吊销令牌 → 重新登录 | 管理员-社区绑定 |
+| E10b | /guest/housings/:id → 登录居民账号预约 → /admin/housings?tab=viewings | 未登录公开浏览、居民账号提交看房预约 |
+| E11 | /admin/system?tab=users → 吊销令牌 → 重新登录 | 管理员-小区绑定 |
 | E12 | 任意操作 → /admin/system?tab=logs | 操作日志留痕 |
 
 ---
@@ -1565,8 +1568,9 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 |------|------|------|
 | 居民端 | Resident Portal | 面向居民的消费者界面 |
 | 服务人员工作台 | Staff Workbench | 面向服务人员的任务处理界面 |
-| 管理员后台 | Admin Dashboard | 面向管理员的管理界面 |
-| 游客端 | Guest Portal | 面向游客的公开界面 |
+| 小区管理员 | Community Administrator | 仅管理已授权小区范围内业务；对应技术角色 `ADMIN` |
+| 管理员后台 | Admin Dashboard | 面向小区管理员与超级管理员的管理界面 |
+| 未登录公开信息入口 | Public Access | 仅浏览公开信息的访问状态，不是账号或角色；`/guest` 为兼容路由 |
 | 工单 | Work Order | 服务申请与工单 |
 | 反馈 | Feedback | 居民反馈 |
 | 预约 | Reservation | 资源预约/看房预约 |
@@ -1579,7 +1583,7 @@ redirect 函数翻译为上述命名空间后剔除（如旧 `/admin/housings?ta
 
 ---
 
-**UI 设计文档 v1.2 完成**
+**UI 设计文档 v1.6 现行术语补正**
 
 > **v1.2 编制说明（2026-09-21，批次 g · 导航合并与申请可见性）**：本版为用户 2026-09-21
 > 两条整改裁决的设计落点修订——①管理端新增一级「租住与房源」Hub `/admin/housing-lease`
@@ -1756,7 +1760,7 @@ bu交叉入口补充：既有管理房源列表/详情也必须复用HouseImageD
 ## 2026-10-16 首页、公告范围与工单沟通入口修正（50 cf）
 
 - 首页hero由布局提供真正全宽区域，使用容器100%而非100vw负边距；内容区独立居中限宽。长公告/卡片在轨道内收缩，不能靠全站overflow-x:hidden遮盖结构溢出。
-- 公告移除只有ALL的“定向范围”选择器；真正的发布范围（全系统/社区/楼栋）及游客可见设置保持，后端兼容字段targetAudience仍按ALL提交。
+- 公告移除只有ALL的“定向范围”选择器；真正的发布范围（全系统/小区/楼栋）及未登录公开可见设置保持，后端兼容字段targetAudience仍按ALL提交。
 - 管理端已受理及后续工单顶部显示“进入工单沟通”，显式调用§9.21.2.1补群/加入后定位聊天区；居民和服务人员有可见群时显示顶部定位链接。关闭态仍只读；未受理不显示可发言群。
 - 会话中心列出租约、看房、工单和直通四类筛选；空态说明只列本人参与会话，超管不自动获得所有群的历史。反馈保留业务详情入口，复用ChatMessageList/ChatComposer，不冒充多方群聊类型。
 
@@ -1783,6 +1787,6 @@ bu交叉入口补充：既有管理房源列表/详情也必须复用HouseImageD
 
 会话路由使用导航下可用视口，页头/聊天头/输入区收紧，消息区占主要高度；其它业务页宽度不变。消息使用内容自适应气泡，正文14px；姓名与时间在气泡外上方，12/11px、间距8px，取消元信息行最小宽度，不把短消息撑成整块卡片。自己一组靠右，按2026-10-18用户修正为时间在左、姓名在右并靠近头像；对方靠左，仍为姓名在左、时间在右；当日只显时分，跨日显示月日，跨年显示年，完整时间可悬停查看。无头像数据时用姓名首字占位；图片限尺寸且保留原图预览，输入框可调整但受高度上限约束，发送/匿名/权限/已读业务规则不变。
 
-## 2026-10-20 R4/R46/R65整改设计（依据定义v1.11、需求v1.23）
+## 2026-10-20 R4/R46/R65整改设计（历史记录；依据定义v1.11、需求v1.23）
 
 本节取代本文旧房屋四态、跨社区四档候选及STAFF仅超管代建描述；详细任务、接口及一致性约束见[60整改实施计划](../60_评估验收/R4与R46整改实施计划.md)。房屋对外区分业主自住/租客居住/空置/维护中/停用，正式主关系驱动入住，临时占用独立；新增迁移不修改历史脚本。服务人员子页供ADMIN/SUPER_ADMIN管理本范围业务资料并代建固定STAFF，创建强制同事务绑定至少一个有效有权社区。POST /api/v1/staff-capabilities/accounts为专用代建入口，GET /api/v1/sys-users/{id}仅SUPER_ADMIN。常驻社区/擅长类别读写及候选按ADMIN授权范围，外部绑定保存不覆盖；派单、排班直接请求亦须人员绑定目标社区。人员行锁串行化绑定和调度。前端新增独立StaffAccountCreateDialog，由StaffCapabilityView编排并刷新列表；系统账号页保留超管详情和全局账号权限。

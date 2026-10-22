@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** 楼栋管理控制器（接口设计.md 9.1.2） */
-@Tag(name = "楼栋管理", description = "社区楼栋信息管理接口")
+@Tag(name = "楼栋管理", description = "小区楼栋信息管理接口")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor

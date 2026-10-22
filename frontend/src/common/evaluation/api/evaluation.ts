@@ -40,7 +40,7 @@ export function listEvaluationFollowups(evaluationId: number) {
   return http.get<IEvaluationFollowup[]>(`/evaluations/${evaluationId}/followups`)
 }
 
-/** 评价统计：总数/平均分/满意率/分档分布（数据权限拦截器按角色收敛社区范围） */
+/** 评价统计：总数/平均分/满意率/分档分布（数据权限拦截器按角色收敛小区范围） */
 export function getEvaluationStatistics(communityId?: number) {
   return http.get<IEvaluationStatistics>('/statistics/evaluations', communityId ? { communityId } : undefined)
 }

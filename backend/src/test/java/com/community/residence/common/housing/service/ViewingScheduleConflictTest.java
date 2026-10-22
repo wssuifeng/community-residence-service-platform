@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 /**
  * DEF-062 修复回归（预约人日程冲突，「影分身」拦截）：居民创建看房预约时，
  * 同账号同日与任意房源的看房预约（跨房源）或任意资源的资源预约（跨域）
- * 时间区间重叠即拒 5807；不重叠/非活跃记录放行；游客预约无账号跳过检查。
+ * 时间区间重叠即拒 5807；不重叠/非活跃记录放行；历史匿名预约无账号跳过检查。
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("看房预约日程冲突回归（DEF-062）")
@@ -213,7 +213,7 @@ class ViewingScheduleConflictTest {
     }
 
     @Test
-    @DisplayName("游客新建看房预约被拒绝：预约能力收归注册居民账号")
+    @DisplayName("未登录访问者新建看房预约被拒绝：预约能力收归注册居民账号")
     void create_guest_rejected() {
         assertThatThrownBy(() -> invokeGuestCreate(LocalTime.of(10, 0), LocalTime.of(11, 0)))
                 .isInstanceOf(ForbiddenException.class)
@@ -236,7 +236,7 @@ class ViewingScheduleConflictTest {
         }
     }
 
-    /** 游客路径创建（SecurityUtils.getUser 返回 null 走 visitor 分支） */
+    /** 未登录访问者路径创建（SecurityUtils.getUser 返回 null 走 visitor 分支） */
     private ViewingAppointmentVO invokeGuestCreate(LocalTime start, LocalTime end) {
         try (var mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUser).thenReturn(null);
@@ -251,7 +251,7 @@ class ViewingScheduleConflictTest {
         dto.setStartTime(start);
         dto.setEndTime(end);
         dto.setContactPhone("13800001111");
-        dto.setVisitorName("游客甲");
+        dto.setVisitorName("未登录访问者甲");
         return dto;
     }
 

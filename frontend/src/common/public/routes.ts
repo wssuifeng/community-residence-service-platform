@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-/** 游客端路由（UI设计.md §3.2，公开页面，无需登录） */
+/** 未登录公开页面路由（UI设计.md §3.2，公开页面，无需登录） */
 const guestRoutes: RouteRecordRaw[] = [{
     path: '/guest',
     component: () => import('@/common/public/views/GuestLayout.vue'),

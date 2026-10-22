@@ -24,10 +24,10 @@ public class LeaseMoveOutApplicationVO {
     @Schema(description = "申请人姓名")
     private String residentName;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
-    @Schema(description = "社区名称")
+    @Schema(description = "小区名称")
     private String communityName;
 
     @Schema(description = "房屋ID")

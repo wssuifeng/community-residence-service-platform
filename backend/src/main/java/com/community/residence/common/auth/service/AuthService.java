@@ -41,7 +41,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenRevocationService tokenRevocationService;
 
-    /** 管理端登录：SUPER_ADMIN/ADMIN/STAFF（sys_user 表），ADMIN 加载绑定社区 */
+    /** 管理端登录：SUPER_ADMIN/ADMIN/STAFF（sys_user 表），ADMIN 加载绑定小区 */
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public LoginVO adminLogin(LoginDTO dto) {
         var candidates = sysUserMapper.selectLoginCandidates(dto.getUsername().trim());

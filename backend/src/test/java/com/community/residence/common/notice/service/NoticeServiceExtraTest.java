@@ -90,7 +90,7 @@ class NoticeServiceExtraTest {
     }
 
     @Test
-    @DisplayName("创建成功：ADMIN 指定社区 + 写定向记录 + 默认失效时间 30 天")
+    @DisplayName("创建成功：ADMIN 指定小区 + 写定向记录 + 默认失效时间 30 天")
     void create_adminWithCommunity_writesTarget() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
@@ -120,16 +120,16 @@ class NoticeServiceExtraTest {
     }
 
     @Test
-    @DisplayName("详情：匿名访问未过期已发布公告成功（GUEST+COMMUNITY 开放游客场景，DEF-046 后口径）")
+    @DisplayName("详情：匿名访问未过期已发布公告成功（GUEST+COMMUNITY 开放未登录访问者场景，DEF-046 后口径）")
     void getById_publishedNotExpired_ok() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
             mocked.when(() -> com.community.residence.common.security.context.SecurityUtils
                     .hasRole(anyString())).thenReturn(false);
             when(noticeMapper.selectById(1L)).thenReturn(published);
-            /* DEF-046：游客仅见纯广播/含 GUEST 目标公告——纯 COMMUNITY 定向已改 404
+            /* DEF-046：未登录公开访问仅见纯广播/含 GUEST 目标公告——纯 COMMUNITY 定向已改 404
                （见 NoticeGuestVisibilityTest）；此处用 GUEST+COMMUNITY 组合保留
-               communityName 装配断言（游客可见且定向社区的公告） */
+               communityName 装配断言（无需居住关系可见且定向小区的公告） */
             NoticeTarget guestTarget = new NoticeTarget();
             guestTarget.setNoticeId(1L);
             guestTarget.setTargetType("GUEST");

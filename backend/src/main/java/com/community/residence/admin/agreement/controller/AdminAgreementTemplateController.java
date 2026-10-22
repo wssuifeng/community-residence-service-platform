@@ -32,7 +32,7 @@ public class AdminAgreementTemplateController {
 
     private final AgreementService agreementService;
 
-    @Operation(summary = "协议模板列表（分页）", description = "社区管理员可见全局模板与本社区模板；超管可见全部")
+    @Operation(summary = "协议模板列表（分页）", description = "小区管理员可见全局模板与本小区模板；超管可见全部")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping
     public ApiResponse<PageVO<AgreementTemplateVO>> page(
@@ -43,7 +43,7 @@ public class AdminAgreementTemplateController {
         return ApiResponse.success(agreementService.pageTemplates(page, size, communityId, status));
     }
 
-    @Operation(summary = "某社区可用的协议模板清单", description = "本社区模板 + 全局模板，默认模板排最前")
+    @Operation(summary = "某小区可用的协议模板清单", description = "本小区模板 + 全局模板，默认模板排最前")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/available")
     public ApiResponse<List<AgreementTemplateVO>> available(@RequestParam Long communityId) {

@@ -51,7 +51,7 @@ public class AdminServiceCategoryController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "社区服务类别树（管理端全量）", description = "含停用类别，供管理端配置管理（DEF-041 配套）")
+    @Operation(summary = "小区服务类别树（管理端全量）", description = "含停用类别，供管理端配置管理（DEF-041 配套）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/communities/{communityId}/service-categories/all")
     public ApiResponse<List<CategoryVO>> treeAll(@PathVariable Long communityId) {

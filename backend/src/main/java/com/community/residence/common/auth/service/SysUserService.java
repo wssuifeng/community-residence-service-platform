@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-/** 系统用户业务逻辑：账号 CRUD、冻结（吊销令牌）、社区绑定（吊销令牌 + 缓存同步） */
+/** 系统用户业务逻辑：账号 CRUD、冻结（吊销令牌）、小区绑定（吊销令牌 + 缓存同步） */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -94,7 +94,7 @@ public class SysUserService {
         return user;
     }
 
-    /** 用户详情（ADMIN 角色附绑定社区列表） */
+    /** 用户详情（ADMIN 角色附绑定小区列表） */
     public SysUserVO getById(Long id) {
         SysUserVO vo = SysUserVO.from(requireUser(id));
         if (RoleConstants.ADMIN.equals(vo.getRole())) {
@@ -145,9 +145,9 @@ public class SysUserService {
         tokenRevocationService.revokeAdminUser(user.getId());
     }
 
-    /* 绑定社区：仅 ADMIN 角色可绑定；重复绑定拒绝；变更后吊销令牌并清缓存 */
+    /* 绑定小区：仅 ADMIN 角色可绑定；重复绑定拒绝；变更后吊销令牌并清缓存 */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#userId", content = "'绑定社区：' + #dto.communityIds")
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#userId", content = "'绑定小区：' + #dto.communityIds")
     public BoundCommunityVO bindCommunity(Long userId, BindCommunityDTO dto) {
         SysUser user = requireUser(userId);
         if (!RoleConstants.ADMIN.equals(user.getRole())) {
@@ -162,7 +162,7 @@ public class SysUserService {
             SysAdminCommunity present = adminCommunityMapper.selectOne(new LambdaQueryWrapper<SysAdminCommunity>()
                     .eq(SysAdminCommunity::getAdminId, userId).eq(SysAdminCommunity::getCommunityId, dto.getCommunityId()));
             if (present == null || Integer.valueOf(1).equals(present.getManualGranted()))
-                throw new BusinessException(ErrorCode.DATA_EXISTS, "该社区已绑定");
+                throw new BusinessException(ErrorCode.DATA_EXISTS, "该小区已绑定");
             present.setManualGranted(1);
             adminCommunityMapper.updateById(present);
             return new BoundCommunityVO(community.getId(), community.getName(), community.getAddress(), null);
@@ -177,16 +177,16 @@ public class SysUserService {
 
         adminCommunityCacheService.evict(userId);
         tokenRevocationService.revokeAdminUser(userId);
-        log.info("管理员绑定社区：adminId={}, communityId={}, operator={}",
+        log.info("管理员绑定小区：adminId={}, communityId={}, operator={}",
                 userId, dto.getCommunityId(), SecurityUtils.getUserId());
 
         return new BoundCommunityVO(community.getId(), community.getName(),
                 community.getAddress(), null);
     }
 
-    /* 解绑社区：变更后吊销令牌并清缓存（数据级权限范围立即收窄） */
+    /* 解绑小区：变更后吊销令牌并清缓存（数据级权限范围立即收窄） */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#userId", content = "'解绑社区：' + #communityId")
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "SYS_USER", targetId = "#userId", content = "'解绑小区：' + #communityId")
     public void unbindCommunity(Long userId, Long communityId) {
         requireUser(userId);
         communityService.lockForAuthorization(communityId);
@@ -201,7 +201,7 @@ public class SysUserService {
         }
         adminCommunityCacheService.evict(userId);
         tokenRevocationService.revokeAdminUser(userId);
-        log.info("管理员解绑社区：adminId={}, communityId={}, operator={}",
+        log.info("管理员解绑小区：adminId={}, communityId={}, operator={}",
                 userId, communityId, SecurityUtils.getUserId());
     }
 

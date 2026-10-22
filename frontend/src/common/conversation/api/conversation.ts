@@ -9,7 +9,7 @@ import type {
 } from '@/common/conversation/types/conversation'
 
 /**
- * R63 多方会话接口（v1.5）：看房预约群聊 + 居民-社区管理员直通。
+ * R63 多方会话接口（v1.5）：看房预约群聊 + 居民-小区管理员直通。
  * 实时性复用 R30/R59 模式：WS /topic/conversation/{id} 推送（参与者鉴权）
  * + HTTP 轮询兜底（组件层）；发送走 HTTP。
  */
@@ -43,9 +43,9 @@ export function sendConversationMessage(conversationId: number, data: IConversat
 }
 
 /**
- * 创建/获取居民与所在社区管理员的直通会话（幂等：同（DIRECT，社区，居民）已有则返回同一条）。
+ * 创建/获取居民与所在小区管理员的直通会话（幂等：同（DIRECT，小区，居民）已有则返回同一条）。
  * 居民端为本人；**管理端/超管传 `residentId` 代居民发起**（DEF-076，缺省 → 400、
- * 未绑定该社区 → 403）。
+ * 未绑定该小区 → 403）。
  */
 export function openDirectConversation(data: IDirectConversationDTO) {
   return http.post<IConversation>('/conversations/direct', data)

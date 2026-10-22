@@ -100,7 +100,7 @@ class WorkOrderDispatchTest {
             when(staffCapabilityService.categoryIdsByStaff(any()))
                     .thenReturn(Map.of(1L, List.of(5L), 3L, List.of(5L)));
             when(staffCapabilityService.communityNamesByStaff(any()))
-                    .thenReturn(Map.of(1L, "幸福社区", 2L, "幸福社区"));
+                    .thenReturn(Map.of(1L, "幸福小区", 2L, "幸福小区"));
             /* 仅 3 号今日排了早班，1 号未排班 → todayShiftLabel 为空 */
             when(staffScheduleService.shiftLabelsOn(any(), any(), any()))
                     .thenReturn(Map.of(3L, "早班"));
@@ -114,7 +114,7 @@ class WorkOrderDispatchTest {
                     .containsExactly(true, true);
             assertThat(options).extracting(StaffOptionVO::getMatchedCategory)
                     .containsExactly(true, false);
-            assertThat(options.get(0).getCommunityNames()).isEqualTo("幸福社区");
+            assertThat(options.get(0).getCommunityNames()).isEqualTo("幸福小区");
             assertThat(options.get(0).getTodayShiftLabel()).isNull();
             assertThat(options).allSatisfy(vo -> assertThat(vo.getTodayShiftLabel()).isNull());
             assertThat(options).allSatisfy(vo -> assertThat(vo.getActiveOrderCount()).isEqualTo(0));

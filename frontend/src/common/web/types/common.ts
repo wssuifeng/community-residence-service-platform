@@ -5,7 +5,7 @@ export interface Option<T = string | number> {
   disabled?: boolean
 }
 
-/** 树形节点（服务类别树/社区-楼栋级联） */
+/** 树形节点（服务类别树/小区-楼栋级联） */
 export interface TreeNode<T = unknown> {
   id: number
   label: string

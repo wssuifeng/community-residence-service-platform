@@ -8,8 +8,8 @@ import { resourceTypeLabels } from '@/common/community/types/community'
 
 /**
  * 公共资源列表（居民端三段预约流第一段）：
- * 只展示当前登录居民已生效居住关系社区的开放资源，点击卡片进入资源详情。
- * 无生效居住关系时显示引导空态（不展示任何社区的资源）。
+ * 只展示当前登录居民已生效居住关系小区的开放资源，点击卡片进入资源详情。
+ * 无生效居住关系时显示引导空态（不展示任何小区的资源）。
  */
 
 const resources = ref<IPublicResource[]>([])
@@ -43,7 +43,7 @@ function coverImage(resource: IPublicResource): string | undefined {
 async function load(): Promise<void> {
   loading.value = true
   try {
-    /* 入住社区来源：已生效居住关系（后端 RESIDENT 限本人）；多个社区时取首个，见任务报告 */
+    /* 入住小区来源：已生效居住关系（后端 RESIDENT 限本人）；多个小区时取首个，见任务报告 */
     const relations = await getMyResidenceRelations({ status: 'ACTIVE' })
     const communityId = relations.records[0]?.communityId
     if (!communityId) {
@@ -148,17 +148,17 @@ onMounted(load)
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 21V8l7-5 7 5v13M3 21h18M9 21v-6h6v6M9 11h.01M15 11h.01" />
         </svg>
-        <h3>未查到您的入住社区，请联系物业</h3>
-        <p>公共资源按入住社区分配展示，待您的入住申请审核通过后即可预约社区资源。</p>
+        <h3>未查到您的入住小区，请联系物业</h3>
+        <p>公共资源按入住小区分配展示，待您的入住申请审核通过后即可预约小区资源。</p>
       </div>
 
-      <!-- 资源空态：有入住社区但暂无开放资源 -->
+      <!-- 资源空态：有入住小区但暂无开放资源 -->
       <div v-else-if="!loading && !hasResources" class="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="9" />
           <path d="M12 7v5l3 3" />
         </svg>
-        <h3>社区暂无开放预约的资源</h3>
+        <h3>小区暂无开放预约的资源</h3>
         <p>管理员配置公共资源后会在这里展示，请稍后再来看看。</p>
       </div>
     </div>

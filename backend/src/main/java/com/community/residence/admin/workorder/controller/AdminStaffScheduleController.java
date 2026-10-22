@@ -33,7 +33,7 @@ public class AdminStaffScheduleController {
 
     private final StaffScheduleService staffScheduleService;
 
-    @Operation(summary = "排班列表", description = "按社区与日期范围查询（跨度上限 62 天），日期升序、人员升序")
+    @Operation(summary = "排班列表", description = "按小区与日期范围查询（跨度上限 62 天），日期升序、人员升序")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping
     public ApiResponse<List<StaffScheduleVO>> list(
@@ -44,7 +44,7 @@ public class AdminStaffScheduleController {
         return ApiResponse.success(staffScheduleService.list(communityId, startDate, endDate, staffId));
     }
 
-    @Operation(summary = "批量设置排班", description = "人员×日期逐条覆盖式保存；同社区同人同日已存在则更新")
+    @Operation(summary = "批量设置排班", description = "人员×日期逐条覆盖式保存；同小区同人同日已存在则更新")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping("/batch")
     public ApiResponse<BatchSaveScheduleResultVO> batchSave(@RequestBody @Valid BatchSaveScheduleDTO dto) {

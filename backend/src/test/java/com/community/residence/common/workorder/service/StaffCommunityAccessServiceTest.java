@@ -28,7 +28,7 @@ class StaffCommunityAccessServiceTest {
   var order=inOrder(users,bindings); order.verify(users).selectByIdForUpdate(7L); order.verify(bindings).selectList(any());
  }
  @Test void unboundStaffRejected() { when(users.selectByIdForUpdate(7L)).thenReturn(staff); when(bindings.selectList(any())).thenReturn(List.of());
-  assertThatThrownBy(()->service.requireBoundActiveForUpdate(7L,1L)).hasMessageContaining("未绑定目标社区"); }
+  assertThatThrownBy(()->service.requireBoundActiveForUpdate(7L,1L)).hasMessageContaining("未绑定目标小区"); }
  @Test void frozenStaffRejected() { staff.setStatus("FROZEN"); when(users.selectByIdForUpdate(7L)).thenReturn(staff);
   assertThatThrownBy(()->service.requireBoundActiveForUpdate(7L,1L)).hasMessageContaining("冻结"); verifyNoInteractions(bindings); }
  @Test void adminCannotBeTreatedAsStaff() { staff.setRole("ADMIN"); when(users.selectByIdForUpdate(7L)).thenReturn(staff);

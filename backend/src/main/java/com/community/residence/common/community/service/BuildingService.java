@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/** 楼栋业务逻辑：社区下四级结构的第二级，删除前校验单元引用；
+/** 楼栋业务逻辑：小区下四级结构的第二级，删除前校验单元引用；
  *  事务级联删除（cascade=true）与批量创建（D-端点1/2，50 阶段第三批） */
 @Slf4j
 @Service
@@ -70,9 +70,9 @@ public class BuildingService {
     @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "BUILDING", targetId = "#id", content = "'更新楼栋：' + #dto.name")
     public BuildingVO update(Long id, CreateBuildingDTO dto) {
         Building building = requireBuilding(id);
-        /* 更新不允许跨社区迁移楼栋（四级结构按社区归属建立，迁移会导致子级引用断裂） */
+        /* 更新不允许跨小区迁移楼栋（四级结构按小区归属建立，迁移会导致子级引用断裂） */
         if (!building.getCommunityId().equals(dto.getCommunityId())) {
-            throw new BusinessException(ErrorCode.OPERATION_FAILED, "楼栋不允许变更所属社区");
+            throw new BusinessException(ErrorCode.OPERATION_FAILED, "楼栋不允许变更所属小区");
         }
         SecurityUtils.checkCommunityAccess(building.getCommunityId());
         buildingBoundaryService.validateReduction(id, dto.getFloors());
@@ -104,13 +104,13 @@ public class BuildingService {
     }
 
     /**
-     * 楼栋事务级联删除（D-端点1，50 阶段第三批）：参照社区级联（stage-50-1b
+     * 楼栋事务级联删除（D-端点1，50 阶段第三批）：参照小区级联（stage-50-1b
      * CommunityService.delete）事务模式，自底向上物理删除——房屋状态历史 →
      * 房屋 → 单元 → 楼栋。在住居民保护：任一房屋存在在住居住关系（move_out_date
      * 为空）时整体拒绝（事务回滚），替代前端逐层编排的非原子删除。
      * DEF-033：补齐 house_id 引用链清理（residence_application/residence_relation/
      * lease_record/lease_reminder/housing 及其子表）——历史（已搬出）关系随级联
-     * 清理，在住关系整体拒绝，与社区级联 26 表口径对齐。
+     * 清理，在住关系整体拒绝，与小区级联 26 表口径对齐。
      */
     private void cascadeDelete(Building building) {
         Long buildingId = building.getId();
@@ -190,7 +190,7 @@ public class BuildingService {
         return vo;
     }
 
-    /** 社区下楼栋分页列表（公开；ADMIN 限绑定社区） */
+    /** 小区下楼栋分页列表（公开；ADMIN 限绑定小区） */
     public PageVO<BuildingVO> pageByCommunity(Long communityId, long page, long size, String keyword) {
         SecurityUtils.checkCommunityAccess(communityId);
         LambdaQueryWrapper<Building> wrapper = new LambdaQueryWrapper<Building>()

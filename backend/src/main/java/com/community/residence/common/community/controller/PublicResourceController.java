@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** 公共资源管理控制器（接口设计.md 9.1.5） */
-@Tag(name = "公共资源管理", description = "社区公共资源管理接口")
+@Tag(name = "公共资源管理", description = "小区公共资源管理接口")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class PublicResourceController {
         return ApiResponse.success(resourceService.getById(id));
     }
 
-    @Operation(summary = "社区资源列表（分页）")
+    @Operation(summary = "小区资源列表（分页）")
     @GetMapping("/communities/{communityId}/resources")
     public ApiResponse<PageVO<ResourceVO>> pageByCommunity(@PathVariable Long communityId,
                                                            @RequestParam(defaultValue = "1") long page,

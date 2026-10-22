@@ -24,7 +24,7 @@ public class WorkOrderEvaluation {
     @Schema(description = "评价人ID")
     private Long residentId;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "评分：1-5星")

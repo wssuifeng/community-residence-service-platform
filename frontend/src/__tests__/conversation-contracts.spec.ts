@@ -4,7 +4,7 @@ import { openDirectConversation, ensureLeaseGroupConversation, getConversation }
 
 /**
  * 后端新交付契约的前端接入（第一层：接口级）——
- * ①`POST /conversations/direct` 放开 ADMIN/SUPER_ADMIN + `residentId`（幂等 / 缺居民 400 / 跨社区 403）
+ * ①`POST /conversations/direct` 放开 ADMIN/SUPER_ADMIN + `residentId`（幂等 / 缺居民 400 / 跨小区 403）
  * ②`POST /conversations/lease-groups`（幂等建/取 LEASE_GROUP 并回写 lease_record.conversation_id）
  */
 vi.mock('@/common/conversation/api/conversation', async () => (await import('@/test/fakeBackend')).fakeApi('conversation'))
@@ -44,7 +44,7 @@ describe('① 管理端代居民发起直通会话（DEF-076）', () => {
       backend().state.conversations.filter((item) => item.type === 'DIRECT' && item.communityId === 1)
     ).toHaveLength(1)
 
-    /* 参与者：该居民（居民身份空间）+ 社区管理员 */
+    /* 参与者：该居民（居民身份空间）+ 小区管理员 */
     const detail = await getConversation(first.id)
     expect(detail.participants?.some((item) => item.ownerType === 'RESIDENT' && item.userId === 2)).toBe(
       true
@@ -58,7 +58,7 @@ describe('① 管理端代居民发起直通会话（DEF-076）', () => {
     })
   })
 
-  it('管理端发起未绑定社区 → 403', async () => {
+  it('管理端发起未绑定小区 → 403', async () => {
     await expect(openDirectConversation({ communityId: 99, residentId: 2 })).rejects.toMatchObject({
       code: 403
     })
@@ -108,10 +108,10 @@ describe('② 建/取租约沟通会话（DEF-076 补建入口）', () => {
     expect(backend().state.conversations.filter((item) => item.type === 'LEASE_GROUP')).toHaveLength(1)
   })
 
-  it('租约不存在 → 404；租约属未绑定社区 → 403；居民不可调用 → 403', async () => {
+  it('租约不存在 → 404；租约属未绑定小区 → 403；居民不可调用 → 403', async () => {
     await expect(ensureLeaseGroupConversation(404)).rejects.toMatchObject({ code: 404 })
 
-    /* 跨社区：租约属社区 2，管理端仅绑社区 1 → 403（checkCommunityAccess） */
+    /* 跨小区：租约属小区 2，管理端仅绑小区 1 → 403（checkCommunityAccess） */
     seedLease(null, 2)
     await expect(ensureLeaseGroupConversation(1)).rejects.toMatchObject({ code: 403 })
     expect(backend().state.conversations.filter((item) => item.type === 'LEASE_GROUP')).toHaveLength(0)

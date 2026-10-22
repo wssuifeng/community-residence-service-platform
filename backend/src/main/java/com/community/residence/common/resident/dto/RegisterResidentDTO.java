@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/** 居民注册请求（游客自助注册，受 registration.enabled 配置控制） */
+/** 居民注册请求（未登录用户自助注册，受 registration.enabled 配置控制） */
 @Data
 @Schema(description = "居民注册请求")
 public class RegisterResidentDTO {

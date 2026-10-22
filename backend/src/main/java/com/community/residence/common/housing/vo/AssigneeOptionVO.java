@@ -14,7 +14,7 @@ public class AssigneeOptionVO {
     @Schema(description = "真实姓名")
     private String realName;
 
-    @Schema(description = "角色（STAFF 服务人员 / ADMIN 社区管理员）")
+    @Schema(description = "角色（STAFF 服务人员 / ADMIN 小区管理员）")
     private String role;
 
     public static AssigneeOptionVO of(Long id, String realName, String role) {

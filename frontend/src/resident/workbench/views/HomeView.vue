@@ -195,7 +195,7 @@ function goNotifications(): void {
     </div>
 
     <div class="home-grid">
-      <!-- 社区公告：白色大容器（notice 无封面字段，统一用占位插画封面） -->
+      <!-- 小区公告：白色大容器（notice 无封面字段，统一用占位插画封面） -->
       <div class="notice-panel card">
         <div class="panel-head">
           <h2 class="section-title">
@@ -203,7 +203,7 @@ function goNotifications(): void {
               <path d="M3 11l14-6v14L3 13v-2z" />
               <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
             </svg>
-            社区公告
+            小区公告
           </h2>
           <router-link to="/resident/notices" class="panel-more">更多 →</router-link>
         </div>

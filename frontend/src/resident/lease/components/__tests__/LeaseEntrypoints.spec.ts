@@ -52,7 +52,7 @@ function seedResidentLeaseGroup(conversationId: number): void {
     participantIds: [1, 1],
     participantRefs: [
       { id: 1, space: 'RESIDENT', name: '演示居民', role: 'RESIDENT' },
-      { id: 1, space: 'USER', name: '社区管理员', role: 'ADMIN' }
+      { id: 1, space: 'USER', name: '小区管理员', role: 'ADMIN' }
     ],
     createdAt: '2026-01-01T10:00:00'
   })
@@ -214,14 +214,14 @@ describe('居民端入住申请 · 租约/会话入口（V26 强关联 lease_id�
     expect(router.currentRoute.value.path).toBe('/resident/conversations/7')
   })
 
-  it('申请已通过但尚无群（存量租约）：入口降级为「咨询社区管理员」，走居民侧直通会话', async () => {
+  it('申请已通过但尚无群（存量租约）：入口降级为「咨询小区管理员」，走居民侧直通会话', async () => {
     seedApplication('APPROVED', 1)
     seedLease({ conversationId: null })
     const router = buildRouter()
     const wrapper = await mountAt(router, '/resident/residence-applications', ResidenceApplicationListView)
 
-    const entry = buttonByText(wrapper, '咨询社区管理员')
-    expect(entry, '未渲染「咨询社区管理员」').toBeTruthy()
+    const entry = buttonByText(wrapper, '咨询小区管理员')
+    expect(entry, '未渲染「咨询小区管理员」').toBeTruthy()
     await entry?.trigger('click')
     await flushPromises()
 
@@ -315,7 +315,7 @@ describe('居民端入住申请 · 租约/会话入口（V26 强关联 lease_id�
 
       expect(buttonByText(wrapper, '进入租约会话'), `${status} 不应有会话入口`).toBeFalsy()
       expect(buttonByText(wrapper, '查看我的租约'), `${status} 不应有租约入口`).toBeFalsy()
-      expect(buttonByText(wrapper, '咨询社区管理员')).toBeFalsy()
+      expect(buttonByText(wrapper, '咨询小区管理员')).toBeFalsy()
     }
   })
 

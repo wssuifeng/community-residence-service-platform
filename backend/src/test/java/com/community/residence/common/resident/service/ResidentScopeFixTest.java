@@ -40,11 +40,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * DEF-010 修复回归（R45 两级数据授权）：居民列表/详情按管理员绑定社区过滤
- * （接口设计 9.2.1.7/9.2.1.8：ADMIN 限绑定社区内居民，经 residence_relation 关联）。
+ * DEF-010 修复回归（R45 两级数据授权）：居民列表/详情按管理员绑定小区过滤
+ * （接口设计 9.2.1.7/9.2.1.8：ADMIN 限绑定小区内居民，经 residence_relation 关联）。
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("居民账号数据社区过滤修复回归（DEF-010）")
+@DisplayName("居民账号数据小区过滤修复回归（DEF-010）")
 class ResidentScopeFixTest {
     @org.mockito.Mock private com.community.residence.common.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
@@ -86,13 +86,13 @@ class ResidentScopeFixTest {
         resident.setStatus("ACTIVE");
     }
 
-    /* ---- 详情：越绑定社区 404 ---- */
+    /* ---- 详情：越绑定小区 404 ---- */
 
     @Test
-    @DisplayName("ADMIN 查详情：居民无绑定社区内居住关系 → 404（原 200 全量资料）")
+    @DisplayName("ADMIN 查详情：居民无绑定小区内居住关系 → 404（原 200 全量资料）")
     void getById_crossCommunity_throws() {
         lenient().when(residentMapper.selectById(2L)).thenReturn(resident);
-        /* 绑定社区 1 内的居住关系仅居民 3（居民 2 只在社区 2 在住）；
+        /* 绑定小区 1 内的居住关系仅居民 3（居民 2 只在小区 2 在住）；
            selectList(any()) 不解析 wrapper，stub 语义=查询结果的命中行 */
         lenient().when(residenceRelationMapper.selectList(any()))
                 .thenReturn(List.of(relation(3L, 1L)));
@@ -103,7 +103,7 @@ class ResidentScopeFixTest {
     }
 
     @Test
-    @DisplayName("ADMIN 查详情：居民在绑定社区内有居住关系 → 200")
+    @DisplayName("ADMIN 查详情：居民在绑定小区内有居住关系 → 200")
     void getById_boundCommunity_ok() {
         lenient().when(residentMapper.selectById(2L)).thenReturn(resident);
         lenient().when(residenceRelationMapper.selectList(any()))
@@ -114,7 +114,7 @@ class ResidentScopeFixTest {
     }
 
     @Test
-    @DisplayName("SUPER_ADMIN 查详情：不受社区过滤 → 200")
+    @DisplayName("SUPER_ADMIN 查详情：不受小区过滤 → 200")
     void getById_superAdmin_ok() {
         lenient().when(residentMapper.selectById(2L)).thenReturn(resident);
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
@@ -126,10 +126,10 @@ class ResidentScopeFixTest {
         }
     }
 
-    /* ---- 列表：注入绑定社区过滤 ---- */
+    /* ---- 列表：注入绑定小区过滤 ---- */
 
     @Test
-    @DisplayName("ADMIN 列表：查询注入绑定社区内居民 ID 过滤（wrapper 含 IN 子句）")
+    @DisplayName("ADMIN 列表：查询注入绑定小区内居民 ID 过滤（wrapper 含 IN 子句）")
     void page_admin_injectsCommunityFilter() {
         when(residenceRelationMapper.selectList(any()))
                 .thenReturn(List.of(relation(2L, 1L), relation(5L, 1L)));
@@ -150,7 +150,7 @@ class ResidentScopeFixTest {
     }
 
     @Test
-    @DisplayName("ADMIN 未绑定任何社区：列表直接空页，不触库查询")
+    @DisplayName("ADMIN 未绑定任何小区：列表直接空页，不触库查询")
     void page_adminNoBinding_empty() {
         try (MockedStatic<SecurityUtils> mocked = mockAdmin(Set.of())) {
             PageVO<ResidentVO> vo = residentService.page(1, 10, null, null);

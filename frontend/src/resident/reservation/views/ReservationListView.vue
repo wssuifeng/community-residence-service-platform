@@ -47,7 +47,7 @@ function handleTabChange(value: string | number | boolean | undefined): void {
 const headSub = computed(() =>
   tab.value === 'viewing'
     ? '看房预约记录，点击行查看详情并与带看人沟通'
-    : '社区公共资源预约记录，待审核与已预约的预约可取消'
+    : '小区公共资源预约记录，待审核与已预约的预约可取消'
 )
 
 /* ---------- 资源预约 tab（原「我的预约」全部功能保留） ---------- */

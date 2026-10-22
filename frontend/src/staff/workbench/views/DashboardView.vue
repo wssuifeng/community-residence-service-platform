@@ -237,8 +237,6 @@ onMounted(() => {
               <li><i class="dot is-todo" />待接单<em>{{ todoCount }}</em></li>
             </ul>
           </div>
-
-          <footer class="progress-footer">总工单<em>{{ totalCount }}</em></footer>
         </article>
 
         <!-- 最新消息 -->

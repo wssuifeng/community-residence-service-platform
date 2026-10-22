@@ -23,7 +23,7 @@ import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 看房预约管理（管理端 Tab 内容）：筛选 + TO_CONFIRM 确认/拒绝 + RESERVED 完成/违约处置
- * + 带看人分配（R59：目标为启用状态服务人员或社区管理员，分配后后端通知双方）
+ * + 带看人分配（R59：目标为启用状态服务人员或小区管理员，分配后后端通知双方）
  * + 看房群聊入口（R63 v1.5：预约创建即建群，管理端在此直接进群与居民/带看人对话）。
  * （看房预约无独立拒绝接口，拒绝走 cancel 携带理由，状态机 9.12.2）
  * 列表展示字段对齐后端 ViewingAppointmentVO 真实返回：联系电话为 contactPhone，
@@ -205,7 +205,7 @@ async function loadCandidates(): Promise<void> {
   if (!row) return
   candidatesLoading.value = true
   try {
-    /* 候选=STAFF 全量 + 管辖该房源社区的启用 ADMIN（后端按 communityId 过滤并校验调用者绑定） */
+    /* 候选=STAFF 全量 + 管辖该房源小区的启用 ADMIN（后端按 communityId 过滤并校验调用者绑定） */
     candidates.value = await listAssignableAssignees(row.communityId)
   } catch (error) {
     candidates.value = []
@@ -243,7 +243,7 @@ async function handleAssignConfirm(): Promise<void> {
 }
 
 /* ------------------------------ 看房群聊（R63 v1.5） ------------------------------ */
-/* 预约创建即建群（居民 + 该社区管理员；分配带看人后入群）：管理端从此直接进群对话。
+/* 预约创建即建群（居民 + 该小区管理员；分配带看人后入群）：管理端从此直接进群对话。
    实时性（WS 推送 + 轮询兜底 + 403 只读降级）全部由 ConversationChat 组件内处理；
    打开时应调 conversations read 标已读——api/conversation.ts 暂未导出 read 函数，
    待主会话补充 markConversationRead 后在此接入（当前跳过，不影响会话读写）。 */
@@ -365,7 +365,7 @@ onMounted(loadList)
       @update:size="loadList"
     />
 
-    <!-- 分配带看人弹窗（R59）：候选=启用状态服务人员与社区管理员，最小暴露面仅 id/姓名/角色 -->
+    <!-- 分配带看人弹窗（R59）：候选=启用状态服务人员与小区管理员，最小暴露面仅 id/姓名/角色 -->
     <el-dialog v-model="assignDialogVisible" title="分配带看人" width="480px">
       <p class="assign-context">{{ assigningRowLabel }}</p>
       <p v-if="assigningRow?.assigneeName" class="assign-current">
@@ -374,7 +374,7 @@ onMounted(loadList)
       <el-select
         v-model="assigneeId"
         :loading="candidatesLoading"
-        placeholder="选择带看人（启用状态的服务人员/社区管理员）"
+        placeholder="选择带看人（启用状态的服务人员/小区管理员）"
         filterable
         style="width: 100%"
       >

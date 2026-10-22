@@ -7,7 +7,7 @@ import type { ILeaseRecord } from '@/common/lease/types/lease'
 
 /**
  * 申请退租弹窗（R70/V20）：居民对**本人已生效租约**发起自助退租，
- * 填计划搬出日期与原因后落地一条待审核申请，由社区管理方审核。
+ * 填计划搬出日期与原因后落地一条待审核申请，由小区管理方审核。
  *
  * 约束与口径：
  * - 仅 ACTIVE 租约可发起（调用方负责只在该状态露出入口，后端 LEASE_STATUS_INVALID 兜底）；
@@ -71,7 +71,7 @@ async function handleSubmit(): Promise<void> {
       moveOutDate: form.moveOutDate,
       reason: form.reason.trim() || undefined
     })
-    ElMessage.success('退租申请已提交，等待社区管理方审核')
+    ElMessage.success('退租申请已提交，等待小区管理方审核')
     visible.value = false
     emit('success')
   } catch (error) {
@@ -107,7 +107,7 @@ watch(
       :closable="false"
       show-icon
       class="form-alert"
-      title="提交后由社区管理方审核"
+      title="提交后由小区管理方审核"
       description="审核通过后租约转为「已搬出」，居住关系终止、房屋置空置、房源按管理方选择回收或下架；审核驳回时租约保持已生效。同一租约同时只能有一条待审核申请。"
     />
 

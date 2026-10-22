@@ -50,7 +50,7 @@ async function load(): Promise<void> {
   }
   loading.value = true
   try {
-    /* 游客无回执主体（notice_view_record 以 resident_id 记录，接口权限 RESIDENT），
+    /* 未登录公开访问无回执主体（notice_view_record 以 resident_id 记录，接口权限 RESIDENT），
        仅阅读公开详情，不调用查看回执接口 */
     notice.value = await getNotice(noticeId)
     void loadNeighbors()
@@ -109,7 +109,7 @@ useLiveRefresh(async()=>{if(!notice.value)return;const fresh=await getNotice(not
         <span class="meta-dot">·</span>
         <span>阅读 {{ notice.viewCount }}</span>
         <span class="meta-dot">·</span>
-        <span>{{ notice.communityName ?? '全社区' }}</span>
+        <span>{{ notice.communityName ?? '全小区' }}</span>
       </div>
 
       <div class="article-divider"></div>

@@ -152,7 +152,7 @@ class FeedbackAttachmentTest {
     }
 
     @Test
-    @DisplayName("管理员上传任意社区反馈附件：成功")
+    @DisplayName("管理员上传任意小区反馈附件：成功")
     void upload_admin_success() {
         try (MockedStatic<SecurityUtils> mocked = mockLogin("ADMIN", 5L)) {
             when(feedbackMapper.selectById(1L)).thenReturn(pendingFeedback);

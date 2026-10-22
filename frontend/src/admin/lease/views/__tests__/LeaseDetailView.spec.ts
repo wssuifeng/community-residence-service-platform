@@ -25,7 +25,7 @@ const api = vi.hoisted(() => {
     tenantId: 1,
     tenantName: '演示居民',
     communityId: 1,
-    communityName: '阳光花园社区',
+    communityName: '阳光花园小区',
     houseId: 1,
     houseLocation: '1号楼-1单元-101',
     startDate: '2026-01-01',
@@ -63,7 +63,7 @@ vi.mock('@/common/conversation/api/conversation', () => ({
     relatedId: 1,
     participants: [
       { userId: 1, name: '演示居民', role: 'RESIDENT', ownerType: 'RESIDENT' },
-      { userId: 1, name: '社区管理员', role: 'ADMIN', ownerType: 'USER' }
+      { userId: 1, name: '小区管理员', role: 'ADMIN', ownerType: 'USER' }
     ],
     participantCount: 2,
     createdAt: '2026-01-01T10:00:00'
@@ -80,7 +80,7 @@ vi.mock('@/common/conversation/api/conversation', () => ({
     relatedId: 1,
     participants: [
       { userId: 1, name: '演示居民', role: 'RESIDENT', ownerType: 'RESIDENT' },
-      { userId: 1, name: '社区管理员', role: 'ADMIN', ownerType: 'USER' }
+      { userId: 1, name: '小区管理员', role: 'ADMIN', ownerType: 'USER' }
     ],
     participantCount: 2,
     createdAt: '2026-01-01T10:00:00'
@@ -94,7 +94,7 @@ function leaseOf(status: LeaseStatus, extra: Record<string, unknown> = {}): ILea
     tenantId: 1,
     tenantName: '演示居民',
     communityId: 1,
-    communityName: '阳光花园社区',
+    communityName: '阳光花园小区',
     houseId: 1,
     houseLocation: '1号楼-1单元-101',
     startDate: '2026-01-01',
@@ -148,7 +148,7 @@ beforeEach(() => {
     tenantId: 1,
     tenantName: '演示居民',
     communityId: 1,
-    communityName: '阳光花园社区',
+    communityName: '阳光花园小区',
     houseId: 1,
     houseLocation: '1号楼-1单元-101',
     startDate: '2026-01-01',
@@ -177,7 +177,7 @@ describe('管理端租约详情 · 打开与失败兜底（④）', () => {
     const text = wrapper.text()
     expect(text).toContain('1号楼-1单元-101')
     expect(text).toContain('演示居民')
-    expect(text).toContain('阳光花园社区')
+    expect(text).toContain('阳光花园小区')
     expect(text).toContain('ZL0001')
   })
 
@@ -216,7 +216,7 @@ describe('管理端租约详情 · ③ 会话相关操作界面', () => {
       tenantId: 1,
       tenantName: '演示居民',
       communityId: 1,
-      communityName: '阳光花园社区',
+      communityName: '阳光花园小区',
       houseId: 1,
       houseLocation: '1号楼-1单元-101',
       startDate: '2026-01-01',
@@ -259,7 +259,7 @@ describe('管理端租约详情 · ② 补建租约沟通群（DEF-076）', () =
         tenantId: 1,
         tenantName: '演示居民',
         communityId: 1,
-        communityName: '阳光花园社区',
+        communityName: '阳光花园小区',
         houseId: 1,
         houseLocation: '1号楼-1单元-101',
         startDate: '2026-01-01',
@@ -293,10 +293,10 @@ describe('管理端租约详情 · ② 补建租约沟通群（DEF-076）', () =
     expect(wrapper.get('.conversation-entry a').attributes('href')).toContain('id=9')
   })
 
-  it('补建失败（非绑定社区 403）时如实提示，不改变无群空态', async () => {
+  it('补建失败（非绑定小区 403）时如实提示，不改变无群空态', async () => {
     const conversationApi = await import('@/common/conversation/api/conversation')
     vi.mocked(conversationApi.ensureLeaseGroupConversation).mockRejectedValueOnce(
-      new Error('无权操作未绑定社区的数据')
+      new Error('无权操作未绑定小区的数据')
     )
 
     const wrapper = await mountDetail()
@@ -306,7 +306,7 @@ describe('管理端租约详情 · ② 补建租约沟通群（DEF-076）', () =
 
     expect(wrapper.find('.conversation-chat').exists()).toBe(false)
     expect(wrapper.text()).toContain('该租约尚未建立沟通群')
-    expect(document.body.textContent).toContain('无权操作未绑定社区的数据')
+    expect(document.body.textContent).toContain('无权操作未绑定小区的数据')
   })
 })
 

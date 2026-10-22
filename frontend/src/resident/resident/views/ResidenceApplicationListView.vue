@@ -27,7 +27,7 @@ import { formatDateTime } from '@/common/web/utils/date'
  *   故前端只在 `APPROVED && leaseId` 时给「查看我的租约」深链，`leaseId` 为空一律中性兜底
  *   （提示"暂无关联租约"+ 去租约列表），**不渲染指向具体租约的死链**；
  * - `conversationId` 取**该租约**的会话（不是靠猜）；已通过且已建群 → 「进入租约会话」；
- *   已通过但尚无群 → 「咨询社区管理员」，走居民侧既有 `POST /conversations/direct`；
+ *   已通过但尚无群 → 「咨询小区管理员」，走居民侧既有 `POST /conversations/direct`；
  * - 非 `APPROVED` 状态不给任何租约/会话入口。
  */
 
@@ -95,7 +95,7 @@ function openApplicationConversation(row: IResidenceApplication): void {
   router.push(`/resident/conversations/${row.conversationId}`)
 }
 
-/** 已通过但尚无群：走居民侧直通会话咨询社区管理员（后端 /conversations/direct 居民仅本人） */
+/** 已通过但尚无群：走居民侧直通会话咨询小区管理员（后端 /conversations/direct 居民仅本人） */
 async function openApplicationDirectChat(row: IResidenceApplication): Promise<void> {
   if (!leaseLinkUsable(row)) return
   openingChatId.value = row.id
@@ -231,7 +231,7 @@ onMounted(load)
                 :loading="openingChatId === row.id"
                 @click="openApplicationDirectChat(row)"
               >
-                咨询社区管理员
+                咨询小区管理员
               </el-button>
               <!-- 有真实关联（V26 写死的 lease_id）→ 深链到「租住契约」Tab 的对应租约 -->
               <el-button

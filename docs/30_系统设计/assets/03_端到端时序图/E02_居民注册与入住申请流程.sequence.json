@@ -10,7 +10,7 @@
   },
   "participants": [
     { "id": "resident", "type": "external", "label": "潜在居民", "sublabel": "自助注册" },
-    { "id": "admin", "type": "external", "label": "社区管理员", "sublabel": "审核人" },
+    { "id": "admin", "type": "external", "label": "小区管理员", "sublabel": "审核人" },
     { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
     { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
     { "id": "notify", "type": "messagebus", "label": "通知服务", "sublabel": "站内推送" }
@@ -19,7 +19,7 @@
     { "id": "register", "from": "resident", "to": "backend", "y": 190, "label": "POST /api/v1/auth/resident/register", "note": "自助注册（姓名/手机/密码）", "variant": "emphasis" },
     { "id": "insert-resident", "from": "backend", "to": "db", "y": 234, "label": "INSERT tb_resident (status=PENDING)" },
     { "id": "register-ok", "from": "backend", "to": "resident", "y": 278, "label": "注册成功，返回 JWT", "variant": "return" },
-    { "id": "apply", "from": "resident", "to": "backend", "y": 336, "label": "POST /api/v1/residence-applications", "note": "提交入住申请（社区/房屋/关系类型/起止时间）" },
+    { "id": "apply", "from": "resident", "to": "backend", "y": 336, "label": "POST /api/v1/residence-applications", "note": "提交入住申请（小区/房屋/关系类型/起止时间）" },
     { "id": "insert-application", "from": "backend", "to": "db", "y": 380, "label": "INSERT tb_residence_application (status=PENDING)" },
     { "id": "notify-new", "from": "backend", "to": "notify", "y": 424, "label": "生成通知：新入住申请" },
     { "id": "push-admin", "from": "notify", "to": "admin", "y": 468, "label": "推送通知", "variant": "dashed" },

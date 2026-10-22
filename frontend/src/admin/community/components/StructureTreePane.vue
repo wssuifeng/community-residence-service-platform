@@ -56,12 +56,12 @@ import { loadAllPages, mapLimited } from '@/admin/community/utils/structureData'
 import { useUserStore } from '@/common/auth/store/user'
 
 /**
- * 社区管理主面板（2026-09-21 布局重做；2026-09-22 批次 j/k 交互与布局再修）。
+ * 小区管理主面板（2026-09-21 布局重做；2026-09-22 批次 j/k 交互与布局再修）。
  *
- * 信息架构（两栏：社区栏 + 详情单列）：
- *   ① 社区栏：关键字/状态筛选 + 分页 + 每社区概览计数 + 选中态；超管可多选批量管理；
+ * 信息架构（两栏：小区栏 + 详情单列）：
+ *   ① 小区栏：关键字/状态筛选 + 分页 + 每小区概览计数 + 选中态；超管可多选批量管理；
  *   ② 详情栏（单列，占满剩余宽度）：
- *      · 社区头部：社区名/状态/联系方式 + 社区级操作（编辑社区 · 停用启用 · 删除 · 社区设置）；
+ *      · 小区头部：小区名/状态/联系方式 + 小区级操作（编辑小区 · 停用启用 · 删除 · 小区设置）；
  *      · **建房带**：一个总入口「一键生成结构链」（楼栋→单元→房屋，先预览后落库）
  *        ＋ 三个按层级递进的分步入口「①建楼栋 / ②建单元与房屋 / ③建房屋」
  *        ＋ 右端低频「结构维护 ▾」（编辑楼栋/编辑单元/新增单个单元/删除楼栋/删除单元）；
@@ -69,9 +69,9 @@ import { useUserStore } from '@/common/auth/store/user'
  *        ＋ **单元平行列**（一单元一列，列多时横向滚动，缩放即可一屏多看几列）。
  *
  * 为什么建房要分区成带：新建（楼栋/单元与房屋/房屋/整链）是高频且成组的结构动作，
- * 混在社区级操作里会让头部堆成一片按钮；单独一条浅底带 + 主次分明的按钮层级
+ * 混在小区级操作里会让头部堆成一片按钮；单独一条浅底带 + 主次分明的按钮层级
  * （实心总入口 → 序号分步按钮 → 右端低频维护菜单），既讲清"从哪一级开始建"，
- * 也不再和「编辑社区 / 停用 / 删除」抢视觉重量。
+ * 也不再和「编辑小区 / 停用 / 删除」抢视觉重量。
  *
  * 结构目录为什么取消：批量建房已一次性建成 楼栋→单元→房屋，常驻结构树的选择功能被筛选区
  * 完全替代，且它固定占掉半屏、把房屋列表挤到下面。维护动作并不常用，改为「先选目标、
@@ -93,12 +93,12 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-/** 批量管理社区仅超管可用（数据级影响面最大，不允许社区管理员自助） */
+/** 批量管理小区仅超管可用（数据级影响面最大，不允许小区管理员自助） */
 const isSuperAdmin = computed(() => userStore.role === 'SUPER_ADMIN')
 
-/* ===================== 左栏：社区列表（服务端筛选 + 分页 + 概览计数） ===================== */
+/* ===================== 左栏：小区列表（服务端筛选 + 分页 + 概览计数） ===================== */
 
-/** 列表行 = 社区 + 概览计数（计数来自看板聚合接口的社区维度口径，非前端推算） */
+/** 列表行 = 小区 + 概览计数（计数来自看板聚合接口的小区维度口径，非前端推算） */
 interface CommunityRow {
   community: ICommunity
   buildingCount: number
@@ -134,7 +134,7 @@ const selectedCommunity = ref<ICommunity | null>(null)
 let listSeq = 0
 let rowStatsSeq = 0
 
-/** 列表筛选/翻页后重新拉取社区；选中社区不在本页时保持选中（详情与列表解耦） */
+/** 列表筛选/翻页后重新拉取小区；选中小区不在本页时保持选中（详情与列表解耦） */
 async function loadCommunities(): Promise<void> {
   const seq = ++listSeq
   listLoading.value = true
@@ -155,7 +155,7 @@ async function loadCommunities(): Promise<void> {
       statsLoading: true
     }))
     listTotal.value = result.total
-    /* 选中社区对象随最新列表刷新（编辑后名称/状态即时同步到详情头部） */
+    /* 选中小区对象随最新列表刷新（编辑后名称/状态即时同步到详情头部） */
     const refreshed = result.records.find((item) => item.id === selectedCommunityId.value)
     if (refreshed) selectedCommunity.value = refreshed
     if (selectedCommunityId.value === null && result.records.length > 0) {
@@ -168,13 +168,13 @@ async function loadCommunities(): Promise<void> {
     if (seq !== listSeq) return
     communityRows.value = []
     listTotal.value = 0
-    listError.value = error instanceof Error ? error.message : '加载社区列表失败'
+    listError.value = error instanceof Error ? error.message : '加载小区列表失败'
   } finally {
     if (seq === listSeq) listLoading.value = false
   }
 }
 
-/** 概览计数：逐社区取看板聚合（服务端精确值，前端不按分页数据推算） */
+/** 概览计数：逐小区取看板聚合（服务端精确值，前端不按分页数据推算） */
 async function loadRowStats(seq: number): Promise<void> {
   const statsSeq = ++rowStatsSeq
   const rows = communityRows.value
@@ -247,7 +247,7 @@ function clearDetail(): void {
   resetHouseFilters()
 }
 
-/** 深链 ?communityId= 与「查看该社区结构」：定位到指定社区（不在当前页则单独取回并置顶） */
+/** 深链 ?communityId= 与「查看该小区结构」：定位到指定小区（不在当前页则单独取回并置顶） */
 async function focusCommunity(communityId: number): Promise<void> {
   const inPage = communityRows.value.find((row) => row.community.id === communityId)
   if (inPage) {
@@ -276,11 +276,11 @@ async function focusCommunity(communityId: number): Promise<void> {
       row.statsLoading = false
     }
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '定位社区失败')
+    ElMessage.error(error instanceof Error ? error.message : '定位小区失败')
   }
 }
 
-/* ===================== 右栏：选中社区的结构（楼栋 → 单元 → 房屋） ===================== */
+/* ===================== 右栏：选中小区的结构（楼栋 → 单元 → 房屋） ===================== */
 
 const activeBuildingId = ref<number | null>(null)
 const activeUnitId = ref<number | null>(null)
@@ -433,7 +433,7 @@ const scopeSummary = computed(() => {
   return { total: entries.length, occupied, vacant }
 })
 
-/** 社区关键数字（空置与入住率在房屋状态面上，与结构计数同源） */
+/** 小区关键数字（空置与入住率在房屋状态面上，与结构计数同源） */
 const communityMetrics = computed(() => {
   const stats = structureStats.value
   const total = stats?.houseCount ?? 0
@@ -726,7 +726,7 @@ async function handleHouseBatchDelete(): Promise<void> {
   clearHouseSelection()
 }
 
-/* ===================== 社区 / 楼栋 / 单元 增删改 ===================== */
+/* ===================== 小区 / 楼栋 / 单元 增删改 ===================== */
 
 const communityDialogVisible = ref(false)
 const communityEditing = ref<ICommunity | null>(null)
@@ -750,7 +750,7 @@ function handleCommunitySaved(entity: ICommunity): void {
   loadCommunities()
 }
 
-/** 选中社区概览计数刷新（结构与房屋变动后行概览同步，避免两处数字打架） */
+/** 选中小区概览计数刷新（结构与房屋变动后行概览同步，避免两处数字打架） */
 function refreshSelectedRowStats(): void {
   const row = communityRows.value.find((item) => item.community.id === selectedCommunityId.value)
   if (!row) return
@@ -1011,17 +1011,17 @@ function runStructureAction(): void {
   }
 }
 
-/* ---------------- 社区删除 / 启用停用 ---------------- */
+/* ---------------- 小区删除 / 启用停用 ---------------- */
 
 const deletionDialog = { customClass: 'community-deletion-dialog', closeOnClickModal: false, cancelButtonText: '取消删除', cancelButtonClass: 'community-delete-cancel' }
 const finalDeletionDialog = { ...deletionDialog, confirmButtonText: '永久删除', confirmButtonClass: 'community-delete-final' }
 async function handleCommunityDelete(community: ICommunity): Promise<void> {
   try {
     const impact = await getCommunityDeletionImpact(community.id)
-    await ElMessageBox.confirm(h(CommunityDeletionImpactPanel, { impacts: [impact] }), '删除社区前请核对', { ...deletionDialog, confirmButtonText: '继续核对名称', confirmButtonClass: 'community-delete-next' })
-    const confirmation = await ElMessageBox.prompt(h('div', [h('p', '请输入完整社区名称，确认永久删除：'), h('strong', { class: 'delete-final-name' }, impact.communityName), h('p', '账号本身保留。删除不会自动退租或退款。')]), '最终删除确认', { ...finalDeletionDialog, inputPlaceholder: '输入完整社区名称', inputValidator: value => value === impact.communityName || '社区名称不一致，未执行删除' })
+    await ElMessageBox.confirm(h(CommunityDeletionImpactPanel, { impacts: [impact] }), '删除小区前请核对', { ...deletionDialog, confirmButtonText: '继续核对名称', confirmButtonClass: 'community-delete-next' })
+    const confirmation = await ElMessageBox.prompt(h('div', [h('p', '请输入完整小区名称，确认永久删除：'), h('strong', { class: 'delete-final-name' }, impact.communityName), h('p', '账号本身保留。删除不会自动退租或退款。')]), '最终删除确认', { ...finalDeletionDialog, inputPlaceholder: '输入完整小区名称', inputValidator: value => value === impact.communityName || '小区名称不一致，未执行删除' })
     await deleteCommunity(community.id, impact.confirmationVersion, confirmation.value)
-    ElMessage.success('社区已删除')
+    ElMessage.success('小区已删除')
     if (selectedCommunityId.value === community.id) clearDetail()
     loadCommunities()
   } catch (error) {
@@ -1034,8 +1034,8 @@ async function handleCommunityToggle(community: ICommunity): Promise<void> {
   const action = next === 'ACTIVE' ? '启用' : '停用'
   try {
     await ElMessageBox.confirm(
-      `确定${action}社区「${community.name}」？${next === 'INACTIVE' ? '停用后该社区相关业务将不可用。' : ''}`,
-      `${action}社区`,
+      `确定${action}小区「${community.name}」？${next === 'INACTIVE' ? '停用后该小区相关业务将不可用。' : ''}`,
+      `${action}小区`,
       { type: 'warning', confirmButtonText: action, cancelButtonText: '取消' }
     )
   } catch {
@@ -1043,14 +1043,14 @@ async function handleCommunityToggle(community: ICommunity): Promise<void> {
   }
   try {
     await updateCommunityStatus(community.id, { status: next })
-    ElMessage.success(`社区已${action}`)
+    ElMessage.success(`小区已${action}`)
     loadCommunities()
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : `${action}失败`)
   }
 }
 
-/* ===================== 批量管理社区（仅超管） ===================== */
+/* ===================== 批量管理小区（仅超管） ===================== */
 
 const batchSelection = ref<Set<number>>(new Set())
 const batchRunning = ref(false)
@@ -1063,7 +1063,7 @@ const batchSelectedCount = computed(() => batchSelection.value.size)
 /** 跨页累计选择可能超过后端单次上限：提交前拦住并明示原因 */
 function batchOverLimit(ids: number[]): boolean {
   if (ids.length > MAX_BATCH) {
-    ElMessage.error(`单次最多批量处理 ${MAX_BATCH} 个社区（当前已选 ${ids.length} 个），请减少选择后重试`)
+    ElMessage.error(`单次最多批量处理 ${MAX_BATCH} 个小区（当前已选 ${ids.length} 个），请减少选择后重试`)
     return true
   }
   return false
@@ -1111,7 +1111,7 @@ const batchResult = reactive({
   failures: [] as IBatchFailure[]
 })
 
-/** 失败项只带 ID 时补社区名，让「哪个失败了」无需另行查号 */
+/** 失败项只带 ID 时补小区名，让「哪个失败了」无需另行查号 */
 function resolveFailures(failures: IBatchFailure[]): IBatchFailure[] {
   return failures.map((item) => {
     if (item.name) return item
@@ -1146,10 +1146,10 @@ async function handleBatchStatus(status: CommunityStatus): Promise<void> {
   const action = status === 'ACTIVE' ? '批量启用' : '批量停用'
   try {
     await ElMessageBox.confirm(
-      `将${action}选中的 ${ids.length} 个社区${
+      `将${action}选中的 ${ids.length} 个小区${
         batchSelectedNames.value.length > 0 ? `：${batchSelectedNames.value.join('、')}` : ''
-      }？${status === 'INACTIVE' ? '停用后这些社区的相关业务将不可用。' : ''}`,
-      `${action}社区`,
+      }？${status === 'INACTIVE' ? '停用后这些小区的相关业务将不可用。' : ''}`,
+      `${action}小区`,
       { type: 'warning', confirmButtonText: action, cancelButtonText: '取消' }
     )
   } catch {
@@ -1160,8 +1160,8 @@ async function handleBatchStatus(status: CommunityStatus): Promise<void> {
     const result = await batchUpdateCommunityStatus(ids, status)
     showBatchResult({
       successCount: result.successIds.length,
-      successText: `个社区已${status === 'ACTIVE' ? '启用' : '停用'}`,
-      intro: `${action}：已提交 ${ids.length} 个社区。`,
+      successText: `个小区已${status === 'ACTIVE' ? '启用' : '停用'}`,
+      intro: `${action}：已提交 ${ids.length} 个小区。`,
       failures: result.failures
     })
     clearBatchSelection()
@@ -1184,12 +1184,12 @@ async function handleBatchDelete(): Promise<void> {
   let impacts: Awaited<ReturnType<typeof getCommunityDeletionImpact>>[]
   try {
     impacts = await Promise.all(ids.map(getCommunityDeletionImpact))
-    await ElMessageBox.confirm(h(CommunityDeletionImpactPanel, { impacts }), '逐社区核对删除影响', { ...deletionDialog, confirmButtonText: '继续核对', confirmButtonClass: 'community-delete-next' })
+    await ElMessageBox.confirm(h(CommunityDeletionImpactPanel, { impacts }), '逐小区核对删除影响', { ...deletionDialog, confirmButtonText: '继续核对', confirmButtonClass: 'community-delete-next' })
     await ElMessageBox.confirm(
-      `将【级联删除】选中的 ${ids.length} 个社区${
+      `将【级联删除】选中的 ${ids.length} 个小区${
         batchSelectedNames.value.length > 0 ? `：${batchSelectedNames.value.join('、')}` : ''
-      }。这会一并删除这些社区下的全部楼栋、单元、房屋、公共资源、房源及关联业务数据。`,
-      '批量删除社区（级联删除）',
+      }。这会一并删除这些小区下的全部楼栋、单元、房屋、公共资源、房源及关联业务数据。`,
+      '批量删除小区（级联删除）',
       { ...deletionDialog, confirmButtonText: '继续核对名称', confirmButtonClass: 'community-delete-next' }
     )
   } catch {
@@ -1197,9 +1197,9 @@ async function handleBatchDelete(): Promise<void> {
   }
   try {
     for (const impact of impacts) {
-      await ElMessageBox.prompt(`输入「${impact.communityName}」确认本社区永久删除；有效关系和财务记录亦被删除，不自动退款。`, '最终逐社区确认', {
-        ...finalDeletionDialog, confirmButtonText: '确认本社区名称', inputPlaceholder: '输入完整社区名称',
-        inputValidator: value => value === impact.communityName || '社区名称不一致'
+      await ElMessageBox.prompt(`输入「${impact.communityName}」确认本小区永久删除；有效关系和财务记录亦被删除，不自动退款。`, '最终逐小区确认', {
+        ...finalDeletionDialog, confirmButtonText: '确认本小区名称', inputPlaceholder: '输入完整小区名称',
+        inputValidator: value => value === impact.communityName || '小区名称不一致'
       })
     }
   } catch {
@@ -1210,9 +1210,9 @@ async function handleBatchDelete(): Promise<void> {
     const result = await batchDeleteCommunities(ids, Object.fromEntries(impacts.map(i => [i.communityId, i.confirmationVersion])), Object.fromEntries(impacts.map(i => [i.communityId, i.communityName])))
     showBatchResult({
       successCount: result.successIds.length,
-      successText: '个社区已级联删除',
-      intro: `批量删除：已提交 ${ids.length} 个社区。`,
-      warning: '级联删除不可恢复；未完成的社区及其下级数据仍完整保留，可按失败原因处理后重试。',
+      successText: '个小区已级联删除',
+      intro: `批量删除：已提交 ${ids.length} 个小区。`,
+      warning: '级联删除不可恢复；未完成的小区及其下级数据仍完整保留，可按失败原因处理后重试。',
       failures: result.failures
     })
     if (selectedCommunityId.value !== null && ids.includes(selectedCommunityId.value)) {
@@ -1434,7 +1434,7 @@ async function handleUnitDelete(unit: IUnit): Promise<void> {
   }
 }
 
-/* ===================== 社区设置入口（隐藏下钻页） ===================== */
+/* ===================== 小区设置入口（隐藏下钻页） ===================== */
 
 function goCommunitySettings(): void {
   if (selectedCommunity.value) {
@@ -1446,7 +1446,7 @@ function goCommunitySettings(): void {
 
 onMounted(async () => {
   await loadCommunities()
-  /* 旧深链（/admin/houses?communityId=x 等 redirect 承接）与详情页「前往社区结构」在此消费 */
+  /* 旧深链（/admin/houses?communityId=x 等 redirect 承接）与详情页「前往小区结构」在此消费 */
   const deepLink = Number(route.query.communityId)
   if (Number.isFinite(deepLink) && deepLink > 0) {
     focusCommunity(deepLink)
@@ -1457,11 +1457,11 @@ onMounted(async () => {
 <template>
 
   <section class="manage">
-    <!-- ==================== 左栏：社区列表（筛选 → 分页 → 选中） ==================== -->
+    <!-- ==================== 左栏：小区列表（筛选 → 分页 → 选中） ==================== -->
     <aside class="rail">
       <header class="rail-head">
         <div class="rail-title-line">
-          <h3 class="rail-title">社区</h3>
+          <h3 class="rail-title">小区</h3>
           <span class="rail-total">共 {{ listTotal }} 个</span>
         </div>
         <el-button
@@ -1470,7 +1470,7 @@ onMounted(async () => {
           size="small"
           @click="openCommunityCreate"
         >
-          新增社区
+          新增小区
         </el-button>
       </header>
 
@@ -1478,7 +1478,7 @@ onMounted(async () => {
         <el-input
           v-model="query.keyword"
           size="small"
-          placeholder="搜索社区名称 / 地址"
+          placeholder="搜索小区名称 / 地址"
           clearable
           @keyup.enter="handleSearch"
           @clear="handleSearch"
@@ -1498,7 +1498,7 @@ onMounted(async () => {
             </svg>
           </template>
         </el-input>
-        <div class="status-chips" role="group" aria-label="按状态筛选社区">
+        <div class="status-chips" role="group" aria-label="按状态筛选小区">
           <button
             v-for="item in statusFilters"
             :key="item.value"
@@ -1544,7 +1544,7 @@ onMounted(async () => {
           >
             全选本页
           </el-checkbox>
-          <span class="batch-tip">勾选社区后可批量启用 / 停用 / 删除</span>
+          <span class="batch-tip">勾选小区后可批量启用 / 停用 / 删除</span>
         </template>
       </div>
 
@@ -1554,24 +1554,24 @@ onMounted(async () => {
         </div>
 
         <div v-else-if="listError" class="rail-state">
-          <p class="state-title">社区列表加载失败</p>
+          <p class="state-title">小区列表加载失败</p>
           <p class="state-text">{{ listError }}</p>
           <el-button size="small" @click="loadCommunities">重试</el-button>
         </div>
 
         <div v-else-if="communityRows.length === 0" class="rail-state">
           <template v-if="filtered">
-            <p class="state-title">没有匹配的社区</p>
+            <p class="state-title">没有匹配的小区</p>
             <p class="state-text">换个关键字，或把状态筛选切回「全部」。</p>
             <el-button size="small" @click="resetListQuery">清空筛选</el-button>
           </template>
           <template v-else>
-            <p class="state-title">还没有社区</p>
+            <p class="state-title">还没有小区</p>
             <p class="state-text">
-              先新增一个社区，再进入「批量建房」一次生成楼栋、单元与房屋。
+              先新增一个小区，再进入「批量建房」一次生成楼栋、单元与房屋。
             </p>
             <el-button v-permission="['SUPER_ADMIN']" type="primary" size="small" @click="openCommunityCreate">
-              新增社区
+              新增小区
             </el-button>
           </template>
         </div>
@@ -1622,20 +1622,20 @@ onMounted(async () => {
       />
     </aside>
 
-    <!-- ==================== 右栏：选中社区详情 ==================== -->
+    <!-- ==================== 右栏：选中小区详情 ==================== -->
     <main class="detail">
       <article v-if="!selectedCommunity" class="panel empty-panel">
         <el-empty
           :description="
             communityRows.length === 0
-              ? '还没有社区数据。新增社区后即可在这里管理楼栋、单元与房屋。'
-              : '从左侧选择一个社区，查看其楼栋、单元与房屋结构。'
+              ? '还没有小区数据。新增小区后即可在这里管理楼栋、单元与房屋。'
+              : '从左侧选择一个小区，查看其楼栋、单元与房屋结构。'
           "
         />
       </article>
 
       <template v-else>
-        <!-- 社区头部：状态与联系方式 + 关键数字（视觉重心） -->
+        <!-- 小区头部：状态与联系方式 + 关键数字（视觉重心） -->
         <article class="panel head-card">
           <header class="head-top">
             <div class="head-identity">
@@ -1662,7 +1662,7 @@ onMounted(async () => {
                 size="small"
                 @click="openCommunityEdit(selectedCommunity)"
               >
-                编辑社区
+                编辑小区
               </el-button>
               <el-button
                 v-permission="['ADMIN', 'SUPER_ADMIN']"
@@ -1683,13 +1683,13 @@ onMounted(async () => {
                 删除
               </el-button>
               <el-button link type="primary" size="small" @click="goCommunitySettings">
-                社区设置
+                小区设置
               </el-button>
             </div>
           </header>
 
           <!-- 建房带：一个总入口（一次建成整条结构链）+ 三个按层级递进的入口，
-               社区级操作留在上方头部，两类动作分区呈现而不是混排成一片按钮 -->
+               小区级操作留在上方头部，两类动作分区呈现而不是混排成一片按钮 -->
           <section class="build-bar" aria-label="建房入口">
             <span class="build-bar-title">
               <span class="panel-icon" aria-hidden="true">
@@ -1719,7 +1719,7 @@ onMounted(async () => {
 
             <div class="build-steps" role="group" aria-label="按层级分步建房">
               <el-tooltip
-                content="在指定社区批量建楼栋：按名称前缀与序号区间一次建多栋，并可同批建立每栋的单元与楼层房屋"
+                content="在指定小区批量建楼栋：按名称前缀与序号区间一次建多栋，并可同批建立每栋的单元与楼层房屋"
                 placement="bottom"
               >
                 <el-button
@@ -2084,7 +2084,7 @@ onMounted(async () => {
       </el-form>
       <p class="structure-hint">{{ structureActionMeta.hint }}</p>
       <p v-if="buildings.length === 0" class="structure-hint is-warning">
-        该社区还没有楼栋，请先用「批量建房」生成结构。
+        该小区还没有楼栋，请先用「批量建房」生成结构。
       </p>
       <template #footer>
         <el-button @click="structureDialogVisible = false">取消</el-button>
@@ -2372,7 +2372,7 @@ onMounted(async () => {
   background-color: var(--color-bg-hover);
 }
 
-/* 选中态：品牌浅底 + 左侧色条，与「当前正在看的社区」一一对应 */
+/* 选中态：品牌浅底 + 左侧色条，与「当前正在看的小区」一一对应 */
 .community-item.is-active {
   background-color: var(--color-primary-bg);
   box-shadow: inset 2px 0 0 var(--color-primary);
@@ -2449,7 +2449,7 @@ onMounted(async () => {
 
 /* ---------- 右栏 ---------- */
 
-/* 详情区单列：社区头部 → 房屋（唯一筛选区 + 单元平行列）。
+/* 详情区单列：小区头部 → 房屋（唯一筛选区 + 单元平行列）。
    原左侧结构目录已取消（批量建房一次性建成结构后，选择功能由筛选区完全替代），
    腾出的整列宽度全部交给房屋列表。 */
 .detail {
@@ -2507,7 +2507,7 @@ onMounted(async () => {
 
 /* ---------- 建房带（总入口 + 分步入口 + 结构维护） ---------- */
 
-/* 浅底横带：与「社区级操作」在视觉上分开——建房是本页最高频的结构动作，
+/* 浅底横带：与「小区级操作」在视觉上分开——建房是本页最高频的结构动作，
    给它一条独立的带，而不是继续往头部右侧堆按钮 */
 .build-bar {
   display: flex;
@@ -2559,7 +2559,7 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 
-/* 分步入口：序号徽标把「社区 → 楼栋 → 单元」的层级顺序写在按钮上 */
+/* 分步入口：序号徽标把「小区 → 楼栋 → 单元」的层级顺序写在按钮上 */
 .build-step {
   display: inline-flex;
   align-items: center;
@@ -3272,7 +3272,7 @@ onMounted(async () => {
 
 /* ---------- 响应式 ---------- */
 
-/* < 1200px：社区栏与详情上下堆叠 */
+/* < 1200px：小区栏与详情上下堆叠 */
 @media (max-width: 1199px) {
   .manage {
     grid-template-columns: minmax(0, 1fr);

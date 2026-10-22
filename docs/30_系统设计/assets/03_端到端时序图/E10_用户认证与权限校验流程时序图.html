@@ -5077,13 +5077,13 @@
         </g>
         </g>
 
-        <g data-edge-from="gateway" data-edge-to="redis" data-edge-label="查询社区绑定关系" data-edge-key="4" data-edge-id="query-binding">
+        <g data-edge-from="gateway" data-edge-to="redis" data-edge-label="查询小区绑定关系" data-edge-key="4" data-edge-id="query-binding">
           <path data-composition-edge-from="gateway" data-composition-edge-to="redis" data-composition-edge-id="query-binding" data-composition-points="285,366;595,366" d="M 285 366 L 595 366" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
           <rect x="392.4" y="346" width="95.2" height="16" rx="3" class="c-mask"/>
-          <text x="440" y="356" class="t-backend" font-size="9" text-anchor="middle">查询社区绑定关系</text>
+          <text x="440" y="356" class="t-backend" font-size="9" text-anchor="middle">查询小区绑定关系</text>
         </g>
-        <text data-detail="fine" x="297" y="384" class="t-dim" font-size="7">社区管理员缓存绑定列表</text>
+        <text data-detail="fine" x="297" y="384" class="t-dim" font-size="7">小区管理员缓存绑定列表</text>
         </g>
 
         <g data-edge-from="gateway" data-edge-to="frontend" data-edge-label="签发 JWT（含角色+有效期）" data-edge-key="5" data-edge-id="issue-jwt">
@@ -5144,7 +5144,7 @@
           <rect x="363.8" y="682" width="152.4" height="16" rx="3" class="c-mask"/>
           <text x="440" y="692" class="t-backend" font-size="9" text-anchor="middle">MyBatis-Plus 拦截器注入过滤</text>
         </g>
-        <text data-detail="fine" x="405" y="720" class="t-dim" font-size="7">社区管理员：WHERE community_id IN (绑定列表)</text>
+        <text data-detail="fine" x="405" y="720" class="t-dim" font-size="7">小区管理员：WHERE community_id IN (绑定列表)</text>
         </g>
 
         <g data-edge-from="backend" data-edge-to="frontend" data-edge-label="返回数据（已过滤）" data-edge-key="12" data-edge-id="return-data">
@@ -5155,13 +5155,13 @@
         </g>
         </g>
 
-        <g data-edge-from="user" data-edge-to="frontend" data-edge-label="社区管理员访问全局级接口" data-edge-key="13" data-edge-id="over-access">
+        <g data-edge-from="user" data-edge-to="frontend" data-edge-label="小区管理员访问全局级接口" data-edge-key="13" data-edge-id="over-access">
           <path data-composition-edge-from="user" data-composition-edge-to="frontend" data-composition-edge-id="over-access" data-composition-points="69,804;163,804" d="M 69 804 L 163 804" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
           <rect x="47.599999999999994" y="784" width="136.8" height="16" rx="3" class="c-mask"/>
-          <text x="116" y="794" class="t-backend" font-size="9" text-anchor="middle">社区管理员访问全局级接口</text>
+          <text x="116" y="794" class="t-backend" font-size="9" text-anchor="middle">小区管理员访问全局级接口</text>
         </g>
-        <text data-detail="fine" x="81" y="822" class="t-dim" font-size="7">越权访问（R44/R45）：如创建社区（仅超管）</text>
+        <text data-detail="fine" x="81" y="822" class="t-dim" font-size="7">越权访问（R44/R45）：如创建小区（仅超管）</text>
         </g>
 
         <g data-edge-from="frontend" data-edge-to="gateway" data-edge-label="POST /api/v1/communities" data-edge-key="14" data-edge-id="over-api">
@@ -5244,8 +5244,8 @@
 
 
         <!-- Participants -->
-        <g id="node-user" data-node-id="user" data-node-label="用户" tabindex="0" role="button" aria-label="聚焦用户，五类角色, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="五类角色" data-node-context="时序参与者">
-          <title>用户 · 五类角色 · 时序参与者</title>
+        <g id="node-user" data-node-id="user" data-node-label="用户" tabindex="0" role="button" aria-label="聚焦用户，四类账号/未登录, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="四类账号/未登录" data-node-context="时序参与者">
+          <title>用户 · 四类账号/未登录 · 时序参与者</title>
           <rect x="19" y="72" width="86" height="54" rx="6" class="c-mask"/>
           <rect x="19" y="72" width="86" height="54" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(25 78) scale(0.6875)">
@@ -5253,7 +5253,7 @@
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="62" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">用户</text>
-          <text data-detail="context" x="62" y="111" class="t-muted" font-size="7" text-anchor="middle">五类角色</text>
+          <text data-detail="context" x="62" y="111" class="t-muted" font-size="7" text-anchor="middle">四类账号/未登录</text>
         </g>
 
         <g id="node-frontend" data-node-id="frontend" data-node-label="前端" tabindex="0" role="button" aria-label="聚焦前端，Vue 3 SPA, 时序参与者" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Vue 3 SPA" data-node-context="时序参与者">
@@ -5526,7 +5526,7 @@
         </div>
         <ul>
           <li>&bull; 账号密码 + BCrypt 校验（N4），签发含角色与有效期的 JWT</li>
-          <li>&bull; 社区管理员 JWT 附带绑定社区列表</li>
+          <li>&bull; 小区管理员 JWT 附带绑定小区列表</li>
         </ul>
       </div>
 
@@ -5537,7 +5537,7 @@
         </div>
         <ul>
           <li>&bull; 功能级：@PreAuthorize 角色校验</li>
-          <li>&bull; 数据级：MyBatis-Plus 拦截器按绑定社区注入过滤条件</li>
+          <li>&bull; 数据级：MyBatis-Plus 拦截器按绑定小区注入过滤条件</li>
         </ul>
       </div>
 

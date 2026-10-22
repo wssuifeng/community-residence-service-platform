@@ -44,12 +44,12 @@
   --color-bg: #f9fafb;
   --color-bg-hover: #f3f4f6;
 
-  /* 深色区（游客端沉浸式首页页脚等深灰蓝底场景） */
+  /* 深色区（未登录公开页面沉浸式首页页脚等深灰蓝底场景） */
   --color-bg-dark: #1e293b;
   --color-text-on-dark: rgba(255, 255, 255, 0.72);
   --color-text-on-dark-strong: #f8fafc;
 
-  /* 浅灰容器底（游客首页公告板等贴底容器，仅比 --color-bg 深一档的冷灰） */
+  /* 浅灰容器底（公开首页公告板等贴底容器，仅比 --color-bg 深一档的冷灰） */
   --color-bg-subtle: #f3f4f6;
 
   /* 兼容别名（2026-09-12 用户裁决：全站画布统一冷灰，暖白弃用；仅 auth/错误页

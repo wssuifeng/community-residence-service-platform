@@ -113,7 +113,7 @@ class NoticeTargetPinTest {
     }
 
     @Test
-    @DisplayName("多目标创建：2 社区 + 1 楼栋 → notice_target 写 3 条 + isPinned 落值")
+    @DisplayName("多目标创建：2 小区 + 1 楼栋 → notice_target 写 3 条 + isPinned 落值")
     void create_multipleTargets_writesAllTargets() {
         when(noticeMapper.insert(any(Notice.class))).thenAnswer(inv -> {
             inv.getArgument(0, Notice.class).setId(8L);
@@ -138,11 +138,11 @@ class NoticeTargetPinTest {
     }
 
     @Test
-    @DisplayName("越范围目标逐项拒绝：ADMIN 目标社区含绑定外社区 → 403")
+    @DisplayName("越范围目标逐项拒绝：ADMIN 目标小区含绑定外小区 → 403")
     void create_outOfBoundTarget_rejected() {
         try (MockedStatic<SecurityUtils> mocked = mockSuperAdmin()) {
             mocked.when(() -> SecurityUtils.checkCommunityAccess(99L))
-                    .thenThrow(new ForbiddenException("无权操作未绑定社区的数据"));
+                    .thenThrow(new ForbiddenException("无权操作未绑定小区的数据"));
 
             assertThatThrownBy(() -> noticeService.create(
                     dto(List.of(community(1L), community(99L)), null)))

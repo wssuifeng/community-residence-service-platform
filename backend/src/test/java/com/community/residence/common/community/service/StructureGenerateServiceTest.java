@@ -81,7 +81,7 @@ class StructureGenerateServiceTest {
         securityUtils = mockStatic(SecurityUtils.class);
         Community community = new Community();
         community.setId(1L);
-        community.setName("演示社区");
+        community.setName("演示小区");
         community.setStatus("ACTIVE");
         lenient().when(communityService.requireActiveCommunity(1L)).thenReturn(community);
     }

@@ -14,13 +14,13 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 
-/** 按社区批量挂牌请求（R62：为无房源房屋批量生成 AVAILABLE 房源，默认参数化） */
+/** 按小区批量挂牌请求（R62：为无房源房屋批量生成 AVAILABLE 房源，默认参数化） */
 @Data
-@Schema(description = "按社区批量挂牌请求")
+@Schema(description = "按小区批量挂牌请求")
 public class BatchGenerateHousingDTO {
 
-    @Schema(description = "社区ID")
-    @NotNull(message = "社区ID不能为空")
+    @Schema(description = "小区ID")
+    @NotNull(message = "小区ID不能为空")
     private Long communityId;
 
     @Schema(description = "默认月租金")
@@ -36,13 +36,13 @@ public class BatchGenerateHousingDTO {
     @Pattern(regexp = "^(RENT|SALE)$", message = "租售类型仅支持 RENT/SALE")
     private String rentType;
 
-    @Schema(description = "限定楼栋ID列表（可空=整个社区；与 unitIds/houseIds 可叠加取更细粒度）")
+    @Schema(description = "限定楼栋ID列表（可空=整个小区；与 unitIds/houseIds 可叠加取更细粒度）")
     private List<Long> buildingIds;
 
     @Schema(description = "限定单元ID列表（可空=不限单元）")
     private List<Long> unitIds;
 
-    @Schema(description = "限定房屋ID列表（可空=不限房屋；最细粒度，必须属于该社区）")
+    @Schema(description = "限定房屋ID列表（可空=不限房屋；最细粒度，必须属于该小区）")
     private List<Long> houseIds;
 
     @Schema(description = "标题后缀（可空；非空时标题为「...·精装房源·{suffix}」，≤32 字）")

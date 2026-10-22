@@ -25,7 +25,7 @@ import java.util.Set;
 
 /**
  * JWT 认证过滤器：解析 Bearer 令牌 → 黑名单校验（Redis 优先，降级查 DB）→
- * 填充 UserContext（ADMIN 附绑定社区集合，供数据级权限过滤）。
+ * 填充 UserContext（ADMIN 附绑定小区集合，供数据级权限过滤）。
  * 令牌缺失/非法/已拉黑时不设置认证信息（由 SecurityConfig 默认拒绝 401/403）。
  */
 @Component

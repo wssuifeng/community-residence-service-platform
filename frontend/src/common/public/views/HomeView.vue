@@ -11,7 +11,7 @@ import { housingStatusLabels } from '@/common/housing/types/housing'
 import type { INotice } from '@/common/notice/types/notice'
 import { formatDate } from '@/common/web/utils/date'
 
-/** 游客首页：沉浸式摄影 Hero + 服务入口卡 + 精选房源 + 社区公告 + 注册引导（产品门面） */
+/** 公开首页：沉浸式摄影 Hero + 服务入口卡 + 精选房源 + 小区公告 + 注册引导（产品门面） */
 
 const router = useRouter()
 
@@ -100,7 +100,7 @@ onMounted(() => {
     <section class="hero">
       <div class="hero-inner">
         <h1 class="hero-title">回家，是件值得期待的事</h1>
-        <p class="hero-subtitle">报修 · 反馈 · 预约 · 看房，社区服务一站式办理</p>
+        <p class="hero-subtitle">报修 · 反馈 · 预约 · 看房，小区服务一站式办理</p>
         <form class="hero-search" role="search" @submit.prevent="handleSearch">
           <!-- 搜索对象切换（DEF-047）：房源 / 公告双落点 -->
           <div class="hero-search-scope" role="group" aria-label="搜索对象">
@@ -139,7 +139,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- 三张服务入口卡：负边距叠在 Hero 底边上；游客点击统一引导登录 -->
+    <!-- 三张服务入口卡：负边距叠在 Hero 底边上；未登录访问者点击统一引导登录 -->
     <section class="service-cards" aria-label="服务入口">
       <router-link to="/auth/login" class="service-card">
         <span class="service-icon">
@@ -193,7 +193,7 @@ onMounted(() => {
       </router-link>
     </section>
 
-    <!-- 精选房源 + 社区公告：不对称分栏 -->
+    <!-- 精选房源 + 小区公告：不对称分栏 -->
     <section class="split">
       <div class="housing-panel">
         <header class="section-head">
@@ -226,14 +226,14 @@ onMounted(() => {
             </div>
           </router-link>
           <div v-if="!housingLoading && housings.length === 0" class="section-empty">
-            暂无在租房源，先去公告里了解社区动态吧
+            暂无在租房源，先去公告里了解小区动态吧
           </div>
         </div>
       </div>
 
       <aside class="notice-panel">
         <header class="section-head">
-          <h2 class="section-title">社区公告</h2>
+          <h2 class="section-title">小区公告</h2>
         </header>
         <div v-loading="noticeLoading" class="notice-board">
           <!-- 最多 5 条平分容器高度（与左侧房源区等高），全量走底部「查看全部」 -->
@@ -501,7 +501,7 @@ onMounted(() => {
   font-size: var(--font-size-sm);
 }
 
-/* 精选房源 + 社区公告不对称分栏：stretch 使公告板与房源区等高；
+/* 精选房源 + 小区公告不对称分栏：stretch 使公告板与房源区等高；
    minmax(0, …) 防止横向卡条的内容最小宽度撑破轨道（grid item 默认 min-width:auto） */
 .housing-panel, .notice-panel { min-width: 0; }
 

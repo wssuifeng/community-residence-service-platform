@@ -34,8 +34,8 @@ public class AdminWorkOrderController {
 
     private final WorkOrderService workOrderService;
 
-    @Operation(summary = "可派单服务人员选项", description = "启用状态 STAFF，按调度推荐档位排序（常驻本社区且擅长该类别优先），"
-            + "同在手工单数升序；返回档位、社区/类别匹配、今日班次与在手工单数（R20，V19）")
+    @Operation(summary = "可派单服务人员选项", description = "启用状态 STAFF，按调度推荐档位排序（常驻本小区且擅长该类别优先），"
+            + "同在手工单数升序；返回档位、小区/类别匹配、今日班次与在手工单数（R20，V19）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @GetMapping("/assignable-staff")
     public ApiResponse<List<StaffOptionVO>> assignableStaff(

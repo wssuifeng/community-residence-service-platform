@@ -14,11 +14,11 @@ import type { RelationType } from '@/common/resident/types/resident'
 import { relationTypeLabels } from '@/common/resident/types/resident'
 
 /**
- * 申请租住（R62 补：居民端此前缺少直接的租住申请入口；R62 补 v2：社区级自动通过）。
+ * 申请租住（R62 补：居民端此前缺少直接的租住申请入口；R62 补 v2：小区级自动通过）。
  * 流程：选择身份（租客 / 业主 / 家属）→ 提交入住申请 → 管理方审核通过后
  * 生成居住关系与租约（租期从审核通过起算）。
- * 社区开启「入住申请自动通过」后提交即自动审核，正式租客关系延后至协议与首期成功，本页据社区配置切换文案与结果态，
- * 结果态以提交响应的 status 为准（不靠前端猜测社区开关）。
+ * 小区开启「入住申请自动通过」后提交即自动审核，正式租客关系延后至协议与首期成功，本页据小区配置切换文案与结果态，
+ * 结果态以提交响应的 status 为准（不靠前端猜测小区开关）。
  *
  * 批次 g：已有待审核申请被拒（后端 ErrorCode.APPLICATION_PENDING_EXISTS）时，
  * 提示语必须指引到「租住与房源 → 入住申请」（本人申请的进度与撤回入口），
@@ -33,11 +33,11 @@ const housing = ref<IHousing | null>(null)
 const loading = ref(true)
 const submitting = ref(false)
 const submitted = ref(false)
-/** 提交被拒：已有待审核申请（同社区），页面给出查看/撤回的直达入口 */
+/** 提交被拒：已有待审核申请（同小区），页面给出查看/撤回的直达入口 */
 const pendingExists = ref(false)
-/** 提交后是否即时通过（社区自动审批路径）：决定结果态文案与后续引导 */
+/** 提交后是否即时通过（小区自动审批路径）：决定结果态文案与后续引导 */
 const autoApproved = ref(false)
-/** 社区是否开启自动通过（提交前提示文案用；取不到时按人工审核口径展示） */
+/** 小区是否开启自动通过（提交前提示文案用；取不到时按人工审核口径展示） */
 const communityAutoApprove = ref(false)
 
 const form = reactive({
@@ -65,14 +65,14 @@ async function loadHousing(): Promise<void> {
   }
 }
 
-/* 社区自动审批开关（GET /communities/{id} 对居民开放）：仅影响文案，判定仍以后端提交结果为准 */
+/* 小区自动审批开关（GET /communities/{id} 对居民开放）：仅影响文案，判定仍以后端提交结果为准 */
 async function loadCommunityPolicy(communityId: number | undefined): Promise<void> {
   if (!communityId) return
   try {
     const community = await getCommunity(communityId)
     communityAutoApprove.value = community.autoApproveResidence === 1
   } catch {
-    /* 取不到社区配置不影响申请主流程，按人工审核口径提示 */
+    /* 取不到小区配置不影响申请主流程，按人工审核口径提示 */
     communityAutoApprove.value = false
   }
 }
@@ -133,7 +133,7 @@ onMounted(() => {
       <h1>申请租住</h1>
       <p class="page-head-sub">
         {{ communityAutoApprove
-          ? '本社区自动审核：提交后保留房屋并生成待签约租约；协议确认且首期成功后入住'
+          ? '本小区自动审核：提交后保留房屋并生成待签约租约；协议确认且首期成功后入住'
           : '提交后临时保留房屋，由管理方审核；协议确认且首期成功后正式入住' }}
       </p>
     </header>
@@ -142,7 +142,7 @@ onMounted(() => {
     <div v-if="pendingExists" class="result-card card">
       <h2>您已有待审核的入住申请</h2>
       <p>
-        同一房屋（或同一社区在住/在审）无法重复提交。请在「租住与房源 → 入住申请」查看审核进度，
+        同一房屋（或同一小区在住/在审）无法重复提交。请在「租住与房源 → 入住申请」查看审核进度，
         若不再需要该申请，可在该页撤回后重新提交。
       </p>
       <div class="result-actions">
@@ -155,7 +155,7 @@ onMounted(() => {
     <div v-else-if="submitted" class="result-card card">
       <h2>{{ autoApproved ? '申请已通过，租约已生成' : '申请已提交' }}</h2>
       <p v-if="autoApproved">
-        本社区已开启入住申请自动通过，租约已生成。可在「租住与房源 → 租住契约」查看租期、租金与押金，
+        本小区已开启入住申请自动通过，租约已生成。可在「租住与房源 → 租住契约」查看租期、租金与押金，
         并留意管理方发起的租赁协议确认。
       </p>
       <p v-else>
@@ -233,8 +233,8 @@ onMounted(() => {
 
         <div class="form-tip">
           <template v-if="communityAutoApprove">
-            <p>· 本社区已开启入住申请自动通过，提交后立即生成待签约租约，不提前建立正式租客关系；</p>
-            <p>· 租期按社区默认租期起算，租金与押金取本次申请提交时的挂牌价快照；</p>
+            <p>· 本小区已开启入住申请自动通过，提交后立即生成待签约租约，不提前建立正式租客关系；</p>
+            <p>· 租期按小区默认租期起算，租金与押金取本次申请提交时的挂牌价快照；</p>
             <p>· 租约生成后可在「租住契约」查看，并在管理方发起协议后在线确认租赁协议。</p>
           </template>
           <template v-else>

@@ -20,7 +20,7 @@ public class UnitVO {
     @Schema(description = "所属楼栋名称")
     private String buildingName;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "单元名称")

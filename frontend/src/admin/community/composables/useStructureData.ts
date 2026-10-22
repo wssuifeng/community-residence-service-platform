@@ -13,13 +13,13 @@ const structureError = ref('')
 const scopeLoading = ref(false)
 const structureStats = ref<IDashboardStats | null>(null)
 let houseScopeSeq = 0
-/** 是否已成功加载过当前社区结构（区分「未加载」与「确实为空」两种空态） */
+/** 是否已成功加载过当前小区结构（区分「未加载」与「确实为空」两种空态） */
 const structureLoaded = ref(false)
 
 let structureSeq = 0
 
 /* 元数据用于范围选择/结构维护；房屋仅按用户所选范围读取。
-   社区统计独立取聚合接口，不能把首楼栋缓存解释为社区全量。 */
+   小区统计独立取聚合接口，不能把首楼栋缓存解释为小区全量。 */
 async function loadStructure(communityId: number, initial = false): Promise<void> {
   const seq = ++structureSeq
   houseScopeSeq += 1
@@ -91,7 +91,7 @@ function retryStructure(): void {
   if (selectedCommunityId.value !== null) loadStructure(selectedCommunityId.value)
 }
 
-/* 局部刷新单个单元的房屋（房屋增删改后不整社区重载，保持筛选与展开态）。
+/* 局部刷新单个单元的房屋（房屋增删改后不整小区重载，保持筛选与展开态）。
    独立序列号：与结构整体加载互不作废，避免两侧并发时把对方结果丢弃 */
 let unitReloadSeq = 0
 

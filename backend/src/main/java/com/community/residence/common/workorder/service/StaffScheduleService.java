@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 服务人员排班业务逻辑（V19，C4 物业调度）：一人一社区一天一条
+ * 服务人员排班业务逻辑（V19，C4 物业调度）：一人一小区一天一条
  * （staff_schedule.uk_staff_schedule），批量设置按「人员×日期」逐条覆盖式保存。
  * 班次起止时间以 ShiftType 默认值落库快照，管理员传自定义时间时以自定义为准，
  * REST（休息）强制清空起止时间。
@@ -58,8 +58,8 @@ public class StaffScheduleService {
     private final StaffCommunityAccessService staffCommunityAccessService;
     private final CommunityMapper communityMapper;
 
-    /* 排班列表：按社区+日期范围查询（communityId 为空时不额外收敛，ADMIN 由
-       数据级权限拦截器收敛到绑定社区）；排序 workDate 升序、staffId 升序。
+    /* 排班列表：按小区+日期范围查询（communityId 为空时不额外收敛，ADMIN 由
+       数据级权限拦截器收敛到绑定小区）；排序 workDate 升序、staffId 升序。
        日期范围必填且跨度上限 62 天，防全表扫描 */
     public List<StaffScheduleVO> list(Long communityId, LocalDate startDate, LocalDate endDate, Long staffId) {
         requireDateRange(startDate, endDate, MAX_RANGE_DAYS);
@@ -76,18 +76,18 @@ public class StaffScheduleService {
         return assemble(schedules);
     }
 
-    /* 批量设置排班：人员×日期 笛卡尔积逐条落库（同社区同人同日已存在则覆盖更新）。
-       社区归属与存在性、人员角色、班次取值、班次时间先后在此集中校验；
+    /* 批量设置排班：人员×日期 笛卡尔积逐条落库（同小区同人同日已存在则覆盖更新）。
+       小区归属与存在性、人员角色、班次取值、班次时间先后在此集中校验；
        已存在记录一次批量查出后内存匹配，避免逐条查询 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE", targetType = "STAFF_SCHEDULE", targetId = "#dto.communityId", communityId = "#dto.communityId", content = "'批量设置排班：' + #dto.staffIds + ' / ' + #dto.dates + ' / ' + #dto.shiftType")
     public BatchSaveScheduleResultVO batchSave(BatchSaveScheduleDTO dto) {
         if (dto == null || dto.getCommunityId() == null) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "社区不能为空");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "小区不能为空");
         }
         SecurityUtils.checkCommunityAccess(dto.getCommunityId());
         if (communityMapper.selectById(dto.getCommunityId()) == null) {
-            throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "社区不存在：" + dto.getCommunityId());
+            throw new BusinessException(ErrorCode.DATA_NOT_FOUND, "小区不存在：" + dto.getCommunityId());
         }
         List<Long> staffIds = distinct(dto.getStaffIds());
         if (staffIds.isEmpty()) {
@@ -144,7 +144,7 @@ public class StaffScheduleService {
         return new BatchSaveScheduleResultVO(saved);
     }
 
-    /* 删除单条排班：写操作须显式校验社区归属（拦截器仅改写 SELECT） */
+    /* 删除单条排班：写操作须显式校验小区归属（拦截器仅改写 SELECT） */
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
         StaffSchedule schedule = id == null ? null : staffScheduleMapper.selectById(id);
@@ -155,12 +155,12 @@ public class StaffScheduleService {
         staffScheduleMapper.deleteById(id);
     }
 
-    /* 按社区+日期范围清空排班：staffIds 为空表示清空范围内全部人员 */
+    /* 按小区+日期范围清空排班：staffIds 为空表示清空范围内全部人员 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "DELETE", targetType = "STAFF_SCHEDULE", targetId = "#dto.communityId", communityId = "#dto.communityId", content = "'清空排班范围'")
     public BatchSaveScheduleResultVO clear(ClearScheduleDTO dto) {
         if (dto == null || dto.getCommunityId() == null) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "社区不能为空");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "小区不能为空");
         }
         SecurityUtils.checkCommunityAccess(dto.getCommunityId());
         requireDateRange(dto.getStartDate(), dto.getEndDate(), MAX_RANGE_DAYS);
@@ -175,8 +175,8 @@ public class StaffScheduleService {
         return new BatchSaveScheduleResultVO(removed);
     }
 
-    /** 批量取人员指定日期的班次标签（可空=当日未排班）；communityId 非空时限定该社区，
-        同一人多社区同日多条时取绑定行中 id 最小的一条（一次批量查询，避免 N+1） */
+    /** 批量取人员指定日期的班次标签（可空=当日未排班）；communityId 非空时限定该小区，
+        同一人多小区同日多条时取绑定行中 id 最小的一条（一次批量查询，避免 N+1） */
     public Map<Long, String> shiftLabelsOn(Collection<Long> staffIds, Long communityId, LocalDate date) {
         Map<Long, String> labels = new LinkedHashMap<>();
         schedulesOn(staffIds, communityId, date)
@@ -209,7 +209,7 @@ public class StaffScheduleService {
         row.setRemark(remark);
     }
 
-    /* 组装排班视图：人员姓名与社区名称各一次批量查询，无逐条查询 */
+    /* 组装排班视图：人员姓名与小区名称各一次批量查询，无逐条查询 */
     private List<StaffScheduleVO> assemble(List<StaffSchedule> schedules) {
         Set<Long> staffIds = new LinkedHashSet<>();
         Set<Long> communityIds = new LinkedHashSet<>();

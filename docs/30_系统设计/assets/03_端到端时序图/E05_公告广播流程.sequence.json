@@ -18,7 +18,7 @@
   ],
   "messages": [
     { "id": "create", "from": "admin", "to": "backend", "y": 190, "label": "POST /api/v1/notices", "note": "发布公告（标题/正文/分类/范围/有效期/渠道勾选）", "variant": "emphasis" },
-    { "id": "check-scope", "from": "backend", "to": "db", "y": 234, "label": "权限校验：社区管理员限绑定社区范围（R24）" },
+    { "id": "check-scope", "from": "backend", "to": "db", "y": 234, "label": "权限校验：小区管理员限绑定小区范围（R24）" },
     { "id": "insert-notice", "from": "backend", "to": "db", "y": 278, "label": "INSERT tb_notice (status=DRAFT)" },
     { "id": "publish", "from": "admin", "to": "backend", "y": 336, "label": "PATCH /api/v1/notices/{id}/publish", "note": "发布 → PUBLISHED" },
     { "id": "update-published", "from": "backend", "to": "db", "y": 380, "label": "UPDATE status=PUBLISHED" },
@@ -44,7 +44,7 @@
       "dot": "violet",
       "title": "范围与渠道",
       "items": [
-        "社区管理员发布范围限其绑定社区（R24）",
+        "小区管理员发布范围限其绑定小区（R24）",
         "站内渠道必达；短信/微信为可插拔模拟通道（R51）"
       ]
     },

@@ -26,9 +26,9 @@ import java.util.regex.Pattern;
 
 /**
  * 反馈会话订阅鉴权拦截器（R30，接口设计 §9.6.3.3）：/topic/feedback/{feedbackId}
- * 仅会话参与者可订阅——RESIDENT 限反馈提交人，ADMIN 限绑定社区覆盖该反馈所属
- * 社区（sys_admin_community 实时查询，WS 连接不缓存绑定），SUPER_ADMIN 放行；
- * STAFF/GUEST 非会话角色（§6.1 权限仅 RESIDENT/ADMIN），非参与者订阅即拒。
+ * 仅会话参与者可订阅——RESIDENT 限反馈提交人，ADMIN 限绑定小区覆盖该反馈所属
+ * 小区（sys_admin_community 实时查询，WS 连接不缓存绑定），SUPER_ADMIN 放行；
+ * STAFF 不具备反馈会话权限；未登录公开访问没有会话身份，均不能订阅。
  * Principal 由 WebSocketAuthInterceptor 在 CONNECT 帧注入。
  */
 @Slf4j

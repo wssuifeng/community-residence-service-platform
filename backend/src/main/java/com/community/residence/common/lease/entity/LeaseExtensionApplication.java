@@ -10,7 +10,7 @@ public class LeaseExtensionApplication {
     @TableId(type=IdType.AUTO)
     @Schema(description="申请ID") private Long id;
     @Schema(description="租约ID") private Long leaseId;
-    @Schema(description="社区ID") private Long communityId;
+    @Schema(description="小区ID") private Long communityId;
     @Schema(description="主租客账号ID") private Long residentId;
     @Schema(description="延长月数") private Integer months;
     @Schema(description="原合同止期快照") private LocalDate originalEndDate;

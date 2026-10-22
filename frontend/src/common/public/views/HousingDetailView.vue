@@ -10,7 +10,7 @@ import { housingStatusLabels } from '@/common/housing/types/housing'
 import { useUserStore } from '@/common/auth/store/user'
 import { formatDate, todayISO } from '@/common/web/utils/date'
 
-/** 房源详情（公开）：大图 + 基本信息 + 描述；预约看房对游客引导注册/登录 */
+/** 房源详情（公开）：大图 + 基本信息 + 描述；预约看房对未登录访问者引导注册/登录 */
 
 const route = useRoute()
 const router = useRouter()
@@ -79,7 +79,7 @@ async function load(): Promise<void> {
   loading.value = true
   try {
     housing.value = await getHousingDetail(id)
-    /* 浏览量记录为尽力而为的埋点，失败不阻塞游客浏览；返回值实时计数就地刷新 */
+    /* 浏览量记录为尽力而为的埋点，失败不阻塞公开浏览；返回值实时计数就地刷新 */
     recordHousingView(id)
       .then((count) => {
         if (housing.value) housing.value.viewCount = count
@@ -95,8 +95,8 @@ async function load(): Promise<void> {
 }
 
 /**
- * 看房预约入口：游客跳居民登录并回跳预约页；非居民不调用预约接口。
- * 游客只负责浏览房源与可预约时段，创建预约由居民端完成。
+ * 看房预约入口：未登录访问者跳居民登录并回跳预约页；非居民不调用预约接口。
+ * 未登录访问者只负责浏览房源与可预约时段，创建预约由居民端完成。
  */
 function handleBookViewing(): void {
   const reservePath = `/resident/housings/${route.params.id}/reserve`
@@ -232,7 +232,7 @@ onMounted(load)
             <el-button type="primary" size="large" @click="handleBookViewing">
               {{ bookingActionLabel }}
             </el-button>
-            <p class="action-hint">游客可浏览时段；注册并登录居民账号后即可在线提交预约</p>
+            <p class="action-hint">可公开浏览房源与时段；登录居民账号后即可在线提交预约</p>
           </div>
 
           <!-- 可约时段：只读胶囊，最多展示 4 个，预约动作统一走上方按钮 -->

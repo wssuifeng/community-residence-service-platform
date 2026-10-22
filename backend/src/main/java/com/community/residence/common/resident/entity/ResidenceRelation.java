@@ -28,7 +28,7 @@ public class ResidenceRelation {
     @Schema(description = "居民ID")
     private Long residentId;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "房屋ID")

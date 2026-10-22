@@ -9,28 +9,28 @@ import type { HouseStatus } from '@/common/community/types/community'
 import { SKIP_SYNTAX_HINT, planHouseRows } from '@/admin/community/utils/structureBatch'
 
 /**
- * 结构批量生成（社区管理「批量建房」主入口，替代原「整栋创建」的前端循环创建）：
+ * 结构批量生成（小区管理「批量建房」主入口，替代原「整栋创建」的前端循环创建）：
  * 一次请求建成 楼栋 → 单元 → 房屋 整条链，取代此前「建楼栋 → 选楼栋建单元 →
  * 选单元建房屋」三次来回与逐条 createXxx 循环（中断即半成品）。
  *
  * 两段式交互（约束：不允许未预览直接落库）：
  *  ① 预览：dryRun=true 只读演算，展示后端将生成的楼栋/单元/房号（各上限 20/20/50 条）
  *     与三类计数、跳过数、撞号去重数；表单任何改动都会使预览失效，须重新预览。
- *  ② 生成：dryRun=false 落库，结果面板给出三类计数与逐条失败明细，可直达该社区结构。
+ *  ② 生成：dryRun=false 落库，结果面板给出三类计数与逐条失败明细，可直达该小区结构。
  *
  * 跳过项语法与结构生成预览口径来自共用模块 structureBatch.ts（与单元批量建房同源）。
  * 房屋总量在提交前按前端估算设上限，避免误操作把库写爆。
  */
 const props = defineProps<{
-  /** 目标社区（入口已锁定，本弹窗不提供社区选择：结构生成只能在某个社区下进行） */
+  /** 目标小区（入口已锁定，本弹窗不提供小区选择：结构生成只能在某个小区下进行） */
   community: ICommunity | null
 }>()
 
 const visible = defineModel<boolean>({ required: true })
-/** saved 携带目标社区：父层刷新该社区结构、统计与列表概览 */
+/** saved 携带目标小区：父层刷新该小区结构、统计与列表概览 */
 const emit = defineEmits<{
   saved: [communityId: number]
-  /** 生成成功后跳转该社区结构（父层负责收起弹窗并聚焦社区） */
+  /** 生成成功后跳转该小区结构（父层负责收起弹窗并聚焦小区） */
   viewStructure: [communityId: number]
 }>()
 
@@ -235,7 +235,7 @@ async function handleGenerate(): Promise<void> {
   }
 }
 
-/** 继续生成：保留本次规则继续在同一社区追加（清空上次预览结论） */
+/** 继续生成：保留本次规则继续在同一小区追加（清空上次预览结论） */
 function backToForm(): void {
   phase.value = 'form'
   generated.value = null
@@ -251,7 +251,7 @@ function viewStructure(): void {
   emit('viewStructure', communityId)
 }
 
-/* 每次打开回到表单态并按入口社区重置：默认楼栋前缀取社区名，减少输入 */
+/* 每次打开回到表单态并按入口小区重置：默认楼栋前缀取小区名，减少输入 */
 watch(visible, (value) => {
   if (!value) return
   phase.value = 'form'
@@ -299,7 +299,7 @@ watch(
     <!-- ---------------- 结果面板 ---------------- -->
     <template v-if="phase === 'done' && generated">
       <p class="gen-intro">
-        已在社区「{{ community?.name }}」生成下列结构。计数为本次实际写入量。
+        已在小区「{{ community?.name }}」生成下列结构。计数为本次实际写入量。
       </p>
       <div class="count-grid">
         <div class="count-cell">
@@ -338,7 +338,7 @@ watch(
     <!-- ---------------- 表单 ---------------- -->
     <template v-else>
       <p class="gen-intro">
-        目标社区：<b>{{ community?.name ?? '-' }}</b>
+        目标小区：<b>{{ community?.name ?? '-' }}</b>
         ｜ 一次请求建成整条结构链，不再逐层创建。
       </p>
 
@@ -585,7 +585,7 @@ watch(
     <template #footer>
       <template v-if="phase === 'done' && generated">
         <el-button @click="backToForm">继续生成</el-button>
-        <el-button type="primary" @click="viewStructure">查看该社区结构</el-button>
+        <el-button type="primary" @click="viewStructure">查看该小区结构</el-button>
       </template>
       <template v-else>
         <el-button @click="visible = false">取消</el-button>

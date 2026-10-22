@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** 多方会话控制器：看房预约群聊 + 居民-社区管理员直通（接口设计.md 9.14，R63） */
-@Tag(name = "多方会话", description = "看房预约群聊与居民-社区管理员直通会话接口")
+/** 多方会话控制器：看房预约群聊 + 居民-小区管理员直通（接口设计.md 9.14，R63） */
+@Tag(name = "多方会话", description = "看房预约群聊与居民-小区管理员直通会话接口")
 @RestController
 @RequestMapping("/api/v1/conversations")
 @RequiredArgsConstructor
@@ -68,7 +68,7 @@ public class ConversationController {
     }
 
     @Operation(summary = "创建/获取直通会话",
-            description = "居民与本社区管理员直通（幂等：已有会话直接返回）；居民须属于该社区。"
+            description = "居民与本小区管理员直通（幂等：已有会话直接返回）；居民须属于该小区。"
                     + "DEF-076：管理端（ADMIN/SUPER_ADMIN）可代居民发起——须在请求体传 residentId，"
                     + "居民本人调用可省略（传他人一律 403）")
     @PreAuthorize("hasAnyRole('RESIDENT', 'ADMIN', 'SUPER_ADMIN')")

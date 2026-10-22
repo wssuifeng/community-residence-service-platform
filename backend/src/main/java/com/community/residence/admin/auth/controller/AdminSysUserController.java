@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/** 系统用户管理控制器：账号 CRUD、冻结、改密、社区绑定（接口设计.md 9.10.1/9.10.2） */
+/** 系统用户管理控制器：账号 CRUD、冻结、改密、小区绑定（接口设计.md 9.10.1/9.10.2） */
 @Tag(name = "系统用户管理", description = "管理员/服务人员账号管理接口")
 @RestController
 @RequestMapping("/api/v1/sys-users")
@@ -77,7 +77,7 @@ public class AdminSysUserController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "绑定社区", description = "仅社区管理员角色可绑定；变更后重新登录生效")
+    @Operation(summary = "绑定小区", description = "仅小区管理员角色可绑定；变更后重新登录生效")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping("/{userId}/communities")
     public ApiResponse<BoundCommunityVO> bindCommunity(@PathVariable Long userId,
@@ -85,7 +85,7 @@ public class AdminSysUserController {
         return ApiResponse.success(sysUserService.bindCommunity(userId, dto));
     }
 
-    @Operation(summary = "解绑社区", description = "变更后重新登录生效")
+    @Operation(summary = "解绑小区", description = "变更后重新登录生效")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{userId}/communities/{communityId}")
     public ApiResponse<Void> unbindCommunity(@PathVariable Long userId, @PathVariable Long communityId) {
@@ -93,7 +93,7 @@ public class AdminSysUserController {
         return ApiResponse.success();
     }
 
-    @Operation(summary = "管理员绑定社区列表")
+    @Operation(summary = "管理员绑定小区列表")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/{userId}/communities")
     public ApiResponse<List<BoundCommunityVO>> listBoundCommunities(@PathVariable Long userId) {

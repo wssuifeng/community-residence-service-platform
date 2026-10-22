@@ -49,8 +49,8 @@ export const targetAudienceLabels: Record<TargetAudience, string> = {
 }
 
 /**
- * 公告目标范围类型（V9 R25 v1.2：COMMUNITY-社区, BUILDING-楼栋；
- * DEF-046 V13：GUEST-游客可见，仅超管可勾选、无目标 ID 纯标记）
+ * 公告目标范围类型（V9 R25 v1.2：COMMUNITY-小区, BUILDING-楼栋；
+ * DEF-046 V13：GUEST-无需居住关系可见，仅超管可勾选、无目标 ID 纯标记）
  */
 export type NoticeTargetType = 'COMMUNITY' | 'BUILDING' | 'GUEST'
 
@@ -62,7 +62,7 @@ export type NoticeTargetType = 'COMMUNITY' | 'BUILDING' | 'GUEST'
 export interface INoticeTargetItem {
   targetType: NoticeTargetType
   targetId: number | null
-  /** 社区名/楼栋名，可空 */
+  /** 小区名/楼栋名，可空 */
   targetName: string | null
 }
 
@@ -82,11 +82,11 @@ export interface INotice {
   editedAt?: string | null
   editedBy?: number | null
   id: number
-  /** 首个社区目标 ID；全系统广播时为 null */
+  /** 首个小区目标 ID；全系统广播时为 null */
   communityId: number | null
-  /** 首个社区目标名称 */
+  /** 首个小区目标名称 */
   communityName: string | null
-  /** 目标范围列表（R25 v1.2：多社区/楼栋定向；空=全系统广播） */
+  /** 目标范围列表（R25 v1.2：多小区/楼栋定向；空=全系统广播） */
   targets: INoticeTargetItem[]
   title: string
   content: string

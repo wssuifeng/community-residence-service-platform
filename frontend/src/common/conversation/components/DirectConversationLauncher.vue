@@ -20,9 +20,9 @@ async function open() {
  visible.value = true; communityId.value = undefined; residentId.value = undefined; communities.value = []
  try {
   if (admin.value) { const page = await getCommunityList({ page: 1, size: 100 }); if (!disposed) communities.value = page.records; void searchResidents() }
-  else { const page = await getLeaseList({ page: 1, size: 100 }); if (!disposed) communities.value = [...new Map(page.records.map(item => [item.communityId, { id: item.communityId, name: item.communityName || `社区 #${item.communityId}` }])).values()] }
+  else { const page = await getLeaseList({ page: 1, size: 100 }); if (!disposed) communities.value = [...new Map(page.records.map(item => [item.communityId, { id: item.communityId, name: item.communityName || `小区 #${item.communityId}` }])).values()] }
   if (!disposed && communities.value.length === 1) communityId.value = communities.value[0].id
- } catch (e) { if (!disposed) ElMessage.error(e instanceof Error ? e.message : '社区选项读取失败') }
+ } catch (e) { if (!disposed) ElMessage.error(e instanceof Error ? e.message : '小区选项读取失败') }
 }
 async function submit() {
  if (!communityId.value || admin.value && !residentId.value || busy.value) return
@@ -34,12 +34,12 @@ async function submit() {
 onBeforeUnmount(() => { disposed = true; sequence++ })
 </script>
 <template>
- <button v-if="user.role !== 'STAFF'" type="button" class="direct-launch" @click="open">＋ {{ admin ? '发起直通会话' : '联系社区管理员' }}</button>
+ <button v-if="user.role !== 'STAFF'" type="button" class="direct-launch" @click="open">＋ {{ admin ? '发起直通会话' : '联系小区管理员' }}</button>
  <el-dialog v-model="visible" title="发起直通会话" width="min(460px, 92vw)">
-  <el-form label-width="72px"><el-form-item label="社区"><el-select v-model="communityId" placeholder="选择社区" filterable><el-option v-for="item in communities" :key="item.id" :label="item.name" :value="item.id" /></el-select></el-form-item>
+  <el-form label-width="72px"><el-form-item label="小区"><el-select v-model="communityId" placeholder="选择小区" filterable><el-option v-for="item in communities" :key="item.id" :label="item.name" :value="item.id" /></el-select></el-form-item>
    <el-form-item v-if="admin" label="居民"><el-select v-model="residentId" placeholder="输入姓名或用户名搜索居民" filterable remote :remote-method="searchResidents"><el-option v-for="item in residents" :key="item.id" :label="`${item.realName || item.username}（${item.username}）`" :value="item.id" /></el-select></el-form-item>
   </el-form>
-  <p v-if="!communities.length" class="direct-hint">暂无可用社区，请确认社区归属。发起时后端会再次核验归属。</p>
+  <p v-if="!communities.length" class="direct-hint">暂无可用小区，请确认小区归属。发起时后端会再次核验归属。</p>
   <template #footer><el-button @click="visible = false">取消</el-button><el-button type="primary" :loading="busy" :disabled="!communityId || (admin && !residentId)" @click="submit">发起会话</el-button></template>
  </el-dialog>
 </template>

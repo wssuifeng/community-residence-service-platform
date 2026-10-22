@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 「看房 → 租约 指向修正」SQL 守卫（DEF-081）：
  * `ViewingAppointmentMapper.linkToLease` 必须①**只补空指向**（`lease_id IS NULL`，幂等、
  * 不覆盖既有非空指向）；②只改指向字段，**不得动看房状态**（看房是沟通手段，不是承约门槛）；
- * ③按（居民 + 本房屋的挂牌房源）匹配，不得全表乱写；④游客预约（user_id 为空）不命中。
+ * ③按（居民 + 本房屋的挂牌房源）匹配，不得全表乱写；④历史匿名预约（user_id 为空）不命中。
  */
 @DisplayName("看房→租约指向修正 SQL 守卫（DEF-081）")
 class ViewingLeaseLinkGuardTest {
@@ -46,7 +46,7 @@ class ViewingLeaseLinkGuardTest {
     }
 
     @Test
-    @DisplayName("匹配口径：按居民 + 本房屋的挂牌房源（游客预约 user_id 为空自然不命中）")
+    @DisplayName("匹配口径：按居民 + 本房屋的挂牌房源（历史匿名预约 user_id 为空自然不命中）")
     void matchesResidentAndHouseListings() throws Exception {
         String sql = sql();
 

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.util.List;
 
-/** 代建服务人员账号；社区绑定与账号在同一事务提交。 */
+/** 代建服务人员账号；小区绑定与账号在同一事务提交。 */
 @Data
 @Schema(description = "代建服务人员账号")
 public class CreateStaffAccountDTO {
@@ -27,10 +27,10 @@ public class CreateStaffAccountDTO {
     @Schema(description = "固定STAFF，不允许创建其他角色")
     @NotBlank @Pattern(regexp = "^STAFF$", message = "只能代建服务人员账号")
     private String role = "STAFF";
-    @Schema(description = "至少绑定一个有效且有管理权限的社区")
+    @Schema(description = "至少绑定一个有效且有管理权限的小区")
     @NotEmpty @Size(max = 100)
     private List<@NotNull @Positive Long> communityIds;
-    @Schema(description = "所选社区内的擅长服务类别，可空")
+    @Schema(description = "所选小区内的擅长服务类别，可空")
     @Size(max = 100)
     private List<@NotNull @Positive Long> categoryIds;
 }

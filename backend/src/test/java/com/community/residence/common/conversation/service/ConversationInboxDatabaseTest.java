@@ -38,7 +38,7 @@ class ConversationInboxDatabaseTest {
      "CREATE TABLE feedback_message(id BIGINT PRIMARY KEY,feedback_id BIGINT,sender_id BIGINT,sender_type VARCHAR(20),content VARCHAR(500),created_at DATETIME)"
     ))statement.execute(sql);
     statement.execute(java.nio.file.Files.readString(java.nio.file.Path.of("src/main/resources/db/migration/V43__feedback_read_cursor.sql")));
-    statement.execute("INSERT INTO community VALUES(2,'合成社区','C2'),(99,'不可见社区','C99')");
+    statement.execute("INSERT INTO community VALUES(2,'合成小区','C2'),(99,'不可见小区','C99')");
     statement.execute("INSERT INTO resident VALUES(8,'不可泄露实名'),(9,'实名居民')");
     statement.execute("INSERT INTO conversation VALUES(10,'WORK_ORDER_GROUP','工单甲','ACTIVE',2,11,'旧消息','2026-10-10 10:00:00','2026-10-09 10:00:00'),(20,'DIRECT','无权群','ACTIVE',99,NULL,NULL,NULL,'2026-10-17 10:00:00')");
     statement.execute("INSERT INTO conversation_participant VALUES(10,'USER',8,0),(20,'RESIDENT',8,0)");

@@ -22,7 +22,7 @@ public class ResidenceApplication {
     @Schema(description = "申请人ID")
     private Long residentId;
 
-    @Schema(description = "申请社区ID")
+    @Schema(description = "申请小区ID")
     private Long communityId;
 
     @Schema(description = "申请房屋ID")

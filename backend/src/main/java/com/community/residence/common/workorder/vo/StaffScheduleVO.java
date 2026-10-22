@@ -22,10 +22,10 @@ public class StaffScheduleVO {
     @Schema(description = "服务人员姓名")
     private String staffName;
 
-    @Schema(description = "排班社区ID")
+    @Schema(description = "排班小区ID")
     private Long communityId;
 
-    @Schema(description = "排班社区名称")
+    @Schema(description = "排班小区名称")
     private String communityName;
 
     @Schema(description = "排班日期")

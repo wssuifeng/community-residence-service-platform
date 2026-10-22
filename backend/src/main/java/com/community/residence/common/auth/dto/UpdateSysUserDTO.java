@@ -26,7 +26,7 @@ public class UpdateSysUserDTO {
     @Email(message = "邮箱格式不正确")
     private String email;
 
-    @Schema(description = "角色：SUPER_ADMIN-超级管理员, ADMIN-社区管理员, STAFF-服务人员")
+    @Schema(description = "角色：SUPER_ADMIN-超级管理员, ADMIN-小区管理员, STAFF-服务人员")
     @NotBlank(message = "角色不能为空")
     @Pattern(regexp = "^(SUPER_ADMIN|ADMIN|STAFF)$", message = "角色不合法")
     private String role;

@@ -19,7 +19,7 @@ public class StaffCommunityAccessService {
     private final SysUserMapper sysUserMapper;
     private final StaffCommunityMapper staffCommunityMapper;
 
-    /** 调用方事务内锁定人员，随后使用当前读校验目标社区，避免与解绑穿透。 */
+    /** 调用方事务内锁定人员，随后使用当前读校验目标小区，避免与解绑穿透。 */
     public SysUser requireBoundActiveForUpdate(Long staffId, Long communityId) {
         SysUser staff = sysUserMapper.selectByIdForUpdate(staffId);
         if (staff == null || !RoleConstants.STAFF.equals(staff.getRole())) {
@@ -31,7 +31,7 @@ public class StaffCommunityAccessService {
         if (staffCommunityMapper.selectList(new LambdaQueryWrapper<StaffCommunity>()
                 .eq(StaffCommunity::getStaffId, staffId).eq(StaffCommunity::getCommunityId, communityId)
                 .last("FOR UPDATE")).isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "服务人员未绑定目标社区");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "服务人员未绑定目标小区");
         }
         return staff;
     }

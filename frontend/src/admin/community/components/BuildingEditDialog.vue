@@ -25,7 +25,7 @@ import { SKIP_SYNTAX_HINT, planHouseRows } from '@/admin/community/utils/structu
  * 两用仍保留原文件名（不新增 `.vue`）：`views/` 计数口径 98 个 `.vue` / 子组件 21 /
  * 功能视图 69 不因本次改动漂移（与批次 k 就地重写 UnitBatchDialog 同一处理）。
  *
- * 新建模式（building 为空）= 在指定社区**批量建楼栋**，而非过去的单个空楼栋：
+ * 新建模式（building 为空）= 在指定小区**批量建楼栋**，而非过去的单个空楼栋：
  *   ① 楼栋名按「前缀 + 序号区间 + 后缀」生成（也可切「单栋自定义名称」建 A 座这类
  *      不带序号的名称，避免把任意名称硬套成「前缀+序号」）；
  *   ② 可同批建立每栋的**单元**（按序号）与**楼层房屋**（楼层区间 × 每层序号 + 跳过项），
@@ -33,19 +33,19 @@ import { SKIP_SYNTAX_HINT, planHouseRows } from '@/admin/community/utils/structu
  *   ③ 提交链：POST /buildings/batch → 对成功创建的楼栋 POST /units/batch
  *      → 对成功创建的单元 POST /houses/batch，逐行结果交父层统一的批量结果弹窗。
  *   为什么不用结构链生成（/structures/batch-generate）：后者对**已存在同名楼栋整栋跳过**
- *   （连其单元与房屋一起不建），"社区里已有楼栋、再补几栋并带上单元房屋"走不通；
+ *   （连其单元与房屋一起不建），"小区里已有楼栋、再补几栋并带上单元房屋"走不通；
  *   本路径按行独立（部分成功语义），楼栋重名不拦截（后端无唯一约束，预览里点名提示）。
- * 编辑模式（building 非空）= 既有单栋表单（社区 / 名称 / 总层数 / 描述），行为不变。
+ * 编辑模式（building 非空）= 既有单栋表单（小区 / 名称 / 总层数 / 描述），行为不变。
  */
 
 const props = defineProps<{
-  /** 社区下拉选项（结构树已加载的社区列表） */
+  /** 小区下拉选项（结构树已加载的小区列表） */
   communities: ICommunity[]
   /** 编辑目标：null = 新建（批量建楼栋） */
   building?: IBuilding | null
-  /** 新建时的默认社区（树上下文预选） */
+  /** 新建时的默认小区（树上下文预选） */
   defaultCommunityId?: number | null
-  /** 当前社区已存在的楼栋名：重名不阻断创建，但要在预览里点名（避免误按重复序号续建） */
+  /** 当前小区已存在的楼栋名：重名不阻断创建，但要在预览里点名（避免误按重复序号续建） */
   existingNames?: string[]
 }>()
 
@@ -102,7 +102,7 @@ const editForm = reactive<BuildingForm>({
 })
 
 const editRules: FormRules = {
-  communityId: [{ required: true, message: '请选择所属社区', trigger: 'change' }],
+  communityId: [{ required: true, message: '请选择所属小区', trigger: 'change' }],
   name: [{ required: true, message: '请输入楼栋名称', trigger: 'blur' }],
   floors: [{ required: true, message: '请输入总层数', trigger: 'blur' }]
 }
@@ -139,7 +139,7 @@ const form = reactive({
 })
 
 const rules: FormRules = {
-  communityId: [{ required: true, message: '请选择所属社区', trigger: 'change' }],
+  communityId: [{ required: true, message: '请选择所属小区', trigger: 'change' }],
   name: [{ required: true, message: '请输入楼栋名称', trigger: 'blur' }],
   startNo: [
     {
@@ -167,7 +167,7 @@ const rules: FormRules = {
   ]
 }
 
-/** 只读展示的社区名（结构与房屋只能建在某个社区下，故新建时不给社区切换） */
+/** 只读展示的小区名（结构与房屋只能建在某个小区下，故新建时不给小区切换） */
 const communityName = computed(
   () => props.communities.find((item) => item.id === form.communityId)?.name ?? ''
 )
@@ -251,7 +251,7 @@ const overBuildingLimit = computed(() => buildingNames.value.length > MAX_BUILDI
 const overUnitTotal = computed(() => unitTotal.value > MAX_TOTAL_UNITS)
 const overHousePerUnit = computed(() => buildsHouses.value && housesPerUnit.value > MAX_HOUSES_PER_UNIT)
 const overHouseTotal = computed(() => houseTotal.value > MAX_TOTAL_HOUSES)
-/** 无社区即无落点：楼栋只能建在某个社区下，缺它直接禁用提交（否则会在禁用输入框上弹校验错误） */
+/** 无小区即无落点：楼栋只能建在某个小区下，缺它直接禁用提交（否则会在禁用输入框上弹校验错误） */
 const noCommunity = computed(() => form.communityId === undefined)
 const blocked = computed(
   () =>
@@ -282,7 +282,7 @@ const limitWarning = computed(() => {
 const floorMismatch = computed(
   () => buildsHouses.value && form.floorEnd > form.floors
 )
-/* 打开时重置：编辑模式回填目标，新建模式给一套可直接落在当前社区的默认值 */
+/* 打开时重置：编辑模式回填目标，新建模式给一套可直接落在当前小区的默认值 */
 watch(visible, (value) => {
   if (!value) return
   if (props.building) {
@@ -451,7 +451,7 @@ async function submitCreate(): Promise<void> {
       detail.push({ name: '其余失败项', reason: `另有 ${overflow} 项未完成（明细已截断）` })
     }
 
-    const scope = `已在「${communityName.value || '该社区'}」下`
+    const scope = `已在「${communityName.value || '该小区'}」下`
     const buildingPart =
       form.mode === 'single'
         ? `创建楼栋「${names[0]}」`
@@ -520,8 +520,8 @@ const hiddenBuildingCount = computed(() =>
   >
     <!-- 编辑模式：既有单栋表单 -->
     <el-form v-if="isEdit" ref="formRef" :model="editForm" :rules="editRules" label-width="100px">
-      <el-form-item label="所属社区" prop="communityId">
-        <el-select v-model="editForm.communityId" placeholder="请选择社区" style="width: 100%">
+      <el-form-item label="所属小区" prop="communityId">
+        <el-select v-model="editForm.communityId" placeholder="请选择小区" style="width: 100%">
           <el-option
             v-for="item in communities"
             :key="item.id"
@@ -550,12 +550,12 @@ const hiddenBuildingCount = computed(() =>
 
     <!-- 新建模式：批量建楼栋（可按需同批建立单元与楼层房屋） -->
     <el-form v-else ref="formRef" :model="form" :rules="rules" label-width="108px">
-      <div class="batch-section">目标社区</div>
-      <el-form-item label="所属社区" prop="communityId">
-        <el-input :model-value="communityName || '尚未选择社区'" disabled />
+      <div class="batch-section">目标小区</div>
+      <el-form-item label="所属小区" prop="communityId">
+        <el-input :model-value="communityName || '尚未选择小区'" disabled />
       </el-form-item>
       <p v-if="!form.communityId" class="batch-warn">
-        请先在左侧选中一个社区：楼栋只能建在某个社区下。
+        请先在左侧选中一个小区：楼栋只能建在某个小区下。
       </p>
 
       <div class="batch-section">
@@ -743,7 +743,7 @@ const hiddenBuildingCount = computed(() =>
         房屋最高到 {{ form.floorEnd }} 层，而楼栋总层数为 {{ form.floors }}：必须先把总层数改到 {{ form.floorEnd }}，避免楼栋层数据与房屋互相矛盾。
       </p>
       <p v-if="duplicateNames.length > 0" class="batch-preview-note is-warning">
-        该社区已存在同名楼栋：{{ duplicateNames.join('、') }}（后端不做楼栋重名校验，继续创建会得到同名楼栋）。
+        该小区已存在同名楼栋：{{ duplicateNames.join('、') }}（后端不做楼栋重名校验，继续创建会得到同名楼栋）。
       </p>
     </div>
 

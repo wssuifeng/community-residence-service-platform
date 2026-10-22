@@ -17,16 +17,16 @@ import { userStatusLabels } from '@/common/auth/types/auth'
 import { useUserStore } from '@/common/auth/store/user'
 
 /**
- * 服务人员能力绑定（V19，C4）：物业长期对接人 → 常驻社区 + 擅长服务类别。
- * 这页是工单派单推荐档位的数据来源（档位 1 = 常驻本社区且擅长该类别），
- * 因此页面首要任务是让管理员一眼看懂「绑了谁、管哪个社区、擅长什么」。
+ * 服务人员能力绑定（V19，C4）：物业长期对接人 → 常驻小区 + 擅长服务类别。
+ * 这页是工单派单推荐档位的数据来源（档位 1 = 常驻本小区且擅长该类别），
+ * 因此页面首要任务是让管理员一眼看懂「绑了谁、管哪个小区、擅长什么」。
  * 保存为全量覆盖式：勾选集合即最终状态，取消勾选等于解绑该维度。
  */
 
 const userStore = useUserStore()
 const createVisible = ref(false)
 
-/** 社区标签折叠阈值：超过 2 个折叠为 +N，避免多绑定人员撑坏表格列宽 */
+/** 小区标签折叠阈值：超过 2 个折叠为 +N，避免多绑定人员撑坏表格列宽 */
 const COMMUNITY_TAG_LIMIT = 2
 
 const communities = ref<ICommunity[]>([])
@@ -41,24 +41,24 @@ const total = ref(0)
 const records = ref<IStaffCapability[]>([])
 const loading = ref(false)
 
-/* ---------------- 社区与类别选项 ---------------- */
+/* ---------------- 小区与类别选项 ---------------- */
 
 const boundCommunityIds = computed(() => userStore.user?.boundCommunities ?? [])
 
-/** 可选社区：管理员限绑定社区，超管回落全量（与后端数据权限同口径） */
+/** 可选小区：管理员限绑定小区，超管回落全量（与后端数据权限同口径） */
 async function loadCommunities(): Promise<void> {
   try {
     const result = await getCommunityList({ page: 1, size: 100 })
     const bound = boundCommunityIds.value
     communities.value = userStore.user?.role === 'ADMIN' ? result.records.filter((item) => bound.includes(item.id)) : result.records
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '社区列表加载失败')
+    ElMessage.error(error instanceof Error ? error.message : '小区列表加载失败')
   }
 }
 
 const categoryOptions = ref<{ id: number; name: string; communityName: string }[]>([])
 
-/** 服务类别树拍平（带社区名以便区分跨社区的同名类别） */
+/** 服务类别树拍平（带小区名以便区分跨小区的同名类别） */
 function flattenTree(
   trees: IServiceCategoryTreeNode[][],
   names: string[]
@@ -82,10 +82,10 @@ function flattenTree(
 }
 
 function communityNameOf(id: number): string {
-  return communities.value.find((item) => item.id === id)?.name ?? `社区 ${id}`
+  return communities.value.find((item) => item.id === id)?.name ?? `小区 ${id}`
 }
 
-/** 筛选用类别选项：类别按社区划分，取当前可管理社区的全部类别 */
+/** 筛选用类别选项：类别按小区划分，取当前可管理小区的全部类别 */
 async function loadCategoryOptions(): Promise<void> {
   const ids = boundCommunityIds.value.length > 0 ? boundCommunityIds.value : communities.value.map((item) => item.id)
   if (ids.length === 0) return
@@ -148,7 +148,7 @@ const detailLoading = ref(false)
 const form = ref<{ realName: string; phone: string; email: string; communityIds: number[]; categoryIds: number[] }>({ realName: '', phone: '', email: '', communityIds: [], categoryIds: [] })
 const saving = ref(false)
 
-/** 抽屉内可选类别：来自已勾选社区的服务类别树（未选社区则不给选项并提示） */
+/** 抽屉内可选类别：来自已勾选小区的服务类别树（未选小区则不给选项并提示） */
 const drawerCategoryOptions = ref<{ id: number; name: string; communityName: string }[]>([])
 const drawerCategoryLoading = ref(false)
 
@@ -156,7 +156,7 @@ async function loadDrawerCategories(): Promise<void> {
   const ids = form.value.communityIds
   if (ids.length === 0) {
     drawerCategoryOptions.value = []
-    /* 未绑定社区即无法确定类别归属社区，先清掉类别勾选，避免存下无归属的绑定 */
+    /* 未绑定小区即无法确定类别归属小区，先清掉类别勾选，避免存下无归属的绑定 */
     form.value.categoryIds = []
     return
   }
@@ -166,7 +166,7 @@ async function loadDrawerCategories(): Promise<void> {
       ids.map((id) => getServiceCategoryTree(id).catch(() => [] as IServiceCategoryTreeNode[]))
     )
     drawerCategoryOptions.value = flattenTree(trees, ids.map(communityNameOf))
-    /* 社区变更后可能剔除原类别：只保留仍在选项内的勾选 */
+    /* 小区变更后可能剔除原类别：只保留仍在选项内的勾选 */
     const allowed = new Set(drawerCategoryOptions.value.map((item) => item.id))
     form.value.categoryIds = form.value.categoryIds.filter((item) => allowed.has(item))
   } catch (error) {
@@ -207,7 +207,7 @@ async function handleSave(): Promise<void> {
       categoryIds: form.value.categoryIds
     })
     ElMessage.success(
-      `已保存 ${result.realName} 的能力绑定：常驻社区 ${result.communityIds.length} 个 · 擅长类别 ${result.categoryIds.length} 个`
+      `已保存 ${result.realName} 的能力绑定：常驻小区 ${result.communityIds.length} 个 · 擅长类别 ${result.categoryIds.length} 个`
     )
     drawerVisible.value = false
     fetchList()
@@ -219,9 +219,9 @@ async function handleSave(): Promise<void> {
   }
 }
 
-/** 社区标签折叠后的完整名称交给原生 title 提示 */
+/** 小区标签折叠后的完整名称交给原生 title 提示 */
 function communityTitle(row: IStaffCapability): string {
-  return row.communityNames.length > 0 ? row.communityNames.join('、') : '未绑定常驻社区'
+  return row.communityNames.length > 0 ? row.communityNames.join('、') : '未绑定常驻小区'
 }
 
 function categoryTitle(row: IStaffCapability): string {
@@ -239,7 +239,7 @@ onMounted(async () => {
   <section class="staff-capability">
     <AdminPageHeader
       title="服务人员"
-      :subtitle="`管理服务人员资料与社区绑定（当前 ${total} 人）`"
+      :subtitle="`管理服务人员资料与小区绑定（当前 ${total} 人）`"
     ><el-button type="primary" @click="createVisible = true">代建服务人员账号</el-button></AdminPageHeader>
 
     <p class="page-note">
@@ -247,13 +247,13 @@ onMounted(async () => {
         <circle cx="12" cy="12" r="9" />
         <path d="M12 11v5.5M12 7.8v.2" />
       </svg>
-      服务人员须绑定目标社区后才能派单或排班，擅长类别用于社区内推荐。代建账号必须选择社区；社区管理员仅管理自己授权范围内的绑定。
+      服务人员须绑定目标小区后才能派单或排班，擅长类别用于小区内推荐。代建账号必须选择小区；小区管理员仅管理自己授权范围内的绑定。
     </p>
 
     <FilterPanel resettable @reset="handleReset">
       <el-select
         v-model="communityId"
-        placeholder="全部社区"
+        placeholder="全部小区"
         clearable
         filterable
         class="filter-select"
@@ -296,7 +296,7 @@ onMounted(async () => {
         <el-table-column label="电话" width="130">
           <template #default="{ row }">{{ row.phone || '—' }}</template>
         </el-table-column>
-        <el-table-column label="常驻社区" min-width="220">
+        <el-table-column label="常驻小区" min-width="220">
           <template #default="{ row }">
             <div v-if="row.communityNames.length > 0" class="tag-row" :title="communityTitle(row)">
               <span v-for="name in row.communityNames.slice(0, COMMUNITY_TAG_LIMIT)" :key="name" class="tag is-community">
@@ -326,7 +326,7 @@ onMounted(async () => {
         <template #empty>
           <el-empty :description="hasFilter ? '暂无符合条件的服务人员' : '暂无服务人员账号'" :image-size="80">
             <p v-if="!hasFilter" class="empty-tip">
-              可在本页代建服务人员账号；已有账号可在本页绑定授权社区与擅长类别。
+              可在本页代建服务人员账号；已有账号可在本页绑定授权小区与擅长类别。
             </p>
           </el-empty>
         </template>
@@ -349,19 +349,19 @@ onMounted(async () => {
     >
       <div v-loading="detailLoading" class="drawer-body">
         <p class="drawer-note">
-          保存为<strong>全量覆盖</strong>：本次勾选的社区与类别即最终绑定；某一维度全部取消勾选表示清空该维度，
-          该人员将不再因常驻社区或擅长类别被优先推荐。
+          保存为<strong>全量覆盖</strong>：本次勾选的小区与类别即最终绑定；某一维度全部取消勾选表示清空该维度，
+          该人员将不再因常驻小区或擅长类别被优先推荐。
         </p>
 
         <el-form label-position="top" @submit.prevent>
-          <el-form-item label="常驻社区（决定派单档位：常驻本社区优先）">
+          <el-form-item label="常驻小区（决定派单档位：常驻本小区优先）">
             <el-select
               v-model="form.communityIds"
               multiple
               filterable
               collapse-tags
               class="full-width"
-              placeholder="选择该人员常驻的社区"
+              placeholder="选择该人员常驻的小区"
               @change="loadDrawerCategories"
             >
               <el-option v-for="item in communities" :key="item.id" :label="item.name" :value="item.id" />
@@ -373,8 +373,8 @@ onMounted(async () => {
               v-if="form.communityIds.length === 0"
               type="warning"
               :closable="false"
-              title="请先选择常驻社区"
-              description="服务类别按社区划分，选定社区后才能列出该社区可绑定的类别。"
+              title="请先选择常驻小区"
+              description="服务类别按小区划分，选定小区后才能列出该小区可绑定的类别。"
               show-icon
             />
             <template v-else>
@@ -395,7 +395,7 @@ onMounted(async () => {
                 />
               </el-select>
               <p v-if="!drawerCategoryLoading && drawerCategoryOptions.length === 0" class="form-hint">
-                所选社区尚未配置服务类别，可先在工单调度页的「服务类别」抽屉中维护。
+                所选小区尚未配置服务类别，可先在工单调度页的「服务类别」抽屉中维护。
               </p>
             </template>
           </el-form-item>
@@ -475,7 +475,7 @@ onMounted(async () => {
   margin-left: var(--spacing-xs);
 }
 
-/* 社区/类别标签行：单行不换行，超出交给 +N 与悬浮提示 */
+/* 小区/类别标签行：单行不换行，超出交给 +N 与悬浮提示 */
 .tag-row {
   display: flex;
   align-items: center;

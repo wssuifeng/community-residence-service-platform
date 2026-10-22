@@ -101,7 +101,7 @@ public class LeaseMoveOutApplicationService {
 
     /**
      * 创建退租申请（RESIDENT 本人）：仅已生效租约、退租日期须落在租期窗口内、
-     * 同租约无待审申请；落 PENDING 终态待管理方审核；提交即通知本社区管理方（退租需人工确认）。
+     * 同租约无待审申请；落 PENDING 终态待管理方审核；提交即通知本小区管理方（退租需人工确认）。
      */
     /* DEF-104 并发防护：PENDING 唯一性是「检查后落库」型竞态（无库级唯一约束兜底），
        检查与落库须同锁完成，且承载「落库 + 通知」的事务必须在锁内提交——若保留方法级
@@ -193,7 +193,7 @@ public class LeaseMoveOutApplicationService {
 
     /**
      * 退租申请分页（ADMIN/SUPER_ADMIN）：数据级权限由 DataScopeInterceptor
-     * 按 community_id 注入（本表带 community_id 列，拦截器自动过滤绑定社区）。
+     * 按 community_id 注入（本表带 community_id 列，拦截器自动过滤绑定小区）。
      * size 钳制到 [1,100]，防御 page/size 传 0 或负数产生非法 LIMIT（DEF-127）。
      */
     public PageVO<LeaseMoveOutApplicationVO> page(long page, long size, String status, Long communityId) {
@@ -393,14 +393,14 @@ public class LeaseMoveOutApplicationService {
         return lease;
     }
 
-    /* 社区绑定管理员 ID 集合（通知口径同到期提醒任务） */
+    /* 小区绑定管理员 ID 集合（通知口径同到期提醒任务） */
     private List<Long> boundAdminIds(Long communityId) {
         return sysAdminCommunityMapper.selectList(new LambdaQueryWrapper<SysAdminCommunity>()
                         .eq(SysAdminCommunity::getCommunityId, communityId))
                 .stream().map(SysAdminCommunity::getAdminId).toList();
     }
 
-    /* VO 装配：补申请人姓名、社区名与房屋位置（列表页展示需要）。
+    /* VO 装配：补申请人姓名、小区名与房屋位置（列表页展示需要）。
        单记录路径与批量路径共用一套装配逻辑（DEF-127），仅装载方式不同 */
     private LeaseMoveOutApplicationVO toVO(LeaseMoveOutApplication application) {
         return toVO(application, loadAssemblyContext(List.of(application)));

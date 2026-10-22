@@ -1,4 +1,5 @@
 import { ApiError } from '@/common/web/utils/request'
+import type { Role } from '@/common/web/types/api'
 
 /**
  * 内存版「假后端」——**模拟 E2E** 的测试基建（不连真后端、不发网络请求）。
@@ -102,12 +103,12 @@ function fail(code: number, message: string): never {
   throw new ApiError(code, message, CODES.OK)
 }
 
-/* ------------------------------ 角色与身份 ------------------------------ */
+/* ------------------------------ 访问身份 ------------------------------ */
 
-export type FakeRole = 'GUEST' | 'RESIDENT' | 'STAFF' | 'ADMIN' | 'SUPER_ADMIN'
+export type FakeRole = Role
 
 export interface FakeActor {
-  role: FakeRole
+  role: FakeRole | null
   /** 身份空间内的主体 ID：RESIDENT → resident.id；ADMIN/STAFF/SUPER_ADMIN → sys_user.id */
   id: number
   communityIds: number[]
@@ -133,19 +134,21 @@ export function fakeLogin(role: FakeRole, options: { id?: number; username?: str
   )
 }
 
-/** 当前身份：读 sessionStorage（无会话按游客） */
+/** 当前访问状态：未登录时主体为空，不伪造账号角色。 */
 export function currentActor(): FakeActor {
   const raw = sessionStorage.getItem(SESSION_KEY)
-  if (!raw) return { role: 'GUEST', id: 0, communityIds: [] }
+  if (!raw) return { role: null, id: 0, communityIds: [] }
   try {
     const session = JSON.parse(raw) as {
       user?: { id: number; role: FakeRole; boundCommunities?: number[] }
     }
     const user = session.user
-    if (!user) return { role: 'GUEST', id: 0, communityIds: [] }
+    if (!user || !['RESIDENT', 'STAFF', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+      return { role: null, id: 0, communityIds: [] }
+    }
     return { role: user.role, id: user.id, communityIds: user.boundCommunities ?? [] }
   } catch {
-    return { role: 'GUEST', id: 0, communityIds: [] }
+    return { role: null, id: 0, communityIds: [] }
   }
 }
 
@@ -186,7 +189,7 @@ export interface FakeResidenceApplication {
   houseId: number
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'WITHDRAWN'
   reviewRemark?: string | null
-  /** V26 强关联：审批通过（含社区自动审批）时写死的租约 id；为空表示无关联 */
+  /** V26 强关联：审批通过（含小区自动审批）时写死的租约 id；为空表示无关联 */
   leaseId?: number | null
   createdAt: string
 }
@@ -299,7 +302,7 @@ export interface FakeConversation {
   id: number
   type: 'VIEWING_GROUP' | 'LEASE_GROUP' | 'DIRECT' | 'WORK_ORDER_GROUP'
   relatedId: number | null
-  /** 所属社区（真实 conversation 表有该列；DIRECT 幂等键之一） */
+  /** 所属小区（真实 conversation 表有该列；DIRECT 幂等键之一） */
   communityId?: number | null
   title: string
   status: 'ACTIVE' | 'CLOSED'
@@ -457,9 +460,9 @@ export interface FakeViewingAppointment {
   housingId: number
   houseId: number
   communityId: number
-  /** 新预约绑定居民身份；历史游客样本可能为空 */
+  /** 新预约绑定居民身份；历史匿名样本可能为空 */
   userId?: number | null
-  /** 居民预约联系电话；历史游客数据继续保留旧字段供兼容展示 */
+  /** 居民预约联系电话；历史匿名数据继续保留旧字段供兼容展示 */
   contactPhone?: string | null
   visitorName: string
   visitorPhone: string
@@ -566,14 +569,14 @@ export class FakeBackend {
     this.reset()
   }
 
-  /** 复位为演示种子（联调种子社区的等价最小集） */
+  /** 复位为演示种子（联调种子小区的等价最小集） */
   reset(overrides: Partial<FakeBackendState> = {}): void {
     this.seq = 0
     this.ids = {}
     this.calls = []
     this.state = {
       /* autoApproveResidence 按 ICommunity 口径为 0/1（0=人工审核，1=提交即通过） */
-      communities: [{ id: 1, name: '联调测试社区', autoApproveResidence: 0, defaultLeaseMonths: 12 }],
+      communities: [{ id: 1, name: '联调测试小区', autoApproveResidence: 0, defaultLeaseMonths: 12 }],
       buildings: [{ id: 1, communityId: 1, name: '1 号楼' }],
       units: [{ id: 1, buildingId: 1, name: '1 单元' }],
       houses: [
@@ -606,8 +609,8 @@ export class FakeBackend {
         {
           id: 1,
           communityId: 1,
-          name: '社区标准租赁协议',
-          content: '甲方：社区管理方；乙方：{{tenantName}}；房屋：{{houseLocation}}；月租：{{monthlyRent}}',
+          name: '小区标准租赁协议',
+          content: '甲方：小区管理方；乙方：{{tenantName}}；房屋：{{houseLocation}}；月租：{{monthlyRent}}',
           status: 'ACTIVE'
         }
       ],
@@ -769,10 +772,10 @@ export class FakeBackend {
     }
   }
 
-  /** 管理端数据级权限：ADMIN/SUPER_ADMIN 限绑定社区（R72 押金端点沿用该口径） */
+  /** 管理端数据级权限：ADMIN/SUPER_ADMIN 限绑定小区（R72 押金端点沿用该口径） */
   private assertCommunity(communityId: number, actor: FakeActor): void {
     if (actor.role === 'ADMIN' && !actor.communityIds.includes(communityId)) {
-      fail(CODES.FORBIDDEN, '无权访问非绑定社区的数据')
+      fail(CODES.FORBIDDEN, '无权访问非绑定小区的数据')
     }
   }
 
@@ -838,7 +841,7 @@ export class FakeBackend {
       participantIds: [order.residentId, adminId],
       participantRefs: [
         { id: order.residentId, space: 'RESIDENT', name: residentName, role: 'RESIDENT' },
-        { id: adminId, space: 'USER', name: '社区管理员', role: 'ADMIN' }
+        { id: adminId, space: 'USER', name: '小区管理员', role: 'ADMIN' }
       ],
       createdAt: nowIso()
     }
@@ -877,7 +880,7 @@ export class FakeBackend {
 
   /**
    * 申请 → 租约：**只读申请表上写死的 `lease_id`**（审批通过时写入），
-   * 再取该租约的会话 id。为空即返回空——**不回退按（居民/社区/房屋）猜"最新租约"**，
+   * 再取该租约的会话 id。为空即返回空——**不回退按（居民/小区/房屋）猜"最新租约"**，
    * 避免把"同屋多租约指错"的 bug 引回读路径。
    */
   private applicationLeaseLink(application: FakeResidenceApplication): {
@@ -996,7 +999,7 @@ export class FakeBackend {
       const application: FakeResidenceApplication = {
         id: this.nextId('residenceApplication'),
         residentId: actor.id,
-        /* 社区由房屋推导（前端不传 communityId，与真实后端同口径） */
+        /* 小区由房屋推导（前端不传 communityId，与真实后端同口径） */
         communityId: house.communityId,
         houseId: data.houseId,
         status: 'PENDING',
@@ -1015,7 +1018,7 @@ export class FakeBackend {
     },
     getResidenceApplicationList: async (params?: { status?: string } & PageParams) => {
       const actor = currentActor()
-      /* 居民只看本人；管理端只看绑定社区（数据级权限口径） */
+      /* 居民只看本人；管理端只看绑定小区（数据级权限口径） */
       let rows = this.state.residenceApplications.filter((item) =>
         actor.role === 'RESIDENT' ? item.residentId === actor.id : actor.communityIds.includes(item.communityId)
       )
@@ -1080,7 +1083,7 @@ export class FakeBackend {
         newValue: 'TO_SIGN',
         createdAt: nowIso()
       })
-      /* 自动建租约群聊（R68：参与者=申请居民 + 本社区启用管理员）；同租约建群幂等 */
+      /* 自动建租约群聊（R68：参与者=申请居民 + 本小区启用管理员）；同租约建群幂等 */
       let conversation = this.state.conversations.find(
         (item) => item.type === 'LEASE_GROUP' && item.relatedId === lease.id
       )
@@ -1502,7 +1505,7 @@ export class FakeBackend {
         status: 'SUCCESS',
         failReason: null,
         operatorId: actor.id,
-        operatorName: '社区管理员',
+        operatorName: '小区管理员',
         createdAt: nowIso(),
         refundedAt: nowIso()
       }
@@ -1678,7 +1681,9 @@ export class FakeBackend {
       const lease = this.state.leases.find((item) => item.id === data.leaseId)
       if (!lease) fail(CODES.NOT_FOUND, '租约不存在')
       const actor = currentActor()
-      if (!['ADMIN', 'SUPER_ADMIN'].includes(actor.role)) fail(CODES.FORBIDDEN, '仅管理方可发出协议')
+      if (actor.role === null || !['ADMIN', 'SUPER_ADMIN'].includes(actor.role)) {
+        fail(CODES.FORBIDDEN, '仅管理方可发出协议')
+      }
       if (lease.status !== 'TO_SIGN') fail(CODES.LEASE_STATUS_INVALID, '仅待签约可发出协议')
       const unfinished = this.state.agreements.find(
         (item) => item.leaseId === data.leaseId && item.status !== 'SIGNED' && item.status !== 'CANCELLED'
@@ -1763,7 +1768,8 @@ export class FakeBackend {
       return agreement
     },
     cancelLeaseAgreement: async (id: number, reason: string) => {
-      if (!['ADMIN', 'SUPER_ADMIN'].includes(currentActor().role)) fail(CODES.FORBIDDEN, '仅管理方可撤回')
+      const role = currentActor().role
+      if (role === null || !['ADMIN', 'SUPER_ADMIN'].includes(role)) fail(CODES.FORBIDDEN, '仅管理方可撤回')
       const agreement = this.state.agreements.find((item) => item.id === id)
       if (!agreement) fail(CODES.NOT_FOUND, '租赁协议不存在')
       if (agreement.status === 'SIGNED') fail(CODES.LEASE_STATUS_INVALID, '已双方确认的协议不可撤回')
@@ -1844,7 +1850,7 @@ export class FakeBackend {
         senderName:
           conversation.participantRefs?.find(
             (item) => item.id === actor.id && item.space === (actor.role === 'RESIDENT' ? 'RESIDENT' : 'USER') && item.role === actor.role
-          )?.name ?? (actor.role === 'RESIDENT' ? '演示居民' : '社区管理员'),
+          )?.name ?? (actor.role === 'RESIDENT' ? '演示居民' : '小区管理员'),
         content: data.content,
         createdAt: nowIso()
       }
@@ -1854,8 +1860,8 @@ export class FakeBackend {
     /**
      * 创建/获取直通会话（DEF-076）：
      * - 居民端：本人（传他人 403）；
-     * - **管理端/超管代居民发起**：须指定 `residentId`（缺省 → 400），未绑定该社区 → 403；
-     * - 幂等键 =（DIRECT，社区，居民）——两个入口谁先发起都命中同一条会话。
+     * - **管理端/超管代居民发起**：须指定 `residentId`（缺省 → 400），未绑定该小区 → 403；
+     * - 幂等键 =（DIRECT，小区，居民）——两个入口谁先发起都命中同一条会话。
      */
     openDirectConversation: async (data: { communityId: number; residentId?: number }) => {
       const actor = currentActor()
@@ -1863,7 +1869,7 @@ export class FakeBackend {
       let residentId = data.residentId ?? null
       if (adminInitiated) {
         if (!actor.communityIds.includes(data.communityId)) {
-          fail(CODES.FORBIDDEN, '无权操作未绑定社区的数据')
+          fail(CODES.FORBIDDEN, '无权操作未绑定小区的数据')
         }
         if (residentId === null) {
           fail(CODES.PARAM_INVALID, '请指定直通会话的居民')
@@ -1878,7 +1884,7 @@ export class FakeBackend {
         residentId = actor.id
       }
       const residentName = this.state.residents.find((item) => item.id === residentId)?.name ?? '居民'
-      /* 幂等命中：该居民（居民身份空间）在该社区的 DIRECT 会话 */
+      /* 幂等命中：该居民（居民身份空间）在该小区的 DIRECT 会话 */
       let conversation = this.state.conversations.find(
         (item) =>
           item.type === 'DIRECT' &&
@@ -1886,7 +1892,7 @@ export class FakeBackend {
           (item.participantRefs ?? []).some((ref) => ref.space === 'RESIDENT' && ref.id === residentId)
       )
       if (!conversation) {
-        /* 参与者（真实后端同一事务内拉入）：该居民 + 该社区启用管理员——
+        /* 参与者（真实后端同一事务内拉入）：该居民 + 该小区启用管理员——
            管理端代发起时为发起人本人，居民端发起时取演示管理员 id=1 */
         const adminId = adminInitiated ? actor.id : 1
         conversation = {
@@ -1894,12 +1900,12 @@ export class FakeBackend {
           type: 'DIRECT',
           relatedId: null,
           communityId: data.communityId,
-          title: `${residentName} 与社区管理员`,
+          title: `${residentName} 与小区管理员`,
           status: 'ACTIVE',
           participantIds: Array.from(new Set([residentId, adminId])),
           participantRefs: [
             { id: residentId, space: 'RESIDENT', name: residentName, role: 'RESIDENT' },
-            { id: adminId, space: 'USER', name: '社区管理员', role: 'ADMIN' }
+            { id: adminId, space: 'USER', name: '小区管理员', role: 'ADMIN' }
           ],
           createdAt: nowIso()
         }
@@ -1914,12 +1920,12 @@ export class FakeBackend {
     ensureLeaseGroupConversation: async (leaseId: number) => {
       const actor = currentActor()
       if (actor.role !== 'ADMIN' && actor.role !== 'SUPER_ADMIN') {
-        fail(CODES.FORBIDDEN, '仅社区管理员可建立租约沟通会话')
+        fail(CODES.FORBIDDEN, '仅小区管理员可建立租约沟通会话')
       }
       const lease = this.state.leases.find((item) => item.id === leaseId)
       if (!lease) fail(CODES.NOT_FOUND, '租住记录不存在')
       if (!actor.communityIds.includes(lease.communityId)) {
-        fail(CODES.FORBIDDEN, '无权操作未绑定社区的数据')
+        fail(CODES.FORBIDDEN, '无权操作未绑定小区的数据')
       }
       let conversation = this.state.conversations.find(
         (item) => item.type === 'LEASE_GROUP' && item.relatedId === leaseId
@@ -1940,7 +1946,7 @@ export class FakeBackend {
               name: this.state.residents.find((item) => item.id === lease.tenantId)?.name ?? '居民',
               role: 'RESIDENT'
             },
-            { id: actor.id, space: 'USER', name: '社区管理员', role: 'ADMIN' }
+            { id: actor.id, space: 'USER', name: '小区管理员', role: 'ADMIN' }
           ],
           createdAt: nowIso()
         }
@@ -2026,7 +2032,7 @@ export class FakeBackend {
     intakeWorkOrder: async (id: number, data?: { remark?: string }) => {
       const actor = currentActor()
       if (actor.role !== 'ADMIN' && actor.role !== 'SUPER_ADMIN') {
-        fail(CODES.FORBIDDEN, '仅社区管理员可受理工单')
+        fail(CODES.FORBIDDEN, '仅小区管理员可受理工单')
       }
       const order = this.transitionOrder(id, ['PENDING'], 'TO_ASSIGN', '受理', { remark: data?.remark })
       const conversation = this.ensureWorkOrderGroup(order, actor.id)
@@ -2114,7 +2120,7 @@ export class FakeBackend {
       id: this.nextId('workOrderProcess'),
       orderId: id,
       action,
-      operatorName: actor.role === 'RESIDENT' ? '演示居民' : actor.role === 'STAFF' ? '服务人员一号' : '社区管理员',
+      operatorName: actor.role === 'RESIDENT' ? '演示居民' : actor.role === 'STAFF' ? '服务人员一号' : '小区管理员',
       remark: extra.remark ?? null,
       createdAt: nowIso()
     })
@@ -2160,7 +2166,7 @@ export class FakeBackend {
       const followup = {
         id: this.nextId('followup'),
         content: data.content,
-        operatorName: '社区管理员',
+        operatorName: '小区管理员',
         createdAt: nowIso()
       }
       evaluation.followups.push(followup)
@@ -2226,11 +2232,11 @@ export class FakeBackend {
       if (!notice) fail(CODES.NOT_FOUND, '公告不存在')
       return notice
     },
-    /** 可见性口径：游客仅可见含 GUEST 目标的 PUBLISHED；居民可见本社区/全社区目标；管理端看本社区 */
+    /** 可见性口径：未登录公开访问仅可见“无需居住关系可见”目标；居民可见本小区/全小区目标；管理端看本小区 */
     listNotices: async (params?: { status?: string; targetType?: string } & PageParams) => {
       const actor = currentActor()
       let rows = this.state.notices.filter((item) => {
-        if (actor.role === 'GUEST') {
+        if (actor.role === null) {
           return (
             item.status === 'PUBLISHED' &&
             item.targets.some((target) => target.targetType === 'GUEST')
@@ -2325,7 +2331,7 @@ export class FakeBackend {
         conversationId: feedbackId,
         senderType: actor.role === 'RESIDENT' ? 'RESIDENT' : 'ADMIN',
         senderId: actor.id,
-        senderName: actor.role === 'RESIDENT' ? '演示居民' : '社区管理员',
+        senderName: actor.role === 'RESIDENT' ? '演示居民' : '小区管理员',
         content: data.content,
         createdAt: nowIso()
       }
@@ -2682,11 +2688,11 @@ export class FakeBackend {
   }
 
   community = {
-    /* 社区列表：真实契约为 PageResult（各端筛选下拉均读 records） */
+    /* 小区列表：真实契约为 PageResult（各端筛选下拉均读 records） */
     getCommunityList: async (params?: PageParams) => pageOf(this.state.communities, params),
     getCommunity: async (id: number) => {
       const found = this.state.communities.find((item) => item.id === id)
-      if (!found) fail(CODES.NOT_FOUND, '社区不存在')
+      if (!found) fail(CODES.NOT_FOUND, '小区不存在')
       return found
     },
     getBuildingList: async (communityId: number, params?: PageParams) =>
@@ -2735,11 +2741,11 @@ export class FakeBackend {
       if (!resource) fail(CODES.NOT_FOUND, '资源不存在')
       return resource
     },
-    /* ---- 结构初始化写接口（E1：社区→楼栋→单元→房屋→公共资源→时段） ---- */
+    /* ---- 结构初始化写接口（E1：小区→楼栋→单元→房屋→公共资源→时段） ---- */
     createCommunity: async (data: { name?: string } ) => {
       const community = {
         id: this.nextId('community'),
-        name: data?.name ?? '新建社区',
+        name: data?.name ?? '新建小区',
         autoApproveResidence: 0,
         defaultLeaseMonths: 12
       }
@@ -2917,7 +2923,11 @@ export function installFakeBackend(options: { role?: FakeRole; id?: number } = {
 }
 
 /** 切换当前身份（三端交替推进时用；不动假后端状态） */
-export function actAs(role: FakeRole, id = 1): void {
+export function actAs(role: FakeRole | null, id = 1): void {
+  if (role === null) {
+    sessionStorage.removeItem(SESSION_KEY)
+    return
+  }
   fakeLogin(role, { id })
 }
 

@@ -149,8 +149,8 @@ onMounted(load)
   <div class="notice-list">
     <header class="list-head">
       <div>
-        <h1 class="list-title">社区公告</h1>
-        <p class="list-sub">了解社区最新动态与服务安排</p>
+        <h1 class="list-title">小区公告</h1>
+        <p class="list-sub">了解小区最新动态与服务安排</p>
       </div>
       <SearchBar v-model="keyword" placeholder="搜索公告标题 / 内容" @search="handleSearch" />
     </header>
@@ -254,7 +254,7 @@ onMounted(load)
       <div v-if="!loading && notices.length === 0" class="empty-state">
         <img src="/images/empty-state.png" alt="暂无公告" />
         <h3>暂无相关公告</h3>
-        <p>换个关键字试试，社区有新动态时会第一时间在这里发布。</p>
+        <p>换个关键字试试，小区有新动态时会第一时间在这里发布。</p>
       </div>
     </div>
 

@@ -121,7 +121,7 @@ class WorkOrderServiceExtraTest {
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
             mocked.when(com.community.residence.common.security.context.SecurityUtils::getUserId).thenReturn(1L);
             when(categoryMapper.selectById(1L)).thenReturn(category);
-            /* DEF-001：提交人须在类别归属社区有在住关系 */
+            /* DEF-001：提交人须在类别归属小区有在住关系 */
             when(residenceRelationMapper.selectCount(any())).thenReturn(1L);
             when(workOrderMapper.insert(any(WorkOrder.class))).thenAnswer(inv -> {
                 inv.getArgument(0, WorkOrder.class).setId(1L);

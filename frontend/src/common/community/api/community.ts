@@ -1,4 +1,4 @@
-/** C1 社区基础信息管理接口（接口设计.md §9.1） */
+/** C1 小区基础信息管理接口（接口设计.md §9.1） */
 import { http } from '@/common/web/utils/request'
 import type { PageResult } from '@/common/web/types/api'
 import type {
@@ -30,34 +30,34 @@ import type {
 } from '@/common/community/types/community'
 import type { CommunityStatus } from '@/common/community/types/community'
 
-/* ---------------------------------- 9.1.1 社区管理 ---------------------------------- */
+/* ---------------------------------- 9.1.1 小区管理 ---------------------------------- */
 
-/** 创建社区（接口设计.md 9.1.1.1） */
+/** 创建小区（接口设计.md 9.1.1.1） */
 export function createCommunity(data: ICreateCommunityDTO) {
   return http.post<ICommunity>('/communities', data)
 }
 
-/** 更新社区（接口设计.md 9.1.1.2） */
+/** 更新小区（接口设计.md 9.1.1.2） */
 export function updateCommunity(id: number, data: ICreateCommunityDTO) {
   return http.put<ICommunity>(`/communities/${id}`, data)
 }
 
-/** 查询社区详情（接口设计.md 9.1.1.3） */
+/** 查询小区详情（接口设计.md 9.1.1.3） */
 export function getCommunity(id: number) {
   return http.get<ICommunity>(`/communities/${id}`)
 }
 
-/** 社区分页列表（接口设计.md 9.1.1.4） */
+/** 小区分页列表（接口设计.md 9.1.1.4） */
 export function getCommunityList(params: ICommunityQuery) {
   return http.get<PageResult<ICommunity>>('/communities', params)
 }
 
-/** 更新社区状态（接口设计.md 9.1.1.5） */
+/** 更新小区状态（接口设计.md 9.1.1.5） */
 export function updateCommunityStatus(id: number, data: IUpdateCommunityStatusDTO) {
   return http.patch<null>(`/communities/${id}/status`, data)
 }
 
-/** 删除社区（需求 v1.1 R1/R6：仅超管，级联删除下级结构与关联业务数据；端点由 50 阶段步骤 1b 后端并行交付） */
+/** 删除小区（需求 v1.1 R1/R6：仅超管，级联删除下级结构与关联业务数据；端点由 50 阶段步骤 1b 后端并行交付） */
 export interface CommunityDeletionImpact {
   communityId: number; communityName: string; houses: number; relations: number; activeRelations: number
   leases: number; activeLeases: number; applications: number; pendingApplications: number
@@ -70,12 +70,12 @@ export function deleteCommunity(id: number, confirmationVersion?: string, confir
   return http.delete<null>(`/communities/${id}?confirmationVersion=${encodeURIComponent(confirmationVersion ?? '')}&confirmationName=${encodeURIComponent(confirmationName ?? '')}`)
 }
 
-/** 批量删除社区（仅超管，部分成功语义：逐社区独立事务，返回成功 ID 与失败原因） */
+/** 批量删除小区（仅超管，部分成功语义：逐小区独立事务，返回成功 ID 与失败原因） */
 export function batchDeleteCommunities(ids: number[], confirmationVersions?: Record<number,string>, confirmationNames?: Record<number,string>) {
   return http.post<IBatchOperationResult>('/communities/batch-delete', { ids, confirmationVersions, confirmationNames })
 }
 
-/** 批量启用/停用社区（仅超管，部分成功语义） */
+/** 批量启用/停用小区（仅超管，部分成功语义） */
 export function batchUpdateCommunityStatus(ids: number[], status: CommunityStatus) {
   return http.patch<IBatchOperationResult>('/communities/batch-status', { ids, status })
 }
@@ -120,7 +120,7 @@ export function getBuilding(id: number) {
   return http.get<IBuilding>(`/buildings/${id}`)
 }
 
-/** 社区楼栋分页列表（接口设计.md 9.1.2.5） */
+/** 小区楼栋分页列表（接口设计.md 9.1.2.5） */
 export function getBuildingList(communityId: number, params?: IBuildingQuery) {
   return http.get<PageResult<IBuilding>>(`/communities/${communityId}/buildings`, params)
 }
@@ -227,7 +227,7 @@ export function getResource(id: number) {
   return http.get<IPublicResource>(`/resources/${id}`)
 }
 
-/** 社区公共资源分页列表（接口设计.md 9.1.5.5） */
+/** 小区公共资源分页列表（接口设计.md 9.1.5.5） */
 export function getResourceList(communityId: number, params?: IPublicResourceQuery) {
   return http.get<PageResult<IPublicResource>>(`/communities/${communityId}/resources`, params)
 }
@@ -254,7 +254,7 @@ export function getTimeslotList(resourceId: number, params?: ITimeslotQuery) {
   return http.get<PageResult<IResourceTimeslot>>(`/resources/${resourceId}/timeslots`, params)
 }
 
-/** 责任人最小必要候选，社区绑定优先。 */
+/** 责任人最小必要候选，小区绑定优先。 */
 export function getResponsibleAdmins(params: { communityId?: number; page?: number; size?: number; keyword?: string }) {
   return http.get<PageResult<import('@/common/community/types/community').IResponsibleAdmin>>('/communities/responsible-admins', params)
 }

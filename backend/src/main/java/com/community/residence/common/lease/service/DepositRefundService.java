@@ -113,7 +113,7 @@ public class DepositRefundService {
 
     /**
      * 发起押金退还（管理端）：分布式锁内校验，顺序（硬口径，幂等优先）——
-     * 租约存在 → 数据权限（非绑定社区 403）→ **幂等命中直接返回既有结果（同号内容不一致 5706）**
+     * 租约存在 → 数据权限（非绑定小区 403）→ **幂等命中直接返回既有结果（同号内容不一致 5706）**
      * → 租约状态（须已搬出或存在已通过退租申请，否则 5602）→ 押金状态（仅 PAID，否则 5703；
      * 并发第二请求锁内重读到 REFUNDING 在此拦截，不再落第二张 PENDING 单）
      * → 金额（≤ 可退金额，否则 5704）→ 渠道一致性（否则 5705）→ 凭据门控（否则 5901）
@@ -253,12 +253,12 @@ public class DepositRefundService {
 
     /**
      * 某租约的押金退还记录（R72 §9.20.2）：RESIDENT 限本人租约（越权 403），
-     * 其余角色走社区归属校验；按发起时间倒序，不分页（单租约记录量小）。
+     * 其余角色走小区归属校验；按发起时间倒序，不分页（单租约记录量小）。
      */
     public List<DepositRefundVO> listByLease(Long leaseId) {
         LeaseRecord lease = requireLease(leaseId);
         /* 居民侧唯一数据防线（DEF-103）：lease_deposit_refund 在数据级拦截器 SKIP_TABLES 中，
-           拦截器不注入社区条件——非本人租约必须在此显式拒绝，勿删 */
+           拦截器不注入小区条件——非本人租约必须在此显式拒绝，勿删 */
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)) {
             if (!lease.getTenantId().equals(SecurityUtils.getUserId())) {
                 throw new ForbiddenException("无权查看他人租约的押金退还记录");
@@ -320,7 +320,7 @@ public class DepositRefundService {
                                 + (StringUtils.hasText(remark) ? "；备注：" + remark : "")));
                 notifyResident(lease, "押金退还失败",
                         "您的租约押金 " + refund.getAmount().toPlainString() + " 元退还失败："
-                                + stored + "，可联系社区管理员重新发起。");
+                                + stored + "，可联系小区管理员重新发起。");
                 log.warn("押金退还失败：leaseId={}, refundId={}, reason={}", lease.getId(), refund.getId(), stored);
             });
         }

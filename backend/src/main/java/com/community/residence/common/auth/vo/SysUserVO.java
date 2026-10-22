@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** 系统用户响应（不含密码哈希；绑定社区列表仅详情返回） */
+/** 系统用户响应（不含密码哈希；绑定小区列表仅详情返回） */
 @Data
 @Schema(description = "系统用户信息")
 public class SysUserVO {
@@ -27,13 +27,13 @@ public class SysUserVO {
     @Schema(description = "邮箱")
     private String email;
 
-    @Schema(description = "角色：SUPER_ADMIN-超级管理员, ADMIN-社区管理员, STAFF-服务人员")
+    @Schema(description = "角色：SUPER_ADMIN-超级管理员, ADMIN-小区管理员, STAFF-服务人员")
     private String role;
 
     @Schema(description = "状态：ACTIVE-正常, FROZEN-冻结")
     private String status;
 
-    @Schema(description = "绑定社区列表（仅 ADMIN 角色有值）")
+    @Schema(description = "绑定小区列表（仅 ADMIN 角色有值）")
     private List<BoundCommunityVO> boundCommunities;
 
     @Schema(description = "创建时间")

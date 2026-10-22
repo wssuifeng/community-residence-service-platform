@@ -26,9 +26,9 @@ describe('工单通知 → 工单详情落点（R74/R48）', () => {
     )
   })
 
-  it('明细型来源缺 sourceId 时不跳转（停留在原页），GUEST 无导航语境同样不跳', () => {
+  it('明细型来源缺 sourceId 或未登录访问时不跳转（停留在原页）', () => {
     expect(notificationTarget({ sourceType: 'WORK_ORDER', sourceId: null }, 'RESIDENT')).toBeNull()
-    expect(notificationTarget({ sourceType: 'WORK_ORDER', sourceId: 7 }, 'GUEST')).toBeNull()
+    expect(notificationTarget({ sourceType: 'WORK_ORDER', sourceId: 7 }, null)).toBeNull()
   })
 })
 

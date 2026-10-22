@@ -293,7 +293,7 @@ public class FeedbackService {
         attachmentMapper.deleteById(attachmentId);
     }
 
-    /* 附件写权限：居民限本人反馈；管理端角色放行（社区归属在 Controller 入口由数据级权限过滤） */
+    /* 附件写权限：居民限本人反馈；管理端角色放行（小区归属在 Controller 入口由数据级权限过滤） */
     private void checkWriteAccess(Feedback feedback) {
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
                 && !feedback.getResidentId().equals(SecurityUtils.getUserId())) {

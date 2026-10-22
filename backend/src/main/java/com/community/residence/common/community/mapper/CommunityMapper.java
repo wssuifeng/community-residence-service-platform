@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.community.residence.common.community.entity.Community;
 import org.apache.ibatis.annotations.Mapper;
 
-/** 社区数据访问（数据级权限：community 本表按 id 过滤，由拦截器处理） */
+/** 小区数据访问（数据级权限：community 本表按 id 过滤，由拦截器处理） */
 @Mapper
 public interface CommunityMapper extends BaseMapper<Community> {
     /* 锁父记录，使删除前检查与执行处于同一事务，结构外键新增不能穿越删除。 */

@@ -15,13 +15,13 @@ public class NoticeVO {
     @Schema(description = "公告ID")
     private Long id;
 
-    @Schema(description = "目标社区ID（首个社区目标；全系统广播时为空）")
+    @Schema(description = "目标小区ID（首个小区目标；全系统广播时为空）")
     private Long communityId;
 
-    @Schema(description = "目标社区名称（首个社区目标）")
+    @Schema(description = "目标小区名称（首个小区目标）")
     private String communityName;
 
-    @Schema(description = "目标范围列表（R25 v1.2：多社区/楼栋定向）")
+    @Schema(description = "目标范围列表（R25 v1.2：多小区/楼栋定向）")
     private List<TargetItem> targets;
 
     @Schema(description = "公告标题")
@@ -92,18 +92,18 @@ public class NoticeVO {
         return vo;
     }
 
-    /** 目标范围项（R25：COMMUNITY 社区 / BUILDING 楼栋 / GUEST 游客可见） */
+    /** 目标范围项（R25：COMMUNITY 小区 / BUILDING 楼栋 / GUEST 无需居住关系可见） */
     @Data
     @Schema(description = "公告目标范围")
     public static class TargetItem {
 
-        @Schema(description = "目标类型：COMMUNITY-社区, BUILDING-楼栋, GUEST-游客可见（DEF-046）")
+        @Schema(description = "目标类型：COMMUNITY-小区, BUILDING-楼栋, GUEST-无需居住关系可见（DEF-046）")
         private String targetType;
 
         @Schema(description = "目标ID（GUEST 目标为空）")
         private Long targetId;
 
-        @Schema(description = "目标名称（社区名/楼栋名，可空）")
+        @Schema(description = "目标名称（小区名/楼栋名，可空）")
         private String targetName;
 
         public static TargetItem of(String targetType, Long targetId, String targetName) {

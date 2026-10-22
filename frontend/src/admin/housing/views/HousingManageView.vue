@@ -13,7 +13,7 @@ import { listHousings, listViewingAppointments } from '@/common/housing/api/hous
  * 房源管理（「租住与房源」Hub 的房源管理子视图，批次 g）：页内三分区
  * ?view=houses|viewings|list（缺省 houses）。
  * 主体为 R62 的「房屋与房源」一体化视图（挂牌/编辑/上下架 + 批量挂牌）；
- * 看房预约处置与跨社区「全局房源」总览为同模块的另两个分区，避免同模块再拆页面。
+ * 看房预约处置与跨小区「全局房源」总览为同模块的另两个分区，避免同模块再拆页面。
  * 对照设计稿 09-房源管理：页头 + 4 统计卡 + 白卡 Tab 条（看房预约 Tab 带待确认角标）。
  * 稿例「在租/待租/已租/本月看房」为 AI 即兴，统计卡按真实状态枚举
  * （可租/已预订/已出租）取计数，第四卡按简报取看房预约累计（接口无时间参数不造假）；
@@ -44,7 +44,7 @@ function switchTab(view: TabName): void {
   loadStats()
 }
 
-/** R62：一体化挂牌管理入口（社区结构 → 房屋与房源 Tab） */
+/** R62：一体化挂牌管理入口（小区结构 → 房屋与房源 Tab） */
 function goCommunityHousing(): void {
   void router.push({ name: 'AdminCommunity', query: { tab: 'housing' } })
 }
@@ -117,13 +117,13 @@ useLiveRefresh(() => loadStats(), ['housing'])
       />
     </div>
 
-    <!-- 并入说明（R62）：仅「全局房源」分区展示，指向社区结构内同一体化挂牌管理 -->
+    <!-- 并入说明（R62）：仅「全局房源」分区展示，指向小区结构内同一体化挂牌管理 -->
     <div v-if="activeTab === 'list'" class="merged-notice">
       <span class="merged-notice-text">
-        房源挂牌管理由「房屋与房源」分区与「社区结构 → 房屋与房源」共同承载：按 社区→楼栋→单元→房屋 树形完成挂牌/编辑/上下架与批量挂牌。本分区为跨社区「全局房源」总览视图（支持社区筛选），仍可进行详情、时段与删除操作。
+        房源挂牌管理由「房屋与房源」分区与「小区结构 → 房屋与房源」共同承载：按 小区→楼栋→单元→房屋 树形完成挂牌/编辑/上下架与批量挂牌。本分区为跨小区「全局房源」总览视图（支持小区筛选），仍可进行详情、时段与删除操作。
       </span>
       <el-button type="primary" link class="merged-notice-link" @click="goCommunityHousing">
-        前往社区结构 →
+        前往小区结构 →
       </el-button>
     </div>
 

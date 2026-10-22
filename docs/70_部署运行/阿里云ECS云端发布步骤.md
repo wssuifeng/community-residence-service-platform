@@ -31,7 +31,20 @@ docker push <registry>/<namespace>/frontend:<tag>
 
 版本标签使用不可变发布标识，不使用 `latest`。推送后记录两个镜像 digest，并写入服务器 `.env.cloud`。私有仓库在 ECS 上使用最小拉取权限登录。
 
-当前发布构建（2026-10-21，已推送到 ACR）：
+最近一次镜像更新（2026-10-22，已推送到 ACR；未部署到 ECS）：
+
+| 产物 | 指纹 |
+|---|---|
+| 后端镜像 | `crpi-1trewaz90eq5799a.cn-hongkong.personal.cr.aliyuncs.com/community-residence/backend:cloud-20261022-r2` |
+| 后端远程 digest | `sha256:81225d27901943cd5faf89cd2eb95f4619b1adb4fd6272ad1a33f9e137064027` |
+| 前端镜像 | `crpi-1trewaz90eq5799a.cn-hongkong.personal.cr.aliyuncs.com/community-residence/frontend:cloud-20261022-r2` |
+| 前端远程 digest | `sha256:8e030842682370ceba0a99c01ab12e173b7de395ea05ce4846bbe4f18df99f8c` |
+| 后端 JAR SHA-256 | `480B9C5106D207FAD3823A6EF1880968191F2F26C97CCFCD9B1EDDD5DBA86B68` |
+| 包含变更 | 后端移除未使用的 `GUEST` 账号角色常量（不改变权限/API行为），并包含 Flyway V46 列注释同步；前端账号角色为四类，未登录访问无角色，公告目标界面标为“无需居住关系可见” |
+
+本次只更新 ACR 镜像，没有连接 ECS 或执行部署。后端 `cloud-20261022-r2` 替代前一版 `r1`，用于去除未使用的伪角色常量并同步注释/匿名测试语义；前端 `cloud-20261022-r2` 是当前版，`r1` 已被替代。用户已于 2026-10-22 释放 ECS；当前镜像留待后续重新创建服务器时使用。新后端启动时 Flyway 会应用 V46。
+
+首次部署构建（2026-10-21，已推送并完成 ECS 验证）：
 
 | 产物 | 指纹 |
 |---|---|
@@ -117,7 +130,7 @@ docker compose --env-file .env.cloud -f docker-compose.cloud.yml up -d --wait
 
 回滚时改回上一版本 digest。普通更新不要删除 MySQL、Redis 和 `cloud_uploads` 卷。
 
-## 8. 当前状态
+## 8. ECS 首次部署验证记录（2026-10-21）
 
 已完成：
 
@@ -129,7 +142,7 @@ docker compose --env-file .env.cloud -f docker-compose.cloud.yml up -d --wait
 - IP 首页、OpenAPI/Swagger、公共只读接口、四角色登录、`/ws/info` 和用户主动上传图片已完成部署级冒烟；
 - 本机 `uploads/` 未上传。云端图片卷中的演示图片来自用户主动上传，不是自动同步。
 
-收尾状态：
+域名与 TLS 收尾记录：
 
 - 域名 `cloud-computing-webstatic.cc.cd` 已绑定到 ECS，A 记录指向 `47.238.196.17`，HTTP 入口已验证；
 - HTTPS 已使用 Certbot 申请并配置，443 已启用，HTTP 已重定向到 HTTPS；证书有效期至 `2027-01-19`，Certbot 自动续期定时器已启用；
@@ -149,3 +162,9 @@ sudo docker compose --env-file .env.cloud -f docker-compose.cloud.yml up -d --wa
 ```
 
 证书自动续期需要 ECS 在续期窗口内处于运行状态，并且域名仍指向该 ECS、`80/443` 可从公网访问。若服务器长期关闭，重新开机后先检查证书有效期；临近到期时再执行 `sudo certbot renew`。
+
+## 9. 当前云端状态（2026-10-22）
+
+- 原 ECS 资源已由用户释放，不存在需要检查、启动或更新的服务器；以上 IP、Nginx、证书和容器状态均为释放前的历史验证记录。
+- ACR 当前推荐镜像为 backend `cloud-20261022-r2`、frontend `cloud-20261022-r2`，digest 见本文件第 2 节；该组合尚未部署或运行验证。
+- 后续重新创建 ECS 时，使用更新后的 `.env.cloud.example` 固定镜像引用，再按本文件执行部署；不需要恢复已释放实例。

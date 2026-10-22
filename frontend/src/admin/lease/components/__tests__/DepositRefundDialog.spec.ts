@@ -263,7 +263,7 @@ describe('DepositRefundDialog · 服务端口径（后端定稿）', () => {
     ).rejects.toMatchObject({ code: CODES.DEPOSIT_OUT_REQUEST_CONFLICT })
   })
 
-  it('非绑定社区管理员不可发起（403）', async () => {
+  it('非绑定小区管理员不可发起（403）', async () => {
     seedRefundableLease()
     actAs('ADMIN', 1)
     backend().state.leases[0].communityId = 99

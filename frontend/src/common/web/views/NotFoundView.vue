@@ -14,7 +14,7 @@ function goNotices(): void {
     <header class="error-nav">
       <router-link class="error-brand" to="/guest/home">
         <AppLogo class="error-brand-logo" :size="22" />
-        <span>社区居住服务</span>
+        <span>小区居住服务</span>
       </router-link>
       <nav class="error-nav-links">
         <router-link to="/guest/home">首页</router-link>
@@ -31,7 +31,7 @@ function goNotices(): void {
         <el-button type="primary" class="error-btn error-btn--primary" @click="router.push('/')">
           返回首页
         </el-button>
-        <el-button class="error-btn error-btn--ghost" @click="goNotices">查看社区公告</el-button>
+        <el-button class="error-btn error-btn--ghost" @click="goNotices">查看小区公告</el-button>
       </div>
     </section>
   </main>

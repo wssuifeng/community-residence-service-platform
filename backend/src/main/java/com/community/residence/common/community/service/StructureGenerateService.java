@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 结构链一次性批量生成（C1）：一次请求生成 社区 → 楼栋 → 单元 → 房屋 整条链，
+ * 结构链一次性批量生成（C1）：一次请求生成 小区 → 楼栋 → 单元 → 房屋 整条链，
  * 替代「楼栋一次一栋 + 前端循环逐条建单元/房屋」的多次请求编排。
  *
  * 生成规则（与前端 UnitBatchDialog / HouseBatchDialog 同一口径）：
@@ -37,7 +37,7 @@ import java.util.Set;
  * 部分成功语义：楼栋/单元重名逐项记 failure 后继续，房屋逐行失败由
  * {@link HouseService#insertHouses} 反馈（与单单元批量创建同一套去重与校验），
  * 不整批回滚；dryRun=true 时零写入，只返回预计清单与计数（且不做重名校验）。
- * 内存判断代替逐行查库：楼栋重名由本社区楼栋名集合判定，房屋去重由批内
+ * 内存判断代替逐行查库：楼栋重名由本小区楼栋名集合判定，房屋去重由批内
  * seenNumbers 判定（新建单元不存在既有房屋，见 buildPlan 注释），不做 N+1 查询。
  */
 @Slf4j
@@ -78,7 +78,7 @@ public class StructureGenerateService {
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "CREATE", targetType = "COMMUNITY",
             targetId = "#dto.communityId", communityId = "#dto.communityId",
-            content = "'结构链批量生成：社区 ' + #dto.communityId")
+            content = "'结构链批量生成：小区 ' + #dto.communityId")
     public StructureBatchGenerateResultVO generate(StructureBatchGenerateDTO dto) {
         return execute(dto, Boolean.TRUE.equals(dto.getDryRun()));
     }
@@ -209,7 +209,7 @@ public class StructureGenerateService {
     /* ---- 落库 ---- */
 
     private StructureBatchGenerateResultVO persist(StructureBatchGenerateDTO dto, Community community, Plan plan) {
-        /* 楼栋重名判定用集合：一次查出本社区既有楼栋名（内存判断，避免逐栋查询） */
+        /* 楼栋重名判定用集合：一次查出本小区既有楼栋名（内存判断，避免逐栋查询） */
         Set<String> existingBuildingNames = new HashSet<>();
         buildingMapper.selectList(new LambdaQueryWrapper<Building>()
                         .select(Building::getId, Building::getName)
@@ -234,7 +234,7 @@ public class StructureGenerateService {
             String nameViolation = nameViolation(buildingPlan.name, "楼栋名称");
             if (existingBuildingNames.contains(buildingPlan.name) || !batchBuildingNames.add(buildingPlan.name)) {
                 vo.getFailures().add(Failure.of(StructureBatchGenerateResultVO.LEVEL_BUILDING,
-                        buildingPlan.name, "该社区下已存在同名楼栋，已跳过"));
+                        buildingPlan.name, "该小区下已存在同名楼栋，已跳过"));
                 continue;
             }
             if (nameViolation != null) {

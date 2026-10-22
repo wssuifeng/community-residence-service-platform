@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /** 运营统计控制器：看板与专项统计（接口设计.md 9.9） */
-@Tag(name = "运营统计", description = "社区运营看板与统计接口")
+@Tag(name = "运营统计", description = "小区运营看板与统计接口")
 @RestController
 @RequestMapping("/api/v1/statistics")
 @RequiredArgsConstructor

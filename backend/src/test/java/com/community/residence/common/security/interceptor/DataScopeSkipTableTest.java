@@ -21,7 +21,7 @@ import static org.mockito.Mockito.mockStatic;
 
 /**
  * 数据级权限白名单回归（DEF-070 同型）：**无 `community_id` 列的表必须登记在
- * `DataScopeInterceptor.SKIP_TABLES`**，否则社区管理员（ADMIN）查询会被注入
+ * `DataScopeInterceptor.SKIP_TABLES`**，否则小区管理员（ADMIN）查询会被注入
  * `community_id IN (...)` → `BadSqlGrammarException: Unknown column 'community_id'` → HTTP 500。
  * <p>
  * 本用例同时守住两个方向：①无该列的表不得被注入（V22 押金退还记录 / C10 拉黑审计）；
@@ -54,7 +54,7 @@ class DataScopeSkipTableTest {
     }
 
     @Test
-    @DisplayName("V22 押金退还记录（无 community_id 列）：不注入过滤条件，社区管理员查询不再 500")
+    @DisplayName("V22 押金退还记录（无 community_id 列）：不注入过滤条件，小区管理员查询不再 500")
     void leaseDepositRefund_skipped() throws Exception {
         String sql = rewriteAsCommunityAdmin("lease_deposit_refund");
 
@@ -71,12 +71,12 @@ class DataScopeSkipTableTest {
     }
 
     @Test
-    @DisplayName("有 community_id 列的表仍按绑定社区注入（白名单未被过度扩张）")
+    @DisplayName("有 community_id 列的表仍按绑定小区注入（白名单未被过度扩张）")
     void leaseRecord_injected() throws Exception {
         String sql = rewriteAsCommunityAdmin("lease_record");
 
-        /* 绑定社区集合为 Set.of(1,2)（JDK ImmutableCollections 迭代顺序按 JVM SALT 随机化），
-           故只断言"注入了 1 与 2 两个社区"而不锁定书写顺序，避免 JVM 间 flake */
+        /* 绑定小区集合为 Set.of(1,2)（JDK ImmutableCollections 迭代顺序按 JVM SALT 随机化），
+           故只断言"注入了 1 与 2 两个小区"而不锁定书写顺序，避免 JVM 间 flake */
         assertThat(sql).containsPattern("community_id IN \\((?:1, 2|2, 1)\\)");
     }
 
@@ -96,7 +96,7 @@ class DataScopeSkipTableTest {
     }
 
     @Test
-    @DisplayName("图片消息表具有community_id，仍保留数据库社区过滤")
+    @DisplayName("图片消息表具有community_id，仍保留数据库小区过滤")
     void chatImageWithCommunityColumnStillFiltered() throws Exception {
         assertThat(rewriteAsCommunityAdmin("chat_message_image")).contains("chat_message_image.community_id IN");
     }

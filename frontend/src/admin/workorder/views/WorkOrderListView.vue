@@ -133,7 +133,7 @@ const closedCount = computed(
 const categoryOptions = ref<{ id: number; name: string }[]>([])
 const staffFilterOptions = ref<IStaffOption[]>([])
 
-/** 分类选项：管理范围社区的服务类别树拍平（列表按 categoryId 过滤） */
+/** 分类选项：管理范围小区的服务类别树拍平（列表按 categoryId 过滤） */
 async function loadCategoryOptions(): Promise<void> {
   try {
     const communityPage = await getCommunityList({ page: 1, size: 100 })

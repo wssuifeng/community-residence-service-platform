@@ -29,7 +29,7 @@ import { formatDateTime } from '@/common/web/utils/date'
 use([CanvasRenderer, LineChart, PieChart, GridComponent, TooltipComponent])
 
 const props = defineProps<{
-  /** 社区筛选：null/缺省 = 全部口径；父层切换时经 :key 重挂载整体刷新 */
+  /** 小区筛选：null/缺省 = 全部口径；父层切换时经 :key 重挂载整体刷新 */
   communityId?: number | null
   startDate: string
   endDate: string

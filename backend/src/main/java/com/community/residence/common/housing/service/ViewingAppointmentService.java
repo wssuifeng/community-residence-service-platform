@@ -64,9 +64,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 看房预约业务逻辑：待确认→已预约→已完成 + 已取消/已违约（六大状态机 #5，
- * 复用 C7 冲突检测模式）。新建预约绑定居民 user_id；历史游客记录仅作兼容读取。
+ * 复用 C7 冲突检测模式）。新建预约绑定居民 user_id；历史匿名记录仅作兼容读取。
  * R59：管理端分配带看人（assigned_staff_id）+ 预约居民与带看人会话消息。
- * R63：会话模型升级多方会话——预约创建即建群（居民 + 该社区启用管理员），
+ * R63：会话模型升级多方会话——预约创建即建群（居民 + 该小区启用管理员），
  * 分配带看人时带看人入群（conversation.conversation_id 关联，
  * /topic/conversation/{id}，见 ConversationService）；R59 的
  * viewing_message 单聊端点（messages）保留兼容存量前端，已标注迁移注释。
@@ -120,13 +120,13 @@ public class ViewingAppointmentService {
      * 与入住申请串行，完整同槽另由唯一约束兜底。
      * DEF-062：锁内落库前增「预约人日程冲突」检查（跨房源 + 跨域）——同账号
      * 同日与任意看房预约或任意资源预约时间区间重叠即拒 5807（「影分身」拦截；
-     * 新建预约均有账号，历史游客记录不参与新建冲突检查）。
+     * 新建预约均有账号，历史匿名记录不参与新建冲突检查）。
      */
     @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public ViewingAppointmentVO create(CreateViewingAppointmentDTO dto) {
         requireResidentIdentity();
         ViewingAppointment appointment = insertAppointment(dto);
-        /* R63 预约创建即建群：居民 + 该社区启用管理员入群；历史游客预约
+        /* R63 预约创建即建群：居民 + 该小区启用管理员入群；历史匿名预约
            不进入新建路径；建群与
            conversation_id 回写发生在锁外——insertAppointment 返回时锁已
            释放，但房屋行锁仍保留至本事务提交；预约、群聊及指向共同落库（OCR DEF-118 注释时序修正：
@@ -199,7 +199,7 @@ public class ViewingAppointmentService {
         resolveHousingFromLease(conversation.getRelatedId(),dto);
         Housing housing=housingMapper.selectById(dto.getHousingId());
         if(housingMapper.privateLeaseViewingAvailabilityCount(dto.getHousingId(),conversation.getRelatedId(),SecurityUtils.getUserId())==0)
-            throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,"当前租约来源房源不可预约：请核对承租人、租约状态、社区和挂牌是否启用");
+            throw new BusinessException(ErrorCode.LEASE_STATUS_INVALID,"当前租约来源房源不可预约：请核对承租人、租约状态、小区和挂牌是否启用");
         return housing;
     }
 
@@ -266,7 +266,7 @@ public class ViewingAppointmentService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "所选时间不在房源可预约时段内");
         }
 
-        /* 预约人身份由居民令牌确定（DEF-158 方案 B）：游客没有新建预约路径。
+        /* 预约人身份由居民令牌确定（DEF-158 方案 B）：未登录访问者没有新建预约路径。
            身份先行解析用于跨房源/跨资源日程冲突检查。 */
         Long userId = requireResidentIdentity();
 
@@ -299,7 +299,7 @@ public class ViewingAppointmentService {
                任意房源的看房预约（TO_CONFIRM/RESERVED）或任意资源的资源预约
                （PENDING/RESERVED）时间区间重叠（start<other.end 且 end>other.start，
                仅首尾相接放行）即拒绝；本条记录尚未落库天然不参与比对；
-               游客预约（userId=null）跳过。同房源重叠已由上方冲突检测先行拦截，
+               历史匿名预约（userId=null）跳过。同房源重叠已由上方冲突检测先行拦截，
                此处命中即跨房源/跨域安排 */
             if (userId != null) {
                 Long crossHousing = appointmentMapper.selectCount(
@@ -350,8 +350,8 @@ public class ViewingAppointmentService {
     }
 
     /**
-     * 预约详情：居民限本人；服务人员限被分配预约；ADMIN 限绑定社区；
-     * SUPER_ADMIN 可查看全局。历史游客预约仅对管理端保留兼容读取。
+     * 预约详情：居民限本人；服务人员限被分配预约；ADMIN 限绑定小区；
+     * SUPER_ADMIN 可查看全局。历史匿名预约仅对管理端保留兼容读取。
      */
     public ViewingAppointmentVO getById(Long id) {
         ViewingAppointment appointment = requireAppointment(id);
@@ -374,7 +374,7 @@ public class ViewingAppointmentService {
     /**
      * 某租约关联的看房预约列表（R69 双向关联，按预约日期降序 + id 降序稳定排序，
      * 接口设计 §9.19.8 契约；原仅按 id 排序，同日多条时日期乱序——DEF-118）：
-     * 读权限沿用租约口径——RESIDENT 限本人租约，ADMIN 限绑定社区，SUPER_ADMIN 放行。
+     * 读权限沿用租约口径——RESIDENT 限本人租约，ADMIN 限绑定小区，SUPER_ADMIN 放行。
      * 供居民端「我的租约」与租约详情页展示会话内发起的看房安排。
      */
     public List<ViewingAppointmentVO> listByLease(Long leaseId) {
@@ -434,7 +434,7 @@ public class ViewingAppointmentService {
                 "您 " + appointment.getAppointmentDate() + " 的看房预约已确认");
     }
 
-    /* 完成预约：在预约行锁内校验当前分配人/管理员社区及RESERVED，防改派与完成竞态、重复通知。 */
+    /* 完成预约：在预约行锁内校验当前分配人/管理员小区及RESERVED，防改派与完成竞态、重复通知。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "STATUS", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约完成'")
     public void complete(Long id, String remark) {
@@ -469,7 +469,7 @@ public class ViewingAppointmentService {
                 || SecurityUtils.hasRole(RoleConstants.SUPER_ADMIN)) {
             SecurityUtils.checkCommunityAccess(appointment.getCommunityId());
         } else {
-            throw new ForbiddenException("服务人员与游客无权取消看房预约");
+            throw new ForbiddenException("服务人员与未登录公开访问无权取消看房预约");
         }
         validateTransition(appointment, "CANCELLED");
         appointment.setStatus("CANCELLED");
@@ -491,7 +491,7 @@ public class ViewingAppointmentService {
     }
 
     /* 标记违约：预约行锁防重；账号级统一计数达到现行阈值后冻结并吊销旧令牌。
-       历史游客只保留预约处置，不生成账号级计数或通知。 */
+       历史匿名只保留预约处置，不生成账号级计数或通知。 */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "DISPOSAL", targetType = "VIEWING_APPOINTMENT", targetId = "#id", content = "'看房预约违约处置：' + #reason")
     public void violate(Long id, String reason) {
@@ -549,7 +549,7 @@ public class ViewingAppointmentService {
     }
 
     /* R55「确认/取消均通知对方」（DEF-023）：预约人有账号时经通知中心触达（resident.id
-       身份空间）；游客预约无账号，通知语义不适用（违约处置等动作的游客触达无通道，
+       身份空间）；历史匿名预约无账号，通知语义不适用（违约处置等动作的未登录访问者触达无通道，
        为 R55 口径内边界） */
     private void notifyApplicant(ViewingAppointment appointment, String title, String content) {
         if (appointment.getUserId() != null) {
@@ -558,7 +558,7 @@ public class ViewingAppointmentService {
         }
     }
 
-    /* R48/E12：新建看房预约投递给房源所属社区的绑定管理员；游客历史预约无新建入口，
+    /* R48/E12：新建看房预约投递给房源所属小区的绑定管理员；未登录访问者历史预约无新建入口，
        因此此处只处理已登录居民创建的预约。 */
     private void notifyAdminsOfNewAppointment(ViewingAppointment appointment) {
         notifyAdmins(appointment, "新看房预约",
@@ -566,7 +566,7 @@ public class ViewingAppointmentService {
                         + appointment.getStartTime() + "~" + appointment.getEndTime() + " 的看房预约，请及时确认");
     }
 
-    /* 管理方通知统一走社区绑定关系，避免创建 / 取消事件各自复制收件人逻辑。 */
+    /* 管理方通知统一走小区绑定关系，避免创建 / 取消事件各自复制收件人逻辑。 */
     private void notifyAdmins(ViewingAppointment appointment, String title, String content) {
         List<Long> adminIds = sysAdminCommunityMapper.selectList(
                         new LambdaQueryWrapper<SysAdminCommunity>()
@@ -582,7 +582,7 @@ public class ViewingAppointmentService {
      * 分配带看人（R59）：目标账号须存在、启用、且角色为 STAFF/ADMIN
      * （禁分配 SUPER_ADMIN——平台管理不承担带看；RESIDENT 不在 sys_user 表，
      * 查无即拒）。重复分配允许覆盖（换带看人场景），不校验旧带看人。
-     * 成功后通知双方：带看人 + 预约居民（游客预约无账号跳过居民侧通知）。
+     * 成功后通知双方：带看人 + 预约居民（历史匿名预约无账号跳过居民侧通知）。
      */
     @Transactional(rollbackFor = Exception.class)
     @com.community.residence.common.log.annotation.OperationLog(operationType = "UPDATE",
@@ -599,25 +599,25 @@ public class ViewingAppointmentService {
                 || RoleConstants.ADMIN.equals(assignee.getRole());
         if (!roleAssignable || !CommonStatus.ACTIVE.equals(assignee.getStatus())) {
             throw new BusinessException(ErrorCode.VIEWING_ASSIGNEE_INVALID,
-                    "目标账号不可分配（仅启用状态的服务人员或社区管理员）");
+                    "目标账号不可分配（仅启用状态的服务人员或小区管理员）");
         }
         if (RoleConstants.STAFF.equals(assignee.getRole())) {
             staffCommunityAccessService.requireBoundActiveForUpdate(assigneeId, appointment.getCommunityId());
         }
-        /* R59 管辖校验：ADMIN 带看人须管辖房源所在社区（STAFF 无社区绑定概念），
-           防跨社区分配导致会话参与者越权读取非管辖社区预约信息 */
+        /* R59 管辖校验：ADMIN 带看人须管辖房源所在小区（STAFF 无小区绑定概念），
+           防跨小区分配导致会话参与者越权读取非管辖小区预约信息 */
         if (RoleConstants.ADMIN.equals(assignee.getRole())
                 && !sysAdminCommunityMapper.exists(new LambdaQueryWrapper<SysAdminCommunity>()
                         .eq(SysAdminCommunity::getAdminId, assigneeId)
                         .eq(SysAdminCommunity::getCommunityId, appointment.getCommunityId()))) {
             throw new BusinessException(ErrorCode.VIEWING_ASSIGNEE_INVALID,
-                    "目标管理员未管辖该房源所在社区，不可分配");
+                    "目标管理员未管辖该房源所在小区，不可分配");
         }
         appointment.setAssignedStaffId(assigneeId);
         appointmentMapper.updateById(appointment);
 
         /* R63 带看人入群（幂等，复用 addParticipant 撞号忽略语义）；
-           未建群（历史游客预约）无会话可入，跳过 */
+           未建群（历史匿名预约）无会话可入，跳过 */
         if (appointment.getConversationId() != null) {
             conversationService.addParticipant(appointment.getConversationId(), assigneeId);
         }
@@ -632,8 +632,8 @@ public class ViewingAppointmentService {
     }
 
     /**
-     * 带看人候选（R59）：启用状态 STAFF 全量 + 管辖该社区的启用 ADMIN，
-     * 最小暴露面仅 ID/姓名/角色；调用者 ADMIN 仅可查其绑定社区（复用 checkCommunityAccess）。
+     * 带看人候选（R59）：启用状态 STAFF 全量 + 管辖该小区的启用 ADMIN，
+     * 最小暴露面仅 ID/姓名/角色；调用者 ADMIN 仅可查其绑定小区（复用 checkCommunityAccess）。
      */
     public List<AssigneeOptionVO> assignableAssignees(Long communityId) {
         SecurityUtils.checkCommunityAccess(communityId);
@@ -662,7 +662,7 @@ public class ViewingAppointmentService {
      * 会话消息列表（R59，已被 R63 多方会话取代——前端已迁移
      * /conversations/{conversationId}/messages，本端点保留兼容存量数据）：
      * 时间正序（按 id 升序，自增单调）非分页。
-     * 可读=预约居民、带看人、或该房源所在社区的 ADMIN/SUPER_ADMIN；其余 403。
+     * 可读=预约居民、带看人、或该房源所在小区的 ADMIN/SUPER_ADMIN；其余 403。
      */
     public List<ViewingMessageVO> listMessages(Long appointmentId) {
         ViewingAppointment appointment = requireAppointment(appointmentId);

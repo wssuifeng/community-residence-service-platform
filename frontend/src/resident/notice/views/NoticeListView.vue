@@ -8,13 +8,13 @@ import { listNotices } from '@/common/notice/api/notice'
 import type { INotice } from '@/common/notice/types/notice'
 import { formatDate } from '@/common/web/utils/date'
 
-/** 居民端公告列表：同步游客端 v5 定稿设计（衬线页头 + 置顶轮播 + 日期块期刊列表）；
+/** 居民端公告列表：同步未登录公开页面 v5 定稿设计（衬线页头 + 置顶轮播 + 日期块期刊列表）；
     数据层维持居民登录态 listNotices 分页/搜索与关键词 URL 回写，详情跳转走居民端路由 */
 
 const route = useRoute()
 const router = useRouter()
 
-/** URL ?keyword= 读取（与游客端同口径；非字符串/空值归一为空串） */
+/** URL ?keyword= 读取（与未登录公开页面同口径；非字符串/空值归一为空串） */
 function keywordFromQuery(): string {
   const value = route.query.keyword
   return typeof value === 'string' ? value.trim() : ''
@@ -27,7 +27,7 @@ const size = ref(10)
 const keyword = ref(keywordFromQuery())
 const loading = ref(false)
 
-/** 置顶轮播背景：仅使用后端保存的公告图片，无图不渲染封面（与游客端同款公共目录图） */
+/** 置顶轮播背景：仅使用后端保存的公告图片，无图不渲染封面（与未登录公开页面同款公共目录图） */
 function noticeBgOf(notice: INotice, _index: number): string | undefined { return notice.images?.[0] }
 
 
@@ -150,8 +150,8 @@ onMounted(load)
   <div class="notice-list">
     <header class="list-head">
       <div>
-        <h1 class="list-title">社区公告</h1>
-        <p class="list-sub">了解社区最新动态与服务安排</p>
+        <h1 class="list-title">小区公告</h1>
+        <p class="list-sub">了解小区最新动态与服务安排</p>
       </div>
       <SearchBar v-model="keyword" placeholder="搜索公告标题 / 内容" @search="handleSearch" />
     </header>
@@ -255,7 +255,7 @@ onMounted(load)
       <div v-if="!loading && notices.length === 0" class="empty-state">
         <img src="/images/empty-state.png" alt="暂无公告" />
         <h3>暂无相关公告</h3>
-        <p>换个关键字试试，社区有新动态时会第一时间在这里发布。</p>
+        <p>换个关键字试试，小区有新动态时会第一时间在这里发布。</p>
       </div>
     </div>
 

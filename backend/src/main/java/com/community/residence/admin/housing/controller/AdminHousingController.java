@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-/** 房源管理控制器：上架/下架 + 游客浏览（接口设计.md 9.12.1） */
+/** 房源管理控制器：上架/下架 + 公开浏览（接口设计.md 9.12.1） */
 @Tag(name = "房源管理", description = "房源展示与管理接口")
 @RestController
 @RequestMapping("/api/v1/housings")
@@ -38,9 +38,9 @@ public class AdminHousingController {
         return ApiResponse.success(housingService.create(dto));
     }
 
-    @Operation(summary = "按社区批量挂牌（R62）",
-            description = "为社区内无在架房源的房屋批量生成 AVAILABLE 房源（默认月租/押金/租售类型参数化，"
-                    + "标题「{楼栋}{单元}{房号}·精装房源」）；已有在架房源的房屋跳过（幂等）；ADMIN 限绑定社区。"
+    @Operation(summary = "按小区批量挂牌（R62）",
+            description = "为小区内无在架房源的房屋批量生成 AVAILABLE 房源（默认月租/押金/租售类型参数化，"
+                    + "标题「{楼栋}{单元}{房号}·精装房源」）；已有在架房源的房屋跳过（幂等）；ADMIN 限绑定小区。"
                     + "可同时为本次新建房源建立可预约看房时段（createTimeslots 缺省 true，"
                     + "timeslotMode 缺省 DEFAULT=工作日 09:00-12:00 + 14:00-18:00）")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")

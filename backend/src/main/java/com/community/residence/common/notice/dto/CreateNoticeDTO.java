@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /** 公告创建/更新请求（更新接口复用；目标为空表示全系统广播，仅超管）。
- *  R25 v1.2：targets 支持多社区/楼栋定向；communityId 单目标写法保留向后兼容
+ *  R25 v1.2：targets 支持多小区/楼栋定向；communityId 单目标写法保留向后兼容
  *  （两者并设时以 targets 为准，communityId 忽略）。
  *  V12（C3 项）：补接收 priority/type/expireTime——expireTime 语义即失效时间，
  *  映射 endTime 列不另落新列；isPinned/priority 分工：置顶是排序、优先级是展示属性。 */
@@ -19,10 +19,10 @@ import java.util.List;
 @Schema(description = "公告创建/更新请求")
 public class CreateNoticeDTO {
 
-    @Schema(description = "目标社区ID（单目标旧写法，向后兼容；新调用请用 targets）")
+    @Schema(description = "目标小区ID（单目标旧写法，向后兼容；新调用请用 targets）")
     private Long communityId;
 
-    @Schema(description = "目标范围列表（R25 v1.2：多社区/楼栋定向；DEF-046：支持 GUEST 游客可见目标仅超管；空=全系统广播仅超管）")
+    @Schema(description = "目标范围列表（R25 v1.2：多小区/楼栋定向；DEF-046：支持 GUEST 无需居住关系可见目标仅超管；空=全系统广播仅超管）")
     private List<TargetItemDTO> targets;
 
     @Schema(description = "置顶：0-普通, 1-置顶（R25 v1.2）")
@@ -71,7 +71,7 @@ public class CreateNoticeDTO {
     @Schema(description = "公告目标范围项")
     public static class TargetItemDTO {
 
-        @Schema(description = "目标类型：COMMUNITY-社区, BUILDING-楼栋, GUEST-游客可见（DEF-046，仅超管）")
+        @Schema(description = "目标类型：COMMUNITY-小区, BUILDING-楼栋, GUEST-无需居住关系可见（DEF-046，仅超管）")
         @NotBlank(message = "目标类型不能为空")
         private String targetType;
 

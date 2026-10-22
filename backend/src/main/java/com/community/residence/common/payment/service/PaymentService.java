@@ -286,7 +286,7 @@ public class PaymentService {
 
     /**
      * 某租约的支付单列表（R71 契约补充）：居民限本人租约（非本人 403），
-     * ADMIN/SUPER_ADMIN 按社区数据权限可查（非绑定社区 403）；按创建时间倒序，
+     * ADMIN/SUPER_ADMIN 按小区数据权限可查（非绑定小区 403）；按创建时间倒序，
      * 含 paymentType 供前端区分「首期 / 续期」。
      */
     public List<LeasePaymentVO> listByLease(Long leaseId) {
@@ -393,7 +393,7 @@ public class PaymentService {
                     "LEASE", "LEASE_PAYMENT", current.getId());
             for (Long adminId : boundAdminIds(lease.getCommunityId())) {
                 notificationService.createForUser(adminId, lease.getCommunityId(),
-                        "社区租约首期费用到账",
+                        "小区租约首期费用到账",
                         "租住记录 #" + lease.getId() + " 的首期费用已到账（"
                                 + current.getAmount() + " 元）。",
                         "LEASE", "LEASE_PAYMENT", current.getId());
@@ -498,7 +498,7 @@ public class PaymentService {
         }
     }
 
-    /* 社区绑定管理员 ID 集合（通知口径同到期提醒任务） */
+    /* 小区绑定管理员 ID 集合（通知口径同到期提醒任务） */
     private List<Long> boundAdminIds(Long communityId) {
         return sysAdminCommunityMapper.selectList(new LambdaQueryWrapper<SysAdminCommunity>()
                         .eq(SysAdminCommunity::getCommunityId, communityId))

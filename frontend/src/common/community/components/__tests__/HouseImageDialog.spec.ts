@@ -7,7 +7,7 @@ vi.mock('@/common/community/api/houseImages',()=>({listHouseImages:api.list,save
 describe('共用房屋相册弹窗',()=>{
  beforeEach(()=>{vi.clearAllMocks();api.list.mockResolvedValue([])})
  it('打开时加载真实房屋相册，无图不伪装实拍',async()=>{const w=mount(HouseImageDialog,{attachTo:document.body,props:{modelValue:false,houseId:9},global:{plugins:[ElementPlus]}});await w.setProps({modelValue:true});await flushPromises();expect(api.list).toHaveBeenCalledWith(9);expect(document.body.textContent).toContain('尚未上传房屋图片');w.unmount()})
- it('读取失败有明确错误，不显示空相册并允许覆盖保存',async()=>{api.list.mockRejectedValue(new Error('无权访问该社区'));const w=mount(HouseImageDialog,{attachTo:document.body,props:{modelValue:false,houseId:9},global:{plugins:[ElementPlus]}});await w.setProps({modelValue:true});await flushPromises();expect(document.body.textContent).toContain('无权访问该社区');expect(api.save).not.toHaveBeenCalled();w.unmount()})
+ it('读取失败有明确错误，不显示空相册并允许覆盖保存',async()=>{api.list.mockRejectedValue(new Error('无权访问该小区'));const w=mount(HouseImageDialog,{attachTo:document.body,props:{modelValue:false,houseId:9},global:{plugins:[ElementPlus]}});await w.setProps({modelValue:true});await flushPromises();expect(document.body.textContent).toContain('无权访问该小区');expect(api.save).not.toHaveBeenCalled();w.unmount()})
  it('没有房屋ID不会上传或读取其他房屋',async()=>{const w=mount(HouseImageDialog,{attachTo:document.body,props:{modelValue:false,houseId:null},global:{plugins:[ElementPlus]}});await w.setProps({modelValue:true});await flushPromises();expect(api.list).not.toHaveBeenCalled();w.unmount()})
  it('初次挂载已打开时也读取相册',async()=>{const w=mount(HouseImageDialog,{props:{modelValue:true,houseId:9},global:{plugins:[ElementPlus]}});await flushPromises();expect(api.list).toHaveBeenCalledWith(9);w.unmount()})
  it('切换房屋后旧请求不会覆盖新房屋相册',async()=>{

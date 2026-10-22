@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 
 /** 第三批 D-端点回归：楼栋事务级联删除（D-端点1）+ 楼栋/单元/房屋批量创建（D-端点2） */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("社区结构第三批端点回归（D-端点1/2）")
+@DisplayName("小区结构第三批端点回归（D-端点1/2）")
 class BuildingBatch3Test {
     @org.mockito.Mock private com.community.residence.common.community.service.StructureBusinessCodeService structureBusinessCodeService;
 
@@ -244,7 +244,7 @@ class BuildingBatch3Test {
     }
 
     @Test
-    @DisplayName("D-端点2：单元批量创建——社区ID 由楼栋推导冗余")
+    @DisplayName("D-端点2：单元批量创建——小区ID 由楼栋推导冗余")
     void batchCreateUnits_communityDerived() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> ignored =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {

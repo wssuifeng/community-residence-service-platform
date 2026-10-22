@@ -81,7 +81,7 @@ public class EvaluationService {
         return toVO(evaluation);
     }
 
-    /* 评价是工单子资源：先复用父工单的本人/最新派单/社区授权，再查询评价。 */
+    /* 评价是工单子资源：先复用父工单的本人/最新派单/小区授权，再查询评价。 */
     public EvaluationVO getByWorkOrder(Long workOrderId) {
         workOrderService.getById(workOrderId);
         WorkOrderEvaluation evaluation = evaluationMapper.selectOne(

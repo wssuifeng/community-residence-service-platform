@@ -5,10 +5,10 @@ import lombok.Data;
 
 /** 删除前实际关联摘要；确认版本仅用于检测预览后变化，不作为权限凭据。 */
 @Data
-@Schema(description="社区删除影响")
+@Schema(description="小区删除影响")
 public class CommunityDeletionImpactVO {
-    @Schema(description="社区ID") private Long communityId;
-    @Schema(description="社区名称") private String communityName;
+    @Schema(description="小区ID") private Long communityId;
+    @Schema(description="小区名称") private String communityName;
     @Schema(description="房屋总数，含已软删除") private long houses;
     @Schema(description="居住关系总数，含历史") private long relations;
     @Schema(description="有效居住关系数") private long activeRelations;

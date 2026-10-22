@@ -26,12 +26,12 @@ import { formatDateTime } from '@/common/web/utils/date'
 /**
  * 协议模板管理（R64 轻量版）：模板列表 + 新建/编辑（正文 + 变量 + 附件）+ 设默认/启停/删除。
  *
- * 数据口径：模板总量为社区级小数据集（每社区几条），故一次性拉全量后客户端筛选与分页——
+ * 数据口径：模板总量为小区级小数据集（每小区几条），故一次性拉全量后客户端筛选与分页——
  * 后端 communityId 参数无法表达「全局模板（communityId 为 null）」这一筛选档，
- * 全量拉取才能把「全局 / 本社区」两档都做成可筛选项。
+ * 全量拉取才能把「全局 / 本小区」两档都做成可筛选项。
  *
  * 权限口径：全局通用模板（communityId 为 null）仅 SUPER_ADMIN 可维护，
- * 普通管理员的归属下拉只列其所绑定社区（后端另有数据级权限兜底）。
+ * 普通管理员的归属下拉只列其所绑定小区（后端另有数据级权限兜底）。
  */
 
 const userStore = useUserStore()
@@ -78,7 +78,7 @@ async function loadCommunities(): Promise<void> {
   }
 }
 
-/** 归属下拉：超管可选全局模板 + 全部社区；普通管理员限本人绑定社区 */
+/** 归属下拉：超管可选全局模板 + 全部小区；普通管理员限本人绑定小区 */
 const ownerOptions = computed(() => {
   if (isSuperAdmin.value) {
     return [
@@ -90,9 +90,9 @@ const ownerOptions = computed(() => {
   if (bound.length === 0) {
     return communityOptions.value.map((item) => ({ value: item.id, label: item.name }))
   }
-  /* 社区名列表可能因权限或请求失败而缺项，用绑定 ID 兜底生成选项，避免下拉空白导致无法保存 */
+  /* 小区名列表可能因权限或请求失败而缺项，用绑定 ID 兜底生成选项，避免下拉空白导致无法保存 */
   const optionMap = new Map(communityOptions.value.map((item) => [item.id, item.name]))
-  return bound.map((id) => ({ value: id, label: optionMap.get(id) ?? `社区 ID ${id}` }))
+  return bound.map((id) => ({ value: id, label: optionMap.get(id) ?? `小区 ID ${id}` }))
 })
 
 /* ---------- 筛选与分页（客户端） ---------- */
@@ -131,7 +131,7 @@ const isGlobal = (row: IAgreementTemplate): boolean => row.communityId == null
 
 function ownerText(row: IAgreementTemplate): string {
   if (isGlobal(row)) return '全局通用模板'
-  return row.communityName || `社区 ID ${row.communityId}`
+  return row.communityName || `小区 ID ${row.communityId}`
 }
 
 /** 全局模板仅超管可维护；非超管按钮置灰并给出原因 */
@@ -163,7 +163,7 @@ function fileSizeText(size?: number): string {
 
 /** 协议正文可用占位符（后端 AgreementService.render 支持，点击插入到光标处） */
 const TEMPLATE_VARIABLES: { token: string; desc: string }[] = [
-  { token: '{{社区名称}}', desc: '租约所属社区名称' },
+  { token: '{{小区名称}}', desc: '租约所属小区名称' },
   { token: '{{房屋位置}}', desc: '楼栋-单元-房号' },
   { token: '{{房号}}', desc: '房屋房号' },
   { token: '{{楼层}}', desc: '房屋所在楼层' },
@@ -224,7 +224,7 @@ function openCreate(): void {
   editingId.value = null
   Object.assign(form, {
     name: '',
-    /* 默认归属：超管默认全局通用，管理员默认其唯一绑定社区（无可选项时留空由用户选择） */
+    /* 默认归属：超管默认全局通用，管理员默认其唯一绑定小区（无可选项时留空由用户选择） */
     communityId: isSuperAdmin.value
       ? GLOBAL_SENTINEL
       : ownerOptions.value.length === 1
@@ -426,8 +426,8 @@ onMounted(() => {
       title="模板与协议的关系"
       :description="
         isSuperAdmin
-          ? '「全局通用模板」对所有社区可用；各社区模板仅本社区可用。所有社区各保留一份默认模板，设为默认时同范围其他模板自动取消。'
-          : '您可维护本人绑定社区的模板；全局通用模板由超级管理员维护，本页只读展示。所有社区各保留一份默认模板，设为默认时同范围其他模板自动取消。'
+          ? '「全局通用模板」对所有小区可用；各小区模板仅本小区可用。所有小区各保留一份默认模板，设为默认时同范围其他模板自动取消。'
+          : '您可维护本人绑定小区的模板；全局通用模板由超级管理员维护，本页只读展示。所有小区各保留一份默认模板，设为默认时同范围其他模板自动取消。'
       "
     />
 
@@ -558,13 +558,13 @@ onMounted(() => {
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="760px" top="6vh">
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="90px">
         <el-form-item label="模板名称" prop="name">
-          <el-input v-model="form.name" placeholder="如：社区房屋租赁协议（标准版）" maxlength="100" show-word-limit />
+          <el-input v-model="form.name" placeholder="如：小区房屋租赁协议（标准版）" maxlength="100" show-word-limit />
         </el-form-item>
         <el-form-item label="归属" prop="communityId">
           <el-select
             v-model="form.communityId"
             :disabled="!isSuperAdmin"
-            placeholder="选择归属社区"
+            placeholder="选择归属小区"
             style="width: 100%"
           >
             <el-option
@@ -577,8 +577,8 @@ onMounted(() => {
           <p class="field-hint">
             {{
               isSuperAdmin
-                ? '「全局通用模板」= 所有社区可用，仅超管可维护'
-                : '归属限本人绑定的社区（全局通用模板由超级管理员维护）'
+                ? '「全局通用模板」= 所有小区可用，仅超管可维护'
+                : '归属限本人绑定的小区（全局通用模板由超级管理员维护）'
             }}
           </p>
         </el-form-item>
@@ -589,7 +589,7 @@ onMounted(() => {
             v-model="form.content"
             class="content-input"
             rows="10"
-            placeholder="填写协议正文，可在右侧点击变量插入占位符，如：甲方（出租方）{{社区名称}}……"
+            placeholder="填写协议正文，可在右侧点击变量插入占位符，如：甲方（出租方）{{小区名称}}……"
           />
           <p class="field-hint">正文与模板附件至少填写一项；正文中的占位符会在发起协议时渲染成快照存库。</p>
         </el-form-item>
@@ -725,7 +725,7 @@ onMounted(() => {
   font-weight: var(--font-weight-medium);
 }
 
-/* 归属标签：全局通用模板用强调色与本社区模板区分 */
+/* 归属标签：全局通用模板用强调色与本小区模板区分 */
 .owner-chip {
   display: inline-block;
   padding: 2px var(--spacing-sm);

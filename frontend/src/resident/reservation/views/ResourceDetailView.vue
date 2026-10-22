@@ -14,7 +14,7 @@ import { resourceTypeLabels } from '@/common/community/types/community'
  * 资源详情（居民端三段预约流第二段，视觉对齐房源详情）：
  * 左资源主视觉（类型图标）+ 右信息面板；下方「可约时段」横拉卡列表（未来 7 天，DEF-057）
  * 与周循环开放时段表（周一~周日）；醒目「预约该资源」按钮进入预约子页。
- * 非本人入住社区的资源显示不可约空态。
+ * 非本人入住小区的资源显示不可约空态。
  */
 
 const route = useRoute()
@@ -24,7 +24,7 @@ const resourceId = Number(route.params.id)
 const resource = ref<IPublicResource | null>(null)
 const templates = ref<IResourceTimeslot[]>([])
 const loading = ref(true)
-/** 资源不属于当前登录居民的入住社区：按三段流的社区分配口径拒绝展示预约入口 */
+/** 资源不属于当前登录居民的入住小区：按三段流的小区分配口径拒绝展示预约入口 */
 const notInMyCommunity = ref(false)
 
 /** 画廊当前主图下标（多图时经缩略图切换） */
@@ -164,13 +164,13 @@ onMounted(load)
       <span class="breadcrumb-current">{{ resource?.name ?? '资源详情' }}</span>
     </nav>
 
-    <!-- 非本人入住社区的资源：按社区分配口径拒绝（不展示预约入口） -->
+    <!-- 非本人入住小区的资源：按小区分配口径拒绝（不展示预约入口） -->
     <div v-if="notInMyCommunity" class="empty-state">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 21V8l7-5 7 5v13M3 21h18M9 21v-6h6v6" />
       </svg>
-      <h3>该资源不属于您的入住社区</h3>
-      <p>公共资源按入住社区分配展示，请返回列表查看您所在社区的资源。</p>
+      <h3>该资源不属于您的入住小区</h3>
+      <p>公共资源按入住小区分配展示，请返回列表查看您所在小区的资源。</p>
       <router-link to="/resident/resources">
         <el-button type="primary" plain>返回公共资源列表</el-button>
       </router-link>
@@ -667,7 +667,7 @@ onMounted(load)
   font-size: var(--font-size-sm);
 }
 
-/* 非本社区资源空态 */
+/* 非本小区资源空态 */
 .empty-state {
   display: flex;
   flex-direction: column;

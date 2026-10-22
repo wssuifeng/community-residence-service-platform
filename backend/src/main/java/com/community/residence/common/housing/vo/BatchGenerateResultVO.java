@@ -5,11 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** 按社区批量挂牌结果（R62：幂等——已有在架房源的房屋跳过） */
+/** 按小区批量挂牌结果（R62：幂等——已有在架房源的房屋跳过） */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "按社区批量挂牌结果")
+@Schema(description = "按小区批量挂牌结果")
 public class BatchGenerateResultVO {
 
     @Schema(description = "新建房源数")

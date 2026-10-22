@@ -6,7 +6,7 @@ export interface AuthUser {
   username: string
   realName: string
   role: Role
-  /** 后端登录响应为社区 ID 数组（数字），社区名需另查社区列表 */
+  /** 后端登录响应为小区 ID 数组（数字），小区名需另查小区列表 */
   boundCommunities?: number[]
 }
 

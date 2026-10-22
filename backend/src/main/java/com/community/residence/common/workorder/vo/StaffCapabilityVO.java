@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 
-/** 服务人员能力绑定响应（常驻社区 + 擅长类别） */
+/** 服务人员能力绑定响应（常驻小区 + 擅长类别） */
 @Data
 @Schema(description = "服务人员能力绑定")
 public class StaffCapabilityVO {
@@ -28,10 +28,10 @@ public class StaffCapabilityVO {
     @Schema(description = "账号状态：ACTIVE-正常, FROZEN-冻结")
     private String status;
 
-    @Schema(description = "常驻社区ID列表")
+    @Schema(description = "常驻小区ID列表")
     private List<Long> communityIds;
 
-    @Schema(description = "常驻社区名称列表（与 communityIds 同序）")
+    @Schema(description = "常驻小区名称列表（与 communityIds 同序）")
     private List<String> communityNames;
 
     @Schema(description = "擅长服务类别ID列表")

@@ -15,7 +15,7 @@ import { useUserStore } from '@/common/auth/store/user'
 
 /**
  * 服务类别抽屉（原 /admin/service-categories 独立页收编，对照 design-mockups/admin/03 任务 4）：
- * 社区选择 + 两级类别树表格 + 新增/编辑/删除全套，挂在工作列表页页头入口。
+ * 小区选择 + 两级类别树表格 + 新增/编辑/删除全套，挂在工作列表页页头入口。
  * CRUD 完成后 emit('changed')（当前列表数据与类别无联动、不强制刷新，留作扩展点）。
  */
 const props = defineProps<{ modelValue: boolean }>()
@@ -33,7 +33,7 @@ watch(
   () => props.modelValue,
   (value) => {
     visible.value = value
-    /* 首次打开再初始化社区与类别树，避免页面挂载即发请求 */
+    /* 首次打开再初始化小区与类别树，避免页面挂载即发请求 */
     if (value && !initialized) {
       initialized = true
       loadCommunities().then(() => {
@@ -92,17 +92,17 @@ async function loadCommunities(): Promise<void> {
     const page = await getCommunityList({ page: 1, size: 100 })
     communities.value = page.records
     const bound = userStore.user?.boundCommunities ?? []
-    /* 管理员只管绑定社区：单绑定自动锁定，多绑定取第一个（可切换）；登录响应为 ID 数组 */
+    /* 管理员只管绑定小区：单绑定自动锁定，多绑定取第一个（可切换）；登录响应为 ID 数组 */
     if (bound.length > 0) {
       communityId.value = bound[0]
     } else if (page.records.length > 0) {
       communityId.value = page.records[0].id
     }
     if (communityId.value === null) {
-      ElMessage.warning('暂无可管理的社区，请先创建社区或绑定社区')
+      ElMessage.warning('暂无可管理的小区，请先创建小区或绑定小区')
     }
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '社区列表加载失败')
+    ElMessage.error(error instanceof Error ? error.message : '小区列表加载失败')
   }
 }
 
@@ -154,7 +154,7 @@ async function openEdit(row: IServiceCategoryTreeNode): Promise<void> {
 
 async function handleSave(): Promise<void> {
   if (!communityId.value) {
-    ElMessage.warning('请先选择社区')
+    ElMessage.warning('请先选择小区')
     return
   }
   if (!form.name.trim()) {
@@ -212,10 +212,10 @@ async function handleDelete(row: IServiceCategoryTreeNode): Promise<void> {
       <div class="drawer-toolbar">
         <el-select
           v-model="communityId"
-          placeholder="选择社区"
+          placeholder="选择小区"
           class="community-select"
           :disabled="communities.length === 0"
-          aria-label="社区选择"
+          aria-label="小区选择"
         >
           <el-option v-for="item in communities" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>

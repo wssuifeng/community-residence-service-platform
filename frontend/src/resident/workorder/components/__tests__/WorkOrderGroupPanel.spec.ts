@@ -32,7 +32,7 @@ function seedOrder(options: SeedOptions = {}): void {
       participantIds: [1, 1],
       participantRefs: [
         { id: 1, space: 'RESIDENT', name: '演示居民', role: 'RESIDENT' },
-        { id: 1, space: 'USER', name: '社区管理员', role: 'ADMIN' }
+        { id: 1, space: 'USER', name: '小区管理员', role: 'ADMIN' }
       ],
       closedAt: options.status === 'CLOSED' ? '2026-09-22T18:00:00' : null,
       createdAt: '2026-09-22T09:00:00'
@@ -42,7 +42,7 @@ function seedOrder(options: SeedOptions = {}): void {
       conversationId: 1,
       senderType: 'ADMIN',
       senderId: 1,
-      senderName: '社区管理员',
+      senderName: '小区管理员',
       content: '已受理，正在安排服务人员',
       createdAt: '2026-09-22T09:30:00'
     })

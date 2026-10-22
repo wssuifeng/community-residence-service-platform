@@ -25,7 +25,7 @@ public interface ViewingAppointmentMapper extends BaseMapper<ViewingAppointment>
      * 「同一居民 + 同一房源」反查（同屋多租约时张冠李戴）。
      * 幂等：`lease_id IS NULL` 保证重复审批不重写、不覆盖既有非空指向；
      * 只改指向字段，不动看房自身状态（看房仍只是沟通手段，不是承约门槛）。
-     * 游客预约（user_id 为空）不命中。
+     * 历史匿名预约（user_id 为空）不命中。
      */
     @Update("UPDATE viewing_appointment va "
             + "SET va.lease_id = #{leaseId}, va.updated_at = NOW() "

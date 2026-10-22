@@ -104,11 +104,11 @@ class ResidentAdminCreateTest {
     }
 
     @Test
-    @DisplayName("越社区代建：ADMIN 绑定范围外 403")
+    @DisplayName("越小区代建：ADMIN 绑定范围外 403")
     void adminCreate_outOfBoundCommunity_forbidden() {
         try (MockedStatic<SecurityUtils> mocked = mockSuperAdmin()) {
             mocked.when(() -> SecurityUtils.checkCommunityAccess(3L))
-                    .thenThrow(new ForbiddenException("无权操作未绑定社区的数据"));
+                    .thenThrow(new ForbiddenException("无权操作未绑定小区的数据"));
 
             assertThatThrownBy(() -> residentService.adminCreate(dto()))
                     .isInstanceOf(ForbiddenException.class);
@@ -139,7 +139,7 @@ class ResidentAdminCreateTest {
                     inv.getArgument(0, Resident.class).setId(100L);
                     return 1;
                 });
-        String csv = "社区ID,姓名,手机号,证件号\n"
+        String csv = "小区ID,姓名,手机号,证件号\n"
                 + "3,张三,13900000011,\n"
                 + "3,李四,13900000012,\n"
                 + "3,王五,13900000012,\n";
@@ -159,7 +159,7 @@ class ResidentAdminCreateTest {
     }
 
     @Test
-    @DisplayName("坏格式行：列数不足/手机号非法/社区ID非数字 → 该行失败不影响他行")
+    @DisplayName("坏格式行：列数不足/手机号非法/小区ID非数字 → 该行失败不影响他行")
     void importCsv_badRows_isolated() {
         /* 唯一成功行（行1）调 2 次 selectCount；其余坏行在校验阶段即失败不触库 */
         when(residentMapper.selectCount(any())).thenReturn(0L, 0L);
@@ -168,7 +168,7 @@ class ResidentAdminCreateTest {
             inv.getArgument(0, Resident.class).setId(101L);
             return 1;
         });
-        String csv = "社区ID,姓名,手机号,证件号\n"
+        String csv = "小区ID,姓名,手机号,证件号\n"
                 + "3,张三,13900000021,\n"
                 + "3,李四,not-a-phone,\n"
                 + "abc,王五,13900000023,\n"
@@ -193,7 +193,7 @@ class ResidentAdminCreateTest {
     @DisplayName("仅表头无数据行：400 拒绝")
     void importCsv_emptyData_rejected() {
         InputStream in = new ByteArrayInputStream(
-                "社区ID,姓名,手机号,证件号\n".getBytes(StandardCharsets.UTF_8));
+                "小区ID,姓名,手机号,证件号\n".getBytes(StandardCharsets.UTF_8));
         try (MockedStatic<SecurityUtils> mocked = mockSuperAdmin()) {
             assertThatThrownBy(() -> residentService.importCsv(in))
                     .isInstanceOf(BusinessException.class)
@@ -210,7 +210,7 @@ class ResidentAdminCreateTest {
             inv.getArgument(0, Resident.class).setId(102L);
             return 1;
         });
-        String csv = "社区ID,姓名,手机号,证件号\n"
+        String csv = "小区ID,姓名,手机号,证件号\n"
                 + "3,\"张,三\",13900000031,\n";
         InputStream in = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
 

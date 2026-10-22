@@ -14,10 +14,10 @@ public class AgreementTemplateVO {
     @Schema(description = "模板ID")
     private Long id;
 
-    @Schema(description = "归属社区ID（为空=全局通用模板）")
+    @Schema(description = "归属小区ID（为空=全局通用模板）")
     private Long communityId;
 
-    @Schema(description = "归属社区名称（全局模板为空）")
+    @Schema(description = "归属小区名称（全局模板为空）")
     private String communityName;
 
     @Schema(description = "模板名称")

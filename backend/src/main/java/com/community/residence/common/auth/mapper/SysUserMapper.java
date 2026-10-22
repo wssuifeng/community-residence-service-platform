@@ -14,7 +14,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
     @Select("SELECT id, username, password_hash, real_name, phone, email, avatar_url, role, status, "
             + "created_at, updated_at FROM sys_user WHERE username = #{username}")
     SysUser selectByUsername(@Param("username") String username);
-    /* 仅ADMIN候选，目标社区已绑定者优先；范围在服务层校验，不开放系统用户管理。 */
+    /* 仅ADMIN候选，目标小区已绑定者优先；范围在服务层校验，不开放系统用户管理。 */
     @Select("<script>SELECT su.id, su.real_name, su.phone, EXISTS(SELECT 1 FROM sys_admin_community sac "
             + "WHERE sac.admin_id=su.id AND sac.community_id=#{communityId}) AS bound_to_community "
             + "FROM sys_user su WHERE su.role='ADMIN' "

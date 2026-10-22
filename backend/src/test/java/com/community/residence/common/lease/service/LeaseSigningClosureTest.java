@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * 承租确认（R67）与租约关联看房预约（R69）回归：
- * 仅本人 + 仅待签约、幂等且不覆盖首次留痕、通知本社区管理方；
+ * 仅本人 + 仅待签约、幂等且不覆盖首次留痕、通知本小区管理方；
  * 看房预约按 lease_id 归属且读权限沿用租约口径。
  */
 @ExtendWith(MockitoExtension.class)

@@ -7,13 +7,13 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/** 提交反馈请求（社区归属由居民在住关系推导，无在住关系时拒绝） */
+/** 提交反馈请求（小区归属由居民在住关系推导，无在住关系时拒绝） */
 @Data
 @Schema(description = "提交反馈请求")
 public class CreateFeedbackDTO {
 
-    @Schema(description = "所属社区ID")
-    @NotNull(message = "所属社区不能为空")
+    @Schema(description = "所属小区ID")
+    @NotNull(message = "所属小区不能为空")
     private Long communityId;
 
     @Schema(description = "反馈标题")

@@ -18,7 +18,7 @@ export function useHousingReservation(context: HousingReservationContext, onCrea
  * 非连续点击拒绝并提示，本地连续时长上限 MAX_CONTINUOUS_MINUTES 前置拦截，
  * 最终超限由后端按 sys_config 兜底拒绝；提交为合并区间单条预约，成功跳预约详情页。
  *
- * 联系人身份由登录居民账号确定，不再收集游客姓名或短信验证码信息。
+ * 联系人身份由登录居民账号确定，不再收集历史匿名预约姓名或短信验证码信息。
  * 连续多选规则与 ReservationCreateView（资源域）为同规则双实现（R60 两域各一键），
  * 一侧调整约束须同步另一侧。
  */
