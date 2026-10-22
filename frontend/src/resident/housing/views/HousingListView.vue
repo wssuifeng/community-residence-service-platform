@@ -11,7 +11,7 @@ import type { ICommunity } from '@/common/community/types/community'
 import type { IHousing, HousingRentType, HousingStatus } from '@/common/housing/types/housing'
 import { housingStatusLabels } from '@/common/housing/types/housing'
 
-/** 房源浏览（居民端）：与游客端列表同款——筛选条 + 卡片网格 + 分页；空图按序号轮换示例图 */
+/** 房源浏览（居民端）：与未登录公开页面列表同款——筛选条 + 卡片网格 + 分页；空图按序号轮换示例图 */
 
 const housings = ref<IHousing[]>([])
 const total = ref(0)
@@ -97,8 +97,8 @@ async function load(): Promise<void> {
   }
 }
 
-/* 社区下拉选项：社区列表接口居民可访问，拉取失败降级为不过滤。
-   R62 全社区开放要求筛选器覆盖全量社区：接口分页返回，翻页累加至 total（护栏 5 页防死循环） */
+/* 小区下拉选项：小区列表接口居民可访问，拉取失败降级为不过滤。
+   R62 全小区开放要求筛选器覆盖全量小区：接口分页返回，翻页累加至 total（护栏 5 页防死循环） */
 async function loadCommunities(): Promise<void> {
   try {
     const all: ICommunity[] = []
@@ -115,8 +115,8 @@ async function loadCommunities(): Promise<void> {
   }
 }
 
-/* 社区房源计数（R62：无房源社区在筛选器显示「0 套房源」提示）。
-   列表接口无按社区计数端点，取全量房源（翻页累加，护栏 10 页）后前端聚合；
+/* 小区房源计数（R62：无房源小区在筛选器显示「0 套房源」提示）。
+   列表接口无按小区计数端点，取全量房源（翻页累加，护栏 10 页）后前端聚合；
    计数失败降级为不显示计数后缀，不影响筛选行为 */
 const communityHousingCounts = ref(new Map<number, number>())
 
@@ -138,7 +138,7 @@ async function loadCommunityHousingCounts(): Promise<void> {
   }
 }
 
-/** 筛选器社区选项标签：计数可用时附「N 套房源」（0 套即无房源提示），失败降级纯社区名 */
+/** 筛选器小区选项标签：计数可用时附「N 套房源」（0 套即无房源提示），失败降级纯小区名 */
 function communityOptionLabel(community: ICommunity): string {
   const count = communityHousingCounts.value.get(community.id)
   return count === undefined ? community.name : `${community.name}（${count} 套房源）`
@@ -180,7 +180,7 @@ onMounted(() => {
       <p class="list-sub">共 {{ total }} 套可见房源 · 挑选心仪的房源，预约时间实地看房</p>
     </header>
 
-    <!-- 筛选工具条：白卡横条铺满整行；社区/状态/租金/租售/户型/关键字有接口参数，朝向无参数不做控件 -->
+    <!-- 筛选工具条：白卡横条铺满整行；小区/状态/租金/租售/户型/关键字有接口参数，朝向无参数不做控件 -->
     <div class="filter-bar">
       <el-select
         v-model="communityFilter"
@@ -189,9 +189,9 @@ onMounted(() => {
         @change="handleScopeChange"
       >
         <template #prefix>
-          <span class="filter-select-label">社区</span>
+          <span class="filter-select-label">小区</span>
         </template>
-        <el-option label="全部社区" :value="0" />
+        <el-option label="全部小区" :value="0" />
         <el-option
           v-for="community in communityOptions"
           :key="community.id"

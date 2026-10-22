@@ -52,7 +52,7 @@ import java.util.List;
  * 居民账号业务逻辑：注册（开关控制）、个人资料、改密、冻结。
  * resident 表无 community_id 列（拦截器跳过），ADMIN 的居民范围过滤
  * 经 residence_relation 在业务层处理（接口设计 9.2.1.7/9.2.1.8：
- * ADMIN 限绑定社区内居民；DEF-010 修复：列表注入社区过滤，详情越范围 404）。
+ * ADMIN 限绑定小区内居民；DEF-010 修复：列表注入小区过滤，详情越范围 404）。
  */
 @Slf4j
 @Service
@@ -122,7 +122,7 @@ public class ResidentService {
         tokenRevocationService.revokeResident(resident.getId());
     }
 
-    /** 居民详情：ADMIN 限绑定社区内居民（经 residence_relation 关联，越范围 404；
+    /** 居民详情：ADMIN 限绑定小区内居民（经 residence_relation 关联，越范围 404；
         SUPER_ADMIN/STAFF 放行——STAFF 数据权限走派单关系，由工单模块约束） */
     public ResidentVO getById(Long id) {
         Resident resident = requireResident(id);
@@ -133,7 +133,7 @@ public class ResidentService {
         return ResidentVO.from(resident);
     }
 
-    /** 居民列表：ADMIN 自动注入绑定社区过滤（经 residence_relation，DEF-010） */
+    /** 居民列表：ADMIN 自动注入绑定小区过滤（经 residence_relation，DEF-010） */
     public PageVO<ResidentVO> page(long page, long size, String status, String keyword) {
         LambdaQueryWrapper<Resident> wrapper = new LambdaQueryWrapper<Resident>()
                 .eq(StringUtils.hasText(status), Resident::getStatus, status)
@@ -153,7 +153,7 @@ public class ResidentService {
         return PageVO.of(result.convert(ResidentVO::from));
     }
 
-    /* 同住邀请可精确匹配未绑定账号，但不开放跨社区居民台账或敏感资料。 */
+    /* 同住邀请可精确匹配未绑定账号，但不开放跨小区居民台账或敏感资料。 */
     public java.util.List<com.community.residence.common.resident.vo.CoResidentCandidateVO> coResidentCandidates(Long houseId, String keyword) {
         var house=houseMapper.selectById(houseId);
         if(house==null) throw new com.community.residence.common.web.exception.ResourceNotFoundException("房屋不存在");
@@ -168,7 +168,7 @@ public class ResidentService {
                 }).toList();
     }
 
-    /** 绑定社区内在住/曾住居民 ID 集合（居民与社区的关联唯一来源是 residence_relation） */
+    /** 绑定小区内在住/曾住居民 ID 集合（居民与小区的关联唯一来源是 residence_relation） */
     private List<Long> boundResidentIds(java.util.Set<Long> communityIds) {
         if (communityIds == null || communityIds.isEmpty()) {
             return List.of();
@@ -244,7 +244,7 @@ public class ResidentService {
 
     private AdminCreateResidentDTO parseResidentRow(String[] columns, Long defaultCommunityId) {
         if (columns.length < 3 || columns.length > 10) {
-            throw new IllegalArgumentException("列数不符（需社区ID,姓名,手机号及可选关系字段，最多10列）");
+            throw new IllegalArgumentException("列数不符（需小区ID,姓名,手机号及可选关系字段，最多10列）");
         }
         AdminCreateResidentDTO dto = new AdminCreateResidentDTO();
         com.community.residence.common.community.entity.House codedHouse = null;
@@ -252,8 +252,8 @@ public class ResidentService {
             String code = columns[0].substring(1).trim();
             if (!code.isEmpty()) codedHouse = structureBusinessCodeService.resolve(code);
             Long communityId = codedHouse == null ? defaultCommunityId : codedHouse.getCommunityId();
-            if (communityId == null) throw new IllegalArgumentException("仅建账号时请在上传窗口选择社区");
-            if (defaultCommunityId != null && !defaultCommunityId.equals(communityId)) throw new IllegalArgumentException("房屋业务编号不属于上传窗口所选社区");
+            if (communityId == null) throw new IllegalArgumentException("仅建账号时请在上传窗口选择小区");
+            if (defaultCommunityId != null && !defaultCommunityId.equals(communityId)) throw new IllegalArgumentException("房屋业务编号不属于上传窗口所选小区");
             dto.setCommunityId(communityId);
         } else dto.setCommunityId(Long.parseLong(columns[0].trim()));
         dto.setRealName(columns[1].trim());
@@ -302,7 +302,7 @@ public class ResidentService {
             }
             SecurityUtils.checkCommunityAccess(house.getCommunityId());
             if (!house.getCommunityId().equals(dto.getCommunityId())) {
-                throw new BusinessException(ErrorCode.INVALID_PARAM, "所选房屋不属于所选社区");
+                throw new BusinessException(ErrorCode.INVALID_PARAM, "所选房屋不属于所选小区");
             }
         }
         String username = StringUtils.hasText(dto.getUsername()) ? dto.getUsername().trim() : "r" + dto.getPhone();
@@ -368,8 +368,8 @@ public class ResidentService {
                     String header = java.util.Arrays.stream(splitCsvLine(line.replace("\uFEFF", "")))
                             .map(String::trim).collect(java.util.stream.Collectors.joining(","));
                     businessHeader = header.equals("房屋编号,姓名,手机号,证件号,用户名,邮箱,关系类型,入住日期,备注");
-                    if (!businessHeader && !header.equals("社区ID,姓名,手机号,证件号")
-                            && !header.equals("社区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注")) {
+                    if (!businessHeader && !header.equals("小区ID,姓名,手机号,证件号")
+                            && !header.equals("小区ID,姓名,手机号,证件号,用户名,邮箱,房屋ID,关系类型,入住日期,备注")) {
                         throw new BusinessException(ErrorCode.INVALID_PARAM, "CSV表头不符，请下载当前导入模板");
                     }
                     first = false;

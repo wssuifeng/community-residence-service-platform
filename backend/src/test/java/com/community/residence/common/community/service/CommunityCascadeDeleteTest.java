@@ -110,7 +110,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.InOrder;
 
 /**
- * 社区级联删除测试（R1/R6 v1.1）：级联清单全覆盖、删除顺序（子表先于父表）、
+ * 小区级联删除测试（R1/R6 v1.1）：级联清单全覆盖、删除顺序（子表先于父表）、
  * 账号体系保留（仅解除绑定）、不存在 404、操作日志留痕。
  * 纯 Mockito 环境，Lambda 条件构造器经 deep-stub wrapper 驱动，实体元数据
  * 需手动注册。
@@ -261,14 +261,14 @@ class CommunityCascadeDeleteTest {
         communityService=com.community.residence.admin.community.service.DeletionTestAssembly.from(this);
         community = new Community();
         community.setId(9L);
-        community.setName("退场社区");
+        community.setName("退场小区");
         community.setStatus("ACTIVE");
         /* 404 用例查询的是其他 id，lenient 避免 UnnecessaryStubbing */
         lenient().when(communityMapper.selectById(9L)).thenReturn(community);
     }
 
     @Test
-    @DisplayName("删除不存在/已删社区：404")
+    @DisplayName("删除不存在/已删小区：404")
     void delete_missingCommunity_throws() {
         when(communityMapper.selectById(99L)).thenReturn(null);
         assertThatThrownBy(() -> communityService.delete(99L))
@@ -277,7 +277,7 @@ class CommunityCascadeDeleteTest {
     }
 
     @Test
-    @DisplayName("空数据社区删除：仅删本体与绑定、写操作日志，无业务表调用")
+    @DisplayName("空数据小区删除：仅删本体与绑定、写操作日志，无业务表调用")
     void delete_emptyCommunity_minimalCascade() {
         Notification notification = new Notification();
         notification.setId(501L);
@@ -299,11 +299,11 @@ class CommunityCascadeDeleteTest {
         verify(viewingAppointmentMapper).selectList(any());
         verify(leaseRecordMapper).selectList(any());
 
-        /* 无 community_id 空间列的表直接按社区删除（每表一次） */
+        /* 无 community_id 空间列的表直接按小区删除（每表一次） */
         verify(serviceCategoryMapper).delete(any());
         verify(residenceApplicationMapper).delete(any());
         verify(residenceRelationMapper).delete(any());
-        /* V20 退租申请表：按 community_id 直删，空数据社区亦须执行（零残留） */
+        /* V20 退租申请表：按 community_id 直删，空数据小区亦须执行（零残留） */
         verify(leaseMoveOutApplicationMapper).delete(any());
         verify(houseStatusHistoryMapper).delete(any());
         verify(resourceTimeslotMapper).delete(any());
@@ -322,7 +322,7 @@ class CommunityCascadeDeleteTest {
     }
 
     @Test
-    @DisplayName("有业务数据的社区删除：级联子表→父表全链调用 + 顺序约束 + 操作日志含社区名")
+    @DisplayName("有业务数据的小区删除：级联子表→父表全链调用 + 顺序约束 + 操作日志含小区名")
     void delete_withBusinessData_cascadesAll() {
         /* 工单链：1 工单 + 1 评价 */
         WorkOrder order = new WorkOrder();
@@ -398,14 +398,14 @@ class CommunityCascadeDeleteTest {
         order2.verify(buildingMapper).physicalDeleteByCommunityId(9L);
         order2.verify(communityMapper).deleteById(9L);
 
-        /* 操作日志：先写日志后删父表，含社区名可溯源 */
+        /* 操作日志：先写日志后删父表，含小区名可溯源 */
         ArgumentCaptor<SysOperationLog> logCaptor = ArgumentCaptor.forClass(SysOperationLog.class);
         verify(sysOperationLogMapper).insert(logCaptor.capture());
         SysOperationLog logged = logCaptor.getValue();
         assertThat(logged.getOperationType()).isEqualTo("DELETE");
         assertThat(logged.getTargetType()).isEqualTo("COMMUNITY");
         assertThat(logged.getTargetId()).isEqualTo(9L);
-        assertThat(logged.getContent()).contains("退场社区");
+        assertThat(logged.getContent()).contains("退场小区");
         InOrder order3 = inOrder(sysOperationLogMapper, communityMapper);
         order3.verify(sysOperationLogMapper).insert(any(SysOperationLog.class));
         order3.verify(communityMapper).deleteById(9L);
@@ -427,7 +427,7 @@ class CommunityCascadeDeleteTest {
     }
 
     @Test
-    @DisplayName("V18/V19 新表纳入级联：排班/人员绑定/协议模板按社区直删，协议与变更历史随租约先删")
+    @DisplayName("V18/V19 新表纳入级联：排班/人员绑定/协议模板按小区直删，协议与变更历史随租约先删")
     void delete_cascadesV18V19Tables() {
         LeaseRecord lease = new LeaseRecord();
         lease.setId(77L);
@@ -456,7 +456,7 @@ class CommunityCascadeDeleteTest {
         categoryOrder.verify(staffServiceCategoryMapper).delete(any());
         categoryOrder.verify(serviceCategoryMapper).delete(any());
 
-        /* 直接以 community_id 归属的三张表按社区清理 */
+        /* 直接以 community_id 归属的三张表按小区清理 */
         verify(staffCommunityMapper).delete(any());
         verify(staffScheduleMapper).delete(any());
         verify(agreementTemplateMapper).delete(any());
@@ -480,7 +480,7 @@ class CommunityCascadeDeleteTest {
         verify(leaseMoveOutApplicationMapper).delete(any());
 
         /* 顺序：退租申请（FK 指向 lease_record / house / community）必须先于
-           租约、房屋结构链与社区本体删除，否则 FK 违约 */
+           租约、房屋结构链与小区本体删除，否则 FK 违约 */
         InOrder moveOutOrder = inOrder(leaseMoveOutApplicationMapper, leaseRecordMapper,
                 houseMapper, buildingMapper, communityMapper);
         moveOutOrder.verify(leaseMoveOutApplicationMapper).delete(any());
@@ -509,7 +509,7 @@ class CommunityCascadeDeleteTest {
         verify(leaseDepositRefundMapper).delete(any());
 
         /* 顺序：lease_deposit_refund 外键指向 lease_record，必须排在租约物理删除之前，
-           否则含押金退还记录的社区删除将 FK 违约 */
+           否则含押金退还记录的小区删除将 FK 违约 */
         InOrder refundOrder = inOrder(leaseAgreementMapper, leaseChangeLogMapper,
                 leaseDepositRefundMapper, leaseRecordMapper);
         refundOrder.verify(leaseAgreementMapper).delete(any());

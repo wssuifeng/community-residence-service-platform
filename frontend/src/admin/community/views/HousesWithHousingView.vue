@@ -16,9 +16,9 @@ import { housingRentTypeLabels } from '@/common/housing/types/housing'
 /**
  * 房屋与房源一体化（R62，v1.5；2026-09-20 用户反馈改版为带图卡片 + 筛选）：
  * 主体为「房屋为主线」的卡片流（GET /communities/houses-manage 分页），
- * 顶部筛选（社区/楼栋/单元三级联动 + 房号关键字 + 挂牌状态）；
+ * 顶部筛选（小区/楼栋/单元三级联动 + 房号关键字 + 挂牌状态）；
  * 卡片带房源首图（无图/未挂牌用占位插画），行内完成挂牌/编辑/上下架；
- * 「批量挂牌」弹窗沿用层级选择（整社区/按楼栋/按单元 + 标题后缀）。
+ * 「批量挂牌」弹窗沿用层级选择（整小区/按楼栋/按单元 + 标题后缀）。
  */
 
 /* 契约：GET /communities/houses-manage → 分页房屋主线项（R62 v1.5，接口设计.md §9.15.3） */
@@ -50,7 +50,7 @@ const total = ref(0)
 const items = ref<HouseManageItem[]>([])
 const listLoading = ref(false)
 
-/** 社区选项（管理端数据级权限内全量） */
+/** 小区选项（管理端数据级权限内全量） */
 const communities = ref<ICommunity[]>([])
 const buildings = ref<IBuilding[]>([])
 const units = ref<IUnit[]>([])
@@ -61,11 +61,11 @@ async function loadCommunities(): Promise<void> {
     communities.value = result.records
   } catch (error) {
     communities.value = []
-    ElMessage.error(error instanceof Error ? error.message : '加载社区列表失败')
+    ElMessage.error(error instanceof Error ? error.message : '加载小区列表失败')
   }
 }
 
-/** 社区变更：清空下级并拉楼栋 */
+/** 小区变更：清空下级并拉楼栋 */
 async function handleCommunityChange(): Promise<void> {
   filters.buildingId = undefined
   filters.unitId = undefined
@@ -289,7 +289,7 @@ async function handleToggleStatus(item: HouseManageItem): Promise<void> {
 /* 契约：POST /housings/batch-generate
    {communityId, monthlyRent, deposit, rentType?, buildingIds?, unitIds?, houseIds?, titleSuffix?,
     createTimeslots?, timeslotMode?: 'DEFAULT'|'CUSTOM', timeslots?: [{dayOfWeek,startTime,endTime}]}
-   → {created, skipped, timeslotsCreated}（R62 v1.5；收窄链 houseIds > unitIds > buildingIds > 整社区） */
+   → {created, skipped, timeslotsCreated}（R62 v1.5；收窄链 houseIds > unitIds > buildingIds > 整小区） */
 interface BatchTreeHouse {
   id: number
   houseNumber: string
@@ -364,19 +364,19 @@ function buildingUnlistedCount(building: BatchTreeBuilding): number {
   return building.units.reduce((sum, u) => sum + unlistedCount(u), 0)
 }
 
-/** 打开批量挂牌：默认以当前筛选社区为范围（未选社区时要求先选一个） */
+/** 打开批量挂牌：默认以当前筛选小区为范围（未选小区时要求先选一个） */
 async function openBatchDialog(): Promise<void> {
   const target = filters.communityId != null
     ? communities.value.find((c) => c.id === filters.communityId) ?? null
     : null
   if (!target) {
-    ElMessage.info('请先在筛选中选择社区，或从社区卡片进入批量挂牌')
+    ElMessage.info('请先在筛选中选择小区，或从小区卡片进入批量挂牌')
     return
   }
   await openBatchDialogFor(target)
 }
 
-/** 从社区维度直接打开批量挂牌（卡片空态/社区筛选场景） */
+/** 从小区维度直接打开批量挂牌（卡片空态/小区筛选场景） */
 async function openBatchDialogFor(community: ICommunity): Promise<void> {
   batchCommunity.value = community
   batchForm.monthlyRent = undefined
@@ -400,7 +400,7 @@ async function openBatchDialogFor(community: ICommunity): Promise<void> {
     )
   } catch (error) {
     batchTree.value = []
-    ElMessage.error(error instanceof Error ? error.message : '加载社区结构失败')
+    ElMessage.error(error instanceof Error ? error.message : '加载小区结构失败')
   } finally {
     batchTreeLoading.value = false
   }
@@ -425,7 +425,7 @@ function selectAllUnits(): void {
 const batchScopeText = computed(() => {
   switch (batchScopeMode.value) {
     case 'community':
-      return '整社区：全部无在架房源的房屋'
+      return '整小区：全部无在架房源的房屋'
     case 'buildings': {
       if (batchForm.buildingIds.length === 0) return '请选择楼栋'
       const unlisted = batchBuildings.value
@@ -510,19 +510,19 @@ useLiveRefresh(() => loadItems(), ['community','housing'])
     <header class="page-lead">
       <div class="page-lead-text">
         <h2 class="page-lead-title">房屋与房源</h2>
-        <p class="page-lead-sub">按社区筛选查看房屋与挂牌状态，卡片内直接挂牌、编辑与上下架</p>
+        <p class="page-lead-sub">按小区筛选查看房屋与挂牌状态，卡片内直接挂牌、编辑与上下架</p>
       </div>
       <el-button v-permission="['ADMIN', 'SUPER_ADMIN']" type="primary" @click="openBatchDialog">
         批量挂牌
       </el-button>
     </header>
 
-    <!-- 筛选条：社区 / 楼栋 / 单元三级联动 + 房号关键字 + 挂牌状态 -->
+    <!-- 筛选条：小区 / 楼栋 / 单元三级联动 + 房号关键字 + 挂牌状态 -->
     <div class="filter-bar">
       <el-select
         v-model="filters.communityId"
         class="filter-community"
-        placeholder="全部社区"
+        placeholder="全部小区"
         clearable
         filterable
         @change="handleCommunityChange"
@@ -720,7 +720,7 @@ useLiveRefresh(() => loadItems(), ['community','housing'])
       </template>
     </el-dialog>
 
-    <!-- 批量挂牌：层级范围（整社区/按楼栋/按单元）+ 标题后缀 -->
+    <!-- 批量挂牌：层级范围（整小区/按楼栋/按单元）+ 标题后缀 -->
     <el-dialog v-model="batchVisible" title="批量挂牌" width="560px" destroy-on-close>
       <p class="dialog-context">
         为「{{ batchCommunity?.name }}」范围内无在架房源的房屋按默认参数生成在售（可租）房源，
@@ -730,7 +730,7 @@ useLiveRefresh(() => loadItems(), ['community','housing'])
         <el-form-item label="挂牌范围">
           <div class="batch-scope">
             <el-radio-group v-model="batchScopeMode" size="small" @change="handleScopeModeChange">
-              <el-radio-button value="community">整社区</el-radio-button>
+              <el-radio-button value="community">整小区</el-radio-button>
               <el-radio-button value="buildings">按楼栋</el-radio-button>
               <el-radio-button value="units">按单元</el-radio-button>
             </el-radio-group>
@@ -747,7 +747,7 @@ useLiveRefresh(() => loadItems(), ['community','housing'])
               </span>
             </el-checkbox>
           </el-checkbox-group>
-          <p v-if="batchBuildings.length === 0" class="pick-empty">该社区暂无楼栋</p>
+          <p v-if="batchBuildings.length === 0" class="pick-empty">该小区暂无楼栋</p>
         </el-form-item>
 
         <template v-if="batchScopeMode === 'units'">

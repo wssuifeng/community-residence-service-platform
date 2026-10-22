@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 租期到期提醒（R15，每日 01:30，租期判定扫描之后）。
- * 对止期进入提醒窗口的 ACTIVE 租住记录生成站内通知，通知居民与绑定社区管理员；
+ * 对止期进入提醒窗口的 ACTIVE 租住记录生成站内通知，通知居民与绑定小区管理员；
  * 去重由 lease_reminder 唯一键（lease_id + status）保证——同一租住记录同一到期标注
  * 仅提醒一次，插入冲突即视为已提醒过直接跳过；提醒窗口天数取
  * sys_config: lease.reminder_days_before_expire（R15 可配）。
@@ -123,7 +123,7 @@ public class LeaseExpiryReminderTask {
                 "LEASE", "LEASE_RECORD", lease.getId());
         for (Long adminId : boundAdminIds(lease.getCommunityId())) {
             notificationService.createForUser(adminId, lease.getCommunityId(),
-                    expired ? "社区租住已到期" : "社区租住即将到期",
+                    expired ? "小区租住已到期" : "小区租住即将到期",
                     "租住记录 #" + lease.getId() + " 的合同"
                             + (expired ? "已于 " : "将于 ") + dateText
                             + (expired ? " 到期，请跟进居民办理退住。" : " 到期，请跟进居民续签或退住。"),

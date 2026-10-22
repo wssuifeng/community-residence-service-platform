@@ -8,12 +8,12 @@ import { isReassignOrder } from '@/admin/workorder/utils/dispatch'
 
 /**
  * 派单候选抽屉（列表看板与工单详情共用，避免两处各写一套候选呈现）。
- * 候选由后端按推荐档位排序：常驻本社区且擅长该类别 → 常驻本社区 → 擅长该类别 → 其他，
+ * 候选由后端按推荐档位排序：常驻本小区且擅长该类别 → 常驻本小区 → 擅长该类别 → 其他，
  * 同档按在手工单数升序；抽屉只做分组展示与选择，档位口径不在前端重算。
  */
 const props = defineProps<{
   modelValue: boolean
-  /** 目标工单（社区与类别决定候选推荐档位） */
+  /** 目标工单（小区与类别决定候选推荐档位） */
   order: IWorkOrder | null
 }>()
 
@@ -109,7 +109,7 @@ async function handleSubmit(): Promise<void> {
   <el-drawer v-model="visible" :title="title" size="520px" append-to-body>
     <div class="picker">
       <p class="picker-intro">
-        候选按调度推荐档位排列：<strong>常驻本社区且擅长该类别</strong>最优先，同档按当前在手工单数从少到多。
+        候选按调度推荐档位排列：<strong>常驻本小区且擅长该类别</strong>最优先，同档按当前在手工单数从少到多。
         今日班次为「休息 / 未排班」的人员仍可派单，但接单响应可能延迟。
       </p>
 
@@ -145,11 +145,11 @@ async function handleSubmit(): Promise<void> {
                 <div class="candidate-main">
                   <p class="candidate-name">
                     {{ staff.realName }}
-                    <span v-if="staff.matchedCommunity" class="match-chip">常驻本社区</span>
+                    <span v-if="staff.matchedCommunity" class="match-chip">常驻本小区</span>
                     <span v-if="staff.matchedCategory" class="match-chip">擅长该类别</span>
                   </p>
                   <p class="candidate-meta">
-                    <span>常驻社区：{{ staff.communityNames || '未绑定' }}</span>
+                    <span>常驻小区：{{ staff.communityNames || '未绑定' }}</span>
                   </p>
                 </div>
                 <div class="candidate-side">

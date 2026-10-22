@@ -172,7 +172,7 @@ class LeaseMoveOutApplicationServiceTest {
         when(houseMapper.selectById(5L)).thenReturn(house);
         Community community = new Community();
         community.setId(3L);
-        community.setName("演示社区");
+        community.setName("演示小区");
         when(communityMapper.selectById(3L)).thenReturn(community);
         when(sysAdminCommunityMapper.selectList(any())).thenReturn(List.of());
         when(housingMapper.update(any(), any())).thenReturn(1);

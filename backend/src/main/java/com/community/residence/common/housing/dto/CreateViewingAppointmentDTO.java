@@ -11,7 +11,7 @@ import java.time.LocalTime;
 
 /**
  * 创建看房预约请求：仅注册并登录的居民账号可提交，预约人身份从 JWT 取得。
- * `visitorName` 仅为历史请求兼容字段，新接口不再消费游客身份信息。
+ * `visitorName` 仅为历史请求兼容字段，新预约不再接受匿名身份信息。
  */
 @Data
 @Schema(description = "创建看房预约请求")

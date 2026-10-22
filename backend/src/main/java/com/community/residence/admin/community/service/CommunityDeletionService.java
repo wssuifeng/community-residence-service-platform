@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
-/** 管理端社区删除协调：单社区单事务、域内清理、保留账号与审计。 */
+/** 管理端小区删除协调：单小区单事务、域内清理、保留账号与审计。 */
 @Slf4j @Service @RequiredArgsConstructor
 public class CommunityDeletionService {
     private final CommunityMapper communityMapper;
@@ -33,17 +33,17 @@ public class CommunityDeletionService {
     private final com.community.residence.common.messaging.service.CommunityNotificationCleanupService communityNotificationCleanupService;
     private final com.community.residence.common.auth.service.CommunityAuthorizationCleanupService communityAuthorizationCleanupService;
     /**
-     * 社区级联删除（R1/R6 v1.1，仅超管；50 阶段步骤 1b 前置开发）。
+     * 小区级联删除（R1/R6 v1.1，仅超管；50 阶段步骤 1b 前置开发）。
      * 级联清单从 V1 迁移逐表推导：凡 community_id 直接引用的表 + 经结构链
-     * （社区→楼栋→单元→房屋）或业务链（公告→notice_target 定向）传递归属的表
+     * （小区→楼栋→单元→房屋）或业务链（公告→notice_target 定向）传递归属的表
      * 全部纳入，删除顺序一律子表在前、父表在后（FK 约束要求）。
-     * 账号体系不删：sys_user / resident 均为跨社区共享账号（resident 表无
-     * community_id 列，社区归属经 residence_relation 表达），仅随关系删业务数据；
-     * sys_admin_community 删除该社区绑定行。不存在/已删返回 404；
+     * 账号体系不删：sys_user / resident 均为跨小区共享账号（resident 表无
+     * community_id 列，小区归属经 residence_relation 表达），仅随关系删业务数据；
+     * sys_admin_community 删除该小区绑定行。不存在/已删返回 404；
      * 删除动作写操作日志（先写后删父表，sys_operation_log 无 FK 不受级联影响）。
      */
     @Transactional(rollbackFor = Exception.class)
-    @com.community.residence.common.log.annotation.OperationLog(operationType = "DELETE", targetType = "COMMUNITY", targetId = "#id", content = "'删除社区（级联）'")
+    @com.community.residence.common.log.annotation.OperationLog(operationType = "DELETE", targetType = "COMMUNITY", targetId = "#id", content = "'删除小区（级联）'")
     public void delete(Long id) {
         Community community = communityService.requireCommunity(id);
         Long operatorId = SecurityUtils.getUserId();
@@ -71,19 +71,19 @@ public class CommunityDeletionService {
         operationLog.setTargetType("COMMUNITY");
         operationLog.setTargetId(id);
         operationLog.setContent("{\"communityName\":\"" + community.getName()
-                + "\",\"action\":\"级联删除社区及关联业务数据\"}");
+                + "\",\"action\":\"级联删除小区及关联业务数据\"}");
         operationLog.setCreatedAt(LocalDateTime.now());
         sysOperationLogMapper.insert(operationLog);
 
         /* ---- 父表收尾：community 本体 ---- */
         communityMapper.deleteById(id);
-        log.info("社区级联删除完成：communityId={}, name={}, operator={}", id, community.getName(), operatorId);
+        log.info("小区级联删除完成：communityId={}, name={}, operator={}", id, community.getName(), operatorId);
     }
 
     /** 删除前关联摘要，仅超管入口；不删除、不猜测历史。 */
     public com.community.residence.common.community.vo.CommunityDeletionImpactVO deletionImpact(Long id) {
         var impact = communityMapper.selectDeletionImpact(id);
-        if (impact == null) throw new ResourceNotFoundException("社区不存在");
+        if (impact == null) throw new ResourceNotFoundException("小区不存在");
         impact.setDeletable(true);
         impact.setBlockingReason("");
         String version = impact.getCommunityId() + ":" + impact.getCommunityName() + ":" + impact.getHouses()
@@ -97,13 +97,13 @@ public class CommunityDeletionService {
     /* 重新锁定并核对影响版本：旧客户端/缺失确认/预览后变化均不进入级联操作。 */
     @Transactional(rollbackFor = Exception.class)
     public void deleteConfirmed(Long id, String confirmationVersion, String confirmationName) {
-        if (communityMapper.lockForDeletion(id) == null) throw new ResourceNotFoundException("社区不存在");
+        if (communityMapper.lockForDeletion(id) == null) throw new ResourceNotFoundException("小区不存在");
         communityMapper.lockRelationsForDeletion(id);
         communityMapper.lockLeasesForDeletion(id);
         communityMapper.lockApplicationsForDeletion(id);
         var impact = deletionImpact(id);
         if (!impact.getCommunityName().equals(confirmationName))
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "请输入完整社区名称完成最终删除确认");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "请输入完整小区名称完成最终删除确认");
         if (confirmationVersion == null || !confirmationVersion.equals(impact.getConfirmationVersion()))
             throw new BusinessException(ErrorCode.INVALID_PARAM, "请重新查看删除影响并完成两次确认；关联数据已变化或未确认");
         delete(id);

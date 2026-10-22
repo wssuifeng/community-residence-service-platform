@@ -16,10 +16,10 @@ public class ViewingAppointmentVO {
     @Schema(description = "预约ID")
     private Long id;
 
-    @Schema(description = "预约人ID（游客预约为空）")
+    @Schema(description = "预约人ID（历史匿名预约为空）")
     private Long userId;
 
-    @Schema(description = "预约人姓名（居民取实名，游客取填写的姓名）")
+    @Schema(description = "预约人姓名（居民预约取实名；历史匿名预约取存量姓名）")
     private String visitorName;
 
     @Schema(description = "房源ID")
@@ -34,13 +34,13 @@ public class ViewingAppointmentVO {
     @Schema(description = "带看人姓名（未分配为空）")
     private String assigneeName;
 
-    @Schema(description = "关联会话ID（R63 看房群聊；游客预约/未建群为空）")
+    @Schema(description = "关联会话ID（R63 看房群聊；历史匿名预约/未建群为空）")
     private Long conversationId;
 
     @Schema(description = "所属租约ID（R69 会话内发起时写入；房源页发起为空）")
     private Long leaseId;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "预约日期")

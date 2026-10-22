@@ -15,7 +15,7 @@ import FileUploader from '@/common/upload/components/FileUploader.vue'
 
 /**
  * 提交反馈：类别/标题/内容/附件；
- * communityId 由当前居住关系链（房屋→单元→楼栋→社区）推导，
+ * communityId 由当前居住关系链（房屋→单元→楼栋→小区）推导，
  * 附件在创建反馈后按 URL 取回文件补传（uploadFeedbackAttachment 需 feedbackId）
  */
 const router = useRouter()
@@ -61,7 +61,7 @@ const rules = {
 const formRef = ref()
 const canSubmit = computed(() => !communityLoading.value && communityId.value !== null)
 
-/** 由居住关系推导所属社区：居住关系 → 房屋 → 单元 → 楼栋 → communityId */
+/** 由居住关系推导所属小区：居住关系 → 房屋 → 单元 → 楼栋 → communityId */
 async function resolveCommunityId(): Promise<void> {
   communityLoading.value = true
   try {
@@ -100,7 +100,7 @@ async function handleSubmit(): Promise<void> {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
   if (communityId.value === null) {
-    ElMessage.error('未能确定您所属的社区，请先完成入住或稍后再试')
+    ElMessage.error('未能确定您所属的小区，请先完成入住或稍后再试')
     return
   }
   submitting.value = true
@@ -248,7 +248,7 @@ onMounted(async () => {
             :disabled="!canSubmit"
             @click="handleSubmit"
           >
-            {{ communityLoading ? '确认社区信息…' : '提交反馈' }}
+            {{ communityLoading ? '确认小区信息…' : '提交反馈' }}
           </el-button>
         </div>
       </el-form>

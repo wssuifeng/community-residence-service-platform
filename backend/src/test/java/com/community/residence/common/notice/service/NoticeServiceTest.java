@@ -75,7 +75,7 @@ class NoticeServiceTest {
     }
 
     @Test
-    @DisplayName("创建公告：社区管理员必须指定目标社区")
+    @DisplayName("创建公告：小区管理员必须指定目标小区")
     void create_adminWithoutCommunity_throws() {
         try (MockedStatic<com.community.residence.common.security.context.SecurityUtils> mocked =
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class)) {
@@ -90,7 +90,7 @@ class NoticeServiceTest {
 
             assertThatThrownBy(() -> noticeService.create(dto))
                     .isInstanceOf(BusinessException.class)
-                    .hasMessageContaining("必须指定目标社区");
+                    .hasMessageContaining("必须指定目标小区");
         }
     }
 

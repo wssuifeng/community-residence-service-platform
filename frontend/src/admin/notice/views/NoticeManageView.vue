@@ -54,7 +54,7 @@ import { useUserStore } from '@/common/auth/store/user'
  * 原 NoticeListView/NoticeCreateView/NoticeDetailView 收编于此（任务 7）；
  * ?action=create 深链为任务 1 redirect 契约，编辑态经 ?action=edit&id= 同步。
  * 表单 priority/type/expireTime 照常提交（D2 裁决，V12 后端已接收）；
- * DEF-039：V9 后补 isPinned 置顶开关 + targets 多社区/楼栋定向编辑 +
+ * DEF-039：V9 后补 isPinned 置顶开关 + targets 多小区/楼栋定向编辑 +
  * 左栏 priority 筛选（排序由后端 is_pinned DESC 负责，前端不重排）。
  */
 
@@ -240,8 +240,8 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
     form.value.publishTime = notice.publishTime ? new Date(notice.publishTime) : null
     form.value.expireTime = notice.expireTime ? new Date(notice.expireTime) : null
     /* DEF-039 回显：置顶开关（0/1 → 布尔）与 targets 拆分回两组选择
-       （V9 起 VO 真实返回；无 targets = 广播/单社区旧语义，保持空选择）；
-       DEF-046：GUEST 纯标记回游客可见勾选 */
+       （V9 起 VO 真实返回；无 targets = 广播/单小区旧语义，保持空选择）；
+       DEF-046：GUEST 纯标记回无需居住关系可见勾选 */
     form.value.isPinned = notice.isPinned === 1
     form.value.guestVisible = notice.targets.some((item) => item.targetType === 'GUEST')
     form.value.targetCommunityIds = notice.targets
@@ -252,8 +252,8 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
       .filter((item): item is INoticeTargetItem & { targetId: number } =>
         item.targetType === 'BUILDING' && item.targetId !== null)
       .map((item) => item.targetId)
-    /* 楼栋选项回显：拿不到社区列表时用 VO targetName 补位（楼栋归属社区不在
-       编辑者绑定范围外时无社区选项可选，name 兜底保证已选项可读） */
+    /* 楼栋选项回显：拿不到小区列表时用 VO targetName 补位（楼栋归属小区不在
+       编辑者绑定范围外时无小区选项可选，name 兜底保证已选项可读） */
     const knownBuildings = new Set(buildingOptions.value.map((item) => item.id))
     const fallbackBuildings = notice.targets
       .filter((item): item is INoticeTargetItem & { targetId: number; targetName: string } =>
@@ -263,8 +263,8 @@ async function enterEdit(id: number, writeUrl = true): Promise<void> {
     if (fallbackBuildings.length > 0) {
       buildingOptions.value = [...buildingOptions.value, ...fallbackBuildings]
     }
-    /* 编辑回显的社区选项：接口列表为空时用 VO 自带名称补位（原编辑页经独立路由进入
-       未加载绑定社区，社区名显示为裸 ID，迁移时顺修） */
+    /* 编辑回显的小区选项：接口列表为空时用 VO 自带名称补位（原编辑页经独立路由进入
+       未加载绑定小区，小区名显示为裸 ID，迁移时顺修） */
     if (notice.communityId !== null) {
       const known = boundCommunities.value.some((item) => item.id === notice.communityId)
       if (!known && notice.communityName) {
@@ -407,14 +407,14 @@ function openViewers(): void {
 /* ===================== 编辑态表单（原创建/编辑页整体迁入，D2：字段照常提交） ===================== */
 
 const isSuperAdmin = computed(() => userStore.role === 'SUPER_ADMIN')
-/** 绑定社区 ID 列表（登录响应）；社区名经社区列表接口补全（后端仅返回 ID 数组） */
+/** 绑定小区 ID 列表（登录响应）；小区名经小区列表接口补全（后端仅返回 ID 数组） */
 const boundCommunityIds = computed(() => userStore.user?.boundCommunities ?? [])
 const boundCommunities = ref<{ id: number; name: string }[]>([])
 
 async function loadBoundCommunities(): Promise<void> {
-  /* DEF-046：游客可见勾选（超管专属）以社区定向公告为实际载体（纯广播本就游客可见），
-     超管无绑定社区，若不加载社区列表则发布范围/定向目标两个下拉均无选项，
-     勾选项形同虚设——超管改取全量社区列表，社区管理员仍按绑定社区过滤 */
+  /* DEF-046：GUEST 标记用于小区定向公告；纯广播本身已对未登录公开访问开放，
+     超管无绑定小区，若不加载小区列表则发布范围/定向目标两个下拉均无选项，
+     勾选项形同虚设——超管改取全量小区列表，小区管理员仍按绑定小区过滤 */
   if (isSuperAdmin.value) {
     try {
       const result = await getCommunityList({ page: 1, size: 200 })
@@ -448,17 +448,17 @@ const form = ref({
   broadcast: false,
   /** 置顶开关（isPinned 0/1，R25 v1.2） */
   isPinned: false,
-  /** 社区级定向目标（COMMUNITY targets；空=按上方发布范围单社区） */
+  /** 小区级定向目标（COMMUNITY targets；空=按上方发布范围单小区） */
   targetCommunityIds: [] as number[],
-  /** 楼栋级定向目标（BUILDING targets；可跨社区累加） */
+  /** 楼栋级定向目标（BUILDING targets；可跨小区累加） */
   targetBuildingIds: [] as number[],
-  /** 游客可见（GUEST 纯标记 target，DEF-046 V13；仅超管可勾选，ADMIN 勾选后端 403） */
+  /** 无需居住关系可见（GUEST 纯标记 target，DEF-046 V13；仅超管可勾选，ADMIN 勾选后端 403） */
   guestVisible: false,
   publishTime: new Date() as Date | null,
   expireTime: null as Date | null
 })
 
-/* 楼栋定向：选社区加载楼栋，选项跨社区累加（编辑回显不同社区楼栋时可复选） */
+/* 楼栋定向：选小区加载楼栋，选项跨小区累加（编辑回显不同小区楼栋时可复选） */
 const buildingCommunityId = ref<number | null>(null)
 const buildingOptions = ref<{ id: number; name: string }[]>([])
 const buildingsLoading = ref(false)
@@ -476,14 +476,14 @@ async function handleBuildingCommunityChange(communityId: number | null): Promis
         .map((item) => ({ id: item.id, name: item.name }))
     ]
   } catch {
-    /* 楼栋加载失败静默：定向范围仍可仅用社区级 */
+    /* 楼栋加载失败静默：定向范围仍可仅用小区级 */
   } finally {
     buildingsLoading.value = false
   }
 }
 
 /* 全系统广播与定向范围互斥：勾选广播时清空定向选择（广播 = 无 targets；
-   游客可见标记同属 targets 一并清空——纯广播本身对游客可见） */
+   无需居住关系可见标记同属 targets 一并清空——纯广播本身对无需居住关系可见） */
 watch(
   () => form.value.broadcast,
   (broadcast) => {
@@ -532,7 +532,7 @@ function resetForm(): void {
 }
 
 /** 组装保存请求体（targets 优先；两组定向均空时回退 communityId 单目标旧写法；
- *  游客可见勾选追加 GUEST 纯标记 target（DEF-046，无 targetId，仅超管勾选生效）） */
+ *  无需居住关系可见勾选追加 GUEST 纯标记 target（DEF-046，无 targetId，仅超管勾选生效）） */
 function buildRequest(): INoticeSaveRequest {
   const targets: INoticeSaveTargetItem[] = [
     ...form.value.targetCommunityIds.map((id) => ({ targetType: 'COMMUNITY' as const, targetId: id })),
@@ -561,12 +561,12 @@ function buildRequest(): INoticeSaveRequest {
   }
 }
 
-/** 校验 + 社区必选检查（ADMIN 未绑定社区时阻断） */
+/** 校验 + 小区必选检查（ADMIN 未绑定小区时阻断） */
 async function validate(): Promise<boolean> {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return false
   if (!(isSuperAdmin.value && form.value.broadcast) && form.value.communityId === null) {
-    ElMessage.warning(isSuperAdmin.value ? '请选择发布社区或勾选全系统广播' : '请选择发布社区')
+    ElMessage.warning(isSuperAdmin.value ? '请选择发布小区或勾选全系统广播' : '请选择发布小区')
     return false
   }
   return true
@@ -646,8 +646,8 @@ const publishButtonLabel = computed(() =>
 /* ===================== 初始化：深链消费 + 首屏自动选中第一条 ===================== */
 
 onMounted(async () => {
-  /* 社区选项：ADMIN 按绑定社区过滤；DEF-046 起超管也需加载（全量），否则
-     游客可见勾选（超管专属）因无可选社区而不可用 */
+  /* 小区选项：ADMIN 按绑定小区过滤；DEF-046 起超管也需加载（全量），否则
+     无需居住关系可见勾选（超管专属）因无可选小区而不可用 */
   await loadBoundCommunities()
   const action = route.query.action
   if (action === 'create') {
@@ -832,8 +832,8 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
               <div class="meta-item">
                 <dt class="meta-label">发布范围</dt>
                 <dd class="meta-value">
-                  <!-- DEF-039：targets 真实返回后逐条展示（社区/楼栋分组名），无目标=全系统广播；
-                       DEF-046：GUEST 纯标记展示「游客可见」chip -->
+                  <!-- DEF-039：targets 真实返回后逐条展示（小区/楼栋分组名），无目标=全系统广播；
+                       DEF-046：GUEST 纯标记展示「无需居住关系可见」chip -->
                   <template v-if="current.targets && current.targets.length > 0">
                     <span
                       v-for="target in current.targets"
@@ -841,8 +841,8 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
                       class="scope-chip"
                     >
                       {{ target.targetType === 'GUEST'
-                        ? '游客可见'
-                        : (target.targetName ?? (target.targetType === 'COMMUNITY' ? `社区#${target.targetId}` : `楼栋#${target.targetId}`)) }}
+                        ? '无需居住关系可见'
+                        : (target.targetName ?? (target.targetType === 'COMMUNITY' ? `小区#${target.targetId}` : `楼栋#${target.targetId}`)) }}
                     </span>
                   </template>
                   <span v-else class="scope-chip">全系统广播</span>
@@ -921,12 +921,12 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
 
               <el-form-item label="发布范围">
                 <template v-if="isSuperAdmin">
-                  <el-checkbox v-model="form.broadcast">全系统广播（所有社区）</el-checkbox>
-                  <span v-if="form.broadcast" class="form-tip">全系统广播公告对游客可见</span>
+                  <el-checkbox v-model="form.broadcast">全系统广播（所有小区）</el-checkbox>
+                  <span v-if="form.broadcast" class="form-tip">全系统广播公告无需居住关系即可查看</span>
                   <el-select
                     v-if="!form.broadcast"
                     v-model="form.communityId"
-                    placeholder="选择绑定社区"
+                    placeholder="选择绑定小区"
                     style="width: 260px"
                   >
                     <el-option
@@ -940,7 +940,7 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
                 <template v-else>
                   <el-select
                     v-model="form.communityId"
-                    placeholder="选择发布社区（限绑定社区）"
+                    placeholder="选择发布小区（限绑定小区）"
                     style="width: 260px"
                   >
                     <el-option
@@ -951,13 +951,13 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
                     />
                   </el-select>
                   <span v-if="boundCommunities.length === 0" class="form-tip is-warning">
-                    当前账号未绑定社区，无法发布
+                    当前账号未绑定小区，无法发布
                   </span>
                 </template>
               </el-form-item>
 
-              <!-- DEF-039：定向目标（R25 v1.2 多社区/楼栋定向）；
-                   空选 = 仅上方发布范围单社区；全系统广播时隐藏（广播无 targets） -->
+              <!-- DEF-039：定向目标（R25 v1.2 多小区/楼栋定向）；
+                   空选 = 仅上方发布范围单小区；全系统广播时隐藏（广播无 targets） -->
               <el-form-item v-if="!form.broadcast" label="定向目标">
                 <div class="targets-editor">
                   <el-select
@@ -966,7 +966,7 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
                     collapse-tags
                     collapse-tags-tooltip
                     clearable
-                    placeholder="定向社区（可多选）"
+                    placeholder="定向小区（可多选）"
                     class="target-select"
                   >
                     <el-option
@@ -979,7 +979,7 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
                   <div class="building-row">
                     <el-select
                       v-model="buildingCommunityId"
-                      placeholder="选择社区加载楼栋"
+                      placeholder="选择小区加载楼栋"
                       clearable
                       style="width: 180px"
                       @change="handleBuildingCommunityChange"
@@ -998,7 +998,7 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
                       collapse-tags-tooltip
                       clearable
                       filterable
-                      placeholder="定向楼栋（可跨社区多选）"
+                      placeholder="定向楼栋（可跨小区多选）"
                       class="target-select"
                       :loading="buildingsLoading"
                     >
@@ -1011,16 +1011,15 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
                     </el-select>
                   </div>
                   <span class="form-tip is-block">
-                    定向社区/楼栋会在发布范围基础上叠加触达；两者均不选 = 仅发布范围所选社区
+                    定向小区/楼栋会在发布范围基础上叠加触达；两者均不选 = 仅发布范围所选小区
                   </span>
-                  <!-- DEF-046 游客可见（V13 GUEST 纯标记 target）：仅超管可勾选，
-                       ADMIN 勾选后端 403；广播公告本身对游客可见，故广播态隐藏 -->
+                  <!-- DEF-046 GUEST 表示无需居住关系可见；仅超管可设置，广播态无需额外标记 -->
                   <el-checkbox
                     v-permission="['SUPER_ADMIN']"
                     v-model="form.guestVisible"
                     class="guest-visible-check"
                   >
-                    游客可见（免登录游客可查看此公告）
+                    无需居住关系可见
                   </el-checkbox>
                 </div>
               </el-form-item>
@@ -1424,7 +1423,7 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
   color: var(--color-warning);
 }
 
-/* ---------- 定向目标编辑（DEF-039：社区多选 + 社区→楼栋多选，紧凑两行） ---------- */
+/* ---------- 定向目标编辑（DEF-039：小区多选 + 小区→楼栋多选，紧凑两行） ---------- */
 
 .targets-editor {
   display: flex;
@@ -1443,7 +1442,7 @@ useLiveRefresh(async()=>{if(mode.value==='view'){await load();if(current.value)a
   flex-wrap: wrap;
 }
 
-/* 游客可见勾选（DEF-046）：targets-editor 内顶格无表单缩进 */
+/* 无需居住关系可见勾选（DEF-046）：targets-editor 内顶格无表单缩进 */
 .guest-visible-check {
   margin-left: 0;
 }

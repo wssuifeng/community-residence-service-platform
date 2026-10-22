@@ -38,7 +38,7 @@ public class AdminResidenceRelationController {
         return ApiResponse.success(relationService.pageByHouse(houseId, page, size, status));
     }
 
-    @Operation(summary = "管理员直建居住关系", description = "限绑定社区；OWNER/TENANT仅空置房直录；FAMILY/CO_RESIDENT依赖已入住有效主关系，不新增租约")
+    @Operation(summary = "管理员直建居住关系", description = "限绑定小区；OWNER/TENANT仅空置房直录；FAMILY/CO_RESIDENT依赖已入住有效主关系，不新增租约")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/residence-relations")
     public ApiResponse<RelationVO> adminCreate(@RequestBody @Valid

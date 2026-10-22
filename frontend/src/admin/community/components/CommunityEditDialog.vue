@@ -6,8 +6,8 @@ import { createCommunity, updateCommunity, getResponsibleAdmins } from '@/common
 import type { ICommunity, ICreateCommunityDTO, IResponsibleAdmin } from '@/common/community/types/community'
 
 /**
- * 社区新建/编辑对话框（任务 3 自 CommunityListView 表单逻辑收编抽取：
- * 结构树「新增社区/编辑」与社区详情「编辑社区」双入口共用）。
+ * 小区新建/编辑对话框（任务 3 自 CommunityListView 表单逻辑收编抽取：
+ * 结构树「新增小区/编辑」与小区详情「编辑小区」双入口共用）。
  * 字段、校验规则、成功/失败文案与原视图保持一致。
  */
 const props = defineProps<{
@@ -49,8 +49,8 @@ async function loadResponsibleAdmins(keyword: string): Promise<void> {
 const selectedResponsible = computed(() => responsibleOptions.value.find(item => item.id === form.responsibleAdminId))
 
 const rules: FormRules = {
-  name: [{ required: true, message: '请输入社区名称', trigger: 'blur' }],
-  address: [{ required: true, message: '请输入社区地址', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入小区名称', trigger: 'blur' }],
+  address: [{ required: true, message: '请输入小区地址', trigger: 'blur' }]
 }
 
 /* 每次打开按编辑目标重置表单（新建为全空，自动化变量回落默认值） */
@@ -90,10 +90,10 @@ async function handleSubmit(): Promise<void> {
     let saved: ICommunity
     if (props.community) {
       saved = await updateCommunity(props.community.id, payload)
-      ElMessage.success('社区已更新')
+      ElMessage.success('小区已更新')
     } else {
       saved = await createCommunity(payload)
-      ElMessage.success('社区创建成功')
+      ElMessage.success('小区创建成功')
     }
     visible.value = false
     emit('saved', saved)
@@ -106,33 +106,33 @@ async function handleSubmit(): Promise<void> {
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="community ? '编辑社区' : '新建社区'" width="520px">
+  <el-dialog v-model="visible" :title="community ? '编辑小区' : '新建小区'" width="520px">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-      <el-form-item label="社区编号"><el-input v-model="form.businessCode" maxlength="32" placeholder="创建留空自动分配；与内部ID不同" /></el-form-item>
-      <el-form-item label="社区名称" prop="name">
-        <el-input v-model="form.name" placeholder="请输入社区名称" maxlength="50" />
+      <el-form-item label="小区编号"><el-input v-model="form.businessCode" maxlength="32" placeholder="创建留空自动分配；与内部ID不同" /></el-form-item>
+      <el-form-item label="小区名称" prop="name">
+        <el-input v-model="form.name" placeholder="请输入小区名称" maxlength="50" />
       </el-form-item>
-      <el-form-item label="社区地址" prop="address">
-        <el-input v-model="form.address" placeholder="请输入社区地址" maxlength="100" />
+      <el-form-item label="小区地址" prop="address">
+        <el-input v-model="form.address" placeholder="请输入小区地址" maxlength="100" />
       </el-form-item>
-      <el-form-item label="社区责任人">
+      <el-form-item label="小区责任人">
         <el-select v-model="form.responsibleAdminId" clearable filterable remote :remote-method="loadResponsibleAdmins" :loading="responsibleLoading" placeholder="搜索管理员姓名或电话" style="width: 100%">
           <el-option-group v-if="responsibleOptions.some(item => item.currentOnly)" label="当前责任人">
             <el-option v-for="admin in responsibleOptions.filter(item => item.currentOnly)" :key="admin.id" :value="admin.id" :label="`${admin.realName} · ${admin.phone}`" />
           </el-option-group>
-          <el-option-group v-for="bound in [true, false]" :key="String(bound)" :label="bound ? '已绑定本社区' : '其他管理员'">
+          <el-option-group v-for="bound in [true, false]" :key="String(bound)" :label="bound ? '已绑定本小区' : '其他管理员'">
             <el-option v-for="admin in responsibleOptions.filter(item => !item.currentOnly && item.boundToCommunity === bound)" :key="admin.id" :value="admin.id" :label="`${admin.realName} · ${admin.phone}`" />
           </el-option-group>
         </el-select>
       </el-form-item>
-      <p class="form-hint">设置责任人时同步授予本社区管理权限；更换或清除只移除责任人来源，超管手工授权保留。权限发生变化后需重新登录。</p>
+      <p class="form-hint">设置责任人时同步授予本小区管理权限；更换或清除只移除责任人来源，超管手工授权保留。权限发生变化后需重新登录。</p>
       <el-form-item label="联系电话"><span>{{ selectedResponsible?.phone || '未设置' }}</span></el-form-item>
-      <el-form-item label="社区简介" prop="description">
+      <el-form-item label="小区简介" prop="description">
         <el-input
           v-model="form.description"
           type="textarea"
           :rows="3"
-          placeholder="请输入社区简介"
+          placeholder="请输入小区简介"
           maxlength="200"
         />
       </el-form-item>

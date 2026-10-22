@@ -32,7 +32,7 @@ public class BuildingBoundaryService {
     public void validateFloor(Unit unit, Integer floor) {
         Building building = lockBuilding(unit.getBuildingId());
         if (!building.getCommunityId().equals(unit.getCommunityId())) {
-            throw new BusinessException(ErrorCode.INVALID_PARAM, "单元与楼栋社区不一致");
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "单元与楼栋小区不一致");
         }
         validateLockedFloor(building, floor);
     }

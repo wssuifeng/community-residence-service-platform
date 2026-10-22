@@ -45,8 +45,8 @@ const depositLabel = computed(() => depositStatusLabels[depositStatus.value])
                 <dd>{{ lease.houseLocation || '—' }}（房屋 ID {{ lease.houseId }}）</dd>
               </div>
               <div class="info-row">
-                <dt>社区</dt>
-                <dd>{{ lease.communityName || `社区 ID ${lease.communityId}` }}</dd>
+                <dt>小区</dt>
+                <dd>{{ lease.communityName || `小区 ID ${lease.communityId}` }}</dd>
               </div>
               <div class="info-row">
                 <dt>登记时间</dt>

@@ -45,14 +45,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * DEF-046 修复回归：游客公告可见性维度（GUEST 目标类型）。
- * 用户裁决口径：游客仅见「全平台广播 + 管理端显式开放游客的公告」，
- * 社区/楼栋定向公告对游客不可见；居民与管理端口径不回归；
+ * DEF-046 修复回归：未登录访问者公告可见性维度（GUEST 目标类型）。
+ * 用户裁决口径：未登录公开访问仅见「全平台广播 + 管理端显式开放未登录访问者的公告」，
+ * 小区/楼栋定向公告对未登录访问者不可见；居民与管理端口径不回归；
  * GUEST 目标为全局级操作仅超管可发布（定义 v1.3 权责）。
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-@DisplayName("公告游客可见性维度修复回归（DEF-046）")
+@DisplayName("公告无需居住关系可见性维度修复回归（DEF-046）")
 class NoticeGuestVisibilityTest {
 
     @BeforeAll
@@ -123,7 +123,7 @@ class NoticeGuestVisibilityTest {
     private CreateNoticeDTO dto(List<CreateNoticeDTO.TargetItemDTO> targets) {
         CreateNoticeDTO dto = new CreateNoticeDTO();
         dto.setTargets(targets);
-        dto.setTitle("游客可见公告");
+        dto.setTitle("无需居住关系可见公告");
         dto.setContent("内容");
         dto.setPublishTime(LocalDateTime.of(2026, 10, 1, 9, 0));
         return dto;
@@ -180,7 +180,7 @@ class NoticeGuestVisibilityTest {
     }
 
     @Test
-    @DisplayName("GUEST 目标携带 targetId → 400 拒绝（游客可见不指向具体对象）")
+    @DisplayName("GUEST 目标携带 targetId → 400 拒绝（无需居住关系可见不指向具体对象）")
     void create_guestTarget_withTargetId_rejected() {
         CreateNoticeDTO.TargetItemDTO bad = guest();
         bad.setTargetId(5L);
@@ -220,10 +220,10 @@ class NoticeGuestVisibilityTest {
         assertThat(captor.getValue().getTargetId()).isEqualTo(0L);
     }
 
-    /* ---- 游客查询：列表与详情同口径 ---- */
+    /* ---- 未登录访问者查询：列表与详情同口径 ---- */
 
     @Test
-    @DisplayName("游客列表：过滤条件含「无 COMMUNITY/BUILDING 定向 OR 存在 GUEST 目标」")
+    @DisplayName("未登录访问者列表：过滤条件含「无 COMMUNITY/BUILDING 定向 OR 存在 GUEST 目标」")
     void page_guestFilter_appliesGuestVisibleSql() {
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(false);
@@ -260,7 +260,7 @@ class NoticeGuestVisibilityTest {
             mocked.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(false);
             mocked.when(() -> SecurityUtils.hasRole("RESIDENT")).thenReturn(true);
             mocked.when(SecurityUtils::getUserId).thenReturn(5L);
-            /* 居民无在住社区 → 仅纯广播（BROADCAST_FILTER_SQL） */
+            /* 居民无在住小区 → 仅纯广播（BROADCAST_FILTER_SQL） */
             when(residenceRelationMapper.selectList(any())).thenReturn(List.of());
             when(noticeMapper.selectPage(any(), any())).thenAnswer(inv -> {
                 Page<Notice> p = inv.getArgument(0);
@@ -283,7 +283,7 @@ class NoticeGuestVisibilityTest {
     }
 
     @Test
-    @DisplayName("游客详情：纯广播公告 → 200（存量兼容，无需迁移）")
+    @DisplayName("未登录访问者详情：纯广播公告 → 200（存量兼容，无需迁移）")
     void getById_guest_broadcast_ok() {
         when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
         when(noticeTargetMapper.selectList(any())).thenReturn(List.of());
@@ -298,7 +298,7 @@ class NoticeGuestVisibilityTest {
     }
 
     @Test
-    @DisplayName("游客详情：仅 GUEST 目标公告 → 200（显式开放游客）")
+    @DisplayName("未登录访问者详情：仅 GUEST 目标公告 → 200（显式开放未登录访问者）")
     void getById_guest_guestOnly_ok() {
         when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
         when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target("GUEST", 0L)));
@@ -313,7 +313,7 @@ class NoticeGuestVisibilityTest {
     }
 
     @Test
-    @DisplayName("游客详情：社区定向公告 → 404（原口径全量可见，本修复收口）")
+    @DisplayName("未登录访问者详情：小区定向公告 → 404（原口径全量可见，本修复收口）")
     void getById_guest_communityTargeted_404() {
         when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
         when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target("COMMUNITY", 1L)));
@@ -334,7 +334,7 @@ class NoticeGuestVisibilityTest {
     void publish_guestOnlyNotice_notifiesNobody() {
         Notice draft = new Notice();
         draft.setId(5L);
-        draft.setTitle("游客教程");
+        draft.setTitle("未登录访问者教程");
         draft.setStatus("DRAFT");
         draft.setPublisherId(1L);
         when(noticeMapper.selectById(5L)).thenReturn(draft);

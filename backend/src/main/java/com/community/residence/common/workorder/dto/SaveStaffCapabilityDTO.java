@@ -21,7 +21,7 @@ public class SaveStaffCapabilityDTO {
     private String email;
 
 
-    @Schema(description = "常驻社区ID列表（可空=清空社区绑定）")
+    @Schema(description = "常驻小区ID列表（可空=清空小区绑定）")
     private List<Long> communityIds;
 
     @Schema(description = "擅长服务类别ID列表（可空=清空类别绑定）")

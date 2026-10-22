@@ -19,7 +19,7 @@ public class Building {
     @Schema(description = "楼栋ID")
     private Long id;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "楼栋名称")

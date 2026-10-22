@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
  * R74 工单完整链路回归（服务侧）：受理 PENDING→TO_ASSIGN + 同一事务建群 +
  * 回写 conversation_id、重复/非法状态受理 5302 且不建群、派单后服务人员入群、
  * 终审关闭前置收窄（仅 COMPLETED）+ 会话资源回收、
- * 通知事件集（提交→社区绑定管理员+超管；受理/接单/提交结果/居民确认/终审关闭→相关管理员）。
+ * 通知事件集（提交→小区绑定管理员+超管；受理/接单/提交结果/居民确认/终审关闭→相关管理员）。
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -146,7 +146,7 @@ class WorkOrderR74IntakeTest {
                 .thenAnswer(invocation -> sysUserMapper.selectById(invocation.getArgument(0)));
     }
 
-    /** 社区绑定管理员 + 超管：两次 selectList 依次返回（notifySubmit 先社区后超管） */
+    /** 小区绑定管理员 + 超管：两次 selectList 依次返回（notifySubmit 先小区后超管） */
     private void stubAdminTargets() {
         SysAdminCommunity binding = new SysAdminCommunity();
         binding.setCommunityId(COMMUNITY_ID);
@@ -266,7 +266,7 @@ class WorkOrderR74IntakeTest {
     }
 
     @Test
-    @DisplayName("⑦提交工单 → 该社区绑定管理员与超管各收到通知（DEF-072），居民不收管理口径")
+    @DisplayName("⑦提交工单 → 该小区绑定管理员与超管各收到通知（DEF-072），居民不收管理口径")
     void submit_notifiesAdminsAndSuperAdmins() {
         ServiceCategory category = new ServiceCategory();
         category.setId(1L);
@@ -287,7 +287,7 @@ class WorkOrderR74IntakeTest {
             WorkOrderVO vo = service.create(dto);
 
             assertThat(vo.getStatus()).isEqualTo(WorkOrderStatus.PENDING);
-            /* 提交 → 社区绑定管理员 + 超管（去重后两个 sys_user 身份空间收件人） */
+            /* 提交 → 小区绑定管理员 + 超管（去重后两个 sys_user 身份空间收件人） */
             verify(notificationService).createForUser(eq(BOUND_ADMIN_ID), eq(COMMUNITY_ID), eq("新工单待受理"),
                     anyString(), eq("WORK_ORDER"), eq("WORK_ORDER"), eq(ORDER_ID));
             verify(notificationService).createForUser(eq(SUPER_ADMIN_ID), eq(COMMUNITY_ID), eq("新工单待受理"),

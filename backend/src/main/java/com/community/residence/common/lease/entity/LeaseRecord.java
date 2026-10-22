@@ -23,7 +23,7 @@ public class LeaseRecord {
     @Schema(description = "租客ID")
     private Long tenantId;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "房屋ID")

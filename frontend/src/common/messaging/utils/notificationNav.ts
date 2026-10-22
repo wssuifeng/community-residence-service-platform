@@ -28,8 +28,8 @@ import type { Role } from '@/common/web/types/api'
  *   feedbacks/:id、notices/:id 为既有 redirect 落对应管理列表页。
  */
 
-/** 角色 → 路由前缀（GUEST 无导航语境，恒不跳转） */
-function prefixOf(role: Role): '/resident' | '/staff' | '/admin' | null {
+/** 账号角色 → 路由前缀；未登录公开访问没有通知导航目标 */
+function prefixOf(role: Role | null): '/resident' | '/staff' | '/admin' | null {
   if (role === 'RESIDENT') return '/resident'
   if (role === 'STAFF') return '/staff'
   if (role === 'ADMIN' || role === 'SUPER_ADMIN') return '/admin'
@@ -46,7 +46,7 @@ function residentLeaseList(leaseId?: number): string {
 /** 通知 → 目标路由；无可靠落地页时返回 null（调用方不跳转，仅做已读标记等本地处理） */
 export function notificationTarget(
   item: { sourceType?: string | null; sourceId?: number | null },
-  role: Role
+  role: Role | null
 ): string | null {
   const prefix = prefixOf(role)
   if (prefix === null) return null

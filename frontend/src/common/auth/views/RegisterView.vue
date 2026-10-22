@@ -77,10 +77,10 @@ async function handleRegister(): Promise<void> {
       <img
         class="register-brand-image"
         src="/images/guest-hero.png"
-        alt="白天的社区花园"
+        alt="白天的小区花园"
       />
       <div class="register-brand-copy">
-        <h1>社区居住服务</h1>
+        <h1>小区居住服务</h1>
       </div>
     </div>
 

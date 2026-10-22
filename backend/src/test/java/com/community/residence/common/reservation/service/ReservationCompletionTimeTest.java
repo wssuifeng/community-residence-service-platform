@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-/** G-016：完成须等待预约结束，拒绝不得释放占用，原状态与社区权限约束仍生效。 */
+/** G-016：完成须等待预约结束，拒绝不得释放占用，原状态与小区权限约束仍生效。 */
 @ExtendWith(MockitoExtension.class)
 class ReservationCompletionTimeTest {
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 10, 20, 10, 0);

@@ -3,7 +3,7 @@ package com.community.residence.common.housing.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-/** 房屋节点（R62 房源社区一体化树：housing 为空表示未挂牌） */
+/** 房屋节点（R62 房源小区一体化树：housing 为空表示未挂牌） */
 @Data
 @Schema(description = "房屋节点（含房源摘要）")
 public class HouseHousingTreeVO {

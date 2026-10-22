@@ -9,14 +9,14 @@ import lombok.Data;
 
 import java.util.List;
 
-/** 社区批量状态变更请求（停用/启用）：ids 非空、单次上限 50，status 仅 ACTIVE/INACTIVE */
+/** 小区批量状态变更请求（停用/启用）：ids 非空、单次上限 50，status 仅 ACTIVE/INACTIVE */
 @Data
-@Schema(description = "社区批量状态变更请求")
+@Schema(description = "小区批量状态变更请求")
 public class BatchCommunityStatusDTO {
 
-    @Schema(description = "社区ID列表（非空，单次上限 50；重复 ID 自动去重）")
-    @NotEmpty(message = "请至少选择一个社区")
-    @Size(max = 50, message = "单次最多处理 50 个社区")
+    @Schema(description = "小区ID列表（非空，单次上限 50；重复 ID 自动去重）")
+    @NotEmpty(message = "请至少选择一个小区")
+    @Size(max = 50, message = "单次最多处理 50 个小区")
     private List<Long> ids;
 
     @Schema(description = "状态：ACTIVE-运营中, INACTIVE-已停用")

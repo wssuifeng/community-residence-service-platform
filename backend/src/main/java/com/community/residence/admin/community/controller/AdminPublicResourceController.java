@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /** 公共资源管理控制器（接口设计.md 9.1.5） */
-@Tag(name = "公共资源管理", description = "社区公共资源管理接口")
+@Tag(name = "公共资源管理", description = "小区公共资源管理接口")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor

@@ -17,7 +17,7 @@ defineProps<{
     fill="currentColor"
     aria-hidden="true"
   >
-    <!-- 后排小屋：45% 透明度退后，形成社区层次 -->
+    <!-- 后排小屋：45% 透明度退后，形成小区层次 -->
     <path d="M23.5 8 29.5 13.8h-2.6v7.4h-6.8v-7.4h-2.6L23.5 8z" opacity="0.45" />
     <!-- 前排主屋：evenodd 挖出门形负空间 -->
     <path

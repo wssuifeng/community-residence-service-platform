@@ -54,7 +54,7 @@ import java.util.Set;
 
 /**
  * 入住申请业务逻辑：PENDING → APPROVED / REJECTED / WITHDRAWN 状态机（终态不可变更，R66 增撤回）。
- * 审批通过（人工或社区自动）租客仅建立待签约租约与群聊，不提前正式居住关系；
+ * 审批通过（人工或小区自动）租客仅建立待签约租约与群聊，不提前正式居住关系；
  * **审核通过 ≠ 租约生效**（R66 v1.8 口径）：租约落 TO_SIGN 待签约、房屋保持空置，
  * 待协议完成且首期成功才建立正式关系、置ACTIVE与房屋已入住。
  */
@@ -63,7 +63,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ResidenceApplicationService {
 
-    /** 自动通过路径的兜底默认租期（月）：社区未配置时使用 */
+    /** 自动通过路径的兜底默认租期（月）：小区未配置时使用 */
     private static final int DEFAULT_LEASE_MONTHS = 12;
 
     /** 会阻止同一房屋继续生成新入住业务链的租约状态。 */
@@ -88,7 +88,7 @@ public class ResidenceApplicationService {
     /* 提交申请：锁定房屋行后串行检查申请、租约与居住关系，避免多账号抢同一房屋或重复建租约。 */
     @Transactional(rollbackFor = Exception.class, isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public ApplicationVO create(CreateApplicationDTO dto) {
-        if (ResidenceDependencyService.isDependent(dto.getRelationType())) throw new BusinessException(ErrorCode.INVALID_PARAM,"家属或共同居住人须由社区管理员依有效主居住关系登记，不单独申请占用房屋");
+        if (ResidenceDependencyService.isDependent(dto.getRelationType())) throw new BusinessException(ErrorCode.INVALID_PARAM,"家属或共同居住人须由小区管理员依有效主居住关系登记，不单独申请占用房屋");
         House house = lockHouse(dto.getHouseId());
         if (house == null) {
             throw new ResourceNotFoundException("房屋不存在");
@@ -125,8 +125,8 @@ public class ResidenceApplicationService {
         }
         applicationMapper.insert(application);
 
-        /* 社区开启「入住申请自动通过」（R62 补，社区级开关）：提交即完成审批，
-           免去人工审核；租期按社区默认月数推导，租金与押金取明确来源挂牌的申请时快照 */
+        /* 小区开启「入住申请自动通过」（R62 补，小区级开关）：提交即完成审批，
+           免去人工审核；租期按小区默认月数推导，租金与押金取明确来源挂牌的申请时快照 */
         Community community = communityService.requireCommunity(house.getCommunityId());
         if (community.getAutoApproveResidence() != null && community.getAutoApproveResidence() == 1) {
             autoApprove(application, house, community);
@@ -142,12 +142,12 @@ public class ResidenceApplicationService {
         BigDecimal monthlyRent = application.getListedMonthlyRent() != null ? application.getListedMonthlyRent() : BigDecimal.ZERO;
         BigDecimal deposit = application.getListedDeposit();
         applyApproval(application, house, startDate, startDate.plusMonths(months).minusDays(1), monthlyRent, deposit,
-                null, "社区已开启入住申请自动通过，系统自动审批", months, 1, 1);
+                null, "小区已开启入住申请自动通过，系统自动审批", months, 1, 1);
         log.info("入住申请自动通过：applicationId={}, houseId={}, leaseMonths={}, rent={}",
                 application.getId(), house.getId(), months, monthlyRent);
     }
 
-    /** 申请详情：居民限本人，ADMIN 限绑定社区 */
+    /** 申请详情：居民限本人，ADMIN 限绑定小区 */
     public ApplicationVO getById(Long id) {
         ResidenceApplication application = requireApplication(id);
         checkReadAccess(application);
@@ -217,9 +217,9 @@ public class ResidenceApplicationService {
 
     /**
      * 审批通过内核：TENANT 只建待签约租约及群聊；非租客建立居住关系；申请落终态。
-     * 人工审批与社区自动审批共用，差异仅在租期/租金来源与审核人是否留痕（自动审批无人工审核者）。
+     * 人工审批与小区自动审批共用，差异仅在租期/租金来源与审核人是否留痕（自动审批无人工审核者）。
      * R66 v1.8：**不**翻转房屋状态（协议完成且首期成功时才置 OCCUPIED）；群聊生命周期开始于审核通过，
-     * 参与者 = 申请居民 + 该社区全部启用 ADMIN，会话 ID 回写 lease_record.conversation_id。
+     * 参与者 = 申请居民 + 该小区全部启用 ADMIN，会话 ID 回写 lease_record.conversation_id。
      */
     private void applyApproval(ResidenceApplication application, House house, LocalDate startDate,
                                LocalDate endDate, BigDecimal monthlyRent, BigDecimal deposit,
@@ -271,8 +271,8 @@ public class ResidenceApplicationService {
                 leaseRecordMapper.updateById(lease);
             }
             /* V26 强关联（DEF-080）：把"本申请生成的那份租约"写死到申请上（同一事务，
-               人工审批与社区自动审批共用本内核，故两条链路都覆盖）——
-               杜绝前端按"同一居民/社区/房屋 取最新"反查在同屋多租约时指错 */
+               人工审批与小区自动审批共用本内核，故两条链路都覆盖）——
+               杜绝前端按"同一居民/小区/房屋 取最新"反查在同屋多租约时指错 */
             application.setLeaseId(lease.getId());
 
             /* 看房 → 租约 指向修正（DEF-081）：把该居民该房屋下 lease_id 仍为空的看房预约
@@ -408,7 +408,7 @@ public class ResidenceApplicationService {
             log.warn("撤回申请未匹配到租约，无需关闭群聊：applicationId={}", id);
             return toVO(application);
         }
-        /* 弱回退关群收窄（OCR DEF-117）：弱命中（同居民/社区/房屋最新租约）若仍处活跃态
+        /* 弱回退关群收窄（OCR DEF-117）：弱命中（同居民/小区/房屋最新租约）若仍处活跃态
            （TO_SIGN/ACTIVE），该群是**另一份已批申请**的现行沟通渠道——本次撤回的是别的申请，
            不得误关；强关联租约（lease_id 直挂本申请）不受此限，其群生命周期本就止于本申请撤回 */
         boolean strongLink = application.getLeaseId() != null
@@ -469,7 +469,7 @@ public class ResidenceApplicationService {
         return application;
     }
 
-    /* 读权限：RESIDENT 限本人；ADMIN 限绑定社区；STAFF 只读放行 */
+    /* 读权限：RESIDENT 限本人；ADMIN 限绑定小区；STAFF 只读放行 */
     private void checkReadAccess(ResidenceApplication application) {
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
                 && !application.getResidentId().equals(SecurityUtils.getUserId())) {
@@ -480,7 +480,7 @@ public class ResidenceApplicationService {
         }
     }
 
-    /* 审核权限：ADMIN 限绑定社区（SUPER_ADMIN 放行） */
+    /* 审核权限：ADMIN 限绑定小区（SUPER_ADMIN 放行） */
     private void checkReviewAccess(ResidenceApplication application) {
         SecurityUtils.checkCommunityAccess(application.getCommunityId());
         communityService.requireCommunity(application.getCommunityId());
@@ -516,7 +516,7 @@ public class ResidenceApplicationService {
      * 申请对应租约（**单一口径实现**）：
      * ①强关联优先——V26 起由审批通过内核写死的 `application.lease_id`；
      * ②`allowWeakFallback=true` 时，仅当强关联为空，才回退到弱关联
-     *   （同一 居民/社区/房屋 的最新租约，与 V26 存量回填口径一致）并 WARN 留痕。
+     *   （同一 居民/小区/房屋 的最新租约，与 V26 存量回填口径一致）并 WARN 留痕。
      * 该回退**只允许用于撤回关闭群聊这一副作用路径**；VO 取值一律 `false`，避免两套口径
      * 并存、也避免把"靠猜"重新引入读路径。
      */
@@ -542,7 +542,7 @@ public class ResidenceApplicationService {
                 .orderByDesc(LeaseRecord::getId)
                 .last("LIMIT 1"));
         if (weak != null) {
-            log.warn("申请无强关联租约，回退弱关联（同居民/社区/房屋最新租约，可能不精确）：applicationId={}, leaseId={}",
+            log.warn("申请无强关联租约，回退弱关联（同居民/小区/房屋最新租约，可能不精确）：applicationId={}, leaseId={}",
                     application.getId(), weak.getId());
         }
         return weak;

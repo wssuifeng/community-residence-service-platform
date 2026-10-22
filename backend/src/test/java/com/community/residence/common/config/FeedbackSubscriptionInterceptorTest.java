@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-/** 反馈会话订阅鉴权测试（R30）：居民本人/越权居民/管理员绑定社区/超管/无权限管理员/STAFF */
+/** 反馈会话订阅鉴权测试（R30）：居民本人/越权居民/管理员绑定小区/超管/无权限管理员/STAFF */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("FeedbackSubscriptionInterceptor 单元测试")
 class FeedbackSubscriptionInterceptorTest {
@@ -83,7 +83,7 @@ class FeedbackSubscriptionInterceptorTest {
     }
 
     @Test
-    @DisplayName("绑定社区的管理员订阅：放行")
+    @DisplayName("绑定小区的管理员订阅：放行")
     void subscribe_adminBoundCommunity_allowed() {
         when(sysAdminCommunityMapper.selectCount(any())).thenReturn(1L);
         assertThatCode(() -> interceptor.preSend(
@@ -92,7 +92,7 @@ class FeedbackSubscriptionInterceptorTest {
     }
 
     @Test
-    @DisplayName("未绑定社区的管理员订阅：拒绝")
+    @DisplayName("未绑定小区的管理员订阅：拒绝")
     void subscribe_adminUnboundCommunity_rejected() {
         when(sysAdminCommunityMapper.selectCount(any())).thenReturn(0L);
         assertThatThrownBy(() -> interceptor.preSend(

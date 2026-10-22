@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import java.time.LocalDate;
 import java.util.List;
 
-/* 统计快照数据访问（社区级联删除按 community_id 清理；C9 看板为实时聚合不读本表） */
+/* 统计快照数据访问（小区级联删除按 community_id 清理；C9 看板为实时聚合不读本表） */
 @Mapper
 public interface StatisticsSnapshotMapper extends BaseMapper<StatisticsSnapshot> {
 

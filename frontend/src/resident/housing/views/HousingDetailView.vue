@@ -10,7 +10,7 @@ import type { IHousing, HousingStatus } from '@/common/housing/types/housing'
 import { housingStatusLabels } from '@/common/housing/types/housing'
 
 /**
- * 房源详情（居民端）：视觉与游客端一致（16:9 主图 + 缩略图 + 信息面板 + 描述/配套两栏）；
+ * 房源详情（居民端）：视觉与未登录公开页面一致（16:9 主图 + 缩略图 + 信息面板 + 描述/配套两栏）；
  * 右侧预约看房面板为入口式（R59/v1.3 裁决：DEF-056 详情页内点选+轻确认交互拆除），
  * 醒目「预约看房」按钮跳三步预约页完成日期与时段选择（DEF-063：页内可约时段展示区移除）。
  * 未登录引导登录。

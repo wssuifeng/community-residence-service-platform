@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-/** 房源管理控制器：上架/下架 + 游客浏览（接口设计.md 9.12.1） */
+/** 房源管理控制器：上架/下架 + 公开浏览（接口设计.md 9.12.1） */
 @Tag(name = "房源管理", description = "房源展示与管理接口")
 @RestController
 @RequestMapping("/api/v1/housings")
@@ -29,7 +29,7 @@ public class HousingController {
 
     private final HousingService housingService;
 
-    @Operation(summary = "查询可见房源的真实户型选项", description = "遵循列表的社区权限与占用过滤，不读取挂牌冗余户型")
+    @Operation(summary = "查询可见房源的真实户型选项", description = "遵循列表的小区权限与占用过滤，不读取挂牌冗余户型")
     @GetMapping("/filter-options")
     public ApiResponse<List<String>> filterOptions(
             @RequestParam(required = false) Long communityId,
@@ -41,13 +41,13 @@ public class HousingController {
         return ApiResponse.success(housingService.filterLayouts(communityId, status, minRent, maxRent, keyword, rentType));
     }
 
-    @Operation(summary = "查询房源详情", description = "公开；已出租/下线房源游客不可见")
+    @Operation(summary = "查询房源详情", description = "公开；已出租/下线房源未登录访问者不可见")
     @GetMapping("/{id}")
     public ApiResponse<HousingVO> getById(@PathVariable Long id) {
         return ApiResponse.success(housingService.getById(id));
     }
 
-    @Operation(summary = "房源列表（分页）", description = "公开；支持社区/状态/租金/关键词/户型/租售类型过滤（R53 v1.2）")
+    @Operation(summary = "房源列表（分页）", description = "公开；支持小区/状态/租金/关键词/户型/租售类型过滤（R53 v1.2）")
     @GetMapping
     public ApiResponse<PageVO<HousingVO>> page(@RequestParam(defaultValue = "1") long page,
                                                @RequestParam(defaultValue = "20") long size,
@@ -63,7 +63,7 @@ public class HousingController {
     }
 
     @Operation(summary = "记录房源浏览",
-            description = "公开；游客/居民均可。返回计入本次后的最新浏览数，口径为"
+            description = "公开；未登录访问者/居民均可。返回计入本次后的最新浏览数，口径为"
                     + "「DB 值 + 未回写 Redis 增量」（回写任务 5 分钟周期，故展示实时合并增量）")
     @PostMapping("/{id}/view")
     public ApiResponse<Long> recordView(@PathVariable Long id) {

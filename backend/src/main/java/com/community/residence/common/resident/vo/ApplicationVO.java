@@ -20,7 +20,7 @@ public class ApplicationVO {
     @Schema(description = "申请人姓名")
     private String residentName;
 
-    @Schema(description = "申请社区ID")
+    @Schema(description = "申请小区ID")
     private Long communityId;
 
     @Schema(description = "申请房屋ID")

@@ -137,7 +137,7 @@ class ConversationLeaseGroupEnsureTest {
         admin.setId(ADMIN_ID);
         admin.setRole(RoleConstants.ADMIN);
         admin.setStatus("ACTIVE");
-        admin.setRealName("社区管理员");
+        admin.setRealName("小区管理员");
         when(sysUserMapper.selectList(any())).thenReturn(List.of(admin));
     }
 

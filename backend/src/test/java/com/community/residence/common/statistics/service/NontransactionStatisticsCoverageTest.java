@@ -95,8 +95,8 @@ class NontransactionStatisticsCoverageTest {
   when(reservationMapper.selectList(any())).thenReturn(List.of());assertThat(service.reservationStatistics(3L).get("total")).isEqualTo(0);
  }
  @Test void communityOptionsUseRealNames() {
-  Community c=new Community();c.setId(8L);c.setName("后端社区名");when(communityMapper.selectList(any())).thenReturn(List.of(c));
-  assertThat(service.communityOptions()).containsExactly(Map.of("id",8L,"name","后端社区名"));
+  Community c=new Community();c.setId(8L);c.setName("后端小区名");when(communityMapper.selectList(any())).thenReturn(List.of(c));
+  assertThat(service.communityOptions()).containsExactly(Map.of("id",8L,"name","后端小区名"));
  }
  @Test void emptyDashboardExposesZeroCounts() {
   stubDashboard();Map<String,Object> r=service.dashboard(null);

@@ -36,7 +36,7 @@ const router: Router = createRouter({
 
 /**
  * 路由守卫：未登录访问受限页 → 登录页（携带回跳地址）；
- * 角色不匹配 → 403；登录后访问登录页 → 按角色跳转各自首页
+ * 角色不匹配 → 403；登录后访问登录页 → 按账号角色跳转各自首页
  */
 router.beforeEach((to) => {
   const userStore = useUserStore()
@@ -44,13 +44,13 @@ router.beforeEach((to) => {
 
   document.title = to.meta.title ? `${to.meta.title} · 社区居住服务管理系统` : '社区居住服务管理系统'
 
-  if (to.name === 'Login' && userStore.isLoggedIn) {
+  if (to.name === 'Login' && userStore.role !== null) {
     return roleHomePath(userStore.role)
   }
 
   if (roles.length === 0) return true
 
-  if (!userStore.isLoggedIn) {
+  if (userStore.role === null) {
     return {
       name: 'Login',
       query: { redirect: to.fullPath }
@@ -63,7 +63,7 @@ router.beforeEach((to) => {
   return true
 })
 
-function roleHomePath(role: Role): string {
+function roleHomePath(role: Role | null): string {
   switch (role) {
     case 'RESIDENT':
       return '/resident/home'
@@ -72,7 +72,7 @@ function roleHomePath(role: Role): string {
     case 'ADMIN':
     case 'SUPER_ADMIN':
       return '/admin/statistics/dashboard'
-    default:
+    case null:
       return '/guest/home'
   }
 }

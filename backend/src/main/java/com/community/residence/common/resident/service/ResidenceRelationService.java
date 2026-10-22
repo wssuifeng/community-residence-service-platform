@@ -49,7 +49,7 @@ public class ResidenceRelationService {
     private final com.community.residence.common.lease.service.LeaseService leaseService;
     private final com.community.residence.common.resident.mapper.ResidenceApplicationMapper applicationMapper;
 
-    /** 居民居住关系列表：RESIDENT 限本人，ADMIN 限绑定社区（业务层过滤） */
+    /** 居民居住关系列表：RESIDENT 限本人，ADMIN 限绑定小区（业务层过滤） */
     public PageVO<RelationVO> pageByResident(Long residentId, long page, long size, String status) {
         if (SecurityUtils.hasRole(RoleConstants.RESIDENT)
                 && !residentId.equals(SecurityUtils.getUserId())) {
@@ -135,7 +135,7 @@ public class ResidenceRelationService {
     }
 
     /**
-     * 管理员直建居住关系（D-端点3，50 阶段第三批）：ADMIN 限绑定社区，直接建立
+     * 管理员直建居住关系（D-端点3，50 阶段第三批）：ADMIN 限绑定小区，直接建立
      * 关系不走入住审批流；校验居民存在且房屋可入住（VACANT，同审批通过口径），
      * 房屋状态置 OCCUPIED，写操作日志（R47 管理侧变更语义）。
      * 租约不联动建立——TENANT 租约仍走 C3 独立登记（与审批流 approve 口径一致）。

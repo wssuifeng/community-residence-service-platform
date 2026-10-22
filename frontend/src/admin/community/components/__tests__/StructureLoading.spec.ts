@@ -8,7 +8,7 @@ import StructureTreePane from '@/admin/community/components/StructureTreePane.vu
 const mocks = vi.hoisted(() => ({ communities: vi.fn(), buildings: vi.fn(), units: vi.fn(), houses: vi.fn(), stats: vi.fn() }))
 vi.mock('@/common/community/api/community', async (original) => ({ ...await original<object>(), getCommunityList: mocks.communities, getBuildingList: mocks.buildings, getUnitList: mocks.units, getHouseList: mocks.houses }))
 vi.mock('@/common/statistics/api/statistics', () => ({ getDashboardStats: mocks.stats }))
-const community = { id: 1, name: '大社区', status: 'ACTIVE', address: '测试地址' }
+const community = { id: 1, name: '大小区', status: 'ACTIVE', address: '测试地址' }
 const page = (records: unknown[], total = records.length, current = 1) => ({ records, total, page: current, size: 100, pages: Math.ceil(total / 100) })
 const building = (id: number) => ({ id, communityId: 1, name: `${id}栋`, floors: 20 })
 const unit = (id: number, buildingId: number) => ({ id, buildingId, name: `${id}单元` })
@@ -37,13 +37,13 @@ beforeEach(() => {
   mocks.stats.mockResolvedValue({ buildingCount: 2, houseCount: 624, occupiedHouseCount: 124, houseStatusDistribution: { VACANT: 500, OCCUPIED: 124 } })
 })
 afterEach(() => { wrapper?.unmount(); wrapper = undefined; document.body.innerHTML = ''; sessionStorage.clear() })
-describe('DEF-154 社区结构按范围读取', () => {
+describe('DEF-154 小区结构按范围读取', () => {
   it('网格多选与右键编辑在组件拆分后保留', async () => {
     const w=await mountPage();const card=w.find('.grid-block');await card.trigger('click',{ctrlKey:true});await flushPromises()
     expect(w.find('.selection-bar').text()).toContain('已选 1 套')
     await card.trigger('contextmenu');await flushPromises();(document.querySelector('.layout-context-menu') as HTMLButtonElement).click();await flushPromises();expect(w.findComponent({name:'HouseAttributesDialog'}).props('modelValue')).toBe(true)
   })
-  it('初次仅读取序号第一栋房屋，社区计数不以局部缓存冒充全量', async () => {
+  it('初次仅读取序号第一栋房屋，小区计数不以局部缓存冒充全量', async () => {
     const w = await mountPage()
     expect(mocks.houses.mock.calls.map(c => c[0])).toEqual([10])
     expect(w.find('.metric-strip').text()).toContain('624')

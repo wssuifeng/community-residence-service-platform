@@ -10,9 +10,9 @@ export const menuItems: MenuItem[] = [
   },
   {
     "path": "/admin/community",
-    "title": "社区管理",
+    "title": "小区管理",
     "icon": "community",
-    "pageTitle": "社区管理"
+    "pageTitle": "小区管理"
   },
   {
     "path": "/admin/work-orders",

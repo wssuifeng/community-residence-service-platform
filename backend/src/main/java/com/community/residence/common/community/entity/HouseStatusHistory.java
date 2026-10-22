@@ -21,7 +21,7 @@ public class HouseStatusHistory {
     @Schema(description = "房屋ID")
     private Long houseId;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "变更前状态")

@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 社区结构链批量生成控制器（C1）：一次请求生成 社区 → 楼栋 → 单元 → 房屋
+ * 小区结构链批量生成控制器（C1）：一次请求生成 小区 → 楼栋 → 单元 → 房屋
  * 整条结构链，独立于逐层单建端点（building/unit/house）单独成控，避免与
  * 单资源 CRUD 的路径与语义混杂（接口路径 /api/v1/structures 为结构域聚合动作）。
  */
-@Tag(name = "结构链批量生成", description = "社区结构链（楼栋/单元/房屋）一次性批量生成接口")
+@Tag(name = "结构链批量生成", description = "小区结构链（楼栋/单元/房屋）一次性批量生成接口")
 @RestController
 @RequestMapping("/api/v1/structures")
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class AdminStructureGenerateController {
                     + "skipItems 支持前端同一套跳过语法（4 整层 ｜ 4:1 第4层1号 ｜ 04 所有层4号 ｜ "
                     + "*:4 所有层4号 ｜ 104 基础房号 ｜ A-101 完整房号，逗号/顿号/空格分隔）；"
                     + "上限：楼栋 ≤60、单元 ≤600、房屋 ≤5000；楼栋/单元重名逐项失败不中断，"
-                    + "房屋逐行失败反馈（部分成功语义）；dryRun=true 仅预览零写入；ADMIN 限绑定社区")
+                    + "房屋逐行失败反馈（部分成功语义）；dryRun=true 仅预览零写入；ADMIN 限绑定小区")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/batch-generate")
     public ApiResponse<StructureBatchGenerateResultVO> batchGenerate(

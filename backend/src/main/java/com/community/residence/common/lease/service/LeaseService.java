@@ -376,7 +376,7 @@ public class LeaseService {
         return locked;
     }
 
-    /** 租约变更历史（字段级前后值）：RESIDENT 限本人，ADMIN 限绑定社区 */
+    /** 租约变更历史（字段级前后值）：RESIDENT 限本人，ADMIN 限绑定小区 */
     public java.util.List<com.community.residence.common.lease.vo.LeaseChangeVO> changes(Long id) {
         LeaseRecord lease = requireLease(id);
         checkReadAccess(lease);
@@ -465,7 +465,7 @@ public class LeaseService {
                 String buildingName = building != null ? building.getName() : "";
                 vo.setHouseLocation(buildingName + unit.getName() + house.getHouseNumber());
             }
-            /* 社区名（居民端租约卡片按社区分组展示，R61 界面重设计补） */
+            /* 小区名（居民端租约卡片按小区分组展示，R61 界面重设计补） */
             com.community.residence.common.community.entity.Community community =
                     communityMapper.selectById(house.getCommunityId());
             if (community != null) {

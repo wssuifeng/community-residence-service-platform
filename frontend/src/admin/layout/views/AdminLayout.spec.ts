@@ -22,7 +22,7 @@ function page() {
 describe('DEF-178 管理端平板侧栏按响应式规范默认收起', () => {
   beforeEach(() => {
     state.tablet = ref(true)
-    state.route = reactive({ path: '/admin/community', fullPath: '/admin/community', meta: { title: '社区管理' } })
+    state.route = reactive({ path: '/admin/community', fullPath: '/admin/community', meta: { title: '小区管理' } })
   })
 
   it('平板默认不占用侧栏宽度，菜单按钮可打开覆盖层', async () => {

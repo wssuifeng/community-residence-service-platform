@@ -50,7 +50,7 @@ const TAB_ITEMS: Array<{ value: HubTab; label: string; desc: string; roles?: str
 
 /** 角色过滤后的可见 Tab（超管独占项对其它角色不可见，UI设计.md §10.1 同口径） */
 const visibleTabs = computed(() =>
-  TAB_ITEMS.filter((item) => !item.roles || item.roles.includes(userStore.role))
+  TAB_ITEMS.filter((item) => !item.roles || (userStore.role !== null && item.roles.includes(userStore.role)))
 )
 
 const activeTab = computed<HubTab>(() => {

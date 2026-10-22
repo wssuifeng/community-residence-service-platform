@@ -143,7 +143,7 @@ async function fetchViewings(): Promise<void> {
 
 /* --------------------- 押金状态与退还（R72） --------------------- */
 
-/** 押金退还流水（§9.20.2）：管理端限绑定社区；失败原因需在详情可见 */
+/** 押金退还流水（§9.20.2）：管理端限绑定小区；失败原因需在详情可见 */
 const depositRefunds = ref<IDepositRefund[]>([])
 /** 该租约支付单：用于推导实缴押金与原支付渠道，供押金退还弹窗只读展示 */
 const payments = ref<ILeasePayment[]>([])
@@ -559,12 +559,12 @@ onMounted(fetchDetail)
     </nav>
 
     <template v-if="lease">
-      <!-- 状态条：房屋位置为主标题，社区/租户/创建时间为元信息，右侧三枚状态标签 -->
+      <!-- 状态条：房屋位置为主标题，小区/租户/创建时间为元信息，右侧三枚状态标签 -->
       <article class="status-strip">
         <div class="strip-main">
           <h1 class="status-title">
             {{ lease.houseLocation || '未命名房屋' }}
-            <span class="strip-community">{{ lease.communityName || `社区 ID ${lease.communityId}` }}</span>
+            <span class="strip-community">{{ lease.communityName || `小区 ID ${lease.communityId}` }}</span>
           </h1>
           <p class="strip-meta">
             租户 {{ lease.tenantName || '—' }}
@@ -672,7 +672,7 @@ onMounted(fetchDetail)
         </div>
       </el-empty>
       <p class="load-failed-hint">
-        若持续失败：请确认该租约属于当前账号绑定的社区（社区管理员）或改用超管账号查看；
+        若持续失败：请确认该租约属于当前账号绑定的小区（小区管理员）或改用超管账号查看；
         接口返回 404 表示租约不存在，403 表示无数据权限。
       </p>
     </article>

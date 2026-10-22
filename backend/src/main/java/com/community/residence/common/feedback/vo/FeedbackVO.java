@@ -24,7 +24,7 @@ public class FeedbackVO {
     private Boolean isAnonymous;
 
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "反馈标题")

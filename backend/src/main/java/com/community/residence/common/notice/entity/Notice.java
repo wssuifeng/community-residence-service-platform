@@ -8,7 +8,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/** 公告（notice 表；社区归属经 notice_target 关联，全系统广播无 target 记录） */
+/** 公告（notice 表；小区归属经 notice_target 关联，全系统广播无 target 记录） */
 @Data
 @TableName("notice")
 @Schema(description = "公告")

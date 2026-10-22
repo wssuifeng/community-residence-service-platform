@@ -20,7 +20,7 @@ public class ConversationVO {
     @Schema(description = "会话标题")
     private String title;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "关联业务对象ID（VIEWING_GROUP=看房预约ID；LEASE_GROUP=租约ID；DIRECT 为空）")

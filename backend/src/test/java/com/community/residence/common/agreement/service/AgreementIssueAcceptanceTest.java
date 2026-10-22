@@ -141,7 +141,7 @@ class AgreementIssueAcceptanceTest {
         pendingAgreement.setLeaseId(LEASE_ID);
         pendingAgreement.setCommunityId(3L);
         pendingAgreement.setTenantId(RESIDENT_ID);
-        pendingAgreement.setTitle("演示社区1栋101 租赁协议");
+        pendingAgreement.setTitle("演示小区1栋101 租赁协议");
         pendingAgreement.setStatus("PENDING");
         /* 管理方已确认，待居民确认即达成 SIGNED */
         pendingAgreement.setAdminConfirmTime(LocalDateTime.now().minusMinutes(5));
@@ -373,7 +373,7 @@ class AgreementIssueAcceptanceTest {
         AgreementTemplate template = new AgreementTemplate();
         template.setId(1L);
         template.setName("标准租赁协议");
-        template.setContent("甲方：{{社区名称}}，房屋：{{房屋位置}}，月租：{{月租金}}");
+        template.setContent("甲方：{{小区名称}}，房屋：{{房屋位置}}，月租：{{月租金}}");
         template.setIsDefault(1);
         template.setStatus("ACTIVE");
         template.setCommunityId(3L);

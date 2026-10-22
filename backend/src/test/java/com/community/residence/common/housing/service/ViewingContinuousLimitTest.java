@@ -140,7 +140,7 @@ class ViewingContinuousLimitTest {
                 .hasMessageContaining("单次看房预约最长 30 分钟");
     }
 
-    /* ---- 脚手架：游客路径创建（SecurityUtils.getUser 返回 null 走 visitor 分支） ---- */
+    /* ---- 脚手架：未登录访问者路径创建（SecurityUtils.getUser 返回 null 走 visitor 分支） ---- */
 
     private ViewingAppointmentVO invokeCreate(LocalTime start, LocalTime end) {
         try (var mocked = mockStatic(SecurityUtils.class)) {
@@ -159,7 +159,7 @@ class ViewingContinuousLimitTest {
         dto.setStartTime(start);
         dto.setEndTime(end);
         dto.setContactPhone("13800001111");
-        dto.setVisitorName("游客甲");
+        dto.setVisitorName("未登录访问者甲");
         return dto;
     }
 

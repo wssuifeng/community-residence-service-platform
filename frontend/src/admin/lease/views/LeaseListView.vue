@@ -32,7 +32,7 @@ import FilterPanel from '@/common/web/components/FilterPanel.vue'
  * 分组取后端标注，绝不把标注当 status 传参）；历史 = 待审核/已搬出/已归档/已驳回。
  * 分组阈值与后端到期提醒任务口径一致（sys_config lease.reminder_days，默认 30 天）。
  *
- * 筛选区（状态/社区/签约状态/到期区间/关键词）在 Tab 分组之上叠加，均为客户端过滤：
+ * 筛选区（状态/小区/签约状态/到期区间/关键词）在 Tab 分组之上叠加，均为客户端过滤：
  * 后端列表仅支持 status/residentId/houseId 三个查询条件，关键字与区间无服务端参数。
  * 租约详情不在此页承载（页内 Dialog 信息密度过低），统一跳独立详情页 /admin/leases/:id。
  *
@@ -76,7 +76,7 @@ const loading = ref(false)
 const communityNames = ref<Record<number, string>>({})
 const communityOptions = ref<{ id: number; name: string }[]>([])
 
-/* 后端分页上限 100：循环翻页取全量，供四 Tab 分组与角标计数（量级为社区级，循环有 50 页保险上限）。
+/* 后端分页上限 100：循环翻页取全量，供四 Tab 分组与角标计数（量级为小区级，循环有 50 页保险上限）。
    序号令牌并发防护：动作后未 await 的 reload 与前一次拉取重叠时，仅最新一次的结果落地，
    旧快照在每次 await 后即刻作废，防止覆盖新快照 */
 let loadSeq = 0
@@ -102,7 +102,7 @@ async function load(): Promise<void> {
   }
 }
 
-/* 社区名映射 + 筛选下拉选项（VO 只带 communityId） */
+/* 小区名映射 + 筛选下拉选项（VO 只带 communityId） */
 async function loadCommunities(): Promise<void> {
   try {
     const result = await getCommunityList({ page: 1, size: 100 })
@@ -111,7 +111,7 @@ async function loadCommunities(): Promise<void> {
     communityNames.value = map
     communityOptions.value = result.records.map((item) => ({ id: item.id, name: item.name }))
   } catch {
-    /* 映射失败不阻塞列表，社区名显示占位符 */
+    /* 映射失败不阻塞列表，小区名显示占位符 */
   }
 }
 
@@ -174,7 +174,7 @@ const agreementOptions = (
 ).map((value) => ({ value, label: leaseAgreementSignStatusLabels[value] }))
 
 const status = ref<LeaseStatus | ''>(queryText('leaseStatus') in leaseStatusLabels ? queryText('leaseStatus') as LeaseStatus : '')
-/* 社区筛选：el-select 清空回填 undefined（非 null），故用 undefined 表示未筛选 */
+/* 小区筛选：el-select 清空回填 undefined（非 null），故用 undefined 表示未筛选 */
 const communityId = ref<number | undefined>(Number(queryText('leaseCommunity')) > 0 ? Number(queryText('leaseCommunity')) : undefined)
 const agreementFilter = ref<LeaseAgreementSignStatus | ''>(queryText('leaseAgreement') in leaseAgreementSignStatusLabels ? queryText('leaseAgreement') as LeaseAgreementSignStatus : '')
 /* 到期区间：按租期结束日期过滤（后端无该查询参数，客户端比对 YYYY-MM-DD 字符串） */
@@ -657,7 +657,7 @@ useLiveRefresh(() => load(), ['lease'])
       <el-select v-model="status" placeholder="全部状态" clearable class="filter-select">
         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
-      <el-select v-model="communityId" placeholder="全部社区" clearable filterable class="filter-select">
+      <el-select v-model="communityId" placeholder="全部小区" clearable filterable class="filter-select">
         <el-option v-for="item in communityOptions" :key="item.id" :label="item.name" :value="item.id" />
       </el-select>
       <el-select v-model="agreementFilter" placeholder="全部签约状态" clearable class="filter-select-wide">

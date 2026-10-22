@@ -153,7 +153,7 @@ class ViewingSlotCoverageTest {
                 .hasMessageContaining("不在房源可预约时段内");
     }
 
-    /* ---- 脚手架：游客路径创建 ---- */
+    /* ---- 脚手架：未登录访问者路径创建 ---- */
 
     private void stubTemplates(List<HousingTimeslot> templates) {
         when(timeslotMapper.selectList(any())).thenReturn(templates);
@@ -176,7 +176,7 @@ class ViewingSlotCoverageTest {
         dto.setStartTime(start);
         dto.setEndTime(end);
         dto.setContactPhone("13800001111");
-        dto.setVisitorName("游客甲");
+        dto.setVisitorName("未登录访问者甲");
         return dto;
     }
 

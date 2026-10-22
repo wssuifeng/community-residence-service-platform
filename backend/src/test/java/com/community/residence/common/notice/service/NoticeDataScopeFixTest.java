@@ -109,13 +109,13 @@ class NoticeDataScopeFixTest {
         publishedNotice.setIsPinned(0);
     }
 
-    /* ---- DEF-003①：管理员 GET 详情越绑定社区 404 ---- */
+    /* ---- DEF-003①：管理员 GET 详情越绑定小区 404 ---- */
 
     @Test
-    @DisplayName("ADMIN 读详情：公告目标社区不在绑定集合内 → 404（原 200 全文放行）")
+    @DisplayName("ADMIN 读详情：公告目标小区不在绑定集合内 → 404（原 200 全文放行）")
     void getById_adminCrossCommunity_throws() {
         lenient().when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
-        /* 公告定向社区 1，admin2 仅绑定社区 2 */
+        /* 公告定向小区 1，admin2 仅绑定小区 2 */
         lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(
                 target("COMMUNITY", 1L)));
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
@@ -131,7 +131,7 @@ class NoticeDataScopeFixTest {
     }
 
     @Test
-    @DisplayName("ADMIN 读详情：目标社区在绑定集合内 → 200")
+    @DisplayName("ADMIN 读详情：目标小区在绑定集合内 → 200")
     void getById_adminBoundCommunity_ok() {
         lenient().when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
         lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(
@@ -151,7 +151,7 @@ class NoticeDataScopeFixTest {
     /* ---- DEF-003②：居民范围外公告不可见 ---- */
 
     @Test
-    @DisplayName("居民读详情：公告定向其他社区 → 404（R25 范围外不可见）")
+    @DisplayName("居民读详情：公告定向其他小区 → 404（R25 范围外不可见）")
     void getById_residentOutOfScope_throws() {
         lenient().when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
         lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(
@@ -162,7 +162,7 @@ class NoticeDataScopeFixTest {
             mocked.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(false);
             mocked.when(() -> SecurityUtils.hasRole("RESIDENT")).thenReturn(true);
             mocked.when(SecurityUtils::getUserId).thenReturn(5L);
-            /* 居民在住社区 1，公告定向社区 2 */
+            /* 居民在住小区 1，公告定向小区 2 */
             lenient().when(residenceRelationMapper.selectList(any())).thenReturn(List.of(relation(5L, 1L)));
 
             assertThatThrownBy(() -> noticeService.getById(1L))
@@ -171,7 +171,7 @@ class NoticeDataScopeFixTest {
     }
 
     @Test
-    @DisplayName("居民读详情：公告定向本人社区 → 200")
+    @DisplayName("居民读详情：公告定向本人小区 → 200")
     void getById_residentInScope_ok() {
         lenient().when(noticeMapper.selectById(1L)).thenReturn(publishedNotice);
         lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(
@@ -210,7 +210,7 @@ class NoticeDataScopeFixTest {
     /* ---- DEF-004：communityId 单目标写法越权校验 ---- */
 
     @Test
-    @DisplayName("创建公告：communityId 单目标指向未绑定社区 → 403（原 200 落库越权定向）")
+    @DisplayName("创建公告：communityId 单目标指向未绑定小区 → 403（原 200 落库越权定向）")
     void create_communityIdOutOfScope_throws() {
         CreateNoticeDTO dto = new CreateNoticeDTO();
         dto.setTitle("越权定向公告");
@@ -228,19 +228,19 @@ class NoticeDataScopeFixTest {
             /* checkCommunityAccess 为 void 静态方法，mockStatic 默认 no-op，
                越权用例按项目惯例显式 thenThrow（真实链路归 SP-01 独立实例冒烟） */
             mocked.when(() -> SecurityUtils.checkCommunityAccess(2L))
-                    .thenThrow(new ForbiddenException("无权操作未绑定社区的数据"));
+                    .thenThrow(new ForbiddenException("无权操作未绑定小区的数据"));
 
             assertThatThrownBy(() -> noticeService.create(dto))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessageContaining("无权操作未绑定社区");
+                    .hasMessageContaining("无权操作未绑定小区");
         }
     }
 
     @Test
-    @DisplayName("创建公告：communityId 单目标指向绑定社区 → 正常落库")
+    @DisplayName("创建公告：communityId 单目标指向绑定小区 → 正常落库")
     void create_communityIdBound_ok() {
         CreateNoticeDTO dto = new CreateNoticeDTO();
-        dto.setTitle("本社区公告");
+        dto.setTitle("本小区公告");
         dto.setContent("内容");
         dto.setCommunityId(1L);
         dto.setPublishTime(LocalDateTime.now());
@@ -260,7 +260,7 @@ class NoticeDataScopeFixTest {
             mocked.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(false);
             mocked.when(SecurityUtils::getUserId).thenReturn(1L);
 
-            assertThat(noticeService.create(dto).getTitle()).isEqualTo("本社区公告");
+            assertThat(noticeService.create(dto).getTitle()).isEqualTo("本小区公告");
         }
     }
 
@@ -313,7 +313,7 @@ class NoticeDataScopeFixTest {
     }
 
     @Test
-    @DisplayName("DEF-162：管理员绑定社区可看到该社区楼栋定向公告")
+    @DisplayName("DEF-162：管理员绑定小区可看到该小区楼栋定向公告")
     void page_adminBoundCommunity_seesBuildingNotice() {
         lenient().when(noticeTargetMapper.selectList(any())).thenReturn(List.of(target("BUILDING", 101L)));
         lenient().when(buildingMapper.selectBatchIds(any())).thenReturn(List.of(building(101L, 1L)));
@@ -358,7 +358,7 @@ class NoticeDataScopeFixTest {
             mocked.when(() -> SecurityUtils.hasRole("SUPER_ADMIN")).thenReturn(true);
             mocked.when(SecurityUtils::getUserId).thenReturn(1L);
             noticeService.publish(2L, LocalDateTime.now());
-            verify(notificationService).createForResident(5L, null, "社区公告",
+            verify(notificationService).createForResident(5L, null, "小区公告",
                     "新公告「楼栋公告」已发布，请查看", "NOTICE", "NOTICE", 2L);
         }
     }

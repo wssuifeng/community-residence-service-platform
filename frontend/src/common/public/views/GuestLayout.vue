@@ -4,18 +4,18 @@ import { useRoute } from 'vue-router'
 import AppHeader from '@/common/web/components/AppHeader.vue'
 import AppLogo from '@/common/web/components/AppLogo.vue'
 
-/** 游客端布局：顶部导航 + 单栏内容区 + 深色页脚（UI设计.md §2，未登录态） */
+/** 未登录公开页面布局：顶部导航 + 单栏内容区 + 深色页脚（UI设计.md §2，未登录态） */
 const navItems = [
   { label: '首页', to: '/guest/home' },
   { label: '房源', to: '/guest/housings' },
   { label: '公告', to: '/guest/notices' }
 ]
 
-/* 页脚快速链接：服务类入口游客需先登录，统一指向登录页 */
+/* 页脚快速链接：服务类入口未登录访问者需先登录，统一指向登录页 */
 const quickLinks = [
   { label: '首页', to: '/guest/home' },
   { label: '房源', to: '/guest/housings' },
-  { label: '社区公告', to: '/guest/notices' },
+  { label: '小区公告', to: '/guest/notices' },
   { label: '在线报修', to: '/auth/login' },
   { label: '意见反馈', to: '/auth/login' },
   { label: '资源预约', to: '/auth/login' }
@@ -68,16 +68,16 @@ onUnmounted(() => {
       <router-view />
     </main>
 
-    <!-- 深色页脚：品牌 + 快速链接 + 联系方式（游客端全页面共享） -->
+    <!-- 深色页脚：品牌 + 快速链接 + 联系方式（未登录公开页面全页面共享） -->
     <footer class="guest-footer">
       <div class="guest-footer-inner">
         <div class="footer-brand">
           <h2 class="footer-brand-name">
             <AppLogo :size="22" />
-            <span>社区居住服务</span>
+            <span>小区居住服务</span>
           </h2>
           <p class="footer-brand-desc">
-            致力于为社区居民提供便捷、高效、贴心的社区服务，打造更美好的社区生活。
+            致力于为小区居民提供便捷、高效、贴心的小区服务，打造更美好的小区生活。
           </p>
         </div>
 
@@ -110,7 +110,7 @@ onUnmounted(() => {
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
-            <span>社区服务中心一层 · 物业办公室</span>
+            <span>小区服务中心一层 · 物业办公室</span>
           </p>
         </div>
       </div>

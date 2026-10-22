@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/** 提交工单请求（居民端；社区归属由服务类别推导） */
+/** 提交工单请求（居民端；小区归属由服务类别推导） */
 @Data
 @Schema(description = "提交工单请求")
 public class CreateWorkOrderDTO {

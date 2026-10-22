@@ -37,7 +37,7 @@ export function getServiceCategory(id: number) {
   return http.get<IServiceCategory>(`/service-categories/${id}`)
 }
 
-/** 查询社区服务类别树（接口设计.md 9.4.1.5） */
+/** 查询小区服务类别树（接口设计.md 9.4.1.5） */
 export function getServiceCategoryTree(communityId: number) {
   return http.get<IServiceCategoryTreeNode[]>(`/communities/${communityId}/service-categories`)
 }
@@ -91,7 +91,7 @@ export function confirmWorkOrder(id: number, data?: { remark?: string }) {
  * 管理端受理（接口设计 §9.21.1，R74）：
  * 仅 `PENDING` 可受理（否则 5302），`PENDING → TO_ASSIGN`，同一事务自动建立
  * 工单临时群聊（`WORK_ORDER_GROUP`）并回带 `conversationId`。
- * 权限：ADMIN（限绑定社区）/ SUPER_ADMIN；请求体可空（`remark` ≤200 记入时间线）。
+ * 权限：ADMIN（限绑定小区）/ SUPER_ADMIN；请求体可空（`remark` ≤200 记入时间线）。
  */
 export function intakeWorkOrder(id: number, data?: IWorkOrderIntakeRequest) {
   return http.patch<IWorkOrder>(`/work-orders/${id}/intake`, data)
@@ -123,7 +123,7 @@ export function getWorkOrderTimeline(id: number) {
 }
 
 /**
- * 派单候选清单（V19 档位推荐）：常驻本社区且擅长该类别（1）→ 常驻（2）→ 擅长（3）→ 其他（4），
+ * 派单候选清单（V19 档位推荐）：常驻本小区且擅长该类别（1）→ 常驻（2）→ 擅长（3）→ 其他（4），
  * 同档内按在手工单数升序；带今日班次标签供调度判断在岗情况
  */
 export function listAssignableStaff(params?: { communityId?: number; categoryId?: number }) {

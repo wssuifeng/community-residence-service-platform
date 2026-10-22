@@ -5,20 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** 管理员绑定社区摘要 */
+/** 管理员绑定小区摘要 */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "管理员绑定的社区")
+@Schema(description = "管理员绑定的小区")
 public class BoundCommunityVO {
 
-    @Schema(description = "社区ID")
+    @Schema(description = "小区ID")
     private Long communityId;
 
-    @Schema(description = "社区名称")
+    @Schema(description = "小区名称")
     private String communityName;
 
-    @Schema(description = "社区地址")
+    @Schema(description = "小区地址")
     private String communityAddress;
 
     @Schema(description = "绑定时间")

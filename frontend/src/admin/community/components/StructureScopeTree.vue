@@ -17,7 +17,7 @@ const emit=defineEmits<{building:[unknown];unit:[unknown];clear:[]}>()
               <span class="filter-result">
                 共 {{ scopeSummary.total }} 套 · 已入住 {{ scopeSummary.occupied }} · 空置
                 {{ scopeSummary.vacant }}
-                <template v-if="!structureLoading"> · 社区共 {{ communityMetrics.houses }} 套</template>
+                <template v-if="!structureLoading"> · 小区共 {{ communityMetrics.houses }} 套</template>
               </span>
               <el-button
                 v-if="filtersActive"

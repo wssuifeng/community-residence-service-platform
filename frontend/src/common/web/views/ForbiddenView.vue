@@ -24,7 +24,7 @@ function reLogin(): void {
     <header class="error-nav">
       <router-link class="error-brand" to="/guest/home">
         <AppLogo class="error-brand-logo" :size="22" />
-        <span>社区居住服务</span>
+        <span>小区居住服务</span>
       </router-link>
       <nav class="error-nav-links">
         <router-link to="/guest/home">首页</router-link>
@@ -36,7 +36,7 @@ function reLogin(): void {
       <img class="error-illustration" src="/images/error-403.png" alt="锁与盾牌插画" />
       <h1 class="error-code">403</h1>
       <h2 class="error-title">无权访问该页面</h2>
-      <p class="error-desc">你当前的账号没有访问此页面的权限，如有疑问请联系社区管理员</p>
+      <p class="error-desc">你当前的账号没有访问此页面的权限，如有疑问请联系小区管理员</p>
       <div class="error-actions">
         <el-button type="primary" class="error-btn error-btn--primary" @click="backHome">
           返回首页

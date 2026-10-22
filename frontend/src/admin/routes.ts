@@ -76,7 +76,7 @@ const adminRoutes: RouteRecordRaw[] = [
       // ---- 隐藏下钻详情 + 通知（无侧栏项） ----
       /* 租约详情与房源详情必须原样直达：静态段 leases/housings 的 redirect 只匹配无子段路径，
          动态段 :id 优先承接带 id 的 URL，故 /admin/leases/:id 不会被 Hub 重定向吞掉 */
-      { path: 'communities/:id', name: 'AdminCommunityDetail', component: () => import('@/admin/community/views/CommunityDetailView.vue'), meta: { title: '社区详情' } },
+      { path: 'communities/:id', name: 'AdminCommunityDetail', component: () => import('@/admin/community/views/CommunityDetailView.vue'), meta: { title: '小区详情' } },
       { path: 'work-orders/:id', name: 'AdminWorkOrderDetail', component: () => import('@/admin/workorder/views/WorkOrderDetailView.vue'), meta: { title: '工单详情' } },
       { path: 'leases/:id', name: 'AdminLeaseDetail', component: () => import('@/admin/lease/views/LeaseDetailView.vue'), meta: { title: '租约详情' } },
       { path: 'residents/:id', name: 'AdminResidentDetail', component: () => import('@/admin/resident/views/ResidentDetailView.vue'), meta: { title: '居民详情' } },
@@ -90,7 +90,7 @@ const adminRoutes: RouteRecordRaw[] = [
       { path: 'statistics/dashboard', redirect: '/admin/dashboard' },
       { path: 'statistics/details', redirect: { name: 'AdminDashboard', query: { tab: 'details' } } },
       { path: 'communities', redirect: '/admin/community' },
-      /* 结构四旧路径：函数写法承接旧 query（如 communityId），由结构树预选对应社区 */
+      /* 结构四旧路径：函数写法承接旧 query（如 communityId），由结构树预选对应小区 */
       { path: 'buildings', redirect: (to) => ({ name: 'AdminCommunity', query: { ...to.query, tab: 'tree' } }) },
       { path: 'units', redirect: (to) => ({ name: 'AdminCommunity', query: { ...to.query, tab: 'tree' } }) },
       { path: 'houses', redirect: (to) => ({ name: 'AdminCommunity', query: { ...to.query, tab: 'houses' } }) },

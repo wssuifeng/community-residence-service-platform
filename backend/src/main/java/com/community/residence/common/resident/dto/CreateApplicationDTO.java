@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/** 提交入住申请请求（社区与房屋归属由 houseId 推导） */
+/** 提交入住申请请求（小区与房屋归属由 houseId 推导） */
 @Data
 @Schema(description = "提交入住申请请求")
 public class CreateApplicationDTO {

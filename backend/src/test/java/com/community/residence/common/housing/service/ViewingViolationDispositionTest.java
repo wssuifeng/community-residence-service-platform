@@ -99,7 +99,7 @@ class ViewingViolationDispositionTest {
         appointment(null);
         try(var security = mockStatic(SecurityUtils.class)) {
             security.when(() -> SecurityUtils.hasRole("ADMIN")).thenReturn(true);
-            service.violate(1L, "历史游客未到场");
+            service.violate(1L, "历史匿名未到场");
             verifyNoInteractions(residentMapper, violationRecordMapper, tokenRevocationService, notificationService);
         }
     }

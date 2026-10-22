@@ -49,7 +49,7 @@ class ResidenceApplicationLeaseIdMigrationTest {
         assertThat(sql).contains("UPDATE residence_application");
         assertThat(sql).contains("WHERE a.status = 'APPROVED'");
         assertThat(sql).contains("AND a.lease_id IS NULL");
-        /* 弱关联口径：同 居民/社区/房屋，取最新（与 V26 前运行时代码口径一致） */
+        /* 弱关联口径：同 居民/小区/房屋，取最新（与 V26 前运行时代码口径一致） */
         assertThat(sql).contains("l.tenant_id = a.resident_id");
         assertThat(sql).contains("l.community_id = a.community_id");
         assertThat(sql).contains("l.house_id = a.house_id");

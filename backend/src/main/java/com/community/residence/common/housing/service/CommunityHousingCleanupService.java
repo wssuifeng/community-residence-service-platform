@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
-/** 社区删除时的housing域清理；参加管理端协调事务，不能独立提交。 */
+/** 小区删除时的housing域清理；参加管理端协调事务，不能独立提交。 */
 @Service
 @RequiredArgsConstructor
 @org.springframework.transaction.annotation.Transactional(propagation=org.springframework.transaction.annotation.Propagation.MANDATORY,rollbackFor=Exception.class)
@@ -23,7 +23,7 @@ public class CommunityHousingCleanupService {
     private final HousingTimeslotMapper housingTimeslotMapper;
     private final ViewingAppointmentMapper viewingAppointmentMapper;
     private final com.community.residence.common.resident.service.CommunityResidentCleanupService residentCleanup;
-    /* 按原级联顺序清理本域，所有条件来自已确认社区或其受限关联ID。 */
+    /* 按原级联顺序清理本域，所有条件来自已确认小区或其受限关联ID。 */
     public void removeHousing(Long id) {
         /* ---- C12 房源链（V1 #37~39）：时段/看房预约 → 房源；看房违约记录随之清理 ---- */
         List<Long> housingIds = housingMapper.selectList(

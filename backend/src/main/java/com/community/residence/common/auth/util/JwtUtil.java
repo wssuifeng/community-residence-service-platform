@@ -17,7 +17,7 @@ import java.util.UUID;
 
 /**
  * JWT 工具（jjwt 0.12.6）。
- * Claims 精简为 userId/username/role + jti（架构设计.md §3.2：绑定社区不进令牌，
+ * Claims 精简为 userId/username/role + jti（架构设计.md §3.2：绑定小区不进令牌，
  * 每次请求从 Redis 读绑定关系，避免令牌膨胀与权限变更后旧令牌范围失效问题）。
  * 有效期默认 36 小时（接口设计.md 9.10.1.1）。
  */
@@ -41,7 +41,7 @@ public class JwtUtil {
         return generateToken(userId, username, role, null);
     }
 
-    /** 新登录附带签名保护的权限代次；不将社区绑定写入JWT，旧签发入口保持兼容。 */
+    /** 新登录附带签名保护的权限代次；不将小区绑定写入JWT，旧签发入口保持兼容。 */
     public String generateToken(Long userId, String username, String role, Long revision) {
         Date now = new Date();
         Date expire = new Date(now.getTime() + accessTtl.toMillis());

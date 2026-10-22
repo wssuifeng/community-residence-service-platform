@@ -8,16 +8,16 @@ import type { IBuilding, ICommunity, IUnit, IUnitDTO } from '@/common/community/
 /**
  * 单元新建/编辑对话框（任务 3 自 UnitListView 表单逻辑收编抽取，
  * 结构树楼栋节点「新增单元」/单元节点「编辑」共用）。
- * 保留原对话框内社区→楼栋二级联动；编辑回显改由 IUnit.communityId
+ * 保留原对话框内小区→楼栋二级联动；编辑回显改由 IUnit.communityId
  * 直接定位（原视图靠筛选选项兜底推断，对话框场景无筛选态）。
- * 社区选项由父层（结构树已加载）传入，避免重复请求。
+ * 小区选项由父层（结构树已加载）传入，避免重复请求。
  */
 const props = defineProps<{
-  /** 社区下拉选项（结构树已加载的社区列表） */
+  /** 小区下拉选项（结构树已加载的小区列表） */
   communities: ICommunity[]
   /** 编辑目标：null = 新建 */
   unit?: IUnit | null
-  /** 新建时的默认社区/楼栋（树上下文预选） */
+  /** 新建时的默认小区/楼栋（树上下文预选） */
   defaultCommunityId?: number | null
   defaultBuildingId?: number | null
 }>()
@@ -39,7 +39,7 @@ const form = reactive<UnitForm>({
   description: ''
 })
 
-/** 对话框内独立维护的社区→楼栋联动（与树选中状态互不干扰） */
+/** 对话框内独立维护的小区→楼栋联动（与树选中状态互不干扰） */
 const formCommunityId = ref<number | ''>('')
 const formBuildings = ref<IBuilding[]>([])
 
@@ -70,7 +70,7 @@ watch(visible, (value) => {
     form.name = props.unit.name
     form.description = props.unit.description ?? ''
     form.buildingId = props.unit.buildingId
-    /* 回显楼栋选项：按单元所属社区拉取（communityId 为 IUnit 既有字段） */
+    /* 回显楼栋选项：按单元所属小区拉取（communityId 为 IUnit 既有字段） */
     getBuildingList(props.unit.communityId, { page: 1, size: 200 })
       .then((result) => {
         formBuildings.value = result.records
@@ -122,10 +122,10 @@ async function handleSubmit(): Promise<void> {
 <template>
   <el-dialog v-model="visible" :title="unit ? '编辑单元' : '新建单元'" width="480px">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-      <el-form-item label="所属社区">
+      <el-form-item label="所属小区">
         <el-select
           v-model="formCommunityId"
-          placeholder="请选择社区"
+          placeholder="请选择小区"
           style="width: 100%"
           @change="handleFormCommunityChange"
         >

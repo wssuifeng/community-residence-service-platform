@@ -23,13 +23,13 @@ import { formatDateTime } from '@/common/web/utils/date'
  * 租赁协议签约面板（R64，管理端与居民端共用）。
  *
  * 自洽性约定：组件不依赖父层任何状态——除 leaseId/role 两个必填 props 外，
- * 协议数据、模板清单、社区归属（用于筛可用模板）全部由组件内部拉取；
+ * 协议数据、模板清单、小区归属（用于筛可用模板）全部由组件内部拉取；
  * 发起/确认/撤回成功后仅 emit('changed') 通知父层刷新它自己的租约数据
  *（后端会把协议状态回写租约 agreementStatus）。
  *
- * 社区归属取数：优先用可选的 communityId prop（父层已知时传入，省一次请求）；
+ * 小区归属取数：优先用可选的 communityId prop（父层已知时传入，省一次请求）；
  * 缺省则由组件内调 getLease(leaseId) 补全（居民查本人租约、管理员查辖区租约均合法），
- * 取不到时降级为「不指定模板」发起——后端会取该社区默认模板。
+ * 取不到时降级为「不指定模板」发起——后端会取该小区默认模板。
  */
 
 const props = defineProps<{
@@ -37,7 +37,7 @@ const props = defineProps<{
   leaseId: number
   /** 当前身份：ADMIN-管理方（同意并发出/撤回），RESIDENT-居民方（确认） */
   role: 'ADMIN' | 'RESIDENT'
-  /** 社区 ID（可选；缺省由组件内部查租约补全，仅影响可用模板清单） */
+  /** 小区 ID（可选；缺省由组件内部查租约补全，仅影响可用模板清单） */
   communityId?: number
   /** 已知租约状态；缺省由本组件读取，只有待签约可发出。 */
   leaseStatus?: LeaseStatus
@@ -55,7 +55,7 @@ const emit = defineEmits<{
 const agreements = ref<ILeaseAgreement[]>([])
 const loading = ref(false)
 const submitting = ref(false)
-/* 社区归属兜底来源（props.communityId 缺省时才请求） */
+/* 小区归属兜底来源（props.communityId 缺省时才请求） */
 const leaseCommunityId = ref<number | null>(null)
 const resolvedLeaseStatus = ref<LeaseStatus | null>(null)
 const canIssue = computed(() => !props.readOnly && (props.leaseStatus ?? resolvedLeaseStatus.value) === 'TO_SIGN')
@@ -109,7 +109,7 @@ async function load(): Promise<void> {
   }
 }
 
-/* 社区归属兜底：拿不到只降级模板选择，不阻塞协议流程 */
+/* 小区归属兜底：拿不到只降级模板选择，不阻塞协议流程 */
 async function resolveCommunity(): Promise<void> {
   if (props.communityId != null && props.leaseStatus != null) return
   const leaseId = props.leaseId
@@ -423,8 +423,8 @@ defineExpose({ reload: load })
         :closable="false"
         show-icon
         class="form-alert"
-        title="未能获取租约所属社区"
-        description="无法列出可选模板，将按该社区默认模板生成协议正文；若该社区无默认模板，请先在「协议模板」中配置。"
+        title="未能获取租约所属小区"
+        description="无法列出可选模板，将按该小区默认模板生成协议正文；若该小区无默认模板，请先在「协议模板」中配置。"
       />
       <p class="action-hint">请确认所选模板及租约内容。发出即代表您以管理方身份同意本协议，并记录您的姓名与时间；居民确认且首期费用支付成功后租约生效。</p>
       <el-form label-width="90px" @submit.prevent>
@@ -435,7 +435,7 @@ defineExpose({ reload: load })
             :disabled="effectiveCommunityId == null"
             clearable
             filterable
-            placeholder="留空使用社区默认模板"
+            placeholder="留空使用小区默认模板"
             style="width: 100%"
           >
             <el-option

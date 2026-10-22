@@ -114,7 +114,7 @@ public class OperationLogAspect {
         return null;
     }
 
-    /* 社区归属：SpEL 显式指定优先；否则取操作人绑定社区（ADMIN 单绑定场景）；再否则空 */
+    /* 小区归属：SpEL 显式指定优先；否则取操作人绑定小区（ADMIN 单绑定场景）；再否则空 */
     private Long resolveCommunityId(JoinPoint joinPoint, OperationLog annotation, UserContext user, Object result) {
         Long explicit = resolveLong(joinPoint, annotation.communityId(), result);
         if (explicit != null) {

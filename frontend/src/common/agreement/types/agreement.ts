@@ -8,14 +8,14 @@ export type AgreementTemplateStatus = 'ACTIVE' | 'INACTIVE'
 
 /**
  * 协议正文可用占位符（后端 AgreementService.render 支持中英文别名）：
- * {{社区名称}} {{房屋位置}} {{房号}} {{楼层}} {{租客姓名}} {{租期开始}} {{租期结束}}
+ * {{小区名称}} {{房屋位置}} {{房号}} {{楼层}} {{租客姓名}} {{租期开始}} {{租期结束}}
  * {{月租金}} {{押金}} {{租约编号}} {{签约日期}}
  */
 export interface IAgreementTemplate {
   id: number
-  /** 归属社区ID：为空表示全局通用模板（仅超管可维护，各社区均可用） */
+  /** 归属小区ID：为空表示全局通用模板（仅超管可维护，各小区均可用） */
   communityId?: number | null
-  /** 归属社区名称（全局模板后端回填「全局通用模板」） */
+  /** 归属小区名称（全局模板后端回填「全局通用模板」） */
   communityName?: string
   name: string
   /** 协议正文（支持 {{变量}} 占位；为空时正文以模板附件为准） */
@@ -106,7 +106,7 @@ export interface ILeaseAgreement {
   createdAt: string
 }
 
-/** 发起协议请求（POST /lease-agreements；templateId 为空时取该社区默认模板） */
+/** 发起协议请求（POST /lease-agreements；templateId 为空时取该小区默认模板） */
 export interface ICreateAgreementDTO {
   leaseId: number
   templateId?: number

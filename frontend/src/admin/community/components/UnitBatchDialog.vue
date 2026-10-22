@@ -8,7 +8,7 @@ import { manualHouseStatusLabels } from '@/common/community/types/community'
 import { SKIP_SYNTAX_HINT, planHouseRows } from '@/admin/community/utils/structureBatch'
 
 /**
- * 批量建单元与房屋（社区管理「建房」区第 ② 级：**指定社区 + 楼栋**）。
+ * 批量建单元与房屋（小区管理「建房」区第 ② 级：**指定小区 + 楼栋**）。
  *
  * 一次提交做完两件事：
  *  ① 按「名称前缀 + 起始序号 + 数量」批量建单元（`POST /units/batch`，逐行独立）；
@@ -35,7 +35,7 @@ interface BuildingOption {
 }
 
 const props = defineProps<{
-  /** 当前社区名（只读展示：结构只能在某个社区下建，故不提供社区切换） */
+  /** 当前小区名（只读展示：结构只能在某个小区下建，故不提供小区切换） */
   communityName?: string
   /** 可选楼栋（父层已加载的结构，含单元/房屋规模） */
   buildingOptions: BuildingOption[]
@@ -281,7 +281,7 @@ async function handleSubmit(): Promise<void> {
   <el-dialog v-model="visible" title="建单元与房屋" width="640px" :close-on-click-modal="false">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="108px">
       <div class="batch-section">目标楼栋</div>
-      <el-form-item label="所属社区">
+      <el-form-item label="所属小区">
         <el-input :model-value="communityName || '-'" disabled />
       </el-form-item>
       <el-form-item label="楼栋" prop="buildingId">
@@ -295,7 +295,7 @@ async function handleSubmit(): Promise<void> {
         </el-select>
       </el-form-item>
       <p v-if="buildingOptions.length === 0" class="batch-warn">
-        该社区还没有楼栋：请先用「建楼栋」或「一键生成结构链」建好楼栋，再来补单元与房屋。
+        该小区还没有楼栋：请先用「建楼栋」或「一键生成结构链」建好楼栋，再来补单元与房屋。
       </p>
 
       <div class="batch-section">单元生成规则</div>

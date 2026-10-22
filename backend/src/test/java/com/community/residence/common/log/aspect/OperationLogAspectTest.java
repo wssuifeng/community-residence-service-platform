@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * DEF-014 修复回归（R47 关键变更留痕）：@OperationLog 切面写入 sys_operation_log——
- * 操作人/对象/内容解析、社区归属推导、未登录 SYSTEM 口径、留痕失败不阻断业务。
+ * 操作人/对象/内容解析、小区归属推导、未登录 SYSTEM 口径、留痕失败不阻断业务。
  * 纯单测无 Spring 容器（@Aspect 代理不生效），直接以 JoinPoint 驱动切面方法。
  */
 @ExtendWith(MockitoExtension.class)
@@ -48,7 +48,7 @@ class OperationLogAspectTest {
     /** 测试用 Service：承载注解方法（注解元数据经反射读取） */
     static class FakeService {
         @OperationLog(operationType = "CREATE", targetType = "COMMUNITY",
-                targetId = "#result.id", content = "'创建社区：' + #dto.name")
+                targetId = "#result.id", content = "'创建小区：' + #dto.name")
         public String create(Dto dto) {
             return "9";
         }
@@ -172,7 +172,7 @@ class OperationLogAspectTest {
             SysOperationLog entry = captor.getValue();
             assertThat(entry.getTargetId()).isEqualTo(42L);
             assertThat(entry.getOperationType()).isEqualTo("CREATE");
-            assertThat(entry.getContent()).isEqualTo("{\"action\":\"创建社区：阳光花园\"}");
+            assertThat(entry.getContent()).isEqualTo("{\"action\":\"创建小区：阳光花园\"}");
         }
     }
 
@@ -217,7 +217,7 @@ class OperationLogAspectTest {
     }
 
     @Test
-    @DisplayName("无表达式：targetId/communityId 为空、内容回退方法签名、ADMIN 单绑定推导社区")
+    @DisplayName("无表达式：targetId/communityId 为空、内容回退方法签名、ADMIN 单绑定推导小区")
     void noExpression_fallbacks() throws Exception {
         try (MockedStatic<SecurityUtils> mocked = mockStatic(SecurityUtils.class)) {
             mocked.when(SecurityUtils::getUser)
@@ -230,7 +230,7 @@ class OperationLogAspectTest {
             verify(operationLogMapper).insert(captor.capture());
             SysOperationLog entry = captor.getValue();
             assertThat(entry.getTargetId()).isNull();
-            /* 无显式表达式 → ADMIN 单绑定社区推导 */
+            /* 无显式表达式 → ADMIN 单绑定小区推导 */
             assertThat(entry.getCommunityId()).isEqualTo(3L);
             assertThat(entry.getContent()).contains("noExpression");
         }

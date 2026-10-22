@@ -38,7 +38,7 @@ public class LoginVO {
         @Schema(description = "角色：RESIDENT/STAFF/ADMIN/SUPER_ADMIN")
         private String role;
 
-        @Schema(description = "绑定社区 ID 列表（仅 ADMIN 非空）")
+        @Schema(description = "绑定小区 ID 列表（仅 ADMIN 非空）")
         private Set<Long> boundCommunities;
     }
 }

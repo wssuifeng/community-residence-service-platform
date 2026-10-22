@@ -16,7 +16,7 @@ import type {
 
 /* ------------------------------- 能力绑定 ------------------------------- */
 
-/** 服务人员能力绑定分页列表（ADMIN 限本社区已绑定人员） */
+/** 服务人员能力绑定分页列表（ADMIN 限本小区已绑定人员） */
 export function listStaffCapabilities(params: IStaffCapabilityQuery) {
   return http.get<PageResult<IStaffCapability>>('/staff-capabilities', params)
 }
@@ -43,7 +43,7 @@ export function listStaffSchedules(params: IStaffScheduleQuery) {
   return http.get<IStaffSchedule[]>('/staff-schedules', params)
 }
 
-/** 排班批量设置（同 staff+社区+日期已存在则覆盖） */
+/** 排班批量设置（同 staff+小区+日期已存在则覆盖） */
 export function batchSaveStaffSchedules(data: IBatchSaveScheduleDTO) {
   return http.put<IBatchSaveScheduleResult>('/staff-schedules/batch', data)
 }
@@ -53,7 +53,7 @@ export function deleteStaffSchedule(id: number) {
   return http.delete<null>(`/staff-schedules/${id}`)
 }
 
-/** 按范围清空排班（staffIds 为空表示该社区全部人员） */
+/** 按范围清空排班（staffIds 为空表示该小区全部人员） */
 export function clearStaffSchedules(params: IClearScheduleParams) {
   return http.delete<IBatchSaveScheduleResult>('/staff-schedules', {
     params: {
@@ -65,7 +65,7 @@ export function clearStaffSchedules(params: IClearScheduleParams) {
   })
 }
 
-/** 代建服务人员并原子绑定授权社区。 */
+/** 代建服务人员并原子绑定授权小区。 */
 export function createStaffAccount(data: ICreateStaffAccountDTO) {
   return http.post<IStaffCapability>('/staff-capabilities/accounts', data)
 }

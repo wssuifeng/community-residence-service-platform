@@ -12,9 +12,9 @@ import { formatDateTime } from '@/common/web/utils/date'
 
 /**
  * 看房预约详情（R59 v1.3 → R63 v1.5 群聊化）：预约信息卡 + 看房群聊 + 取消入口。
- * R63 起会话模型升级多方会话：群聊（居民+社区管理员+带看人）挂 conversationId，
+ * R63 起会话模型升级多方会话：群聊（居民+小区管理员+带看人）挂 conversationId，
  * 直接复用 ConversationChat（WS 推送 + 轮询兜底 + 403 只读降级，组件内自处理）。
- * conversationId 为空（游客预约/存量未建群数据）时展示只读占位提示。
+ * conversationId 为空（历史匿名预约/存量未建群数据）时展示只读占位提示。
  */
 
 const route = useRoute()

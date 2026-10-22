@@ -8,14 +8,14 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-/** 社区创建/更新请求（更新接口复用本 DTO） */
+/** 小区创建/更新请求（更新接口复用本 DTO） */
 @Data
-@Schema(description = "社区创建/更新请求")
+@Schema(description = "小区创建/更新请求")
 public class CreateCommunityDTO {
 
-    @Schema(description = "社区名称")
-    @NotBlank(message = "社区名称不能为空")
-    @Size(max = 100, message = "社区名称最多 100 字符")
+    @Schema(description = "小区名称")
+    @NotBlank(message = "小区名称不能为空")
+    @Size(max = 100, message = "小区名称最多 100 字符")
     private String name;
 
     @Schema(description = "业务编号；创建留空按本级结构分配，更新留空保留")
@@ -27,12 +27,12 @@ public class CreateCommunityDTO {
     @Size(max = 255, message = "详细地址最多 255 字符")
     private String address;
 
-    @Schema(description = "社区责任人账号ID，必须为ADMIN；null表示未设置")
+    @Schema(description = "小区责任人账号ID，必须为ADMIN；null表示未设置")
     @jakarta.validation.constraints.Positive
     private Long responsibleAdminId;
 
-    @Schema(description = "社区简介")
-    @Size(max = 1000, message = "社区简介最多 1000 字符")
+    @Schema(description = "小区简介")
+    @Size(max = 1000, message = "小区简介最多 1000 字符")
     private String description;
 
     @Schema(description = "入住申请自动通过：0-关闭（人工审核）, 1-开启（提交即通过）；缺省视为 0")

@@ -52,7 +52,7 @@ import static org.mockito.Mockito.when;
 /**
  * R59 带看人分配回归：管理端将看房预约分配给启用状态的 STAFF/ADMIN
  * （禁超管/禁冻结/禁不存在账号，错误码 5805），重复分配允许覆盖；
- * 成功后带看人与预约居民均收到通知（游客预约无账号跳过居民侧通知）。
+ * 成功后带看人与预约居民均收到通知（历史匿名预约无账号跳过居民侧通知）。
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -200,7 +200,7 @@ class ViewingAssignTest {
     }
 
     @Test
-    @DisplayName("游客预约（无账号）：仅通知带看人，居民侧跳过不报错")
+    @DisplayName("历史匿名预约（无账号）：仅通知带看人，居民侧跳过不报错")
     void assign_guestAppointment_onlyAssigneeNotified() {
         appointment.setUserId(null);
 
@@ -224,7 +224,7 @@ class ViewingAssignTest {
     }
 
     @Test
-    @DisplayName("ADMIN 带看人须管辖房源社区：未管辖拒绝 5805 且不落库")
+    @DisplayName("ADMIN 带看人须管辖房源小区：未管辖拒绝 5805 且不落库")
     void assign_adminWithoutCommunity_rejected() {
         SysUser admin = new SysUser();
         admin.setId(9L);
@@ -243,7 +243,7 @@ class ViewingAssignTest {
     }
 
     @Test
-    @DisplayName("ADMIN 带看人管辖该社区：分配成功并双方通知")
+    @DisplayName("ADMIN 带看人管辖该小区：分配成功并双方通知")
     void assign_adminWithCommunity_success() {
         SysUser admin = new SysUser();
         admin.setId(9L);

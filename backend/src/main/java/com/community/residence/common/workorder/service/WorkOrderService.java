@@ -133,7 +133,7 @@ public class WorkOrderService {
 
     /* 提交工单：初始 PENDING 待受理；工单号 WO+日期+随机序号。
        R9「申请通过后获得居民端功能入口」+ R12 居住私有数据口径（DEF-001）：
-       提交人须在类别归属社区存在在住关系（move_out_date 为空） */
+       提交人须在类别归属小区存在在住关系（move_out_date 为空） */
     @Transactional(rollbackFor = Exception.class)
     public WorkOrderVO create(CreateWorkOrderDTO dto) {
         ServiceCategory category = categoryMapper.selectById(dto.getCategoryId());
@@ -150,7 +150,7 @@ public class WorkOrderService {
                         .le(com.community.residence.common.resident.entity.ResidenceRelation::getMoveInDate,java.time.LocalDate.now()));
         if (activeRelation == 0) {
             throw new BusinessException(ErrorCode.FORBIDDEN,
-                    "居住关系未建立或不在该社区，无法提交工单（请先完成入住申请）");
+                    "居住关系未建立或不在该小区，无法提交工单（请先完成入住申请）");
         }
 
         WorkOrder order = new WorkOrder();
@@ -167,14 +167,14 @@ public class WorkOrderService {
         workOrderMapper.insert(order);
 
         appendProcess(order.getId(), "SUBMIT", null, WorkOrderStatus.PENDING, dto.getContent());
-        /* R48/R74 事件 1「提交」：**必须**通知该社区绑定管理员与超管（DEF-072 修复口径）——
+        /* R48/R74 事件 1「提交」：**必须**通知该小区绑定管理员与超管（DEF-072 修复口径）——
            居民提交后管理端必须"被知道"，否则受理入口对管理端不可见；居民不重复收本事件 */
         notifySubmit(order);
         return toVO(order);
     }
 
     /* 受理（R74 / DEF-071 裁决＝补实现，接口设计 §9.21.1）：PENDING → TO_ASSIGN；
-       ADMIN/SUPER_ADMIN（数据级按社区在控制器与服务层双重收口）。
+       ADMIN/SUPER_ADMIN（数据级按小区在控制器与服务层双重收口）。
        同一事务内建立工单临时群聊（type=WORK_ORDER_GROUP、related_id=工单ID，
        成员＝居民提交人+受理管理员）并回写 work_order.conversation_id；
        重复受理/非法状态 → 5302（非成功幂等，与撤回同口径，不重复建群）。 */
@@ -198,7 +198,7 @@ public class WorkOrderService {
             conversationService.sendSystemMessage(group.getId(),
                     "工单已受理，本群用于工单沟通（工单号 " + order.getOrderNo() + "）");
         }
-        /* R48/R74 事件 2「受理」：通知居民提交人 + 该社区绑定管理员 */
+        /* R48/R74 事件 2「受理」：通知居民提交人 + 该小区绑定管理员 */
         notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已受理",
                 "您的工单 " + order.getOrderNo() + " 已被受理，正在安排服务人员",
                 "WORK_ORDER", "WORK_ORDER", id);
@@ -432,7 +432,7 @@ public class WorkOrderService {
         }
         fillAcceptTime(id);
         appendProcess(id, "ACCEPT", WorkOrderStatus.ASSIGNED, WorkOrderStatus.ACCEPTED, remark);
-        /* R48/R74 事件 4「接单」：通知服务人员（留痕提醒）+ 该社区绑定管理员；
+        /* R48/R74 事件 4「接单」：通知服务人员（留痕提醒）+ 该小区绑定管理员；
            §9.4.2.6 正文的「通知居民」按用户裁决 2026-09-23 属**必须收到**项（§9.21.4 事件 4 该格 ✅） */
         notifyCurrentAssignee(order, "工单已接单",
                 "工单 " + order.getOrderNo() + " 已接单，请按约上门", id);
@@ -474,7 +474,7 @@ public class WorkOrderService {
         appendProcess(id, WorkOrderProcessAction.COMPLETE, WorkOrderStatus.IN_PROGRESS, WorkOrderStatus.TO_CONFIRM, solution);
         notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已处理完成",
                 "您的工单 " + order.getOrderNo() + " 已处理完成，请确认", "WORK_ORDER", "WORK_ORDER", id);
-        /* R48/R74 事件 6「提交结果」：另通知该社区绑定管理员 */
+        /* R48/R74 事件 6「提交结果」：另通知该小区绑定管理员 */
         notifyCommunityAdmins(order, "工单待居民确认",
                 "工单 " + order.getOrderNo() + " 已提交处理结果，等待居民确认");
     }
@@ -492,7 +492,7 @@ public class WorkOrderService {
         appendProcess(id, "CONFIRM", WorkOrderStatus.TO_CONFIRM, WorkOrderStatus.COMPLETED, remark);
         notifyCurrentAssignee(order, "居民已确认工单",
                 "工单 " + order.getOrderNo() + " 已被居民确认完成", id);
-        /* R48/R74 事件 7「居民确认」：另通知该社区绑定管理员（等待终审关闭） */
+        /* R48/R74 事件 7「居民确认」：另通知该小区绑定管理员（等待终审关闭） */
         notifyCommunityAdmins(order, "工单待终审关闭",
                 "工单 " + order.getOrderNo() + " 居民已确认完成，等待管理端终审关闭");
     }
@@ -540,7 +540,7 @@ public class WorkOrderService {
             conversationService.sendSystemMessage(group.getId(), "工单已终审结束（已关闭），本群停止接收新消息，历史记录保留可查");
             conversationService.closeWorkOrderGroup(id);
         }
-        /* R48/R74 事件 8「终审关闭」：通知居民提交人 + 该社区绑定管理员 */
+        /* R48/R74 事件 8「终审关闭」：通知居民提交人 + 该小区绑定管理员 */
         notificationService.createForResident(order.getResidentId(), order.getCommunityId(), "工单已结束",
                 "您的工单 " + order.getOrderNo() + " 已终审结束（已关闭）", "WORK_ORDER", "WORK_ORDER", id);
         notifyCommunityAdmins(order, "工单已关闭",
@@ -593,11 +593,11 @@ public class WorkOrderService {
 
     /**
      * 可派单服务人员选项（R20 + V19 调度推荐）：启用状态 STAFF 账号，最小暴露面。
-     * 推荐档位（越小越推荐）：1-常驻本社区且擅长该类别、2-常驻本社区、
+     * 推荐档位（越小越推荐）：1-常驻本小区且擅长该类别、2-常驻本小区、
      * 3-擅长该类别、4-其他；同档位按在手工单数升序（负载均衡），再按账号 ID 稳定排序。
-     * 社区/类别绑定、社区名称、今日班次、在手工单数各自批量查询，无逐人查库。
+     * 小区/类别绑定、小区名称、今日班次、在手工单数各自批量查询，无逐人查库。
      * 范围外 STAFF 仍保留在候选池（R20 判据仅要求启用状态，不做硬过滤）；
-     * ADMIN 未显式传社区时以其唯一绑定社区作为匹配社区。
+     * ADMIN 未显式传小区时以其唯一绑定小区作为匹配小区。
      */
     public List<StaffOptionVO> assignableStaff(Long communityId, Long categoryId) {
         if (communityId != null) SecurityUtils.checkCommunityAccess(communityId);
@@ -610,7 +610,7 @@ public class WorkOrderService {
         }
         Long matchCommunityId = communityId;
         if (matchCommunityId == null && SecurityUtils.hasRole(RoleConstants.ADMIN)) {
-            /* 未显式传社区时：ADMIN 取其绑定社区（单绑定直接用，多绑定不预置） */
+            /* 未显式传小区时：ADMIN 取其绑定小区（单绑定直接用，多绑定不预置） */
             var bound = SecurityUtils.getCommunityIds();
             matchCommunityId = bound.size() == 1 ? bound.iterator().next() : null;
         }
@@ -712,8 +712,8 @@ public class WorkOrderService {
         processMapper.insert(process);
     }
 
-    /* R48/R74 事件 1「提交」（DEF-072 修复口径）：收件人 = **该工单所属社区的绑定启用管理员**
-       + **全部启用超管**，身份空间一律 USER（sys_user.id）；**不跨社区投递**，
+    /* R48/R74 事件 1「提交」（DEF-072 修复口径）：收件人 = **该工单所属小区的绑定启用管理员**
+       + **全部启用超管**，身份空间一律 USER（sys_user.id）；**不跨小区投递**，
        也不发居民口径（提交人即居民本人）。同一账号去重，避免绑定+超管双投递。 */
     private void notifySubmit(WorkOrder order) {
         String title = "新工单待受理";
@@ -725,12 +725,12 @@ public class WorkOrderService {
                     "WORK_ORDER", "WORK_ORDER", order.getId());
         }
         if (targets.isEmpty()) {
-            log.warn("工单提交无管理端收件人（社区无绑定管理员且无启用超管）：orderId={}", order.getId());
+            log.warn("工单提交无管理端收件人（小区无绑定管理员且无启用超管）：orderId={}", order.getId());
         }
     }
 
-    /* 事件 2/4/6/7/8 的「相关管理员」收件：该工单所属社区在 sys_admin_community 绑定的启用管理员，
-       不跨社区投递（§9.21.4 行内口径） */
+    /* 事件 2/4/6/7/8 的「相关管理员」收件：该工单所属小区在 sys_admin_community 绑定的启用管理员，
+       不跨小区投递（§9.21.4 行内口径） */
     private void notifyCommunityAdmins(WorkOrder order, String title, String content) {
         for (Long adminId : communityAdminIds(order.getCommunityId())) {
             notificationService.createForUser(adminId, order.getCommunityId(), title, content,
@@ -738,7 +738,7 @@ public class WorkOrderService {
         }
     }
 
-    /* 社区绑定启用管理员（sys_admin_community → sys_user 角色 ADMIN + 启用态） */
+    /* 小区绑定启用管理员（sys_admin_community → sys_user 角色 ADMIN + 启用态） */
     private List<Long> communityAdminIds(Long communityId) {
         if (communityId == null) {
             return List.of();

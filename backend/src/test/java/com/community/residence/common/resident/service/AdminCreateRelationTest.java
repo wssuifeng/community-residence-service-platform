@@ -137,7 +137,7 @@ class AdminCreateRelationTest {
     }
 
     @Test
-    @DisplayName("D-端点3：ADMIN 越绑定社区 403")
+    @DisplayName("D-端点3：ADMIN 越绑定小区 403")
     void adminCreate_outOfBoundCommunity_forbidden() {
         /* CALLS_REAL_METHODS：checkCommunityAccess 真实执行（mockStatic 默认会把它
            连带 mock 成空操作，导致校验形同虚设），仅桩 getUserId/getUser */
@@ -145,7 +145,7 @@ class AdminCreateRelationTest {
                      mockStatic(com.community.residence.common.security.context.SecurityUtils.class,
                              org.mockito.Mockito.CALLS_REAL_METHODS)) {
             mocked.when(com.community.residence.common.security.context.SecurityUtils::getUserId).thenReturn(5L);
-            /* getUser 返回绑定社区 2 的 ADMIN 上下文（校验目标房屋属社区 1） */
+            /* getUser 返回绑定小区 2 的 ADMIN 上下文（校验目标房屋属小区 1） */
             mocked.when(com.community.residence.common.security.context.SecurityUtils::getUser)
                     .thenReturn(new com.community.residence.common.security.context.UserContext(
                             5L, "admin1", "ADMIN", java.util.Set.of(2L)));

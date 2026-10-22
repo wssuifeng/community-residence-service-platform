@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
-/** 社区管理控制器：社区 CRUD 与停用/启用（接口设计.md 9.1.1） */
-@Tag(name = "社区管理", description = "社区基础信息管理接口")
+/** 小区管理控制器：小区 CRUD 与停用/启用（接口设计.md 9.1.1） */
+@Tag(name = "小区管理", description = "小区基础信息管理接口")
 @RestController
 @RequestMapping("/api/v1/communities")
 @RequiredArgsConstructor
@@ -23,13 +23,13 @@ public class CommunityController {
 
     private final CommunityService communityService;
 
-    @Operation(summary = "查询社区详情")
+    @Operation(summary = "查询小区详情")
     @GetMapping("/{id}")
     public ApiResponse<CommunityVO> getById(@PathVariable Long id) {
         return ApiResponse.success(communityService.getById(id));
     }
 
-    @Operation(summary = "社区列表（分页）")
+    @Operation(summary = "小区列表（分页）")
     @GetMapping
     public ApiResponse<PageVO<CommunityVO>> page(@RequestParam(defaultValue = "1") long page,
                                                  @RequestParam(defaultValue = "20") long size,

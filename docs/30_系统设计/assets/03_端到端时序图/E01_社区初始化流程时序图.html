@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.17.0-dev.1">
-  <title>E1：社区初始化流程</title>
+  <title>E1：小区初始化流程</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4955,7 +4955,7 @@
            data-preset-badge-blueprint="蓝图 / 修订 01"
            data-preset-badge-editorial="编辑风格 / 现场笔记">
         <div class="pulse-dot"></div>
-        <h1>E1：社区初始化流程</h1>
+        <h1>E1：小区初始化流程</h1>
       </div>
     </div>
 
@@ -5005,7 +5005,7 @@
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / 图版 04">
       <svg viewBox="0 0 760 1230" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
-        <title id="archify-diagram-title">E1：社区初始化流程</title>
+        <title id="archify-diagram-title">E1：小区初始化流程</title>
         <desc id="archify-diagram-description">由 Archify 生成的时序图。</desc>
         <!-- Definitions -->
         <defs>
@@ -5049,7 +5049,7 @@
           <rect x="47.599999999999994" y="170" width="136.8" height="16" rx="3" class="c-mask"/>
           <text x="116" y="180" class="t-backend" font-size="9" text-anchor="middle">POST /api/v1/communities</text>
         </g>
-        <text data-detail="fine" x="81" y="208" class="t-dim" font-size="7">新建社区（名称/地址）</text>
+        <text data-detail="fine" x="81" y="208" class="t-dim" font-size="7">新建小区（名称/地址）</text>
         </g>
 
         <g data-edge-from="backend" data-edge-to="db" data-edge-label="INSERT tb_community" data-edge-key="1" data-edge-id="insert-community">
@@ -5209,11 +5209,11 @@
         </g>
         </g>
 
-        <g data-edge-from="backend" data-edge-to="admin" data-edge-label="社区初始化完成" data-edge-key="20" data-edge-id="done">
+        <g data-edge-from="backend" data-edge-to="admin" data-edge-label="小区初始化完成" data-edge-key="20" data-edge-id="done">
           <path data-composition-edge-from="backend" data-composition-edge-to="admin" data-composition-edge-id="done" data-composition-points="163,1126;69,1126" d="M 163 1126 L 69 1126" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
           <rect x="73.6" y="1106" width="84.8" height="16" rx="3" class="c-mask"/>
-          <text x="116" y="1116" class="t-muted" font-size="9" text-anchor="middle">社区初始化完成</text>
+          <text x="116" y="1116" class="t-muted" font-size="9" text-anchor="middle">小区初始化完成</text>
         </g>
         </g>
 
@@ -5221,15 +5221,15 @@
 
 
         <!-- Participants -->
-        <g id="node-admin" data-node-id="admin" data-node-label="社区管理员" tabindex="0" role="button" aria-label="聚焦社区管理员，初始化操作人, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="初始化操作人" data-node-context="时序参与者">
-          <title>社区管理员 · 初始化操作人 · 时序参与者</title>
+        <g id="node-admin" data-node-id="admin" data-node-label="小区管理员" tabindex="0" role="button" aria-label="聚焦小区管理员，初始化操作人, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="初始化操作人" data-node-context="时序参与者">
+          <title>小区管理员 · 初始化操作人 · 时序参与者</title>
           <rect x="19" y="72" width="86" height="54" rx="6" class="c-mask"/>
           <rect x="19" y="72" width="86" height="54" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(25 78) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="62" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">社区管理员</text>
+          <text data-node-label="" data-detail-anchor="" x="62" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">小区管理员</text>
           <text data-detail="context" x="62" y="111" class="t-muted" font-size="7" text-anchor="middle">初始化操作人</text>
         </g>
 
@@ -5476,7 +5476,7 @@
           <h3>四级结构依次建立</h3>
         </div>
         <ul>
-          <li>&bull; 社区 → 楼栋 → 单元 → 房屋，四级结构按序创建，房屋初始状态为空置</li>
+          <li>&bull; 小区 → 楼栋 → 单元 → 房屋，四级结构按序创建，房屋初始状态为空置</li>
           <li>&bull; 随后配置公共资源及其可预约时段</li>
         </ul>
       </div>
@@ -5499,7 +5499,7 @@
         </div>
         <ul>
           <li>&bull; 后续业务按 community_id 隔离查询</li>
-          <li>&bull; 社区级管理员仅能操作其绑定社区的数据</li>
+          <li>&bull; 小区管理员仅能操作其绑定小区的数据</li>
         </ul>
       </div>
     </div>

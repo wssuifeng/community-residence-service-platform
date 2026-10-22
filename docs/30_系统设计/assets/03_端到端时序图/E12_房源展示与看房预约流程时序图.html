@@ -5004,7 +5004,7 @@
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
          data-preset-badge-editorial-plate="ARCHIFY / 图版 04">
-      <svg viewBox="0 0 860 1550" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+      <svg viewBox="0 0 920 560" role="img" lang="zh-CN" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
         <title id="archify-diagram-title">E12：房源展示与看房预约流程</title>
         <desc id="archify-diagram-description">由 Archify 生成的时序图。</desc>
         <!-- Definitions -->
@@ -5033,340 +5033,222 @@
 
 
         <!-- Lifelines -->
-        <path d="M 62 142 L 62 1485" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
-        <path d="M 170 142 L 170 1485" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
-        <path d="M 278 142 L 278 1485" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
-        <path d="M 386 142 L 386 1485" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
-        <path d="M 494 142 L 494 1485" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
-        <path d="M 602 142 L 602 1485" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 62 142 L 62 495" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 170 142 L 170 495" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 278 142 L 278 495" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 386 142 L 386 495" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 494 142 L 494 495" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 602 142 L 602 495" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
+        <path d="M 710 142 L 710 495" class="a-default" stroke-width="0.8" stroke-dasharray="3,7"/>
 
         <!-- Activations -->
 
 
         <!-- Messages -->
         <g data-edge-from="admin" data-edge-to="backend" data-edge-label="POST /api/v1/housings" data-edge-key="0" data-edge-id="create-housing">
-          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="create-housing" data-composition-points="69,190;271,190" d="M 69 190 L 271 190" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="create-housing" data-composition-points="69,160;379,160" d="M 69 160 L 379 160" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
         <g data-detail="context">
-          <rect x="109.4" y="170" width="121.2" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="180" class="t-backend" font-size="9" text-anchor="middle">POST /api/v1/housings</text>
+          <rect x="163.4" y="140" width="121.2" height="16" rx="3" class="c-mask"/>
+          <text x="224" y="150" class="t-backend" font-size="9" text-anchor="middle">POST /api/v1/housings</text>
         </g>
-        <text data-detail="fine" x="81" y="208" class="t-dim" font-size="7">上架房源（关联房屋+地图标注+户型/面积/租金/图片）</text>
+        <text data-detail="fine" x="81" y="178" class="t-dim" font-size="7">真实信息自查后上架（R52）</text>
         </g>
 
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="校验：真实性自查清单（R52）" data-edge-key="1" data-edge-id="check-authenticity">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="check-authenticity" data-composition-points="285,234;379,234" d="M 285 234 L 379 234" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="backend" data-edge-to="db" data-edge-label="校验并写入 AVAILABLE 房源" data-edge-key="1" data-edge-id="insert-housing">
+          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="insert-housing" data-composition-points="393,188;487,188" d="M 393 188 L 487 188" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="255.8" y="214" width="152.4" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="224" class="t-backend" font-size="9" text-anchor="middle">校验：真实性自查清单（R52）</text>
-        </g>
-        <text data-detail="fine" x="297" y="252" class="t-dim" font-size="7">地址/面积/租金真实准确完整（《住房租赁条例》口径）</text>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="INSERT tb_housing (status=AVAILABLE)" data-edge-key="2" data-edge-id="insert-housing">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="insert-housing" data-composition-points="285,278;379,278" d="M 285 278 L 379 278" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="232.39999999999998" y="258" width="199.20000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="268" class="t-backend" font-size="9" text-anchor="middle">INSERT tb_housing (status=AVAILABLE)</text>
+          <rect x="369" y="168" width="142" height="16" rx="3" class="c-mask"/>
+          <text x="440" y="178" class="t-backend" font-size="9" text-anchor="middle">校验并写入 AVAILABLE 房源</text>
         </g>
         </g>
 
-        <g data-edge-from="admin" data-edge-to="backend" data-edge-label="POST /api/v1/housings/{id}/timeslots" data-edge-key="3" data-edge-id="create-timeslot">
-          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="create-timeslot" data-composition-points="69,336;271,336" d="M 69 336 L 271 336" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="admin" data-edge-to="backend" data-edge-label="POST /api/v1/housings/{id}/timeslots" data-edge-key="2" data-edge-id="create-timeslot">
+          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="create-timeslot" data-composition-points="69,216;379,216" d="M 69 216 L 379 216" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="70.39999999999999" y="316" width="199.20000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="326" class="t-backend" font-size="9" text-anchor="middle">POST /api/v1/housings/{id}/timeslots</text>
+          <rect x="124.39999999999999" y="196" width="199.20000000000002" height="16" rx="3" class="c-mask"/>
+          <text x="224" y="206" class="t-backend" font-size="9" text-anchor="middle">POST /api/v1/housings/{id}/timeslots</text>
         </g>
-        <text data-detail="fine" x="81" y="354" class="t-dim" font-size="7">配置可预约时段</text>
+        <text data-detail="fine" x="81" y="234" class="t-dim" font-size="7">配置并保存可预约时段</text>
         </g>
 
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="INSERT tb_housing_timeslot" data-edge-key="4" data-edge-id="insert-timeslot">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="insert-timeslot" data-composition-points="285,380;379,380" d="M 285 380 L 379 380" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="public-access" data-edge-to="backend" data-edge-label="查询房源列表、详情与时段" data-edge-key="3" data-edge-id="browse">
+          <path data-composition-edge-from="public-access" data-composition-edge-to="backend" data-composition-edge-id="browse" data-composition-points="177,244;379,244" d="M 177 244 L 379 244" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="258.4" y="360" width="147.20000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="370" class="t-backend" font-size="9" text-anchor="middle">INSERT tb_housing_timeslot</text>
+          <rect x="209.6" y="224" width="136.8" height="16" rx="3" class="c-mask"/>
+          <text x="278" y="234" class="t-backend" font-size="9" text-anchor="middle">查询房源列表、详情与时段</text>
         </g>
+        <text data-detail="fine" x="189" y="262" class="t-dim" font-size="7">未登录公开浏览（R53）；可预约时段只读</text>
         </g>
 
-        <g data-edge-from="guest" data-edge-to="backend" data-edge-label="GET /api/v1/housings" data-edge-key="5" data-edge-id="browse">
-          <path data-composition-edge-from="guest" data-composition-edge-to="backend" data-composition-edge-id="browse" data-composition-points="177,438;271,438" d="M 177 438 L 271 438" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="backend" data-edge-to="db" data-edge-label="读取可见房源与预约时段" data-edge-key="4" data-edge-id="select-public-data">
+          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="select-public-data" data-composition-points="393,272;487,272" d="M 393 272 L 487 272" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="166" y="418" width="116" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="428" class="t-backend" font-size="9" text-anchor="middle">GET /api/v1/housings</text>
-        </g>
-        <text data-detail="fine" x="189" y="456" class="t-dim" font-size="7">游客浏览房源（R53）：筛选（社区/户型/价格区间/租售类型）</text>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="SELECT tb_housing WHERE 筛选条件" data-edge-key="6" data-edge-id="select-housing">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="select-housing" data-composition-points="285,482;379,482" d="M 285 482 L 379 482" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="242.8" y="462" width="178.4" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="472" class="t-backend" font-size="9" text-anchor="middle">SELECT tb_housing WHERE 筛选条件</text>
+          <rect x="376.8" y="252" width="126.4" height="16" rx="3" class="c-mask"/>
+          <text x="440" y="262" class="t-backend" font-size="9" text-anchor="middle">读取可见房源与预约时段</text>
         </g>
         </g>
 
-        <g data-edge-from="backend" data-edge-to="guest" data-edge-label="返回房源列表" data-edge-key="7" data-edge-id="return-list">
-          <path data-composition-edge-from="backend" data-composition-edge-to="guest" data-composition-edge-id="return-list" data-composition-points="271,526;177,526" d="M 271 526 L 177 526" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="backend" data-edge-to="redis" data-edge-label="INCR housing:{id}:view_count" data-edge-key="5" data-edge-id="incr-view">
+          <path data-composition-edge-from="backend" data-composition-edge-to="redis" data-composition-edge-id="incr-view" data-composition-points="393,300;595,300" d="M 393 300 L 595 300" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="186.8" y="506" width="74.4" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="516" class="t-muted" font-size="9" text-anchor="middle">返回房源列表</text>
+          <rect x="415.2" y="280" width="157.6" height="16" rx="3" class="c-mask"/>
+          <text x="494" y="290" class="t-backend" font-size="9" text-anchor="middle">INCR housing:{id}:view_count</text>
+        </g>
+        <text data-detail="fine" x="405" y="318" class="t-dim" font-size="7">详情浏览量（R57）</text>
+        </g>
+
+        <g data-edge-from="resident" data-edge-to="backend" data-edge-label="POST /api/v1/viewing-appointments" data-edge-key="6" data-edge-id="book">
+          <path data-composition-edge-from="resident" data-composition-edge-to="backend" data-composition-edge-id="book" data-composition-points="285,328;379,328" d="M 285 328 L 379 328" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <g data-detail="context">
+          <rect x="240.2" y="308" width="183.6" height="16" rx="3" class="c-mask"/>
+          <text x="332" y="318" class="t-backend" font-size="9" text-anchor="middle">POST /api/v1/viewing-appointments</text>
+        </g>
+        <text data-detail="fine" x="297" y="346" class="t-dim" font-size="7">仅已登录居民账号可申请</text>
+        </g>
+
+        <g data-edge-from="backend" data-edge-to="db" data-edge-label="校验时段/冲突并写入 TO_CONFIRM" data-edge-key="7" data-edge-id="validate-create">
+          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="validate-create" data-composition-points="393,356;487,356" d="M 393 356 L 487 356" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="356" y="336" width="168" height="16" rx="3" class="c-mask"/>
+          <text x="440" y="346" class="t-backend" font-size="9" text-anchor="middle">校验时段/冲突并写入 TO_CONFIRM</text>
+        </g>
+        <text data-detail="fine" x="405" y="374" class="t-dim" font-size="7">R54 时段校验 + R33 重叠拦截</text>
+        </g>
+
+        <g data-edge-from="backend" data-edge-to="notify" data-edge-label="推送新预约给对应小区管理员" data-edge-key="8" data-edge-id="notify-new">
+          <path data-composition-edge-from="backend" data-composition-edge-to="notify" data-composition-edge-id="notify-new" data-composition-points="393,384;703,384" d="M 393 384 L 703 384" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-detail="context">
+          <rect x="474.4" y="364" width="147.20000000000002" height="16" rx="3" class="c-mask"/>
+          <text x="548" y="374" class="t-backend" font-size="9" text-anchor="middle">推送新预约给对应小区管理员</text>
         </g>
         </g>
 
-        <g data-edge-from="guest" data-edge-to="backend" data-edge-label="GET /api/v1/housings/{id}" data-edge-key="8" data-edge-id="detail">
-          <path data-composition-edge-from="guest" data-composition-edge-to="backend" data-composition-edge-id="detail" data-composition-points="177,584;271,584" d="M 177 584 L 271 584" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="admin" data-edge-to="backend" data-edge-label="PATCH /api/v1/viewing-appointments/{id}/confirm" data-edge-key="9" data-edge-id="confirm">
+          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="confirm" data-composition-points="69,412;379,412" d="M 69 412 L 379 412" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="153" y="564" width="142" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="574" class="t-backend" font-size="9" text-anchor="middle">GET /api/v1/housings/{id}</text>
+          <rect x="95.80000000000001" y="392" width="256.4" height="16" rx="3" class="c-mask"/>
+          <text x="224" y="402" class="t-backend" font-size="9" text-anchor="middle">PATCH /api/v1/viewing-appointments/{id}/confirm</text>
         </g>
-        <text data-detail="fine" x="189" y="602" class="t-dim" font-size="7">查看详情（含地图位置）</text>
+        <text data-detail="fine" x="81" y="430" class="t-dim" font-size="7">TO_CONFIRM → RESERVED；提交后通知居民</text>
         </g>
 
-        <g data-edge-from="backend" data-edge-to="redis" data-edge-label="INCR housing:{id}:view_count" data-edge-key="9" data-edge-id="incr-view">
-          <path data-composition-edge-from="backend" data-composition-edge-to="redis" data-composition-edge-id="incr-view" data-composition-points="285,628;487,628" d="M 285 628 L 487 628" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="backend" data-edge-to="db" data-edge-label="UPDATE status=RESERVED" data-edge-key="10" data-edge-id="update-reserved">
+          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="update-reserved" data-composition-points="393,440;487,440" d="M 393 440 L 487 440" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="307.2" y="608" width="157.6" height="16" rx="3" class="c-mask"/>
-          <text x="386" y="618" class="t-backend" font-size="9" text-anchor="middle">INCR housing:{id}:view_count</text>
+          <rect x="376.8" y="420" width="126.4" height="16" rx="3" class="c-mask"/>
+          <text x="440" y="430" class="t-backend" font-size="9" text-anchor="middle">UPDATE status=RESERVED</text>
         </g>
-        <text data-detail="fine" x="297" y="646" class="t-dim" font-size="7">记录浏览量（R57）</text>
+        <text data-detail="fine" x="405" y="458" class="t-dim" font-size="7">预约确认提交后通知居民</text>
         </g>
 
-        <g data-edge-from="backend" data-edge-to="guest" data-edge-label="返回房源详情" data-edge-key="10" data-edge-id="return-detail">
-          <path data-composition-edge-from="backend" data-composition-edge-to="guest" data-composition-edge-id="return-detail" data-composition-points="271,672;177,672" d="M 271 672 L 177 672" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
+        <g data-edge-from="admin" data-edge-to="backend" data-edge-label="PATCH /api/v1/viewing-appointments/{id}/complete | /violate" data-edge-key="11" data-edge-id="complete-or-violate">
+          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="complete-or-violate" data-composition-points="69,468;379,468" d="M 69 468 L 379 468" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
         <g data-detail="context">
-          <rect x="186.8" y="652" width="74.4" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="662" class="t-muted" font-size="9" text-anchor="middle">返回房源详情</text>
+          <rect x="64.6" y="448" width="318.8" height="16" rx="3" class="c-mask"/>
+          <text x="224" y="458" class="t-backend" font-size="9" text-anchor="middle">PATCH /api/v1/viewing-appointments/{id}/complete | /violate</text>
         </g>
-        </g>
-
-        <g data-edge-from="guest" data-edge-to="backend" data-edge-label="GET /api/v1/housings/{id}/available-slots" data-edge-key="11" data-edge-id="query-slots">
-          <path data-composition-edge-from="guest" data-composition-edge-to="backend" data-composition-edge-id="query-slots" data-composition-points="177,730;271,730" d="M 177 730 L 271 730" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="111.39999999999999" y="710" width="225.20000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="720" class="t-backend" font-size="9" text-anchor="middle">GET /api/v1/housings/{id}/available-slots</text>
-        </g>
-        <text data-detail="fine" x="189" y="748" class="t-dim" font-size="7">看房预约（R55）：查询可预约时段</text>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="SELECT tb_housing_timeslot WHERE housing_id={id}" data-edge-key="12" data-edge-id="select-slots">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="select-slots" data-composition-points="285,774;379,774" d="M 285 774 L 379 774" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="201.2" y="754" width="261.6" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="764" class="t-backend" font-size="9" text-anchor="middle">SELECT tb_housing_timeslot WHERE housing_id={id}</text>
-        </g>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="guest" data-edge-label="返回可预约时段列表" data-edge-key="13" data-edge-id="return-slots">
-          <path data-composition-edge-from="backend" data-composition-edge-to="guest" data-composition-edge-id="return-slots" data-composition-points="271,818;177,818" d="M 271 818 L 177 818" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="171.2" y="798" width="105.60000000000001" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="808" class="t-muted" font-size="9" text-anchor="middle">返回可预约时段列表</text>
-        </g>
-        </g>
-
-        <g data-edge-from="guest" data-edge-to="backend" data-edge-label="POST /api/v1/viewing-appointments" data-edge-key="14" data-edge-id="book">
-          <path data-composition-edge-from="guest" data-composition-edge-to="backend" data-composition-edge-id="book" data-composition-points="177,876;271,876" d="M 177 876 L 271 876" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="132.2" y="856" width="183.6" height="16" rx="3" class="c-mask"/>
-          <text x="224" y="866" class="t-backend" font-size="9" text-anchor="middle">POST /api/v1/viewing-appointments</text>
-        </g>
-        <text data-detail="fine" x="189" y="894" class="t-dim" font-size="7">申请看房（选择时段）</text>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="时段校验：须落在可预约时段内（R54）" data-edge-key="15" data-edge-id="check-timeslot">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="check-timeslot" data-composition-points="285,920;379,920" d="M 285 920 L 379 920" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="235" y="900" width="194" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="910" class="t-backend" font-size="9" text-anchor="middle">时段校验：须落在可预约时段内（R54）</text>
-        </g>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="冲突校验：同一房源同一时段重叠100%拦截" data-edge-key="16" data-edge-id="check-conflict">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="check-conflict" data-composition-points="285,964;379,964" d="M 285 964 L 379 964" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="227.2" y="944" width="209.6" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="954" class="t-backend" font-size="9" text-anchor="middle">冲突校验：同一房源同一时段重叠100%拦截</text>
-        </g>
-        <text data-detail="fine" x="297" y="982" class="t-dim" font-size="7">复用 R33 机制</text>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="INSERT tb_viewing_appointment (status=PENDING)" data-edge-key="17" data-edge-id="insert-appointment">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="insert-appointment" data-composition-points="285,1008;379,1008" d="M 285 1008 L 379 1008" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="206.39999999999998" y="988" width="251.20000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="998" class="t-backend" font-size="9" text-anchor="middle">INSERT tb_viewing_appointment (status=PENDING)</text>
-        </g>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="notify" data-edge-label="生成通知：新看房预约" data-edge-key="18" data-edge-id="notify-new">
-          <path data-composition-edge-from="backend" data-composition-edge-to="notify" data-composition-edge-id="notify-new" data-composition-points="285,1052;595,1052" d="M 285 1052 L 595 1052" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="382" y="1032" width="116" height="16" rx="3" class="c-mask"/>
-          <text x="440" y="1042" class="t-backend" font-size="9" text-anchor="middle">生成通知：新看房预约</text>
-        </g>
-        </g>
-
-        <g data-edge-from="notify" data-edge-to="admin" data-edge-label="推送通知" data-edge-key="19" data-edge-id="push-admin">
-          <path data-composition-edge-from="notify" data-composition-edge-to="admin" data-composition-edge-id="push-admin" data-composition-points="595,1096;69,1096" d="M 595 1096 L 69 1096" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <g data-detail="context">
-          <rect x="305.2" y="1076" width="53.6" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="1086" class="t-messagebus" font-size="9" text-anchor="middle">推送通知</text>
-        </g>
-        </g>
-
-        <g data-edge-from="admin" data-edge-to="backend" data-edge-label="PATCH /api/v1/viewing-appointments/{id}/confirm" data-edge-key="20" data-edge-id="confirm">
-          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="confirm" data-composition-points="69,1154;271,1154" d="M 69 1154 L 271 1154" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="41.80000000000001" y="1134" width="256.4" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="1144" class="t-backend" font-size="9" text-anchor="middle">PATCH /api/v1/viewing-appointments/{id}/confirm</text>
-        </g>
-        <text data-detail="fine" x="81" y="1172" class="t-dim" font-size="7">确认预约 → CONFIRMED</text>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="UPDATE status=CONFIRMED" data-edge-key="21" data-edge-id="update-confirmed">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="update-confirmed" data-composition-points="285,1198;379,1198" d="M 285 1198 L 379 1198" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="266.2" y="1178" width="131.60000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="1188" class="t-backend" font-size="9" text-anchor="middle">UPDATE status=CONFIRMED</text>
-        </g>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="notify" data-edge-label="生成通知：预约已确认" data-edge-key="22" data-edge-id="notify-confirmed">
-          <path data-composition-edge-from="backend" data-composition-edge-to="notify" data-composition-edge-id="notify-confirmed" data-composition-points="285,1242;595,1242" d="M 285 1242 L 595 1242" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="382" y="1222" width="116" height="16" rx="3" class="c-mask"/>
-          <text x="440" y="1232" class="t-backend" font-size="9" text-anchor="middle">生成通知：预约已确认</text>
-        </g>
-        </g>
-
-        <g data-edge-from="notify" data-edge-to="guest" data-edge-label="推送通知" data-edge-key="23" data-edge-id="push-guest">
-          <path data-composition-edge-from="notify" data-composition-edge-to="guest" data-composition-edge-id="push-guest" data-composition-points="595,1286;177,1286" d="M 595 1286 L 177 1286" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-        <g data-detail="context">
-          <rect x="359.2" y="1266" width="53.6" height="16" rx="3" class="c-mask"/>
-          <text x="386" y="1276" class="t-messagebus" font-size="9" text-anchor="middle">推送通知</text>
-        </g>
-        </g>
-
-        <g data-edge-from="admin" data-edge-to="backend" data-edge-label="PATCH /api/v1/viewing-appointments/{id}/complete" data-edge-key="24" data-edge-id="complete">
-          <path data-composition-edge-from="admin" data-composition-edge-to="backend" data-composition-edge-id="complete" data-composition-points="69,1344;271,1344" d="M 69 1344 L 271 1344" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="39.19999999999999" y="1324" width="261.6" height="16" rx="3" class="c-mask"/>
-          <text x="170" y="1334" class="t-backend" font-size="9" text-anchor="middle">PATCH /api/v1/viewing-appointments/{id}/complete</text>
-        </g>
-        <text data-detail="fine" x="81" y="1362" class="t-dim" font-size="7">带看完成与违约处置（R56）：登记已完成 → COMPLETED</text>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="db" data-edge-label="UPDATE status=COMPLETED" data-edge-key="25" data-edge-id="update-completed">
-          <path data-composition-edge-from="backend" data-composition-edge-to="db" data-composition-edge-id="update-completed" data-composition-points="285,1388;379,1388" d="M 285 1388 L 379 1388" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="266.2" y="1368" width="131.60000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="332" y="1378" class="t-backend" font-size="9" text-anchor="middle">UPDATE status=COMPLETED</text>
-        </g>
-        </g>
-
-        <g data-edge-from="backend" data-edge-to="redis" data-edge-label="INCR housing:{id}:viewing_count" data-edge-key="26" data-edge-id="incr-viewing">
-          <path data-composition-edge-from="backend" data-composition-edge-to="redis" data-composition-edge-id="incr-viewing" data-composition-points="285,1432;487,1432" d="M 285 1432 L 487 1432" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <g data-detail="context">
-          <rect x="299.4" y="1412" width="173.20000000000002" height="16" rx="3" class="c-mask"/>
-          <text x="386" y="1422" class="t-backend" font-size="9" text-anchor="middle">INCR housing:{id}:viewing_count</text>
-        </g>
-        <text data-detail="fine" x="297" y="1450" class="t-dim" font-size="7">记录带看量（R57）</text>
+        <text data-detail="fine" x="81" y="486" class="t-dim" font-size="7">指定服务人员可登记完成；管理员处理违约（R56）。完成后记带看量（R57）</text>
         </g>
 
         <!-- Segment Labels -->
 
 
         <!-- Participants -->
-        <g id="node-admin" data-node-id="admin" data-node-label="管理员" tabindex="0" role="button" aria-label="聚焦管理员，上架/登记, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="上架/登记" data-node-context="时序参与者">
-          <title>管理员 · 上架/登记 · 时序参与者</title>
+        <g id="node-admin" data-node-id="admin" data-node-label="小区管理员" tabindex="0" role="button" aria-label="聚焦小区管理员，上架/登记, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="上架/登记" data-node-context="时序参与者">
+          <title>小区管理员 · 上架/登记 · 时序参与者</title>
           <rect x="19" y="72" width="86" height="54" rx="6" class="c-mask"/>
           <rect x="19" y="72" width="86" height="54" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(25 78) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="62" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">管理员</text>
+          <text data-node-label="" data-detail-anchor="" x="62" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">小区管理员</text>
           <text data-detail="context" x="62" y="111" class="t-muted" font-size="7" text-anchor="middle">上架/登记</text>
         </g>
 
-        <g id="node-guest" data-node-id="guest" data-node-label="游客/居民" tabindex="0" role="button" aria-label="聚焦游客/居民，浏览/预约, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="浏览/预约" data-node-context="时序参与者">
-          <title>游客/居民 · 浏览/预约 · 时序参与者</title>
+        <g id="node-public-access" data-node-id="public-access" data-node-label="公开访问" tabindex="0" role="button" aria-label="聚焦公开访问，未登录浏览房源与时段, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="未登录浏览房源与时段" data-node-context="时序参与者">
+          <title>公开访问 · 未登录浏览房源与时段 · 时序参与者</title>
           <rect x="127" y="72" width="86" height="54" rx="6" class="c-mask"/>
           <rect x="127" y="72" width="86" height="54" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(133 78) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="170" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">游客/居民</text>
-          <text data-detail="context" x="170" y="111" class="t-muted" font-size="7" text-anchor="middle">浏览/预约</text>
+          <text data-node-label="" data-detail-anchor="" x="170" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">公开访问</text>
+          <text data-detail="context" x="170" y="111" class="t-muted" font-size="6.5" text-anchor="middle">未登录浏览房源与时段</text>
+        </g>
+
+        <g id="node-resident" data-node-id="resident" data-node-label="居民账号" tabindex="0" role="button" aria-label="聚焦居民账号，登录后预约看房, 时序参与者" aria-pressed="false" data-node-kind="external" data-node-sublabel="登录后预约看房" data-node-context="时序参与者">
+          <title>居民账号 · 登录后预约看房 · 时序参与者</title>
+          <rect x="235" y="72" width="86" height="54" rx="6" class="c-mask"/>
+          <rect x="235" y="72" width="86" height="54" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(241 78) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="278" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">居民账号</text>
+          <text data-detail="context" x="278" y="111" class="t-muted" font-size="7" text-anchor="middle">登录后预约看房</text>
         </g>
 
         <g id="node-backend" data-node-id="backend" data-node-label="后端服务" tabindex="0" role="button" aria-label="聚焦后端服务，REST API, 时序参与者" aria-pressed="false" data-node-kind="backend" data-node-sublabel="REST API" data-node-context="时序参与者">
           <title>后端服务 · REST API · 时序参与者</title>
-          <rect x="235" y="72" width="86" height="54" rx="6" class="c-mask"/>
-          <rect x="235" y="72" width="86" height="54" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(241 78) scale(0.6875)">
+          <rect x="343" y="72" width="86" height="54" rx="6" class="c-mask"/>
+          <rect x="343" y="72" width="86" height="54" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(349 78) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="278" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">后端服务</text>
-          <text data-detail="context" x="278" y="111" class="t-muted" font-size="7" text-anchor="middle">REST API</text>
+          <text data-node-label="" data-detail-anchor="" x="386" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">后端服务</text>
+          <text data-detail="context" x="386" y="111" class="t-muted" font-size="7" text-anchor="middle">REST API</text>
         </g>
 
         <g id="node-db" data-node-id="db" data-node-label="MySQL" tabindex="0" role="button" aria-label="聚焦MySQL，业务库, 时序参与者" aria-pressed="false" data-node-kind="database" data-node-sublabel="业务库" data-node-context="时序参与者">
           <title>MySQL · 业务库 · 时序参与者</title>
-          <rect x="343" y="72" width="86" height="54" rx="6" class="c-mask"/>
-          <rect x="343" y="72" width="86" height="54" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(349 78) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="386" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MySQL</text>
-          <text data-detail="context" x="386" y="111" class="t-muted" font-size="7" text-anchor="middle">业务库</text>
-        </g>
-
-        <g id="node-redis" data-node-id="redis" data-node-label="Redis" tabindex="0" role="button" aria-label="聚焦Redis，浏览计数, 时序参与者" aria-pressed="false" data-node-kind="database" data-node-sublabel="浏览计数" data-node-context="时序参与者">
-          <title>Redis · 浏览计数 · 时序参与者</title>
           <rect x="451" y="72" width="86" height="54" rx="6" class="c-mask"/>
           <rect x="451" y="72" width="86" height="54" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(457 78) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="494" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Redis</text>
-          <text data-detail="context" x="494" y="111" class="t-muted" font-size="7" text-anchor="middle">浏览计数</text>
+          <text data-node-label="" data-detail-anchor="" x="494" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MySQL</text>
+          <text data-detail="context" x="494" y="111" class="t-muted" font-size="7" text-anchor="middle">业务库</text>
+        </g>
+
+        <g id="node-redis" data-node-id="redis" data-node-label="Redis" tabindex="0" role="button" aria-label="聚焦Redis，浏览计数, 时序参与者" aria-pressed="false" data-node-kind="database" data-node-sublabel="浏览计数" data-node-context="时序参与者">
+          <title>Redis · 浏览计数 · 时序参与者</title>
+          <rect x="559" y="72" width="86" height="54" rx="6" class="c-mask"/>
+          <rect x="559" y="72" width="86" height="54" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(565 78) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="602" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Redis</text>
+          <text data-detail="context" x="602" y="111" class="t-muted" font-size="7" text-anchor="middle">浏览计数</text>
         </g>
 
         <g id="node-notify" data-node-id="notify" data-node-label="通知服务" tabindex="0" role="button" aria-label="聚焦通知服务，站内推送, 时序参与者" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="站内推送" data-node-context="时序参与者">
           <title>通知服务 · 站内推送 · 时序参与者</title>
-          <rect x="559" y="72" width="86" height="54" rx="6" class="c-mask"/>
-          <rect x="559" y="72" width="86" height="54" rx="6" class="c-messagebus" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(565 78) scale(0.6875)">
+          <rect x="667" y="72" width="86" height="54" rx="6" class="c-mask"/>
+          <rect x="667" y="72" width="86" height="54" rx="6" class="c-messagebus" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(673 78) scale(0.6875)">
             <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
             <circle cx="5" cy="4.5" r="1" class="sigil-fill"/>
             <circle cx="10.5" cy="8" r="1" class="sigil-fill"/>
             <circle cx="7" cy="11.5" r="1" class="sigil-fill"/>
           </g>
-          <text data-node-label="" data-detail-anchor="" x="602" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">通知服务</text>
-          <text data-detail="context" x="602" y="111" class="t-muted" font-size="7" text-anchor="middle">站内推送</text>
+          <text data-node-label="" data-detail-anchor="" x="710" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">通知服务</text>
+          <text data-detail="context" x="710" y="111" class="t-muted" font-size="7" text-anchor="middle">站内推送</text>
         </g>
 
         <!-- Legend -->
         <g data-legend="">
-          <text x="40" y="1476" class="t-primary" font-size="12" font-weight="650">图例</text>
-          <g data-legend-semantic-kind="emphasis" data-legend-x="40" data-legend-baseline="1496" data-legend-width="63">
-            <path d="M 40 1493 L 74 1493" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-            <text x="83" y="1496" class="t-muted" font-size="10" font-weight="500">请求</text>
+          <text x="40" y="486" class="t-primary" font-size="12" font-weight="650">图例</text>
+          <g data-legend-semantic-kind="emphasis" data-legend-x="40" data-legend-baseline="506" data-legend-width="63">
+            <path d="M 40 503 L 74 503" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+            <text x="83" y="506" class="t-muted" font-size="10" font-weight="500">请求</text>
           </g>
-          <g data-legend-semantic-kind="return" data-legend-x="125" data-legend-baseline="1496" data-legend-width="63">
-            <path d="M 125 1493 L 159 1493" class="a-default" stroke-width="1.4" stroke-dasharray="3,5" marker-end="url(#arrowhead)"/>
-            <text x="168" y="1496" class="t-muted" font-size="10" font-weight="500">返回</text>
-          </g>
-          <g data-legend-semantic-kind="dashed" data-legend-x="210" data-legend-baseline="1496" data-legend-width="83">
-            <path d="M 210 1493 L 244 1493" class="a-dashed" stroke-width="1.4" marker-end="url(#arrowhead-dashed)"/>
-            <text x="253" y="1496" class="t-muted" font-size="10" font-weight="500">异步追踪</text>
-          </g>
-          <g data-legend-semantic-kind="default" data-legend-x="315" data-legend-baseline="1496" data-legend-width="83">
-            <path d="M 315 1493 L 349 1493" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-            <text x="358" y="1496" class="t-muted" font-size="10" font-weight="500">默认消息</text>
+          <g data-legend-semantic-kind="default" data-legend-x="125" data-legend-baseline="506" data-legend-width="83">
+            <path d="M 125 503 L 159 503" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+            <text x="168" y="506" class="t-muted" font-size="10" font-weight="500">默认消息</text>
           </g>
         </g>
       </svg>
@@ -5555,38 +5437,7 @@
 
     <!-- Info Cards -->
     <div class="cards">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot emerald"></div>
-          <h3>房源主线</h3>
-        </div>
-        <ul>
-          <li>&bull; 上架房源（真实性自查 R52）→ 配置时段 → 游客筛选浏览（R53）</li>
-          <li>&bull; 看房预约：查询时段 → 提交 → 确认 → 带看完成（R55）</li>
-        </ul>
-      </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot amber"></div>
-          <h3>双重校验（复用 C7 机制）</h3>
-        </div>
-        <ul>
-          <li>&bull; 时段校验：须落在可预约时段内（R54）</li>
-          <li>&bull; 冲突校验：同一房源同一时段重叠 100% 拦截（R33 机制）</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot cyan"></div>
-          <h3>统计与违约处置</h3>
-        </div>
-        <ul>
-          <li>&bull; 浏览量与带看量计入运营统计（R57，Redis 计数）</li>
-          <li>&bull; 违约登记后处置：冻结账号/限制预约，留痕（R56）</li>
-        </ul>
-      </div>
     </div>
 
   </div>

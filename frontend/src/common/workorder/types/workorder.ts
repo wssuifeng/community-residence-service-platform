@@ -144,7 +144,7 @@ export type WorkOrderSort = 'DEFAULT' | 'WAIT_DESC' | 'PRIORITY'
 
 /**
  * 派单候选（V19 档位推荐，GET /work-orders/assignable-staff）。
- * recommendLevel 越小越推荐：1=常驻本社区且擅长该类别，2=常驻本社区，3=擅长该类别，4=其他
+ * recommendLevel 越小越推荐：1=常驻本小区且擅长该类别，2=常驻本小区，3=擅长该类别，4=其他
  */
 export interface IStaffOption {
   id: number
@@ -152,7 +152,7 @@ export interface IStaffOption {
   recommendLevel?: number
   matchedCommunity?: boolean
   matchedCategory?: boolean
-  /** 常驻社区名称（顿号/逗号拼接） */
+  /** 常驻小区名称（顿号/逗号拼接） */
   communityNames?: string
   /** 今日班次标签（为空=未排班） */
   todayShiftLabel?: string | null
@@ -162,8 +162,8 @@ export interface IStaffOption {
 
 /** 派单候选推荐档位标签 */
 export const staffRecommendLevelLabels: Record<number, string> = {
-  1: '常驻本社区 · 擅长该类别',
-  2: '常驻本社区',
+  1: '常驻本小区 · 擅长该类别',
+  2: '常驻本小区',
   3: '擅长该类别',
   4: '其他人员'
 }

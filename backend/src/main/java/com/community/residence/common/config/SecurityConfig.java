@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException;
 
 /**
- * 安全配置：无状态 JWT 认证 + 五角色功能级权限（@PreAuthorize）。
+ * 安全配置：无状态 JWT 认证 + 四类账号角色功能级权限（@PreAuthorize）。
  * 数据级权限由 DataScopeInterceptor 按 UserContext 注入（架构设计.md §3.2 两层模型）。
  * 401/403 返回统一 ApiResponse 格式（含错误场景不走 GlobalExceptionHandler 的过滤器层）。
  */
@@ -63,7 +63,7 @@ public class SecurityConfig {
                                 "/api/v1/housings/{housingId}/available-slots",
                                 "/api/v1/housings/{housingId}/timeslots",
                                 "/api/v1/configs/{key}").permitAll()
-                        // 游客只读：房源浏览计数仍公开；看房预约创建归居民账号
+                        // 未登录访问只读：房源浏览计数仍公开；看房预约创建归居民账号
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
                                 "/api/v1/housings/{id}/view").permitAll()
                         /* 支付密钥管理在读取请求体之前鉴权，不让非超管进入参数/密钥解析。 */

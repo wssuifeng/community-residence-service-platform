@@ -26,7 +26,7 @@ public class AuthController {
     private final AuthService authService;
     private final ResidentService residentService;
 
-    /** 居民注册（游客自助，受 registration.enabled 配置控制，接口设计 9.2.1.1） */
+    /** 居民注册（未登录用户自助，受 registration.enabled 配置控制，接口设计 9.2.1.1） */
     @Operation(summary = "居民注册")
     @PostMapping("/resident/register")
     public ApiResponse<ResidentVO> register(@RequestBody @Valid RegisterResidentDTO dto) {
@@ -49,7 +49,7 @@ public class AuthController {
         return ApiResponse.success();
     }
 
-    /** 管理端登录（sys_user 表：SUPER_ADMIN/ADMIN/STAFF，ADMIN 附绑定社区） */
+    /** 管理端登录（sys_user 表：SUPER_ADMIN/ADMIN/STAFF，ADMIN 附绑定小区） */
     @Operation(summary = "管理员登录")
     @PostMapping("/admin/login")
     public ApiResponse<LoginVO> adminLogin(@RequestBody @Valid LoginDTO dto) {

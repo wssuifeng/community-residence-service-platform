@@ -31,7 +31,7 @@ public class RelationVO {
     @Schema(description = "居民手机号")
     private String residentPhone;
 
-    @Schema(description = "所属社区ID")
+    @Schema(description = "所属小区ID")
     private Long communityId;
 
     @Schema(description = "房屋ID")

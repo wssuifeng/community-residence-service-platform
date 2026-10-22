@@ -71,7 +71,7 @@ export function adminCreateResident(data: IAdminCreateResidentDTO): Promise<IAdm
 }
 
 /**
- * CSV 批量导入居民（R8 v1.2；UTF-8 CSV，表头：社区ID,姓名,手机号,证件号；
+ * CSV 批量导入居民（R8 v1.2；UTF-8 CSV，表头：小区ID,姓名,手机号,证件号；
  * 部分成功语义。FormData 传法与 api/upload.ts 一致，axios 自动带
  * multipart/form-data 边界，勿手动设置 Content-Type）
  */
@@ -131,7 +131,7 @@ export function getResidentResidenceList(
 }
 
 /**
- * 当前登录居民的居住关系列表（居民端自助查询，居民端三段预约流的社区来源）
+ * 当前登录居民的居住关系列表（居民端自助查询，居民端三段预约流的小区来源）
  * residentId 取当前会话用户 ID（后端 ResidenceRelationService 对 RESIDENT 强校验限本人），
  * 默认只取生效中关系（status=ACTIVE，后端按 move_out_date IS NULL 过滤）
  */

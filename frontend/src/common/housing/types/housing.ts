@@ -78,9 +78,9 @@ export interface IHousing {
   /** 发布时间（创建即发布） */
   publishTime: string
   createdAt: string
-  /** 幽灵字段：后端 HousingVO 不返回 tags；游客/居民端列表与详情仍读取，使用处需空值防御 */
+  /** 幽灵字段：后端 HousingVO 不返回 tags；未登录访问者/居民端列表与详情仍读取，使用处需空值防御 */
   tags?: string[]
-  /** 幽灵字段：后端 HousingVO 不返回 contactPhone；游客/居民端详情仍读取，保留原因同 layout */
+  /** 幽灵字段：后端 HousingVO 不返回 contactPhone；未登录访问者/居民端详情仍读取，保留原因同 layout */
   contactPhone: string | null
 }
 
@@ -127,11 +127,11 @@ export interface HousingStatusUpdateDTO {
 /**
  * 看房预约单（2026-09-12 以后端 ViewingAppointmentVO.java 核对收口）。
  * 接口设计.md 9.12.2.1 的 visitorPhone/residentId 为历史漂移命名：
- * visitorPhone→contactPhone、residentId→userId 已收口；游客预约路径已退役，历史游客字段仅作兼容展示。
+ * visitorPhone→contactPhone、residentId→userId 已收口；历史匿名预约路径已退役，历史匿名字段仅作兼容展示。
  */
 export interface IViewingAppointment {
   id: number
-  /** 预约人用户ID（新预约必有；历史游客预约可能为 null） */
+  /** 预约人用户ID（新预约必有；历史匿名预约可能为 null） */
   userId: number | null
   housingId: number
   housingTitle: string
@@ -139,14 +139,14 @@ export interface IViewingAppointment {
   appointmentDate: string
   startTime: string
   endTime: string
-  /** 居民实名；历史游客预约可能来自存量字段 */
+  /** 居民实名；历史匿名预约可能来自存量字段 */
   visitorName?: string | null
-  /** 联系电话；历史游客预约可能为空 */
+  /** 联系电话；历史匿名预约可能为空 */
   contactPhone?: string | null
   status: ViewingAppointmentStatus
   remark: string | null
   createdAt: string
-  /** R63 看房群聊关联会话（游客预约为空；居民预约创建时建立） */
+  /** R63 看房群聊关联会话（历史匿名预约为空；居民预约创建时建立） */
   conversationId?: number | null
   /** 带看人（R59，v1.3 新增；未分配为 null，后端 VO 补齐后点亮） */
   assigneeId?: number | null

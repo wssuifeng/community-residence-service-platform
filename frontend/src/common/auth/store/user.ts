@@ -14,7 +14,7 @@ export const useUserStore = defineStore('user', () => {
 
   const token = computed(() => session.value?.token ?? '')
   const user = computed<AuthUser | null>(() => session.value?.user ?? null)
-  const role = computed<Role>(() => session.value?.user.role ?? 'GUEST')
+  const role = computed<Role | null>(() => session.value?.user.role ?? null)
   const isLoggedIn = computed(() => session.value !== null)
 
   function setSession(next: PersistedSession): void {

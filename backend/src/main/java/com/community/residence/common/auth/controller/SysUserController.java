@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-/** 系统用户管理控制器：账号 CRUD、冻结、改密、社区绑定（接口设计.md 9.10.1/9.10.2） */
+/** 系统用户管理控制器：账号 CRUD、冻结、改密、小区绑定（接口设计.md 9.10.1/9.10.2） */
 @Tag(name = "系统用户管理", description = "管理员/服务人员账号管理接口")
 @RestController
 @RequestMapping("/api/v1/sys-users")

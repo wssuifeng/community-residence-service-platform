@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
-/** 社区状态更新请求 */
+/** 小区状态更新请求 */
 @Data
-@Schema(description = "社区状态更新请求")
+@Schema(description = "小区状态更新请求")
 public class UpdateCommunityStatusDTO {
 
     @Schema(description = "状态：ACTIVE-运营中, INACTIVE-已停用")

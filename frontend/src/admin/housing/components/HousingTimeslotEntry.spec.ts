@@ -26,13 +26,13 @@ vi.mock('@/common/community/api/community', () => ({
 vi.mock('@/common/web/utils/request', () => ({ http: { get: mocks.houses } }))
 
 const housing = {
-  id: 7, houseId: 42, communityId: 1, communityName: '测试社区', houseLocation: '1号楼101',
+  id: 7, houseId: 42, communityId: 1, communityName: '测试小区', houseLocation: '1号楼101',
   title: '测试房源', description: '', monthlyRent: 3000, deposit: 6000, rentType: 'RENT',
   status: 'AVAILABLE', images: [], viewCount: 0, publishTime: '2026-10-10T09:00:00',
   createdAt: '2026-10-10T09:00:00'
 }
 const house = {
-  houseId: 42, communityId: 1, communityName: '测试社区', buildingId: 1, buildingName: '1号楼',
+  houseId: 42, communityId: 1, communityName: '测试小区', buildingId: 1, buildingName: '1号楼',
   unitId: 1, unitName: '1单元', houseNumber: '101', floor: 1, area: 80, layout: '2室1厅',
   houseStatus: 'VACANT', housing
 }

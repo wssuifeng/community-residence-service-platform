@@ -2,20 +2,20 @@
   "schema_version": 1,
   "diagram_type": "sequence",
   "meta": {
-    "title": "E1：社区初始化流程",
+    "title": "E1：小区初始化流程",
     "locale": "zh-CN",
     "output": "E01_社区初始化流程时序图.html",
     "quality_profile": "showcase",
     "viewBox": [760, 1230]
   },
   "participants": [
-    { "id": "admin", "type": "external", "label": "社区管理员", "sublabel": "初始化操作人" },
+    { "id": "admin", "type": "external", "label": "小区管理员", "sublabel": "初始化操作人" },
     { "id": "backend", "type": "backend", "label": "后端服务", "sublabel": "REST API" },
     { "id": "db", "type": "database", "label": "MySQL", "sublabel": "业务库" },
     { "id": "oplog", "type": "database", "label": "操作日志", "sublabel": "tb_operation_log" }
   ],
   "messages": [
-    { "id": "create-community", "from": "admin", "to": "backend", "y": 190, "label": "POST /api/v1/communities", "note": "新建社区（名称/地址）", "variant": "emphasis" },
+    { "id": "create-community", "from": "admin", "to": "backend", "y": 190, "label": "POST /api/v1/communities", "note": "新建小区（名称/地址）", "variant": "emphasis" },
     { "id": "insert-community", "from": "backend", "to": "db", "y": 234, "label": "INSERT tb_community" },
     { "id": "log-community", "from": "backend", "to": "oplog", "y": 278, "label": "写入操作日志" },
     { "id": "community-id", "from": "backend", "to": "admin", "y": 322, "label": "返回 community_id", "variant": "return" },
@@ -35,7 +35,7 @@
     { "id": "insert-resource", "from": "backend", "to": "db", "y": 994, "label": "INSERT tb_public_resource" },
     { "id": "create-timeslot", "from": "admin", "to": "backend", "y": 1038, "label": "POST /api/v1/resources/{id}/timeslots", "note": "配置可预约时段" },
     { "id": "insert-timeslot", "from": "backend", "to": "db", "y": 1082, "label": "INSERT tb_resource_timeslot" },
-    { "id": "done", "from": "backend", "to": "admin", "y": 1126, "label": "社区初始化完成", "variant": "return" }
+    { "id": "done", "from": "backend", "to": "admin", "y": 1126, "label": "小区初始化完成", "variant": "return" }
   ],
   "activations": [
     { "participant": "backend", "from": 185, "to": 1131, "type": "backend" }
@@ -45,7 +45,7 @@
       "dot": "emerald",
       "title": "四级结构依次建立",
       "items": [
-        "社区 → 楼栋 → 单元 → 房屋，四级结构按序创建，房屋初始状态为空置",
+        "小区 → 楼栋 → 单元 → 房屋，四级结构按序创建，房屋初始状态为空置",
         "随后配置公共资源及其可预约时段"
       ]
     },
@@ -62,7 +62,7 @@
       "title": "数据隔离",
       "items": [
         "后续业务按 community_id 隔离查询",
-        "社区级管理员仅能操作其绑定社区的数据"
+        "小区管理员仅能操作其绑定小区的数据"
       ]
     }
   ]
