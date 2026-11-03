@@ -77,3 +77,8 @@ docs/50_系统测试/scripts/tokens.csv
 # 60阶段技能检索的本地第三方原文/目录快照：仅供方法核对，不再发布到公开仓库。
 output/phase60-skill-reference-20261019.json
 output/phase60-reference-*-20261019.json
+
+# 论文正文、图表与生成脚本：作者个人学术成果，不入公开仓库。
+# （2026-11-03 用户明确要求；此前已从全部 git 历史中移除，
+#   详见 docs/90_全局/决策日志.md 同日条目）
+docs/90_全局/论文编写/
